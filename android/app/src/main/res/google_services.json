@@ -1,0 +1,168 @@
+{
+  "project_info": {
+    "project_number": "618036466482",
+    "firebase_url": "https://webblen-events.firebaseio.com",
+    "project_id": "webblen-events",
+    "storage_bucket": "webblen-events.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618036466482:android:f25b55b59af673b6",
+        "android_client_info": {
+          "package_name": "com.webblen.events.webblen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "618036466482-d0u9uvf6o4tq1gbqs3en8bstc8q5emt3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webblen.events.webblen",
+            "certificate_hash": "0533fec5dbff3ebec27d7c4427504725f3c5d311"
+          }
+        },
+        {
+          "client_id": "618036466482-jq0eam30jj50skbep1jn1ljdkh4thahi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webblen.events.webblen",
+            "certificate_hash": "62a6531a8fbb3fcb15f10bb172f2e67a38e7bedc"
+          }
+        },
+        {
+          "client_id": "618036466482-kuuq9pob3vnhf90ampft69kiih298qi1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webblen.events.webblen",
+            "certificate_hash": "0e2551dda965c4aafea5638a90e0b1414c0358e1"
+          }
+        },
+        {
+          "client_id": "618036466482-9keg207g5mpbdhi1osnbpfkv9auuluva.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webblen.events.webblen",
+            "certificate_hash": "d50316bc070c853869d29ecd56774054103b11a3"
+          }
+        },
+        {
+          "client_id": "618036466482-2ch7gmahk38212m5qvaehk6bkd7erdhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqL9sC8EPTibjMP3Q-zF4P1onTNwXGYpU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "618036466482-2ch7gmahk38212m5qvaehk6bkd7erdhj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "618036466482-m6hgiqm3n15nprj8n8ou8to0ith32ls8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.webblen.io"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618036466482:android:bf39f2bc8ca14f97",
+        "android_client_info": {
+          "package_name": "com.webblen.webblen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "618036466482-2ch7gmahk38212m5qvaehk6bkd7erdhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqL9sC8EPTibjMP3Q-zF4P1onTNwXGYpU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618036466482:android:f593e41167f576f6",
+        "android_client_info": {
+          "package_name": "com.webblen.webevents"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "618036466482-7b2fls22vacrs0qlu2c2g780u43eoqgi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.webblen.webevents",
+            "certificate_hash": "2ee2eaf0b5d821fe44bbd2476d18b5e694111c91"
+          }
+        },
+        {
+          "client_id": "618036466482-2ch7gmahk38212m5qvaehk6bkd7erdhj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqL9sC8EPTibjMP3Q-zF4P1onTNwXGYpU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "618036466482-2ch7gmahk38212m5qvaehk6bkd7erdhj.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "618036466482-m6hgiqm3n15nprj8n8ou8to0ith32ls8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.webblen.io"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
