@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/firebase_services/reward_data.dart';
+import 'package:webblen/firebase_data/reward_data.dart';
 import 'package:webblen/widgets_common/common_button.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:google_maps_webservice/places.dart';

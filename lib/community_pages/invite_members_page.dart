@@ -6,8 +6,8 @@ import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community.dart';
-import 'package:webblen/firebase_services/community_data.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_user/user_row.dart';
 
 
@@ -79,7 +79,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
     super.initState();
     if (widget.currentUser.friends != null || widget.currentUser.friends.isNotEmpty){
       widget.currentUser.friends.forEach((uid){
-        UserDataService().findUserByID(uid).then((user){
+        UserDataService().getUserByID(uid).then((user){
           if (user != null){
             if (!widget.community.memberIDs.contains(user.uid)){
               friends.add(user);

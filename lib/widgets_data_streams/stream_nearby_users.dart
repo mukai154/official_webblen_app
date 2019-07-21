@@ -29,9 +29,11 @@ class StreamTop10NearbyUsers extends StatelessWidget {
       builder: (context, AsyncSnapshot<List<DocumentSnapshot>> docSnapshots) {
         List<WebblenUser> nearbyUsers = [];
         if (!docSnapshots.hasData) {
-          return Padding(
-            padding: EdgeInsets.only(top: 8.0),
-            child: Center(child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed)),
+          return Container(
+              height: 100,
+              child: Center(
+                child: CustomLinearProgress(progressBarColor: Colors.black12),
+              ),
           );
         } else {
           docSnapshots.data.shuffle();
@@ -46,7 +48,7 @@ class StreamTop10NearbyUsers extends StatelessWidget {
             children: <Widget>[
               Container(
                 //margin: EdgeInsets.symmetric(horizontal: 12.0),
-                width: MediaQuery.of(context).size.width - 16,
+                width: MediaQuery.of(context).size.width,
                 child: Center(
                   child: new CarouselSlider(
                     items:  BuildTopUsers(context: context, currentUser: currentUser, top10NearbyUsers: nearbyUsers).buildTopUsers(),
@@ -84,7 +86,7 @@ class StreamNumberOfNearbyUsers extends StatelessWidget {
           .within(center: center, radius: 20, field: 'location'),
       builder: (context, AsyncSnapshot<List<DocumentSnapshot>> docSnapshots){
         if (!docSnapshots.hasData) {
-          return Fonts().textW500("Searching Community", 18.0, FlatColors.darkGray, TextAlign.left);
+          return Container();
         } else {
           return Fonts().textW700("${docSnapshots.data.length} People Nearby", 16.0, Colors.black, TextAlign.left);
         }

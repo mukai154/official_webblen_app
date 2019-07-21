@@ -10,14 +10,19 @@ import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'dart:async';
-import 'package:webblen/firebase_services/auth.dart';
+import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/widgets_data_streams/stream_user_data.dart';
 import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/widgets_common/common_button.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 
 class UserRanksPage extends StatefulWidget {
+
+  final String simLocation;
+  final double simLat;
+  final double simLon;
+  UserRanksPage({this.simLocation, this.simLat, this.simLon});
 
   @override
   _UserRanksPageState createState() => _UserRanksPageState();
@@ -33,12 +38,6 @@ class _UserRanksPageState extends State<UserRanksPage> {
   List<WebblenUser> nearbyUsers = [];
   bool hasLocation = false;
   bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    initialize();
-  }
 
   Future<Null> initialize() async {
     BaseAuth().currentUser().then((val) {
@@ -64,17 +63,31 @@ class _UserRanksPageState extends State<UserRanksPage> {
   }
 
   Future<Null> loadLocation() async {
-    LocationService().getCurrentLocation(context).then((location){
-      if (this.mounted){
-        if (location != null){
-          hasLocation = true;
-          currentLat = location.latitude;
-          currentLon = location.longitude;
-        }
+    if (widget.simLocation != null){
+      currentLat = widget.simLat;
+      currentLon = widget.simLon;
+      hasLocation = true;
+      UserDataService().getNearbyUsers(currentLat, currentLon).then((users){
+        nearbyUsers = users;
         isLoading = false;
         setState(() {});
-      }
-    });
+      });
+    } else {
+      LocationService().getCurrentLocation(context).then((location){
+        if (this.mounted){
+          if (location != null){
+            hasLocation = true;
+            currentLat = location.latitude;
+            currentLon = location.longitude;
+            UserDataService().getNearbyUsers(currentLat, currentLon).then((users){
+              nearbyUsers = users;
+              isLoading = false;
+              setState(() {});
+            });
+          }
+        }
+      });
+    }
   }
 
   Widget noUsersFoundWidget() {
@@ -90,7 +103,7 @@ class _UserRanksPageState extends State<UserRanksPage> {
             child: new Image.asset("assets/images/sleepy.png", fit: BoxFit.scaleDown),
           ),
           SizedBox(height: 16.0),
-          Fonts().textW800("There's nobody around...", 24.0, FlatColors.darkGray, TextAlign.center),
+          Fonts().textW700("There's nobody around...", 24.0, FlatColors.darkGray, TextAlign.center),
           //new Text("No Nearby Users Found", style: Fonts.noEventsFont, textAlign: TextAlign.center),
         ],
       ),
@@ -118,6 +131,13 @@ class _UserRanksPageState extends State<UserRanksPage> {
 
 
   @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
 
 
@@ -136,37 +156,19 @@ class _UserRanksPageState extends State<UserRanksPage> {
       body: isLoading
         ? LoadingScreen(context: context, loadingDescription: "")
           : hasLocation
-          ? StreamBuilder(
-              stream: geo.collection(collectionRef: userRef)
-                  .within(center: center, radius: 20, field: 'location'),
-              builder: (context, AsyncSnapshot<List<DocumentSnapshot>> docSnapshots) {
-                if (!docSnapshots.hasData) {
-                  return Padding(
-                    padding: EdgeInsets.only(top: 8.0),
-                    child: Center(child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed)),
+          ? Container(
+              color: FlatColors.clouds,
+              child: ListView.builder(
+                itemBuilder: (context, index){
+                  return UserRow(
+                    user: nearbyUsers[index],
+                    isFriendsWithUser: currentUser.friends.contains(nearbyUsers[index].uid),
+                    sendUserFriendRequest: () => sendFriendRequest(nearbyUsers[index]),
+                    transitionToUserDetails: () => PageTransitionService(context: context, currentUser: currentUser, webblenUser: nearbyUsers[index]).transitionToUserDetailsPage(),
                   );
-                } else {
-                  docSnapshots.data.sort((docA, docB) => docB['eventHistory'].length.compareTo(docA['eventHistory'].length));
-                  return Container(
-                    color: FlatColors.clouds,
-                    child: ListView.builder(
-                      itemBuilder: (context, index){
-                        WebblenUser user = WebblenUser.fromMap(docSnapshots.data[index].data);
-                        if (user != null && !nearbyUsers.contains(user)){
-                          nearbyUsers.add(user);
-                        }
-                        return UserRow(
-                          user: user,
-                          isFriendsWithUser: currentUser.friends.contains(user.uid),
-                          sendUserFriendRequest: () => sendFriendRequest(user),
-                          transitionToUserDetails: () => PageTransitionService(context: context, currentUser: currentUser, webblenUser: user).transitionToUserDetailsPage(),
-                        );
-                      },
-                      itemCount: docSnapshots.data.length,
-                    ),
-                  );
-                }
-              },
+                },
+                itemCount: nearbyUsers.length,
+              ),
             )
           : Column(
               mainAxisAlignment: MainAxisAlignment.center,

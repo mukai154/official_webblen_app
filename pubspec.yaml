@@ -16,6 +16,7 @@ dependencies:
   firebase_auth: ^0.11.1
   firebase_messaging: ^5.0.1+1
   firebase_dynamic_links: ^0.4.0
+  cloud_functions: ^0.4.0+2
 
   #Social Dependencies
   flutter_facebook_login:
@@ -53,9 +54,9 @@ dependencies:
   #Other Dependencies
   font_awesome_flutter: 8.4.0
   flutter_tags: ^0.3.1
-  flutter_staggered_grid_view: 0.2.7
   carousel_slider: ^1.3.0
-  pull_to_refresh: ^1.3.1
+  liquid_pull_to_refresh: ^1.1.1
+  shimmer: ^1.0.0
   hidden_drawer_menu:  ^1.0.1
   flutter_masked_text: ^0.8.0
   flushbar: 1.5.0
@@ -71,20 +72,15 @@ flutter:
     - assets/images/
 
   fonts:
-    - family: Barlow
-      fonts:
-        - asset: assets/fonts/Barlow-Light.ttf
-          weight: 300
-        - asset: assets/fonts/Barlow-Regular.ttf
-          weight: 400
-        - asset: assets/fonts/Barlow-Medium.ttf
-          weight: 500
-
-    - family: Nunito
-      fonts:
-        - asset: assets/fonts/Nunito-Bold.ttf
-          weight: 700
-        - asset: assets/fonts/Nunito-ExtraBold.ttf
-          weight: 800
-        - asset: assets/fonts/Nunito-Black.ttf
-          weight: 900
+      - family: Helvetica Neue
+        fonts:
+          - asset: assets/fonts/HelveticaNeueThin.ttf
+            weight: 300
+          - asset: assets/fonts/HelveticaNeueLight.ttf
+            weight: 400
+          - asset: assets/fonts/HelveticaNeue.ttf
+            weight: 500
+          - asset: assets/fonts/HelveticaNeueMedium.ttf
+            weight: 600
+          - asset: assets/fonts/HelveticaNeueBold.ttf
+            weight: 700

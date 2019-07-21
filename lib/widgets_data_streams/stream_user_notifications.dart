@@ -6,9 +6,8 @@ class StreamUserNotifications extends StatelessWidget {
 
   final String uid;
   final VoidCallback notifAction;
-  final bool isLoading;
 
-  StreamUserNotifications({this.uid, this.notifAction, this.isLoading});
+  StreamUserNotifications({this.uid, this.notifAction});
 
   @override
   Widget build(BuildContext context) {
@@ -21,16 +20,13 @@ class StreamUserNotifications extends StatelessWidget {
         builder: (BuildContext context, notifSnapshot) {
           if (!notifSnapshot.hasData) return Container();
           int notifCount = notifSnapshot.data.documents.length;
-          return
-            isLoading
-            ? Container()
-            : GestureDetector(
-                onTap: notifAction,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 8.0),
-                  child: NotificationBell(notificationCount: notifCount == null ? 0 : notifCount),
-                ),
-              );
+          return GestureDetector(
+            onTap: notifAction,
+            child: Padding(
+              padding: EdgeInsets.only(right: 8.0, top: 6.0),
+              child: NotificationBell(notificationCount: notifCount == null ? 0 : notifCount),
+            ),
+          );
         });
   }
 }

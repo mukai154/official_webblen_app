@@ -6,9 +6,9 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/models/comment.dart';
 import 'package:webblen/widgets_comment/comment_row.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/comment_data.dart';
+import 'package:webblen/firebase_data/comment_data.dart';
 
 class StreamCommentData extends StatelessWidget {
 
@@ -20,7 +20,7 @@ class StreamCommentData extends StatelessWidget {
   final CollectionReference commentRef = Firestore.instance.collection('comments');
 
   transitionToUserPage(BuildContext context, String uid) async {
-    UserDataService().findUserByID(uid).then((user){
+    UserDataService().getUserByID(uid).then((user){
       if (user != null){
         PageTransitionService(context: context, currentUser: currentUser, webblenUser: user).transitionToUserDetailsPage();
       }

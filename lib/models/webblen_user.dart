@@ -8,7 +8,7 @@ class WebblenUser {
   double impactPoints;
   double userLat;
   double userLon;
-  String lastCheckIn;
+  int lastCheckInTimeInMilliseconds;
   List eventHistory;
   List rewards;
   List savedEvents;
@@ -23,7 +23,7 @@ class WebblenUser {
   bool notifySuggestedEvents;
   bool notifyWalletDeposits;
   bool notifyNewMessages;
-  String lastNotificationSentAt;
+  int lastNotifInMilliseconds;
   int messageNotificationCount;
   int friendRequestNotificationCount;
   int achievementNotificationCount;
@@ -34,7 +34,6 @@ class WebblenUser {
   bool isOnWaitList;
   String messageToken;
   bool isNew;
-  Map<dynamic, dynamic> location;
   Map<dynamic, dynamic> communities;
   Map<dynamic, dynamic> followingCommunities;
   bool canMakeAds;
@@ -51,7 +50,7 @@ class WebblenUser {
     this.impactPoints,
     this.userLat,
     this.userLon,
-    this.lastCheckIn,
+    this.lastCheckInTimeInMilliseconds,
     this.eventHistory,
     this.rewards,
     this.savedEvents,
@@ -64,7 +63,7 @@ class WebblenUser {
     this.notifySuggestedEvents,
     this.notifyWalletDeposits,
     this.notifyNewMessages,
-    this.lastNotificationSentAt,
+    this.lastNotifInMilliseconds,
     this.messageNotificationCount,
     this.friendRequestNotificationCount,
     this.achievementNotificationCount,
@@ -77,12 +76,52 @@ class WebblenUser {
     this.isOnWaitList,
     this.messageToken,
     this.isNew,
-    this.location,
     this.communities,
     this.followingCommunities,
     this.canMakeAds,
   });
 
+  factory WebblenUser.fromJson(Map<String, dynamic> data){
+    return WebblenUser(
+        blockedUsers: data['blockedUsers'],
+        username: data['username'],
+        uid: data['uid'],
+        profile_pic: data['profile_pic'],
+        eventPoints: data['eventPoints'] * 1.00,
+        impactPoints: data['impactPoints'] * 1.00,
+        userLat: data['userLat'],
+        userLon: data['userLon'],
+        lastCheckInTimeInMilliseconds: data['lastCheckInTimeInMilliseconds'],
+        eventHistory: data['eventHistory'],
+        rewards: data['rewards'],
+        savedEvents: data['savedEvents'],
+        friends: data['friends'],
+        friendRequests: data['friendRequests'],
+        achievements: data['acheivements'],
+        notifyHotEvents: data['notifyHotEvents'],
+        notifyFlashEvents: data['notifyFlashEvents'],
+        notifyFriendRequests: data['notifyFriendRequests'],
+        notifySuggestedEvents: data['notifySuggestedEvents'],
+        notifyWalletDeposits: data['notifyWalletDeposits'],
+        notifyNewMessages: data['notifyNewMessages'],
+        lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
+        messageNotificationCount: data['messageNotificationCount'],
+        friendRequestNotificationCount: data['friendRequestNotificationCount'],
+        achievementNotificationCount: data['achievementNotificationCount'],
+        eventNotificationCount: data['eventNotificationCount'],
+        walletNotificationCount: data['walletNotificationCount'],
+        isCommunityBuilder: data['isCommunityBuilder'],
+        isNewCommunityBuilder: data['isNewCommunityBuilder'],
+        communityBuilderNotificationCount: data['communityBuilderNotificationCount'],
+        notificationCount: data['notificationCount'],
+        isOnWaitList: data['isOnWaitList'],
+        messageToken: data['messageToken'],
+        isNew: data['isNew'],
+        communities: data['communities'],
+        followingCommunities: data['followingCommunities'],
+        canMakeAds: data['canMakeAds']
+    );
+  }
   WebblenUser.fromMap(Map<String, dynamic> data)
       : this(
       blockedUsers: data['blockedUsers'],
@@ -93,7 +132,7 @@ class WebblenUser {
       impactPoints: data['impactPoints'] * 1.00,
       userLat: data['userLat'],
       userLon: data['userLon'],
-      lastCheckIn: data['lastCheckIn'],
+      lastCheckInTimeInMilliseconds: data['lastCheckInTimeInMilliseconds'],
       eventHistory: data['eventHistory'],
       rewards: data['rewards'],
       savedEvents: data['savedEvents'],
@@ -106,7 +145,7 @@ class WebblenUser {
       notifySuggestedEvents: data['notifySuggestedEvents'],
       notifyWalletDeposits: data['notifyWalletDeposits'],
       notifyNewMessages: data['notifyNewMessages'],
-      lastNotificationSentAt: data['lastNotificationSentAt'],
+      lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
       messageNotificationCount: data['messageNotificationCount'],
       friendRequestNotificationCount: data['friendRequestNotificationCount'],
       achievementNotificationCount: data['achievementNotificationCount'],
@@ -119,7 +158,6 @@ class WebblenUser {
       isOnWaitList: data['isOnWaitList'],
       messageToken: data['messageToken'],
       isNew: data['isNew'],
-      location: data['location'],
       communities: data['communities'],
       followingCommunities: data['followingCommunities'],
       canMakeAds: data['canMakeAds']
@@ -134,7 +172,7 @@ class WebblenUser {
     'impactPoints': this.impactPoints,
     'userLat': this.userLat,
     'userLon': this.userLon,
-    'lastCheckIn': this.lastCheckIn,
+    'lastCheckInTimeInMilliseconds': this.lastCheckInTimeInMilliseconds,
     'eventHistory': this.eventHistory,
     'rewards': this.rewards,
     'savedEvents': this.savedEvents,
@@ -147,7 +185,7 @@ class WebblenUser {
     'notifySuggestedEvents': this.notifySuggestedEvents,
     'notifyWalletDeposits': this.notifyWalletDeposits,
     'notifyNewMessages': this.notifyNewMessages,
-    'lastNotificationSentAt': this.lastNotificationSentAt,
+    'lastNotifInMilliseconds': this.lastNotifInMilliseconds,
     'messageNotificationCount': this.messageNotificationCount,
     'friendRequestNotificationCount': this.friendRequestNotificationCount,
     'achievementNotificationCount': this.achievementNotificationCount,
@@ -160,9 +198,9 @@ class WebblenUser {
     'isOnWaitList': this.isOnWaitList,
     'messageToken': this.messageToken,
     'isNew': this.isNew,
-    'location': this.location,
     'communities': this.communities,
     'followingCommunities': this.followingCommunities,
     'canMakeAds': this.canMakeAds
   };
+
 }

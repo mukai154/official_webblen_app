@@ -15,6 +15,7 @@ class LocationUnavailablePage extends StatelessWidget {
     return Container(
       child: Column (
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget> [
           currentUser.isOnWaitList
               ? Fonts().textW700("You're On the Waitlist", 18.0, FlatColors.darkGray, TextAlign.center)
@@ -33,6 +34,17 @@ class LocationUnavailablePage extends StatelessWidget {
             height: 40.0,
             width: 200.0,
             onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToWaitListPage(),
+          ),
+          CustomColorButton(
+            text: "View Available Locations",
+            textColor: FlatColors.darkGray,
+            backgroundColor: FlatColors.clouds,
+            height: 40.0,
+            width: 200.0,
+            onPressed: (){
+              Navigator.of(context).pop();
+              PageTransitionService(context: context).transitionToChooseSim();
+            },
           ),
         ],
       ),

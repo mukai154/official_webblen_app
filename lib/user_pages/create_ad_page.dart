@@ -8,7 +8,7 @@ import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/local_ad.dart';
-import 'package:webblen/firebase_services/ad_data.dart';
+import 'package:webblen/firebase_data/ad_data.dart';
 import 'package:flutter/services.dart';
 import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/styles/fonts.dart';

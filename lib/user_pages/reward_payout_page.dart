@@ -5,10 +5,10 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/firebase_services/transaction_data.dart';
+import 'package:webblen/firebase_data/transaction_data.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/firebase_services/reward_data.dart';
+import 'package:webblen/firebase_data/reward_data.dart';
 
 
 class RewardPayoutPage extends StatefulWidget {

@@ -8,7 +8,7 @@ import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/event.dart';
-import 'package:webblen/firebase_services/event_data.dart';
+import 'package:webblen/firebase_data/event_data.dart';
 import 'package:flutter/services.dart';
 import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -83,10 +83,9 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
     });
     Navigator.of(context).pop();
     eventImage = getImageFromCamera
-      ? await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromCamera()
-      : await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromLibrary();
+      ? await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromCamera()
+      : await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromLibrary();
     if (eventImage != null){
-
       setState(() {});
     }
   }
@@ -116,7 +115,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
         onTap: () => ShowAlertDialogService().showImageSelectDialog(context, () => setEventImage(true), () => setEventImage(false)),
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 300.0,
+          height: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
               color: Colors.black12
           ),
@@ -125,7 +124,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Icon(Icons.camera_alt, size: 40.0, color: FlatColors.londonSquare),
-                    Fonts().textW500('900 x 700', 16.0, FlatColors.londonSquare, TextAlign.center)
+                    Fonts().textW500('1:1', 16.0, FlatColors.londonSquare, TextAlign.center)
                   ],
                 )
               : Image.file(eventImage, fit: BoxFit.cover),
@@ -135,45 +134,63 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
 
 
     Widget _buildEventTitleField(){
-      return new Container(
+      return Container(
         margin: EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-        child: new TextFormField(
-          maxLengthEnforced: true,
-          cursorColor: FlatColors.darkGray,
-          style: TextStyle(color: FlatColors.darkGray, fontSize: 30.0, fontFamily: 'Nunito', fontWeight: FontWeight.w800),
-          autofocus: false,
+        decoration: BoxDecoration(
+          color: FlatColors.textFieldGray,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: TextFormField(
+          decoration: InputDecoration(
+            hintText: "Event Title",
+            contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
+            border: InputBorder.none,
+          ),
+          onSaved: (value) => newEvent.title = value,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontFamily: "Helvetica Neue",
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
           inputFormatters: [
             LengthLimitingTextInputFormatter(30),
+            BlacklistingTextInputFormatter(RegExp("[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
           ],
-          onSaved: (value) => newEvent.title = value,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Event Title",
-            counterStyle: TextStyle(fontFamily: 'Nunito'),
-            contentPadding: EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 10.0),
-          ),
+          textInputAction: TextInputAction.done,
+          autocorrect: false,
         ),
       );
     }
 
     Widget _buildEventDescriptionField(){
       return Container(
-        margin: EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-        height: 150.0,
-        child: new TextFormField(
-          maxLines: 5,
-          maxLength: 300,
-          cursorColor: FlatColors.darkGray,
-          style: TextStyle(color: Colors.black54, fontSize: 18.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
-          maxLengthEnforced: true,
-          autofocus: false,
-          onSaved: (value) => newEvent.description = value,
+        height: 180,
+        margin: EdgeInsets.only(left: 8, right: 8, bottom: 16),
+        constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width - 16
+        ),
+        decoration: BoxDecoration(
+          color: FlatColors.textFieldGray,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: TextFormField(
           decoration: InputDecoration(
-            border: InputBorder.none,
             hintText: "Event Description",
-            counterStyle: TextStyle(fontFamily: 'Barlow'),
-            contentPadding: EdgeInsets.fromLTRB(10.0, 4.0, 10.0, 10.0),
+            contentPadding: EdgeInsets.all(8),
+            border: InputBorder.none,
           ),
+          onSaved: (val) => newEvent.description = val,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            fontFamily: "Helvetica Neue",
+          ),
+          textInputAction: TextInputAction.done,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          autocorrect: false,
         ),
       );
     }
@@ -192,6 +209,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
               children: <Widget>[
                 addImageButton(),
                 _buildEventTitleField(),
+                SizedBox(height: 8.0),
                 _buildEventDescriptionField(),
                 CustomColorButton(
                   text: "Submit",

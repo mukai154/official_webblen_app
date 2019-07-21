@@ -4,7 +4,7 @@ import 'package:webblen/widgets_reward/reward_card.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/firebase_services/reward_data.dart';
+import 'package:webblen/firebase_data/reward_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/widgets_reward/reward_purchase.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -237,7 +237,7 @@ class _ShopPageState extends State<ShopPage> {
           SizedBox(height: 16.0),
           isLoading
               ? Container()
-              : Fonts().textW800('No Rewards Available', 24.0, FlatColors.darkGray, TextAlign.center),//new Text(message, style: Fonts.noEventsFont, textAlign: TextAlign.center),
+              : Fonts().textW700('No Rewards Available', 24.0, FlatColors.darkGray, TextAlign.center),//new Text(message, style: Fonts.noEventsFont, textAlign: TextAlign.center),
         ],
       ),
     );

@@ -8,14 +8,14 @@ import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/models/community_news.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_data_streams/stream_comment_data.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:webblen/widgets_common/common_flushbar.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:webblen/models/comment.dart';
-import 'package:webblen/firebase_services/comment_data.dart';
+import 'package:webblen/firebase_data/comment_data.dart';
 import 'package:webblen/utils/open_url.dart';
 
 class CommunityPostCommentsPage extends StatefulWidget {
@@ -133,7 +133,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
             ),
             Padding(
               padding: EdgeInsets.only(left: 4.0, top: 12.0, right: 4.0),
-              child: Fonts().textW800("@" + widget.newsPost.username, 18.0, FlatColors.darkGray, TextAlign.start),
+              child: Fonts().textW700("@" + widget.newsPost.username, 18.0, FlatColors.darkGray, TextAlign.start),
             ),
           ],
         ),

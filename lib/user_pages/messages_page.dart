@@ -4,7 +4,7 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/widgets_chat/chat_preview_row.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
@@ -28,7 +28,7 @@ class _MessagesPageState extends State<MessagesPage> with SingleTickerProviderSt
   Widget buildMessagesView(){
     UserDataService().updateMessageNotifications(widget.currentUser.uid);
     return Container(
-      color: FlatColors.clouds,
+      color: Colors.white,
       child: StreamBuilder(
         stream: Firestore.instance
             .collection('chats')
@@ -81,7 +81,7 @@ class _MessagesPageState extends State<MessagesPage> with SingleTickerProviderSt
     return Container(
       margin: EdgeInsets.all(16.0),
       width: MediaQuery.of(context).size.width,
-      color: FlatColors.clouds,
+      color: Colors.white,
       child: new Column(
         children: <Widget>[
           SizedBox(height: 160.0),
@@ -134,8 +134,8 @@ class _MessagesPageState extends State<MessagesPage> with SingleTickerProviderSt
       elevation: 0.5,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
-      title: Text('Messages', style: new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600, color: FlatColors.blackPearl)),
-      leading: BackButton(color: FlatColors.londonSquare),
+      title: Fonts().textW700('Messages', 18.0, Colors.black, TextAlign.center),
+      leading: BackButton(color: Colors.black),
     );
 
     return Scaffold(

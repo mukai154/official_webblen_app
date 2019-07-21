@@ -36,8 +36,8 @@ class StreamEventDetails extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Fonts().textW700('Details', 24.0, FlatColors.darkGray, TextAlign.left),
-                Fonts().textW400(event.description, 18.0, FlatColors.lightAmericanGray, TextAlign.left),
+                Fonts().textW700('Details', 24.0, Colors.black, TextAlign.left),
+                Fonts().textW500(event.description, 16.0, Colors.black, TextAlign.left),
               ],
             ),
           );
@@ -48,14 +48,14 @@ class StreamEventDetails extends StatelessWidget {
             children: <Widget>[
               Column(
                 children: <Widget>[
-                  Icon(FontAwesomeIcons.calendar, size: 24.0, color: FlatColors.darkGray),
+                  Icon(FontAwesomeIcons.calendar, size: 20.0, color: Colors.black),
                 ],
               ),
               SizedBox(width: 4.0),
               Column(
                 children: <Widget>[
                   SizedBox(height: 4.0),
-                  Fonts().textW400(dateFormat.format(DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds)), 16.0, FlatColors.darkGray, TextAlign.left),
+                  Fonts().textW400(dateFormat.format(DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds)), 16.0, Colors.black, TextAlign.left),
                 ],
               ),
             ],

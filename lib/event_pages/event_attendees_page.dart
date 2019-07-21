@@ -3,11 +3,11 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/widgets_user/user_row.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/firebase_services/event_data.dart';
+import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 
 class EventAttendeesPage extends StatefulWidget {
@@ -57,20 +57,11 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
   @override
   void initState() {
     super.initState();
-    EventDataService().findEventByKey(widget.eventKey).then((event){
-      List attendees = event.attendees;
-      if (attendees.isNotEmpty){
-        attendees.forEach((uid){
-          UserDataService().findUserByID(uid).then((user){
-            if (user != null){
-              eventAttendees.add(user);
-            }
-            if (attendees.last == uid){
-              isLoading = false;
-              setState(() {});
-            }
-          });
-        });
+    EventDataService().getEventAttendees(widget.eventKey).then((attendees){
+      if (attendees != null && attendees.isNotEmpty){
+        eventAttendees = attendees;
+        isLoading = false;
+        setState(() {});
       } else {
         isLoading = false;
         setState(() {});

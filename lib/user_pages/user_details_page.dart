@@ -3,18 +3,20 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/widgets_user/user_details_header.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets_common/common_alert.dart';
-import 'package:webblen/firebase_services/chat_data.dart';
+import 'package:webblen/firebase_data/chat_data.dart';
 import 'chat_page.dart';
-import 'package:webblen/firebase_services/firebase_notification_services.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/firebase_notification_services.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/widgets_data_streams/stream_events.dart';
 import 'package:webblen/widgets_data_streams/stream_community_data.dart';
 import 'package:flutter/services.dart';
+import 'package:webblen/models/event.dart';
+import 'package:webblen/widgets_event/event_list.dart';
 
 class UserDetailsPage extends StatefulWidget {
 
@@ -31,8 +33,17 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
   ScrollController _scrollController;
   bool isFriendsWithUser = false;
   String friendRequestStatus = "";
-  bool isLoading = true;
   List<Community> communities = [];
+  List<Event> events = [];
+
+  Future<void> loadEventHistory() async {
+    events = [];
+    UserDataService().getUserEventHistory(widget.webblenUser.uid).then((res){
+      events = res;
+      events.sort((e1, e2) => e2.startDateInMilliseconds.compareTo(e1.startDateInMilliseconds));
+      setState(() {});
+    });
+  }
 
   void transitionToMessenger(String chatDocKey, String currentProfileUrl, String currentUsername){
     Navigator.push(context,
@@ -127,7 +138,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
       if (exists){
         String currentUsername;
         String currentProfileUrl;
-        UserDataService().findUserByID(widget.currentUser.uid).then((user){
+        UserDataService().getUserByID(widget.currentUser.uid).then((user){
           currentUsername = user.username;
           currentProfileUrl = user.profile_pic;
           ChatDataService().chatWithUser(widget.currentUser.uid, widget.webblenUser.uid).then((chatDocKey){
@@ -139,7 +150,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
       } else {
         String currentUsername;
         String currentProfileUrl;
-        UserDataService().findUserByID(widget.currentUser.uid).then((user){
+        UserDataService().getUserByID(widget.currentUser.uid).then((user){
           currentUsername = user.username;
           currentProfileUrl = user.profile_pic;
           ChatDataService().createChat(widget.currentUser.uid, widget.webblenUser.uid, currentUsername, widget.webblenUser.username, currentProfileUrl, widget.webblenUser.profile_pic).then((chatDocKey){
@@ -156,18 +167,12 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    loadEventHistory();
     UserDataService().checkFriendStatus(widget.currentUser.uid, widget.webblenUser.uid).then((friendStatus){
       friendRequestStatus = friendStatus;
       if (friendStatus == "friends"){
         isFriendsWithUser = true;
       }
-      CommunityDataService().findAllMemberCommunities(widget.webblenUser.uid).then((result){
-        if (this.mounted){
-          communities = result;
-          isLoading = false;
-          setState(() {});
-        }
-      });
     });
   }
 
@@ -247,7 +252,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
           body: TabBarView(
             children: <Widget>[
               StreamMemberCommunities(currentUser: widget.webblenUser),
-              StreamPastEvents(currentUser: widget.currentUser, user: widget.webblenUser),
+              EventList(events: events, currentUser: widget.currentUser, refreshData: loadEventHistory)
             ],
           ),
         ),
@@ -295,7 +300,7 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
               SliverAppBar(
                 brightness: Brightness.light,
                 backgroundColor: FlatColors.iosOffWhite,
-                title: Fonts().textW800("@" + widget.currentUser.username, 24.0, FlatColors.darkGray, TextAlign.center),
+                title: Fonts().textW700("@" + widget.currentUser.username, 24.0, FlatColors.darkGray, TextAlign.center),
                 pinned: true,
                 floating: true,
                 snap: false,

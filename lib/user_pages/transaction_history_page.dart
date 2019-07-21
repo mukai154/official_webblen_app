@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/widgets_data_streams/stream_user_transactions.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
-import 'package:webblen/firebase_services/transaction_data.dart';
+import 'package:webblen/firebase_data/transaction_data.dart';
 
 
 class TransactionHistoryPage extends StatefulWidget {

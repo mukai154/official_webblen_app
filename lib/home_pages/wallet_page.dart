@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/widgets_wallet/wallet_header.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/user_pages/power_up_page.dart';
 import 'dart:async';
-import 'package:webblen/firebase_services/reward_data.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/reward_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_reward.dart';
-import 'package:webblen/firebase_services/transaction_data.dart';
+import 'package:webblen/firebase_data/transaction_data.dart';
 import 'package:webblen/widgets_reward/reward_card.dart';
 import 'package:webblen/widgets_reward/reward_purchase.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
@@ -33,12 +31,6 @@ class _WalletPageState extends State<WalletPage> {
   GlobalKey<FormState> paymentFormKey = new GlobalKey<FormState>();
   String formDepositName;
   WebblenReward redeemingReward;
-
-
-  void transitionToPowerUpPage(double totalPoints){
-    Navigator.push(context, MaterialPageRoute(builder: (context) =>  PowerUpPage(currentUser: widget.currentUser)));
-  }
-
 
   Future<bool> showRewardDialog(BuildContext context, WebblenReward reward) {
     return showDialog<bool>(
@@ -129,11 +121,10 @@ class _WalletPageState extends State<WalletPage> {
 
   Widget rewardsList(List<WebblenReward> walletRewards)  {
     return Container(
-      height: 300.0,
-      child: new GridView.count(
-        crossAxisCount: 2,
+      height: 150,
+      child: GridView.count(
+        crossAxisCount: 1,
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.only(top: 8.0, bottom: 4.0),
         children: new List<Widget>.generate(walletRewards.length, (index) {
           return GridTile(
             child: RewardCard(
@@ -163,7 +154,6 @@ class _WalletPageState extends State<WalletPage> {
   @override
   void initState() {
     super.initState();
-    UserDataService().updateWalletNotifications(widget.currentUser.uid);
     widget.currentUser.rewards.forEach((reward){
       String rewardID = reward.toString();
       RewardDataService().findRewardByID(rewardID).then((userReward){
@@ -182,52 +172,90 @@ class _WalletPageState extends State<WalletPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: FlatColors.clouds,
+      color: Colors.white,
       child: StreamBuilder(
           stream: Firestore.instance.collection("users").document(widget.currentUser.uid).snapshots(),
           builder: (context, userSnapshot) {
             if (!userSnapshot.hasData) return Text("Loading...");
             var userData = userSnapshot.data;
-            return ListView(
+            double webblenBalance = userData['eventPoints'];
+            return Column(
               children: <Widget>[
                 Container(
-                  color: Colors.white,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      SizedBox(height: 8.0),
-                      Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                          child: Fonts().textW700("Balances", 24.0, FlatColors.darkGray, TextAlign.left)
-                      ),
-                      WalletHeader(
-                        eventPoints: userData["eventPoints"] * 1.00,
-                        impactPoints: userData["impactPoints"] * 1.00,
-                        purchaseWebblenAction: () => ShowAlertDialogService().showInfoDialog(context, "Webblen is Currently Unavailable for Purchase", "Someday... But That Day is Not Today"),
-                      ),
+                  height: 70,
+                  margin: EdgeInsets.only(left: 16, top: 30, right: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Fonts().textW700('Wallet', 40, Colors.black, TextAlign.left),
+//                      IconButton(
+//                        onPressed: () => ShowAlertDialogService().showInfoDialog(context, "Webblen is Currently Unavailable for Purchase", "Someday... But That Day is Not Today"),
+//                        icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
+//                      )
                     ],
                   ),
                 ),
-                SizedBox(height: 8.0),
                 Container(
-                  color: Colors.white,
+                  margin: EdgeInsets.only(left: 16, top: 24, right: 16),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      Padding(
-                          padding: EdgeInsets.only(top: 8.0, left: 16.0),
-                          child: Row(
-                            children: <Widget>[
-                              Fonts().textW700("Rewards", 24.0, FlatColors.darkGray, TextAlign.left),
-                              IconButton(
-                                icon: Icon(FontAwesomeIcons.cartPlus, size: 20.0, color: FlatColors.greenTeal),
-                                onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToShopPage(),
-                              ),
-                            ],
-                          ),
-                      ),
-                      buildWalletRewards(),
+                        Fonts().textW700(
+                            '${webblenBalance.toStringAsFixed(2)}',
+                            34,
+                            Colors.black,
+                            TextAlign.left
+                        ),
+                        Fonts().textW300(
+                            'Webblen Balance',
+                            12,
+                            FlatColors.webblenRed,
+                            TextAlign.left
+                        ),
+                        SizedBox(height: 8.0),
+                        Fonts().textW500(
+                            "Webblen are tokens that can be transferred or traded at anytime.  You need Webblen in order to create new events and communities.",
+                            12,
+                            Colors.black,
+                            TextAlign.left
+                        ),
+                        SizedBox(height: 16.0),
+                        Fonts().textW700(
+                            'x1.00',
+                            34,
+                            Colors.black,
+                            TextAlign.left
+                        ),
+                        Fonts().textW300(
+                            "Attendance Power",
+                            12,
+                            FlatColors.webblenRed,
+                            TextAlign.left
+                        ),
+                        SizedBox(height: 8.0),
+                        Fonts().textW500(
+                            "A multiplier that increases the value of the events you attend. The higher your AP, the more your attendance is worth. Increase your AP by attending events regularly.",
+                            12,
+                            Colors.black,
+                            TextAlign.left
+                        ),
+                        SizedBox(height: 16.0),
+                        Row(
+                          children: <Widget>[
+                            Fonts().textW700(
+                                'Rewards',
+                                28,
+                                Colors.black,
+                                TextAlign.left
+                            ),
+                            IconButton(
+                              onPressed:  () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToShopPage(),
+                              icon: Icon(FontAwesomeIcons.plusCircle, size: 18.0, color: FlatColors.darkMountainGreen),
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 16.0),
+                        buildWalletRewards()
                     ],
                   ),
                 ),

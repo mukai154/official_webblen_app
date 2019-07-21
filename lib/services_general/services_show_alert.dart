@@ -105,8 +105,15 @@ class ShowAlertDialogService {
   Future<bool> showImageSelectDialog(BuildContext context, VoidCallback imageFromCameraAction, VoidCallback imageFromLibraryAction) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: true, //// user must tap button!
         builder: (BuildContext context) { return AddImageDialog(imageFromCameraAction: imageFromCameraAction, imageFromLibraryAction: imageFromLibraryAction); });
+  }
+
+  Future<bool> showEventOptionsDialog(BuildContext context, VoidCallback viewAttendeesAction, VoidCallback shareEventAction, VoidCallback deleteEventAction) {
+    return showDialog<bool>(
+        context: context,
+        barrierDismissible: true, //// user must tap button!
+        builder: (BuildContext context) { return EventOptionsDialog(viewAttendeesAction: viewAttendeesAction, shareEventAction: shareEventAction, deleteEventAction: deleteEventAction); });
   }
 
 }

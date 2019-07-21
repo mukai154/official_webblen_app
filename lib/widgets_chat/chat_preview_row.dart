@@ -45,9 +45,14 @@ class ChatRowPreview extends StatelessWidget {
                 children: <Widget>[
                   Fonts().textW700("@" + chattingWith, 18.0, seenByUser ? FlatColors.darkGray : Colors.white, TextAlign.left),
                   SizedBox(height: 4.0),
-                  lastMessageType == "text" ? Fonts().textW500(lastMessageSentBy + lastMessageSent, 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
-                      : lastMessageType == "image" ? Fonts().textW500(lastMessageSentBy + "Sent an Image", 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
-                      :  Fonts().textW500(lastMessageSentBy + "Sent a Video", 14.0, seenByUser ? FlatColors.blackPearl : Colors.white, TextAlign.left),
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width - 90
+                    ),
+                    child: lastMessageType == "text" ? Fonts().textW500(lastMessageSentBy + lastMessageSent, 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
+                        : lastMessageType == "image" ? Fonts().textW500(lastMessageSentBy + "Sent an Image", 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
+                        :  Fonts().textW500(lastMessageSentBy + "Sent a Video", 14.0, seenByUser ? FlatColors.blackPearl : Colors.white, TextAlign.left),
+                  ),
                   SizedBox(height: 8.0),
                 ],
               ),
@@ -66,14 +71,8 @@ class ChatRowPreview extends StatelessWidget {
     );
 
     final userCard = new Container(
-      //height: 85.0,
       child: userCardContent,
-      decoration: new BoxDecoration(
-        gradient: LinearGradient(
-            colors: seenByUser ? [Colors.white, Colors.white] : [FlatColors.webblenDarkBlue, FlatColors.webblenLightBlue]
-        ),
-      ),
-
+      color: seenByUser ? FlatColors.lynxWhite : Colors.white,
     );
 
 

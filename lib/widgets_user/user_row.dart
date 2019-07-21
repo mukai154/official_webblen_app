@@ -12,7 +12,7 @@ import 'user_details_badges.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 
 class UserRow extends StatelessWidget {
 
@@ -126,7 +126,10 @@ class UserRowMin extends StatelessWidget {
         children: <Widget>[
           userPic,
           user.username == null ? new Text("", style: headerTextStyle)
-              : Fonts().textW500(" @" + user.username, 12.0, Colors.black, TextAlign.center),
+              : user.username.length > 10
+                ? Fonts().textW500(" @" + user.username, 10.0, Colors.black, TextAlign.center)
+                : Fonts().textW500(" @" + user.username, 12.0, Colors.black, TextAlign.center),
+
         ],
       ),
     );

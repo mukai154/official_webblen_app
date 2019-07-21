@@ -3,14 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/widgets_notifications/notification_row.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/firebase_services/firebase_notification_services.dart';
+import 'package:webblen/firebase_data/firebase_notification_services.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 
 class NotificationPage extends StatefulWidget {
@@ -159,7 +159,7 @@ class _NotificationPageState extends State<NotificationPage> {
 
   transitionToUserDetails(String peerID) async {
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().findUserByID(peerID).then((user){
+    UserDataService().getUserByID(peerID).then((user){
       Navigator.of(context).pop();
       PageTransitionService(context: context, currentUser: widget.currentUser, webblenUser: user).transitionToUserDetailsPage();
     });

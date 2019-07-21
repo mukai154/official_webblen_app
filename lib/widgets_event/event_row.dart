@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/webblen_user.dart';
 
@@ -34,99 +34,116 @@ class ComEventRow extends StatelessWidget {
     if (event.endDateInMilliseconds != null){
       isHappeningNow = (event.startDateInMilliseconds < currentDateTime && event.endDateInMilliseconds > currentDateTime) ? true : false;
     }
-    return Padding(
-      padding: EdgeInsets.only(bottom: 8.0),
-      child: GestureDetector(
-        onTap: eventPostAction,
-        child: Container(
-          color: Colors.white,
-          child: Column(
-            children: <Widget>[
-              Container(
-                height: 280,
-                decoration: BoxDecoration(
-                    image: DecorationImage(image: CachedNetworkImageProvider(event.imageURL), fit: BoxFit.cover)
-                ),
-              ),
-              SizedBox(height: 8.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Container(
-                    padding: EdgeInsets.only(left: 8.0, right: 8.0),
-                    constraints: BoxConstraints(
-                        maxWidth: 300
+    return GestureDetector(
+      onTap: eventPostAction,
+      child: Container(
+        margin: EdgeInsets.only(left: 8.0, bottom: 8.0, right: 8.0),
+        height: MediaQuery.of(context).size.width - 16,
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: CachedNetworkImageProvider(event.imageURL),
+            fit: BoxFit.cover,
+          ),
+          borderRadius: BorderRadius.circular(25.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            SizedBox(height: 8.0),
+            Row(
+              children: <Widget>[
+                SizedBox(width: 16.0),
+                event.flashEvent
+                  ? Container()
+                  : GestureDetector(
+                        onTap: showCommunity ? () => transitionToCommunityProfile() : null,
+                        child:  Padding(
+                          padding: EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
+                          child: Material(
+                            borderRadius: BorderRadius.circular(24.0),
+                            color: FlatColors.textFieldGray,
+                            child: Padding(
+                                padding: EdgeInsets.all(6.0),
+                                child: Fonts().textW500('${event.communityAreaName}/${event.communityName}', 14.0, Colors.black, TextAlign.center)
+                            ),
+                          ),
+                        )
                     ),
-                    child: Fonts().textW800(event.title, 24.0, Colors.black, TextAlign.start),
+                Container(),
+              ],
+            ),
+            Spacer(),
+            Container(
+              padding: EdgeInsets.only(top: 16.0),
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.black, FlatColors.transparent],
+                    begin: Alignment(0.0, 1.0),
+                    end: Alignment(0.0, -1.0),
                   ),
+                borderRadius: BorderRadius.only(bottomLeft: Radius.circular(25.0), bottomRight: Radius.circular(25.0))
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(right: 8.0),
-                    child: Material(
-                      borderRadius: BorderRadius.circular(24.0),
-                      color: currentDateTime < event.endDateInMilliseconds ? FlatColors.webblenRed : Colors.black12,
-                      child: Padding(
-                        padding: EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0, bottom: 4.0),
+                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
+                    child: Fonts().textW700('${event.title}', 26.0, Colors.white, TextAlign.left),
+
+                  ),
+
+                  Row(
+                    children: [
+                      SizedBox(width: 16.0),
+                      Container(
+                        padding: EdgeInsets.all(4.0),
+                        decoration: BoxDecoration(
+                          color: Color.fromARGB(255, 255, 89, 89),
+                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                        ),
                         child: Row(
-                          children: <Widget>[
-                            Image.asset("assets/images/transparent_logo_xxsmall.png", height: 18.0, width: 18.0),
-                            SizedBox(width: 3.0),
-                            currentDateTime < event.endDateInMilliseconds
-                                ? Fonts().textW700('${event.estimatedTurnout.toDouble().toStringAsFixed(2) }', 12.0, Colors.white, TextAlign.center)
-                                : Fonts().textW700('${event.eventPayout.toStringAsFixed(2)}', 12.0, FlatColors.darkGray, TextAlign.center)
+                          children: [
+                            currentDateTime > event.startDateInMilliseconds && !isHappeningNow
+                                ? Container(
+                              width: 20,
+                              height: 20,
+                              margin: EdgeInsets.only(left: 4),
+                              child: Image.asset(
+                                "assets/images/transparent-logo.png",
+                                fit: BoxFit.none,
+                              ),
+                            )
+                                : Container(),
+                            //Spacer(),
+                            SizedBox(width: 4.0),
+                            currentDateTime > event.startDateInMilliseconds && !isHappeningNow
+                                ? Container(
+                              margin: EdgeInsets.only(right: 4),
+                              child: Fonts().textW400('${event.eventPayout.toStringAsFixed(2)}', 16.0, Colors.white, TextAlign.left),
+                            )
+                                : Container(
+                                margin: EdgeInsets.only(right: 11),
+                                child: Row(
+                                  children: <Widget>[
+                                    Fonts().textW400('${event.views} views', 16.0, Colors.white, TextAlign.left),
+                                  ],
+                                )
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  )
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start ,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width - 16
-                    ),
-                    padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                    child: Fonts().textW400(event.description, 18.0, FlatColors.darkGray, TextAlign.start),
-                  )
-                ],
-              ),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start ,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  event.startDateInMilliseconds == null
-                      ? Container()
-                      : isHappeningNow
-                      ? Padding(
-                    padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
-                    child: Fonts().textW500('Happening Now', 14.0, Colors.red, TextAlign.start),
-                  )
-                      : Padding(
-                    padding: EdgeInsets.only(left: 8.0, top: 8.0, bottom: 8.0),
-                    child: Fonts().textW400(startDateTime, 14.0, Colors.black, TextAlign.start),
+                      Spacer(),
+                      Fonts().textW400('$startDateTime', 16.0, Colors.white, TextAlign.right),
+                      SizedBox(width: 16.0),
+                    ],
                   ),
-                  GestureDetector(
-                      onTap: showCommunity ? () => transitionToCommunityProfile() : null,
-                      child:  Padding(
-                        padding: EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
-                        child: Material(
-                          borderRadius: BorderRadius.circular(24.0),
-                          color: Colors.black12,
-                          child: Padding(
-                              padding: EdgeInsets.all(6.0),
-                              child: Fonts().textW400('${event.communityAreaName}/${event.communityName}', 12.0, Colors.black, TextAlign.center)
-                          ),
-                        ),
-                      )
-                  )
+                  SizedBox(height: 16.0)
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+
+          ],
+        )
       ),
     );
   }
@@ -165,44 +182,27 @@ class ComRecurringEventRow extends StatelessWidget {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.only(left: 10.0, top: 8.0, right: 4.0),
-                child: Fonts().textW800(event.title, 18.0, FlatColors.darkGray, TextAlign.left),
+                child: Fonts().textW700(event.title, 20.0, Colors.black, TextAlign.left),
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start ,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-//                      Padding(
-//                        padding: EdgeInsets.only(left: 8.0, top: 4.0, bottom: 8.0),
-//                        child: Material(
-//                          borderRadius: BorderRadius.circular(8.0),
-//                          color: FlatColors.casandoraYellow,
-//                          child: Padding(
-//                              padding: EdgeInsets.all(4.0),
-//                              child: Fonts().textW700('Average Payout Pool: \$${event.estimatedTurnout.toStringAsFixed(2)}', 12.0, Colors.white, TextAlign.center)
-//                          ),
-//                        ),
-//                      ),
-                    ],
-                  ),
-                  Column(
                     children: <Widget>[
                       event.recurrenceType == 'daily'
                         ? Padding(
-                            padding: EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
+                            padding: EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
                             child: Fonts().textW500('Everyday from ${event.startTime} to ${event.endTime}', 14.0, FlatColors.darkGray, TextAlign.start),
                           )
                           : event.recurrenceType == 'weekly'
                           ? Padding(
-                              padding: EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
-                              child: Fonts().textW500('Every ', 14.0, FlatColors.darkGray, TextAlign.start),
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
+                              child: Fonts().textW500('Every ${event.dayOfTheWeek} from ${event.startTime} to ${event.endTime}', 14.0, FlatColors.darkGray, TextAlign.start),
                             )
                           : Padding(
-                              padding: EdgeInsets.only(right: 8.0, top: 8.0, bottom: 8.0),
-                              child: Fonts().textW500('Every ', 14.0, FlatColors.darkGray, TextAlign.start),
+                              padding: EdgeInsets.only(left: 10.0, top: 10.0, bottom: 10.0),
+                              child: Fonts().textW500('Every ${event.dayOfTheMonth} ${event.dayOfTheWeek} from ${event.startTime} to ${event.endTime}', 14.0, FlatColors.darkGray, TextAlign.start),
                             )
                     ],
                   )

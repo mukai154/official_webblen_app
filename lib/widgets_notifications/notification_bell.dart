@@ -14,7 +14,7 @@ class NotificationBell extends StatelessWidget {
       children: <Widget>[
         Padding(
           padding: EdgeInsets.only(right: 4.0, top: 18.0),
-          child: Icon(FontAwesomeIcons.bell, size: 24.0, color: FlatColors.darkGray),
+          child: Icon(FontAwesomeIcons.bell, size: 24.0, color: Colors.black),
         ),
         new Positioned(
          top: 12.0,

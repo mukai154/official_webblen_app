@@ -7,7 +7,7 @@ class LocalAd {
   String adURL;
   int clicks;
   int impressions;
-  Map<dynamic, dynamic> location;
+
 
   LocalAd({
     this.adKey,
@@ -17,7 +17,6 @@ class LocalAd {
     this.adURL,
     this.clicks,
     this.impressions,
-    this.location
   });
 
   LocalAd.fromMap(Map<String, dynamic> data)
@@ -28,7 +27,6 @@ class LocalAd {
       imageURL: data['imageURL'],
       clicks: data['clicks'],
       impressions: data['impressions'],
-      location: data['location'],
       adURL: data['adURL']
   );
 
@@ -39,7 +37,6 @@ class LocalAd {
     'imageURL': this.imageURL,
     'clicks': this.clicks,
     'impressions': this.impressions,
-    'location': this.location,
     'adURL': this.adURL
   };
 }

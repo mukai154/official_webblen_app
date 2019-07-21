@@ -34,9 +34,9 @@ class WebblenAppBar {
       elevation: 0.5,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
-      title: Fonts().textW700(appBarTitle, 20.0, FlatColors.darkGray, TextAlign.center),
+      title: Fonts().textW700(appBarTitle, 20.0, Colors.black, TextAlign.center),
       leading: IconButton(
-        icon: Icon(FontAwesomeIcons.arrowLeft, color: FlatColors.darkGray, size:  16.0),
+        icon: Icon(FontAwesomeIcons.arrowLeft, color: Colors.black, size:  16.0),
         onPressed: prevPage,
       ),
       actions: <Widget>[
@@ -44,7 +44,7 @@ class WebblenAppBar {
           padding: EdgeInsets.only(top: 16.0, right: 16.0),
           child: GestureDetector(
             onTap: nextPage,
-            child: Fonts().textW500(nextButtonTitle, 18.0, FlatColors.darkGray, TextAlign.right),
+            child: Fonts().textW500(nextButtonTitle, 18.0, Colors.black, TextAlign.right),
           ),
         ),
       ],
@@ -56,9 +56,9 @@ class WebblenAppBar {
       elevation: 0.5,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
-      title: Fonts().textW700(appBarTitle, 20.0, FlatColors.darkGray, TextAlign.center),
+      title: Fonts().textW700(appBarTitle, 20.0, Colors.black, TextAlign.center),
       leading: IconButton(
-        icon: Icon(FontAwesomeIcons.times, color: FlatColors.darkGray, size:  16.0),
+        icon: Icon(FontAwesomeIcons.times, color: Colors.black, size:  16.0),
         onPressed: (){
           ShowAlertDialogService().showCancelDialog(context, cancelHeader, cancelAction);
         },
@@ -71,8 +71,8 @@ class WebblenAppBar {
       elevation: 0.5,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
-      title: Fonts().textW700(appBarTitle, 20.0, FlatColors.darkGray, TextAlign.center),
-      leading: BackButton(color: FlatColors.darkGray),
+      title: Fonts().textW700(appBarTitle, 20.0, Colors.black, TextAlign.center),
+      leading: BackButton(color: Colors.black),
       actions: <Widget>[
         actionWidget
       ],
@@ -142,13 +142,6 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Icon(item.iconData, color: color, size: widget.iconSize),
-                SizedBox(height: 4),
-                Fonts().textW300(
-                    item.text,
-                    12.0,
-                    widget.color,
-                    TextAlign.center
-                )
               ],
             ),
           ),
@@ -166,12 +159,6 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             SizedBox(height: widget.iconSize + 8),
-            Fonts().textW500(
-                widget.centerItemText ?? '',
-                16.0,
-                widget.color,
-                TextAlign.center
-            )
           ],
         ),
       ),

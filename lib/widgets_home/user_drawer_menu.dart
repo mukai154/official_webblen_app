@@ -11,7 +11,7 @@ import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:contact_picker/contact_picker.dart';
 import 'package:webblen/utils/send_invite.dart';
@@ -80,10 +80,6 @@ class UserDrawerMenu {
                             child: UserDetailsProfilePic(userPicUrl:  currentUser.profile_pic, size: 70.0),
                           )
                               : CustomCircleProgress(20.0, 20.0, 10.0, 10.0, FlatColors.londonSquare),
-                          IconButton(
-                            icon: Icon(FontAwesomeIcons.ellipsisV, color: FlatColors.darkGray, size: 24.0),
-                            onPressed: () => Navigator.pop(context),
-                          )
                         ],
                       ),
                     ),
@@ -227,7 +223,7 @@ class UserDrawerMenu {
               menuRow(
                 Icon(FontAwesomeIcons.questionCircle, color: currentUser.isNew ? FlatColors.darkMountainGreen : FlatColors.blackPearl, size: 18.0),
                 'Help/FAQ',
-                currentUser.isNew ? FlatColors.darkMountainGreen : FlatColors.blackPearl,
+                FlatColors.blackPearl,
                     () {
                       Navigator.pop(context);
                       if (currentUser.isNew){UserDataService().updateNewUser(uid);}

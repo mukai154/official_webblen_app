@@ -4,7 +4,7 @@ import 'package:webblen/auth_buttons/facebook_btn.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/widgets_common/common_button.dart';
-import 'package:webblen/firebase_services/auth.dart';
+import 'package:webblen/firebase_data//auth.dart';
 import 'dart:async';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:firebase_auth/firebase_auth.dart';

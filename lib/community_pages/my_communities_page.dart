@@ -10,7 +10,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/widgets_data_streams/stream_user_data.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/widgets_community/community_row.dart';
 import 'package:webblen/models/event.dart';

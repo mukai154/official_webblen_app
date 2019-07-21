@@ -19,8 +19,8 @@ class BasicTile extends StatelessWidget {
               BoxShadow(
                 color: Colors.black12,
                 blurRadius: 1.8,
-                spreadRadius: 0.5,
-                offset: Offset(0.0, 3.0),
+                spreadRadius: 1.0,
+                offset: Offset(0.0, 1.5),
               ),
             ])
         ),

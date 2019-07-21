@@ -39,5 +39,8 @@ class FlatColors {
   static final blueGray = Color.fromRGBO(119, 140, 163,1.0);
   static final blueGrayLowOpacity = Color.fromRGBO(119, 140, 163,0.3);
   static final blueInneundo = Color.fromRGBO(165, 177, 194,1.0);
+  static final textFieldGray = Color.fromARGB(255, 241, 241, 241);
+  static final transparent = Color(0x00000000);
+
 
 }

@@ -5,7 +5,7 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
 import 'package:webblen/widgets_data_streams/stream_user_data.dart';
@@ -58,7 +58,7 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
 
   getFriends(List friendIDs) async {
     friendIDs.forEach((friendID){
-      UserDataService().findUserByID(friendID).then((user){
+      UserDataService().getUserByID(friendID).then((user){
         if (user != null){
           friendList.add(user);
           if (friendIDs.last == friendID){

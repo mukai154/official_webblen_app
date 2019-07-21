@@ -8,7 +8,7 @@
 //import 'package:webblen/widgets_common/common_button.dart';
 //import 'package:webblen/animations/transition_animations.dart';
 //import 'package:webblen/widgets_common/common_progress.dart';
-//import 'package:webblen/firebase_services/user_data.dart';
+//import 'package:webblen/firebase_data/user_data.dart';
 //
 //class CommunityNewsDetailsPage extends StatefulWidget {
 //

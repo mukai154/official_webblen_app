@@ -10,8 +10,8 @@ import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/user_data.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 
 class SettingsPage extends StatefulWidget {
 
@@ -34,12 +34,13 @@ class _SettingsPageState extends State<SettingsPage> {
     String fileName = "$uid.jpg";
     storageReference.child("profile_pics").child(fileName).putFile(userImage);
     String downloadUrl = await uploadUserImage(userImage, fileName);
-    Firestore.instance.collection("users").document(uid).updateData({"profile_pic": downloadUrl}).whenComplete(() {
-      Navigator.of(context).pop();
-    }).catchError((e) {
-      Navigator.of(context).pop();
-      AlertFlushbar(headerText: "Submit Error", bodyText: e.details)
-          .showAlertFlushbar(context);
+    UserDataService().updateUserProfilePic(widget.currentUser.uid, downloadUrl).then((e){
+      if (e != null){
+        Navigator.of(context).pop();
+        AlertFlushbar(headerText: "Submit Error", bodyText: 'There was an issue uploading a new pic').showAlertFlushbar(context);
+      } else {
+        Navigator.of(context).pop();
+      }
     });
   }
 
@@ -53,12 +54,13 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void changeUserProfilePic(bool getImageFromCamera) async {
+    Navigator.of(context).pop();
     setState(() {
       newUserImage = null;
     });
     newUserImage = getImageFromCamera
-        ? await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromCamera()
-        : await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromLibrary();
+        ? await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromCamera()
+        : await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromLibrary();
     if (newUserImage != null){
       await updateUserPic(newUserImage, widget.currentUser.uid);
       setState(() {});
@@ -67,9 +69,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-//    UserDataService().addUserDataField("canMakeAds", false);
+//    UserDataService().addUserDataField("lastCheckInTimeInMilliseconds", 1562866669946);
+//    UserDataService().addUserDataField("lastNotifInMilliseconds", 1562866669946);
 //    UserDataService().reinstateUserPics();
     //CommunityDataService().updateCommunityDataFields();
   }

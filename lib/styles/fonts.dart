@@ -6,7 +6,7 @@ class Fonts {
   Widget textW300(String text, double size, Color textColor, TextAlign alignment){
     return Text(
       text,
-      style: TextStyle(fontSize: size, fontFamily: 'Barlow', fontWeight: FontWeight.w300, color: textColor),
+      style: TextStyle(fontSize: size, fontFamily: 'Helvetice Neue', fontWeight: FontWeight.w300, color: textColor),
       textAlign: alignment,
     );
   }
@@ -14,7 +14,7 @@ class Fonts {
   Widget textW400(String text, double size, Color textColor, TextAlign alignment){
     return Text(
       text,
-      style: TextStyle(fontSize: size, fontFamily: 'Barlow', fontWeight: FontWeight.w400, color: textColor),
+      style: TextStyle(fontSize: size, fontFamily: 'Helvetice Neue', fontWeight: FontWeight.w400, color: textColor),
       textAlign: alignment,
     );
   }
@@ -22,7 +22,16 @@ class Fonts {
   Widget textW500(String text, double size, Color textColor, TextAlign alignment){
     return Text(
       text,
-      style: TextStyle(fontSize: size, fontFamily: 'Barlow', fontWeight: FontWeight.w500, color: textColor),
+      style: TextStyle(fontSize: size, fontFamily: 'Helvetice Neue', fontWeight: FontWeight.w500, color: textColor),
+      textAlign: alignment,
+      softWrap: true,
+    );
+  }
+
+  Widget textW600(String text, double size, Color textColor, TextAlign alignment){
+    return Text(
+      text,
+      style: TextStyle(fontSize: size, fontFamily: 'Helvetice Neue', fontWeight: FontWeight.w600, color: textColor),
       textAlign: alignment,
       softWrap: true,
     );
@@ -32,26 +41,11 @@ class Fonts {
   Widget textW700(String text, double size, Color textColor, TextAlign alignment){
     return Text(
       text,
-      style: TextStyle(fontSize: size, fontWeight: FontWeight.w700, color: textColor, letterSpacing: 0.1),
+      style: TextStyle(fontSize: size, fontFamily: 'Helvetice Neue', fontWeight: FontWeight.w700, color: textColor, letterSpacing: 0.1),
       textAlign: alignment,
     );
   }
 
-  Widget textW800(String text, double size, Color textColor, TextAlign alignment){
-    return Text(
-      text,
-      style: TextStyle(fontSize: size, fontWeight: FontWeight.w800, color: textColor, letterSpacing: 0.1),
-      textAlign: alignment,
-    );
-  }
-
-  Widget textW900(String text, double size, Color textColor, TextAlign alignment){
-    return Text(
-      text,
-      style: TextStyle(fontSize: size, fontWeight: FontWeight.w900, color: textColor, letterSpacing: 0.1),
-      textAlign: alignment,
-    );
-  }
 
   static final alertDialogHeader =  new TextStyle(fontSize: 20.0, fontWeight: FontWeight.w600, color: FlatColors.blackPearl);
 

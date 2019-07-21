@@ -66,7 +66,7 @@ class Event {
       recurrence: data['recurrence'],
       promoted: data['promoted'],
       location: data['location'],
-      radius: data['radius'],
+      radius: data['radius'].toDouble(),
       imageURL: data['imageURL'],
       tags: data['tags'],
       views: data['views'],

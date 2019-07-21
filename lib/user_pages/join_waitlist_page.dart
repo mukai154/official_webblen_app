@@ -8,7 +8,7 @@ import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 

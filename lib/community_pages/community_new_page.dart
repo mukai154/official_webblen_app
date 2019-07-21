@@ -7,12 +7,12 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:flutter/services.dart';
-import 'package:webblen/firebase_services/community_data.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_user/user_row.dart';
-import 'package:webblen/firebase_services/firebase_notification_services.dart';
+import 'package:webblen/firebase_data/firebase_notification_services.dart';
 import 'dart:async';
-import 'package:webblen/firebase_services/auth.dart';
+import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/widgets_data_streams/stream_user_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -87,7 +87,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     if (currentUser != null){
       if (currentUser.friends != null || currentUser.friends.isNotEmpty){
         currentUser.friends.forEach((uid) async {
-         await UserDataService().findUserByID(uid).then((user){
+         await UserDataService().getUserByID(uid).then((user){
             if (user != null){
               friends.add(user);
             }
@@ -403,15 +403,8 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           "Create Community",
           pageIndex == 0 ? "Next" : "Finish",
           pageIndex == 0
-          ? () => ShowAlertDialogService().showConfirmationDialog(
-          context,
-          'Return to Dashboard?',
-          'Return Home',
-              (){
+          ? () => ShowAlertDialogService().showCancelDialog(context, 'Cancel Create a New Community?', (){
             Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          },
-              (){
             Navigator.of(context).pop();
           })
           : this.previousPage,

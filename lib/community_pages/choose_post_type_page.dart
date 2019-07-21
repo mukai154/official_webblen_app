@@ -22,7 +22,7 @@ class ChoosePostTypePage extends StatelessWidget {
         textColor: FlatColors.darkGray,
         backgroundColor: Colors.white,
         height: 40.0,
-        width: 150.0,
+        width: 200.0,
         onPressed: onPressed,
       );
     }
@@ -38,7 +38,7 @@ class ChoosePostTypePage extends StatelessWidget {
               Fonts().textW700("What Would You Like to Add?", 20.0, FlatColors.darkGray, TextAlign.center),
               SizedBox(height: 24.0),
               optionsButton("Special Event", () => PageTransitionService(context: context, currentUser: currentUser, community: community, isRecurring: false).transitionToNewEventPage()),
-              optionsButton("Regular Event", () => PageTransitionService(context: context, currentUser: currentUser, community: community).transitionToNewRecurringEventPage()),
+              optionsButton("Regular/Repeating Event", () => PageTransitionService(context: context, currentUser: currentUser, community: community).transitionToNewRecurringEventPage()),
               optionsButton("Post", () => PageTransitionService(context: context, currentUser: currentUser, community: community).transitionToCommunityCreatePostPage()),
             ],
           )

@@ -7,7 +7,7 @@ import 'package:webblen/models/community.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/widgets_data_streams/stream_user_data.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/widgets_community/community_row.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
@@ -82,7 +82,11 @@ class _ChooseCommunityPageState extends State<ChooseCommunityPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-        appBar: WebblenAppBar().basicAppBar('Choose Community'),
+        appBar: WebblenAppBar().basicAppBar(
+            widget.newEventOrPost == 'event'
+                ? 'Create New Event For...'
+                : 'Create New Post For...'
+        ),
         body: isLoadingMemberData
             ? LoadingScreen(context: context, loadingDescription: 'Loading Your Communities...')
             : userComs.isEmpty

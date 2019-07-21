@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 //import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:webblen/firebase_services/auth.dart';
+import 'package:webblen/firebase_data/auth.dart';
 import 'services_show_alert.dart';
 
 class UserOptionsService {
@@ -12,7 +12,7 @@ class UserOptionsService {
     String friendRequestStatus;
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    await UserDataService().currentUsername(uid).then((currentUsername){
+    await UserDataService().getUsername(uid).then((currentUsername){
       if (currentUsername != null){
         UserDataService().addFriend(uid, currentUsername, peerUid).then((requestStatus){
           Navigator.of(context).pop();
@@ -34,7 +34,7 @@ class UserOptionsService {
     String friendRequestStatus;
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    await UserDataService().currentUsername(uid).then((currentUsername){
+    await UserDataService().getUsername(uid).then((currentUsername){
       if (currentUsername != null){
         UserDataService().addFriend(uid, currentUsername, peerUid).then((requestStatus){
           Navigator.of(context).pop();

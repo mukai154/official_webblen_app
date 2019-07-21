@@ -31,7 +31,7 @@ class StreamUserAccount extends StatelessWidget {
                 }
               });
               return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+                      padding: EdgeInsets.only(top: 8.0),
                       child: InkWell(
                         onTap: accountAction,
                         child: Hero(
@@ -39,7 +39,7 @@ class StreamUserAccount extends StatelessWidget {
                             child: userData['profile_pic'] != null
                                 ? Stack(
                               children: <Widget>[
-                                UserDetailsProfilePic(userPicUrl:  userData["profile_pic"], size: 40.0),
+                                UserDetailsProfilePic(userPicUrl:  userData["profile_pic"], size: 45.0),
                                 hasMessages
                                     ? Container(
                                   alignment: Alignment(1, -1),
@@ -48,7 +48,7 @@ class StreamUserAccount extends StatelessWidget {
                                     : Container(),
                               ],
                             )
-                              : UserDetailsProfilePic(userPicUrl: '', size: 40.0),
+                              : UserDetailsProfilePic(userPicUrl: '', size: 45.0),
                         ),
                       )
                   );//

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/firebase_services/auth.dart';
-import 'auth_pages/login_page.dart';
+import 'package:webblen/firebase_data/auth.dart';
+import 'auth_pages/splash_page.dart';
 import 'home_page.dart';
 
 
@@ -35,7 +35,7 @@ class _RootPageState extends State<RootPage> {
       case AuthStatus.notDetermined:
         return _buildWaitingScreen();
       case AuthStatus.notSignedIn:
-        return new LoginPage();
+        return new SplashPage();
       case AuthStatus.signedIn:
         return new HomePage();
     }

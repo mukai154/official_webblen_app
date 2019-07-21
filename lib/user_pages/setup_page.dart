@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/firebase_services/auth.dart';
+import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets_common/common_button.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:async';
 import 'dart:io';
 import 'package:webblen/widgets_common/common_flushbar.dart';
@@ -19,11 +18,10 @@ class SetupPage extends StatefulWidget {
 }
 
 class _SetupPageState extends State<SetupPage> {
+
   File userImage;
   String uid;
   String username;
-  bool isLoading = true;
-
 
   final homeScaffoldKey = new GlobalKey<ScaffoldState>();
   final usernameFormKey = new GlobalKey<FormState>();
@@ -31,56 +29,47 @@ class _SetupPageState extends State<SetupPage> {
 
   //Form Validations
   void submitUsernameAndImage() async {
-    setState(() {
-      isLoading = true;
-    });
-
     WebblenUser newUser = WebblenUser(
-      blockedUsers: [],
-      username: username.replaceAll(new RegExp(r"\s+\b|\b\s"), ""),
-      uid: uid,
-      profile_pic: "",
-      eventHistory: [],
-      eventPoints: 0.00,
-      impactPoints: 1.00,
-      rewards: [],
-      savedEvents: [],
-      friends: [],
-      userLat: null,
-      userLon: null,
-      lastCheckIn: null,
-      achievements: [],
-      notifyFlashEvents: true,
-      notifyFriendRequests: true,
-      notifyHotEvents: true,
-      notifySuggestedEvents: true,
-      notifyWalletDeposits: true,
-      notifyNewMessages: true,
-      lastNotificationSentAt: DateTime.now().millisecondsSinceEpoch.toString(),
-      messageNotificationCount: 0,
-      friendRequestNotificationCount: 0,
-      achievementNotificationCount: 0,
-      eventNotificationCount: 0,
-      walletNotificationCount: 0,
-      isCommunityBuilder: false,
-      isNewCommunityBuilder: false,
-      communityBuilderNotificationCount: 0,
-      notificationCount: 0,
-      friendRequests: [],
-      isOnWaitList: false,
-      messageToken: '',
-      isNew: true,
-      location: {},
-      communities: {},
-      followingCommunities: {},
-      canMakeAds: false
+        blockedUsers: [],
+        username: username.replaceAll(new RegExp(r"\s+\b|\b\s"), ""),
+        uid: uid,
+        profile_pic: "",
+        eventHistory: [],
+        eventPoints: 0.00,
+        impactPoints: 1.00,
+        rewards: [],
+        savedEvents: [],
+        friends: [],
+        userLat: null,
+        userLon: null,
+        lastCheckInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+        achievements: [],
+        notifyFlashEvents: true,
+        notifyFriendRequests: true,
+        notifyHotEvents: true,
+        notifySuggestedEvents: true,
+        notifyWalletDeposits: true,
+        notifyNewMessages: true,
+        lastNotifInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+        messageNotificationCount: 0,
+        friendRequestNotificationCount: 0,
+        achievementNotificationCount: 0,
+        eventNotificationCount: 0,
+        walletNotificationCount: 0,
+        isCommunityBuilder: false,
+        isNewCommunityBuilder: false,
+        communityBuilderNotificationCount: 0,
+        notificationCount: 0,
+        friendRequests: [],
+        isOnWaitList: false,
+        messageToken: '',
+        isNew: true,
+        communities: {},
+        followingCommunities: {},
+        canMakeAds: false
     );
 
-    createNewUser(userImage, newUser, uid).then((error) {
-      if (error.isEmpty){
-        PageTransitionService(context: context).transitionToRootPage();
-      }
-    });
+    createNewUser(userImage, newUser, uid);
   }
 
   validateAndSubmit() async {
@@ -107,41 +96,25 @@ class _SetupPageState extends State<SetupPage> {
     }
   }
 
-  Future<String> createNewUser(File userImage, WebblenUser user, String uid) async {
-    String error = "";
+  createNewUser(File userImage, WebblenUser user, String uid) async {
     ShowAlertDialogService().showLoadingDialog(context);
-    StorageReference storageReference = FirebaseStorage.instance.ref();
-    String fileName = "$uid.jpg";
-    storageReference.child("profile_pics").child(fileName).putFile(userImage);
-    String downloadUrl = await uploadUserImage(userImage, fileName);
-
-    user.profile_pic = downloadUrl.toString();
-
-    Firestore.instance.collection("users").document(uid).setData(user.toMap()).whenComplete(() {
-    }).catchError((e) {
-      Navigator.of(context).pop();
-      AlertFlushbar(headerText: "Submit Error", bodyText: e.details)
-          .showAlertFlushbar(context);
+    UserDataService().createNewUser(userImage, user, uid).then((error){
+      if (error.isNotEmpty){
+        PageTransitionService(context: context).transitionToRootPage();
+      } else {
+        Navigator.of(context).pop();
+        AlertFlushbar(headerText: "Submit Error", bodyText: error).showAlertFlushbar(context);
+      }
     });
-    return error;
   }
-
-  Future<String> uploadUserImage(File userImage, String fileName) async {
-    StorageReference storageReference = FirebaseStorage.instance.ref();
-    StorageReference ref = storageReference.child("profile_pics").child(fileName);
-    StorageUploadTask uploadTask = ref.putFile(userImage);
-    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
-    return downloadUrl;
-  }
-
 
   void setUserProfilePic(bool getImageFromCamera) async {
     setState(() {
       userImage = null;
     });
     userImage = getImageFromCamera
-        ? await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromCamera()
-        : await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromLibrary();
+        ? await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromCamera()
+        : await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromLibrary();
     if (userImage != null){
       setState(() {});
     }
@@ -177,7 +150,6 @@ class _SetupPageState extends State<SetupPage> {
     BaseAuth().currentUser().then((userID) {
       setState(() {
         uid = userID;
-        isLoading = false;
       });
     });
   }
@@ -211,7 +183,6 @@ class _SetupPageState extends State<SetupPage> {
           )
       ),
     );
-
 
     final namePicPage = Container(
       height: MediaQuery.of(context).size.height,

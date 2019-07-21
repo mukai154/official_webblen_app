@@ -77,7 +77,7 @@ class CustomColorIconButton extends StatelessWidget {
                 text != null
                     ? Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Fonts().textW500(text, MediaQuery.of(context).size.width * 0.038, textColor, TextAlign.center),
+                        child: Fonts().textW500(text, 16.0, textColor, TextAlign.center),
                       )
                     : Container()
               ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'dart:io';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_common/common_button.dart';
 import 'package:webblen/models/community_news.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -12,7 +12,7 @@ import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
-import 'package:webblen/firebase_services/comment_data.dart';
+import 'package:webblen/firebase_data/comment_data.dart';
 
 
 

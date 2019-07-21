@@ -16,7 +16,10 @@ class DiscoverPage extends StatefulWidget {
 
   final String uid;
   final String areaName;
-  DiscoverPage({this.uid, this.areaName});
+  final String simLocation;
+  final double simLat;
+  final double simLon;
+  DiscoverPage({this.uid, this.areaName, this.simLocation, this.simLat, this.simLon});
 
   @override
   _DiscoverPageState createState() => new _DiscoverPageState();
@@ -26,6 +29,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   StreamSubscription userStream;
   WebblenUser currentUser;
+  String areaName;
   double currentLat;
   double currentLon;
   bool isLoading = true;
@@ -50,16 +54,25 @@ class _DiscoverPageState extends State<DiscoverPage> {
   }
 
   Future<Null> loadLocation() async {
-    LocationService().getCurrentLocation(context).then((location){
-      if (this.mounted){
-        if (location != null){
-          currentLat = location.latitude;
-          currentLon = location.longitude;
-          isLoading = false;
-          setState(() {});
+    if (widget.simLocation != null){
+      areaName = widget.simLocation;
+      currentLat = widget.simLat;
+      currentLon = widget.simLon;
+      isLoading = false;
+      setState(() {});
+    } else {
+      LocationService().getCurrentLocation(context).then((location){
+        if (this.mounted){
+          if (location != null){
+            areaName = widget.areaName;
+            currentLat = location.latitude;
+            currentLon = location.longitude;
+            isLoading = false;
+            setState(() {});
+          }
         }
-      }
-    });
+      });
+    }
   }
 
   @override
@@ -85,7 +98,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
       actions: <Widget>[
         IconButton(
           icon: Icon(FontAwesomeIcons.search, color: Colors.black, size: 18.0),
-          onPressed: () => PageTransitionService(context: context, currentUser: currentUser, areaName: widget.areaName).transitionToSearchPage(),
+          onPressed: () => PageTransitionService(context: context, currentUser: currentUser, areaName: areaName).transitionToSearchPage(),
         ),
       ],
     );
@@ -100,13 +113,13 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 ? LoadingScreen(context: context, loadingDescription: 'Searching for Top Communities...')
                 : Container(
                     color: FlatColors.clouds,
-                    child: StreamTopCommunities(currentUser: currentUser, locRefID: widget.areaName),
+                    child: StreamTopCommunities(currentUser: currentUser, locRefID: areaName),
                   ),
             isLoading
                 ? LoadingScreen(context: context, loadingDescription: 'Searching for Top Communities...')
                 : Container(
                     color: FlatColors.clouds,
-                    child: StreamActiveCommunities(currentUser: currentUser, locRefID: widget.areaName),
+                    child: StreamActiveCommunities(currentUser: currentUser, locRefID: areaName),
                   ),
             isLoading
                 ? LoadingScreen(context: context, loadingDescription: 'Searching for Top Communities...')

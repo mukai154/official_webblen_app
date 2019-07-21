@@ -9,7 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/widgets_data_streams/stream_comment_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
 
 class CommunityPostRow extends StatefulWidget {
@@ -61,7 +61,7 @@ class _CommunityPostRowState extends State<CommunityPostRow> {
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 4.0, top: 12.0, right: 4.0),
-                        child: Fonts().textW500("@" + widget.newsPost.username, 18.0, Colors.black54, TextAlign.start),
+                        child: Fonts().textW500("@" + widget.newsPost.username, 18.0, Colors.black, TextAlign.start),
                       ),
                     ],
                   ),
@@ -73,7 +73,7 @@ class _CommunityPostRowState extends State<CommunityPostRow> {
                       Padding(
                         padding: EdgeInsets.only(top: 8.0),
                         child: IconButton(
-                          icon: Icon(FontAwesomeIcons.comment, color: FlatColors.darkGray, size: 20.0),
+                          icon: Icon(FontAwesomeIcons.comment, color: Colors.black, size: 20.0),
                           onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser, newsPost: widget.newsPost).transitionToPostCommentsPage(),
                         ),
                       )
@@ -118,7 +118,7 @@ class _CommunityPostRowState extends State<CommunityPostRow> {
                           padding: EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
                           child: Material(
                             borderRadius: BorderRadius.circular(8.0),
-                            color: Colors.black12,
+                            color: FlatColors.textFieldGray,
                             child: Padding(
                                 padding: EdgeInsets.all(6.0),
                                 child: Fonts().textW400('${widget.newsPost.areaName}/${widget.newsPost.communityName}', 12.0, Colors.black, TextAlign.center)

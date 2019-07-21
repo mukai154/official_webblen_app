@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/firebase_services/community_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
@@ -159,7 +159,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
 
                           GestureDetector(
                             onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: memberUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage(),
-                            child: Fonts().textW500('${memberUIDs.length} Active Members', 16.0, FlatColors.darkGray, TextAlign.center),
+                            child: Fonts().textW500('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
                           ),
                           GestureDetector(
                             onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: followerUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage(),
@@ -172,9 +172,9 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           CustomColorButton(
-                            text: followerUIDs.contains(widget.currentUser.uid) ? 'Unfollow' : 'Follow',
-                            textColor: followerUIDs.contains(widget.currentUser.uid) ? Colors.redAccent : FlatColors.darkGray,
-                            backgroundColor: followerUIDs.contains(widget.currentUser.uid) ? Colors.white : Colors.white,
+                            text: followerUIDs.contains(widget.currentUser.uid) ? 'Following' : 'Follow',
+                            textColor: followerUIDs.contains(widget.currentUser.uid) ? Colors.black : FlatColors.darkGray,
+                            backgroundColor: followerUIDs.contains(widget.currentUser.uid) ? FlatColors.textFieldGray : Colors.white,
                             onPressed: followUnfollowAction,
                             height: 35.0,
                             width: 150.0,

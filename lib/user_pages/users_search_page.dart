@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/widgets_user/user_row.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 
@@ -29,7 +29,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
     super.initState();
     if (widget.viewingMembersOrAttendees){
       widget.userIDs.forEach((uid){
-        UserDataService().findUserByID(uid).then((user){
+        UserDataService().getUserByID(uid).then((user){
           if (user != null){
             users.add(user);
           }

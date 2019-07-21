@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/styles/flat_colors.dart';
+import 'package:shimmer/shimmer.dart';
 
 class UserDetailsProfilePic extends StatelessWidget {
 
@@ -21,7 +23,19 @@ class UserDetailsProfilePic extends StatelessWidget {
         child: CachedNetworkImage(
           fit: BoxFit.cover,
           imageUrl: userPicUrl,
-          placeholder: (context, url) => Icon(FontAwesomeIcons.user, color: Colors.black12),
+          placeholder: (context, url) => Container(
+              height: size,
+              width: size,
+              child: Shimmer.fromColors(
+                baseColor: FlatColors.clouds,
+                highlightColor: Colors.white,
+                child: Container(
+                  height: size,
+                  width: size,
+                  color: Colors.white,
+                )
+              ),
+          ),
           errorWidget: (context, url, error) => Icon(FontAwesomeIcons.user, color: Colors.black12),
           useOldImageOnUrlChange: false,
         ),
@@ -49,7 +63,7 @@ class _UserProfilePicFromUIDState extends State<UserProfilePicFromUID> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    UserDataService().findProfilePicUrl(widget.uid).then((url){
+    UserDataService().getUserProfilePicURL(widget.uid).then((url){
       if (url != null){
         userImageURL = url;
         if (this.mounted){
@@ -83,7 +97,6 @@ class _UserProfilePicFromUsernameState extends State<UserProfilePicFromUsername>
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     UserDataService().findProfilePicUrlByUsername(widget.username).then((url){
       if (url != null){

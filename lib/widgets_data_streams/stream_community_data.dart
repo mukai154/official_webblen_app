@@ -267,7 +267,8 @@ class StreamCommunitySpecialEvents extends StatelessWidget {
             child: Center(child: Fonts().textW300('This Community Has No Upcoming Events', 18.0, FlatColors.darkGray, TextAlign.center)),
           );
           return Container(
-            color: FlatColors.clouds,
+            padding: EdgeInsets.only(top: 16.0),
+            color: Colors.white,
             child: ListView.builder(
               padding: EdgeInsets.only(bottom: 4.0),
               itemCount: events.length,

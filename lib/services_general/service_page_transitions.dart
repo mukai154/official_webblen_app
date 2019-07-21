@@ -37,6 +37,8 @@ import 'package:webblen/community_pages/community_post_comments_page.dart';
 import 'package:webblen/community_pages/invite_members_page.dart';
 import 'package:webblen/user_pages/search_page.dart';
 import 'package:webblen/community_pages/choose_community.dart';
+import 'package:webblen/home_page.dart';
+import 'package:webblen/auth_pages/choose_sim_page.dart';
 
 
 class PageTransitionService{
@@ -65,6 +67,9 @@ class PageTransitionService{
   final Community community;
   final String newEventOrPost;
   final bool viewingMembersOrAttendees;
+  final String simLocation;
+  final double simLat;
+  final double simLon;
 
   PageTransitionService({
     this.context, this.username, this.isRecurring,
@@ -73,10 +78,15 @@ class PageTransitionService{
     this.peerProfilePic, this.peerUsername, this.profilePicUrl,
     this.newsPost, this.reward, this.event, this.recurringEvent,
     this.eventKey, this.userIDs, this.eventIsLive, this.community,
-    this.areaName, this.newEventOrPost, this.viewingMembersOrAttendees
+    this.areaName, this.newEventOrPost, this.viewingMembersOrAttendees,
+    this.simLocation, this.simLat, this.simLon
   });
 
   void transitionToRootPage () => Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+  void transitionToLoginPage () => Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
+  void transitionToChooseSim () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChooseSimPage()));
+  void transitionToSim () => Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(simLocation: simLocation, simLat: simLat, simLon: simLon)));
+
   void returnToRootPage () => Navigator.of(context).popUntil((route) => route.isFirst);
 //  void transitionToEventListPage () =>  Navigator.push(context, SlideFromRightRoute(widget: EventCalendarPage(currentUser: currentUser)));
 //  void transitionToEventEditPage () =>  Navigator.push(context, SlideFromRightRoute(widget: EventEditPage(event: event, currentUser: currentUser, eventIsLive: eventIsLive)));
@@ -88,7 +98,7 @@ class PageTransitionService{
   void transitionToShopPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  ShopPage(currentUser: currentUser)));
   void transitionToCheckInPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  EventCheckInPage(currentUser: currentUser)));
   void transitionToEventAttendeesPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  EventAttendeesPage(currentUser: currentUser, eventKey: eventKey,)));
-  void transitionToUserRanksPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserRanksPage()));
+  void transitionToUserRanksPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserRanksPage(simLocation: simLocation, simLat: simLat, simLon: simLon)));
   void transitionToCreateRewardPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateRewardPage()));
   void transitionToFriendsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  FriendsPage(uid: uid)));
   void transitionToChatPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  Chat(chatDocKey: chatDocKey, currentUser: currentUser, peerProfilePic: peerProfilePic, peerUsername: peerUsername)));
@@ -96,7 +106,7 @@ class PageTransitionService{
   void transitionToCurrentUserDetailsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CurrentUserDetailsPage(currentUser: currentUser)));
   void transitionToUserDetailsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserDetailsPage(currentUser: currentUser, webblenUser: webblenUser)));
   void transitionToWalletPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  WalletPage(currentUser: currentUser)));
-  void transitionToDiscoverPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  DiscoverPage(uid: uid, areaName: areaName)));
+  void transitionToDiscoverPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  DiscoverPage(uid: uid, areaName: areaName, simLocation: simLocation, simLat: simLat, simLon: simLon)));
   void transitionToMyCommunitiesPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyCommunitiesPage(uid: uid, areaName: areaName)));
   void transitionToNewCommunityPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateCommunityPage(areaName: areaName)));
   void transitionToChoosePostTypePage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ChoosePostTypePage(currentUser: currentUser, community: community)));

@@ -19,7 +19,7 @@ import 'package:webblen/models/community.dart';
 import 'package:flutter_tags/input_tags.dart';
 //import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:webblen/firebase_services/event_data.dart';
+import 'package:webblen/firebase_data/event_data.dart';
 import 'package:flutter/services.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:flutter_picker/flutter_picker.dart';
@@ -188,8 +188,8 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
       eventImage = null;
     });
     eventImage = getImageFromCamera
-        ? await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromCamera()
-        : await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromLibrary();
+        ? await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromCamera()
+        : await WebblenImagePicker(context: context, ratioX: 1.0, ratioY: 1.0).retrieveImageFromLibrary();
     if (eventImage != null){
       Navigator.of(context).pop();
       setState(() {});
@@ -253,7 +253,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
         onTap: () => ShowAlertDialogService().showImageSelectDialog(context, () => setEventImage(true), () => setEventImage(false)),
         child: Container(
           width: MediaQuery.of(context).size.width,
-          height: 300.0,
+          height: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
               color: Colors.black12
           ),
@@ -262,7 +262,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Icon(Icons.camera_alt, size: 40.0, color: FlatColors.londonSquare),
-              Fonts().textW500('900 x 700', 16.0, FlatColors.londonSquare, TextAlign.center)
+              Fonts().textW500('1:1', 16.0, FlatColors.londonSquare, TextAlign.center)
             ],
           )
               : Image.file(eventImage, fit: BoxFit.cover),
@@ -273,44 +273,61 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
     Widget _buildEventTitleField(){
       return Container(
         margin: EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-        child: new TextFormField(
-          maxLengthEnforced: true,
-          cursorColor: FlatColors.darkGray,
-          style: TextStyle(color: Colors.black, fontSize: 30.0, fontWeight: FontWeight.w800),
-          autofocus: false,
+        decoration: BoxDecoration(
+          color: FlatColors.textFieldGray,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: TextFormField(
+          decoration: InputDecoration(
+            hintText: "Event Title",
+            contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
+            border: InputBorder.none,
+          ),
+          onSaved: (value) => newEvent.title = value,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontFamily: "Helvetica Neue",
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
           inputFormatters: [
             LengthLimitingTextInputFormatter(30),
             BlacklistingTextInputFormatter(RegExp("[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
           ],
-          onSaved: (value) => newEvent.title = value,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Event Title",
-            counterStyle: TextStyle(fontFamily: 'Nunito'),
-            contentPadding: EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 10.0),
-          ),
+          textInputAction: TextInputAction.done,
+          autocorrect: false,
         ),
       );
     }
 
     Widget _buildEventDescriptionField(){
       return Container(
-        margin: EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-        height: 150.0,
-        child: new TextFormField(
-          maxLines: 5,
-          maxLength: 300,
-          cursorColor: FlatColors.darkGray,
-          style: TextStyle(color: Colors.black54, fontSize: 18.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
-          maxLengthEnforced: true,
-          autofocus: false,
-          onSaved: (value) => newEvent.description = value,
+        height: 180,
+        margin: EdgeInsets.only(left: 8, right: 8, bottom: 16),
+        constraints: BoxConstraints(
+            maxWidth: MediaQuery.of(context).size.width - 16
+        ),
+        decoration: BoxDecoration(
+          color: FlatColors.textFieldGray,
+          borderRadius: BorderRadius.all(Radius.circular(8)),
+        ),
+        child: TextFormField(
           decoration: InputDecoration(
-            border: InputBorder.none,
             hintText: "Event Description",
-            counterStyle: TextStyle(fontFamily: 'Barlow'),
-            contentPadding: EdgeInsets.fromLTRB(10.0, 4.0, 10.0, 10.0),
+            contentPadding: EdgeInsets.all(8),
+            border: InputBorder.none,
           ),
+          onSaved: (val) => newEvent.description = val,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 14,
+            fontFamily: "Helvetica Neue",
+          ),
+          textInputAction: TextInputAction.done,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          autocorrect: false,
         ),
       );
     }
@@ -471,7 +488,16 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
           maxLines: 1,
           style: TextStyle(color: Colors.black54, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
           autofocus: false,
-          onSaved: (value) => newEvent.fbSite = value,
+          onSaved: (url) {
+            if (!url.contains('http://') || !url.contains('https://')) {
+              if (!url.contains('www.')){
+                url = 'http://www.' + url;
+              } else {
+                url = 'http://' + url;
+              }
+            }
+            newEvent.fbSite = url;
+          },
           inputFormatters: [
             BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
           ],
@@ -495,7 +521,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
           style: TextStyle(color: Colors.black54, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
           autofocus: false,
           inputFormatters: [
-            BlacklistingTextInputFormatter(RegExp("[\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}]"))
+            BlacklistingTextInputFormatter(RegExp("[\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\(|\\)|\\'|\\{|\\}]"))
           ],
           onSaved: (value) {
             if (value != null && value.isNotEmpty){
@@ -525,7 +551,16 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
           inputFormatters: [
             BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
           ],
-          onSaved: (value) => newEvent.website = value,
+          onSaved: (url) {
+            if (!url.contains('http://') || !url.contains('https://')) {
+              if (!url.contains('www.')){
+                url = 'http://www.' + url;
+              } else {
+                url = 'http://' + url;
+              }
+            }
+            newEvent.website = url;
+          },
           decoration: InputDecoration(
             icon: Icon(FontAwesomeIcons.globe, color: FlatColors.darkGray, size: 18),
             border: InputBorder.none,
@@ -638,9 +673,10 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
               children: <Widget>[
                 addImageButton(),
                 _buildEventTitleField(),
+                SizedBox(height: 8.0),
                 _buildEventDescriptionField(),
                 Padding(
-                  padding: EdgeInsets.only(left: 16.0, top: 24.0, right: 16.0),
+                  padding: EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0),
                   child: Fonts().textW700("External Links (Optional)", 18.0, FlatColors.darkGray, TextAlign.left),
                 ),
                 _buildFBUrlField(),
@@ -796,17 +832,25 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
     );
 
     return Scaffold(
-      appBar: WebblenAppBar().basicAppBar("New Regular Event"),
+      appBar: WebblenAppBar().newEventAppBar(context, 'New Regular Event', 'Cancel Adding a New Event?', (){
+        Navigator.of(context).pop();
+        Navigator.of(context).pop();
+      }),
       key: homeScaffoldKey,
-      body: PageView(
-          physics: NeverScrollableScrollPhysics(),
-          controller: _pageController,
-          children: [
-            eventFormPage1,
-            eventFormPage2,
-            eventFormPage3,
-            eventFormPage4
-          ]
+      body: WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _pageController,
+            children: [
+              eventFormPage1,
+              eventFormPage2,
+              eventFormPage3,
+              eventFormPage4
+            ]
+        ),
       ),
     );
   }

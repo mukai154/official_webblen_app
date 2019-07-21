@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:webblen/widgets_chat/chat_row.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/firebase_services/chat_data.dart';
+import 'package:webblen/firebase_data/chat_data.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
@@ -370,17 +370,20 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: Stack(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              buildMessageList(),
-              buildInput(),
-            ],
-          ),
-          // Loading
-          buildLoading()
-        ],
+      child: Container(
+        color: Colors.white,
+        child: Stack(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                buildMessageList(),
+                buildInput(),
+              ],
+            ),
+            // Loading
+            buildLoading()
+          ],
+        ),
       ),
       onWillPop: onBackPress,
     );

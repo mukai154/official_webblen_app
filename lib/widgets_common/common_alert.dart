@@ -310,8 +310,8 @@ class CancelActionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return new CustomAlertDialog(
-      content: new Container(
-        height: 245.0,
+      content: Container(
+        height: 190.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -326,15 +326,12 @@ class CancelActionDialog extends StatelessWidget {
             Container(
                 child: Column(
                   children: <Widget>[
-                    Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
-                    SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    Fonts().textW700(header, 18.0, Colors.black, TextAlign.center)
                   ],
                 )
             ),
             // dialog centre
             SizedBox(height: 16.0),
-            SizedBox(height: 8.0),
             // dialog bottom
             Container(
               child: Column(
@@ -436,7 +433,6 @@ class CancelEventDialog extends StatelessWidget {
 }
 
 class EventUploadSuccessDialog extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return new CustomAlertDialog(
@@ -486,6 +482,86 @@ class EventUploadSuccessDialog extends StatelessWidget {
                           Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
                         }
                       ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class EventOptionsDialog extends StatelessWidget {
+
+  final VoidCallback viewAttendeesAction;
+  final VoidCallback shareEventAction;
+  final VoidCallback deleteEventAction;
+
+  EventOptionsDialog({this.viewAttendeesAction, this.shareEventAction, this.deleteEventAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return new CustomAlertDialog(
+      content: new Container(
+        height: viewAttendeesAction == null
+            ? deleteEventAction == null
+            ? 120.0
+            : 150.0
+            : deleteEventAction == null
+            ? 160.0
+            : 250.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            Container(
+                child: Column(
+                  children: <Widget>[
+                    Fonts().textW700('Event Options', 24, Colors.black, TextAlign.center)
+                  ],
+                )
+            ),
+            Container(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  viewAttendeesAction != null
+                      ? CustomColorIconButton(
+                        icon: Icon(FontAwesomeIcons.users, color: Colors.black, size: 16.0),
+                        text: "View Attendees",
+                        textColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        height: 45.0,
+                        width: 200.0,
+                        onPressed: viewAttendeesAction
+                    ) : Container(),
+                  shareEventAction != null
+                      ? CustomColorIconButton(
+                            icon: Icon(FontAwesomeIcons.share, color: Colors.black, size: 16.0),
+                            text: "Share Event",
+                            textColor: Colors.black,
+                            backgroundColor: Colors.white,
+                            height: 45.0,
+                            width: 200.0,
+                            onPressed: shareEventAction
+                        )
+                      : Container(),
+                  deleteEventAction != null
+                      ? CustomColorIconButton(
+                            icon: Icon(FontAwesomeIcons.trash, color: Colors.white, size: 16.0),
+                            text: "Delete Event",
+                            textColor: Colors.white,
+                            backgroundColor: Colors.red,
+                            height: 45.0,
+                            width: 200.0,
+                            onPressed: deleteEventAction
+                        )
+                      : Container()
                 ],
               ),
             ),
@@ -565,7 +641,6 @@ class ActionMessage extends StatelessWidget {
   final VoidCallback callback;
 
   ActionMessage({this.messageHeader, this.messageA, this.callback});
-
 
   @override
   Widget build(BuildContext context) {
@@ -1036,24 +1111,25 @@ class AddImageDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new CustomAlertDialog(
       content: new Container(
-        height: 230.0,
+        height: 160.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
           borderRadius: BorderRadius.all(new Radius.circular(32.0)),
         ),
-        child: new Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             Container(
                 child: Column(
                   children: <Widget>[
-                    Fonts().textW700('Add Image', 20, Colors.black, TextAlign.center)
+                    Fonts().textW700('Add Image', 24, Colors.black, TextAlign.center)
                   ],
                 )
             ),
             Container(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   CustomColorIconButton(
                       icon: Icon(FontAwesomeIcons.camera, color: Colors.black, size: 16.0),
@@ -1073,14 +1149,6 @@ class AddImageDialog extends StatelessWidget {
                       width: 200.0,
                       onPressed: imageFromLibraryAction
                   ),
-                  CustomColorButton(
-                      text: "Cancel",
-                      textColor: Colors.white,
-                      backgroundColor: Colors.redAccent,
-                      height: 45.0,
-                      width: 200.0,
-                      onPressed: () => Navigator.of(context).pop()
-                  )
                 ],
               ),
             ),

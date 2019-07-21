@@ -4,12 +4,12 @@ import 'package:webblen/widgets_user/user_row.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_services/user_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/firebase_services/community_data.dart';
-import 'package:webblen/firebase_services/event_data.dart';
+import 'package:webblen/firebase_data/community_data.dart';
+import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/widgets_community/community_row.dart';
 import 'package:webblen/widgets_event/event_row.dart';
 import 'package:webblen/widgets_common/common_button.dart';
@@ -59,10 +59,10 @@ class _SearchPageState extends State<SearchPage> {
 
   searchEvents() async {
     resetResults();
-    EventDataService().searchForEventByName(searchVal, widget.areaName).then((result1){
-      eventResults.addAll(result1);
-      EventDataService().searchForEventByTag(searchVal, widget.areaName).then((result2){
-        eventResults.addAll(result2);
+    EventDataService().searchForEventByName(searchVal, widget.areaName).then((res){
+      eventResults.addAll(res);
+      EventDataService().searchForEventByTag(searchVal, widget.areaName).then((res){
+        eventResults.addAll(res);
         setState(() {
           isSearching = false;
           resultType = 'events';
@@ -73,8 +73,8 @@ class _SearchPageState extends State<SearchPage> {
 
   searchUsers() async {
     resetResults();
-    UserDataService().searchForUserByName(searchVal, widget.areaName).then((result2){
-      userResults.addAll(result2);
+    UserDataService().getUserByName(searchVal).then((res){
+      userResults.add(res);
       setState(() {
         isSearching = false;
         resultType = 'users';
@@ -137,20 +137,25 @@ class _SearchPageState extends State<SearchPage> {
   Widget build(BuildContext context) {
 
     Widget _buildSearchField(){
-      return new Container(
-        margin: EdgeInsets.only(left: 8.0, top: 8.0, right: 8.0),
-        child: new TextFormField(
-          maxLengthEnforced: true,
+      return Container(
+        margin: EdgeInsets.only(left: 16, top: 16, right: 16),
+        decoration: BoxDecoration(
+          color: FlatColors.textFieldGray,
+          borderRadius: BorderRadius.all(Radius.circular(25)),
+        ),
+        child: TextFormField(
+          maxLines: 1,
           textCapitalization: TextCapitalization.none,
           cursorColor: FlatColors.darkGray,
-          style: TextStyle(color: FlatColors.darkGray, fontSize: 30.0, fontFamily: 'Nunito', fontWeight: FontWeight.w800),
+          style: TextStyle(color: Colors.black, fontSize: 18.0, fontFamily: 'Helvetica Neue', fontWeight: FontWeight.w700),
           autofocus: false,
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
           onSaved: (value) => searchVal = value.toLowerCase().trim(),
           decoration: InputDecoration(
+            //icon: Icon(Icons.search, color: Colors.black54, size: 18.0),
+            border: InputBorder.none,
             hintText: "Search",
-            counterStyle: TextStyle(fontFamily: 'Nunito'),
-            contentPadding: EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 10.0),
+            contentPadding: EdgeInsets.fromLTRB(12.0, 8.0, 8.0, 8.0),
           ),
         ),
       );
@@ -163,10 +168,7 @@ class _SearchPageState extends State<SearchPage> {
           children: <Widget>[
             Form(
               key: formKey,
-              child: Padding(
-                padding: EdgeInsets.only(top: 32.0),
-                child: _buildSearchField(),
-              ),
+              child: _buildSearchField()
             ),
             SizedBox(height: 16.0),
             Row(
@@ -281,17 +283,17 @@ class _SearchPageState extends State<SearchPage> {
     return  Scaffold(
       appBar: AppBar(
         elevation: 0.5,
-        title: Fonts().textW700('Search', 24.0, FlatColors.darkGray, TextAlign.center),
+        title: Fonts().textW700('Search', 24.0, Colors.black, TextAlign.center),
         backgroundColor: Color(0xFFF9F9F9),
         brightness: Brightness.light,
-        leading: BackButton(color: Colors.black45),
+        leading: BackButton(color: Colors.black),
         actions: <Widget>[
           searchPerformed
               ? GestureDetector(
                   onTap: () => newSearch(),
                   child: Padding(
-                    padding: EdgeInsets.only(top: 16.0, right: 8.0),
-                    child: Fonts().textW500('New Search', 18.0, FlatColors.darkGray, TextAlign.center),
+                    padding: EdgeInsets.only(top: 20.0, right: 8.0),
+                    child: Fonts().textW700('New Search', 16.0, Colors.black, TextAlign.center),
                   ),
                 )
               : Container()
