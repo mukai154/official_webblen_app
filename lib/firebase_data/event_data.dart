@@ -1,19 +1,20 @@
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'dart:math';
 import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'firebase_notification_services.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
+
 class EventDataService{
+
   Geoflutterfire geo = Geoflutterfire();
-  final CollectionReference eventRef = Firestore.instance.collection("events");
+  final CollectionReference pastEventsRef = Firestore.instance.collection("past_events");
+  final CollectionReference upcomingEventsRef = Firestore.instance.collection("upcoming_events");
   final CollectionReference recurringEventRef = Firestore.instance.collection("recurring_events");
   final CollectionReference userRef = Firestore.instance.collection("users");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
@@ -39,16 +40,17 @@ class EventDataService{
     return multiplier;
   }
 
+  //***CREATE
   Future<String> uploadEvent(File eventImage, Event event, double lat, double lon) async {
     String error = '';
-    GeoFirePoint eventLoc = geo.point(latitude: lat, longitude: lon);
     final String eventKey = "${Random().nextInt(999999999)}";
     String fileName = "$eventKey.jpg";
     String downloadUrl = await setEventImage(eventImage, fileName);
     event.imageURL = downloadUrl;
     event.eventKey = eventKey;
-    event.location = eventLoc.data;
-    await eventRef.document(eventKey).setData(event.toMap()).whenComplete(() {
+    GeoFirePoint geoFirePoint = geo.point(latitude: lat, longitude: lon);
+    event.location = geo.point(latitude: lat, longitude: lon).data;
+    await upcomingEventsRef.document(eventKey).setData({'d': event.toMap(), 'g': geoFirePoint.hash, 'l': geoFirePoint.geoPoint}).whenComplete((){
       if (!event.flashEvent) CommunityDataService().updateCommunityEventActivity(event.tags, event.communityAreaName, event.communityName);
     }).catchError((e) {
       error = e.toString();
@@ -73,21 +75,36 @@ class EventDataService{
     return error;
   }
 
-  Future<String> updateEvent(Event event) async {
-    String status = "";
-    eventRef.document(event.eventKey).setData(event.toMap()).whenComplete((){
-    }).catchError((e) {
-      status = e.details;
-    });
-    return status;
-  }
-
-
   Future<String> setEventImage(File eventImage, String fileName) async {
     StorageReference ref = storageReference.child("events").child(fileName);
     StorageUploadTask uploadTask = ref.putFile(eventImage);
     String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
     return downloadUrl;
+  }
+
+  //***READ
+  Future<bool> checkIfEventExists(String eventType, String eventID) async {
+    bool eventExists = false;
+    if (eventType == 'upcoming'){
+      await upcomingEventsRef.document(eventID).get().then((result){
+        if (result.exists){
+          eventExists = true;
+        }
+      });
+    } else if (eventType == 'past'){
+      await pastEventsRef.document(eventID).get().then((result){
+        if (result.exists){
+          eventExists = true;
+        }
+      });
+    } else if (eventType == 'recurring'){
+      await recurringEventRef.document(eventID).get().then((result){
+        if (result.exists){
+          eventExists = true;
+        }
+      });
+    }
+    return eventExists;
   }
 
   Future<List<Event>> getEventsFromFollowedCommunities(String uid) async {
@@ -120,55 +137,91 @@ class EventDataService{
     return users;
   }
 
-  Future<Event> findEventByKey(String eventKey) async {
-    Event event;
-    DocumentSnapshot eventDoc = await eventRef.document(eventKey).get();
-    if (eventDoc.exists){
-      event = Event.fromMap(eventDoc.data);
+  Future<List<Event>> getEventsNearLocation(double lat, double lon, bool forCheckIn) async {
+    List<Event> events = [];
+    final HttpsCallable callable = forCheckIn
+        ? CloudFunctions.instance.getHttpsCallable(functionName: 'getEventsForCheckIn')
+        : CloudFunctions.instance.getHttpsCallable(functionName: 'getEventsNearLocation');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
+    if (result.data != null){
+      List query =  List.from(result.data);
+      query.forEach((resultMap){
+        Map<String, dynamic> eventMap =  Map<String, dynamic>.from(resultMap);
+        Event event = Event.fromMap(eventMap);
+        events.add(event);
+      });
     }
-    return event;
+    return events;
   }
 
-  Future<List<Event>> findSpecialEventsNearLocation(double lat, double lon) async {
-    List<Event> nearbyEvents = [];
-    GeoFirePoint center = geo.point(latitude: lat, longitude: lon);
-    List<DocumentSnapshot> docSnaphots = await geo.collection(collectionRef: eventRef).within(center: center, radius: 20, field: 'location').first;
-
-    docSnaphots.forEach((doc){
-      if (doc.data['recurring'] == 'none' && doc.data['startDateInMilliseconds'] != null){
-        Event event = Event.fromMap(doc.data);
-        nearbyEvents.add(event);
-      }
-    });
-
-    return nearbyEvents;
+  Future<List<Event>> getUserEventHistory(String uid) async {
+    List<Event> events = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getUserEventHistory');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid});
+    if (result.data != null){
+      List query =  List.from(result.data);
+      query.forEach((resultMap){
+        Map<String, dynamic> evMap =  Map<String, dynamic>.from(resultMap);
+        Event event = Event.fromMap(evMap);
+        events.add(event);
+      });
+    }
+    return events;
   }
 
-  Future<String> saveEvent(String eventKey, String uid) async {
-    String error = "";
-    DocumentSnapshot userDoc = await userRef.document(uid).get();
-    List savedEvents = userDoc['savedEvents'];
-    savedEvents = savedEvents.toList(growable: true);
-    savedEvents.add(eventKey);
-    userRef.document(uid).updateData({"savedEvents": savedEvents}).whenComplete((){
-    }).catchError((e) {
-      error = e.details;
-    });
-    return error;
+  Future<List<Event>> getExclusiveWebblenEvents() async {
+    List<Event> events = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getExclusiveWebblenEvents');
+    final HttpsCallableResult result = await callable.call();
+    if (result.data != null){
+      List query =  List.from(result.data);
+      query.forEach((resultMap){
+        Map<String, dynamic> evMap =  Map<String, dynamic>.from(resultMap);
+        Event event = Event.fromMap(evMap);
+        events.add(event);
+      });
+    }
+    return events;
   }
 
-  Future<String> updateEventPayOut(String uid, String eventID) async {
+  Future<bool> areCheckInsAvailable(double lat, double lon) async {
+    bool checkInAvailable = false;
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'areCheckInsAvailable');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
+    if (result.data != null){
+      checkInAvailable = result.data;
+    }
+    return checkInAvailable;
+  }
+
+  Future<List<Event>> searchForEventByName(String searchTerm, String areaName) async {
+    List<Event> events = [];
+    QuerySnapshot querySnapshot = await upcomingEventsRef.where("d.title", isEqualTo: searchTerm).getDocuments();
+    if (querySnapshot.documents.isNotEmpty){
+      querySnapshot.documents.forEach((docSnap){
+        Event event = Event.fromMap(docSnap.data);
+        events.add(event);
+      });
+    }
+    return events;
+  }
+
+  Future<List<Event>> searchForEventByTag(String searchTerm, String areaName) async {
+    List<Event> events = [];
+    QuerySnapshot querySnapshot = await upcomingEventsRef.where("d.tags", arrayContains: searchTerm).getDocuments();
+    if (querySnapshot.documents.isNotEmpty){
+      querySnapshot.documents.forEach((docSnap){
+        Event event = Event.fromMap(docSnap.data);
+        events.add(event);
+      });
+    }
+    return events;
+  }
+
+  //**UPDATE
+  Future<String> updateEvent(Event event) async {
     String status = "";
-    double eventPayout;
-    double attendanceMultiplier;
-    DocumentSnapshot eventSnapshot = await eventRef.document(eventID).get();
-    List attendees = eventSnapshot.data["attendees"];
-    int attendanceCount = attendees.length;
-    attendanceMultiplier = getAttendanceMultiplier(attendanceCount);
-    DocumentSnapshot userSnapshot = await userRef.document(uid).get();
-    double userImpact = userSnapshot.data["impactPoints"].toDouble();
-    eventPayout = (attendanceCount * attendanceMultiplier) + (userImpact * 0.05);
-    eventRef.document(eventID).updateData({"eventPayout": eventPayout}).whenComplete((){
+    upcomingEventsRef.document(event.eventKey).setData(event.toMap()).whenComplete((){
     }).catchError((e) {
       status = e.details;
     });
@@ -176,111 +229,53 @@ class EventDataService{
   }
 
 
-  Future<int> updateEventViews(String eventID) async {
-    DocumentSnapshot documentSnapshot = await eventRef.document(eventID).get();
-    int viewCount = documentSnapshot.data["views"];
-    viewCount += 1;
-    eventRef.document(eventID).updateData({"views": viewCount}).whenComplete((){
-    }).catchError((e) {
-      return 10;
-    });
-    return viewCount;
+  Future<Null> updateEventViews(String eventID) async {
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'updateEventViews');
+    await callable.call(<String, dynamic>{'eventID': eventID});
   }
 
-  Future<int> updateEstimatedTurnout(String eventID) async {
-    int returnVal = 0;
-    DocumentSnapshot documentSnapshot = await eventRef.document(eventID).get();
-    int viewCount = documentSnapshot.data["views"];
-    int currentTurnout = documentSnapshot.data["estimatedTurnout"];
-    viewCount += 1;
-    double estimatedCalculation = viewCount / 3;
-    int randNum = Random().nextInt(10);
-    int estimatedTurnout = estimatedCalculation.round();
-    if (randNum <= 3 && currentTurnout < estimatedTurnout){
-      eventRef.document(eventID).updateData({"estimatedTurnout": estimatedTurnout, "views": viewCount}).whenComplete((){
-        returnVal = estimatedTurnout;
-      }).catchError((e) {
-        returnVal = 10;
-      });
-    } else {
-      eventRef.document(eventID).updateData({ "views": viewCount}).whenComplete((){
-        returnVal = estimatedTurnout;
-      }).catchError((e) {
-        returnVal = 10;
-      });
-    }
-    return returnVal;
-  }
 
   Future<Null> addEventDataField(String dataName, dynamic data) async {
-    QuerySnapshot querySnapshot = await eventRef.getDocuments();
+    QuerySnapshot querySnapshot = await upcomingEventsRef.getDocuments();
     querySnapshot.documents.forEach((doc){
-      eventRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {
+      upcomingEventsRef.document(doc.documentID).updateData({"d.$dataName": data}).whenComplete(() {
       }).catchError((e) {
       });
     });
   }
 
-
-  Future<Null> distributePoints(Event event) async {
-    if (event.attendees != null){
-      event.attendees.forEach((attendeeUID){
-        UserDataService().updateEventPoints(attendeeUID, event.eventPayout).then((error){
-        });
-      });
-      eventRef.document(event.eventKey).updateData({"pointsDistributedToUsers": true}).whenComplete((){
-        //return error;
-      }).catchError((e) {
-        //return error;
-      });
+  Future<Event> checkInAndUpdateEventPayout(String eventID, String uid, double userAP) async {
+    Event event;
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'checkInAndUpdateEventPayout');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventID': eventID, 'uid': uid, 'userAP': userAP});
+    if (result.data != null){
+        Map<String, dynamic> eventMap =  Map<String, dynamic>.from(result.data);
+        event = Event.fromMap(eventMap);
     }
+    return event;
   }
 
-  Future<String> receiveEventPoints(List eventKeys) async {
-    String error = "";
-    DateTime currentDateTime = DateTime.now();
-    if (eventKeys != null){
-      eventKeys.forEach((key) async {
-        QuerySnapshot eventDocs = await eventRef
-            .where('eventKey', isEqualTo: key)
-            .where('pointsDistributedToUsers', isEqualTo: false)
-            .getDocuments();
-        if (eventDocs != null && eventDocs.documents.isNotEmpty){
-          eventDocs.documents.forEach((eventDoc){
-            Event event = Event.fromMap(eventDoc.data);
-            DateTime eventEnd = DateTime.fromMillisecondsSinceEpoch(event.endDateInMilliseconds);
-            if (!event.pointsDistributedToUsers && currentDateTime.isAfter(eventEnd)){
-              double points = event.eventPayout;
-              if (event.attendees != null){
-                event.attendees.forEach((uid) async {
-                  DocumentSnapshot documentSnapshot = await userRef.document(uid).get();
-                  double userImpact = documentSnapshot.data["impactPoints"] * 1.00;
-                  double userPoints = documentSnapshot.data["eventPoints"] * 1.00;
-                  double rewardAmount = (userImpact * 0.05) * (points * 0.8);
-                  userPoints += rewardAmount;
-                  userRef.document(uid).updateData({"eventPoints": userPoints}).whenComplete((){
-                  }).catchError((e) {
-                    error = 'error receiving points';
-                  });
-                });
-              }
-              eventRef.document(event.eventKey).updateData({"pointsDistributedToUsers": true}).whenComplete((){
-              }).catchError((e) {
-                error = 'error receiving points';
-              });
-            }
-          });
-        }
-      });
+  Future<Event> checkoutAndUpdateEventPayout(String eventID, String uid) async {
+    Event event;
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'checkoutAndUpdateEventPayout');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventID': eventID, 'uid': uid});
+    if (result.data != null){
+      Map<String, dynamic> eventMap =  Map<String, dynamic>.from(result.data);
+      event = Event.fromMap(eventMap);
     }
-    return error;
+    return event;
   }
 
+
+  //***DELETE
   Future<String> deleteEvent(String eventID) async {
     String error = "";
-    await eventRef.document(eventID).delete().whenComplete((){
-    }).catchError((e) {
-      error = e.toString();
+    await upcomingEventsRef.document(eventID).get().then((doc) async {
+      if (doc.exists){
+       await upcomingEventsRef.document(eventID).delete();
+      } else {
+        await pastEventsRef.document(eventID).delete();
+      }
     });
     return error;
   }
@@ -294,28 +289,23 @@ class EventDataService{
     return error;
   }
 
-  Future<List<Event>> searchForEventByName(String searchTerm, String areaName) async {
-    List<Event> events = [];
-    QuerySnapshot querySnapshot = await eventRef.where("title", isEqualTo: searchTerm).getDocuments();
-    if (querySnapshot.documents.isNotEmpty){
-      querySnapshot.documents.forEach((docSnap){
-        Event event = Event.fromMap(docSnap.data);
-        events.add(event);
+    Future<Null> convertEventData() async {
+    Firestore.instance.collection("events").getDocuments().then((docs){
+      docs.documents.forEach((doc) async {
+        String geoH = doc.data['location']['geohash'];
+        double lat = doc.data['location']['geopoint'].latitude;
+        double lon = doc.data['location']['geopoint'].longitude;
+        GeoPoint latLon = geo.point(latitude: lat, longitude: lon).geoPoint;
+        int eventEnd = doc.data['endDateInMilliseconds'];
+        int currentDateTime = DateTime.now().millisecondsSinceEpoch;
+        if (eventEnd != null && eventEnd < currentDateTime){
+          pastEventsRef.document(doc.documentID).setData({'d': doc.data, 'g': geoH, 'l': latLon});
+        } else {
+          upcomingEventsRef.document(doc.documentID).setData({'d': doc.data, 'g': geoH, 'l': latLon});
+        }
       });
-    }
-    return events;
+    });
   }
 
-  Future<List<Event>> searchForEventByTag(String searchTerm, String areaName) async {
-    List<Event> events = [];
-    QuerySnapshot querySnapshot = await eventRef.where("tags", arrayContains: searchTerm).getDocuments();
-    if (querySnapshot.documents.isNotEmpty){
-      querySnapshot.documents.forEach((docSnap){
-        Event event = Event.fromMap(docSnap.data);
-        events.add(event);
-      });
-    }
-    return events;
-  }
 
 }

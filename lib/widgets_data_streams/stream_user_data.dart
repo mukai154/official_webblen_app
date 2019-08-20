@@ -7,13 +7,14 @@ class StreamUserData {
   static Future<StreamSubscription<DocumentSnapshot>> getUserStream(String uid, void onData(WebblenUser user)) async {
 
     StreamSubscription<DocumentSnapshot> subscription = Firestore.instance
-        .collection("users")
+        .collection("webblen_user")
         .document(uid)
         .get()
         .asStream()
         .listen((DocumentSnapshot userDoc){
-        WebblenUser user = WebblenUser.fromMap(userDoc.data);
-        onData(user);
+          Map<String, dynamic> userMap =  Map<String, dynamic>.from(userDoc.data['d']);
+          WebblenUser user = WebblenUser.fromMap(userMap);
+          onData(user);
     });
 
     return subscription;

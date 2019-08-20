@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/widgets_chat/chat_preview_row.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 
 class MessagesPage extends StatefulWidget {
@@ -22,109 +21,51 @@ class MessagesPage extends StatefulWidget {
 class _MessagesPageState extends State<MessagesPage> with SingleTickerProviderStateMixin {
 
   bool showLoadingDialog;
-  List messages;
+  List<WebblenChat> chats = [];
   int messageCount;
-
-  Widget buildMessagesView(){
-    UserDataService().updateMessageNotifications(widget.currentUser.uid);
-    return Container(
-      color: Colors.white,
-      child: StreamBuilder(
-        stream: Firestore.instance
-            .collection('chats')
-            .where('users', arrayContains: widget.currentUser.uid)
-            .orderBy('lastMessageTimeStamp', descending: true)
-            .snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> chatSnapshot) {
-          if (!chatSnapshot.hasData) return _buildLoadingScreen();
-          return chatSnapshot.data.documents.isEmpty
-              ? buildEmptyListView("You Have No Messages", "paper_plane")
-              : ListView(
-                children: chatSnapshot.data.documents.map((DocumentSnapshot chatDoc){
-                  if (chatDoc['isActive'] == false && chatSnapshot.data.documents.length <= 1){
-                    return buildEmptyListView("You Have No Messages", "paper_plane");
-                  } else if (chatDoc['isActive'] == false){
-                    return Container();
-                  }
-                  //chatSnapshot.data.documents.sort((chatDocA, chatDocB) => chatDocB.data['lastMessageTimeStamp'].compareTo(chatDocA.data['lastMessageTimeStamp']));
-                  WebblenChat chatData = WebblenChat.fromMap(chatDoc.data);
-                  String username = chatData.usernames.firstWhere((username) => username != widget.currentUser.username);
-                  String peerUid = chatData.users.firstWhere((user) => user != widget.currentUser.uid);
-                  String peerProfilePic = chatData.userProfiles[peerUid];
-                  if (chatData.lastMessageSentBy == widget.currentUser.username){
-                    chatData.lastMessageSentBy = "you: ";
-                  } else {
-                    chatData.lastMessageSentBy = "";
-                  }
-                  return ChatRowPreview(
-                    chattingWith: username,
-                    lastMessageSentBy: chatData.lastMessageSentBy,
-                    dateSent: chatData.lastMessageTimeStamp,
-                    lastMessageSent: chatData.lastMessagePreview,
-                    transitionToChat: () => PageTransitionService(
-                        context: context,
-                        currentUser: widget.currentUser,
-                        chatDocKey: chatDoc.documentID,
-                        peerUsername: username,
-                        peerProfilePic: peerProfilePic).transitionToChatPage(),
-                    lastMessageType: chatData.lastMessageType,
-                    seenByUser: chatData.seenBy.contains(widget.currentUser.uid) ? true : false,
-                  );
-                }).toList(),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget buildEmptyListView(String emptyCaption, String pictureName){
-    return Container(
-      margin: EdgeInsets.all(16.0),
-      width: MediaQuery.of(context).size.width,
-      color: Colors.white,
-      child: new Column(
-        children: <Widget>[
-          SizedBox(height: 160.0),
-          new Container(
-            height: 85.0,
-            width: 85.0,
-            child: new Image.asset("assets/images/$pictureName.png", fit: BoxFit.scaleDown),
-          ),
-          SizedBox(height: 16.0),
-          Fonts().textW500(emptyCaption, 16.0, FlatColors.blueGray, TextAlign.center),
-        ],
-      ),
-    );
-  }
+  bool isLoading = true;
 
 
-  Widget _buildLoadingScreen()  {
-    return new Container(
-      width: MediaQuery.of(context).size.width,
-      child: new Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          SizedBox(height: 185.0),
-          CustomCircleProgress(50.0, 50.0, 40.0, 40.0, FlatColors.londonSquare),
-        ],
-      ),
-    );
+  Future<void> loadUserChats() async {
+    chats = [];
+    QuerySnapshot chatQuery = await Firestore.instance.collection('chats').where('users', arrayContains: widget.currentUser.uid).getDocuments();
+    if (chatQuery.documents != null && chatQuery.documents.length > 0){
+      chatQuery.documents.forEach((chatDoc){
+        WebblenChat chat = WebblenChat.fromMap(chatDoc.data);
+        chats.add(chat);
+      });
+      chats.sort((chatA, chatB) => chatA.lastMessageTimeStamp.compareTo(chatB.lastMessageTimeStamp));
+      isLoading = false;
+      setState(() {});
+    } else {
+      isLoading = false;
+      setState(() {});
+    }
   }
 
 
   void transitionToUserDetails(WebblenUser webblenUser){
     PageTransitionService(context: context, currentUser: widget.currentUser, webblenUser: webblenUser).transitionToUserDetailsPage();
   }
+  
+  void didClickChat(WebblenChat c, int chatIndex, String username){
+    List seenBy = c.seenBy.toList(growable: true);
+    seenBy.add(widget.currentUser.uid);
+    chats[chatIndex].seenBy = seenBy;
+    setState(() {});
+    PageTransitionService(
+        context: context,
+        currentUser: widget.currentUser,
+        chatDocKey: c.chatDocKey,
+        peerUsername: username
+    ).transitionToChatPage();
+  }
 
 
   @override
   void initState()  {
     super.initState();
-//    UserDataService().findUserByID(widget.currentUser.uid).then((user){
-//      setState(() {
-//        messageCount = user.messageNotificationCount;
-//      });
-//    });
+    loadUserChats();
   }
 
   @override
@@ -141,7 +82,37 @@ class _MessagesPageState extends State<MessagesPage> with SingleTickerProviderSt
     return Scaffold(
       appBar: appBar,
       body: Container(
-        child: buildMessagesView(),
+        child: isLoading
+          ? LoadingScreen(context: context, loadingDescription: 'loading messages...',)
+          : LiquidPullToRefresh(
+          onRefresh: loadUserChats,
+          child: chats.isEmpty
+            ? ListView(
+                  children: <Widget>[
+                    SizedBox(height: 64.0),
+                    Fonts().textW500('No Messages Found', 14.0, Colors.black45, TextAlign.center),
+                    SizedBox(height: 8.0),
+                    Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                  ],
+                )
+            :  ListView.builder(
+                shrinkWrap: true,
+                itemCount: chats.length,
+                itemBuilder: (context, index){
+                  WebblenChat c = chats[index];
+                  String username = c.usernames.firstWhere((username) => username != widget.currentUser.username);
+                  return ChatRowPreview(
+                    chattingWith: username,
+                    lastMessageSentBy: c.lastMessageSentBy == widget.currentUser.username ? 'You' : c.lastMessageSentBy,
+                    dateSent: c.lastMessageTimeStamp,
+                    lastMessageSent: c.lastMessagePreview,
+                    transitionToChat: () => didClickChat(chats[index], index, username),
+                    lastMessageType: c.lastMessageType,
+                    seenByUser: c.seenBy.contains(widget.currentUser.uid) ? true : false,
+                  );
+                },
+              ),
+        )
       ),
     );
   }

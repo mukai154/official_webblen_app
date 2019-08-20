@@ -10,12 +10,11 @@ import 'package:flutter/services.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_user/user_row.dart';
-import 'package:webblen/firebase_data/firebase_notification_services.dart';
 import 'dart:async';
 import 'package:webblen/firebase_data/auth.dart';
-import 'package:webblen/widgets_data_streams/stream_user_data.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 
 class CreateCommunityPage extends StatefulWidget {
@@ -31,7 +30,6 @@ class CreateCommunityPage extends StatefulWidget {
 
 class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
-  StreamSubscription userStream;
   WebblenUser currentUser;
   bool isLoading = true;
 
@@ -71,8 +69,14 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     BaseAuth().currentUser().then((uid) {
       Firestore.instance.collection("users").document(uid).get().then((userDoc){
         if (userDoc.exists) {
-          StreamUserData.getUserStream(uid, getUser).then((StreamSubscription<DocumentSnapshot> s){
-            userStream = s;
+          UserDataService().getUserByID(uid).then((result){
+            currentUser = result;
+            UserDataService().getUsersFromList(currentUser.friends).then((result){
+              friends = result;
+              friends.sort((userA, userB) => userA.username.compareTo(userB.username));
+              isLoading = false;
+              setState(() {});
+            });
           });
         } else {
           Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
@@ -82,28 +86,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     });
   }
 
-  getUser(WebblenUser user){
-    currentUser = user;
-    if (currentUser != null){
-      if (currentUser.friends != null || currentUser.friends.isNotEmpty){
-        currentUser.friends.forEach((uid) async {
-         await UserDataService().getUserByID(uid).then((user){
-            if (user != null){
-              friends.add(user);
-            }
-          });
-         if (currentUser.friends.last == uid){
-           friends.sort((userA, userB) => userA.username.compareTo(userB.username));
-           isLoading = false;
-           setState(() {});
-         }
-        });
-      } else {
-        isLoading = false;
-        setState(() {});
-      }
-    }
-  }
 
   //Form Validations
   void validateCommunityName(){
@@ -117,8 +99,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       newCommunity.name.replaceAll(new RegExp(r"\s+\b|\b\s"), "");
       newCommunity.name.replaceAll("#", "");
       newCommunity.name = '#' + newCommunity.name;
-      print(newCommunity.name);
-      CommunityDataService().findIfCommunityExists(widget.areaName, newCommunity.name).then((exists){
+      CommunityDataService().checkIfCommunityExists(widget.areaName, newCommunity.name).then((exists){
         if (exists){
           Navigator.of(context).pop();
           AlertFlushbar(headerText: "Error", bodyText: "The community ${newCommunity.name} already exists in this area").showAlertFlushbar(context);
@@ -153,7 +134,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       AlertFlushbar(headerText: "Error", bodyText: "You must invite at least 2 others to create a community").showAlertFlushbar(context);
     } else {
       ShowAlertDialogService().showLoadingDialog(context);
-      newCommunity.invited = invitedUsers;
       newCommunity.areaName = widget.areaName;
       newCommunity.lastActivityTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
       newCommunity.followers = [currentUser.uid];
@@ -170,12 +150,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       CommunityDataService().createCommunity(newCommunity, widget.areaName, currentUser.uid).then((error){
         if (error.isEmpty){
           invitedUsers.forEach((uid){
-            FirebaseNotificationsService().createInviteNotification(
-                currentUser.uid,
-                newCommunity.name + "." + newCommunity.areaName,
-                uid,
-                "@${currentUser.username} invited you to join ${newCommunity.name}"
-            ).then((error){
+            WebblenNotificationDataService().sendCommunityInviteNotif(currentUser.uid, widget.areaName, newCommunity.name, uid, "@${currentUser.username} invited you to join ${newCommunity.name}").then((error){
               if (error.isEmpty){
                 Navigator.of(context).pop();
                 ShowAlertDialogService().showActionSuccessDialog(

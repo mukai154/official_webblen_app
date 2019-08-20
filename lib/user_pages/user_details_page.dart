@@ -9,14 +9,18 @@ import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets_common/common_alert.dart';
 import 'package:webblen/firebase_data/chat_data.dart';
 import 'chat_page.dart';
-import 'package:webblen/firebase_data/firebase_notification_services.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
-import 'package:webblen/widgets_data_streams/stream_events.dart';
-import 'package:webblen/widgets_data_streams/stream_community_data.dart';
 import 'package:flutter/services.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/widgets_event/event_list.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:webblen/widgets_community/community_row.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/widgets_event/event_row.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
+import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 class UserDetailsPage extends StatefulWidget {
 
@@ -32,18 +36,30 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
 
   ScrollController _scrollController;
   bool isFriendsWithUser = false;
+  bool isLoading = true;
   String friendRequestStatus = "";
   List<Community> communities = [];
   List<Event> events = [];
 
   Future<void> loadEventHistory() async {
     events = [];
-    UserDataService().getUserEventHistory(widget.webblenUser.uid).then((res){
+    EventDataService().getUserEventHistory(widget.webblenUser.uid).then((res){
       events = res;
       events.sort((e1, e2) => e2.startDateInMilliseconds.compareTo(e1.startDateInMilliseconds));
       setState(() {});
     });
   }
+
+  Future<void> getUserCommunities() async {
+    communities = [];
+    await CommunityDataService().getUserCommunities(widget.webblenUser.uid).then((result){
+      communities = result.where((com) => com.status == 'active').toList();
+      communities.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
+      isLoading = false;
+      setState(() {});
+    });
+  }
+
 
   void transitionToMessenger(String chatDocKey, String currentProfileUrl, String currentUsername){
     Navigator.push(context,
@@ -72,14 +88,14 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
   Future<Null> sendFriendRequest() async {
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().addFriend(widget.currentUser.uid, widget.currentUser.username, widget.webblenUser.uid).then((requestStatus){
+    WebblenNotificationDataService().sendFriendRequest(widget.currentUser.uid,  widget.webblenUser.uid, widget.currentUser.username,).then((error){
       Navigator.of(context).pop();
-      if (requestStatus == "success"){
+      if (error.isEmpty){
         ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  "@" + widget.webblenUser.username + " Will Need to Confirm Your Request");
         friendRequestStatus = "pending";
         setState(() {});
       } else {
-        ShowAlertDialogService().showFailureDialog(context, "Request Failed", requestStatus);
+        ShowAlertDialogService().showFailureDialog(context, "Request Failed", error);
       }
     });
   }
@@ -102,9 +118,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
   confirmFriendRequest() async {
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().confirmFriend(widget.currentUser.uid, widget.webblenUser.uid).then((status){
-      if (status == "success" || status == null){
-        FirebaseNotificationsService().deleteFriendRequestByID(widget.currentUser.uid, widget.webblenUser.uid);
+    WebblenNotificationDataService().acceptFriendRequest(widget.currentUser.uid, widget.webblenUser.uid, null).then((success){
+      if (success){
         friendRequestStatus = "friends";
         setState(() {});
         Navigator.of(context).pop();
@@ -119,9 +134,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
   denyFriendRequest() async {
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().denyFriend(widget.currentUser.uid, widget.webblenUser.uid).then((status){
-      if (status == "success"){
-        FirebaseNotificationsService().deleteFriendRequestByID(widget.currentUser.uid, widget.webblenUser.uid);
+    WebblenNotificationDataService().denyFriendRequest(widget.currentUser.uid, widget.webblenUser.uid, null).then((success){
+      if (success){
         friendRequestStatus = "not friends";
         setState(() {});
         Navigator.of(context).pop();
@@ -195,7 +209,7 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
             return <Widget>[
               SliverAppBar(
                 brightness: Brightness.light,
-                backgroundColor: FlatColors.iosOffWhite,
+                backgroundColor: Colors.white,
                 title: Fonts().textW700("@" + widget.webblenUser.username, 24.0, Colors.black, TextAlign.center),
                 pinned: true,
                 floating: true,
@@ -228,8 +242,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
                       child: UserDetailsHeader(
                         username: widget.webblenUser.username,
                         userPicUrl: widget.webblenUser.profile_pic,
-                        eventPoints: widget.webblenUser.eventPoints.toStringAsFixed(2),
-                        eventImpact: widget.webblenUser.impactPoints.toStringAsFixed(2),
+                        ap: widget.webblenUser.ap,
+                        apLvl: widget.webblenUser.apLvl,
                         eventHistoryCount: widget.webblenUser.eventHistory.length.toString(),
                         viewFriendsAction: null,
                         addFriendAction: null,
@@ -251,7 +265,34 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
           },
           body: TabBarView(
             children: <Widget>[
-              StreamMemberCommunities(currentUser: widget.webblenUser),
+              Container(
+                color: Colors.white,
+                child: LiquidPullToRefresh(
+                  color: FlatColors.webblenRed,
+                  onRefresh: getUserCommunities,
+                  child: communities.isEmpty
+                      ? ListView(
+                        children: <Widget>[
+                          SizedBox(height: 64.0),
+                          Fonts().textW500('No Communities Found', 14.0, Colors.black45, TextAlign.center),
+                          SizedBox(height: 8.0),
+                          Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center),
+                        ],
+                      )
+                    : ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          itemCount: communities.length,
+                          itemBuilder: (context, index){
+                            return CommunityRow(
+                              showAreaName: true,
+                              community: communities[index],
+                              onClickAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, community: communities[index]).transitionToCommunityProfilePage(),
+                            );
+                          },
+                        ),
+                      ),
+              ),
               EventList(events: events, currentUser: widget.currentUser, refreshData: loadEventHistory)
             ],
           ),
@@ -273,11 +314,45 @@ class CurrentUserDetailsPage extends StatefulWidget {
 class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
 
   ScrollController _scrollController;
+  List<Community> communities = [];
+  List<Event> events = [];
+  bool isLoading = true;
 
+
+  Future<void> getEventHistory() async {
+    events = [];
+    EventDataService().getUserEventHistory(widget.currentUser.uid).then((res){
+      events = res;
+      events.sort((e1, e2) => e2.startDateInMilliseconds.compareTo(e1.startDateInMilliseconds));
+      if (this.mounted){
+        setState(() {});
+      }
+    });
+  }
+
+  Future<void> getUserCommunities() async {
+    communities = [];
+    await CommunityDataService().getUserCommunities(widget.currentUser.uid).then((result){
+      communities = result.where((com) => com.status == 'active').toList();
+      communities.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
+      if (this.mounted){
+        setState(() {});
+      }
+    });
+  }
+
+  initialize() async {
+    _scrollController = ScrollController();
+    await getEventHistory();
+    await getUserCommunities();
+    isLoading = false;
+    setState(() {});
+  }
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    print(widget.currentUser.ap);
+    initialize();
   }
 
   @override
@@ -299,11 +374,11 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
             return <Widget>[
               SliverAppBar(
                 brightness: Brightness.light,
-                backgroundColor: FlatColors.iosOffWhite,
+                backgroundColor: Colors.white,
                 title: Fonts().textW700("@" + widget.currentUser.username, 24.0, FlatColors.darkGray, TextAlign.center),
                 pinned: true,
                 floating: true,
-                snap: false,
+                snap: true,
                 leading: BackButton(color: FlatColors.darkGray),
                 expandedHeight: 270.0,
                 flexibleSpace: FlexibleSpaceBar(
@@ -312,8 +387,8 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
                       child: UserDetailsHeader(
                         username: widget.currentUser.username,
                         userPicUrl: widget.currentUser.profile_pic,
-                        eventPoints: widget.currentUser.eventPoints.toStringAsFixed(2),
-                        eventImpact: widget.currentUser.impactPoints.toStringAsFixed(2),
+                        ap: widget.currentUser.ap,
+                        apLvl: widget.currentUser.apLvl,
                         eventHistoryCount: widget.currentUser.eventHistory.length.toString(),
                         viewFriendsAction: null,
                         addFriendAction: null,
@@ -327,7 +402,7 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
                   labelStyle: TextStyle(fontFamily: 'Barlow', fontWeight: FontWeight.w500),
                   tabs: [
                     Tab(text: 'Communities'),
-                    Tab(text: 'Past Events'),
+                    Tab(text: 'Past Events (${widget.currentUser.eventHistory.length})'),
                   ],
                 ),
               ),
@@ -335,8 +410,67 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
           },
           body: TabBarView(
             children: <Widget>[
-              StreamMemberCommunities(currentUser: widget.currentUser),
-              StreamPastEvents(currentUser: widget.currentUser, user: widget.currentUser)
+              Container(
+                color: Colors.white,
+                child: isLoading
+                    ? LoadingScreen(context: context, loadingDescription: 'Loading Communities...')
+                    : LiquidPullToRefresh(
+                      color: FlatColors.webblenRed,
+                      onRefresh: getUserCommunities,
+                      child: communities.isEmpty
+                        ? ListView(
+                            children: <Widget>[
+                              SizedBox(height: 64.0),
+                              Fonts().textW500('No Communities Found', 14.0, Colors.black45, TextAlign.center),
+                              SizedBox(height: 8.0),
+                              Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center),
+                            ],
+                          )
+                        : ListView.builder(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.only(bottom: 8.0),
+                        itemCount: communities.length,
+                        itemBuilder: (context, index){
+                          return CommunityRow(
+                            showAreaName: true,
+                            community: communities[index],
+                            onClickAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, community: communities[index]).transitionToCommunityProfilePage(),
+                          );
+                        },
+                      ),
+                    ),
+              ),
+              Container(
+                color: Colors.white,
+                child: isLoading
+                    ? LoadingScreen(context: context, loadingDescription: 'Loading Events...')
+                    : LiquidPullToRefresh(
+                        color: FlatColors.webblenRed,
+                        onRefresh: getEventHistory,
+                        child: events.isEmpty
+                          ? ListView(
+                              children: <Widget>[
+                                SizedBox(height: 64.0),
+                                Fonts().textW500('No Events Found', 14.0, Colors.black45, TextAlign.center),
+                                SizedBox(height: 8.0),
+                                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center),
+                              ],
+                            )
+                          : ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          itemCount: events.length,
+                          itemBuilder: (context, index){
+                            return ComEventRow(
+                                event: events[index],
+                                showCommunity: true,
+                                currentUser: widget.currentUser,
+                                eventPostAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: events[index], eventIsLive: false).transitionToEventPage()
+                            );
+                          },
+                        ),
+                      ),
+              ),
             ],
           ),
         ),

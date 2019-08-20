@@ -9,6 +9,7 @@ import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 class EventAttendeesPage extends StatefulWidget {
 
@@ -32,7 +33,11 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
   }
 
   void transitionToSearchPage(){
-    PageTransitionService(context: context, usersList: eventAttendees, currentUser: widget.currentUser).transitionToUserSearchPage();
+    List<String> attendeeIDs = [];
+    eventAttendees.forEach((attendee){
+      attendeeIDs.add(attendee.uid);
+    });
+    PageTransitionService(context: context, userIDs: attendeeIDs, currentUser: widget.currentUser, viewingMembersOrAttendees: true).transitionToUserSearchPage();
   }
 
   void sendFriendRequest(WebblenUser peerUser) async {
@@ -42,7 +47,7 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(context, "Request Pending", "You already have a pending friend request");
       } else {
-        UserDataService().addFriend(widget.currentUser.uid, widget.currentUser.username, peerUser.uid).then((requestStatus){
+        WebblenNotificationDataService().sendFriendRequest(widget.currentUser.uid, widget.currentUser.username, peerUser.uid).then((requestStatus){
           Navigator.of(context).pop();
           if (requestStatus == "success"){
             ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  "@" + peerUser.username + " Will Need to Confirm Your Request");

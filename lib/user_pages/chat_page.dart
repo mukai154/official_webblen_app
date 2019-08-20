@@ -138,18 +138,14 @@ class ChatScreenState extends State<ChatScreen> {
         await transaction.set(
           messageReference, {
             'username': widget.currentUsername,
-            'userImageURL': widget.currentProfilePic,
             'timestamp': messageSentTime,
             'messageContent': content,
-            'messageType': type
+            'messageType': type,
+            'uid': widget.currentUID
         },
         );
       });
 
-
-      if (previousSeenByList.contains(widget.peerUID) || previousSeenByList.isEmpty){
-        ChatDataService().addMessageNotification(widget.peerUID);
-      }
       ChatDataService().updateLastMessageSent(widget.chatDocKey == null ? newChatDocKey : widget.chatDocKey, widget.currentUsername, messageSentTime, type, seenByList, content);
 
       listScrollController.animateTo(0.0, duration: Duration(milliseconds: 300), curve: Curves.easeOut);
@@ -205,7 +201,7 @@ class ChatScreenState extends State<ChatScreen> {
             ),
             Row(
               children: <Widget>[
-                UserProfilePicFromUsername(username: chatMessage.username, size: 45),
+                UserProfilePicFromUID(uid: chatMessage.uid, size: 45),
                 ReceivedMessage(chatMessage: chatMessage),
               ],
             ),
@@ -355,9 +351,11 @@ class ChatScreenState extends State<ChatScreen> {
       });
     } else {
       ChatDataService().getSeenByList(widget.chatDocKey).then((seenByList){
-        setState(() {
-          previousSeenByList = seenByList;
-        });
+        if (this.mounted){
+          setState(() {
+            previousSeenByList = seenByList;
+          });
+        }
         ChatDataService().updateSeenMessage(widget.chatDocKey, widget.currentUID);
       });
     }

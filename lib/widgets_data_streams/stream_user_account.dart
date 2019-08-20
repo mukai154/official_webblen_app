@@ -14,7 +14,7 @@ class StreamUserAccount extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: Firestore.instance.collection("users").document(uid).snapshots(),
+        stream: Firestore.instance.collection("webblen_user").document(uid).snapshots(),
         builder: (context, userSnapshot) {
           if (!userSnapshot.hasData) return CustomCircleProgress(20.0, 20.0, 20.0, 20.0, Colors.black38);
           var userData = userSnapshot.data;
@@ -36,10 +36,10 @@ class StreamUserAccount extends StatelessWidget {
                         onTap: accountAction,
                         child: Hero(
                             tag: 'user-profile-pic-dashboard',
-                            child: userData['profile_pic'] != null
+                            child: userData['d']['profile_pic'] != null
                                 ? Stack(
                               children: <Widget>[
-                                UserDetailsProfilePic(userPicUrl:  userData["profile_pic"], size: 45.0),
+                                UserDetailsProfilePic(userPicUrl:  userData['d']["profile_pic"], size: 45.0),
                                 hasMessages
                                     ? Container(
                                   alignment: Alignment(1, -1),

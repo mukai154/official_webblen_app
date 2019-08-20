@@ -11,6 +11,9 @@ import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_ads/ad_carousel.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/widgets_user/user_carousel.dart';
+import 'package:webblen/models/event.dart';
+import 'package:webblen/widgets_home_tiles/webblen_events_tile.dart';
+import 'package:webblen/firebase_data/event_data.dart';
 
 class HomeDashboardPage extends StatefulWidget {
 
@@ -33,6 +36,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
 
   List<LocalAd> ads = [];
   List<WebblenUser> randomNearbyUsers = [];
+  List<Event> webblenEvents = [];
   String nearbyUserCount;
   bool isLoading = true;
 
@@ -48,14 +52,20 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     //GET nearby ads
     AdDataService().getNearbyAds(widget.currentLat, widget.currentLon).then((res){
       ads = res;
-      //GET Number of Nearby Users
-      UserDataService().getNumberOfNearbyUsers(widget.currentLat, widget.currentLon).then((res){
-        nearbyUserCount = res;
-        //GET Nearby Users
-        UserDataService().get10RandomUsers(widget.currentLat, widget.currentLon).then((res){
-          randomNearbyUsers = res;
-          isLoading = false;
-          setState(() {});
+      //GET Webblen Events
+      EventDataService().getExclusiveWebblenEvents().then((res){
+        webblenEvents = res;
+        //GET Number of Nearby Users
+        UserDataService().getNumberOfNearbyUsers(widget.currentLat, widget.currentLon).then((res){
+          nearbyUserCount = res;
+          //GET Nearby Users
+          UserDataService().get10RandomUsers(widget.currentLat, widget.currentLon).then((res){
+            if (this.mounted){
+              randomNearbyUsers = res;
+              isLoading = false;
+              setState(() {});
+            }
+          });
         });
       });
     });
@@ -88,6 +98,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
   void didPressCommunityActivityTile(){
     if (widget.currentUser != null && !widget.updateRequired){
       PageTransitionService(context: context, currentUser: widget.currentUser).transitionToUserRanksPage();
+    } else if (updateAlertIsEnabled()){
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void didPressWebblenEventsTile(){
+    if (widget.currentUser != null && !widget.updateRequired){
+      PageTransitionService(context: context, currentUser: widget.currentUser, events: webblenEvents).transitionToWebblenEventsPage();
     } else if (updateAlertIsEnabled()){
       ShowAlertDialogService().showUpdateDialog(context);
     }
@@ -166,14 +184,26 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
               ],
             ),
           ),
-          randomNearbyUsers.isEmpty
+          isLoading
               ? Container(
                   margin: EdgeInsets.symmetric(vertical: 50.0),
                   height: 1.0,
                   child: CustomLinearProgress(progressBarColor: Colors.black12),
                 )
-              : UserCarousel(currentUser: widget.currentUser, users: randomNearbyUsers),
-          ads.isEmpty ? Container() : AdCarousel(ads: ads),
+              :  randomNearbyUsers.isEmpty
+                  ? Container()
+                  : UserCarousel(currentUser: widget.currentUser, users: randomNearbyUsers),
+          ads.isEmpty || webblenEvents.isNotEmpty ? Container() : AdCarousel(ads: ads),
+          webblenEvents.isEmpty
+            ? Container()
+            : Container(
+            height: 60.0,
+            margin: EdgeInsets.only(bottom: 8.0),
+            child: BasicTile(
+              child: WebblenEventsTile(),
+              onTap: () => didPressWebblenEventsTile(),
+            ),
+          ),
           Container(
             height: 60.0,
             child: BasicTile(

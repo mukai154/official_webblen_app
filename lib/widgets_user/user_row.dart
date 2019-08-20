@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets_common/common_button.dart';
 import 'stats_event_history_count.dart';
 import 'stats_impact.dart';
-import 'package:webblen/widgets_webblen/webblen_coin.dart';
 import 'user_details_profile_pic.dart';
 import 'package:webblen/widgets_icons/icon_bubble.dart';
 import 'user_details_badges.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_data/user_data.dart';
+
 
 class UserRow extends StatelessWidget {
 
@@ -62,20 +59,12 @@ class UserRow extends StatelessWidget {
               children: <Widget>[
                 Row(
                   children: <Widget>[
-                    Fonts().textW700("@${user.username}", 16.0, Colors.black, TextAlign.left),
+                    SizedBox(width: 8.0),
+                    user.username.length > 15
+                        ? Fonts().textW700("@${user.username}", 15.0, Colors.black, TextAlign.left)
+                        : Fonts().textW700("@${user.username}", 18.0, Colors.black, TextAlign.left),
                     friendBadge,
                     //communityBuilderBadge,
-                  ],
-                ),
-                SizedBox(height: 2.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: <Widget>[
-                    Container(width: 2.0,),
-                    StatsImpact(impactPoints: "x1.00", textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 16.0, onTap: null),//StatsImpact(user.impactPoints.toStringAsFixed(2)),
-                    Container(width: 18.0,),
-                    StatsEventHistoryCount(eventHistoryCount: user.eventHistory.length.toString(), textSize: 14.0, textColor: FlatColors.darkGray, iconSize: 16.0, onTap: null),
-                    Container(width: 4.0,)
                   ],
                 ),
               ],
@@ -178,7 +167,7 @@ class UserRowInvite extends StatelessWidget {
             children: <Widget>[
               Container(
                 constraints: BoxConstraints(
-                  maxWidth: 100.0,
+                  maxWidth: 250.0,
                 ),
                 child: Fonts().textW700(" @" + user.username, 20.0, FlatColors.darkGray, TextAlign.left),
               ),

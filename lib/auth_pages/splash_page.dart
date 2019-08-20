@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/widgets_common/common_button.dart';
+import 'package:webblen/styles/fonts.dart';
 
 class SplashPage extends StatelessWidget {
 
@@ -14,62 +15,17 @@ class SplashPage extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        constraints: BoxConstraints.expand(),
-        decoration: BoxDecoration(
-          color: Color.fromARGB(255, 255, 255, 255),
-        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              height: 44,
-              child: Container(),
-            ),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Container(
-                width: 301,
-                height: 54,
-                margin: EdgeInsets.only(left: 36, top: 28),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Positioned(
-                      top: 0,
-                      child: Text(
-                        "Welcome to Webblen",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 30,
-                          fontFamily: "Helvetica Neue",
-                          fontWeight: FontWeight.w700,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                    Positioned(
-                      left: 5,
-                      top: 36,
-                      child: Text(
-                        "The World’s First Community Building Platform",
-                        style: TextStyle(
-                          color: Color.fromARGB(255, 0, 0, 0),
-                          fontSize: 14,
-                          fontFamily: "Helvetica Neue",
-                          fontWeight: FontWeight.w300,
-                        ),
-                        textAlign: TextAlign.left,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: 36, top: 27, right: 36),
+            SizedBox(height: 64.0),
+            Fonts().textW700('Welcome to Webblen', 30.0, Colors.black, TextAlign.center),
+            Fonts().textW300('The World’s First Community Building Platform', 14.0, Colors.black, TextAlign.center),
+            Padding(
+              padding: EdgeInsets.only(top: 16.0, left:  8.0, right: 8.0),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
                   Container(
                     width: 145,
                     height: 100,
@@ -78,27 +34,20 @@ class SplashPage extends StatelessWidget {
                       fit: BoxFit.none,
                     ),
                   ),
-                  SizedBox(width: 16.0),
                   Container(
-                    width: 152,
-                    margin: EdgeInsets.only(top: 29),
-                    child: Text(
-                      "Discover meetups and events happening in your community",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 14,
-                        fontFamily: "Helvetica Neue",
-                      ),
-                      textAlign: TextAlign.left,
+                    constraints: BoxConstraints(
+                        maxWidth: 150.0
                     ),
-                  ),
+                    child: Fonts().textW500("Discover meetups and events happening in your community", 14.0, Colors.black, TextAlign.center),
+                  )
                 ],
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 36, top: 20, right: 38),
+            Padding(
+              padding: EdgeInsets.only(top: 16.0, left:  8.0, right: 8.0),
               child: Row(
-                children: [
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
                   Container(
                     width: 145,
                     height: 100,
@@ -108,25 +57,19 @@ class SplashPage extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    width: 152,
-                    margin: EdgeInsets.only(top: 36),
-                    child: Text(
-                      "Know about the news happening in your area",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 14,
-                        fontFamily: "Helvetica Neue",
-                      ),
-                      textAlign: TextAlign.left,
+                    constraints: BoxConstraints(
+                        maxWidth: 150.0
                     ),
-                  ),
+                    child: Fonts().textW500("Know about the news happening in your area", 14.0, Colors.black, TextAlign.center),
+                  )
                 ],
               ),
             ),
-            Container(
-              margin: EdgeInsets.only(left: 36, top: 20, right: 36),
+            Padding(
+              padding: EdgeInsets.only(top: 16.0, left:  8.0, right: 8.0),
               child: Row(
-                children: [
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: <Widget>[
                   Container(
                     width: 145,
                     height: 100,
@@ -136,37 +79,24 @@ class SplashPage extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    width: 152,
-                    margin: EdgeInsets.only(top: 29),
-                    child: Text(
-                      "Earn money and rewards for being involved and attending events",
-                      style: TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontSize: 14,
-                        fontFamily: "Helvetica Neue",
-                      ),
-                      textAlign: TextAlign.left,
+                    constraints: BoxConstraints(
+                        maxWidth: 150.0
                     ),
-                  ),
+                    child: Fonts().textW500( "Earn money and rewards for being involved and attending events", 14.0, Colors.black, TextAlign.center),
+                  )
                 ],
               ),
             ),
-            Spacer(),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                margin: EdgeInsets.only(bottom: 72),
-                child: CustomColorButton(
-                  height: 45.0,
-                  width: 200.0,
-                  hPadding: 8.0,
-                  vPadding: 8.0,
-                  text: 'GET STARTED',
-                  textColor: Colors.black,
-                  onPressed: () => onGetStartedButtonPressed(context),
-                )
-              ),
-            ),
+            SizedBox(height: 32.0),
+            CustomColorButton(
+              height: 45.0,
+              width: 200.0,
+              hPadding: 8.0,
+              vPadding: 8.0,
+              text: 'GET STARTED',
+              textColor: Colors.black,
+              onPressed: () => onGetStartedButtonPressed(context),
+            )
           ],
         ),
       ),

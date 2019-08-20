@@ -279,7 +279,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
           customColumnType: [1, 2, 0, 7, 4, 6],
           isNumberMonth: false,
           yearBegin: DateTime.now().year,
-          yearEnd: DateTime.now().year + 6
+          yearEnd: DateTime.now().year + 6,
         ),
         onConfirm: (Picker picker, List value) {
           DateTime selectedDate = (picker.adapter as DateTimePickerAdapter).value;

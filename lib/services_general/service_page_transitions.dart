@@ -39,6 +39,7 @@ import 'package:webblen/user_pages/search_page.dart';
 import 'package:webblen/community_pages/choose_community.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/auth_pages/choose_sim_page.dart';
+import 'package:webblen/event_pages/webblen_events_page.dart';
 
 
 class PageTransitionService{
@@ -61,6 +62,7 @@ class PageTransitionService{
   final CommunityNewsPost newsPost;
   final WebblenReward reward;
   final Event event;
+  final List<Event> events;
   final RecurringEvent recurringEvent;
   final String eventKey;
   final bool eventIsLive;
@@ -79,7 +81,7 @@ class PageTransitionService{
     this.newsPost, this.reward, this.event, this.recurringEvent,
     this.eventKey, this.userIDs, this.eventIsLive, this.community,
     this.areaName, this.newEventOrPost, this.viewingMembersOrAttendees,
-    this.simLocation, this.simLat, this.simLon
+    this.simLocation, this.simLat, this.simLon, this.events
   });
 
   void transitionToRootPage () => Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
@@ -90,6 +92,7 @@ class PageTransitionService{
   void returnToRootPage () => Navigator.of(context).popUntil((route) => route.isFirst);
 //  void transitionToEventListPage () =>  Navigator.push(context, SlideFromRightRoute(widget: EventCalendarPage(currentUser: currentUser)));
 //  void transitionToEventEditPage () =>  Navigator.push(context, SlideFromRightRoute(widget: EventEditPage(event: event, currentUser: currentUser, eventIsLive: eventIsLive)));
+  void transitionToWebblenEventsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => WebblenEventsFeedPage(currentUser: currentUser, events: events)));
   void transitionToNewEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateEventPage(currentUser: currentUser, community: community, isRecurring: isRecurring)));
   void transitionToNewRecurringEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateRecurringEventPage(currentUser: currentUser, community: community)));
   void transitionToNewFlashEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateFlashEventPage(currentUser: currentUser)));
@@ -117,7 +120,7 @@ class PageTransitionService{
 //  void transitionToCommunityBuilderPage () => Navigator.push(context, SlideFromRightRoute(widget: CommunityCreatePostPage(currentUser: currentUser, community: community)));
   void transitionToNotificationsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  NotificationPage(currentUser: currentUser)));
   void transitionToSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  SearchPage(currentUser: currentUser, areaName: areaName)));
-  void transitionToUserSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserSearchPage(currentUser: currentUser, usersList: usersList, userIDs: userIDs, viewingMembersOrAttendees: viewingMembersOrAttendees)));
+  void transitionToUserSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserSearchPage(currentUser: currentUser, userIDs: userIDs, viewingMembersOrAttendees: viewingMembersOrAttendees)));
   void transitionToSettingsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(currentUser: currentUser)));
   void transitionToRewardPayoutPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  RewardPayoutPage(redeemingReward: reward,currentUser: currentUser)));
   void transitionToTransactionHistoryPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  TransactionHistoryPage(currentUser: currentUser)));

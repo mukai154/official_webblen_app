@@ -26,7 +26,7 @@ class CommunityPostRow extends StatefulWidget {
 class _CommunityPostRowState extends State<CommunityPostRow> {
 
   void transitionToCommunityProfile() async {
-    Community com = await CommunityDataService().getCommunity(widget.newsPost.areaName, widget.newsPost.communityName);
+    Community com = await CommunityDataService().getCommunityByName(widget.newsPost.areaName, widget.newsPost.communityName);
     PageTransitionService(context: context, currentUser: widget.currentUser, community: com).transitionToCommunityProfilePage();
   }
 
@@ -57,7 +57,7 @@ class _CommunityPostRowState extends State<CommunityPostRow> {
                           ? Container()
                           : Padding(
                         padding: EdgeInsets.only(left: 12.0, top: 12.0, right: 4.0),
-                        child: UserProfilePicFromUsername(username: widget.newsPost.username, size: 50.0),
+                        child: UserDetailsProfilePic(userPicUrl: widget.newsPost.userImageURL, size: 50.0),
                       ),
                       Padding(
                         padding: EdgeInsets.only(left: 4.0, top: 12.0, right: 4.0),

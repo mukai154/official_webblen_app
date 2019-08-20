@@ -57,17 +57,13 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
   }
 
   getFriends(List friendIDs) async {
-    friendIDs.forEach((friendID){
-      UserDataService().getUserByID(friendID).then((user){
-        if (user != null){
-          friendList.add(user);
-          if (friendIDs.last == friendID){
-            friendList.sort((userA, userB) => userA.username.compareTo(userB.username));
-            loadingFriends = false;
-            setState(() {});
-          }
-        }
-      });
+    UserDataService().getUsersFromList(currentUser.friends).then((result){
+      friendList = result;
+      friendList.sort((userA, userB) => userA.username.compareTo(userB.username));
+      loadingFriends = false;
+      if (this.mounted){
+        setState(() {});
+      }
     });
   }
 

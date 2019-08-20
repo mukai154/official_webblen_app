@@ -72,9 +72,9 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
   }
 
   void setNewsPostImage(bool getImageFromCamera) async {
-    setState(() {
-      newsImage = null;
-    });
+    Navigator.of(context).pop();
+    newsImage = null;
+    setState(() {});
     newsImage = getImageFromCamera
         ? await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromCamera()
         : await WebblenImagePicker(context: context, ratioX: 9.0, ratioY: 7.0).retrieveImageFromLibrary();
@@ -86,8 +86,8 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
   void cropImage(File img) async {
     File croppedFile = await ImageCropper.cropImage(
         sourcePath: img.path,
-        ratioX: 4.0,
-        ratioY: 3.0,
+        ratioX: 9.0,
+        ratioY: 7.0,
         toolbarTitle: 'Cropper',
         toolbarColor: FlatColors.clouds
     );
@@ -140,10 +140,12 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
         child: new TextFormField(
           initialValue: "",
           maxLength: 30,
+          maxLengthEnforced: true,
           style: new TextStyle(color: Colors.black87, fontSize: 30.0, fontWeight: FontWeight.w700),
           autofocus: false,
           onSaved: (value) => newsPost.title = value,
           decoration: InputDecoration(
+            counterText: '',
             border: InputBorder.none,
             hintText: "Post Title",
             counterStyle: TextStyle(fontFamily: 'Barlow'),
@@ -159,9 +161,10 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
         height: 150.0,
         child: new TextFormField(
           initialValue: "",
-          maxLines: 5,
-          maxLength: 300,
+          maxLines: 10,
+          maxLength: 500,
           maxLengthEnforced: true,
+          textInputAction: TextInputAction.done,
           autofocus: false,
           onSaved: (value) => newsPost.content = value,
           decoration: InputDecoration(
@@ -194,7 +197,7 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
 
     return Scaffold(
       key: homeScaffoldKey,
-      appBar: WebblenAppBar().basicAppBar('New Post'),
+      appBar: WebblenAppBar().basicAppBar('Create News Post'),
       body: Container(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),

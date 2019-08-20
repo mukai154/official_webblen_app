@@ -2,7 +2,6 @@ class Community {
 
   String name;
   String status;
-  List invited;
   List followers;
   int activityCount;
   int eventCount;
@@ -19,7 +18,6 @@ class Community {
   Community({
     this.name,
     this.status,
-    this.invited,
     this.followers,
     this.activityCount,
     this.eventCount,
@@ -38,7 +36,6 @@ class Community {
       : this (
       name: data['name'],
       status: data['status'],
-      invited: data['invited'],
       followers: data['followers'],
       activityCount: data['activityCount'],
       eventCount: data['eventCount'],
@@ -56,7 +53,6 @@ class Community {
   Map<String, dynamic> toMap() => {
     'name': this.name,
     'status': this.status,
-    'invited': this.invited,
     'followers': this.followers,
     'activityCount': this.activityCount,
     'eventCount': this.eventCount,

@@ -5,16 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community.dart';
-import 'package:webblen/widgets_data_streams/stream_community_data.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/widgets_data_streams/stream_user_data.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/widgets_community/community_row.dart';
-import 'package:webblen/models/event.dart';
-import 'package:webblen/models/community_news.dart';
+import 'package:webblen/firebase_data/user_data.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 
 
 class MyCommunitiesPage extends StatefulWidget {
@@ -29,63 +26,36 @@ class MyCommunitiesPage extends StatefulWidget {
 
 class _MyCommunitiesPageState extends State<MyCommunitiesPage> {
 
-  StreamSubscription userStream;
   WebblenUser currentUser;
-  bool isLoadingMemberData = true;
-  bool isLoadingEvents = true;
-  bool isLoadingPosts = true;
-  List<Community> userComs = [];
-  List<Event> events = [];
-  List<CommunityNewsPost> newsPosts = [];
+  bool isLoading = true;
+  List<Community> activeUserComs = [];
+  List<Community> pendingUserComs = [];
 
+  initialize() async {
+    UserDataService().getUserByID(widget.uid).then((result) async {
+      currentUser = result;
+      getUserCommunities();
+    });
+  }
+
+  Future<void> getUserCommunities() async {
+    activeUserComs = [];
+    pendingUserComs = [];
+    await CommunityDataService().getUserCommunities(widget.uid).then((result){
+      activeUserComs = result.where((com) => com.status == 'active').toList();
+      pendingUserComs = result.where((com) => com.status == 'pending').toList();
+      activeUserComs.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
+      pendingUserComs.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
+      isLoading = false;
+      setState(() {});
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     initialize();
   }
-
-  initialize() async {
-    StreamUserData.getUserStream(widget.uid, getUser).then((StreamSubscription<DocumentSnapshot> s){
-      userStream = s;
-    });
-  }
-
-  getUser(WebblenUser user) async {
-    currentUser = user;
-    if (currentUser != null){
-      getUserCommunities();
-    }
-  }
-
-  Future<Null> getUserCommunities() async {
-    if (currentUser.communities != null && currentUser.communities.isNotEmpty){
-      currentUser.communities.forEach((key, val) async {
-        String areaName = key;
-        List communities = val;
-        communities.forEach((com) async {
-          await CommunityDataService().searchForCommunityByName(com, areaName).then((result){
-            if (!userComs.contains(result)){
-              userComs.addAll(result);
-            }
-            if (currentUser.communities.keys.last == key && communities.last == com && isLoadingMemberData){
-              setState(() {
-                userComs.toSet().toList();
-                userComs.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
-                isLoadingMemberData = false;
-              });
-            }
-          });
-        });
-      });
-    } else {
-      setState(() {
-        isLoadingMemberData = false;
-      });
-    }
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -119,34 +89,66 @@ class _MyCommunitiesPageState extends State<MyCommunitiesPage> {
         appBar: appBar,
         body: TabBarView(
           children: <Widget>[
-            isLoadingMemberData
+            isLoading
                 ? LoadingScreen(context: context, loadingDescription: 'Loading Your Communities...')
-                : userComs.isEmpty
-                  ? Container(
-                      color: FlatColors.clouds,
-                      padding: EdgeInsets.only(top: 64.0, left: 8.0, right: 8.0),
-                      child: Fonts().textW300('You are not a member of any communities', 18.0, FlatColors.lightAmericanGray, TextAlign.center),
-
-                    )
-                  : Container(
-                      color: FlatColors.clouds,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(bottom: 8.0, left: 8.0, right: 8.0),
-                        itemCount: userComs.length,
-                        itemBuilder: (context, index){
-                          return CommunityRow(
-                            showAreaName: true,
-                            community: userComs[index],
-                            onClickAction: () => PageTransitionService(context: context, currentUser: currentUser, community: userComs[index]).transitionToCommunityProfilePage(),
-                          );
-                        },
+                : Container(
+                      color: Colors.white,
+                      child: LiquidPullToRefresh(
+                        color: FlatColors.webblenRed,
+                        onRefresh: getUserCommunities,
+                        child: activeUserComs.isEmpty
+                          ? ListView(
+                              children: <Widget>[
+                                SizedBox(height: 64.0),
+                                Fonts().textW500('You Are Not a Member of Any Active Communities', 14.0, Colors.black45, TextAlign.center),
+                                SizedBox(height: 8.0),
+                                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                              ],
+                            )
+                          : ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          itemCount: activeUserComs.length,
+                          itemBuilder: (context, index){
+                            return CommunityRow(
+                              showAreaName: true,
+                              community: activeUserComs[index],
+                              onClickAction: () => PageTransitionService(context: context, currentUser: currentUser, community: activeUserComs[index]).transitionToCommunityProfilePage(),
+                            );
+                          },
+                        ),
                       ),
                     ),
-            //StreamFollowedCommunities(currentUser: currentUser, locRefID: widget.areaName),
-            isLoadingMemberData
+            isLoading
                 ? LoadingScreen(context: context, loadingDescription: 'Loading Your Communities...')
-                : StreamPendingCommunities(currentUser: currentUser, locRefID: widget.areaName)
+                : Container(
+                      color: Colors.white,
+                      child: LiquidPullToRefresh(
+                        color: FlatColors.webblenRed,
+                        onRefresh: getUserCommunities,
+                        child: pendingUserComs.isEmpty
+                          ? ListView(
+                              children: <Widget>[
+                                SizedBox(height: 64.0),
+                                Fonts().textW500('You Currently Have No Communities Pending', 14.0, Colors.black45, TextAlign.center),
+                                SizedBox(height: 8.0),
+                                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                              ],
+                            )
+                          : ListView.builder(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          itemCount: pendingUserComs.length,
+                          itemBuilder: (context, index){
+                            return CommunityRow(
+                              showAreaName: true,
+                              community: pendingUserComs[index],
+                              onClickAction: () => PageTransitionService(context: context, currentUser: currentUser, community: pendingUserComs[index]).transitionToCommunityProfilePage(),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
           ],
         ),
       ),

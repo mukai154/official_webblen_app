@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'user_details_profile_pic.dart';
+import 'package:webblen/widgets_wallet/wallet_attendance_power_bar.dart';
+import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'stats_event_history_count.dart';
-import 'stats_impact.dart';
 
 class UserDetailsHeader extends StatelessWidget {
 
   final String username;
   final String userPicUrl;
-  final String eventPoints;
-  final String eventImpact;
+  final double ap;
+  final int apLvl;
   final String eventHistoryCount;
   final VoidCallback addFriendAction;
   final VoidCallback viewFriendsAction;
 
-  UserDetailsHeader({this.username, this.userPicUrl, this.eventPoints, this.eventImpact, this.eventHistoryCount, this.addFriendAction, this.viewFriendsAction});
+  UserDetailsHeader({this.username, this.userPicUrl, this.ap, this.apLvl, this.eventHistoryCount, this.addFriendAction, this.viewFriendsAction});
 
   @override
   Widget build(BuildContext context) {
@@ -35,13 +35,13 @@ class UserDetailsHeader extends StatelessWidget {
               ),
             ],
           ),
-          SizedBox(height: 16.0),
-          Row(
+          SizedBox(height: 14.0),
+          Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              StatsImpact(impactPoints: "x1.25", textColor: FlatColors.darkGray, textSize: 18.0, iconSize: 18.0, onTap: null),
-              new Container(width: 32.0,),
-              StatsEventHistoryCount(eventHistoryCount: eventHistoryCount, textColor: FlatColors.darkGray, textSize: 18.0, iconSize: 18.0, onTap: null),
+              SmallAttendancePowerBar(currentAP: ap, apLvl: apLvl),
+              SizedBox(height: 4.0),
+              Fonts().textW400('Attendance Power', 12.0, FlatColors.darkGray, TextAlign.center)
             ],
           ),
         ],

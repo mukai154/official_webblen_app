@@ -37,9 +37,10 @@ class WebblenUser {
   Map<dynamic, dynamic> communities;
   Map<dynamic, dynamic> followingCommunities;
   bool canMakeAds;
-
-
-
+  int apLvl;
+  double ap;
+  int lastPayoutTimeInMilliseconds;
+  int eventsToLvlUp;
 
   WebblenUser({
     this.blockedUsers,
@@ -79,49 +80,12 @@ class WebblenUser {
     this.communities,
     this.followingCommunities,
     this.canMakeAds,
+    this.apLvl,
+    this.ap,
+    this.lastPayoutTimeInMilliseconds,
+    this.eventsToLvlUp
   });
 
-  factory WebblenUser.fromJson(Map<String, dynamic> data){
-    return WebblenUser(
-        blockedUsers: data['blockedUsers'],
-        username: data['username'],
-        uid: data['uid'],
-        profile_pic: data['profile_pic'],
-        eventPoints: data['eventPoints'] * 1.00,
-        impactPoints: data['impactPoints'] * 1.00,
-        userLat: data['userLat'],
-        userLon: data['userLon'],
-        lastCheckInTimeInMilliseconds: data['lastCheckInTimeInMilliseconds'],
-        eventHistory: data['eventHistory'],
-        rewards: data['rewards'],
-        savedEvents: data['savedEvents'],
-        friends: data['friends'],
-        friendRequests: data['friendRequests'],
-        achievements: data['acheivements'],
-        notifyHotEvents: data['notifyHotEvents'],
-        notifyFlashEvents: data['notifyFlashEvents'],
-        notifyFriendRequests: data['notifyFriendRequests'],
-        notifySuggestedEvents: data['notifySuggestedEvents'],
-        notifyWalletDeposits: data['notifyWalletDeposits'],
-        notifyNewMessages: data['notifyNewMessages'],
-        lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
-        messageNotificationCount: data['messageNotificationCount'],
-        friendRequestNotificationCount: data['friendRequestNotificationCount'],
-        achievementNotificationCount: data['achievementNotificationCount'],
-        eventNotificationCount: data['eventNotificationCount'],
-        walletNotificationCount: data['walletNotificationCount'],
-        isCommunityBuilder: data['isCommunityBuilder'],
-        isNewCommunityBuilder: data['isNewCommunityBuilder'],
-        communityBuilderNotificationCount: data['communityBuilderNotificationCount'],
-        notificationCount: data['notificationCount'],
-        isOnWaitList: data['isOnWaitList'],
-        messageToken: data['messageToken'],
-        isNew: data['isNew'],
-        communities: data['communities'],
-        followingCommunities: data['followingCommunities'],
-        canMakeAds: data['canMakeAds']
-    );
-  }
   WebblenUser.fromMap(Map<String, dynamic> data)
       : this(
       blockedUsers: data['blockedUsers'],
@@ -160,7 +124,11 @@ class WebblenUser {
       isNew: data['isNew'],
       communities: data['communities'],
       followingCommunities: data['followingCommunities'],
-      canMakeAds: data['canMakeAds']
+      canMakeAds: data['canMakeAds'],
+      ap: data['ap'],
+      apLvl: data['apLvl'],
+      lastPayoutTimeInMilliseconds: data['lastPayoutTimeInMilliseconds'],
+      eventsToLvlUp: data['eventsToLvlUp']
   );
 
   Map<String, dynamic> toMap() => {
@@ -200,7 +168,11 @@ class WebblenUser {
     'isNew': this.isNew,
     'communities': this.communities,
     'followingCommunities': this.followingCommunities,
-    'canMakeAds': this.canMakeAds
+    'canMakeAds': this.canMakeAds,
+    'ap': this.ap,
+    'apLvl': this.apLvl,
+    'lastPayoutTimeInMilliseconds': this.lastPayoutTimeInMilliseconds,
+    'eventsToLvlUp': this.eventsToLvlUp
   };
 
 }

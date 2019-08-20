@@ -67,8 +67,11 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
       EventDataService().uploadEvent(eventImage, newEvent, currentLat, currentLon).then((error){
         if (error.isEmpty){
           Navigator.of(context).pop();
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
+          ShowAlertDialogService().showActionSuccessDialog(context, 'Flash Event Created!', 'Check In. Get Paid. You Know the Rest...', (){
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          });
         } else {
           Navigator.of(context).pop();
           ShowAlertDialogService().showFailureDialog(context, 'Uh Oh', 'There was an issue uploading your event. Please try again.');

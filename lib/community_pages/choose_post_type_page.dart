@@ -39,7 +39,7 @@ class ChoosePostTypePage extends StatelessWidget {
               SizedBox(height: 24.0),
               optionsButton("Special Event", () => PageTransitionService(context: context, currentUser: currentUser, community: community, isRecurring: false).transitionToNewEventPage()),
               optionsButton("Regular/Repeating Event", () => PageTransitionService(context: context, currentUser: currentUser, community: community).transitionToNewRecurringEventPage()),
-              optionsButton("Post", () => PageTransitionService(context: context, currentUser: currentUser, community: community).transitionToCommunityCreatePostPage()),
+              optionsButton("News Post", () => PageTransitionService(context: context, currentUser: currentUser, community: community).transitionToCommunityCreatePostPage()),
             ],
           )
       ),

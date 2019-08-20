@@ -11,12 +11,9 @@ import 'package:webblen/firebase_data/platform_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/models/community_news.dart';
-import 'package:webblen/firebase_data/firebase_notification_services.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets_home/user_drawer_menu.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/widgets_data_streams/stream_user_data.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'home_pages/home_dashboard_page.dart';
 import 'home_pages/event_feed_page.dart';
@@ -28,6 +25,9 @@ import 'home_pages/location_unavailable_page.dart';
 import 'user_pages/notifications_page.dart';
 import 'package:webblen/widgets_data_streams/stream_user_account.dart';
 import 'package:webblen/widgets_data_streams/stream_user_notifications.dart';
+import 'package:webblen/utils/geofencing.dart';
+import 'widgets_home/check_in_floating_action.dart';
+import 'package:webblen/firebase_services/remote_messaging.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -48,19 +48,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
   String notifToken;
   String simLocation = "";
-  StreamSubscription userStream;
   WebblenUser currentUser;
   bool updateRequired = false;
   String uid;
   NetworkImage userImage;
   bool isLoading = true;
-  bool isNewUser = false;
   int activeUserCount;
   double currentLat;
   double currentLon;
   List<CommunityNewsPost> communityNewsPosts;
   bool didClickNotice = false;
-  bool checkInFound = false;
+  bool checkInAvailable = false;
   bool hasLocation = false;
   bool webblenIsAvailable = true;
   bool viewedAd = false;
@@ -78,10 +76,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       uid = val;
       UserDataService().checkIfUserExists(uid).then((exists){
         if (exists) {
-          StreamUserData.getUserStream(uid, getUser).then((
-              StreamSubscription<DocumentSnapshot> s) {
-            userStream = s;
-          });
+          getUserAndLocation(uid);
         } else {
           Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
         }
@@ -89,15 +84,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-  getUser(WebblenUser user) {
-    currentUser = user;
-    if (currentUser != null) {
-      isNewUser = currentUser.isNew;
-      EventDataService().receiveEventPoints(currentUser.eventHistory);
-      FirebaseNotificationsService().updateFirebaseMessageToken(uid);
-      FirebaseNotificationsService().configFirebaseMessaging(context, currentUser);
+  getUserAndLocation(String uid) {
+    UserDataService().getUserByID(uid).then((user){
+      currentUser = user;
+      FirebaseMessagingService().updateFirebaseMessageToken(uid);
+      FirebaseMessagingService().configFirebaseMessaging(context, currentUser);
       loadLocation();
-    }
+    });
   }
 
   Future<Null> loadLocation() async {
@@ -114,8 +107,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             hasLocation = true;
             currentLat = location.latitude;
             currentLon = location.longitude;
+            UserDataService().updateUserAppOpen(uid, currentLat, currentLon);
+            GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
+            EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result){
+              checkInAvailable = result;
+              getPlatformData(currentLat, currentLon);
+            });
             //UserDataService().updateUserCheckIn(uid, currentLat, currentLon);
-            getPlatformData(currentLat, currentLon);
           } else {
             hasLocation = false;
             isLoading = false;
@@ -217,40 +215,22 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()),//() => didPressNotificationsBell(),
         accountWidget: StreamUserAccount(uid: uid, accountAction: () => didPressAccountButton()),
       ),
-      NewsFeedPage(currentUser: currentUser, key: newsPageKey,  discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
-      EventFeedPage(currentUser: currentUser, key: eventsPageKey, discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
+      NewsFeedPage(uid: uid, key: newsPageKey,  discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
+      EventFeedPage(currentUser: currentUser, areaName: areaName, key: eventsPageKey, currentLat: currentLat, currentLon: currentLon, discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
       WalletPage(currentUser: currentUser, key: walletPageKey)
     ];
 
     return Scaffold(
         key: _homeScaffoldKey,
-        drawer: UserDrawerMenu(context: context, uid: uid).buildUserDrawerMenu(),
+        drawer: UserDrawerMenu(context: context, currentUser: currentUser).buildUserDrawerMenu(),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        floatingActionButton: InkWell(
-            onTap: isLoading ? null : () => didPressCheckIn(),
-            child: Container(
-              height: 70.0,
-              width: 70.0,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(35.0)),
-                  gradient: LinearGradient(
-                      colors: [FlatColors.webblenRed, FlatColors.webblenPink]),
-                  boxShadow: ([
-                    BoxShadow(
-                      color: Colors.black12,
-                      blurRadius: 1.8,
-                      spreadRadius: 0.5,
-                      offset: Offset(0.0, 3.0),
-                    ),
-                  ])
-              ),
-              child: Center(
-                child: isLoading
-                    ? CustomCircleProgress(50.0, 50.0, 50.0, 50.0, Colors.white)
-                    : Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white, size: 30.0),
-              ),
-            )
-        ),
+        //() => didPressCheckIn(
+        floatingActionButton: isLoading
+          ? CustomCircleProgress(20.0, 20.0, 20.0, 20.0, FlatColors.webblenRed)
+          : CheckInFloatingAction(
+              checkInAction: () => didPressCheckIn(),
+              checkInAvailable: checkInAvailable,
+            ),
         bottomNavigationBar: FABBottomAppBar(
           centerItemText: 'Check In',
           notchedShape: CircularNotchedRectangle(),

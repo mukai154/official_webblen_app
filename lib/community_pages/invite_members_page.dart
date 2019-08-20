@@ -6,10 +6,10 @@ import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community.dart';
-import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_user/user_row.dart';
-
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
 
 
 class InviteMembersPage extends StatefulWidget {
@@ -26,38 +26,39 @@ class InviteMembersPage extends StatefulWidget {
 
 class _InviteMembersPageState extends State<InviteMembersPage> {
 
-
   bool isLoading = true;
-
-  //Event
   List<WebblenUser> searchResults = [];
   List<WebblenUser> friends = [];
   List invitedUsers = [];
-
 
   void validateAndSubmit(){
     if (invitedUsers.isEmpty){
       AlertFlushbar(headerText: "Error", bodyText: "You must select at least 1 person to invite").showAlertFlushbar(context);
     } else {
       ShowAlertDialogService().showLoadingDialog(context);
-      CommunityDataService().inviteUsers(invitedUsers, widget.community.areaName, widget.community.name, widget.currentUser.uid, widget.currentUser.username).then((error){
-        if (error.isEmpty){
-          Navigator.of(context).pop();
-          ShowAlertDialogService().showActionSuccessDialog(
-              context,
-              "Users Invited!",
-              "Way to grow your community!",
-                  (){
-                Navigator.of(context).pop();
-                Navigator.of(context).pop();
-              }
-          );
-        } else {
-          Navigator.of(context).pop();
-          ShowAlertDialogService().showFailureDialog(context, 'Uh Oh', 'There was an issue... Please try again.');
-        }
+      invitedUsers.forEach((user) async {
+        await WebblenNotificationDataService().checkIfComInviteExists(widget.community.areaName, widget.community.name, user).then((inviteExists) async {
+          if (!inviteExists){
+            await WebblenNotificationDataService().sendCommunityInviteNotif(
+                widget.currentUser.uid,
+                widget.community.areaName,
+                widget.community.name,
+                user,
+                '@${widget.currentUser.username} invited you to join ${widget.community.name} in ${widget.community.areaName}'
+            );
+          }
+        });
       });
-      //Navigator.push(context, ScaleRoute(widget: ConfirmEventPage(newEvent: newEventPost, newEventImage: eventImage)));
+      Navigator.of(context).pop();
+      ShowAlertDialogService().showActionSuccessDialog(
+          context,
+          "Users Invited!",
+          "Way to grow your community!",
+              (){
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          }
+      );
     }
   }
 
@@ -72,25 +73,17 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
     }
   }
 
-
-
   @override
   void initState() {
     super.initState();
     if (widget.currentUser.friends != null || widget.currentUser.friends.isNotEmpty){
-      widget.currentUser.friends.forEach((uid){
-        UserDataService().getUserByID(uid).then((user){
-          if (user != null){
-            if (!widget.community.memberIDs.contains(user.uid)){
-              friends.add(user);
-            }
-            if (widget.currentUser.friends.last == uid){
-              friends.sort((userA, userB) => userA.username.compareTo(userB.username));
-              isLoading = false;
-              setState(() {});
-            }
-          }
-        });
+      UserDataService().getUsersFromList(widget.currentUser.friends).then((result){
+        if (result != null && result.isNotEmpty){
+          friends = result;
+          friends.sort((userA, userB) => userA.username.compareTo(userB.username));
+          isLoading = false;
+          setState(() {});
+        }
       });
     } else {
       isLoading = false;
@@ -99,12 +92,8 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
 
   }
 
-
   @override
   Widget build(BuildContext context) {
-
-
-
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(
           "Invite Users",
@@ -118,7 +107,9 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
       ),
       body: Container(
           padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: ListView.builder(
+          child: isLoading
+              ? LoadingScreen(context: context, loadingDescription: 'Loading Friends...')
+              : ListView.builder(
             itemCount: friends.length,
             itemBuilder: (context, index){
               String friendUid = friends[index].uid;

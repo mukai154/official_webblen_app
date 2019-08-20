@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 class RewardDataService {
 
   final CollectionReference rewardRef = Firestore.instance.collection("rewards");
-  final CollectionReference userRef = Firestore.instance.collection("users");
+  final CollectionReference userRef = Firestore.instance.collection("webblen_user");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
 
@@ -67,26 +67,6 @@ class RewardDataService {
     return charityRewards;
   }
 
-  Future<List<WebblenReward>> findEventsNearLocation(double lat, double lon) async {
-    double latMax = lat + degreeMinMax;
-    double latMin = lat - degreeMinMax;
-    double lonMax = lon + degreeMinMax;
-    double lonMin = lon - degreeMinMax;
-
-    List<WebblenReward> nearbyRewards = [];
-
-    QuerySnapshot querySnapshot = await rewardRef.where('rewardLat', isLessThanOrEqualTo: latMax).getDocuments();
-    List eventsSnapshot = querySnapshot.documents;
-    eventsSnapshot.forEach((rewardDoc){
-      if (rewardDoc["rewardLat"] >= latMin && rewardDoc["rewardLon"] >= lonMin && rewardDoc["rewardLon"] <= lonMax){
-        WebblenReward reward = WebblenReward.fromMap(rewardDoc.data);
-        nearbyRewards.add(reward);
-      }
-    });
-
-    return nearbyRewards;
-  }
-
   Future<String> updateAmountOfRewardAvailable(String rewardID) async {
     String status = "";
     DocumentSnapshot documentSnapshot = await rewardRef.document(rewardID).get();
@@ -105,8 +85,8 @@ class RewardDataService {
   Future<String> purchaseReward(String uid, String rewardID, double cost) async {
     String error = "";
     DocumentSnapshot userSnapshot = await userRef.document(uid).get();
-    double userPoints = userSnapshot.data["eventPoints"] * 1.00;
-    List userRewards = userSnapshot.data["rewards"].toList();
+    double userPoints = userSnapshot.data['d']["eventPoints"] * 1.00;
+    List userRewards = userSnapshot.data['d']["rewards"].toList();
     if (userPoints < cost){
       error = "Insufficient Funds";
     } else if (userRewards.contains(rewardID)){
@@ -114,7 +94,7 @@ class RewardDataService {
     } else {
       userRewards.add(rewardID);
       userPoints = userPoints - cost;
-      userRef.document(uid).updateData({"eventPoints": userPoints, "rewards": userRewards}).whenComplete((){
+      userRef.document(uid).updateData({"d.eventPoints": userPoints, "d.rewards": userRewards}).whenComplete((){
       }).catchError((e) {
         error = e.details;
       });
@@ -125,9 +105,9 @@ class RewardDataService {
   Future<String> removeUserReward(String uid, String rewardID) async {
     String error = "";
     DocumentSnapshot userSnapshot = await userRef.document(uid).get();
-    List userRewards = userSnapshot.data["rewards"].toList();
+    List userRewards = userSnapshot.data['d']["rewards"].toList();
     userRewards.remove(rewardID);
-    userRef.document(uid).updateData({"rewards": userRewards}).whenComplete((){
+    userRef.document(uid).updateData({"d.rewards": userRewards}).whenComplete((){
 
     }).catchError((e) {
       error = e.details;

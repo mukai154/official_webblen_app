@@ -14,6 +14,7 @@ import 'package:webblen/widgets_community/community_row.dart';
 import 'package:webblen/widgets_event/event_row.dart';
 import 'package:webblen/widgets_common/common_button.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 
 class SearchPage extends StatefulWidget {
@@ -27,7 +28,6 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
-
 
   final formKey = new GlobalKey<FormState>();
   bool isSearching = false;
@@ -116,12 +116,12 @@ class _SearchPageState extends State<SearchPage> {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(context, "Request Pending", "You already have a pending friend request");
       } else {
-        UserDataService().addFriend(widget.currentUser.uid, widget.currentUser.username, peerUser.uid).then((requestStatus){
+        WebblenNotificationDataService().sendFriendRequest(widget.currentUser.uid, peerUser.uid, widget.currentUser.username).then((error){
           Navigator.of(context).pop();
-          if (requestStatus == "success"){
+          if (error.isEmpty){
             ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  "@" + peerUser.username + " Will Need to Confirm Your Request");
           } else {
-            ShowAlertDialogService().showFailureDialog(context, "Request Failed", requestStatus);
+            ShowAlertDialogService().showFailureDialog(context, "Request Failed", error);
           }
         });
       }
@@ -222,7 +222,7 @@ class _SearchPageState extends State<SearchPage> {
                         user: userResults[index],
                         transitionToUserDetails: () => transitionToUserDetails(userResults[index]),
                         sendUserFriendRequest: () => sendFriendRequest(userResults[index]),
-                        isFriendsWithUser: false
+                        isFriendsWithUser: widget.currentUser.friends.contains(userResults[index]) ? true : false
                     );
                   }
               ),

@@ -15,12 +15,13 @@ import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:contact_picker/contact_picker.dart';
 import 'package:webblen/utils/send_invite.dart';
+import 'package:webblen/widgets_wallet/wallet_attendance_power_bar.dart';
 
 class UserDrawerMenu {
 
   final BuildContext context;
-  final String uid;
-  UserDrawerMenu({this.context, this.uid});
+  final WebblenUser currentUser;
+  UserDrawerMenu({this.context, this.currentUser});
 
   final ContactPicker _contactPicker = new ContactPicker();
 
@@ -47,24 +48,15 @@ class UserDrawerMenu {
   }
 
   Widget buildUserDrawerMenu(){
-    return StreamBuilder(
-      stream: Firestore.instance.collection("users").document(uid).snapshots(),
-      builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot){
-        if (!userSnapshot.hasData) return Drawer(
-          child: ListView(
+    return Drawer(
+          child: currentUser == null
+              ? ListView()
+              : ListView(
             children: <Widget>[
               DrawerHeader(
-                child: CustomCircleProgress(30.0, 30.0, 30.0, 30.0, Colors.black38),
-              )
-            ],
-          ),
-        );
-        WebblenUser currentUser = WebblenUser.fromMap(userSnapshot.data.data);
-        return Drawer(
-          child: ListView(
-            children: <Widget>[
-              DrawerHeader(
-                child: Column(
+                child: currentUser == null
+                    ? CustomCircleProgress(30.0, 30.0, 30.0, 30.0, FlatColors.darkGray)
+                    : Column(
                   children: <Widget>[
                     Padding(
                       padding: EdgeInsets.only(left: 6.0),
@@ -96,12 +88,13 @@ class UserDrawerMenu {
                       padding: EdgeInsets.only(left: 6.0, top: 6.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          ShowAmountOfWebblen(amount: currentUser.eventPoints.toStringAsFixed(2), textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 24.0, onTap: null),
-                          new Container(width: 18.0,),
-                          StatsImpact(impactPoints: "x1.25", textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 18.0, onTap: null),
+                          MiniAttendancePowerBar(currentAP: currentUser.ap, apLvl: currentUser.apLvl),
                           new Container(width: 18.0,),
                           StatsEventHistoryCount(eventHistoryCount: currentUser.eventHistory.length.toString(), textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 18.0, onTap: null),
+                          new Container(width: 18.0,),
+                          ShowAmountOfWebblen(amount: currentUser.eventPoints.toStringAsFixed(2), textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 24.0, onTap: null),
                         ],
                       ),
                     ),
@@ -179,35 +172,35 @@ class UserDrawerMenu {
               ),
               Container(height: 12.0),
               currentUser.canMakeAds
-                ? menuRow(
-                    Icon(FontAwesomeIcons.ad, color: FlatColors.blackPearl, size: 18.0),
-                    'Create Ad',
-                    FlatColors.blackPearl,
+                  ? menuRow(
+                Icon(FontAwesomeIcons.ad, color: FlatColors.blackPearl, size: 18.0),
+                'Create Ad',
+                FlatColors.blackPearl,
                     () {
-                      Navigator.pop(context);
-                      PageTransitionService(context: context, currentUser: currentUser).transitionToCreateAdPage();
-                    },
-                  )
-                : Container(),
+                  Navigator.pop(context);
+                  PageTransitionService(context: context, currentUser: currentUser).transitionToCreateAdPage();
+                },
+              )
+                  : Container(),
               menuRow(
                 Icon(FontAwesomeIcons.comments, color: FlatColors.blackPearl, size: 18.0),
                 'Invite Friends',
                 FlatColors.blackPearl,
                     () async {
-                      Contact contact = await _contactPicker.selectContact();
-                      SendInviteMessage().sendSMS('test message', [contact.phoneNumber.number]);
+                  Contact contact = await _contactPicker.selectContact();
+                  SendInviteMessage().sendSMS('test message', [contact.phoneNumber.number]);
                 },
               ),
               currentUser != null && currentUser.isCommunityBuilder
                   ? menuRow(
-                        Icon(FontAwesomeIcons.trophy, color: FlatColors.blackPearl, size: 18.0),
-                        'Create Reward',
-                        FlatColors.blackPearl,
-                          () {
-                            Navigator.pop(context);
-                            PageTransitionService(context: context, currentUser: currentUser).transitionToCreateRewardPage();
-                          },
-                        )
+                Icon(FontAwesomeIcons.trophy, color: FlatColors.blackPearl, size: 18.0),
+                'Create Reward',
+                FlatColors.blackPearl,
+                    () {
+                  Navigator.pop(context);
+                  PageTransitionService(context: context, currentUser: currentUser).transitionToCreateRewardPage();
+                },
+              )
                   : Container(height: 0, width: 0),
 //              currentUser != null && currentUser.isCommunityBuilder
 //                  ? menuRow(
@@ -225,10 +218,9 @@ class UserDrawerMenu {
                 'Help/FAQ',
                 FlatColors.blackPearl,
                     () {
-                      Navigator.pop(context);
-                      if (currentUser.isNew){UserDataService().updateNewUser(uid);}
-                      OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq');
-                    },
+                  Navigator.pop(context);
+                  OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq');
+                },
               ),
               menuRow(
                 Icon(FontAwesomeIcons.signOutAlt, color: FlatColors.blackPearl, size: 18.0),
@@ -239,8 +231,6 @@ class UserDrawerMenu {
             ],
           ),
         );
-      },
-    );
   }
 
 }

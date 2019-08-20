@@ -9,16 +9,14 @@ import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/device_calendar.dart';
 import 'package:webblen/widgets_icons/icon_bubble.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
-import 'package:webblen/utils/payment_calc.dart';
-import 'package:webblen/widgets_common/common_button.dart';
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/widgets_data_streams/stream_event_details.dart';
 import 'package:webblen/models/event.dart';
 import 'package:intl/intl.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:share/share.dart';
 import 'dart:math';
+import 'package:webblen/services_general/services_location.dart';
 
 class EventDetailsPage extends StatefulWidget {
 
@@ -35,6 +33,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   int currentDateTime = DateTime.now().millisecondsSinceEpoch;
   DateFormat formatter = DateFormat('MMM d, y h:mma');
+  double eventLat = 0.0;
+  double eventLon = 0.0;
 
   Widget eventCaption(){
     return Padding(
@@ -69,10 +69,12 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   }
 
   void viewAttendeesAction(){
+    Navigator.of(context).pop();
     PageTransitionService(context: context, eventKey: widget.event.eventKey, currentUser: widget.currentUser).transitionToEventAttendeesPage();
   }
 
   void shareEventAction(){
+    Navigator.of(context).pop();
     Share.share(
         widget.eventIsLive
             ? "Checkout the event ${widget.event.title} happening now! \n Where: ${widget.event.address}  \n Be sure to check in with Webblen! https://www.webblen.io"
@@ -114,7 +116,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.event.endDateInMilliseconds != null && currentDateTime < widget.event.endDateInMilliseconds) EventDataService().updateEstimatedTurnout(widget.event.eventKey);
+    EventDataService().updateEventViews(widget.event.eventKey);
     if (widget.currentUser.notifySuggestedEvents){
       if (widget.event.startDateInMilliseconds != null){
         CreateNotification().createTimedNotification(
@@ -126,14 +128,15 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         );
       }
     }
+    eventLat = LocationService().getLatFromGeopoint(widget.event.location['geopoint']);
+    eventLon = LocationService().getLonFromGeopoint(widget.event.location['geopoint']);
+    setState(() {});
   }
   
   @override
   Widget build(BuildContext context) {
 
     Widget eventView(){
-      double estimatedPayout = (widget.event.eventPayout.toDouble() * 0.05);
-      double potentialEarnings = widget.event.attendees.length == 0 ? 0.00 : estimatedPayout/widget.event.attendees.length.toDouble();
       return ListView(
         children: <Widget>[
           Container(
@@ -204,12 +207,15 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             ),
           )
           : Container(),
-
-          StreamEventDetails(
-            currentUser: widget.currentUser,
-            detailType: 'caption',
-            eventKey: widget.event.eventKey,
-            placeholderWidget: eventCaption(),
+          Padding(
+            padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Fonts().textW700('Details', 24.0, Colors.black, TextAlign.left),
+                Fonts().textW500(widget.event.description, 16.0, Colors.black, TextAlign.left),
+              ],
+            ),
           ),
           widget.eventIsLive
               ? Container()
@@ -229,7 +235,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     SizedBox(height: 4.0),
                     widget.event.address == null ? Container() :
                         Container(
-                          width: 320,
+                          constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.8
+                          ),
                           child: Fonts().textW400('${widget.event.address.replaceAll(', USA', '').replaceAll(', United States', '')}', 16.0, Colors.black, TextAlign.left),
                         ),
                   ],
@@ -242,17 +250,32 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               : Padding(
             padding: EdgeInsets.only(left: 16.0, top: 4.0),
             child: InkWell(
-              onTap: () => OpenUrl().openMaps(context, widget.event.location['geopoint'].latitude.toString(), widget.event.location['geopoint'].longitude.toString()),
+              onTap: () => OpenUrl().openMaps(context, eventLat.toString(), eventLon.toString()),
               child: Fonts().textW500('View in Maps', 14.0, FlatColors.webblenDarkBlue, TextAlign.left),
             ),
           ),
           Padding(
-              padding: EdgeInsets.only(left: 16.0, top: 24.0),
-              child: StreamEventDetails(
-                currentUser: widget.currentUser,
-                detailType: 'date',
-                eventKey: widget.event.eventKey,
-                placeholderWidget: eventDate(),
+              padding: EdgeInsets.only(left: 18.0, top: 24.0),
+              child: Row(
+                children: <Widget>[
+                  Column(
+                    children: <Widget>[
+                      Icon(FontAwesomeIcons.calendar, size: 20.0, color: Colors.black),
+                    ],
+                  ),
+                  SizedBox(width: 8.0),
+                  Column(
+                    children: <Widget>[
+                      SizedBox(height: 4.0),
+                      Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.8
+                        ),
+                        child: Fonts().textW400(formatter.format(DateTime.fromMillisecondsSinceEpoch(widget.event.startDateInMilliseconds)), 16.0, Colors.black, TextAlign.left),
+                      ),
+                    ],
+                  ),
+                ],
               )
           ),
           widget.eventIsLive || widget.event.startDateInMilliseconds == null || currentDateTime > widget.event.endDateInMilliseconds
@@ -340,13 +363,13 @@ class RecurringEventDetailsPage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Fonts().textW700('Details', 24.0, Colors.black, TextAlign.left),
-          Fonts().textW400(event.description, 18.0, Colors.black, TextAlign.left),
+          Fonts().textW500(event.description, 18.0, Colors.black, TextAlign.left),
         ],
       ),
     );
   }
 
-  Widget eventDate(){
+  Widget eventDate(BuildContext context){
     return Row(
       children: <Widget>[
         Column(
@@ -357,12 +380,18 @@ class RecurringEventDetailsPage extends StatelessWidget {
         SizedBox(width: 4.0),
         Column(
           children: <Widget>[
-            SizedBox(height: 4.0),
-            event.recurrenceType == 'daily'
-                ? Fonts().textW500('Everyday from ${event.startTime} to ${event.endTime}', 18.0, Colors.black, TextAlign.start)
-                : event.recurrenceType == 'weekly'
-                ? Fonts().textW500('Every ${event.dayOfTheWeek} from  ${event.startTime} to ${event.endTime}', 18.0, Colors.black, TextAlign.start)
-                : Fonts().textW500('Every ${event.dayOfTheMonth} ${event.dayOfTheWeek} from  ${event.startTime} to ${event.endTime}', 18.0, Colors.black, TextAlign.start),
+            Container(
+              padding: EdgeInsets.only(left: 6.0),
+              constraints: BoxConstraints(
+                maxWidth: MediaQuery.of(context).size.width * 0.8
+              ),
+              child: event.recurrenceType == 'daily'
+                  ? Fonts().textW400('Everyday from ${event.startTime} to ${event.endTime}', 14.0, Colors.black, TextAlign.start)
+                  : event.recurrenceType == 'weekly'
+                  ? Fonts().textW400('Every ${event.dayOfTheWeek} from  ${event.startTime} to ${event.endTime}', 14.0, Colors.black, TextAlign.start)
+                  : Fonts().textW400('Every ${event.dayOfTheMonth} ${event.dayOfTheWeek} from  ${event.startTime} to ${event.endTime}', 14.0, Colors.black, TextAlign.start),
+            )
+
           ],
         ),
       ],
@@ -375,6 +404,7 @@ class RecurringEventDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
 
     void deleteEventAction(){
+      Navigator.of(context).pop();
       ShowAlertDialogService().showConfirmationDialog(
           context,
           "Delete this event?",
@@ -431,8 +461,10 @@ class RecurringEventDetailsPage extends StatelessWidget {
                       SizedBox(height: 4.0),
                       event.address == null ? Container() :
                       Container(
-                        width: 320,
-                        child: Fonts().textW400('${event.address.replaceAll(', USA', '').replaceAll(', United States', '')}', 16.0, Colors.black, TextAlign.left),
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width * 0.8
+                        ),
+                        child: Fonts().textW400('${event.address.replaceAll(', USA', '').replaceAll(', United States', '')}', 14.0, Colors.black, TextAlign.left),
                       ),
                     ],
                   ),
@@ -440,15 +472,15 @@ class RecurringEventDetailsPage extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(left: 16.0, top: 4.0),
+              padding: EdgeInsets.only(left: 16.0, top: 8.0),
               child: InkWell(
                 onTap: () => OpenUrl().openMaps(context, event.location['geopoint'].latitude.toString(), event.location['geopoint'].longitude.toString()),
-                child: Fonts().textW500(' View in Maps', 16.0, FlatColors.webblenDarkBlue, TextAlign.left),
+                child: Fonts().textW500(' View in Maps', 14.0, FlatColors.webblenDarkBlue, TextAlign.left),
               ),
             ),
             Padding(
                 padding: EdgeInsets.only(left: 16.0, top: 24.0),
-                child: eventDate()
+                child: eventDate(context)
             ),
             event.fbSite.isNotEmpty || event.twitterSite.isNotEmpty || event.website.isNotEmpty
                 ? Padding(

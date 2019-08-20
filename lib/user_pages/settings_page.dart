@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:webblen/widgets_common/common_flushbar.dart';
@@ -11,7 +10,8 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/community_data.dart';
+import 'package:webblen/widgets_icons/icon_bubble.dart';
+
 
 class SettingsPage extends StatefulWidget {
 
@@ -34,7 +34,7 @@ class _SettingsPageState extends State<SettingsPage> {
     String fileName = "$uid.jpg";
     storageReference.child("profile_pics").child(fileName).putFile(userImage);
     String downloadUrl = await uploadUserImage(userImage, fileName);
-    UserDataService().updateUserProfilePic(widget.currentUser.uid, downloadUrl).then((e){
+    UserDataService().updateUserProfilePic(widget.currentUser.uid, widget.currentUser.username, downloadUrl).then((e){
       if (e != null){
         Navigator.of(context).pop();
         AlertFlushbar(headerText: "Submit Error", bodyText: 'There was an issue uploading a new pic').showAlertFlushbar(context);
@@ -70,8 +70,11 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-//    UserDataService().addUserDataField("lastCheckInTimeInMilliseconds", 1562866669946);
-//    UserDataService().addUserDataField("lastNotifInMilliseconds", 1562866669946);
+    UserDataService().convertData();
+    //EventDataService().convertEventData();
+    UserDataService().addUserDataField("d.apLvl", 1);
+    UserDataService().addUserDataField("d.ap", 0.20);
+    UserDataService().addUserDataField("d.eventsToLvlUp", 20);
 //    UserDataService().reinstateUserPics();
     //CommunityDataService().updateCommunityDataFields();
   }
@@ -80,22 +83,37 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().basicAppBar("Settings"),
-        body: ListView(
-          children: <Widget>[
-            Form(
-              key: settingsFormKey,
-              child: Column(
-                children: <Widget>[
+        body: Container(
+          color: Colors.white,
+          child: ListView(
+            children: <Widget>[
+              Form(
+                key: settingsFormKey,
+                child: Column(
+                  children: <Widget>[
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Padding(
                             padding: EdgeInsets.only(top: 16.0, bottom: 4.0),
-                            child: InkWell(
-                              onTap: () => ShowAlertDialogService().showImageSelectDialog(context, () => changeUserProfilePic(true), () => changeUserProfilePic(false)),
-                              child: newUserImage == null
-                                  ? UserDetailsProfilePic(userPicUrl: widget.currentUser.profile_pic, size: 100.0)
-                                  : CircleAvatar(backgroundImage: FileImage(newUserImage), radius: 50.0,) ,
+                            child: Stack(
+                              children: <Widget>[
+                                InkWell(
+                                  onTap: () => ShowAlertDialogService().showImageSelectDialog(context, () => changeUserProfilePic(true), () => changeUserProfilePic(false)),
+                                  child: newUserImage == null
+                                      ? UserDetailsProfilePic(userPicUrl: widget.currentUser.profile_pic, size: 100.0)
+                                      : CircleAvatar(backgroundImage: FileImage(newUserImage), radius: 50.0,) ,
+                                ),
+                                Positioned(
+                                  right: 0.0,
+                                  top: 0.0,
+                                  child: IconBubble(
+                                    icon: Icon(Icons.camera_alt, color: Colors.black45, size: 16.0,),
+                                    color: FlatColors.clouds,
+                                    size: 30.0,
+                                  ),
+                                )
+                              ],
                             )
                         )
                       ],
@@ -184,9 +202,10 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                   ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         )
     );
   }

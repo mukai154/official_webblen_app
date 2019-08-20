@@ -75,4 +75,18 @@ class LocationService {
     return zip;
   }
 
+  double getLatFromGeopoint(Map<dynamic, dynamic> geoP){
+    double lat;
+    List coordinates = geoP.values.toList();
+    lat = coordinates[0];
+    return lat == null ? 0.0 : lat;
+  }
+
+  double getLonFromGeopoint(Map<dynamic, dynamic> geoP){
+    double lon;
+    List coordinates = geoP.values.toList();
+    lon = coordinates[1];
+    return lon == null ? 0.0 : lon;
+  }
+
 }

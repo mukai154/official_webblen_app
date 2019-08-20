@@ -8,35 +8,6 @@ class ChatDataService {
   final CollectionReference chatDataRef = Firestore.instance.collection("chats");
   final CollectionReference userRef = Firestore.instance.collection("users");
 
-  Future<Null> addMessageNotification(String receivingUid) async {
-    String error = "";
-    DocumentSnapshot userDoc = await userRef.document(receivingUid).get();
-    int messageNotificationCount = userDoc.data['messageNotificationCount'];
-    messageNotificationCount += 1;
-    userRef.document(receivingUid).updateData({
-      "messageNotificationCount": messageNotificationCount,
-    }).whenComplete((){
-      return error;
-    }).catchError((e) {
-      error = e.details;
-      return error;
-    });
-  }
-
-  Future<Null> removeMessageNotification(String receivingUid) async {
-    String error = "";
-    DocumentSnapshot userDoc = await userRef.document(receivingUid).get();
-    int messageNotificationCount = userDoc.data['messageNotificationCount'];
-    messageNotificationCount -= 1;
-    userRef.document(receivingUid).updateData({
-      "messageNotificationCount": messageNotificationCount,
-    }).whenComplete((){
-      return error;
-    }).catchError((e) {
-      error = e.details;
-      return error;
-    });
-  }
 
   Future<Stream<QuerySnapshot>> getMessagesFromChat(String chatKey) async {
     Stream<QuerySnapshot> messagesSnapshots = chatDataRef
@@ -73,7 +44,6 @@ class ChatDataService {
       chatDataRef.document(chatID).updateData({
         "seenBy": seenBy,
       }).whenComplete((){
-        removeMessageNotification(currentUID);
       }).catchError((e) {
         error = e.details;
         return error;
@@ -101,32 +71,31 @@ class ChatDataService {
 
   Future<String> createChat(String currentUID, String peerUID, String currentUsername, String peerUsername, String currentProfilePic, String peerProfilePic) async {
     String result;
-    Map<String, String> userProfiles = {currentUID: currentProfilePic, peerUID: peerProfilePic};
+    final String chatDocKey = Random().nextInt(99999999).toString();
     WebblenChat chat = WebblenChat(
+      chatDocKey: chatDocKey,
       lastMessagePreview: "Empty Conversation",
       lastMessageSentBy: "",
       lastMessageTimeStamp: DateTime.now().millisecondsSinceEpoch,
       lastMessageType: "text",
       usernames: [currentUsername, peerUsername],
       users: [currentUID, peerUID],
-      userProfiles: userProfiles,
       seenBy: [],
       isActive: false,
     );
-    final String chatKey = "${Random().nextInt(999999999)}";
-    await Firestore.instance.collection("chats").document(chatKey).setData(chat.toMap()).whenComplete(() {
-      sendFirstMessage(chatKey, currentUsername, "", 1544413794927, "", "initial");
-      result = chatKey;
+    await Firestore.instance.collection("chats").document(chatDocKey).setData(chat.toMap()).whenComplete(() {
+      sendFirstMessage(chatDocKey, currentUsername, currentUID, 1544413794927, "", "initial");
+      result = chatDocKey;
     }).catchError((e) {
       result = e.toString();
     });
     return result;
   }
 
-  Future<Null> sendFirstMessage(String chatKey, String currentUsername, String userImageURL, int timestamp, String content, String messageType) async {
+  Future<Null> sendFirstMessage(String chatKey, String currentUsername, String uid, int timestamp, String content, String messageType) async {
     WebblenChatMessage newMessage = WebblenChatMessage(
-      username: currentUsername,
-        userImageURL: userImageURL,
+        username: currentUsername,
+        uid: uid,
         timestamp: timestamp,
         messageContent: content,
         messageType: messageType

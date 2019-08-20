@@ -31,6 +31,7 @@ class FlatColors {
   static final twitterBlue = Color.fromRGBO(29, 161, 242, 1.0);
   static final twinkleBlue = Color.fromRGBO(206, 214, 224, 1.0);
   static final carminPink = Color.fromRGBO(235, 77, 75,1.0);
+  static final firstDate = Color.fromRGBO(250, 177, 160, 1.0);
   static final pinkGlamour = Color.fromRGBO(255, 121, 121,1.0);
   static final subtleBlue = Color.fromRGBO(206, 214, 224, 1.0);
   static final clouds = Color.fromRGBO(241, 242, 246, 1.0);

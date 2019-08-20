@@ -16,6 +16,7 @@ import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/widgets_common/common_button.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 class UserRanksPage extends StatefulWidget {
 
@@ -69,6 +70,7 @@ class _UserRanksPageState extends State<UserRanksPage> {
       hasLocation = true;
       UserDataService().getNearbyUsers(currentLat, currentLon).then((users){
         nearbyUsers = users;
+        nearbyUsers.sort((userA, userB) => userB.eventHistory.length.compareTo(userA.eventHistory.length));
         isLoading = false;
         setState(() {});
       });
@@ -81,6 +83,7 @@ class _UserRanksPageState extends State<UserRanksPage> {
             currentLon = location.longitude;
             UserDataService().getNearbyUsers(currentLat, currentLon).then((users){
               nearbyUsers = users;
+              nearbyUsers.sort((userA, userB) => userB.eventHistory.length.compareTo(userA.eventHistory.length));
               isLoading = false;
               setState(() {});
             });
@@ -117,12 +120,12 @@ class _UserRanksPageState extends State<UserRanksPage> {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(context, "Request Pending", "You already have a pending friend request");
       } else {
-        UserDataService().addFriend(currentUser.uid, currentUser.username, peerUser.uid).then((requestStatus){
+        WebblenNotificationDataService().sendFriendRequest(currentUser.uid, peerUser.uid, currentUser.username).then((error){
           Navigator.of(context).pop();
-          if (requestStatus == "success"){
+          if (error.isEmpty){
             ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  "@" + peerUser.username + " Will Need to Confirm Your Request");
           } else {
-            ShowAlertDialogService().showFailureDialog(context, "Request Failed", requestStatus);
+            ShowAlertDialogService().showFailureDialog(context, "Request Failed", error);
           }
         });
       }

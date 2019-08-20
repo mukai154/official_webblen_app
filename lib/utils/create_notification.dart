@@ -24,8 +24,9 @@ class CreateNotification {
     var iOSPlatformChannelSpecifics = new IOSNotificationDetails();
     var platformChannelSpecifics = new NotificationDetails(
         androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);
-    await FlutterLocalNotificationsPlugin().show(0, 'Event Found!', 'Check in Now!', platformChannelSpecifics, payload: 'item id 2');
+    await FlutterLocalNotificationsPlugin().show(0, notifTitle, notifBody, platformChannelSpecifics, payload: 'item id 2');
   }
+
   createTimedNotification(int notifID, int triggerDateInMilliseconds, String notifTitle, String notifBody, String payload) async {
     DateTime scheduledNotificationDateTime = DateTime.fromMillisecondsSinceEpoch(triggerDateInMilliseconds);
     print(scheduledNotificationDateTime);

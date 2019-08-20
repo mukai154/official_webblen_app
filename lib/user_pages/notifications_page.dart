@@ -6,12 +6,12 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/firebase_data/firebase_notification_services.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 class NotificationPage extends StatefulWidget {
 
@@ -23,8 +23,15 @@ class NotificationPage extends StatefulWidget {
 
 class _NotificationPageState extends State<NotificationPage> {
 
+  List<WebblenNotification> notifications = [];
+
+  Future<void> getUserNotifications(){
+    notifications = [];
+
+  }
+
   Widget buildNotificationsView(){
-    UserDataService().updateMessageNotifications(widget.currentUser.uid);
+    //UserDataService().updateMessageNotifications(widget.currentUser.uid);
     return Container(
       child: StreamBuilder(
         stream: Firestore.instance
@@ -42,7 +49,7 @@ class _NotificationPageState extends State<NotificationPage> {
               children: notifDocs.map((DocumentSnapshot notifDoc){
                 WebblenNotification notif = WebblenNotification.fromMap(notifDoc.data);
                 if (notif.notificationSeen == false){
-                  FirebaseNotificationsService().updateNotificationStatus(notif.notificationKey);
+                  WebblenNotificationDataService().updateNotificationStatus(notif.notificationKey);
                 }
                 Widget notifWidget;
                 if (notif.notificationType == "friendRequest"){
@@ -92,11 +99,11 @@ class _NotificationPageState extends State<NotificationPage> {
 
   confirmFriendRequest(WebblenNotification notif) async {
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().confirmFriend(widget.currentUser.uid, notif.notificationData).then((status){
-      if (status == "success" || status == null){
-        FirebaseNotificationsService().deleteNotification(notif.notificationKey);
-        setState(() {});
+    WebblenNotificationDataService().acceptFriendRequest(widget.currentUser.uid, notif.notificationData, notif.notificationKey).then((success){
+      if (success){
+        notifications.remove(notif);
         Navigator.of(context).pop();
+        setState(() {});
         ShowAlertDialogService().showSuccessDialog(context, "Friend Added!", "You and @" + notif.notificationSender + " are now friends");
       } else {
         Navigator.of(context).pop();
@@ -107,19 +114,14 @@ class _NotificationPageState extends State<NotificationPage> {
 
   confirmCommunityInvite(WebblenNotification notif) async {
     int stringIndex = notif.notificationData.indexOf(".");
-    String comNam = notif.notificationData.substring(0, stringIndex);
-    String areaName = notif.notificationData.substring(stringIndex + 1, notif.notificationData.length);
+    String areaName = notif.notificationData.substring(0, stringIndex);
+    String comName = notif.notificationData.substring(stringIndex + 1, notif.notificationData.length);
     ShowAlertDialogService().showLoadingDialog(context);
-    CommunityDataService().updateMembers(widget.currentUser.uid, areaName, comNam).then((error){
-      if (error.isEmpty){
-        FirebaseNotificationsService().deleteNotification(notif.notificationKey);
+    WebblenNotificationDataService().acceptCommunityInvite(areaName, comName, widget.currentUser.uid, notif.notificationKey).then((success){
+      if (success){
         setState(() {});
         Navigator.of(context).pop();
-        ShowAlertDialogService().showSuccessDialog(context, "You've Joined $comNam!", "You can find it within your communities");
-      } else if (error == 'doesNotExist'){
-        FirebaseNotificationsService().deleteNotification(notif.notificationKey);
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(context, "Woops!", "This Community No Longer Exists");
+        ShowAlertDialogService().showSuccessDialog(context, "You've Joined $comName!", "You can find it within your communities");
       } else {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(context, "There was an Issue!", "Please Try Again Later");
@@ -129,11 +131,11 @@ class _NotificationPageState extends State<NotificationPage> {
 
   denyFriendRequest(WebblenNotification notif) async {
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().denyFriend(widget.currentUser.uid, notif.notificationData).then((status){
-      if (status == "success"){
-        FirebaseNotificationsService().deleteNotification(notif.notificationKey);
-        setState(() {});
+    WebblenNotificationDataService().denyFriendRequest(widget.currentUser.uid, notif.notificationData, notif.notificationKey).then((success){
+      if (success){
+        notifications.remove(notif);
         Navigator.of(context).pop();
+        setState(() {});
       } else {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(context, "There was an Issue!", "Please Try Again Later");
@@ -142,19 +144,11 @@ class _NotificationPageState extends State<NotificationPage> {
   }
 
   denyCommunityInvite(WebblenNotification notif) async {
-    int stringIndex = notif.notificationData.indexOf(".");
-    String comNam = notif.notificationData.substring(0, stringIndex);
-    String comAreaName = notif.notificationData.substring(stringIndex + 1, notif.notificationData.length - 1);
     ShowAlertDialogService().showLoadingDialog(context);
-    CommunityDataService().removeInvitedUser(widget.currentUser.uid, comAreaName, comNam).then((error){
-      if (error.isEmpty){
-        FirebaseNotificationsService().deleteNotification(notif.notificationKey);
-        setState(() {});
-        Navigator.of(context).pop();
-      } else {
-        Navigator.of(context).pop();
-      }
-    });
+    WebblenNotificationDataService().deleteNotification(notif.notificationKey);
+    notifications.remove(notif);
+    setState(() {});
+    Navigator.of(context).pop();
   }
 
   transitionToUserDetails(String peerID) async {
@@ -174,7 +168,7 @@ class _NotificationPageState extends State<NotificationPage> {
       int stringIndex = notif.notificationData.indexOf(".");
       String areaName = notif.notificationData.substring(0, stringIndex);
       String comName = notif.notificationData.substring(stringIndex + 1, notif.notificationData.length);
-      CommunityDataService().getCommunity(areaName, comName).then((com){
+      CommunityDataService().getCommunityByName(areaName, comName).then((com){
         if (com != null){
           PageTransitionService(context: context, currentUser: widget.currentUser, community: com).transitionToCommunityProfilePage();
         }

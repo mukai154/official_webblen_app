@@ -4,7 +4,6 @@ class WebblenNotification {
   String notificationTitle;
   String notificationDescription;
   String notificationSender;
-  String notificationPicData;
   String notificationType;
   String notificationKey;
   String notificationExpirationDate;
@@ -19,7 +18,6 @@ class WebblenNotification {
     this.notificationTitle,
     this.notificationDescription,
     this.notificationSender,
-    this.notificationPicData,
     this.notificationType,
     this.notificationKey,
     this.notificationExpirationDate,
@@ -35,7 +33,6 @@ class WebblenNotification {
       notificationTitle: data['notificationTitle'],
       notificationDescription: data['notificationDescription'],
       notificationSender: data['notificationSender'],
-      notificationPicData: data['notificationPicData'],
       notificationType: data['notificationType'],
       notificationKey: data['notificationKey'],
       notificationExpirationDate: data['notificationExpirationDate'],
@@ -51,7 +48,6 @@ class WebblenNotification {
     'notificationTitle': this.notificationTitle,
     'notificationDescription': this.notificationDescription,
     'notificationSender': this.notificationSender,
-    'notificationPicData': this.notificationPicData,
     'notificationType': this.notificationType,
     'notificationKey': this.notificationKey,
     'notificationExpirationDate': this.notificationExpirationDate,

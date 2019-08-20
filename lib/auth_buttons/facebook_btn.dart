@@ -13,7 +13,7 @@ class FacebookBtn extends StatelessWidget {
     return new Padding(
       padding: EdgeInsets.symmetric(vertical: 6.0),
       child: Material(
-        elevation: 5.0,
+        elevation: 2.0,
         color: colorFacebook,
         borderRadius: BorderRadius.circular(25.0),
         child: InkWell(

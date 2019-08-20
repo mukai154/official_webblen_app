@@ -22,7 +22,7 @@ class ComEventRow extends StatelessWidget {
   Widget build(BuildContext context) {
 
     void transitionToCommunityProfile() async {
-      Community com = await CommunityDataService().getCommunity(event.communityAreaName, event.communityName);
+      Community com = await CommunityDataService().getCommunityByName(event.communityAreaName, event.communityName);
       PageTransitionService(context: context, currentUser: currentUser, community: com).transitionToCommunityProfilePage();
     }
 
@@ -124,8 +124,9 @@ class ComEventRow extends StatelessWidget {
                                 : Container(
                                 margin: EdgeInsets.only(right: 11),
                                 child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
                                   children: <Widget>[
-                                    Fonts().textW400('${event.views} views', 16.0, Colors.white, TextAlign.left),
+                                    Fonts().textW400('${event.views} views', 16.0, Colors.white, TextAlign.center),
                                   ],
                                 )
                             ),
@@ -133,7 +134,9 @@ class ComEventRow extends StatelessWidget {
                         ),
                       ),
                       Spacer(),
-                      Fonts().textW400('$startDateTime', 16.0, Colors.white, TextAlign.right),
+                      isHappeningNow
+                        ? Fonts().textW600('Happening Now!', 16.0, Colors.white, TextAlign.right)
+                        : Fonts().textW400('$startDateTime', 16.0, Colors.white, TextAlign.right),
                       SizedBox(width: 16.0),
                     ],
                   ),

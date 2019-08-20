@@ -12,6 +12,8 @@ import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:webblen/auth_buttons/google_btn.dart';
 
 
 class LoginPage extends StatefulWidget {
@@ -26,6 +28,12 @@ class _LoginPageState extends State<LoginPage> {
   final authFormKey = new GlobalKey<FormState>();
 
   static final FacebookLogin facebookSignIn = new FacebookLogin();
+  GoogleSignIn googleSignIn = GoogleSignIn(
+    scopes: <String>[
+      'email',
+      'https://www.googleapis.com/auth/contacts.readonly',
+    ],
+  );
 
   bool isLoading = false;
   bool signInWithEmail = false;
@@ -157,6 +165,43 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void loginWithGoogle() async {
+    setState(() {
+      isLoading = true;
+    });
+    print('logging in with Google...');
+    ScaffoldState scaffold = loginScaffoldKey.currentState;
+    GoogleSignInAccount googleAccount = await googleSignIn.signIn();
+    if (googleAccount == null){
+      scaffold.showSnackBar(new SnackBar(
+        content: new Text("Cancelled Google Login"),
+        backgroundColor: Colors.red,
+        duration: Duration(seconds: 3),
+      ));
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+    GoogleSignInAuthentication googleAuth = await googleAccount.authentication;
+
+    AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+    FirebaseAuth.instance.signInWithCredential(credential).then((user){
+      if (user != null){
+        PageTransitionService(context: context).transitionToRootPage();
+      } else {
+        scaffold.showSnackBar(new SnackBar(
+          content: new Text("There was an Issue Logging Into Google"),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ));
+        setState(() {
+          isLoading = false;
+        });
+      }
+    });
+  }
+
   void loginWithFacebook() async {
     setState(() {
       isLoading = true;
@@ -285,6 +330,9 @@ class _LoginPageState extends State<LoginPage> {
     // **FACEBOOK BUTTON
     final facebookButton = FacebookBtn(action: loginWithFacebook);
 
+    // **GOOGLE BUTTON
+    final googleButton = GoogleBtn(action: loginWithGoogle);
+
 
     // **EMAIL/PHONE BUTTON
     final signInWithEmailButton = CustomColorIconButton(
@@ -359,6 +407,7 @@ class _LoginPageState extends State<LoginPage> {
                           signInWithEmail ? authForm : phoneAuthForm,
                           orTextLabel,
                           facebookButton,
+                          googleButton,
                           signInWithEmail ? signInWithPhoneButton : signInWithEmailButton
                         ],
                       ),

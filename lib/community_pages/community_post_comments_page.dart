@@ -236,7 +236,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
                         (){
                       Navigator.of(context).pop();
                       ShowAlertDialogService().showLoadingDialog(context);
-                      CommunityDataService().deletePost(widget.newsPost.postID).then((error){
+                      CommunityDataService().deletePost(widget.newsPost.postID, widget.newsPost.areaName, widget.newsPost.communityName).then((error){
                         if (error.isNotEmpty){
                           Navigator.of(context).pop();
                           ShowAlertDialogService().showFailureDialog(context, "Uh Oh!", "There was an issue deleting this post. Please Try Again.");

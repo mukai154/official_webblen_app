@@ -152,11 +152,11 @@ class _ShopPageState extends State<ShopPage> {
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 4.0),
           child: StreamBuilder(
-              stream: Firestore.instance.collection("users").document(widget.currentUser.uid).snapshots(),
+              stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
               builder: (context, userSnapshot) {
                 if (!userSnapshot.hasData) return Text("Loading...");
                 var userData = userSnapshot.data;
-                double availablePoints = userData["eventPoints"] * 1.00;
+                double availablePoints = userData['d']["eventPoints"] * 1.00;
                 return Padding(
                   padding: EdgeInsets.all(4.0),
                   child: Row(

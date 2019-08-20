@@ -72,11 +72,11 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return Container(
       width: MediaQuery.of(context).size.width,
-      child: new Column /*or Column*/(
+      child: Column (
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          SizedBox(height: 230.0),
           CustomLinearProgress(progressBarColor: FlatColors.webblenRed),
           SizedBox(height: 12.0),
           loadingDescription != null

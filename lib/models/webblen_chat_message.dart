@@ -6,7 +6,7 @@ class WebblenChat {
   String lastMessageType;
   List users;
   List usernames;
-  Map<dynamic, dynamic> userProfiles;
+  String chatDocKey;
   List seenBy;
   bool isActive;
 
@@ -18,8 +18,8 @@ class WebblenChat {
     this.lastMessageType,
     this.users,
     this.usernames,
+    this.chatDocKey,
     this.seenBy,
-    this.userProfiles,
     this.isActive
   });
 
@@ -30,8 +30,8 @@ class WebblenChat {
       lastMessageType: data['lastMessageType'],
       users: data['users'],
       usernames: data['usernames'],
+      chatDocKey: data['chatDocKey'],
       seenBy: data['seenBy'],
-      userProfiles: data ['userProfiles'],
       isActive: data['isActive']
   );
 
@@ -42,8 +42,8 @@ class WebblenChat {
     'lastMessageType': this.lastMessageType,
     'users': this.users,
     'usernames': this.usernames,
+    'chatDocKey': this.chatDocKey,
     'seenBy': this.seenBy,
-    'userProfiles': this.userProfiles,
     'isActive': this.isActive
   };
 }
@@ -51,6 +51,7 @@ class WebblenChat {
 class WebblenChatMessage {
 
   int timestamp;
+  String uid;
   String username;
   String userImageURL;
   String messageContent;
@@ -59,24 +60,24 @@ class WebblenChatMessage {
 
   WebblenChatMessage({
     this.timestamp,
+    this.uid,
     this.username,
-    this.userImageURL,
     this.messageContent,
     this.messageType
   });
 
   WebblenChatMessage.fromMap(Map<String, dynamic> data)
       : this(timestamp: data['timestamp'],
+      uid: data['uid'],
       username: data['username'],
-      userImageURL: data['userImageURL'],
       messageContent: data['messageContent'],
       messageType: data['messageType']
   );
 
   Map<String, dynamic> toMap() => {
     'timestamp': this.timestamp,
+    'uid': this.uid,
     'username': this.username,
-    'userImageURL': this.userImageURL,
     'messageContent': this.messageContent,
     'messageType': this.messageType
   };

@@ -4,7 +4,6 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'dart:async';
 import 'package:webblen/firebase_data/reward_data.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/firebase_data/transaction_data.dart';
 import 'package:webblen/widgets_reward/reward_card.dart';
@@ -14,6 +13,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:webblen/widgets_wallet/wallet_attendance_power_bar.dart';
+import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
 
 class WalletPage extends StatefulWidget {
 
@@ -27,10 +29,13 @@ class WalletPage extends StatefulWidget {
 
 class _WalletPageState extends State<WalletPage> {
 
+  WebblenUser currentUser;
   List<WebblenReward> walletRewards = [];
   GlobalKey<FormState> paymentFormKey = new GlobalKey<FormState>();
   String formDepositName;
   WebblenReward redeemingReward;
+  bool isLoadingRewards = true;
+
 
   Future<bool> showRewardDialog(BuildContext context, WebblenReward reward) {
     return showDialog<bool>(
@@ -121,7 +126,7 @@ class _WalletPageState extends State<WalletPage> {
 
   Widget rewardsList(List<WebblenReward> walletRewards)  {
     return Container(
-      height: 150,
+      height: 115,
       child: GridView.count(
         crossAxisCount: 1,
         scrollDirection: Axis.horizontal,
@@ -151,22 +156,39 @@ class _WalletPageState extends State<WalletPage> {
     );
   }
 
+  Future<Null> loadRewards() async {
+    isLoadingRewards = true;
+    walletRewards = [];
+    setState(() {});
+    UserDataService().getUserByID(currentUser.uid).then((result){
+      currentUser = result;
+      if (currentUser.rewards.length > 0){
+        currentUser.rewards.forEach((reward){
+          String rewardID = reward.toString();
+          RewardDataService().findRewardByID(rewardID).then((userReward){
+            if (userReward != null){
+              walletRewards.add(userReward);
+              if (reward == currentUser.rewards.last){
+                if (this.mounted){
+                  isLoadingRewards = false;
+                  setState(() {});
+                }
+              }
+            }
+          });
+        });
+      } else {
+        isLoadingRewards = false;
+        setState(() {});
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    widget.currentUser.rewards.forEach((reward){
-      String rewardID = reward.toString();
-      RewardDataService().findRewardByID(rewardID).then((userReward){
-        if (userReward != null){
-          walletRewards.add(userReward);
-          if (reward == widget.currentUser.rewards.last){
-            if (this.mounted){
-              setState(() {});
-            }
-          }
-        }
-      });
-    });
+    currentUser = widget.currentUser;
+    loadRewards();
   }
 
   @override
@@ -174,11 +196,13 @@ class _WalletPageState extends State<WalletPage> {
     return Container(
       color: Colors.white,
       child: StreamBuilder(
-          stream: Firestore.instance.collection("users").document(widget.currentUser.uid).snapshots(),
+          stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
           builder: (context, userSnapshot) {
             if (!userSnapshot.hasData) return Text("Loading...");
             var userData = userSnapshot.data;
-            double webblenBalance = userData['eventPoints'];
+            double webblenBalance = userData['d']['eventPoints'] * 1.00;
+            double ap = userData['d']['ap'] * 1.00;
+            int apLvl = userData['d']['apLvl'];
             return Column(
               children: <Widget>[
                 Container(
@@ -196,66 +220,71 @@ class _WalletPageState extends State<WalletPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(left: 16, top: 24, right: 16),
+                  margin: EdgeInsets.only(left: 16, top: 16, right: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                        Fonts().textW700(
-                            '${webblenBalance.toStringAsFixed(2)}',
-                            34,
-                            Colors.black,
-                            TextAlign.left
-                        ),
-                        Fonts().textW300(
-                            'Webblen Balance',
-                            12,
-                            FlatColors.webblenRed,
-                            TextAlign.left
-                        ),
-                        SizedBox(height: 8.0),
-                        Fonts().textW500(
-                            "Webblen are tokens that can be transferred or traded at anytime.  You need Webblen in order to create new events and communities.",
-                            12,
-                            Colors.black,
-                            TextAlign.left
-                        ),
-                        SizedBox(height: 16.0),
-                        Fonts().textW700(
-                            'x1.00',
-                            34,
-                            Colors.black,
-                            TextAlign.left
-                        ),
-                        Fonts().textW300(
-                            "Attendance Power",
-                            12,
-                            FlatColors.webblenRed,
-                            TextAlign.left
-                        ),
-                        SizedBox(height: 8.0),
-                        Fonts().textW500(
-                            "A multiplier that increases the value of the events you attend. The higher your AP, the more your attendance is worth. Increase your AP by attending events regularly.",
-                            12,
-                            Colors.black,
-                            TextAlign.left
-                        ),
-                        SizedBox(height: 16.0),
-                        Row(
-                          children: <Widget>[
-                            Fonts().textW700(
-                                'Rewards',
-                                28,
-                                Colors.black,
-                                TextAlign.left
-                            ),
-                            IconButton(
-                              onPressed:  () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToShopPage(),
-                              icon: Icon(FontAwesomeIcons.plusCircle, size: 18.0, color: FlatColors.darkMountainGreen),
-                            )
-                          ],
-                        ),
-                        SizedBox(height: 16.0),
-                        buildWalletRewards()
+                      Fonts().textW700(
+                          '${webblenBalance.toStringAsFixed(2)}',
+                          34,
+                          Colors.black,
+                          TextAlign.left
+                      ),
+                      Fonts().textW500(
+                          'Webblen Balance',
+                          16,
+                          FlatColors.webblenRed,
+                          TextAlign.left
+                      ),
+                      SizedBox(height: 4.0),
+                      Fonts().textW400(
+                          "Webblen are tokens that can be transferred or traded at anytime.  You need Webblen in order to create new events and communities.",
+                          14,
+                          Colors.black,
+                          TextAlign.left
+                      ),
+                      SizedBox(height: 24.0),
+                      AttendancePowerBar(currentAP: ap, apLvl: apLvl),
+                      SizedBox(height: 2.0),
+                      Fonts().textW500(
+                          "Attendance Power",
+                          16,
+                          FlatColors.webblenRed,
+                          TextAlign.left
+                      ),
+                      SizedBox(height: 4.0),
+                      Fonts().textW400(
+                          "A multiplier that increases the value of the events you attend. The higher your AP, the more your attendance is worth. Increase your AP by attending events regularly.",
+                          14,
+                          Colors.black,
+                          TextAlign.left
+                      ),
+                      SizedBox(height: 16.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+                          Fonts().textW700(
+                              'Rewards',
+                              28,
+                              Colors.black,
+                              TextAlign.center
+                          ),
+                          IconButton(
+                            onPressed:  () => PageTransitionService(context: context, currentUser: currentUser).transitionToShopPage(),
+                            icon: Icon(FontAwesomeIcons.plusCircle, size: 18.0, color: FlatColors.darkMountainGreen),
+                          ),
+                          isLoadingRewards
+                              ? Container()
+                                : IconButton(
+                                onPressed:  () => loadRewards(),
+                                icon: Icon(FontAwesomeIcons.syncAlt, size: 18.0, color: Colors.black45),
+                              )
+                        ],
+                      ),
+                      //SizedBox(height: 8.0),
+                      isLoadingRewards
+                          ? Center(child: CustomCircleProgress(30.0, 30.0, 30.0, 30.0, Colors.black26))
+                          : buildWalletRewards()
                     ],
                   ),
                 ),

@@ -3,7 +3,6 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/widgets_event/event_row.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -16,8 +15,11 @@ class EventFeedPage extends StatefulWidget {
 
   final WebblenUser currentUser;
   final VoidCallback discoverAction;
+  final double currentLat;
+  final double currentLon;
+  final String areaName;
   final Key key;
-  EventFeedPage({this.currentUser, this.discoverAction, this.key});
+  EventFeedPage({this.currentUser, this.discoverAction, this.currentLat, this.currentLon, this.areaName, this.key});
 
   @override
   _EventFeedPageState createState() => _EventFeedPageState();
@@ -30,30 +32,17 @@ class _EventFeedPageState extends State<EventFeedPage> {
   bool isLoading = true;
 
   Future<Null> getEvents() async {
-    if (widget.currentUser.followingCommunities == null || widget.currentUser.followingCommunities.isEmpty){
-      setState(() {
+    EventDataService().getEventsNearLocation(widget.currentLat, widget.currentLon, false).then((result){
+      if (result.isEmpty){
         isLoading = false;
-      });
-    } else {
-      widget.currentUser.followingCommunities.forEach((key, val) async {
-        String areaName = key;
-        List communities = val;
-        communities.forEach((com) async {
-          //EventDataService().getEventsFromFollowedCommunities(widget.currentUser.uid);
-          await CommunityDataService().getEventsFromCommunities(areaName, com).then((result){
-            events.addAll(result);
-            if (widget.currentUser.followingCommunities.keys.last == key &&  communities.last == com){
-              events.sort((eventA, eventB) => eventB.startDateInMilliseconds.compareTo(eventA.startDateInMilliseconds));
-              if (this.mounted){
-                setState(() {
-                  isLoading = false;
-                });
-              }
-            }
-          });
-        });
-      });
-    }
+        setState(() {});
+      } else {
+        events = result;
+        events.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
+        isLoading = false;
+        setState(() {});
+      }
+    });
   }
 
   Future<void> refreshData() async{
@@ -65,6 +54,7 @@ class _EventFeedPageState extends State<EventFeedPage> {
   void initState() {
     super.initState();
     _scrollController = ScrollController();
+    //EventDataService().convertEventData();
     getEvents();
   }
 
@@ -89,6 +79,12 @@ class _EventFeedPageState extends State<EventFeedPage> {
                 actions: <Widget>[
                   boxIsScrolled ?
                   IconButton(
+                    onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToSearchPage(),
+                    icon: Icon(FontAwesomeIcons.search, size: 18.0, color: Colors.black),
+                  )
+                      : Container(),
+                  boxIsScrolled ?
+                  IconButton(
                     onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid, newEventOrPost: 'event').transitionToChooseCommunityPage(),
                     icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
                   )
@@ -105,11 +101,24 @@ class _EventFeedPageState extends State<EventFeedPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Fonts().textW700('Events', 40, Colors.black, TextAlign.left),
-                              IconButton(
-                                onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid, newEventOrPost: 'event').transitionToChooseCommunityPage(),
-                                icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
-                              )
+                              Expanded(
+                                child: Fonts().textW700('Events', 40, Colors.black, TextAlign.left),
+                                flex: 6,
+                              ),
+                              Expanded(
+                                child: IconButton(
+                                  onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToSearchPage(),
+                                  icon: Icon(FontAwesomeIcons.search, size: 18.0, color: Colors.black),
+                                ),
+                                flex: 1,
+                              ),
+                              Expanded(
+                                child: IconButton(
+                                  onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid, newEventOrPost: 'event').transitionToChooseCommunityPage(),
+                                  icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
+                                ),
+                                flex: 1,
+                              ),
                             ],
                           ),
                         ),

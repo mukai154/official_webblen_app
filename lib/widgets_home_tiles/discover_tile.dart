@@ -23,7 +23,7 @@ class DiscoverTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Fonts().textW700('Discover', 20.0, Colors.black, TextAlign.left),
-                Fonts().textW500('Find News, Events, and Communities Near You', 12.0, Colors.black87, TextAlign.left),
+                Fonts().textW500('Find Popular and Active Communities Near You', 12.0, Colors.black87, TextAlign.left),
               ],
             ),
           )

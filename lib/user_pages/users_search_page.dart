@@ -5,14 +5,14 @@ import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
 
 class UserSearchPage extends StatefulWidget {
 
-  final List<WebblenUser> usersList;
   final List userIDs;
   final WebblenUser currentUser;
   final bool viewingMembersOrAttendees;
-  UserSearchPage({this.usersList, this.currentUser, this.userIDs, this.viewingMembersOrAttendees});
+  UserSearchPage({this.currentUser, this.userIDs, this.viewingMembersOrAttendees});
 
   @override
   _UserSearchPageState createState() => new _UserSearchPageState();
@@ -27,25 +27,13 @@ class _UserSearchPageState extends State<UserSearchPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.viewingMembersOrAttendees){
-      widget.userIDs.forEach((uid){
-        UserDataService().getUserByID(uid).then((user){
-          if (user != null){
-            users.add(user);
-          }
-          if (widget.userIDs.last == uid){
-            searchResults = users;
-            isLoading = false;
-            setState(() {});
-          }
-        });
-      });
-    } else {
-      users = widget.usersList;
+    UserDataService().getUsersFromList(widget.userIDs).then((result){
+      users = result;
+      users.sort((userA, userB) => userA.username.compareTo(userB.username));
       searchResults = users;
       isLoading = false;
       setState(() {});
-    }
+    });
   }
 
   void sendFriendRequest(WebblenUser peerUser) async {
@@ -55,12 +43,12 @@ class _UserSearchPageState extends State<UserSearchPage> {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(context, "Request Pending", "You already have a pending friend request");
       } else {
-        UserDataService().addFriend(widget.currentUser.uid, widget.currentUser.username, peerUser.uid).then((requestStatus){
+        WebblenNotificationDataService().sendFriendRequest(widget.currentUser.uid, peerUser.uid,  widget.currentUser.username).then((error){
           Navigator.of(context).pop();
-          if (requestStatus == "success"){
+          if (error.isEmpty){
             ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  "@" + peerUser.username + " Will Need to Confirm Your Request");
           } else {
-            ShowAlertDialogService().showFailureDialog(context, "Request Failed", requestStatus);
+            ShowAlertDialogService().showFailureDialog(context, "Request Failed", error);
           }
         });
       }

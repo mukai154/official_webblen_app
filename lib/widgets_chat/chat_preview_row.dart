@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 
 class ChatRowPreview extends StatelessWidget {
 
   final String chattingWith;
-  final String userProfilePic;
   final VoidCallback transitionToChat;
   final String lastMessageSent;
   final String lastMessageSentBy;
@@ -19,12 +17,11 @@ class ChatRowPreview extends StatelessWidget {
   final TextStyle subHeaderTextStyle = TextStyle(fontWeight: FontWeight.w500, fontSize: 14.0, color: FlatColors.londonSquare);
   final TextStyle bodyTextStyle =  TextStyle(fontSize: 15.0, fontWeight: FontWeight.w500, color: FlatColors.blackPearl);
 
-  ChatRowPreview({this.chattingWith, this.seenByUser, this.userProfilePic, this.transitionToChat, this.lastMessageSent, this.lastMessageSentBy, this.lastMessageType, this.dateSent});
+  ChatRowPreview({this.chattingWith, this.seenByUser, this.transitionToChat, this.lastMessageSent, this.lastMessageSentBy, this.lastMessageType, this.dateSent});
 
   @override
   Widget build(BuildContext context) {
 
-    final userPic = UserProfilePicFromUsername(username: chattingWith, size: 60.0);
 
     final userCardContent = new Container(
       padding: EdgeInsets.only(left: 8.0, top: 12.0, right: 14.0, bottom: 8.0),
@@ -34,11 +31,6 @@ class ChatRowPreview extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  userPic
-                ],
-              ),
               SizedBox(width: 8.0),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,8 +41,8 @@ class ChatRowPreview extends StatelessWidget {
                     constraints: BoxConstraints(
                       maxWidth: MediaQuery.of(context).size.width - 90
                     ),
-                    child: lastMessageType == "text" ? Fonts().textW500(lastMessageSentBy + lastMessageSent, 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
-                        : lastMessageType == "image" ? Fonts().textW500(lastMessageSentBy + "Sent an Image", 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
+                    child: lastMessageType == "text" ? Fonts().textW500(lastMessageSentBy + ": " + lastMessageSent, 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
+                        : lastMessageType == "image" ? Fonts().textW500(lastMessageSentBy + ": Sent an Image", 14.0, seenByUser ? FlatColors.lightAmericanGray : Colors.white, TextAlign.left)
                         :  Fonts().textW500(lastMessageSentBy + "Sent a Video", 14.0, seenByUser ? FlatColors.blackPearl : Colors.white, TextAlign.left),
                   ),
                   SizedBox(height: 8.0),
@@ -72,7 +64,14 @@ class ChatRowPreview extends StatelessWidget {
 
     final userCard = new Container(
       child: userCardContent,
-      color: seenByUser ? FlatColors.lynxWhite : Colors.white,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+            colors: seenByUser
+                ? [Colors.white, Colors.white]
+                : [FlatColors.webblenRed, FlatColors.webblenPink]
+        ),
+      )
+      ,
     );
 
 

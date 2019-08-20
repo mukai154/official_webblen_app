@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:webblen/firebase_data/user_data.dart';
-//import 'package:flutter_twitter_login/flutter_twitter_login.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:webblen/firebase_data/auth.dart';
 import 'services_show_alert.dart';
+import 'package:webblen/firebase_data/webblen_notification_data.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class UserOptionsService {
 
@@ -14,7 +15,7 @@ class UserOptionsService {
     ShowAlertDialogService().showLoadingDialog(context);
     await UserDataService().getUsername(uid).then((currentUsername){
       if (currentUsername != null){
-        UserDataService().addFriend(uid, currentUsername, peerUid).then((requestStatus){
+        WebblenNotificationDataService().sendFriendRequest(uid, peerUid, peerUsername).then((requestStatus){
           Navigator.of(context).pop();
           if (requestStatus == "success"){
             ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  peerUsername + " Will Need to Confirm Your Request");
@@ -36,7 +37,7 @@ class UserOptionsService {
     ShowAlertDialogService().showLoadingDialog(context);
     await UserDataService().getUsername(uid).then((currentUsername){
       if (currentUsername != null){
-        UserDataService().addFriend(uid, currentUsername, peerUid).then((requestStatus){
+        WebblenNotificationDataService().sendFriendRequest(uid, peerUid, peerUsername).then((requestStatus){
           Navigator.of(context).pop();
           if (requestStatus == "success"){
             ShowAlertDialogService().showSuccessDialog(context, "Friend Request Sent!",  peerUsername + " Will Need to Confirm Your Request");
@@ -54,6 +55,7 @@ class UserOptionsService {
 
   void signUserOut(BuildContext context) async {
     await FacebookLogin().logOut();
+    await GoogleSignIn().signOut();
     BaseAuth().signOut().then((uid){
       Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
     });

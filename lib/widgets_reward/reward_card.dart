@@ -59,12 +59,9 @@ class RewardCard extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                    begin: FractionalOffset.bottomCenter,
-                    end: FractionalOffset.topCenter,
-                    colors: <Color>[
-                      FlatColors.blackPearl,
-                      Colors.transparent,
-                    ]
+                  colors: [Colors.black, FlatColors.transparent],
+                  begin: Alignment(0.0, 1.0),
+                  end: Alignment(0.0, -1.0),
                 ),
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15.0), bottomRight: Radius.circular(15.0)),
               ),
@@ -73,7 +70,7 @@ class RewardCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Fonts().textW500(reward.rewardProviderName, 12.0, FlatColors.iosOffWhite, TextAlign.left),
+                    Fonts().textW300(reward.rewardProviderName, 10.0, FlatColors.iosOffWhite, TextAlign.left),
                   ],
                 ),
               ),
