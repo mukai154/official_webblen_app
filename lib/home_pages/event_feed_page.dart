@@ -10,6 +10,10 @@ import 'package:webblen/widgets_common/common_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/models/community.dart';
+import 'package:webblen/firebase_data/community_data.dart';
+
 
 class EventFeedPage extends StatefulWidget {
 
@@ -25,10 +29,15 @@ class EventFeedPage extends StatefulWidget {
   _EventFeedPageState createState() => _EventFeedPageState();
 }
 
-class _EventFeedPageState extends State<EventFeedPage> {
+class _EventFeedPageState extends State<EventFeedPage> with SingleTickerProviderStateMixin {
 
+  final PageStorageBucket bucket = PageStorageBucket();
+  TabController _tabController;
   ScrollController _scrollController;
-  List<Event> events = [];
+//  List<Event> events = [];
+  List<Event> standardEvents = [];
+  List<Event> foodDrinkEvents = [];
+  List<Event> saleDiscountEvents = [];
   bool isLoading = true;
 
   Future<Null> getEvents() async {
@@ -37,8 +46,12 @@ class _EventFeedPageState extends State<EventFeedPage> {
         isLoading = false;
         setState(() {});
       } else {
-        events = result;
-        events.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
+        standardEvents = result.where((e) => e.eventType == 'standard').toList(growable: true);
+        foodDrinkEvents = result.where((e) => e.eventType == 'foodDrink').toList(growable: true);
+        saleDiscountEvents = result.where((e) => e.eventType == 'saleDiscount').toList(growable: true);
+        standardEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
+        foodDrinkEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
+        saleDiscountEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
         isLoading = false;
         setState(() {});
       }
@@ -46,13 +59,90 @@ class _EventFeedPageState extends State<EventFeedPage> {
   }
 
   Future<void> refreshData() async{
-    events = [];
+    standardEvents = [];
+    foodDrinkEvents = [];
+    saleDiscountEvents = [];
     getEvents();
+  }
+
+  void transitionToCommunityPage(Event event) async {
+    ShowAlertDialogService().showLoadingCommunityDialog(context, event.communityAreaName, event.communityName);
+    CommunityDataService().getCommunityByName(event.communityAreaName, event.communityName).then((com){
+      if (com != null){
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, currentUser: widget.currentUser, community: com).transitionToCommunityProfilePage();
+      } else {
+        Navigator.of(context).pop();
+        ShowAlertDialogService().showFailureDialog(context, 'Uh Oh...', 'There was an issue loading this community. Please try again later');
+      }
+    });
+  }
+
+  Widget listEvents() {
+   return LiquidPullToRefresh(
+      color: FlatColors.webblenRed,
+      onRefresh: refreshData,
+      child: new ListView.builder(
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(top: 4.0, bottom: 4.0),
+        itemCount: standardEvents.length,
+        itemBuilder: (context, index){
+          return ComEventRow(
+              event: standardEvents[index],
+              showCommunity: true,
+              currentUser: widget.currentUser,
+              transitionToComAction: () => transitionToCommunityPage(standardEvents[index]),
+              eventPostAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: standardEvents[index], eventIsLive: false).transitionToEventPage()
+          );
+        },
+      ),
+    );
+  }
+
+  Widget listFoodDrinkEvents() {
+    return LiquidPullToRefresh(
+      color: FlatColors.webblenRed,
+      onRefresh: refreshData,
+      child: new ListView.builder(
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(top: 4.0, bottom: 4.0),
+        itemCount: foodDrinkEvents.length,
+        itemBuilder: (context, fdIndex){
+          return ComEventRow(
+              event: foodDrinkEvents[fdIndex],
+              showCommunity: true,
+              currentUser: widget.currentUser,
+              transitionToComAction: () => transitionToCommunityPage(foodDrinkEvents[fdIndex]),
+              eventPostAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: foodDrinkEvents[fdIndex], eventIsLive: false).transitionToEventPage()
+          );
+        },
+      ),
+    );
+  }
+
+  Widget listSaleDiscountEvents() {
+   return ListView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.only(top: 4.0, bottom: 4.0),
+      itemCount: saleDiscountEvents.length,
+      itemBuilder: (context, sIndex){
+        return ComEventRow(
+            event: saleDiscountEvents[sIndex],
+            showCommunity: true,
+            currentUser: widget.currentUser,
+            transitionToComAction: () => transitionToCommunityPage(saleDiscountEvents[sIndex]),
+            eventPostAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: saleDiscountEvents[sIndex], eventIsLive: false).transitionToEventPage()
+        );
+      },
+    );
   }
 
   @override
   void initState() {
     super.initState();
+    _tabController = new TabController(length: 3, vsync: this);
     _scrollController = ScrollController();
     //EventDataService().convertEventData();
     getEvents();
@@ -61,130 +151,211 @@ class _EventFeedPageState extends State<EventFeedPage> {
   @override
   void dispose() {
     super.dispose();
+    _tabController.dispose();
     _scrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: NestedScrollView(
-          controller: _scrollController,
-          headerSliverBuilder: (BuildContext context, bool boxIsScrolled){
-            return <Widget>[
-              SliverAppBar(
-                brightness: Brightness.light,
-                backgroundColor: Colors.white,
-                title: boxIsScrolled ? Fonts().textW700('Events', 24, Colors.black, TextAlign.left) : Container(),
-                pinned: true,
-                actions: <Widget>[
-                  boxIsScrolled ?
-                  IconButton(
-                    onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToSearchPage(),
-                    icon: Icon(FontAwesomeIcons.search, size: 18.0, color: Colors.black),
-                  )
-                      : Container(),
-                  boxIsScrolled ?
-                  IconButton(
-                    onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid, newEventOrPost: 'event').transitionToChooseCommunityPage(),
-                    icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
-                  )
-                  : Container(),
-                ],
-                expandedHeight: 80.0,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          height: 70,
-                          margin: EdgeInsets.only(left: 16, top: 30, right: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Fonts().textW700('Events', 40, Colors.black, TextAlign.left),
-                                flex: 6,
-                              ),
-                              Expanded(
-                                child: IconButton(
-                                  onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToSearchPage(),
-                                  icon: Icon(FontAwesomeIcons.search, size: 18.0, color: Colors.black),
-                                ),
-                                flex: 1,
-                              ),
-                              Expanded(
-                                child: IconButton(
-                                  onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid, newEventOrPost: 'event').transitionToChooseCommunityPage(),
-                                  icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
-                                ),
-                                flex: 1,
-                              ),
-                            ],
+    final appBar = PreferredSize(
+      preferredSize: Size.fromHeight(118.0),
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                Container(
+                  height: 90.0,
+                  margin: EdgeInsets.only(left: 16, right: 8),
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 40.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Fonts().textW700('Events', 40, Colors.black, TextAlign.left),
+                          flex: 6,
+                        ),
+                        Expanded(
+                          child: IconButton(
+                            onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToSearchPage(),
+                            icon: Icon(FontAwesomeIcons.search, size: 18.0, color: Colors.black),
                           ),
+                          flex: 1,
+                        ),
+                        Expanded(
+                          child: IconButton(
+                            onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid, newEventOrPost: 'event').transitionToChooseCommunityPage(),
+                            icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
+                          ),
+                          flex: 1,
                         ),
                       ],
                     ),
-                  ),
+                  )
                 ),
-              ),
-            ];
-          },
-          body: isLoading
-              ? LoadingScreen(context: context, loadingDescription: 'Loading Events...')
-              : events.isEmpty
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Container(
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width,
-                          ),
-                          child: Fonts().textW300("No Community You're Following Has Upcoming Events", 16.0, FlatColors.lightAmericanGray, TextAlign.center),
-                        )
-                      ],
-                  ),
-              Row(
+                TabBar(
+                  indicatorColor: FlatColors.webblenRed,
+                  labelColor: FlatColors.darkGray,
+                  isScrollable: true,
+                  labelStyle: TextStyle(fontFamily: 'Barlow', fontWeight: FontWeight.w500),
+                  tabs: [
+                    Tab(text: 'Events'),
+                    Tab(text: 'Food/Drink Specials'),
+                    Tab(text: 'Sales & Discounts'),
+                  ],
+                  controller: _tabController,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: appBar,
+        body: TabBarView(
+          controller: _tabController,
+          children: <Widget>[
+            //EVENTS
+            Container(
+              key: PageStorageKey('key0'),
+              color: Colors.white,
+              child: isLoading
+                  ? LoadingScreen(context: context, loadingDescription: 'Loading Events...')
+                  : standardEvents.isEmpty
+                  ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  CustomColorButton(
-                    text: 'Discover Events Near Me',
-                    textColor: FlatColors.darkGray,
-                    backgroundColor: Colors.white,
-                    height: 45.0,
-                    width: 300,
-                    hPadding: 8.0,
-                    vPadding: 8.0,
-                    onPressed: widget.discoverAction,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width - 16,
+                        ),
+                        child: Fonts().textW300("No Community You're Following Has Upcoming Events", 16.0, FlatColors.lightAmericanGray, TextAlign.center),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CustomColorButton(
+                        text: 'Post a Flash Event',
+                        textColor: FlatColors.darkGray,
+                        backgroundColor: Colors.white,
+                        height: 45.0,
+                        width: 300,
+                        hPadding: 8.0,
+                        vPadding: 8.0,
+                        onPressed: () => () => PageTransitionService(context: context, uid: widget.currentUser.uid).transitionToNewFlashEventPage(),
+                      )
+                    ],
                   )
                 ],
               )
-            ],
-          )
-              : Container(
+                  : Container(
                   color: Colors.white,
-                  child: LiquidPullToRefresh(
-                      color: FlatColors.webblenRed,
-                      onRefresh: refreshData,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(bottom: 8.0),
-                        itemCount: events.length,
-                        itemBuilder: (context, index){
-                          return ComEventRow(
-                              event: events[index],
-                              showCommunity: true,
-                              currentUser: widget.currentUser,
-                              eventPostAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: events[index], eventIsLive: false).transitionToEventPage()
-                          );
-                        },
-                      ),
+                  child: listEvents()
+              ),
+            ),
+            //FOOD DRINK SPECIALS
+            Container(
+              key: PageStorageKey('key1'),
+              color: Colors.white,
+              child: isLoading
+                  ? LoadingScreen(context: context, loadingDescription: 'Loading Events...')
+                  : foodDrinkEvents.isEmpty
+                  ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width - 16,
+                        ),
+                        child: Fonts().textW300("We Couldn't Find Any Food or Drink Specials Nearby ", 14.0, FlatColors.lightAmericanGray, TextAlign.center),
+                      )
+                    ],
                   ),
-
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CustomColorButton(
+                        text: 'Post a Flash Food/Drink Special',
+                        textColor: FlatColors.darkGray,
+                        backgroundColor: Colors.white,
+                        height: 45.0,
+                        width: 300,
+                        hPadding: 8.0,
+                        vPadding: 8.0,
+                        onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid).transitionToNewFlashEventPage(),
+                      )
+                    ],
+                  )
+                ],
+              )
+                  : Container(
+                color: Colors.white,
+                child: listFoodDrinkEvents(),
+              ),
+            ),
+            //SALES & DEALS
+            Container(
+              key: PageStorageKey('key2'),
+              color: Colors.white,
+              child: isLoading
+                  ? LoadingScreen(context: context, loadingDescription: 'Searching for Special Sales & Discounts...')
+                  : saleDiscountEvents.isEmpty
+                  ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: MediaQuery.of(context).size.width - 16,
+                        ),
+                        child: Fonts().textW300("We Couldn't Find Any Sales or Discounts Nearby", 14.0, FlatColors.lightAmericanGray, TextAlign.center),
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CustomColorButton(
+                        text: 'Post a Flash Sale',
+                        textColor: FlatColors.darkGray,
+                        backgroundColor: Colors.white,
+                        height: 45.0,
+                        width: 300,
+                        hPadding: 8.0,
+                        vPadding: 8.0,
+                        onPressed: () => PageTransitionService(context: context, uid: widget.currentUser.uid).transitionToNewFlashEventPage(),
+                      )
+                    ],
+                  )
+                ],
+              )
+                  : Container(
+                color: Colors.white,
+                child: LiquidPullToRefresh(
+                  color: FlatColors.webblenRed,
+                  onRefresh: refreshData,
+                  child: listSaleDiscountEvents(),
                 ),
-        )
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

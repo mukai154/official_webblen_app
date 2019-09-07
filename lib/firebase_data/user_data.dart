@@ -6,7 +6,7 @@ import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'dart:io';
 import 'package:webblen/firebase_services/file_uploader.dart';
-
+import 'dart:convert';
 
 class UserDataService {
 
@@ -18,6 +18,17 @@ class UserDataService {
   final StorageReference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
 
+
+  Future<bool> checkAdminStatus(String uid) async {
+    bool isAdmin = false;
+    DocumentSnapshot comDoc = await userRef.document(uid).get();
+    if (comDoc.exists){
+      if (comDoc.data['isAdmin'] != null){
+        isAdmin = comDoc.data['isAdmin'];
+      }
+    }
+    return isAdmin;
+  }
   //***CREATE
   Future<bool> createNewUser(File userImage, WebblenUser user, String uid) async {
     bool success = true;
@@ -43,11 +54,9 @@ class UserDataService {
   //***READ
   Future<String> findProfilePicUrlByUsername(String username) async {
     String userPicURL;
-    print(username);
     QuerySnapshot querySnapshot = await userRef.where('d.username', isEqualTo: username).getDocuments();
-    print(querySnapshot.documents);
     if (querySnapshot.documents.isNotEmpty){
-      userPicURL = querySnapshot.documents.first.data['profile_pic'];
+      userPicURL = querySnapshot.documents.first.data['d']['profile_pic'];
     }
     return userPicURL;
   }
@@ -89,7 +98,7 @@ class UserDataService {
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getUsersFromList');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'userIDs': userIDs});
     if (result.data != null){
-      List query =  List.from(result.data);
+      List query =  List.from(json.decode(result.data));
       query.forEach((resultMap){
         Map<String, dynamic> userMap =  Map<String, dynamic>.from(resultMap);
         WebblenUser user = WebblenUser.fromMap(userMap);
@@ -126,7 +135,7 @@ class UserDataService {
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getNearbyUsers');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
     if (result.data != null){
-      List query =  List.from(result.data);
+      List query =  List.from(json.decode(result.data));
       query.forEach((resultMap){
         Map<String, dynamic> userMap =  Map<String, dynamic>.from(resultMap);
         WebblenUser user = WebblenUser.fromMap(userMap);
@@ -151,7 +160,7 @@ class UserDataService {
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'get10RandomUsers');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
     if (result.data != null){
-      List query =  List.from(result.data);
+      List query =  List.from(json.decode(result.data));
       query.forEach((resultMap){
         Map<String, dynamic> userMap =  Map<String, dynamic>.from(resultMap);
         WebblenUser user = WebblenUser.fromMap(userMap);
@@ -330,23 +339,15 @@ class UserDataService {
     });
   }
 
-  Future<Null> convertData() async {
-    Firestore.instance.collection('users').getDocuments().then((docs){
-      docs.documents.forEach((doc) async {
-        String geoH = doc.data['location']['geohash'];
-        double lat = doc.data['location']['geopoint'].latitude;
-        double lon = doc.data['location']['geopoint'].longitude;
-        GeoPoint latLon = geo.point(latitude: lat, longitude: lon).geoPoint;
-        userRef.document(doc.documentID).setData({
-          'appOpenInMilliseconds': DateTime.now().millisecondsSinceEpoch,
-          'lastNotificationTimeInMilliseconds': DateTime.now().millisecondsSinceEpoch,
-          'd': doc.data,
-          'g': geoH,
-          'l': latLon,
-          'lastAPRechargeInMilliseconds': DateTime.now().millisecondsSinceEpoch
-        });
-      });
-    });
-  }
+//  Future<Null> updateUserField() async {
+//    userRef.getDocuments().then((res){
+//     res.documents.forEach((doc) async {
+//       await userRef.document(doc.documentID).updateData(({
+//         'd.userLat': FieldValue.delete(),
+//         'd.userLon': FieldValue.delete()
+//       }));
+//     });
+//    });
+//  }
 
 }

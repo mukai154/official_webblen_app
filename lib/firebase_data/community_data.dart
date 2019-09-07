@@ -39,6 +39,23 @@ class CommunityDataService {
     return error;
   }
 
+  Future<String> getCommunityImageURL(String areaName, String comName) async {
+    String imageURL;
+    DocumentSnapshot comDoc = await locRef.document(areaName).collection('communities').document(comName).get();
+    if (comDoc.exists){
+      if (comDoc.data['comImage'] != null){
+        imageURL = comDoc.data['comImage'];
+      }
+    }
+    return imageURL;
+  }
+
+  Future<Null> setCommunityImageURL(String areaName, String comName, String imageURL) async {
+    locRef.document(areaName).collection('communities').document(comName).updateData(({
+      'comImage': imageURL
+    }));
+  }
+
   Future<Community> getCommunityByName(String areaName, String comName) async {
     Community com;
     String modifiedComName = comName.contains("#") ? comName : "#$comName";

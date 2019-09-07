@@ -25,7 +25,7 @@ import 'home_pages/location_unavailable_page.dart';
 import 'user_pages/notifications_page.dart';
 import 'package:webblen/widgets_data_streams/stream_user_account.dart';
 import 'package:webblen/widgets_data_streams/stream_user_notifications.dart';
-import 'package:webblen/utils/geofencing.dart';
+//import 'package:webblen/utils/geofencing.dart';
 import 'widgets_home/check_in_floating_action.dart';
 import 'package:webblen/firebase_services/remote_messaging.dart';
 
@@ -41,7 +41,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-
 
   var _homeScaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -108,12 +107,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             currentLat = location.latitude;
             currentLon = location.longitude;
             UserDataService().updateUserAppOpen(uid, currentLat, currentLon);
-            GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
+            //GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
             EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result){
               checkInAvailable = result;
               getPlatformData(currentLat, currentLon);
             });
-            //UserDataService().updateUserCheckIn(uid, currentLat, currentLon);
           } else {
             hasLocation = false;
             isLoading = false;

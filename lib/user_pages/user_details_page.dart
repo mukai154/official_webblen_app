@@ -46,7 +46,9 @@ class _UserDetailsPageState extends State<UserDetailsPage> with SingleTickerProv
     EventDataService().getUserEventHistory(widget.webblenUser.uid).then((res){
       events = res;
       events.sort((e1, e2) => e2.startDateInMilliseconds.compareTo(e1.startDateInMilliseconds));
-      setState(() {});
+      if (this.mounted){
+        setState(() {});
+      }
     });
   }
 

@@ -28,12 +28,12 @@ class CustomColorButton extends StatelessWidget {
           child: Container(
             height: height,
             width: width ,
-            child: Row(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Fonts().textW700(text, 16.0, textColor, TextAlign.center),
+                  padding: EdgeInsets.all(4.0),
+                  child: Fonts().textW600(text, 16.0, textColor, TextAlign.center),
                 )
               ],
             ),

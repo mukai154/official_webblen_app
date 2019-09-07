@@ -10,6 +10,8 @@ import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
+import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:webblen/styles/fonts.dart';
 
 class EventAttendeesPage extends StatefulWidget {
 
@@ -59,9 +61,7 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
+  loadAttendees() async {
     EventDataService().getEventAttendees(widget.eventKey).then((attendees){
       if (attendees != null && attendees.isNotEmpty){
         eventAttendees = attendees;
@@ -74,6 +74,16 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
     });
   }
 
+  Future<void> reloadAttendees() async {
+    loadAttendees();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadAttendees();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -84,8 +94,24 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
             onPressed: () => transitionToSearchPage(),
           ),
         ),
-        body: isLoading ? LoadingScreen(context: context, loadingDescription: 'Loading Attendees')
-          : ListView.builder(
+        body: isLoading
+            ? LoadingScreen(context: context, loadingDescription: 'Loading Attendees...')
+            : LiquidPullToRefresh(
+          color: FlatColors.webblenRed,
+          onRefresh: reloadAttendees,
+          child: eventAttendees.isEmpty
+              ? ListView(
+            children: <Widget>[
+              SizedBox(height: 64.0),
+              Fonts().textW500('This Event Has No Attendees Yet', 14.0, Colors.black45, TextAlign.center),
+              SizedBox(height: 8.0),
+              Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+            ],
+          )
+              : ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.only(top: 8.0, bottom: 8.0),
+            itemCount: eventAttendees.length,
             itemBuilder: (context, index){
               return UserRow(
                 user: eventAttendees[index],
@@ -94,9 +120,8 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
                 transitionToUserDetails: () => transitionToUserDetails(eventAttendees[index]),
               );
             },
-            itemCount: eventAttendees.length,
-            controller: scrollController,
-        )
+          ),
+        ),
     );
   }
 }

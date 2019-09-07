@@ -168,9 +168,14 @@ class _NotificationPageState extends State<NotificationPage> {
       int stringIndex = notif.notificationData.indexOf(".");
       String areaName = notif.notificationData.substring(0, stringIndex);
       String comName = notif.notificationData.substring(stringIndex + 1, notif.notificationData.length);
+      ShowAlertDialogService().showLoadingCommunityDialog(context, areaName, comName);
       CommunityDataService().getCommunityByName(areaName, comName).then((com){
         if (com != null){
+          Navigator.of(context).pop();
           PageTransitionService(context: context, currentUser: widget.currentUser, community: com).transitionToCommunityProfilePage();
+        } else {
+          Navigator.of(context).pop();
+          ShowAlertDialogService().showFailureDialog(context, 'Uh Oh...', 'There was an issue loading this community. Please try again later');
         }
       });
     } else if (notifType == "newPostComment" && (notif.notificationSender != null || notif.notificationSender.isNotEmpty) ){

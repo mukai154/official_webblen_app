@@ -40,8 +40,8 @@ android {
         applicationId "com.webblen.events.webblen"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 58
-        versionName '6.1.1'
+        versionCode 62
+        versionName '7.1.0'
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
     }

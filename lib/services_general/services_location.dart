@@ -20,10 +20,14 @@ class LocationService {
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
         error = 'Location Permission Denied';
-        ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from App Settings");
+        if (context != null){
+          ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from App Settings");
+        }
       } else if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
         error = 'Webblen Needs Permission to Access Your Location';
-        ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from App Settings");
+        if (context != null){
+          ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from App Settings");
+        }
       }
       locationData = null;
     }

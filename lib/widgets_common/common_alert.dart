@@ -1267,8 +1267,42 @@ class LoadingDialog extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            CustomLinearProgress(progressBarColor: FlatColors.webblenRed),
+            Container(
+              height: 3.0,
+              child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class LoadingCommunityDialog extends StatelessWidget {
+
+  final String areaName;
+  final String comName;
+
+  LoadingCommunityDialog({this.areaName, this.comName});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomAlertDialog(
+      content: Container(
+        height: 30.0,
+        decoration: new BoxDecoration(
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Fonts().textW500('Loading $areaName/$comName...', 14.0, Colors.black, TextAlign.center),
+            SizedBox(height: 8.0),
+            Container(
+              height: 3.0,
+              child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed),
+            ),          ],
         ),
       ),
     );

@@ -17,6 +17,7 @@ import 'package:webblen/widgets_community/community_post_row.dart';
 import 'package:webblen/firebase_data/news_post_data.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 
 class CommunityProfilePage extends StatefulWidget {
 
@@ -39,6 +40,18 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
   List<RecurringEvent> recurringEvents = [];
   List<CommunityNewsPost> posts = [];
   bool isLoading = true;
+  bool isAdmin = false;
+
+  checkAdminStatus() async {
+    UserDataService().checkAdminStatus(widget.currentUser.uid).then((res){
+     if (res){
+       isAdmin = res;
+       if (this.mounted){
+         setState(() {});
+       }
+     }
+    });
+  }
 
   void followUnfollowAction() async {
     ShowAlertDialogService().showLoadingDialog(context);
@@ -63,7 +76,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
     upcomingEvents = [];
     await CommunityDataService().getUpcomingCommunityEvents(widget.community.areaName, widget.community.name).then((result){
       upcomingEvents = result;
-      upcomingEvents.sort((eventA, eventB) => eventB.startDateInMilliseconds.compareTo(eventA.startDateInMilliseconds));
+      upcomingEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
     });
     if (reloadingData){
     setState(() {});
@@ -142,6 +155,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
     await getUpcomingCommunityEvents(false);
     await getRecurringCommunityEvents(false);
     await getCommunityNewsPosts(false);
+    checkAdminStatus();
     isLoading = false;
     setState(() {});
   }
@@ -247,7 +261,6 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                                       left: 60.0,
                                       child: memberUIDs.length > 2 ? UserProfilePicFromUID(uid: memberUIDs[2], size: 70.0) : Container(),
                                     )
-
                                   ],
                                 ),
                               ),
@@ -272,7 +285,8 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                         ],
                       ),
                       SizedBox(height: 8.0),
-                      Row(
+                      isAdmin
+                        ? Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget>[
                           CustomColorButton(
@@ -282,7 +296,28 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                             onPressed: followUnfollowAction,
                             height: 35.0,
                             width: 150.0,
+                          ),
+                          CustomColorButton(
+                            text: 'Add Com Image',
+                            textColor: Colors.black,
+                            backgroundColor: FlatColors.textFieldGray,
+                            onPressed: () => PageTransitionService(context: context, community: widget.community).transitionToComImagePage(),
+                            height: 35.0,
+                            width: 150.0,
                           )
+                        ],
+                      )
+                          : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: <Widget>[
+                          CustomColorButton(
+                            text: followerUIDs.contains(widget.currentUser.uid) ? 'Following' : 'Follow',
+                            textColor: followerUIDs.contains(widget.currentUser.uid) ? Colors.black : FlatColors.darkGray,
+                            backgroundColor: followerUIDs.contains(widget.currentUser.uid) ? FlatColors.textFieldGray : Colors.white,
+                            onPressed: followUnfollowAction,
+                            height: 35.0,
+                            width: 150.0,
+                          ),
                         ],
                       ),
                     ],
@@ -331,6 +366,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                             return ComEventRow(
                               event: upcomingEvents[index],
                               showCommunity: false,
+                              transitionToComAction: null,
                               eventPostAction: () => eventPostAction(upcomingEvents[index], null),
                             );
                           },
@@ -390,6 +426,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                             return CommunityPostRow(
                                 newsPost: posts[index],
                                 currentUser: widget.currentUser,
+                                transitionToComAction: null,
                                 showCommunity: false
                             );
                           },

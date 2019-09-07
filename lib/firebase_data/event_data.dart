@@ -238,7 +238,16 @@ class EventDataService{
   Future<Null> addEventDataField(String dataName, dynamic data) async {
     QuerySnapshot querySnapshot = await upcomingEventsRef.getDocuments();
     querySnapshot.documents.forEach((doc){
-      upcomingEventsRef.document(doc.documentID).updateData({"d.$dataName": data}).whenComplete(() {
+      upcomingEventsRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {
+      }).catchError((e) {
+      });
+    });
+  }
+
+  Future<Null> addRecEventDataField(String dataName, dynamic data) async {
+    QuerySnapshot querySnapshot = await recurringEventRef.getDocuments();
+    querySnapshot.documents.forEach((doc){
+      recurringEventRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {
       }).catchError((e) {
       });
     });
@@ -288,24 +297,5 @@ class EventDataService{
     });
     return error;
   }
-
-    Future<Null> convertEventData() async {
-    Firestore.instance.collection("events").getDocuments().then((docs){
-      docs.documents.forEach((doc) async {
-        String geoH = doc.data['location']['geohash'];
-        double lat = doc.data['location']['geopoint'].latitude;
-        double lon = doc.data['location']['geopoint'].longitude;
-        GeoPoint latLon = geo.point(latitude: lat, longitude: lon).geoPoint;
-        int eventEnd = doc.data['endDateInMilliseconds'];
-        int currentDateTime = DateTime.now().millisecondsSinceEpoch;
-        if (eventEnd != null && eventEnd < currentDateTime){
-          pastEventsRef.document(doc.documentID).setData({'d': doc.data, 'g': geoH, 'l': latLon});
-        } else {
-          upcomingEventsRef.document(doc.documentID).setData({'d': doc.data, 'g': geoH, 'l': latLon});
-        }
-      });
-    });
-  }
-
 
 }

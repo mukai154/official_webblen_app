@@ -33,11 +33,13 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
   double currentLon;
   Event newEvent = Event(radius: 0.25);
   File eventImage;
+  int eventTypeRadioVal = 0;
 
   //Form Validations
   void validateAndSubmit() async {
     final form = page1FormKey.currentState;
     form.save();
+    newEvent.eventType = getRadioValue();
     if (currentLat == null){
       AlertFlushbar(headerText: "Error", bodyText: "There was an issue finding your location. Please try again.").showAlertFlushbar(context);
     } else if (newEvent.title == null || newEvent.title.isEmpty) {
@@ -50,6 +52,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
       ShowAlertDialogService().showLoadingDialog(context);
       newEvent.authorUid = "";
       newEvent.attendees = [];
+      newEvent.privacy = 'public';
       newEvent.flashEvent = true;
       newEvent.eventPayout = 0.00;
       newEvent.estimatedTurnout = 0;
@@ -92,6 +95,74 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
       setState(() {});
     }
   }
+
+  void handleRadioValueChanged(int value) {
+    setState(() {
+      eventTypeRadioVal = value;
+    });
+  }
+
+  String getRadioValue(){
+    String val = 'standard';
+    if (eventTypeRadioVal == 1){
+      val = 'foodDrink';
+    } else if (eventTypeRadioVal == 2) {
+      val = 'saleDiscount';
+    }
+    return val;
+  }
+
+  Widget _buildRadioButtons() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+          children: <Widget>[
+            Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  CustomColorButton(
+                    height: 30.0,
+                    width: 110.0,
+                    hPadding: 0,
+                    text: 'standard',
+                    textColor: eventTypeRadioVal == 0 ? Colors.white : Colors.black,
+                    backgroundColor: eventTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                    onPressed: () {
+                      eventTypeRadioVal = 0;
+                      setState(() {});
+                    },
+                  ),
+                  CustomColorButton(
+                    height: 30.0,
+                    width: 110.0,
+                    hPadding: 0,
+                    text: 'food/drink',
+                    textColor: eventTypeRadioVal == 1 ? Colors.white : Colors.black,
+                    backgroundColor: eventTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                    onPressed: () {
+                      eventTypeRadioVal = 1;
+                      setState(() {});
+                    },
+                  ),
+                  CustomColorButton(
+                    height: 30.0,
+                    width: 110.0,
+                    hPadding: 0,
+                    text: 'sale/discount',
+                    textColor: eventTypeRadioVal == 2 ? Colors.white : Colors.black,
+                    backgroundColor: eventTypeRadioVal == 2 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                    onPressed: () {
+                      eventTypeRadioVal = 2;
+                      setState(() {});
+                    },
+                  ),
+                ]
+            ),
+          ]
+      ),
+    );
+  }
+
 
 
   @override
@@ -214,6 +285,11 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                 _buildEventTitleField(),
                 SizedBox(height: 8.0),
                 _buildEventDescriptionField(),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
+                  child: Fonts().textW700("Event Type", 18.0, FlatColors.darkGray, TextAlign.left),
+                ),
+                _buildRadioButtons(),
                 CustomColorButton(
                   text: "Submit",
                   textColor: FlatColors.darkGray,

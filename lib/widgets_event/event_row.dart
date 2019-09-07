@@ -4,33 +4,33 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/models/event.dart';
-import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_data/community_data.dart';
-import 'package:webblen/models/community.dart';
 import 'package:webblen/models/webblen_user.dart';
 
 class ComEventRow extends StatelessWidget {
 
   final Event event;
+  final VoidCallback transitionToComAction;
   final VoidCallback eventPostAction;
   final bool showCommunity;
   final WebblenUser currentUser;
-  ComEventRow({this.event, this.eventPostAction, this.showCommunity, this.currentUser});
+  ComEventRow({this.event, this.transitionToComAction, this.eventPostAction, this.showCommunity, this.currentUser});
 
 
   @override
   Widget build(BuildContext context) {
 
-    void transitionToCommunityProfile() async {
-      Community com = await CommunityDataService().getCommunityByName(event.communityAreaName, event.communityName);
-      PageTransitionService(context: context, currentUser: currentUser, community: com).transitionToCommunityProfilePage();
-    }
-
-    DateFormat formatter = DateFormat("MMM d  h:mma");
+    DateFormat dateFormatter = DateFormat("MMM d  h:mma");
+    DateFormat timeFormatter = DateFormat("h:mma");
     int currentDateTime = DateTime.now().millisecondsSinceEpoch;
-    String startDateTime = event.startDateInMilliseconds == null ? null : formatter.format(DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds));
+    DateTime eventStartDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+    
+
     DateTime eventEndDateTime = event.endDateInMilliseconds == null ? null : DateTime.fromMillisecondsSinceEpoch(event.endDateInMilliseconds);
     bool isHappeningNow = false;
+    bool isHappeningToday = false;
+    if (DateTime.fromMicrosecondsSinceEpoch(event.startDateInMilliseconds).day == DateTime.now().day){
+      isHappeningToday = true;
+    }
     if (event.endDateInMilliseconds != null){
       isHappeningNow = (event.startDateInMilliseconds < currentDateTime && event.endDateInMilliseconds > currentDateTime) ? true : false;
     }
@@ -56,7 +56,7 @@ class ComEventRow extends StatelessWidget {
                 event.flashEvent
                   ? Container()
                   : GestureDetector(
-                        onTap: showCommunity ? () => transitionToCommunityProfile() : null,
+                        onTap: showCommunity ? transitionToComAction : null,
                         child:  Padding(
                           padding: EdgeInsets.only(right: 8.0, top: 4.0, bottom: 8.0),
                           child: Material(
@@ -134,9 +134,15 @@ class ComEventRow extends StatelessWidget {
                         ),
                       ),
                       Spacer(),
-                      isHappeningNow
-                        ? Fonts().textW600('Happening Now!', 16.0, Colors.white, TextAlign.right)
-                        : Fonts().textW400('$startDateTime', 16.0, Colors.white, TextAlign.right),
+                      isHappeningToday && !isHappeningNow
+                        ? Fonts().textW700('Starting Soon...', 16.0, Colors.white, TextAlign.right)
+                        : isHappeningNow
+                        ? Fonts().textW700('Happening Now!', 16.0, Colors.white, TextAlign.right)
+                        : eventStartDateTime.difference(DateTime.now()) <= Duration(days: 1) && eventStartDateTime.difference(DateTime.now()) > Duration(days: 0)
+                        ? Fonts().textW700('Today ${timeFormatter.format(eventStartDateTime)}', 16.0, Colors.white, TextAlign.right)
+                        : eventStartDateTime.difference(DateTime.now()) <= Duration(days: 2) && eventStartDateTime.difference(DateTime.now()) >= Duration(days: 1)
+                        ? Fonts().textW400('Tomorrow ${timeFormatter.format(eventStartDateTime)}', 16.0, Colors.white, TextAlign.right)
+                        : Fonts().textW400('${dateFormatter.format(eventStartDateTime)}', 16.0, Colors.white, TextAlign.right),
                       SizedBox(width: 16.0),
                     ],
                   ),

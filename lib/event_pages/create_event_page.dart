@@ -16,7 +16,7 @@ import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/models/community.dart';
-import 'package:flutter_tags/input_tags.dart';
+import 'package:flutter_tags/tag.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:flutter/services.dart';
@@ -65,7 +65,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   String endDate = "";
   String startTime = "";
   String endTime = "";
-  int recurrenceRadioVal = 0;
+  int eventTypeRadioVal = 0;
   List<String> pageTitles = ['Event Details', 'Add Photo', 'Event Tags', 'Event Date', 'Event Time', 'External Links', 'Event Address'];
   int eventPageTitleIndex = 0;
   List<String> _inputTags = [];
@@ -90,6 +90,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   void validateSpecialEvent(){
     final form = page1FormKey.currentState;
     form.save();
+    newEvent.eventType = getRadioValue();
     if (newEvent.title == null || newEvent.title.isEmpty) {
       AlertFlushbar(headerText: "Error", bodyText: "Event Title Cannot be Empty").showAlertFlushbar(context);
     } else if (newEvent.description == null || newEvent.description.isEmpty){
@@ -185,6 +186,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       }
       newEvent.authorUid = widget.currentUser.uid;
       newEvent.attendees = [];
+      newEvent.privacy = widget.community.communityType;
       newEvent.flashEvent = false;
       newEvent.eventPayout = 0.00;
       newEvent.estimatedTurnout = 0;
@@ -212,16 +214,16 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   void handleRadioValueChanged(int value) {
     setState(() {
-      recurrenceRadioVal = value;
+      eventTypeRadioVal = value;
     });
   }
 
   String getRadioValue(){
-    String val = 'daily';
-    if (recurrenceRadioVal == 1){
-      val = 'weekly';
-    } else if (recurrenceRadioVal == 2) {
-      val = 'monthly';
+    String val = 'standard';
+    if (eventTypeRadioVal == 1){
+      val = 'foodDrink';
+    } else if (eventTypeRadioVal == 2) {
+      val = 'saleDiscount';
     }
     return val;
   }
@@ -290,6 +292,40 @@ class _CreateEventPageState extends State<CreateEventPage> {
           }
         },
     ).show(homeScaffoldKey.currentState);
+  }
+
+  Widget _buildTagsField(){
+    return Tags(
+      textField: TagsTextFiled(
+        textStyle: TextStyle(fontSize: 14.0),
+        onSubmitted: (String str) {
+          if (_inputTags.length == 7){
+            AlertFlushbar(headerText: "Event Tag Error", bodyText: "Events Can Only Have Up to 7 Tags").showAlertFlushbar(context);
+          } else {
+            setState(() {
+              if (!_inputTags.contains(str)){
+                _inputTags.add(str);
+              }
+            });
+          }
+        },
+      ),
+      itemCount: _inputTags.length, // required
+      itemBuilder: (int index){
+        final tag = _inputTags[index];
+        return ItemTags(
+          key: Key(_inputTags[index]),
+          index: index,
+          title: tag,
+          removeButton: ItemTagsRemoveButton(),
+          onRemoved: (){
+            setState(() {
+              _inputTags.removeAt(index);
+            });
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -443,46 +479,43 @@ class _CreateEventPageState extends State<CreateEventPage> {
         child: Column(
             children: <Widget>[
               Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          Fonts().textW500("daily", 16.0, FlatColors.darkGray, TextAlign.left),
-                          Radio<int>(
-                            value: 0,
-                            groupValue: recurrenceRadioVal,
-                            onChanged: handleRadioValueChanged,
-                            activeColor: FlatColors.webblenRed,
-                          )
-                        ],
-                      ),
+                    CustomColorButton(
+                      height: 30.0,
+                      width: 110.0,
+                      hPadding: 0,
+                      text: 'standard',
+                      textColor: eventTypeRadioVal == 0 ? Colors.white : Colors.black,
+                      backgroundColor: eventTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                      onPressed: () {
+                        eventTypeRadioVal = 0;
+                        setState(() {});
+                      },
                     ),
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          Fonts().textW500("weekly", 16.0, FlatColors.darkGray, TextAlign.left),
-                          Radio<int>(
-                            value: 1,
-                            groupValue: recurrenceRadioVal,
-                            onChanged: handleRadioValueChanged,
-                            activeColor: FlatColors.webblenRed,
-                          )
-                        ],
-                      ),
+                    CustomColorButton(
+                      height: 30.0,
+                      width: 110.0,
+                      hPadding: 0,
+                      text: 'food/drink',
+                      textColor: eventTypeRadioVal == 1 ? Colors.white : Colors.black,
+                      backgroundColor: eventTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                      onPressed: () {
+                        eventTypeRadioVal = 1;
+                        setState(() {});
+                      },
                     ),
-                    Container(
-                      child: Row(
-                        children: <Widget>[
-                          Fonts().textW500("monthly", 16.0, FlatColors.darkGray, TextAlign.left),
-                          Radio<int>(
-                            value: 2,
-                            groupValue: recurrenceRadioVal,
-                            onChanged: handleRadioValueChanged,
-                            activeColor: FlatColors.webblenRed,
-                          )
-                        ],
-                      ),
+                    CustomColorButton(
+                      height: 30.0,
+                      width: 110.0,
+                      hPadding: 0,
+                      text: 'sale/discount',
+                      textColor: eventTypeRadioVal == 2 ? Colors.white : Colors.black,
+                      backgroundColor: eventTypeRadioVal == 2 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                      onPressed: () {
+                        eventTypeRadioVal = 2;
+                        setState(() {});
+                      },
                     ),
                   ]
               ),
@@ -500,11 +533,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
           style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
           autofocus: false,
           onSaved: (url) {
-            if (!url.contains('http://') || !url.contains('https://')) {
-              if (!url.contains('www.')){
-                url = 'http://www.' + url;
-              } else {
-                url = 'http://' + url;
+            if (url.isNotEmpty){
+              if (!url.contains('http://') || !url.contains('https://')) {
+                if (!url.contains('www.')){
+                  url = 'http://www.' + url;
+                } else {
+                  url = 'http://' + url;
+                }
               }
             }
             newEvent.fbSite = url;
@@ -564,11 +599,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
             BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
           ],
           onSaved: (url) {
-            if (!url.contains('http://') || !url.contains('https://')) {
-              if (!url.contains('www.')){
-                url = 'http://www.' + url;
-              } else {
-                url = 'http://' + url;
+            if (url.isNotEmpty){
+              if (!url.contains('http://') || !url.contains('https://')) {
+                if (!url.contains('www.')){
+                  url = 'http://www.' + url;
+                } else {
+                  url = 'http://' + url;
+                }
               }
             }
             newEvent.website = url;
@@ -692,10 +729,15 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 _buildEventDescriptionField(),
                 Padding(
                   padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
-                  child: widget.isRecurring ? Fonts().textW700("Frequency", 18.0, FlatColors.darkGray, TextAlign.left) : Fonts().textW700("Date", 18.0, FlatColors.darkGray, TextAlign.left),
+                  child: Fonts().textW700("Event Type", 18.0, FlatColors.darkGray, TextAlign.left),
                 ),
-                widget.isRecurring ? _buildRadioButtons() : _buildStartDateField() ,
-                widget.isRecurring ? Container() : _buildEndDateField(),
+                _buildRadioButtons(),
+                Padding(
+                  padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
+                  child: Fonts().textW700("Date", 18.0, FlatColors.darkGray, TextAlign.left),
+                ),
+                _buildStartDateField(),
+                _buildEndDateField(),
                 Padding(
                   padding: EdgeInsets.only(left: 16.0, top: 24.0, right: 16.0),
                   child: Fonts().textW700("External Links (Optional)", 18.0, FlatColors.darkGray, TextAlign.left),
@@ -717,67 +759,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
           Padding(
             padding: EdgeInsets.all(10),
           ),
-          Container(
-            child:
-            InputTags(
-              tags: _inputTags,
-              iconBackground: FlatColors.darkGray,
-              color: Colors.white,
-              textStyle: TextStyle(color: FlatColors.darkGray, fontWeight: FontWeight.w500, fontFamily: 'Barlow'),
-              lowerCase: true,
-              autofocus: false,
-              popupMenuBuilder: (String tag){
-                return <PopupMenuEntry>[
-                  PopupMenuItem(
-                    child: Text(tag,
-                      style: TextStyle(
-                          color: Colors.black87,fontWeight: FontWeight.w800
-                      ),
-                    ),
-                    enabled: false,
-                  ),
-                  PopupMenuDivider(),
-                  PopupMenuItem(
-                    value: 1,
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.content_copy,size: 18,),
-                        Text(" Copy text"),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem(
-                    value: 2,
-                    child: Row(
-                      children: <Widget>[
-                        Icon(Icons.delete,size: 18),
-                        Text(" Remove"),
-                      ],
-                    ),
-                  )
-                ];
-              },
-              popupMenuOnSelected: (int id,String tag){
-                switch(id){
-                  case 1:
-                    Clipboard.setData( ClipboardData(text: tag));
-                    break;
-                  case 2:
-                    setState(() {
-                      _inputTags.remove(tag);
-                    });
-                }
-              },
-              height: 40,
-              textFieldHidden: _inputTags.length >= 6 ? true : false,
-              backgroundContainer: Colors.transparent,
-              onDelete: (tag) {
-                setState(() {
-                  _inputTags.remove(tag);
-                });
-              },
-            ),
-          ),
+          _buildTagsField(),
           Padding(
             padding: EdgeInsets.all(10),
           ),

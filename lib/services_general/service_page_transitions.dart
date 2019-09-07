@@ -40,6 +40,7 @@ import 'package:webblen/community_pages/choose_community.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/auth_pages/choose_sim_page.dart';
 import 'package:webblen/event_pages/webblen_events_page.dart';
+import 'package:webblen/user_pages/add_com_image_page.dart';
 
 
 class PageTransitionService{
@@ -120,11 +121,13 @@ class PageTransitionService{
 //  void transitionToCommunityBuilderPage () => Navigator.push(context, SlideFromRightRoute(widget: CommunityCreatePostPage(currentUser: currentUser, community: community)));
   void transitionToNotificationsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  NotificationPage(currentUser: currentUser)));
   void transitionToSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  SearchPage(currentUser: currentUser, areaName: areaName)));
-  void transitionToUserSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserSearchPage(currentUser: currentUser, userIDs: userIDs, viewingMembersOrAttendees: viewingMembersOrAttendees)));
+  void transitionToUserSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserSearchPage(currentUser: currentUser, userIDs: userIDs, userList: usersList,viewingMembersOrAttendees: viewingMembersOrAttendees)));
   void transitionToSettingsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(currentUser: currentUser)));
   void transitionToRewardPayoutPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  RewardPayoutPage(redeemingReward: reward,currentUser: currentUser)));
   void transitionToTransactionHistoryPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  TransactionHistoryPage(currentUser: currentUser)));
   void transitionToWaitListPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  JoinWaitlistPage(currentUser: currentUser)));
   void transitionToChooseCommunityPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  ChooseCommunityPage(uid: uid, newEventOrPost: newEventOrPost)));
   void transitionToCreateAdPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateAdPage(currentUser: currentUser)));
+  void transitionToComImagePage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddComImage(com: community)));
+
 }

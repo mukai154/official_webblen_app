@@ -47,7 +47,7 @@ class FirebaseMessagingService {
   }
 
   updateFirebaseMessageToken(String uid){
-    CreateNotification().intializeNotificationSettings();
+    CreateNotification().initializeNotificationSettings();
     firebaseMessaging.getToken().then((token){
       UserDataService().setUserCloudMessageToken(uid, token);
     });

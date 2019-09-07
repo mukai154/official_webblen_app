@@ -27,6 +27,8 @@ class _JoinWaitlistPageState extends State<JoinWaitlistPage> {
   final scaffoldKey = new GlobalKey<ScaffoldState>();
   final formKey = new GlobalKey<FormState>();
 
+  double lat;
+  double lon;
   bool isLoading = false;
   bool submitEmail = false;
   String email;
@@ -62,9 +64,12 @@ class _JoinWaitlistPageState extends State<JoinWaitlistPage> {
     if (validateAndSave()) {
       if (email == null && phoneNo == null){
         Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(context, "Info Missing", "Please Enter Your Email or Phone Number to Join our Waitlist");
+        ShowAlertDialogService().showFailureDialog(context, "Info Missing", "Please Enter Your Email or Phone Number to Join Our Waitlist");
+      } else if (lat == null || lon == null){
+        Navigator.of(context).pop();
+        ShowAlertDialogService().showFailureDialog(context, "Location Missing", "Please Enable Location Services to Join Our Waitlist");
       } else {
-        UserDataService().joinWaitList(widget.currentUser.uid, widget.currentUser.userLat, widget.currentUser.userLon, email, phoneNo, zipCode).then((error){
+        UserDataService().joinWaitList(widget.currentUser.uid, lat, lon, email, phoneNo, zipCode).then((error){
           Navigator.of(context).pop();
           if (error.isEmpty){
             ShowAlertDialogService().showActionSuccessDialog(
@@ -86,11 +91,16 @@ class _JoinWaitlistPageState extends State<JoinWaitlistPage> {
   @override
   void initState() {
     super.initState();
-    LocationService().getZipFromLatLon(widget.currentUser.userLat, widget.currentUser.userLon).then((result){
-      setState(() {
-        zipCode = result;
+    LocationService().getCurrentLocation(context).then((res){
+      lat = res.latitude;
+      lon = res.longitude;
+      LocationService().getZipFromLatLon(lat, lon).then((res){
+        setState(() {
+          zipCode = res;
+        });
       });
     });
+
   }
 
   @override

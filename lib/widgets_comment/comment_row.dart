@@ -103,7 +103,7 @@ class CurrentUserCommentRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
       child: GestureDetector(
         onLongPress: deleteAction,
         child: Container(
@@ -122,11 +122,11 @@ class CurrentUserCommentRow extends StatelessWidget {
                             errorWidget: (context, url, error) => Fonts().textW300('${comment.content}', 16.0, FlatColors.redOrange, TextAlign.right)
                           )
                         : Container(
-                          constraints: BoxConstraints(minWidth: 100, maxWidth: 270),
+                          constraints: BoxConstraints(maxWidth: 230),
                           padding: EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
                             color: FlatColors.webblenRed,
-                            borderRadius: BorderRadius.all(Radius.circular(14.0))
+                            borderRadius: BorderRadius.all(Radius.circular(16.0))
                           ),
                           child: Fonts().textW500('${comment.content}', 16.0, Colors.white, TextAlign.right),
                         ),

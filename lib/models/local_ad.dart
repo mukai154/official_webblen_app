@@ -8,7 +8,6 @@ class LocalAd {
   int clicks;
   int impressions;
 
-
   LocalAd({
     this.adKey,
     this.datePostedInMilliseconds,

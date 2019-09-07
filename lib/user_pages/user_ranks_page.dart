@@ -8,7 +8,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'dart:async';
 import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/widgets_data_streams/stream_user_data.dart';
@@ -43,13 +42,13 @@ class _UserRanksPageState extends State<UserRanksPage> {
   Future<Null> initialize() async {
     BaseAuth().currentUser().then((val) {
       uid = val;
-      Firestore.instance.collection("users").document(uid).get().then((userDoc){
+      Firestore.instance.collection("webblen_user").document(uid).get().then((userDoc){
         if (userDoc.exists) {
           StreamUserData.getUserStream(uid, getUser).then((StreamSubscription<DocumentSnapshot> s){
             userStream = s;
           });
         } else {
-          Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
+          Navigator.of(context).pop();
         }
       });
 
@@ -142,11 +141,6 @@ class _UserRanksPageState extends State<UserRanksPage> {
 
   @override
   Widget build(BuildContext context) {
-
-
-    Geoflutterfire geo = Geoflutterfire();
-    GeoFirePoint center = isLoading ? null : geo.point(latitude: currentLat, longitude: currentLon);
-    CollectionReference userRef = Firestore.instance.collection("users");
 
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(

@@ -38,8 +38,6 @@ class _SetupPageState extends State<SetupPage> {
         rewards: [],
         savedEvents: [],
         friends: [],
-        userLat: null,
-        userLon: null,
         lastCheckInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
         achievements: [],
         notifyFlashEvents: true,

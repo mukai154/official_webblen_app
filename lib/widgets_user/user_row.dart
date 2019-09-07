@@ -171,15 +171,6 @@ class UserRowInvite extends StatelessWidget {
                 ),
                 child: Fonts().textW700(" @" + user.username, 20.0, FlatColors.darkGray, TextAlign.left),
               ),
-              new Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  Container(width: 6.0,),
-                  StatsImpact(impactPoints: "x1.25", textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 16.0, onTap: null),
-                  Container(width: 24.0,),
-                  StatsEventHistoryCount(eventHistoryCount: user.eventHistory.length.toString(), textColor: FlatColors.darkGray, textSize: 14.0, iconSize: 16.0, onTap: null),
-                ],
-              ),
             ],
           ),
         ],

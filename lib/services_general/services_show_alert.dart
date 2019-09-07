@@ -53,6 +53,13 @@ class ShowAlertDialogService {
         builder: (BuildContext context) { return LoadingDialog(); });
   }
 
+  Future<bool> showLoadingCommunityDialog(BuildContext context, String areaName, String comName) {
+    return showDialog<bool>(
+        context: context,
+        barrierDismissible: false, //// user must tap button!
+        builder: (BuildContext context) { return LoadingCommunityDialog(areaName: areaName, comName: comName); });
+  }
+
   Future<bool> showLogoutDialog(BuildContext context) {
     return showDialog<bool>(
         context: context,

@@ -116,16 +116,18 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   @override
   void initState() {
     super.initState();
-    EventDataService().updateEventViews(widget.event.eventKey);
-    if (widget.currentUser.notifySuggestedEvents){
-      if (widget.event.startDateInMilliseconds != null){
-        CreateNotification().createTimedNotification(
-            Random().nextInt(20),
-            widget.event.startDateInMilliseconds - 1800000,
-            "Event Happening Soon!",
-            "The Event: ${widget.event.title} starts in 30 minutes! Be sure to check in to get paid!",
-            widget.event.eventKey
-        );
+    if (widget.event.endDateInMilliseconds > DateTime.now().millisecondsSinceEpoch){
+      EventDataService().updateEventViews(widget.event.eventKey);
+      if (widget.currentUser.notifySuggestedEvents){
+        if (widget.event.startDateInMilliseconds != null){
+          CreateNotification().createTimedNotification(
+              int.parse(widget.event.eventKey),
+              widget.event.startDateInMilliseconds - 1800000,
+              "Event Happening Soon!",
+              "The Event: ${widget.event.title} starts in 30 minutes! Be sure to check in to get paid!",
+              widget.event.eventKey
+          );
+        }
       }
     }
     eventLat = LocationService().getLatFromGeopoint(widget.event.location['geopoint']);

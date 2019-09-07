@@ -11,6 +11,9 @@ import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:webblen/firebase_data/news_post_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/models/community.dart';
+import 'package:webblen/firebase_data/community_data.dart';
 
 
 class NewsFeedPage extends StatefulWidget {
@@ -53,6 +56,13 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
 
   Future<void> refreshData() async{
     getUserNewsPostFeed();
+  }
+
+  void transitionToCommunityPage(CommunityNewsPost post) async {
+    ShowAlertDialogService().showLoadingCommunityDialog(context, post.areaName, post.communityName);
+    Community com = await CommunityDataService().getCommunityByName(post.areaName, post.communityName);
+    Navigator.of(context).pop();
+    PageTransitionService(context: context, currentUser: currentUser, community: com).transitionToCommunityProfilePage();
   }
 
 
@@ -167,6 +177,7 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
                       return CommunityPostRow(
                         newsPost: newsPosts[index],
                         currentUser: currentUser,
+                        transitionToComAction: () => transitionToCommunityPage(newsPosts[index]),
                         showCommunity: true,
                       );
                     },

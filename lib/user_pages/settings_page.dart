@@ -11,6 +11,7 @@ import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/widgets_icons/icon_bubble.dart';
+import 'package:webblen/firebase_data/event_data.dart';
 
 
 class SettingsPage extends StatefulWidget {
@@ -70,11 +71,13 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    UserDataService().convertData();
-    //EventDataService().convertEventData();
-    UserDataService().addUserDataField("d.apLvl", 1);
-    UserDataService().addUserDataField("d.ap", 0.20);
-    UserDataService().addUserDataField("d.eventsToLvlUp", 20);
+    //UserDataService().updateUserField();
+    //EventDataService().addEventDataField('d.eventType', 'standard');
+    //EventDataService().addEventDataField('d.privacy', 'public');
+    //EventDataService().addRecEventDataField('privacy', 'public');
+//    UserDataService().addUserDataField("d.apLvl", 1);
+//    UserDataService().addUserDataField("d.ap", 0.20);
+//    UserDataService().addUserDataField("d.eventsToLvlUp", 20);
 //    UserDataService().reinstateUserPics();
     //CommunityDataService().updateCommunityDataFields();
   }

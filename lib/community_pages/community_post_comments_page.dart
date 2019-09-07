@@ -40,6 +40,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
 
 
   void sendImage(bool getImageFromCamera) async {
+    Navigator.of(context).pop();
     setState(() {
       commentImage = null;
     });
@@ -96,6 +97,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
           AlertFlushbar(headerText: "Message Error", bodyText: "Nothing to Send").showAlertFlushbar(context);
         }
       });
+      FocusScope.of(context).unfocus();
     }
   }
 

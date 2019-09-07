@@ -6,8 +6,6 @@ class WebblenUser {
   String profile_pic;
   double eventPoints;
   double impactPoints;
-  double userLat;
-  double userLon;
   int lastCheckInTimeInMilliseconds;
   List eventHistory;
   List rewards;
@@ -49,8 +47,6 @@ class WebblenUser {
     this.profile_pic,
     this.eventPoints,
     this.impactPoints,
-    this.userLat,
-    this.userLon,
     this.lastCheckInTimeInMilliseconds,
     this.eventHistory,
     this.rewards,
@@ -94,8 +90,8 @@ class WebblenUser {
       profile_pic: data['profile_pic'],
       eventPoints: data['eventPoints'] * 1.00,
       impactPoints: data['impactPoints'] * 1.00,
-      userLat: data['userLat'],
-      userLon: data['userLon'],
+//      userLat: data['userLat'],
+//      userLon: data['userLon'],
       lastCheckInTimeInMilliseconds: data['lastCheckInTimeInMilliseconds'],
       eventHistory: data['eventHistory'],
       rewards: data['rewards'],
@@ -138,8 +134,6 @@ class WebblenUser {
     'profile_pic': this.profile_pic,
     'eventPoints': this.eventPoints,
     'impactPoints': this.impactPoints,
-    'userLat': this.userLat,
-    'userLon': this.userLon,
     'lastCheckInTimeInMilliseconds': this.lastCheckInTimeInMilliseconds,
     'eventHistory': this.eventHistory,
     'rewards': this.rewards,

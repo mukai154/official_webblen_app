@@ -3,13 +3,11 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class CreateNotification {
 
-  intializeNotificationSettings(){
+  initializeNotificationSettings(){
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     var initializationSettingsAndroid = AndroidInitializationSettings('app_icon');
     var initializationSettingsIOS = new IOSInitializationSettings();
-
     var initializationSettings = new InitializationSettings(initializationSettingsAndroid, initializationSettingsIOS);
-
     flutterLocalNotificationsPlugin.initialize(initializationSettings, onSelectNotification: onSelectNotification);
   }
 
@@ -29,7 +27,6 @@ class CreateNotification {
 
   createTimedNotification(int notifID, int triggerDateInMilliseconds, String notifTitle, String notifBody, String payload) async {
     DateTime scheduledNotificationDateTime = DateTime.fromMillisecondsSinceEpoch(triggerDateInMilliseconds);
-    print(scheduledNotificationDateTime);
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(payload, notifTitle, notifBody);
     var iOSPlatformChannelSpecifics = IOSNotificationDetails();
     NotificationDetails platformChannelSpecifics = new NotificationDetails(androidPlatformChannelSpecifics, iOSPlatformChannelSpecifics);

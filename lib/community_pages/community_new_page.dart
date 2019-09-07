@@ -67,7 +67,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
 
   Future<Null> initialize() async {
     BaseAuth().currentUser().then((uid) {
-      Firestore.instance.collection("users").document(uid).get().then((userDoc){
+      Firestore.instance.collection("webblen_user").document(uid).get().then((userDoc){
         if (userDoc.exists) {
           UserDataService().getUserByID(uid).then((result){
             currentUser = result;
@@ -294,7 +294,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                             constraints: BoxConstraints(
                               maxWidth: 260.0,
                             ),
-                            child: Fonts().textW400("This community and its activities can be found by anyone. \nNew members are added by invite only.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            child: Fonts().textW400("This community and its activities are hidden from discover pages. \nNew members are added by invite only.", 14.0, FlatColors.darkGray, TextAlign.left),
                           ),
                         ],
                       ),
@@ -327,7 +327,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                             constraints: BoxConstraints(
                               maxWidth: 260.0,
                             ),
-                            child: Fonts().textW400("This community and its activities are hidden. New members are added by invite only. \n*NOT ELIGIBLE FOR WEBBLEN PAYOUTS.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            child: Fonts().textW400("This community and its activities are COMPETELY hidden. New members are added by invite only. \n*NOT ELIGIBLE FOR WEBBLEN PAYOUTS.", 14.0, FlatColors.darkGray, TextAlign.left),
                           ),
                         ],
                       ),

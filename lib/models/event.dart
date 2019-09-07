@@ -25,6 +25,8 @@ class Event {
   bool flashEvent;
   int startDateInMilliseconds;
   int endDateInMilliseconds;
+  String eventType;
+  String privacy;
 
   Event({
     this.eventKey,
@@ -53,6 +55,8 @@ class Event {
     this.flashEvent,
     this.startDateInMilliseconds,
     this.endDateInMilliseconds,
+    this.eventType,
+    this.privacy
   });
 
   Event.fromMap(Map<String, dynamic> data)
@@ -66,7 +70,7 @@ class Event {
       recurrence: data['recurrence'],
       promoted: data['promoted'],
       location: data['location'],
-      radius: data['radius'].toDouble(),
+      radius: data['radius'] * 1.01,
       imageURL: data['imageURL'],
       tags: data['tags'],
       views: data['views'],
@@ -81,7 +85,9 @@ class Event {
       attendees: data['attendees'],
       flashEvent: data['flashEvent'],
       startDateInMilliseconds: data['startDateInMilliseconds'],
-      endDateInMilliseconds: data['endDateInMilliseconds']
+      endDateInMilliseconds: data['endDateInMilliseconds'],
+      eventType: data['eventType'],
+      privacy: data['privacy']
   );
 
   Map<String, dynamic> toMap() => {
@@ -111,7 +117,9 @@ class Event {
     'attendees': this.attendees,
     'flashEvent': this.flashEvent,
     'startDateInMilliseconds': this.startDateInMilliseconds,
-    'endDateInMilliseconds': this.endDateInMilliseconds
+    'endDateInMilliseconds': this.endDateInMilliseconds,
+    'eventType': this.eventType,
+    'privacy': this.privacy
   };
 }
 
@@ -138,6 +146,8 @@ class RecurringEvent {
   String startTime;
   String endTime;
   String timezone;
+  String eventType;
+  String privacy;
 
   RecurringEvent({
     this.eventKey,
@@ -160,7 +170,9 @@ class RecurringEvent {
     this.dayOfTheMonth,
     this.startTime,
     this.endTime,
-    this.timezone
+    this.timezone,
+    this.eventType,
+    this.privacy
   });
 
   RecurringEvent.fromMap(Map<String, dynamic> data)
@@ -184,7 +196,9 @@ class RecurringEvent {
       dayOfTheMonth: data['dayOfTheMonth'],
       startTime: data['startTime'],
       endTime: data['endTime'],
-      timezone: data['timezone']
+      timezone: data['timezone'],
+      eventType: data['eventType'],
+      privacy: data['privacy']
   );
 
   Map<String, dynamic> toMap() => {
@@ -208,6 +222,8 @@ class RecurringEvent {
     'dayOfTheMonth': this.dayOfTheMonth,
     'startTime': this.startTime,
     'endTime': this.endTime,
-    'timezone': this.timezone
+    'timezone': this.timezone,
+    'eventType': this.eventType,
+    'privacy': this.privacy
   };
 }

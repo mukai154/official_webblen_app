@@ -10,9 +10,10 @@ import 'package:webblen/firebase_data/webblen_notification_data.dart';
 class UserSearchPage extends StatefulWidget {
 
   final List userIDs;
+  final List userList;
   final WebblenUser currentUser;
   final bool viewingMembersOrAttendees;
-  UserSearchPage({this.currentUser, this.userIDs, this.viewingMembersOrAttendees});
+  UserSearchPage({this.currentUser, this.userList, this.userIDs, this.viewingMembersOrAttendees});
 
   @override
   _UserSearchPageState createState() => new _UserSearchPageState();
@@ -27,13 +28,21 @@ class _UserSearchPageState extends State<UserSearchPage> {
   @override
   void initState() {
     super.initState();
-    UserDataService().getUsersFromList(widget.userIDs).then((result){
-      users = result;
-      users.sort((userA, userB) => userA.username.compareTo(userB.username));
+    if (widget.userList == null){
+      UserDataService().getUsersFromList(widget.userIDs).then((result){
+        users = result;
+        users.sort((userA, userB) => userA.username.compareTo(userB.username));
+        searchResults = users;
+        isLoading = false;
+        setState(() {});
+      });
+    } else {
+      users = widget.userList;
       searchResults = users;
       isLoading = false;
       setState(() {});
-    });
+    }
+
   }
 
   void sendFriendRequest(WebblenUser peerUser) async {
