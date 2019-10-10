@@ -176,7 +176,17 @@ class _ShopPageState extends State<ShopPage> {
     return Scaffold(
       appBar: appBar,
       body: Container(
-        child: ListView(
+        child:
+//        Column(
+//          mainAxisAlignment: MainAxisAlignment.center,
+//          children: <Widget>[
+//            Fonts().textW700("Shop Is Currently Unavailable", 24.0, FlatColors.darkGray, TextAlign.center),
+//            Fonts().textW500("Sorry! Our Shop is Closed at the Moment.", 24.0, FlatColors.darkGray, TextAlign.center),
+//            Fonts().textW500("It'll Be Open Again Spring 2020 ☀️💐", 24.0, FlatColors.darkGray, TextAlign.center),
+//          ],
+//        ),
+
+        ListView(
           children: <Widget>[
             Padding(
               padding: EdgeInsets.only(top: 24.0),
@@ -184,14 +194,20 @@ class _ShopPageState extends State<ShopPage> {
             ),
             isLoading
                 ? CustomCircleProgress(60.0, 60.0, 30.0, 30.0, FlatColors.londonSquare)
-                : buildRewardsList(tier1Rewards),
+                : Padding(
+                    padding: EdgeInsets.only(left: 8.0),
+                    child: buildRewardsList(tier1Rewards),
+                  ),
             Padding(
               padding: EdgeInsets.only(top: 24.0),
               child: Fonts().textW700("Standard Rewards", 24.0, FlatColors.darkGray, TextAlign.center),
             ),
             isLoading
                 ? CustomCircleProgress(60.0, 60.0, 30.0, 30.0, FlatColors.londonSquare)
-                : buildRewardsList(tier2Rewards),
+                : Padding(
+                  padding: EdgeInsets.only(left: 8.0),
+                  child: buildRewardsList(tier2Rewards),
+                ),
 
           ],
         ),

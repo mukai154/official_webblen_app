@@ -74,9 +74,12 @@ class CommunityPostRow extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 8.0),
                     constraints: BoxConstraints(
-                        maxWidth: 400
+                        maxWidth: 375
                     ),
-                    child: Fonts().textW700(newsPost.title, 24.0, Colors.black, TextAlign.start),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Fonts().textW700(newsPost.title, 24.0, Colors.black, TextAlign.start),
+                    ),
                   )
                 ],
               ),

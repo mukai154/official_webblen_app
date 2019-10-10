@@ -87,7 +87,7 @@ class _AddComImageState extends State<AddComImage> {
     );
 
     return Scaffold(
-        appBar: WebblenAppBar().basicAppBar("Add Com IMage"),
+        appBar: WebblenAppBar().basicAppBar("Add Com Image", context),
         body: formView
     );
   }

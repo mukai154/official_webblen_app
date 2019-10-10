@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'stats_event_history_count.dart';
-import 'stats_impact.dart';
 import 'user_details_profile_pic.dart';
 import 'package:webblen/widgets_icons/icon_bubble.dart';
 import 'user_details_badges.dart';

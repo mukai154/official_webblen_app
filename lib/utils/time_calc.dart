@@ -77,5 +77,33 @@ class TimeCalc {
     return dateTime;
   }
 
+  String getWhenEventIsHappening(int eventStartInMilliseconds, int eventEndInMilliseconds, String eventStartTime){
+    String eventTime = '';
+    DateFormat dateFormat = DateFormat("MMM d  h:mma");
+    DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(eventStartInMilliseconds);
+    DateTime currentDateTime = DateTime.now();
+    int currentDateTimeInMilliseconds = currentDateTime.millisecondsSinceEpoch;
+
+    if (eventStartInMilliseconds - currentDateTimeInMilliseconds <= 86400000 && eventStartInMilliseconds > currentDateTimeInMilliseconds){
+      if (eventDateTime.weekday == currentDateTime.weekday){
+        if (eventStartInMilliseconds - currentDateTimeInMilliseconds <= 1800000){
+          eventTime = 'Starting Soon...';
+        } else {
+          eventTime = 'Today at $eventStartTime';
+        }
+      } else {
+        eventTime = 'Tomorrow at $eventStartTime';
+      }
+    } else if (eventDateTime.difference(currentDateTime) > Duration(days: 1) && eventDateTime.difference(currentDateTime) < Duration(days: 2) && eventDateTime.weekday == currentDateTime.weekday + 1){
+      eventTime = 'Tomorrow at $eventStartTime';
+    } else if (currentDateTimeInMilliseconds >= eventStartInMilliseconds && currentDateTimeInMilliseconds <= eventEndInMilliseconds){
+      eventTime = 'Happening Now!';
+    } else {
+      eventTime = dateFormat.format(eventDateTime);
+    }
+
+    return eventTime;
+  }
+
 
 }

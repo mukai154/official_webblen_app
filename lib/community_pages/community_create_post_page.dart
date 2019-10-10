@@ -45,19 +45,28 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
     form.save();
     if (newsPost.title.isEmpty) {
       scaffold.showSnackBar(new SnackBar(
-        content: new Text("Title Cannot be Empty"),
+        content: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: Text("Title Cannot be Empty"),
+        ),
         backgroundColor: Colors.red,
         duration: Duration(milliseconds: 800),
       ));
     } else if (newsPost.content.isEmpty){
       scaffold.showSnackBar(new SnackBar(
-        content: new Text("Post Cannot be Empty"),
+        content: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: Text("Post Cannot be Empty"),
+        ),
         backgroundColor: Colors.red,
         duration: Duration(milliseconds: 800),
       ));
     } else if (newsPost.newsURL.isNotEmpty && !OpenUrl().isValidUrl(newsPost.newsURL)){
       scaffold.showSnackBar(new SnackBar(
-        content: new Text("Url is Invalid"),
+        content: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: Text("Url is Invalid"),
+        ),
         backgroundColor: Colors.red,
         duration: Duration(milliseconds: 800),
       ));
@@ -137,19 +146,22 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
     Widget _buildNewsTitleField(){
       return new Container(
         margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: new TextFormField(
-          initialValue: "",
-          maxLength: 30,
-          maxLengthEnforced: true,
-          style: new TextStyle(color: Colors.black87, fontSize: 30.0, fontWeight: FontWeight.w700),
-          autofocus: false,
-          onSaved: (value) => newsPost.title = value,
-          decoration: InputDecoration(
-            counterText: '',
-            border: InputBorder.none,
-            hintText: "Post Title",
-            counterStyle: TextStyle(fontFamily: 'Barlow'),
-            contentPadding: EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 10.0),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            initialValue: "",
+            maxLength: 30,
+            maxLengthEnforced: true,
+            style: new TextStyle(color: Colors.black87, fontSize: 30.0, fontWeight: FontWeight.w700),
+            autofocus: false,
+            onSaved: (value) => newsPost.title = value,
+            decoration: InputDecoration(
+              counterText: '',
+              border: InputBorder.none,
+              hintText: "Post Title",
+              counterStyle: TextStyle(fontFamily: 'Barlow'),
+              contentPadding: EdgeInsets.fromLTRB(8.0, 10.0, 8.0, 10.0),
+            ),
           ),
         ),
       );
@@ -159,19 +171,22 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
       return Container(
         margin: EdgeInsets.symmetric(vertical: 2.0, horizontal: 16.0),
         height: 150.0,
-        child: new TextFormField(
-          initialValue: "",
-          maxLines: 10,
-          maxLength: 500,
-          maxLengthEnforced: true,
-          textInputAction: TextInputAction.done,
-          autofocus: false,
-          onSaved: (value) => newsPost.content = value,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "What Do You Have to Say?",
-            counterStyle: TextStyle(fontFamily: 'Barlow'),
-            contentPadding: EdgeInsets.fromLTRB(10.0, 4.0, 10.0, 10.0),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            initialValue: "",
+            maxLines: 10,
+            maxLength: 500,
+            maxLengthEnforced: true,
+            textInputAction: TextInputAction.done,
+            autofocus: false,
+            onSaved: (value) => newsPost.content = value,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: "What Do You Have to Say?",
+              counterStyle: TextStyle(fontFamily: 'Barlow'),
+              contentPadding: EdgeInsets.fromLTRB(10.0, 4.0, 10.0, 10.0),
+            ),
           ),
         ),
       );
@@ -180,16 +195,19 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
     Widget _buildNewsUrlField(){
       return Container(
         margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-        child: new TextFormField(
-          initialValue: "",
-          maxLines: 1,
-          autofocus: false,
-          onSaved: (value) => newsPost.newsURL = value,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Post Url (Optional)",
-            counterStyle: TextStyle(fontFamily: 'Barlow'),
-            contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            initialValue: "",
+            maxLines: 1,
+            autofocus: false,
+            onSaved: (value) => newsPost.newsURL = value,
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: "Post Url (Optional)",
+              counterStyle: TextStyle(fontFamily: 'Barlow'),
+              contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+            ),
           ),
         ),
       );
@@ -197,7 +215,7 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
 
     return Scaffold(
       key: homeScaffoldKey,
-      appBar: WebblenAppBar().basicAppBar('Create News Post'),
+      appBar: WebblenAppBar().basicAppBar('Create News Post', context),
       body: Container(
         child: GestureDetector(
           onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),

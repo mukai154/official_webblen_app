@@ -206,7 +206,6 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
-    print('logging in with fb...');
     ScaffoldState scaffold = loginScaffoldKey.currentState;
     final FacebookLoginResult result = await facebookSignIn.logInWithReadPermissions(['email']);
     switch (result.status) {
@@ -235,7 +234,10 @@ class _LoginPageState extends State<LoginPage> {
         break;
       case FacebookLoginStatus.error:
         scaffold.showSnackBar(new SnackBar(
-          content: new Text("There was an Issue Logging Into Facebook"),
+          content: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("There was an Issue Logging Into Facebook"),
+          ),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
         ));
@@ -260,46 +262,54 @@ class _LoginPageState extends State<LoginPage> {
 
     // **EMAIL FIELD
     final emailField = Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: TextFormField(
-        style: TextStyle(color: Colors.black),
-        keyboardType: TextInputType.emailAddress,
-        autofocus: false,
-        validator: (value) => value.isEmpty ? 'Email Cannot be Empty' : null,
-        onSaved: (value) => _email = value,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          icon: Icon(Icons.email, color: Colors.black38,),
-          hintText: "Email",
-          hintStyle: TextStyle(color: Colors.black38),
-          errorStyle: TextStyle(color: Colors.redAccent),
-          contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: TextFormField(
+          style: TextStyle(color: Colors.black),
+          keyboardType: TextInputType.emailAddress,
+          autofocus: false,
+          validator: (value) => value.isEmpty ? 'Email Cannot be Empty' : null,
+          onSaved: (value) => _email = value,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            icon: Icon(Icons.email, color: Colors.black38,),
+            hintText: "Email",
+            hintStyle: TextStyle(color: Colors.black38),
+            errorStyle: TextStyle(color: Colors.redAccent),
+            contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          ),
         ),
       ),
     );
 
     // **PHONE FIELD
     final phoneField = Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
-      child: new TextFormField(
-        controller: phoneMaskController,
-        style: TextStyle(color: Colors.black),
-        keyboardType: TextInputType.number,
-        autofocus: false,
-        validator: (value) => value.isEmpty ? 'Phone Cannot be Empty' : null,
-        onSaved: (value) => phoneNo = value,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          icon: Icon(Icons.phone, color: Colors.black38,),
-          hintText: "Phone Number",
-          hintStyle: TextStyle(color: Colors.black38),
-          errorStyle: TextStyle(color: Colors.redAccent),
-          contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: TextFormField(
+          controller: phoneMaskController,
+          style: TextStyle(color: Colors.black),
+          keyboardType: TextInputType.number,
+          autofocus: false,
+          validator: (value) => value.isEmpty ? 'Phone Cannot be Empty' : null,
+          onSaved: (value) => phoneNo = value,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            icon: Icon(Icons.phone, color: Colors.black38,),
+            hintText: "Phone Number",
+            hintStyle: TextStyle(color: Colors.black38),
+            errorStyle: TextStyle(color: Colors.redAccent),
+            contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          ),
         ),
       ),
     );
 
     // **PASSWORD FIELD
     final passwordField = Padding(padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
-      child: new TextFormField(
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: TextFormField(
         style: TextStyle(color: Colors.black),
         keyboardType: TextInputType.text,
         obscureText: true,
@@ -314,6 +324,7 @@ class _LoginPageState extends State<LoginPage> {
           errorStyle: TextStyle(color: Colors.redAccent),
           contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
         ),
+       ),
       ),
     );
 
@@ -358,7 +369,10 @@ class _LoginPageState extends State<LoginPage> {
 
     final orTextLabel = Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: Fonts().textW400('or', 12.0, Colors.black, TextAlign.center)
+      child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: Fonts().textW400('or', 12.0, Colors.black, TextAlign.center)
+      ),
     );
 
     final authForm = Form(

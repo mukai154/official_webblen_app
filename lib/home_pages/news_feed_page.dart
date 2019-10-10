@@ -41,7 +41,9 @@ class _NewsFeedPageState extends State<NewsFeedPage> {
       NewsPostDataService().getUserNewsPostFeed(currentUser.followingCommunities).then((result){
         if (result.isEmpty){
           isLoading = false;
-          setState(() {});
+          if (this.mounted){
+            setState(() {});
+          }
         } else {
           newsPosts = result;
           newsPosts.sort((postA, postB) => postB.datePostedInMilliseconds.compareTo(postA.datePostedInMilliseconds));

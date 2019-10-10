@@ -18,7 +18,7 @@ class RewardCard extends StatelessWidget {
     return InkResponse(
       onTap: onClickAction,//() => rewardClicked(index),
       child: new Container(
-        margin: EdgeInsets.all(8.0),
+        margin: EdgeInsets.only(right: 8.0, bottom: 8.0),
         decoration: new BoxDecoration(
           image: DecorationImage(image: CachedNetworkImageProvider(reward.rewardImagePath), fit: BoxFit.cover),
           color: Colors.white,
@@ -51,7 +51,7 @@ class RewardCard extends StatelessWidget {
                       children: <Widget>[
                         Image.asset('assets/images/webblen_logo_small.png', height: 20.0, width: 20.0, fit: BoxFit.contain),
                         SizedBox(width: 4.0),
-                        Fonts().textW400(reward.rewardCost.toStringAsFixed(2), 12.0, FlatColors.iosOffWhite, TextAlign.left),
+                        Fonts().textW500(reward.rewardCost.toStringAsFixed(2), 12.0, FlatColors.iosOffWhite, TextAlign.left),
                       ],
                     ),
                   ),
@@ -70,7 +70,7 @@ class RewardCard extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Fonts().textW300(reward.rewardProviderName, 10.0, FlatColors.iosOffWhite, TextAlign.left),
+                    Fonts().textW400(reward.rewardProviderName, 12.0, FlatColors.iosOffWhite, TextAlign.left),
                   ],
                 ),
               ),

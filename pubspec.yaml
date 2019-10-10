@@ -27,9 +27,10 @@ dependencies:
 
   #Location Dependencies
   location: ^2.3.5
+  location_permissions: ^2.0.0
   geoflutterfire: ^2.0.3+5
   geocoder: ^0.2.1
-#  flutter_background_geolocation: '^0.3.4'
+  flutter_background_geolocation: '^0.3.4'
   flutter_google_places:
       git: https://github.com/mukai154/flutter_google_places.git
   google_maps_webservice: ^0.0.14
@@ -74,7 +75,6 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-
   fonts:
       - family: Helvetica Neue
         fonts:

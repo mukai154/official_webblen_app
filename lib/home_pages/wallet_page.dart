@@ -207,15 +207,32 @@ class _WalletPageState extends State<WalletPage> {
               children: <Widget>[
                 Container(
                   height: 70,
-                  margin: EdgeInsets.only(left: 16, top: 30, right: 8),
+                  margin: EdgeInsets.only(left: 16, top: 30, right: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Fonts().textW700('Wallet', 40, Colors.black, TextAlign.left),
-//                      IconButton(
-//                        onPressed: () => ShowAlertDialogService().showInfoDialog(context, "Webblen is Currently Unavailable for Purchase", "Someday... But That Day is Not Today"),
-//                        icon: Icon(FontAwesomeIcons.plus, size: 18.0, color: Colors.black),
-//                      )
+                    GestureDetector(
+                        onTap: () => PageTransitionService(context: context, currentUser: currentUser).transitionToShopPage(),
+                        child:  Padding(
+                          padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
+                          child: Material(
+                            borderRadius: BorderRadius.circular(24.0),
+                            color: FlatColors.darkMountainGreen,
+                            child: Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: <Widget>[
+                                    Icon(FontAwesomeIcons.shoppingCart, color: Colors.white, size: 14.0),
+                                    SizedBox(width: 8.0),
+                                    Fonts().textW600('Shop', 14.0, Colors.white, TextAlign.center),
+                                  ],
+                                )
+                            ),
+                          ),
+                        )
+                    ),
                     ],
                   ),
                 ),
@@ -230,38 +247,38 @@ class _WalletPageState extends State<WalletPage> {
                           Colors.black,
                           TextAlign.left
                       ),
-                      Fonts().textW500(
+                      Fonts().textW600(
                           'Webblen Balance',
-                          16,
-                          FlatColors.webblenRed,
+                          18,
+                          Colors.black,
                           TextAlign.left
                       ),
                       SizedBox(height: 4.0),
                       Fonts().textW400(
                           "Webblen are tokens that can be transferred or traded at anytime.  You need Webblen in order to create new events and communities.",
                           14,
-                          Colors.black,
+                          Colors.black87,
                           TextAlign.left
                       ),
                       SizedBox(height: 24.0),
                       AttendancePowerBar(currentAP: ap, apLvl: apLvl),
                       SizedBox(height: 2.0),
-                      Fonts().textW500(
+                      Fonts().textW600(
                           "Attendance Power",
-                          16,
-                          FlatColors.webblenRed,
+                          18,
+                          Colors.black87,
                           TextAlign.left
                       ),
                       SizedBox(height: 4.0),
                       Fonts().textW400(
                           "A multiplier that increases the value of the events you attend. The higher your AP, the more your attendance is worth. Increase your AP by attending events regularly.",
                           14,
-                          Colors.black,
+                          Colors.black87,
                           TextAlign.left
                       ),
                       SizedBox(height: 16.0),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
                           Fonts().textW700(
                               'Rewards',
@@ -269,16 +286,15 @@ class _WalletPageState extends State<WalletPage> {
                               Colors.black,
                               TextAlign.center
                           ),
-                          IconButton(
-                            onPressed:  () => PageTransitionService(context: context, currentUser: currentUser).transitionToShopPage(),
-                            icon: Icon(FontAwesomeIcons.plusCircle, size: 18.0, color: FlatColors.darkMountainGreen),
-                          ),
                           isLoadingRewards
                               ? Container()
-                                : IconButton(
-                                onPressed:  () => loadRewards(),
-                                icon: Icon(FontAwesomeIcons.syncAlt, size: 18.0, color: Colors.black45),
-                              )
+                                : Padding(
+                                  padding: EdgeInsets.only(top: 4.0),
+                                  child: IconButton(
+                                    onPressed:  () => loadRewards(),
+                                    icon: Icon(FontAwesomeIcons.syncAlt, size: 16.0, color: Colors.black45),
+                                  ),
+                                ),
                         ],
                       ),
                       //SizedBox(height: 8.0),

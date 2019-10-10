@@ -33,7 +33,10 @@ class CustomColorButton extends StatelessWidget {
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(4.0),
-                  child: Fonts().textW600(text, 16.0, textColor, TextAlign.center),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW600(text, 16.0, textColor, TextAlign.center),
+                  ),
                 )
               ],
             ),
@@ -77,7 +80,10 @@ class CustomColorIconButton extends StatelessWidget {
                 text != null
                     ? Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Fonts().textW500(text, 16.0, textColor, TextAlign.center),
+                        child: MediaQuery(
+                          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                          child: Fonts().textW500(text, 16.0, textColor, TextAlign.center),
+                        ),
                       )
                     : Container()
               ],
@@ -113,7 +119,10 @@ class NewEventFormButton extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(label, style: TextStyle(color: labelColor)),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(label, style: TextStyle(color: labelColor)),
+                ),
               ],
             ),
           ),
@@ -140,7 +149,10 @@ class FlatBackButton extends StatelessWidget {
       child: FlatButton(
         onPressed: (){ onTap(); },
         color: Colors.transparent,
-        child: Text(label, style: TextStyle(color: labelColor, fontWeight: FontWeight.w400)),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: Text(label, style: TextStyle(color: labelColor, fontWeight: FontWeight.w400)),
+        ),
       ),
     );
   }

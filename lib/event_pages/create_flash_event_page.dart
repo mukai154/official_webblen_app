@@ -70,6 +70,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
       EventDataService().uploadEvent(eventImage, newEvent, currentLat, currentLon).then((error){
         if (error.isEmpty){
           Navigator.of(context).pop();
+          HapticFeedback.mediumImpact();
           ShowAlertDialogService().showActionSuccessDialog(context, 'Flash Event Created!', 'Check In. Get Paid. You Know the Rest...', (){
             Navigator.of(context).pop();
             Navigator.of(context).pop();
@@ -198,7 +199,10 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Icon(Icons.camera_alt, size: 40.0, color: FlatColors.londonSquare),
-                    Fonts().textW500('1:1', 16.0, FlatColors.londonSquare, TextAlign.center)
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW500('1:1', 16.0, FlatColors.londonSquare, TextAlign.center)
+                    ),
                   ],
                 )
               : Image.file(eventImage, fit: BoxFit.cover),
@@ -214,26 +218,29 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
           color: FlatColors.textFieldGray,
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        child: TextFormField(
-          decoration: InputDecoration(
-            hintText: "Event Title",
-            contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
-            border: InputBorder.none,
-          ),
-          onSaved: (value) => newEvent.title = value,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 22,
-            fontFamily: "Helvetica Neue",
-            fontWeight: FontWeight.w700,
-          ),
-          maxLines: 1,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(30),
-            BlacklistingTextInputFormatter(RegExp("[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
-          ],
-          textInputAction: TextInputAction.done,
-          autocorrect: false,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+              decoration: InputDecoration(
+                hintText: "Event Title",
+                contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
+                border: InputBorder.none,
+              ),
+              onSaved: (value) => newEvent.title = value,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 22,
+                fontFamily: "Helvetica Neue",
+                fontWeight: FontWeight.w700,
+              ),
+              maxLines: 1,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(30),
+                BlacklistingTextInputFormatter(RegExp("[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
+              ],
+              textInputAction: TextInputAction.done,
+              autocorrect: false,
+            ),
         ),
       );
     }
@@ -249,22 +256,25 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
           color: FlatColors.textFieldGray,
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        child: TextFormField(
-          decoration: InputDecoration(
-            hintText: "Event Description",
-            contentPadding: EdgeInsets.all(8),
-            border: InputBorder.none,
-          ),
-          onSaved: (val) => newEvent.description = val,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-            fontFamily: "Helvetica Neue",
-          ),
-          textInputAction: TextInputAction.done,
-          keyboardType: TextInputType.multiline,
-          maxLines: null,
-          autocorrect: false,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+              decoration: InputDecoration(
+                hintText: "Event Description",
+                contentPadding: EdgeInsets.all(8),
+                border: InputBorder.none,
+              ),
+              onSaved: (val) => newEvent.description = val,
+              style: TextStyle(
+                color: Colors.black,
+                fontSize: 14,
+                fontFamily: "Helvetica Neue",
+              ),
+              textInputAction: TextInputAction.done,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              autocorrect: false,
+            ),
         ),
       );
     }
@@ -287,7 +297,10 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                 _buildEventDescriptionField(),
                 Padding(
                   padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
-                  child: Fonts().textW700("Event Type", 18.0, FlatColors.darkGray, TextAlign.left),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700("Event Type", 18.0, FlatColors.darkGray, TextAlign.left),
+                  ),
                 ),
                 _buildRadioButtons(),
                 CustomColorButton(
@@ -307,7 +320,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
     );
 
     return Scaffold(
-      appBar: WebblenAppBar().basicAppBar("New Flash Event"),
+      appBar: WebblenAppBar().basicAppBar("New Flash Event", context),
       body: formView
     );
   }

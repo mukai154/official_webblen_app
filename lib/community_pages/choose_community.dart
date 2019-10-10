@@ -27,7 +27,7 @@ class _ChooseCommunityPageState extends State<ChooseCommunityPage> {
 
   StreamSubscription userStream;
   WebblenUser currentUser;
-  bool isLoadingMemberData = true;
+  bool isLoading = true;
   List<Community> userComs = [];
 
   @override
@@ -49,32 +49,14 @@ class _ChooseCommunityPageState extends State<ChooseCommunityPage> {
     }
   }
 
-  Future<Null> getUserCommunities() async {
-    if (currentUser.communities.isNotEmpty){
-      currentUser.communities.forEach((key, val) async {
-        String areaName = key;
-        List communities = val;
-        communities.forEach((com) async {
-          await CommunityDataService().searchForCommunityByName(com, areaName).then((result){
-            if (!userComs.contains(result)){
-              userComs.addAll(result);
-            }
-            if (currentUser.communities.keys.last == key && communities.last == com && isLoadingMemberData){
-              setState(() {
-                userComs.toSet().toList();
-                userComs.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
-                isLoadingMemberData = false;
-              });
-            }
-          });
-        });
-      });
-    } else {
-      setState(() {
-        userComs.toSet().toList();
-        isLoadingMemberData = false;
-      });
-    }
+  Future<void> getUserCommunities() async {
+    userComs = [];
+    await CommunityDataService().getUserCommunities(widget.uid).then((result){
+      userComs = result.where((com) => com.status == 'active').toList();
+      userComs.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
+      isLoading = false;
+      setState(() {});
+    });
   }
 
 
@@ -85,14 +67,18 @@ class _ChooseCommunityPageState extends State<ChooseCommunityPage> {
         appBar: WebblenAppBar().basicAppBar(
             widget.newEventOrPost == 'event'
                 ? 'Create New Event For...'
-                : 'Create New Post For...'
+                : 'Create New Post For...',
+          context
         ),
-        body: isLoadingMemberData
+        body: isLoading
             ? LoadingScreen(context: context, loadingDescription: 'Loading Your Communities...')
             : userComs.isEmpty
             ? Padding(
           padding: EdgeInsets.only(top: 64.0, left: 8.0, right: 8.0),
-          child: Fonts().textW300('You are not a member of any communities', 18.0, FlatColors.lightAmericanGray, TextAlign.center),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Fonts().textW300('You are not a member of any communities', 18.0, FlatColors.lightAmericanGray, TextAlign.center),
+          ),
         )
             : ListView.builder(
           shrinkWrap: true,

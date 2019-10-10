@@ -27,7 +27,7 @@ class WebblenImagePicker {
       if (croppedImageFile != null){
         croppedImageFile = await FlutterImageCompress.compressAndGetFile(
           croppedImageFile.absolute.path, targetPath,
-          quality: 25,
+          quality: 45,
         );
       }
     }

@@ -12,6 +12,7 @@ import 'package:webblen/models/event.dart';
 import 'package:webblen/widgets_event/event_check_in_row.dart';
 import 'package:webblen/widgets_event/event_no_check_in_found.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:flutter/services.dart';
 
 
 class EventCheckInPage extends StatefulWidget {
@@ -56,6 +57,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
       events[eventIndex] = result;
       Navigator.of(context).pop();
       setState(() {});
+      HapticFeedback.mediumImpact();
     });
   }
 
@@ -66,6 +68,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
       events[eventIndex] = result;
       Navigator.of(context).pop();
       setState(() {});
+      HapticFeedback.mediumImpact();
     });
   }
 

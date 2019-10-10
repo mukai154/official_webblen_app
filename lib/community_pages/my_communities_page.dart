@@ -63,7 +63,10 @@ class _MyCommunitiesPageState extends State<MyCommunitiesPage> {
       elevation: 0.0,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
-      title: Fonts().textW700('My Communities', 20.0, Colors.black, TextAlign.center),
+      title: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: Fonts().textW700('My Communities', 20.0, Colors.black, TextAlign.center),
+      ),
       leading: BackButton(color: FlatColors.darkGray),
       bottom: TabBar(
         indicatorColor: FlatColors.webblenRed,
@@ -100,9 +103,15 @@ class _MyCommunitiesPageState extends State<MyCommunitiesPage> {
                           ? ListView(
                               children: <Widget>[
                                 SizedBox(height: 64.0),
-                                Fonts().textW500('You Are Not a Member of Any Active Communities', 14.0, Colors.black45, TextAlign.center),
+                                MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                  child: Fonts().textW500('You Are Not a Member of Any Active Communities', 14.0, Colors.black45, TextAlign.center),
+                                ),
+                                MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                  child: Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                                ),
                                 SizedBox(height: 8.0),
-                                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
                               ],
                             )
                           : ListView.builder(
@@ -130,9 +139,15 @@ class _MyCommunitiesPageState extends State<MyCommunitiesPage> {
                           ? ListView(
                               children: <Widget>[
                                 SizedBox(height: 64.0),
-                                Fonts().textW500('You Currently Have No Communities Pending', 14.0, Colors.black45, TextAlign.center),
+                                MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                  child: Fonts().textW500('You Currently Have No Communities Pending', 14.0, Colors.black45, TextAlign.center),
+                                ),
                                 SizedBox(height: 8.0),
-                                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                                MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                  child: Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                                ),
                               ],
                             )
                           : ListView.builder(

@@ -8,7 +8,7 @@ class SearchTile extends StatelessWidget {
 
     return Container(
       height: 35,
-      margin: EdgeInsets.only(left: 16, top: 4, right: 16),
+      margin: EdgeInsets.only(left: 16, right: 16, bottom: 4.0),
       decoration: BoxDecoration(
         color: Color.fromARGB(255, 246, 245, 245),
         borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -21,22 +21,26 @@ class SearchTile extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(left: 9),
-            child: TypewriterAnimatedTextKit(
-                duration: Duration(seconds: 20),
-                text: [
-                  "Find Communities",
-                  "Find Events",
-                  "Find Things to Do",
-                  "Find Friends",
-                ],
-                textStyle: TextStyle(
-                  fontFamily: 'Helvetica Neue',
-                  fontSize: 14.0,
-                  color: Colors.black26,
-                ),
-                textAlign: TextAlign.start,
-                alignment: AlignmentDirectional.topStart // or Alignment.topLeft
+            child: MediaQuery(
+              child: TypewriterAnimatedTextKit(
+                  duration: Duration(seconds: 20),
+                  text: [
+                    "Find Communities",
+                    "Find Events",
+                    "Find Things to Do",
+                    "Find Friends",
+                  ],
+                  textStyle: TextStyle(
+                    fontFamily: 'Helvetica Neue',
+                    fontSize: 14.0,
+                    color: Colors.black26,
+                  ),
+                  textAlign: TextAlign.start,
+                  alignment: AlignmentDirectional.topStart // or Alignment.topLeft
+              ),
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
             ),
+
           ),
         ],
       ),

@@ -216,7 +216,7 @@ class _JoinWaitlistPageState extends State<JoinWaitlistPage> {
 
     return Scaffold(
       key: scaffoldKey,
-      appBar: WebblenAppBar().basicAppBar("Join Waitlist"),
+      appBar: WebblenAppBar().basicAppBar("Join Waitlist", context),
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,

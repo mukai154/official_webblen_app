@@ -22,6 +22,7 @@ import 'package:webblen/firebase_data/event_data.dart';
 import 'package:flutter/services.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:flutter_picker/flutter_picker.dart';
+import 'package:flutter/services.dart';
 
 
 class CreateEventPage extends StatefulWidget {
@@ -200,8 +201,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
       EventDataService().uploadEvent(eventImage, newEvent, lat, lon).then((error){
         if (error.isEmpty){
           Navigator.of(context).pop();
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
+          HapticFeedback.mediumImpact();
+          ShowAlertDialogService().showActionSuccessDialog(context, 'Event Created!', "We'll recommend this event to members of the community", (){
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          });
         } else {
           Navigator.of(context).pop();
           ShowAlertDialogService().showFailureDialog(context, 'Uh Oh', 'There was an issue uploading your event. Please try again.');
@@ -295,36 +300,39 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
   Widget _buildTagsField(){
-    return Tags(
-      textField: TagsTextFiled(
-        textStyle: TextStyle(fontSize: 14.0),
-        onSubmitted: (String str) {
-          if (_inputTags.length == 7){
-            AlertFlushbar(headerText: "Event Tag Error", bodyText: "Events Can Only Have Up to 7 Tags").showAlertFlushbar(context);
-          } else {
-            setState(() {
-              if (!_inputTags.contains(str)){
-                _inputTags.add(str);
-              }
-            });
-          }
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+      child: Tags(
+        textField: TagsTextFiled(
+          textStyle: TextStyle(fontSize: 14.0),
+          onSubmitted: (String str) {
+            if (_inputTags.length == 7){
+              AlertFlushbar(headerText: "Event Tag Error", bodyText: "Events Can Only Have Up to 7 Tags").showAlertFlushbar(context);
+            } else {
+              setState(() {
+                if (!_inputTags.contains(str)){
+                  _inputTags.add(str);
+                }
+              });
+            }
+          },
+        ),
+        itemCount: _inputTags.length, // required
+        itemBuilder: (int index){
+          final tag = _inputTags[index];
+          return ItemTags(
+            key: Key(_inputTags[index]),
+            index: index,
+            title: tag,
+            removeButton: ItemTagsRemoveButton(),
+            onRemoved: (){
+              setState(() {
+                _inputTags.removeAt(index);
+              });
+            },
+          );
         },
       ),
-      itemCount: _inputTags.length, // required
-      itemBuilder: (int index){
-        final tag = _inputTags[index];
-        return ItemTags(
-          key: Key(_inputTags[index]),
-          index: index,
-          title: tag,
-          removeButton: ItemTagsRemoveButton(),
-          onRemoved: (){
-            setState(() {
-              _inputTags.removeAt(index);
-            });
-          },
-        );
-      },
     );
   }
 
@@ -377,27 +385,30 @@ class _CreateEventPageState extends State<CreateEventPage> {
           color: FlatColors.textFieldGray,
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        child: TextFormField(
-          decoration: InputDecoration(
-            hintText: "Event Title",
-            contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
-            border: InputBorder.none,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Event Title",
+              contentPadding: EdgeInsets.only(left: 8, top: 8, bottom: 8),
+              border: InputBorder.none,
+            ),
+            onSaved: (value) => newEvent.title = value,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 22,
+              fontFamily: "Helvetica Neue",
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 1,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(30),
+              BlacklistingTextInputFormatter(RegExp("[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
+            ],
+            textInputAction: TextInputAction.done,
+            autocorrect: false,
           ),
-          onSaved: (value) => newEvent.title = value,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 22,
-            fontFamily: "Helvetica Neue",
-            fontWeight: FontWeight.w700,
-          ),
-          maxLines: 1,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(30),
-            BlacklistingTextInputFormatter(RegExp("[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
-          ],
-          textInputAction: TextInputAction.done,
-          autocorrect: false,
-        ),
+        )
       );
     }
 
@@ -412,22 +423,25 @@ class _CreateEventPageState extends State<CreateEventPage> {
           color: FlatColors.textFieldGray,
           borderRadius: BorderRadius.all(Radius.circular(8)),
         ),
-        child: TextFormField(
-          decoration: InputDecoration(
-            hintText: "Event Description",
-            contentPadding: EdgeInsets.all(8),
-            border: InputBorder.none,
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            decoration: InputDecoration(
+              hintText: "Event Description",
+              contentPadding: EdgeInsets.all(8),
+              border: InputBorder.none,
+            ),
+            onSaved: (val) => newEvent.description = val,
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 14,
+              fontFamily: "Helvetica Neue",
+            ),
+            textInputAction: TextInputAction.done,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            autocorrect: false,
           ),
-          onSaved: (val) => newEvent.description = val,
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 14,
-            fontFamily: "Helvetica Neue",
-          ),
-          textInputAction: TextInputAction.done,
-          keyboardType: TextInputType.multiline,
-          maxLines: null,
-          autocorrect: false,
         ),
       );
     }
@@ -436,9 +450,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
       return Container(
           margin: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
           child: GestureDetector(
-            child: newEvent.startDateInMilliseconds == null
-                ? Fonts().textW500("Start Date & Time", 18.0, FlatColors.londonSquare, TextAlign.left)
-                : Fonts().textW500("${formatter.format(DateTime.fromMillisecondsSinceEpoch(newEvent.startDateInMilliseconds))}", 18.0, FlatColors.electronBlue, TextAlign.left),
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              child: newEvent.startDateInMilliseconds == null
+                  ? Fonts().textW500("Start Date & Time", 18.0, FlatColors.londonSquare, TextAlign.left)
+                  : Fonts().textW500("${formatter.format(DateTime.fromMillisecondsSinceEpoch(newEvent.startDateInMilliseconds))}", 18.0, FlatColors.electronBlue, TextAlign.left),
+            ),
             onTap: () => showPickerDateTime(context, 'start'),
           )
       );
@@ -453,9 +470,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   GestureDetector(
-                    child: newEvent.endDateInMilliseconds == null
-                      ? Fonts().textW500("End Date & Time", 18.0, FlatColors.londonSquare, TextAlign.left)
-                      : Fonts().textW500("${formatter.format(DateTime.fromMillisecondsSinceEpoch(newEvent.endDateInMilliseconds))}", 18.0, FlatColors.electronBlue, TextAlign.left),
+                    child:  MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: newEvent.endDateInMilliseconds == null
+                          ? Fonts().textW500("End Date & Time", 18.0, FlatColors.londonSquare, TextAlign.left)
+                          : Fonts().textW500("${formatter.format(DateTime.fromMillisecondsSinceEpoch(newEvent.endDateInMilliseconds))}", 18.0, FlatColors.electronBlue, TextAlign.left),
+                    ),
                     onTap: () => showPickerDateTime(context, 'end')
                   ),
                   newEvent.endDateInMilliseconds == null
@@ -527,33 +547,36 @@ class _CreateEventPageState extends State<CreateEventPage> {
     Widget _buildFBUrlField(){
       return Container(
         margin: EdgeInsets.only(left: 16.0, top: 4.0, right: 8.0),
-        child: new TextFormField(
-          initialValue: "",
-          maxLines: 1,
-          style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
-          autofocus: false,
-          onSaved: (url) {
-            if (url.isNotEmpty){
-              if (!url.contains('http://') || !url.contains('https://')) {
-                if (!url.contains('www.')){
-                  url = 'http://www.' + url;
-                } else {
-                  url = 'http://' + url;
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            initialValue: "",
+            maxLines: 1,
+            style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
+            autofocus: false,
+            onSaved: (url) {
+              if (url.isNotEmpty){
+                if (!url.contains('http://') || !url.contains('https://')) {
+                  if (!url.contains('www.')){
+                    url = 'http://www.' + url;
+                  } else {
+                    url = 'http://' + url;
+                  }
                 }
               }
-            }
-            newEvent.fbSite = url;
-          },
-          inputFormatters: [
-            BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
-          ],
-          keyboardType: TextInputType.url,
-          decoration: InputDecoration(
-            icon: Icon(FontAwesomeIcons.facebook, color: FlatColors.darkGray, size: 18),
-            border: InputBorder.none,
-            hintText: "Facebook Page URL",
-            counterStyle: TextStyle(fontFamily: 'Helvetica Neue'),
-            contentPadding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+              newEvent.fbSite = url;
+            },
+            inputFormatters: [
+              BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
+            ],
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              icon: Icon(FontAwesomeIcons.facebook, color: FlatColors.darkGray, size: 18),
+              border: InputBorder.none,
+              hintText: "Facebook Page URL",
+              counterStyle: TextStyle(fontFamily: 'Helvetica Neue'),
+              contentPadding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+            ),
           ),
         ),
       );
@@ -562,26 +585,29 @@ class _CreateEventPageState extends State<CreateEventPage> {
     Widget _buildTwitterUrlField(){
       return Container(
         margin: EdgeInsets.only(left: 16.0, top: 4.0, right: 8.0),
-        child: new TextFormField(
-          initialValue: "",
-          maxLines: 1,
-          style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
-          autofocus: false,
-          inputFormatters: [
-            BlacklistingTextInputFormatter(RegExp("[\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\(|\\)|\\'|\\{|\\}]"))
-          ],
-          onSaved: (value) {
-            if (value != null && value.isNotEmpty){
-              newEvent.twitterSite = 'https://www.twitter.com/' + value;
-              setState(() {});
-            }
-          },
-          decoration: InputDecoration(
-            icon: Icon(FontAwesomeIcons.twitter, color: FlatColors.darkGray, size: 18),
-            border: InputBorder.none,
-            hintText: "@twitter_handle",
-            counterStyle: TextStyle(fontFamily: 'Helvetica Neue'),
-            contentPadding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+        child: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            initialValue: "",
+            maxLines: 1,
+            style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
+            autofocus: false,
+            inputFormatters: [
+              BlacklistingTextInputFormatter(RegExp("[\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\(|\\)|\\'|\\{|\\}]"))
+            ],
+            onSaved: (value) {
+              if (value != null && value.isNotEmpty){
+                newEvent.twitterSite = 'https://www.twitter.com/' + value;
+                setState(() {});
+              }
+            },
+            decoration: InputDecoration(
+              icon: Icon(FontAwesomeIcons.twitter, color: FlatColors.darkGray, size: 18),
+              border: InputBorder.none,
+              hintText: "@twitter_handle",
+              counterStyle: TextStyle(fontFamily: 'Helvetica Neue'),
+              contentPadding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+            ),
           ),
         ),
       );
@@ -590,33 +616,36 @@ class _CreateEventPageState extends State<CreateEventPage> {
     Widget _buildWebsiteUrlField(){
       return Container(
         margin: EdgeInsets.only(left: 16.0, top: 4.0, right: 8.0),
-        child: new TextFormField(
-          initialValue: "",
-          maxLines: 1,
-          style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
-          autofocus: false,
-          inputFormatters: [
-            BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
-          ],
-          onSaved: (url) {
-            if (url.isNotEmpty){
-              if (!url.contains('http://') || !url.contains('https://')) {
-                if (!url.contains('www.')){
-                  url = 'http://www.' + url;
-                } else {
-                  url = 'http://' + url;
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            initialValue: "",
+            maxLines: 1,
+            style: TextStyle(color: Colors.black, fontSize: 16.0, fontFamily: 'Barlow', fontWeight: FontWeight.w500),
+            autofocus: false,
+            inputFormatters: [
+              BlacklistingTextInputFormatter(RegExp("[\\ |\\,]"))
+            ],
+            onSaved: (url) {
+              if (url.isNotEmpty){
+                if (!url.contains('http://') || !url.contains('https://')) {
+                  if (!url.contains('www.')){
+                    url = 'http://www.' + url;
+                  } else {
+                    url = 'http://' + url;
+                  }
                 }
               }
-            }
-            newEvent.website = url;
-          },
-          keyboardType: TextInputType.url,
-          decoration: InputDecoration(
-            icon: Icon(FontAwesomeIcons.globe, color: FlatColors.darkGray, size: 18),
-            border: InputBorder.none,
-            hintText: "Website URL",
-            counterStyle: TextStyle(fontFamily: 'Helvetica Neue'),
-            contentPadding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+              newEvent.website = url;
+            },
+            keyboardType: TextInputType.url,
+            decoration: InputDecoration(
+              icon: Icon(FontAwesomeIcons.globe, color: FlatColors.darkGray, size: 18),
+              border: InputBorder.none,
+              hintText: "Website URL",
+              counterStyle: TextStyle(fontFamily: 'Helvetica Neue'),
+              contentPadding: EdgeInsets.fromLTRB(0.0, 10.0, 10.0, 10.0),
+            ),
           ),
         ),
       );
@@ -626,13 +655,16 @@ class _CreateEventPageState extends State<CreateEventPage> {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Fonts().textW500(
-              newEvent.address == null || newEvent.address.isEmpty
-                  ? "Set Address"
-                  : "${newEvent.address}",
-              16.0,
-              FlatColors.darkGray,
-              TextAlign.center),
+          MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: Fonts().textW500(
+                  newEvent.address == null || newEvent.address.isEmpty
+                      ? "Set Address"
+                      : "${newEvent.address}",
+                  16.0,
+                  FlatColors.darkGray,
+                  TextAlign.center),
+          ),
           SizedBox(height: 16.0),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -658,7 +690,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     });
 //              displayPrediction(p, homeScaffoldKey.currentState);
                   },
-                  child: Text("Search Address")
+                  child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text("Search Address")
+                  ),
               ),
               RaisedButton(
                   color: Colors.white70,
@@ -679,7 +714,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
                       }
                     });
                   },
-                  child: Text("Current Location")
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("Current Location")
+                  ),
               ),
             ],
           ),
@@ -729,18 +767,27 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 _buildEventDescriptionField(),
                 Padding(
                   padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
-                  child: Fonts().textW700("Event Type", 18.0, FlatColors.darkGray, TextAlign.left),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700("Event Type", 18.0, FlatColors.darkGray, TextAlign.left),
+                  ),
                 ),
                 _buildRadioButtons(),
                 Padding(
                   padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0),
-                  child: Fonts().textW700("Date", 18.0, FlatColors.darkGray, TextAlign.left),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700("Date", 18.0, FlatColors.darkGray, TextAlign.left),
+                  ),
                 ),
                 _buildStartDateField(),
                 _buildEndDateField(),
                 Padding(
                   padding: EdgeInsets.only(left: 16.0, top: 24.0, right: 16.0),
-                  child: Fonts().textW700("External Links (Optional)", 18.0, FlatColors.darkGray, TextAlign.left),
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700("External Links (Optional)", 18.0, FlatColors.darkGray, TextAlign.left),
+                  )
                 ),
                 _buildFBUrlField(),
                 _buildTwitterUrlField(),
@@ -784,8 +831,14 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 Row(
                   children: <Widget>[
                     SizedBox(width: 16.0),
-                    Fonts().textW500('Notify Users Within: ', 16.0, FlatColors.darkGray, TextAlign.left),
-                    Fonts().textW400('${(newEvent.radius.toStringAsFixed(2))} Miles ', 16.0, FlatColors.darkGray, TextAlign.left),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW500('Notify Users Within: ', 16.0, FlatColors.darkGray, TextAlign.left),
+                    ),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW400('${(newEvent.radius.toStringAsFixed(2))} Miles ', 16.0, FlatColors.darkGray, TextAlign.left),
+                    ),
                   ],
                 ),
                 _buildDistanceSlider(),
@@ -793,16 +846,28 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 Row(
                   children: <Widget>[
                     SizedBox(width: 16.0),
-                    Fonts().textW700('Estimated Reach: ', 16.0, FlatColors.darkGray, TextAlign.left),
-                    Fonts().textW400('${(newEvent.radius.round() * 13)}', 16.0, FlatColors.darkGray, TextAlign.left),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW700('Estimated Reach: ', 16.0, FlatColors.darkGray, TextAlign.left),
+                    ),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW400('${(newEvent.radius.round() * 13)}', 16.0, FlatColors.darkGray, TextAlign.left),
+                    ),
                   ],
                 ),
                 SizedBox(height: 4.0),
                 Row(
                   children: <Widget>[
                     SizedBox(width: 16.0),
-                    Fonts().textW700('Total Cost: ', 16.0, FlatColors.darkGray, TextAlign.left),
-                    Fonts().textW400('FREE', 16.0, FlatColors.darkGray, TextAlign.left),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW700('Total Cost: ', 16.0, FlatColors.darkGray, TextAlign.left),
+                    ),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW400('FREE', 16.0, FlatColors.darkGray, TextAlign.left),
+                    ),
                   ],
                 ),
                 SizedBox(height: 30.0),

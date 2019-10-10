@@ -24,6 +24,7 @@ import 'package:flutter/services.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter/services.dart';
 
 class CreateRecurringEventPage extends StatefulWidget {
 
@@ -159,8 +160,12 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
       EventDataService().uploadRecurringEvent(eventImage, newEvent, lat, lon).then((error){
         if (error.isEmpty){
           Navigator.of(context).pop();
-          Navigator.of(context).pop();
-          Navigator.of(context).pop();
+          HapticFeedback.mediumImpact();
+          ShowAlertDialogService().showActionSuccessDialog(context, 'Event Created!', "We'll recommend this event to members of the community", (){
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          });
         } else {
           Navigator.of(context).pop();
           ShowAlertDialogService().showFailureDialog(context, 'Uh Oh', 'There was an issue uploading your event. Please try again.');

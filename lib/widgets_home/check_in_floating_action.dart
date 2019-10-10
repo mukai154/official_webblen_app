@@ -30,29 +30,11 @@ class CheckInFloatingAction extends StatelessWidget {
                 ),
               ])
           ),
-          child: Stack(
-            children: <Widget>[
-              checkInAvailable
-                ? Shimmer.fromColors(
-                    baseColor: FlatColors.webblenRed,
-                    highlightColor: FlatColors.firstDate,
-                    child: Container(
-                      height: 70,
-                      width: 70,
-                      decoration: BoxDecoration(
-                        color: FlatColors.webblenRed,
-                        borderRadius: BorderRadius.all(Radius.circular(35.0))
-                      ),
-                    )
-                  )
-                : Container(),
-              Center(
-                child: checkInAvailable
-                    ? Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white, size: 30.0)
-                    : Icon(FontAwesomeIcons.mapMarkerAlt, color: FlatColors.lightAmericanGray, size: 30.0),
-              ),
-            ],
-          )
+          child: Center(
+            child: checkInAvailable
+                ? Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.white, size: 30.0)
+                : Icon(FontAwesomeIcons.mapMarkerAlt, color: FlatColors.lightAmericanGray, size: 30.0),
+          ),
         )
     );
   }

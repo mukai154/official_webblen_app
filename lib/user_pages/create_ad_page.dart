@@ -171,7 +171,7 @@ class _CreateAdPageState extends State<CreateAdPage> {
     );
 
     return Scaffold(
-        appBar: WebblenAppBar().basicAppBar("New Ad"),
+        appBar: WebblenAppBar().basicAppBar("New Ad", context),
         body: formView
     );
   }

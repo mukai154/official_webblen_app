@@ -74,14 +74,14 @@ class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClie
                     ),
                     Row(
                       children: <Widget>[
-                        Fonts().textW400('${widget.community.memberIDs.length} Active Members', 12.0, FlatColors.lightAmericanGray, TextAlign.left),
+                        Fonts().textW400('${widget.community.memberIDs.length} Active Members', 14.0, FlatColors.lightAmericanGray, TextAlign.left),
                       ],
                     ),
-                    Row(
-                      children: <Widget>[
-                        Fonts().textW400('${widget.community.followers.length} Followers', 12.0, FlatColors.lightAmericanGray, TextAlign.left),
-                      ],
-                    ),
+//                    Row(
+//                      children: <Widget>[
+//                        Fonts().textW400('${widget.community.followers.length} Followers', 12.0, FlatColors.lightAmericanGray, TextAlign.left),
+//                      ],
+//                    ),
                   ],
                 ),
                 Column(

@@ -41,6 +41,11 @@ import 'package:webblen/home_page.dart';
 import 'package:webblen/auth_pages/choose_sim_page.dart';
 import 'package:webblen/event_pages/webblen_events_page.dart';
 import 'package:webblen/user_pages/add_com_image_page.dart';
+import 'package:webblen/models/community_request.dart';
+import 'package:webblen/community_request_pages/community_request_details_page.dart';
+import 'package:webblen/community_request_pages/community_requests_page.dart';
+import 'package:webblen/community_request_pages/create_community_request.dart';
+
 
 
 class PageTransitionService{
@@ -52,7 +57,7 @@ class PageTransitionService{
   final List<WebblenUser> usersList;
   final String username;
   final String areaName;
-
+  final CommunityRequest comRequest;
   final WebblenUser webblenUser;
   final WebblenUser currentUser;
   final WebblenChat chat;
@@ -82,7 +87,7 @@ class PageTransitionService{
     this.newsPost, this.reward, this.event, this.recurringEvent,
     this.eventKey, this.userIDs, this.eventIsLive, this.community,
     this.areaName, this.newEventOrPost, this.viewingMembersOrAttendees,
-    this.simLocation, this.simLat, this.simLon, this.events
+    this.simLocation, this.simLat, this.simLon, this.events, this.comRequest
   });
 
   void transitionToRootPage () => Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
@@ -129,5 +134,8 @@ class PageTransitionService{
   void transitionToChooseCommunityPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  ChooseCommunityPage(uid: uid, newEventOrPost: newEventOrPost)));
   void transitionToCreateAdPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateAdPage(currentUser: currentUser)));
   void transitionToComImagePage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddComImage(com: community)));
+  void transitionToCommunityRequestPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityRequestsPage(currentUser: currentUser, areaName: areaName, simLat: simLat, simLon: simLon, simLocation: simLocation)));
+  void transitionToCommunityRequestDetailsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityRequestDetailsPage(request: comRequest, currentUser: currentUser)));
+  void transitionToCreateCommunityRequestPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateCommunityRequestPage(currentUser: currentUser, areaName: areaName)));
 
 }

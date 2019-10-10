@@ -25,7 +25,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: WebblenAppBar().basicAppBar('Transaction History'),
+      appBar: WebblenAppBar().basicAppBar('Transaction History', context),
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,

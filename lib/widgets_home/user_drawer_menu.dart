@@ -5,13 +5,11 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/widgets_webblen/webblen_coin.dart';
-import 'package:webblen/widgets_user/stats_impact.dart';
 import 'package:webblen/widgets_user/stats_event_history_count.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:contact_picker/contact_picker.dart';
 import 'package:webblen/utils/send_invite.dart';
@@ -38,7 +36,10 @@ class UserDrawerMenu {
               padding: EdgeInsets.only(left: 8.0, right: 16.0, top: 4.0, bottom: 4.0),
               child: icon,
             ),
-            Fonts().textW300(optionName, 16.0, optionColor, TextAlign.left)
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              child: Fonts().textW400(optionName, 16.0, optionColor, TextAlign.left),
+            ),
           ],
         ),
       ),
@@ -80,7 +81,10 @@ class UserDrawerMenu {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: <Widget>[
-                          Fonts().textW700("@" + currentUser.username, 20.0, FlatColors.blackPearl, TextAlign.left),
+                          MediaQuery(
+                            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                            child: Fonts().textW700('@' + currentUser.username, 20.0, Colors.black, TextAlign.left),
+                          ),
                         ],
                       ),
                     ),
@@ -121,7 +125,10 @@ class UserDrawerMenu {
                       SizedBox(width: 8.0),
                       Icon(FontAwesomeIcons.envelope, color: FlatColors.blackPearl, size: 18.0),
                       SizedBox(width: 16.0),
-                      Fonts().textW300('Messages', 16.0, FlatColors.blackPearl, TextAlign.left),
+                      MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: Fonts().textW400('Messages', 16.0, FlatColors.blackPearl, TextAlign.left),
+                      ),
                       SizedBox(width: 6.0),
                       StreamBuilder(
                         stream: Firestore.instance.collection("chats").where('users', arrayContains: currentUser.uid).snapshots(),
@@ -156,21 +163,11 @@ class UserDrawerMenu {
                   PageTransitionService(context: context, currentUser: currentUser).transitionToShopPage();
                 },
               ),
-              menuRow(
-                Icon(FontAwesomeIcons.cog, color: FlatColors.blackPearl, size: 18.0),
-                'Settings',
-                FlatColors.blackPearl,
-                    () {
-                  Navigator.pop(context);
-                  PageTransitionService(context: context, currentUser: currentUser).transitionToSettingsPage();
-                },
-              ),
               Container(height: 12.0),
               Divider(
                 height: 1.0,
                 color: Colors.black12,
               ),
-              Container(height: 12.0),
               currentUser.canMakeAds
                   ? menuRow(
                 Icon(FontAwesomeIcons.ad, color: FlatColors.blackPearl, size: 18.0),
@@ -182,6 +179,15 @@ class UserDrawerMenu {
                 },
               )
                   : Container(),
+              menuRow(
+                Icon(FontAwesomeIcons.cog, color: FlatColors.blackPearl, size: 18.0),
+                'Settings',
+                FlatColors.blackPearl,
+                    () {
+                  Navigator.pop(context);
+                  PageTransitionService(context: context, currentUser: currentUser).transitionToSettingsPage();
+                },
+              ),
               menuRow(
                 Icon(FontAwesomeIcons.comments, color: FlatColors.blackPearl, size: 18.0),
                 'Invite Friends',

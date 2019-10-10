@@ -38,7 +38,10 @@ class FailureDialog extends StatelessWidget {
                   children: <Widget>[
                     Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
                     SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -47,7 +50,10 @@ class FailureDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -107,7 +113,10 @@ class LogoutDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text("Are You Sure You Want to Logout?", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("Are You Sure You Want to Logout?", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -153,10 +162,17 @@ class UpdateAvailableDialog extends StatelessWidget {
           ],
         ),
       ),
-      content: new Text("Please Update Your Current Version of Webblen to Continue", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+      content:
+        MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child:  Text("Please Update Your Current Version of Webblen to Continue", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+        ),
       actions: <Widget>[
-        new FlatButton(
-          child: new Text("Ok", style: Fonts.alertDialogAction),
+        FlatButton(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("Ok", style: Fonts.alertDialogAction),
+          ),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -192,7 +208,10 @@ class SuccessDialog extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -201,7 +220,10 @@ class SuccessDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -257,7 +279,10 @@ class FlashEventSuccessDialog extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     SizedBox(height: 8.0),
-                    Text(messageA, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child:  Text(messageA, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -266,7 +291,10 @@ class FlashEventSuccessDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text(messageB, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text(messageB, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -326,7 +354,10 @@ class CancelActionDialog extends StatelessWidget {
             Container(
                 child: Column(
                   children: <Widget>[
-                    Fonts().textW700(header, 18.0, Colors.black, TextAlign.center)
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW700(header, 18.0, Colors.black, TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -388,7 +419,10 @@ class CancelEventDialog extends StatelessWidget {
                   children: <Widget>[
                     Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
                     SizedBox(height: 8.0),
-                    Text("Cancel New Event?", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text("Cancel New Event?", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -397,7 +431,10 @@ class CancelEventDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text("All Progress Will Be Lost", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("All Progress Will Be Lost", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -453,7 +490,10 @@ class EventUploadSuccessDialog extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     SizedBox(height: 8.0),
-                    Text("Event Posted!", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text("Event Posted!", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -462,7 +502,10 @@ class EventUploadSuccessDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text("Interested Users Nearby Will be Notified", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("Interested Users Nearby Will be Notified", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -506,11 +549,11 @@ class EventOptionsDialog extends StatelessWidget {
       content: new Container(
         height: viewAttendeesAction == null
             ? deleteEventAction == null
-            ? 120.0
-            : 150.0
+            ? 125.0
+            : 155.0
             : deleteEventAction == null
-            ? 160.0
-            : 250.0,
+            ? 165.0
+            : 255.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -522,7 +565,10 @@ class EventOptionsDialog extends StatelessWidget {
             Container(
                 child: Column(
                   children: <Widget>[
-                    Fonts().textW700('Event Options', 24, Colors.black, TextAlign.center)
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW700('Event Options', 24, Colors.black, TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -598,7 +644,10 @@ class InfoDialog extends StatelessWidget {
                 child: Column(
                   children: <Widget>[
                     SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -659,10 +708,16 @@ class ActionMessage extends StatelessWidget {
       content: content,
       actions: <Widget>[
         new FlatButton(onPressed: () { Navigator.pop(context); },
-          child: new Text("Cancel", style: new TextStyle(fontWeight: FontWeight.w500)),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("Cancel", style: new TextStyle(fontWeight: FontWeight.w500)),
+          ),
         ),
         new FlatButton(onPressed: () { callback(); },
-          child: new Text("Confirm", style: new TextStyle(fontWeight: FontWeight.w500)),
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("Confirm", style: new TextStyle(fontWeight: FontWeight.w500)),
+          ),
         ),
       ],
     );
@@ -697,7 +752,10 @@ class AdditionalEventInfoDialog extends StatelessWidget {
                   children: <Widget>[
                     Icon(FontAwesomeIcons.users, size: 30.0, color: FlatColors.darkMountainGreen),
                     SizedBox(height: 16.0),
-                    Text("Turnout Info", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Text("Turnout Info", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -713,16 +771,22 @@ class AdditionalEventInfoDialog extends StatelessWidget {
                         children: <Widget>[
                           Icon(FontAwesomeIcons.users, size: 20.0, color: FlatColors.blueGray),
                           SizedBox(width: 16.0),
-                          Text(estimatedTurnout.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          MediaQuery(
+                            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                            child: Text(estimatedTurnout.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          ),
                         ],
                       ),
                       Row(
                         children: <Widget>[
                           Icon(FontAwesomeIcons.dollarSign, size: 20.0, color: FlatColors.blueGray),
                           SizedBox(width: 2.0),
-                          eventCost == null
-                              ? Text("Free", style: Fonts.alertDialogBody, textAlign: TextAlign.center)
-                              : Text(eventCost.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          MediaQuery(
+                            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                            child:  eventCost == null
+                                ? Text("Free", style: Fonts.alertDialogBody, textAlign: TextAlign.center)
+                                : Text(eventCost.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          ),
                         ],
                       )
                     ],
@@ -780,7 +844,10 @@ class EventCheckInDialog extends StatelessWidget {
             Container(
                 child: Column(
                   children: <Widget>[
-                    Fonts().textW700("$eventTitle", 18.0, FlatColors.darkGray, TextAlign.center)
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW700("$eventTitle", 18.0, FlatColors.darkGray, TextAlign.center)
+                    ),
                   ],
                 )
             ),
@@ -845,7 +912,10 @@ class ConfirmationDialog extends StatelessWidget {
                   children: <Widget>[
                     Icon(FontAwesomeIcons.questionCircle, size: 30.0, color: FlatColors.darkGray),
                     SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -908,7 +978,10 @@ class DetailedConfirmationDialog extends StatelessWidget {
                   children: <Widget>[
                     Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
                     SizedBox(height: 8.0),
-                    Fonts().textW500(body, 16.0, FlatColors.darkGray, TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW500(body, 16.0, FlatColors.darkGray, TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -942,18 +1015,22 @@ class DetailedConfirmationDialog extends StatelessWidget {
   }
 }
 
-class CommunitiyOptionsDialog extends StatelessWidget {
+class CommunityOptionsDialog extends StatelessWidget {
 
+  final bool isMember;
+  final String communityType;
+  final VoidCallback viewMembersAction;
   final VoidCallback addAction;
   final VoidCallback inviteAction;
-  final VoidCallback leaveCommunityAction;
-  CommunitiyOptionsDialog({this.inviteAction, this.addAction, this.leaveCommunityAction});
+  final VoidCallback leaveAction;
+  final VoidCallback joinAction;
+  CommunityOptionsDialog({this.isMember, this.communityType, this.viewMembersAction, this.inviteAction, this.addAction, this.leaveAction, this.joinAction});
 
   @override
   Widget build(BuildContext context) {
     return new CustomAlertDialog(
       content: Container(
-        height: 190.0,
+        height: isMember ? 250.0 : 150.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -962,30 +1039,53 @@ class CommunitiyOptionsDialog extends StatelessWidget {
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
+            isMember
+                ? CustomColorButton(
+                    text: "Add Post/Event",
+                    textColor: FlatColors.darkGray,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: addAction
+                  )
+                : Container(),
             CustomColorButton(
-                text: "Add Post/Event",
+                text: "View Members",
                 textColor: FlatColors.darkGray,
                 backgroundColor: Colors.white,
                 height: 45.0,
                 width: 200.0,
-                onPressed: addAction
+                onPressed: viewMembersAction
             ),
-            CustomColorButton(
-                text: "Invite",
-                textColor: FlatColors.darkGray,
-                backgroundColor: Colors.white,
-                height: 45.0,
-                width: 200.0,
-                onPressed: inviteAction
-            ),
-            CustomColorButton(
-                text: "Leave Community",
-                textColor: Colors.white,
-                backgroundColor: FlatColors.webblenRed,
-                height: 45.0,
-                width: 200.0,
-                onPressed: leaveCommunityAction
-            ),
+            isMember
+                ? CustomColorButton(
+                    text: "Invite",
+                    textColor: FlatColors.darkGray,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: inviteAction
+                  )
+                : Container(),
+            isMember
+                ? CustomColorButton(
+                  text: "Leave Community",
+                  textColor: Colors.white,
+                  backgroundColor: FlatColors.webblenRed,
+                  height: 45.0,
+                  width: 200.0,
+                  onPressed: leaveAction
+                )
+                : communityType == 'public'
+                  ? CustomColorButton(
+                        text: "Join Community",
+                        textColor: Colors.white,
+                        backgroundColor: FlatColors.darkMountainGreen,
+                        height: 45.0,
+                        width: 200.0,
+                        onPressed: joinAction
+                    )
+                  : Container()
           ],
         ),
       ),
@@ -1023,9 +1123,12 @@ class UserDetailsOptionsDialog extends StatelessWidget {
                   children: <Widget>[
                     Icon(FontAwesomeIcons.cog, size: 30.0, color: FlatColors.londonSquare),
                     SizedBox(height: 8.0),
-                    friendRequestStatus == "receivedRequest"
-                      ? Text("Pending Friend Request", style: Fonts.alertDialogHeader, textAlign: TextAlign.center)
-                      : Text("Options", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: friendRequestStatus == "receivedRequest"
+                          ? Text("Pending Friend Request", style: Fonts.alertDialogHeader, textAlign: TextAlign.center)
+                          : Text("Options", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                    ),
                   ],
                 )
             ),
@@ -1123,7 +1226,10 @@ class AddImageDialog extends StatelessWidget {
             Container(
                 child: Column(
                   children: <Widget>[
-                    Fonts().textW700('Add Image', 24, Colors.black, TextAlign.center)
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW700('Add Image', 24, Colors.black, TextAlign.center)
+                    ),
                   ],
                 )
             ),
@@ -1184,9 +1290,15 @@ class ActionSuccessDialog extends StatelessWidget {
             Container(
                 child: Column(
                   children: <Widget>[
-                    Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+                    MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+                    ),
                     SizedBox(height: 12.0),
-                    Fonts().textW500(body, 14.0, FlatColors.darkGray, TextAlign.center),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: Fonts().textW500(body, 14.0, FlatColors.darkGray, TextAlign.center),
+                    ),
                   ]
                 )
             ),
@@ -1231,7 +1343,10 @@ class FormActionDialog extends StatelessWidget {
             Container(
                 child: Column(
                     children: <Widget>[
-                      Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+                      MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+                      ),
                     ]
                 )
             ),

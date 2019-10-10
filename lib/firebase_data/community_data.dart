@@ -173,6 +173,18 @@ class CommunityDataService {
     return success;
   }
 
+  Future<bool> joinCommunity(String areaName, String comName, String uid) async {
+    bool success = false;
+    String modifiedComName = comName.contains("#") ? comName : "#$comName";
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'joinCommunity');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'areaName': areaName, 'comName': modifiedComName, 'uid': uid});
+    if (result.data != null) {
+      success = result.data;
+    }
+    return success;
+  }
+
+
 
   Future<List<CommunityNewsPost>> getPostsFromCommunity(String areaName, String communityName) async {
     List<CommunityNewsPost> posts = [];
@@ -291,31 +303,58 @@ class CommunityDataService {
     return error;
   }
 
-//    Future<Null> convertComData() async {
-//    locRef.getDocuments().then((docs){
-//      docs.documents.forEach((doc) async {
-//        String geoH = doc.data['location']['geohash'];
-//        double lat = doc.data['location']['geopoint'].latitude;
-//        double lon = doc.data['location']['geopoint'].longitude;
-//        GeoPoint latLon = geo.point(latitude: lat, longitude: lon).geoPoint;
-//        lRef.document(doc.documentID).setData({'d': {}, 'g': geoH, 'l': latLon});
-//        QuerySnapshot comQuery = await locRef.document(doc.documentID).collection('communities').getDocuments();
-//        comQuery.documents.forEach((comDoc) async{
-//          lRef.document(doc.documentID).collection('communities').document(comDoc.documentID).setData(comDoc.data);
-//        });
-//
-//      });
-//    });
-//  }
+  Future<Null> mergeMembersAndFollowers() async {
+    QuerySnapshot locQuery = await locRef.getDocuments();
+    locQuery.documents.forEach((locDoc) async {
+      QuerySnapshot comQuery = await locRef.document(locDoc.documentID).collection('communities').getDocuments();
+      comQuery.documents.forEach((comDoc) async {
+        List members = [];
+        List followers = [];
+        if (comDoc.data['memberIDs'] != null){
+          members = comDoc.data['memberIDs'].toList(growable: true);
+        }
+        if (comDoc.data['followers'] != null){
+          followers = comDoc.data['followers'].toList(growable: true);
+        }
+        List mergedMembersList = List.from(members)..addAll(followers);
+        List newMembersList = mergedMembersList.toSet().toList(growable: true);
+        await locRef.document(locDoc.documentID).collection('communities').document(comDoc.documentID).updateData({
+          'memberIDs': newMembersList
+        });
+      });
+    });
+  }
 
-//  Future<Null> updateCommunityDataFields() async {
-//    QuerySnapshot locQ = await locRef.getDocuments();
-//    locQ.documents.forEach((areaDoc) async {
-//      QuerySnapshot comQ = await locRef.document(areaDoc.documentID).collection('communities').getDocuments();
-//      comQ.documents.forEach((comDoc) async {
-//        await locRef.document(areaDoc.documentID).collection('communities').document(comDoc.documentID).updateData({'communityType': 'closed'});
-//      });
-//    });
-//  }
+  Future<Null> updateUserMemberships() async {
+    QuerySnapshot locQuery = await locRef.getDocuments();
+    locQuery.documents.forEach((locDoc) async {
+      QuerySnapshot comQuery = await locRef.document(locDoc.documentID).collection('communities').getDocuments();
+      comQuery.documents.forEach((comDoc) async {
+        List members = [];
+        List followers = [];
+        if (comDoc.data['memberIDs'] != null){
+          members = comDoc.data['memberIDs'].toList(growable: true);
+        }
+        members.forEach((uid) async {
+          DocumentSnapshot userDoc = await usersRef.document(uid).get();
+          Map<dynamic, dynamic> userData = userDoc.data['d'];
+          Map<dynamic, dynamic> userComs = userData['communities'];
+          if (userComs[locDoc.documentID] != null){
+            List userAreaComs = userComs[locDoc.documentID].toList(growable: true);
+            if (!userAreaComs.contains(comDoc.documentID)){
+              userAreaComs.add(comDoc.documentID);
+              userComs[locDoc.documentID] = userAreaComs;
+              //print(userComs);
+              await usersRef.document(uid).updateData({
+                'd.communities': userComs
+              });
+            }
+          }
+
+
+        });
+      });
+    });
+  }
 
 }

@@ -8,12 +8,12 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/firebase_data/ad_data.dart';
 import 'package:webblen/models/local_ad.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/widgets_ads/ad_carousel.dart';
 import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/widgets_user/user_carousel.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/widgets_home_tiles/webblen_events_tile.dart';
 import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/widgets_event/event_carousel.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class HomeDashboardPage extends StatefulWidget {
 
@@ -37,6 +37,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
   List<LocalAd> ads = [];
   List<WebblenUser> randomNearbyUsers = [];
   List<Event> webblenEvents = [];
+  List<Event> recommendedEvents = [];
   String nearbyUserCount;
   bool isLoading = true;
 
@@ -55,13 +56,13 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
       //GET Webblen Events
       EventDataService().getExclusiveWebblenEvents().then((res){
         webblenEvents = res;
-        //GET Number of Nearby Users
-        UserDataService().getNumberOfNearbyUsers(widget.currentLat, widget.currentLon).then((res){
-          nearbyUserCount = res;
-          //GET Nearby Users
-          UserDataService().get10RandomUsers(widget.currentLat, widget.currentLon).then((res){
+        //GET Recommended Events
+        EventDataService().getRecommendedEvents(widget.currentUser.uid, widget.areaName).then((res){
+          recommendedEvents = res;
+          //GET Number of Nearby Users
+          UserDataService().getNumberOfNearbyUsers(widget.currentLat, widget.currentLon).then((res){
+            nearbyUserCount = res;
             if (this.mounted){
-              randomNearbyUsers = res;
               isLoading = false;
               setState(() {});
             }
@@ -90,6 +91,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
   void didPressMyCommunitiesTile(){
     if (widget.currentUser != null && !widget.updateRequired){
       PageTransitionService(context: context, uid: widget.currentUser.uid, areaName: widget.areaName).transitionToMyCommunitiesPage();
+    } else if (updateAlertIsEnabled()){
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void didPressCommunityRequestTile(){
+    if (widget.currentUser != null && !widget.updateRequired){
+      PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToCommunityRequestPage();
     } else if (updateAlertIsEnabled()){
       ShowAlertDialogService().showUpdateDialog(context);
     }
@@ -135,12 +144,23 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                     Fonts().textW700('Home', 40, Colors.black, TextAlign.left),
+                      MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: widget.areaName.length <= 6
+                            ? Fonts().textW700(widget.areaName, 40, Colors.black, TextAlign.left)
+                            : widget.areaName.length <= 8
+                            ? Fonts().textW700(widget.areaName, 35, Colors.black, TextAlign.left)
+                            : widget.areaName.length <= 10
+                            ? Fonts().textW700(widget.areaName, 30, Colors.black, TextAlign.left)
+                            : widget.areaName.length <= 12
+                            ? Fonts().textW700(widget.areaName, 25, Colors.black, TextAlign.left)
+                            : Fonts().textW700(widget.areaName, 20, Colors.black, TextAlign.left),
+                      ),
                     ]
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 1,
                   child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.end,
@@ -158,7 +178,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                         widget.accountWidget
                       ]
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -166,61 +186,133 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
             onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, areaName: widget.areaName).transitionToSearchPage(),
             child: SearchTile(),
           ),
-          Container(
-            margin: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0, bottom: 4.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                randomNearbyUsers.isEmpty
-                  ? Fonts().textW700('Searching...', 18.0, Colors.black, TextAlign.left)
-                  : Fonts().textW700('$nearbyUserCount People Nearby', 18.0, Colors.black, TextAlign.left),
-                FlatButton(
-                  onPressed: () => didPressCommunityActivityTile(),
-                  color: Colors.transparent,
-                  textColor: Colors.black,
-                  padding: EdgeInsets.all(0),
-                  child: Fonts().textW400('See More', 16.0, FlatColors.webblenRed, TextAlign.right),
-                ),
-              ],
-            ),
-          ),
           isLoading
-              ? Container(
-                  margin: EdgeInsets.symmetric(vertical: 50.0),
-                  height: 1.0,
-                  child: CustomLinearProgress(progressBarColor: Colors.black12),
+              ? Column(
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed),
+                    )
+                  ],
                 )
-              :  randomNearbyUsers.isEmpty
-                  ? Container()
-                  : UserCarousel(currentUser: widget.currentUser, users: randomNearbyUsers),
-          ads.isEmpty || webblenEvents.isNotEmpty ? Container() : AdCarousel(ads: ads),
-          webblenEvents.isEmpty
-            ? Container()
-            : Container(
-            height: 60.0,
-            margin: EdgeInsets.only(bottom: 8.0),
-            child: BasicTile(
-              child: WebblenEventsTile(),
-              onTap: () => didPressWebblenEventsTile(),
-            ),
-          ),
-          Container(
-            height: 60.0,
-            child: BasicTile(
-              child: DiscoverTile(),
-              onTap: () => didPressDiscoverTile(),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 8.0),
-            height: 60.0,
-            child: BasicTile(
-              child: MyCommunitiesTile(),
-              onTap: () => didPressMyCommunitiesTile(),
-            ),
-          ),
+              : Container(
+                  height: MediaQuery.of(context).size.height > 667.0
+                    ? MediaQuery.of(context).size.height * 0.715
+                    : MediaQuery.of(context).size.height > 568.0
+                    ? MediaQuery.of(context).size.height * 0.67
+                    : MediaQuery.of(context).size.height * 0.60,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            DiscoverTile(
+                                onTap: () => didPressDiscoverTile()
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            MyCommunitiesTile(
+                              onTap: () => didPressMyCommunitiesTile(),
+                            ),
+                            CommunityRequestTile(
+                              onTap: () => didPressCommunityRequestTile(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Container(
+                            //width: MediaQuery.of(context).size.width/1.5,
+                            child: Padding(
+                                padding: EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
+                                child: MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                    child: Fonts().textW700('Events You Might Like', 18.0, Colors.black, TextAlign.left),
+                                ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      webblenEvents.isEmpty
+                          ?  recommendedEvents.isEmpty ? Container() : EventCarousel(events: recommendedEvents, currentUser: widget.currentUser)
+                          : WebblenEventsTile(
+                        onTap: () => didPressWebblenEventsTile(),
+                      ),
+                    ],
+                  ),
+                ),
         ],
       ),
     );
   }
 }
+
+
+//Column(
+//children: <Widget>[
+//Expanded(
+//child: Padding(
+//padding: EdgeInsets.symmetric(vertical: 2.0, horizontal: 16.0),
+//child: Row(
+//mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+//children: <Widget>[
+//DiscoverTile(
+//onTap: () => didPressDiscoverTile()
+//),
+//],
+//),
+//),
+//),
+//Expanded(
+//child: Padding(
+//padding: EdgeInsets.symmetric(horizontal: 16.0),
+//child: Row(
+//mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//children: <Widget>[
+//MyCommunitiesTile(
+//onTap: () => didPressMyCommunitiesTile(),
+//),
+//CommunityRequestTile(
+//onTap: () => didPressCommunityRequestTile(),
+//),
+//],
+//),
+//),
+//),
+//Expanded(
+//child: Row(
+//children: <Widget>[
+//Container(
+//width: MediaQuery.of(context).size.width/2,
+//child: Padding(
+//padding: EdgeInsets.only(left: 16.0, top: 16.0, bottom: 8.0),
+//child: FittedBox(
+//fit: BoxFit.scaleDown,
+//child: Fonts().textW700('Events You Might Like', 18.0, Colors.black, TextAlign.left),
+//)
+//),
+//),
+//],
+//),
+//),
+//Expanded(
+//child: webblenEvents.isEmpty
+//? recommendedEvents.isEmpty ? Container() : EventCarousel(events: recommendedEvents)
+//: WebblenEventsTile(
+//onTap: () => didPressWebblenEventsTile(),
+//),
+//),
+//
+//],
+//),

@@ -101,7 +101,10 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
             onTap: this.validateAndSubmit,
             child: Padding(
               padding: EdgeInsets.only(top: 18.0, right: 16.0),
-              child: Fonts().textW500('Invite', 18.0, FlatColors.darkGray, TextAlign.center),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW500('Invite', 18.0, FlatColors.darkGray, TextAlign.center),
+              ),
             )
           )
       ),

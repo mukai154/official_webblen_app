@@ -10,6 +10,7 @@ import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_data/platform_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_location.dart';
+import 'package:location/location.dart';
 import 'package:webblen/models/community_news.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets_home/user_drawer_menu.dart';
@@ -25,9 +26,12 @@ import 'home_pages/location_unavailable_page.dart';
 import 'user_pages/notifications_page.dart';
 import 'package:webblen/widgets_data_streams/stream_user_account.dart';
 import 'package:webblen/widgets_data_streams/stream_user_notifications.dart';
-//import 'package:webblen/utils/geofencing.dart';
+import 'package:webblen/utils/geofencing.dart';
 import 'widgets_home/check_in_floating_action.dart';
 import 'package:webblen/firebase_services/remote_messaging.dart';
+import 'package:flutter/services.dart';
+import 'package:location_permissions/location_permissions.dart';
+import 'animations/shake_animation.dart';
 
 class HomePage extends StatefulWidget {
 
@@ -75,7 +79,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       uid = val;
       UserDataService().checkIfUserExists(uid).then((exists){
         if (exists) {
-          getUserAndLocation(uid);
+          UserDataService().getUserByID(uid).then((user){
+            currentUser = user;
+            checkPermissions();
+          });
         } else {
           Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
         }
@@ -83,12 +90,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-  getUserAndLocation(String uid) {
-    UserDataService().getUserByID(uid).then((user){
-      currentUser = user;
-      FirebaseMessagingService().updateFirebaseMessageToken(uid);
-      FirebaseMessagingService().configFirebaseMessaging(context, currentUser);
-      loadLocation();
+  checkPermissions() async {
+    LocationService().checkLocationPermissions().then((locationPermissions) async {
+      if (locationPermissions == 'PermissionStatus.unknown'){
+        String permissions = await LocationService().requestPermssion();
+        if (permissions == 'PermissionStatus.denied'){
+          hasLocation = false;
+          isLoading = false;
+          setState(() {});
+        } else {
+          loadLocation();
+        }
+      } else if (locationPermissions == 'PermissionStatus.denied'){
+        hasLocation = false;
+        isLoading = false;
+        setState(() {});
+      } else {
+        loadLocation();
+      }
     });
   }
 
@@ -100,25 +119,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       hasLocation = true;
       getPlatformData(currentLat, currentLon);
     } else {
-      LocationService().getCurrentLocation(context).then((location) {
-        if (this.mounted) {
-          if (location != null) {
-            hasLocation = true;
-            currentLat = location.latitude;
-            currentLon = location.longitude;
-            UserDataService().updateUserAppOpen(uid, currentLat, currentLon);
-            //GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
-            EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result){
-              checkInAvailable = result;
-              getPlatformData(currentLat, currentLon);
-            });
-          } else {
-            hasLocation = false;
-            isLoading = false;
-            setState(() {});
-          }
-        }
-      });
+      LocationData location = await LocationService().getCurrentLocation(context);
+      if (location != null) {
+        hasLocation = true;
+        currentLat = location.latitude;
+        currentLon = location.longitude;
+        FirebaseMessagingService().updateFirebaseMessageToken(uid);
+        FirebaseMessagingService().configFirebaseMessaging(context, currentUser);
+        UserDataService().updateUserAppOpen(uid, currentLat, currentLon);
+        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
+        EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result){
+          checkInAvailable = result;
+          getPlatformData(currentLat, currentLon);
+        });
+      } else {
+        hasLocation = false;
+        isLoading = false;
+        setState(() {});
+      }
     }
   }
 
@@ -158,6 +176,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
   void didPressCheckIn(){
     if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation){
+      HapticFeedback.selectionClick();
       PageTransitionService(context: context, currentUser: currentUser).transitionToCheckInPage();
     } else if (updateAlertIsEnabled()){
       ShowAlertDialogService().showUpdateDialog(context);
@@ -225,10 +244,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         //() => didPressCheckIn(
         floatingActionButton: isLoading
           ? CustomCircleProgress(20.0, 20.0, 20.0, 20.0, FlatColors.webblenRed)
-          : CheckInFloatingAction(
-              checkInAction: () => didPressCheckIn(),
-              checkInAvailable: checkInAvailable,
-            ),
+          : checkInAvailable
+            ? ShakeAnimation(widgetToShake: CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: true))
+            : CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: false),
         bottomNavigationBar: FABBottomAppBar(
           centerItemText: 'Check In',
           notchedShape: CircularNotchedRectangle(),
@@ -249,7 +267,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             bucket: pageStorageBucket,
             child: isLoading == true ? Container()
                 : !hasLocation
-                ? LocationPermissionsPage(reloadAction: () => reloadData())
+                ? LocationPermissionsPage(reloadAction: () => reloadData(), enableLocationAction: () => LocationPermissions().openAppSettings())
                 : !webblenIsAvailable
                 ? LocationUnavailablePage(currentUser: currentUser)
                 : updateRequired

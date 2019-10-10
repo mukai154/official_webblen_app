@@ -27,7 +27,10 @@ class GoogleBtn extends StatelessWidget {
               children: <Widget>[
                 Icon(FontAwesomeIcons.google, color: FlatColors.darkGray, size: 18.0),
                 SizedBox(width: 16.0),
-                Text(buttonText, style: TextStyle(color: FlatColors.darkGray)),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(buttonText, style: TextStyle(color: FlatColors.darkGray)),
+                ),
               ],
             ),
           ),

@@ -184,6 +184,22 @@ class EventDataService{
     return events;
   }
 
+  Future<List<Event>> getRecommendedEvents(String uid, String areaName) async {
+    List<Event> events = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getRecommendedEvents');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid, 'areaName': areaName});
+    if (result.data != null){
+      List query =  List.from(result.data);
+      query.forEach((resultMap){
+        Map<String, dynamic> evMap =  Map<String, dynamic>.from(resultMap);
+        Event event = Event.fromMap(evMap);
+        events.add(event);
+      });
+    }
+    return events;
+  }
+
+
   Future<bool> areCheckInsAvailable(double lat, double lon) async {
     bool checkInAvailable = false;
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'areCheckInsAvailable');

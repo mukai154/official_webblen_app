@@ -3,6 +3,7 @@ import 'package:location/location.dart';
 import 'package:flutter/services.dart';
 import 'services_show_alert.dart';
 import 'package:geocoder/geocoder.dart';
+import 'package:location_permissions/location_permissions.dart';
 
 class LocationService {
 
@@ -11,22 +12,31 @@ class LocationService {
   bool retrievedLocation = false;
   bool locationPermission = false;
 
+  Future<String> checkLocationPermissions() async {
+    PermissionStatus permission = await LocationPermissions().checkPermissionStatus();
+    return permission.toString();
+  }
+
+  Future<String> requestPermssion() async {
+    PermissionStatus permission = await LocationPermissions().requestPermissions();
+    return permission.toString();
+  }
+
   Future<LocationData> getCurrentLocation(BuildContext context) async {
     LocationData locationData;
     String error = "";
     try {
-      locationPermission = await currentUserLocation.hasPermission();
       locationData = await currentUserLocation.getLocation();
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
         error = 'Location Permission Denied';
         if (context != null){
-          ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from App Settings");
+          ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from Your App Settings to Find Events");
         }
       } else if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
         error = 'Webblen Needs Permission to Access Your Location';
         if (context != null){
-          ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from App Settings");
+          ShowAlertDialogService().showFailureDialog(context, error, "Please Enable Location Services from Your App Settings to Find Events");
         }
       }
       locationData = null;

@@ -74,7 +74,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     await CommunityDataService().getNearbyCommunities(currentLat, currentLon).then((result){
       popularComs = result.where((com) => com.status == 'active').toList();
       activeComs = result.where((com) => com.status == 'active').toList();
-      popularComs.sort((comA, comB) => comB.followers.length.compareTo(comA.followers.length));
+      popularComs.sort((comA, comB) => comB.memberIDs.length.compareTo(comA.memberIDs.length));
       activeComs.sort((comA, comB) => comB.lastActivityTimeInMilliseconds.compareTo(comA.lastActivityTimeInMilliseconds));
       isLoading = false;
       if (this.mounted) {

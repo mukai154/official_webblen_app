@@ -18,7 +18,10 @@ class ShowAmountOfWebblen extends StatelessWidget {
           children: <Widget>[
             Image.asset('assets/images/webblen_coin.png', height: iconSize, width: iconSize, fit: BoxFit.contain),
             Container(width: 4.0),
-            Fonts().textW500(amount, textSize, textColor, TextAlign.center)
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              child: Fonts().textW500(amount, textSize, textColor, TextAlign.center)
+            ),
           ]
       ),
     );

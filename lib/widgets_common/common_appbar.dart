@@ -6,12 +6,15 @@ import 'package:webblen/services_general/services_show_alert.dart';
 
 class WebblenAppBar {
 
-  Widget basicAppBar(String appBarTitle){
+  Widget basicAppBar(String appBarTitle, BuildContext context){
     return AppBar(
       elevation: 0.5,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
-      title: Fonts().textW700(appBarTitle, 20.0, Colors.black, TextAlign.center),
+      title: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child:  Fonts().textW700(appBarTitle, 20.0, Colors.black, TextAlign.center)
+      ),
       leading: BackButton(color: Colors.black),
     );
   }
@@ -102,7 +105,7 @@ class FABBottomAppBar extends StatefulWidget {
   FABBottomAppBar({
     this.items,
     this.centerItemText,
-    this.height: 65.0,
+    this.height: 55.0,
     this.iconSize: 24.0,
     this.backgroundColor,
     this.color,
@@ -135,7 +138,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
         height: widget.height,
         child: Material(
           type: MaterialType.transparency,
-          child: InkWell(
+          child: GestureDetector(
             onTap: () => onPressed(index),
             child: Column(
               mainAxisSize: MainAxisSize.min,

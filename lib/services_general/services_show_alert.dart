@@ -74,11 +74,11 @@ class ShowAlertDialogService {
         builder: (BuildContext context) { return CancelActionDialog(header: header, cancelAction: action); });
   }
 
-  Future<bool> showCommunityOptionsDialog(BuildContext context, VoidCallback addAction, VoidCallback inviteAction, VoidCallback leaveAction) {
+  Future<bool> showCommunityOptionsDialog(BuildContext context, bool isMember, VoidCallback viewMembersAction, VoidCallback addAction, VoidCallback inviteAction, VoidCallback leaveAction, VoidCallback joinAction) {
     return showDialog<bool>(
         context: context,
         barrierDismissible: true, //// user must tap button!
-        builder: (BuildContext context) { return CommunitiyOptionsDialog(addAction: addAction, inviteAction: inviteAction, leaveCommunityAction: leaveAction,); });
+        builder: (BuildContext context) { return CommunityOptionsDialog(isMember: isMember, viewMembersAction: viewMembersAction, addAction: addAction, inviteAction: inviteAction, leaveAction: leaveAction, joinAction: joinAction); });
   }
 
   Future<bool> showConfirmationDialog(BuildContext context, String header, String confirmActionTitle, VoidCallback confirmAction, VoidCallback cancelAction) {

@@ -162,7 +162,7 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
 
 
     return Scaffold(
-      appBar: WebblenAppBar().basicAppBar("Redeem Reward"),
+      appBar: WebblenAppBar().basicAppBar("Redeem Reward", context),
       body: Container(
         height: MediaQuery.of(context).size.height,
         width:  MediaQuery.of(context).size.width,

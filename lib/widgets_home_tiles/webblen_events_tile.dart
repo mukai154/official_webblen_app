@@ -6,22 +6,36 @@ import 'package:shimmer/shimmer.dart';
 
 class WebblenEventsTile extends StatelessWidget {
 
+  final VoidCallback onTap;
+  WebblenEventsTile({this.onTap});
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 30.0),
-      child: Row(
-        children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(FontAwesomeIcons.hotjar, color: FlatColors.webblenRed, size: 24.0),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+          height: MediaQuery.of(context).size.height * 0.18,
+          width: MediaQuery.of(context).size.width - 32.0,
+          //margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/images/webblen_events_background.png"),
+              fit: BoxFit.cover,
+            ),
+            boxShadow: ([
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 1.8,
+                spreadRadius: 0.6,
+                offset: Offset(0.0, 2.5),
+              ),
+            ]),
+            borderRadius: BorderRadius.circular(12.0),
           ),
-          Padding(
-            padding: EdgeInsets.only(left: 16.0),
+          child: Padding(
+            padding: EdgeInsets.only(left: 16.0, top: 8.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Shimmer.fromColors(
@@ -31,17 +45,17 @@ class WebblenEventsTile extends StatelessWidget {
                     'Webblen Events',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 20.0,
+                      fontSize: 24.0,
                       fontWeight:
                       FontWeight.bold,
                     ),
                   ),
                 ),
-                Fonts().textW500('Discounted Tickets and Pricing to Exclusive Webblen Events', 10.0, Colors.black87, TextAlign.left),
+                Fonts().textW500('Discounted Tickets and Pricing to Webblen Sponsored Events', 10.0, Colors.black87, TextAlign.left),
+                //Fonts().textW700('Discover', 24.0, Colors.black, TextAlign.left),
               ],
             ),
-          )
-        ],
+          ),
       ),
     );
   }

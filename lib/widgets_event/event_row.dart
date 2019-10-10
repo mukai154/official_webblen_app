@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/utils/time_calc.dart';
 
 class ComEventRow extends StatelessWidget {
 
@@ -19,18 +20,10 @@ class ComEventRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    DateFormat dateFormatter = DateFormat("MMM d  h:mma");
     DateFormat timeFormatter = DateFormat("h:mma");
     int currentDateTime = DateTime.now().millisecondsSinceEpoch;
     DateTime eventStartDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
-    
-
-    DateTime eventEndDateTime = event.endDateInMilliseconds == null ? null : DateTime.fromMillisecondsSinceEpoch(event.endDateInMilliseconds);
     bool isHappeningNow = false;
-    bool isHappeningToday = false;
-    if (DateTime.fromMicrosecondsSinceEpoch(event.startDateInMilliseconds).day == DateTime.now().day){
-      isHappeningToday = true;
-    }
     if (event.endDateInMilliseconds != null){
       isHappeningNow = (event.startDateInMilliseconds < currentDateTime && event.endDateInMilliseconds > currentDateTime) ? true : false;
     }
@@ -74,11 +67,11 @@ class ComEventRow extends StatelessWidget {
             ),
             Spacer(),
             Container(
-              padding: EdgeInsets.only(top: 16.0),
+              padding: EdgeInsets.only(top: 8.0),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [Colors.black, FlatColors.transparent],
-                    begin: Alignment(0.0, 1.0),
+                    begin: Alignment(0.0, 0.6),
                     end: Alignment(0.0, -1.0),
                   ),
                 borderRadius: BorderRadius.only(bottomLeft: Radius.circular(25.0), bottomRight: Radius.circular(25.0))
@@ -88,7 +81,10 @@ class ComEventRow extends StatelessWidget {
                 children: <Widget>[
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-                    child: Fonts().textW700('${event.title}', 26.0, Colors.white, TextAlign.left),
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Fonts().textW700('${event.title}', 26.0, Colors.white, TextAlign.left),
+                    )
 
                   ),
 
@@ -98,51 +94,58 @@ class ComEventRow extends StatelessWidget {
                       Container(
                         padding: EdgeInsets.all(4.0),
                         decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 255, 89, 89),
-                          borderRadius: BorderRadius.all(Radius.circular(25)),
+                          color: FlatColors.textFieldGray,
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
                         ),
                         child: Row(
                           children: [
-                            currentDateTime > event.startDateInMilliseconds && !isHappeningNow
-                                ? Container(
-                              width: 20,
-                              height: 20,
-                              margin: EdgeInsets.only(left: 4),
-                              child: Image.asset(
-                                "assets/images/transparent-logo.png",
-                                fit: BoxFit.none,
-                              ),
-                            )
-                                : Container(),
-                            //Spacer(),
-                            SizedBox(width: 4.0),
-                            currentDateTime > event.startDateInMilliseconds && !isHappeningNow
-                                ? Container(
-                              margin: EdgeInsets.only(right: 4),
-                              child: Fonts().textW400('${event.eventPayout.toStringAsFixed(2)}', 16.0, Colors.white, TextAlign.left),
-                            )
-                                : Container(
-                                margin: EdgeInsets.only(right: 11),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Fonts().textW400('${event.views} views', 16.0, Colors.white, TextAlign.center),
-                                  ],
+                        currentDateTime > event.startDateInMilliseconds
+                            ? event.attendees == null || event.attendees.isEmpty
+                              ? Fonts().textW500('0 Check Ins', 12.0, Colors.white, TextAlign.center)
+                                : Fonts().textW500(
+                                event.attendees .length == 1 ? '${ event.attendees .length} Check Ins' : '${ event.attendees.length} Check Ins',
+                                14.0, Colors.black,
+                                TextAlign.center
                                 )
-                            ),
+                            : Fonts().textW500('${event.views} views', 12.0, Colors.black, TextAlign.center),
                           ],
                         ),
                       ),
+//                        Row(
+//                          mainAxisAlignment: MainAxisAlignment.center,
+//                          children: [
+//                            currentDateTime > event.startDateInMilliseconds && !isHappeningNow
+//                                ? Container(
+//                              width: 20,
+//                              height: 20,
+//                              margin: EdgeInsets.only(left: 4),
+//                              child: Image.asset(
+//                                "assets/images/transparent-logo.png",
+//                                fit: BoxFit.none,
+//                              ),
+//                            )
+//                                : Container(),
+//                            //Spacer(),
+//                            SizedBox(width: 4.0),
+//                            currentDateTime > event.startDateInMilliseconds && !isHappeningNow
+//                                ? Container(
+//                              margin: EdgeInsets.only(right: 4),
+//                              child: Fonts().textW400('${event.eventPayout.toStringAsFixed(2)}', 16.0, Colors.white, TextAlign.left),
+//                            )
+//                                : Container(
+//                                //margin: EdgeInsets.only(right: 11),
+//                                child: Row(
+//                                  mainAxisAlignment: MainAxisAlignment.center,
+//                                  children: <Widget>[
+//                                    Fonts().textW400('${event.views} views', 16.0, Colors.white, TextAlign.center),
+//                                  ],
+//                                )
+//                            ),
+//                          ],
+//                        ),
+
                       Spacer(),
-                      isHappeningToday && !isHappeningNow
-                        ? Fonts().textW700('Starting Soon...', 16.0, Colors.white, TextAlign.right)
-                        : isHappeningNow
-                        ? Fonts().textW700('Happening Now!', 16.0, Colors.white, TextAlign.right)
-                        : eventStartDateTime.difference(DateTime.now()) <= Duration(days: 1) && eventStartDateTime.difference(DateTime.now()) > Duration(days: 0)
-                        ? Fonts().textW700('Today ${timeFormatter.format(eventStartDateTime)}', 16.0, Colors.white, TextAlign.right)
-                        : eventStartDateTime.difference(DateTime.now()) <= Duration(days: 2) && eventStartDateTime.difference(DateTime.now()) >= Duration(days: 1)
-                        ? Fonts().textW400('Tomorrow ${timeFormatter.format(eventStartDateTime)}', 16.0, Colors.white, TextAlign.right)
-                        : Fonts().textW400('${dateFormatter.format(eventStartDateTime)}', 16.0, Colors.white, TextAlign.right),
+                      Fonts().textW400(TimeCalc().getWhenEventIsHappening(event.startDateInMilliseconds, event.endDateInMilliseconds, timeFormatter.format(eventStartDateTime)), 16.0, Colors.white, TextAlign.right),
                       SizedBox(width: 16.0),
                     ],
                   ),
@@ -157,7 +160,6 @@ class ComEventRow extends StatelessWidget {
     );
   }
 }
-
 
 class ComRecurringEventRow extends StatelessWidget {
 
@@ -223,5 +225,56 @@ class ComRecurringEventRow extends StatelessWidget {
       ),
     );
   }
+}
 
+class EventCarouselTile extends StatelessWidget {
+
+
+  final Event event;
+  final VoidCallback transitionToComAction;
+  final VoidCallback eventPostAction;
+  final double size;
+  EventCarouselTile({this.event, this.transitionToComAction, this.eventPostAction, this.size});
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    return GestureDetector(
+      onTap: eventPostAction,
+      child: Container(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              height: size - 12,
+              width: size - 12,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: CachedNetworkImageProvider(event.imageURL),
+                  fit: BoxFit.cover,
+                ),
+                borderRadius: BorderRadius.only(topRight: Radius.circular(16.0), topLeft: Radius.circular(16.0))
+              ),
+              child: Container(),
+            ),
+        //SizedBox(height: 4.0),
+        Container(
+            height: size - 120,
+              width: size - 12,
+              decoration: BoxDecoration(
+                color: FlatColors.textFieldGray,
+                borderRadius: BorderRadius.only(bottomRight: Radius.circular(16.0), bottomLeft: Radius.circular(16.0))
+              ),
+              padding: EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Fonts().textW500('${event.title}', null, Colors.black, TextAlign.center),
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }

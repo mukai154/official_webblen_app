@@ -27,7 +27,10 @@ class FacebookBtn extends StatelessWidget {
               children: <Widget>[
                 Icon(FontAwesomeIcons.facebook, color: Colors.white, size: 18.0),
                 SizedBox(width: 16.0),
-                Text(buttonText, style: TextStyle(color: Colors.white)),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(buttonText, style: TextStyle(color: Colors.white)),
+                ),
               ],
             ),
           ),

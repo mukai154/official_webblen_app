@@ -318,8 +318,8 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
   ScrollController _scrollController;
   List<Community> communities = [];
   List<Event> events = [];
-  bool isLoading = true;
-
+  bool isLoadingEvents = true;
+  bool isLoadingComs = true;
 
   Future<void> getEventHistory() async {
     events = [];
@@ -327,6 +327,7 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
       events = res;
       events.sort((e1, e2) => e2.startDateInMilliseconds.compareTo(e1.startDateInMilliseconds));
       if (this.mounted){
+        isLoadingEvents = false;
         setState(() {});
       }
     });
@@ -338,6 +339,7 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
       communities = result.where((com) => com.status == 'active').toList();
       communities.sort((comA, comB) => comA.name[1].compareTo(comB.name[1]));
       if (this.mounted){
+        isLoadingComs = false;
         setState(() {});
       }
     });
@@ -347,7 +349,6 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
     _scrollController = ScrollController();
     await getEventHistory();
     await getUserCommunities();
-    isLoading = false;
     setState(() {});
   }
   @override
@@ -414,7 +415,7 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
             children: <Widget>[
               Container(
                 color: Colors.white,
-                child: isLoading
+                child: isLoadingComs
                     ? LoadingScreen(context: context, loadingDescription: 'Loading Communities...')
                     : LiquidPullToRefresh(
                       color: FlatColors.webblenRed,
@@ -444,7 +445,7 @@ class _CurrentUserDetailsPageState extends State<CurrentUserDetailsPage> {
               ),
               Container(
                 color: Colors.white,
-                child: isLoading
+                child: isLoadingEvents
                     ? LoadingScreen(context: context, loadingDescription: 'Loading Events...')
                     : LiquidPullToRefresh(
                         color: FlatColors.webblenRed,

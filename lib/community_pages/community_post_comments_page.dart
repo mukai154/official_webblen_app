@@ -107,13 +107,22 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          Fonts().textW700(widget.newsPost.title, 24.0, FlatColors.darkGray, TextAlign.left),
-          Fonts().textW400(widget.newsPost.content, 18.0, FlatColors.lightAmericanGray, TextAlign.left),
+          MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Fonts().textW700(widget.newsPost.title, 24.0, FlatColors.darkGray, TextAlign.left),
+          ),
+          MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Fonts().textW400(widget.newsPost.content, 18.0, FlatColors.lightAmericanGray, TextAlign.left),
+          ),
           SizedBox(height: 8.0),
           widget.newsPost.newsURL != null || widget.newsPost.newsURL.isNotEmpty
             ? GestureDetector(
                 onTap: () => OpenUrl().launchInWebViewOrVC(context, widget.newsPost.newsURL),
-                child: Fonts().textW400(widget.newsPost.newsURL, 18.0, FlatColors.electronBlue, TextAlign.left),
+                child: MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Fonts().textW400(widget.newsPost.newsURL, 18.0, FlatColors.electronBlue, TextAlign.left),
+                ),
               )
               : Container()
         ],
@@ -135,7 +144,10 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
             ),
             Padding(
               padding: EdgeInsets.only(left: 4.0, top: 12.0, right: 4.0),
-              child: Fonts().textW700("@" + widget.newsPost.username, 18.0, FlatColors.darkGray, TextAlign.start),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW700("@" + widget.newsPost.username, 18.0, FlatColors.darkGray, TextAlign.start),
+              ),
             ),
           ],
         ),
@@ -162,13 +174,16 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
           // Edit text
           Flexible(
             child: Container(
-              child: TextField(
-                style: TextStyle(color: FlatColors.blackPearl, fontSize: 18.0, fontWeight: FontWeight.w500),
-                controller: textEditingController,
-                maxLines: null,
-                decoration: InputDecoration.collapsed(
-                  hintText: 'Type your message...',
-                  hintStyle: TextStyle(color: FlatColors.londonSquare),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: TextField(
+                  style: TextStyle(color: FlatColors.blackPearl, fontSize: 18.0, fontWeight: FontWeight.w500),
+                  controller: textEditingController,
+                  maxLines: null,
+                  decoration: InputDecoration.collapsed(
+                    hintText: 'Type your message...',
+                    hintStyle: TextStyle(color: FlatColors.londonSquare),
+                  ),
                 ),
               ),
             ),

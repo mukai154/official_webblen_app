@@ -29,7 +29,7 @@ class Chat extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      appBar: WebblenAppBar().basicAppBar("@$peerUsername"),
+      appBar: WebblenAppBar().basicAppBar("@$peerUsername", context),
       body: new ChatScreen(
         currentUsername: currentUser.username,
         currentUID: currentUser.uid,
