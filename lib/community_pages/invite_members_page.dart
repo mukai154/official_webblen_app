@@ -81,6 +81,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         if (result != null && result.isNotEmpty){
           friends = result;
           friends.sort((userA, userB) => userA.username.compareTo(userB.username));
+          friends = friends.where((friend) => !widget.community.memberIDs.contains(friend.uid)).toList(growable: true);
           isLoading = false;
           setState(() {});
         }
