@@ -74,7 +74,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
           ShowAlertDialogService().showActionSuccessDialog(context, 'Flash Event Created!', 'Check In. Get Paid. You Know the Rest...', (){
             Navigator.of(context).pop();
             Navigator.of(context).pop();
-            Navigator.of(context).pop();
+            Navigator.pop(context, true);
           });
         } else {
           Navigator.of(context).pop();
@@ -123,9 +123,10 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                 children: <Widget>[
                   CustomColorButton(
                     height: 30.0,
-                    width: 110.0,
+                    width: MediaQuery.of(context).size.width * 0.3 - 4,
                     hPadding: 0,
                     text: 'standard',
+                    textSize: 12.0,
                     textColor: eventTypeRadioVal == 0 ? Colors.white : Colors.black,
                     backgroundColor: eventTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                     onPressed: () {
@@ -135,9 +136,10 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                   ),
                   CustomColorButton(
                     height: 30.0,
-                    width: 110.0,
+                    width: MediaQuery.of(context).size.width * 0.3 - 4,
                     hPadding: 0,
                     text: 'food/drink',
+                    textSize: 12.0,
                     textColor: eventTypeRadioVal == 1 ? Colors.white : Colors.black,
                     backgroundColor: eventTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                     onPressed: () {
@@ -147,9 +149,10 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                   ),
                   CustomColorButton(
                     height: 30.0,
-                    width: 110.0,
+                    width: MediaQuery.of(context).size.width * 0.3 - 4,
                     hPadding: 0,
                     text: 'sale/discount',
+                    textSize: 12.0,
                     textColor: eventTypeRadioVal == 2 ? Colors.white : Colors.black,
                     backgroundColor: eventTypeRadioVal == 2 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                     onPressed: () {
