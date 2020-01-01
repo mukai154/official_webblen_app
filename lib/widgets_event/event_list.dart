@@ -23,8 +23,10 @@ class EventList extends StatelessWidget {
       child: events.isEmpty
           ? ListView(
               children: <Widget>[
-                SizedBox(height: 50.0),
-                Fonts().textW500('No Past Events Found', 18.0, Colors.black26, TextAlign.center)
+                SizedBox(height: 64.0),
+                Fonts().textW500('No Past Events Found', 14.0, Colors.black45, TextAlign.center),
+                SizedBox(height: 8.0),
+                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center),
               ],
             )
           : ListView.builder(
