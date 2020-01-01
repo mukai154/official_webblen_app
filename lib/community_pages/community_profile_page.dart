@@ -241,23 +241,35 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
           return <Widget>[
             SliverAppBar(
               backgroundColor: Colors.white,
-              title: MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                child: Fonts().textW700(widget.community.name, 24.0, Colors.black, TextAlign.center),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700(widget.community.name, 24.0, Colors.black, TextAlign.center),
+                  ),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW400('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
+                  ),
+                ],
               ),
               pinned: true,
               floating: true,
               snap: true,
               brightness: Brightness.light,
-              leading: BackButton(color: FlatColors.darkGray),
+              leading: BackButton(color: Colors.black),
               actions: <Widget>[
                 IconButton(
-                    icon: Icon(FontAwesomeIcons.ellipsisH, color: FlatColors.darkGray, size: 24.0),
+                    icon: Icon(FontAwesomeIcons.ellipsisH, color: Colors.black, size: 24.0),
                     onPressed: (){
                       ShowAlertDialogService().showCommunityOptionsDialog(
                           context,
                          memberUIDs.contains(widget.currentUser.uid),
+                              widget.community.communityType,
                               () => viewMembersAction(),
+                              () => PageTransitionService(context: context, community: widget.community).transitionToComImagePage(),
                               () => addEventAction(),
                               () => inviteMembersAction(),
                               () => leaveAction(),
@@ -267,15 +279,15 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                 ),
               ],
               expandedHeight: 115.0,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  margin: EdgeInsets.only(top: 64.0),
-                  child: MediaQuery(
-                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                    child: Fonts().textW400('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
-                  ),
-                ),
-              ),
+//              flexibleSpace: FlexibleSpaceBar(
+//                background: Container(
+//                  margin: EdgeInsets.only(top: 64.0),
+//                  child: MediaQuery(
+//                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+//                    child: Fonts().textW400('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
+//                  ),
+//                ),
+//              ),
               bottom: TabBar(
                 indicatorColor: FlatColors.webblenRed,
                 labelColor: FlatColors.darkGray,
@@ -319,6 +331,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                               event: upcomingEvents[index],
                               showCommunity: false,
                               transitionToComAction: null,
+                              shareEventAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: upcomingEvents[index]).transitionToChatInviteSharePage(),
                               eventPostAction: () => eventPostAction(upcomingEvents[index], null),
                             );
                           },
