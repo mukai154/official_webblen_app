@@ -1,17 +1,18 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'dart:math';
 import 'dart:io';
-import 'package:webblen/models/community_news.dart';
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:webblen/models/community.dart';
+import 'package:webblen/models/community_news.dart';
 import 'package:webblen/models/event.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+
 import 'webblen_notification_data.dart';
 
 class CommunityDataService {
-
   Geoflutterfire geo = Geoflutterfire();
   final CollectionReference locRef = Firestore.instance.collection("locations");
   final CollectionReference eventRef = Firestore.instance.collection("events");
@@ -28,22 +29,20 @@ class CommunityDataService {
     userAreaComs = userComs[areaName] != null ? userComs[areaName].toList(growable: true) : [];
     userAreaComs.add(community.name);
     userComs[areaName] = userAreaComs;
-    await locRef.document(areaName).collection('communities').document(community.name).setData(community.toMap()).whenComplete((){
-    }).catchError((e){
+    await locRef.document(areaName).collection('communities').document(community.name).setData(community.toMap()).whenComplete(() {}).catchError((e) {
       error = e.details.toString();
     });
-    await usersRef.document(uid).updateData({'d.communities': userComs}).whenComplete((){
-    }).catchError((e){
-      error = e.details;
-    });
+    await usersRef.document(uid).updateData({'d.communities': userComs}).whenComplete(() {}).catchError((e) {
+          error = e.details;
+        });
     return error;
   }
 
   Future<String> getCommunityImageURL(String areaName, String comName) async {
     String imageURL;
     DocumentSnapshot comDoc = await locRef.document(areaName).collection('communities').document(comName).get();
-    if (comDoc.exists){
-      if (comDoc.data['comImage'] != null){
+    if (comDoc.exists) {
+      if (comDoc.data['comImage'] != null) {
         imageURL = comDoc.data['comImage'];
       }
     }
@@ -51,9 +50,7 @@ class CommunityDataService {
   }
 
   Future<Null> setCommunityImageURL(String areaName, String comName, String imageURL) async {
-    locRef.document(areaName).collection('communities').document(comName).updateData(({
-      'comImage': imageURL
-    }));
+    locRef.document(areaName).collection('communities').document(comName).updateData(({'comImage': imageURL}));
   }
 
   Future<Community> getCommunityByName(String areaName, String comName) async {
@@ -61,8 +58,8 @@ class CommunityDataService {
     String modifiedComName = comName.contains("#") ? comName : "#$comName";
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getCommunityByName');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'areaName': areaName, 'comName': modifiedComName});
-    if (result.data != null){
-      Map<String, dynamic> comMap =  Map<String, dynamic>.from(result.data);
+    if (result.data != null) {
+      Map<String, dynamic> comMap = Map<String, dynamic>.from(result.data);
       com = Community.fromMap(comMap);
     }
     return com;
@@ -72,10 +69,10 @@ class CommunityDataService {
     List<Community> coms = [];
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getUserCommunities');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid});
-    if (result.data != null){
-      List query =  List.from(result.data);
-      query.forEach((resultMap){
-        Map<String, dynamic> comMap =  Map<String, dynamic>.from(resultMap);
+    if (result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> comMap = Map<String, dynamic>.from(resultMap);
         Community com = Community.fromMap(comMap);
         coms.add(com);
       });
@@ -87,10 +84,10 @@ class CommunityDataService {
     List<Community> coms = [];
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getNearbyCommunities');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
-    if (result.data != null){
-      List query =  List.from(result.data);
-      query.forEach((resultMap){
-        Map<String, dynamic> comMap =  Map<String, dynamic>.from(resultMap);
+    if (result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> comMap = Map<String, dynamic>.from(resultMap);
         Community com = Community.fromMap(comMap);
         coms.add(com);
       });
@@ -102,10 +99,10 @@ class CommunityDataService {
     List<Event> events = [];
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getUpcomingCommunityEvents');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'areaName': areaName, 'comName': comName});
-    if (result.data != null){
-      List query =  List.from(result.data);
-      query.forEach((resultMap){
-        Map<String, dynamic> eventMap =  Map<String, dynamic>.from(resultMap);
+    if (result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> eventMap = Map<String, dynamic>.from(resultMap);
         Event event = Event.fromMap(eventMap);
         events.add(event);
       });
@@ -117,10 +114,10 @@ class CommunityDataService {
     List<RecurringEvent> events = [];
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getRecurringCommunityEvents');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'areaName': areaName, 'comName': comName});
-    if (result.data != null){
-      List query =  List.from(result.data);
-      query.forEach((resultMap){
-        Map<String, dynamic> eventMap =  Map<String, dynamic>.from(resultMap);
+    if (result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> eventMap = Map<String, dynamic>.from(resultMap);
         RecurringEvent event = RecurringEvent.fromMap(eventMap);
         events.add(event);
       });
@@ -131,8 +128,7 @@ class CommunityDataService {
   Future<bool> checkIfCommunityExists(String areaName, String comName) async {
     bool exists = false;
     String modifiedComName = comName.contains("#") ? comName : "#$comName";
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-        functionName: 'checkIfCommunityExists');
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'checkIfCommunityExists');
     final HttpsCallableResult result = await callable.call(<String, dynamic>{'areaName': areaName, 'comName': modifiedComName});
     if (result.data != null) {
       exists = result.data;
@@ -184,16 +180,12 @@ class CommunityDataService {
     return success;
   }
 
-
-
   Future<List<CommunityNewsPost>> getPostsFromCommunity(String areaName, String communityName) async {
     List<CommunityNewsPost> posts = [];
-    QuerySnapshot querySnapshot = await communityNewsDataRef
-        .where("areaName", isEqualTo: areaName)
-        .where("communityName", isEqualTo: communityName)
-        .getDocuments();
-    if (querySnapshot.documents.isNotEmpty){
-      querySnapshot.documents.forEach((newsDoc){
+    QuerySnapshot querySnapshot =
+        await communityNewsDataRef.where("areaName", isEqualTo: areaName).where("communityName", isEqualTo: communityName).getDocuments();
+    if (querySnapshot.documents.isNotEmpty) {
+      querySnapshot.documents.forEach((newsDoc) {
         CommunityNewsPost newsPost = CommunityNewsPost.fromMap(newsDoc.data);
         posts.add(newsPost);
       });
@@ -208,8 +200,8 @@ class CommunityDataService {
         .where("communityName", isEqualTo: communityName)
         .where('recurrence', isEqualTo: 'none')
         .getDocuments();
-    if (querySnapshot.documents.isNotEmpty){
-      querySnapshot.documents.forEach((eventDoc){
+    if (querySnapshot.documents.isNotEmpty) {
+      querySnapshot.documents.forEach((eventDoc) {
         Event event = Event.fromMap(eventDoc.data);
         events.add(event);
       });
@@ -221,7 +213,7 @@ class CommunityDataService {
     List<Community> communities = [];
     String modifiedSearchTerm = searchTerm.contains("#") ? searchTerm : "#$searchTerm";
     DocumentSnapshot docSnap = await locRef.document(areaName).collection('communities').document(modifiedSearchTerm).get();
-    if (docSnap.exists && docSnap.data['status'] == "active"){
+    if (docSnap.exists && docSnap.data['status'] == "active") {
       Community com = Community.fromMap(docSnap.data);
       communities.add(com);
     }
@@ -231,9 +223,9 @@ class CommunityDataService {
   Future<List<Community>> searchForCommmunityByTag(String searchTerm, String areaName) async {
     List<Community> communities = [];
     QuerySnapshot querySnapshot = await locRef.document(areaName).collection('communities').where("subtags", arrayContains: searchTerm).getDocuments();
-    if (querySnapshot.documents.isNotEmpty){
-      querySnapshot.documents.forEach((docSnap){
-        if (docSnap.data['status'] == "active"){
+    if (querySnapshot.documents.isNotEmpty) {
+      querySnapshot.documents.forEach((docSnap) {
+        if (docSnap.data['status'] == "active") {
           Community com = Community.fromMap(docSnap.data);
           communities.add(com);
         }
@@ -247,12 +239,11 @@ class CommunityDataService {
     final String postID = "${Random().nextInt(999999999)}";
     String fileName = "$postID.jpg";
     communityNews.postID = postID;
-    if (newsImage != null){
+    if (newsImage != null) {
       String downloadUrl = await uploadNewsImage(newsImage, fileName);
       communityNews.imageURL = downloadUrl;
     }
-    await Firestore.instance.collection("community_news").document(postID).setData(communityNews.toMap()).whenComplete(() {
-    }).catchError((e) {
+    await Firestore.instance.collection("community_news").document(postID).setData(communityNews.toMap()).whenComplete(() {}).catchError((e) {
       error = e.toString();
     });
     return error;
@@ -270,7 +261,7 @@ class CommunityDataService {
     List comTags = [];
     List newTagList;
     int activityCount = 0;
-    int eventCount  = 0;
+    int eventCount = 0;
     DocumentSnapshot comDoc = await locRef.document(areaName).collection('communities').document(comName).get();
     comTags = comDoc.data['subtags'] == null ? [] : comDoc.data['subtags'];
     activityCount = comDoc.data['activityCount'] == null ? 0 : comDoc.data['activityCount'];
@@ -279,17 +270,22 @@ class CommunityDataService {
     eventCount += 1;
     newTagList = List.from(comTags)..addAll(tags);
     List uniqueTags = newTagList.toSet().toList();
-    await locRef.document(areaName).collection("communities").document(comName).updateData({"subtags": uniqueTags, "activityCount": activityCount, "eventCount": eventCount}).whenComplete(() {
-    }).catchError((e) {
-      error = e.toString();
-    });
+    await locRef
+        .document(areaName)
+        .collection("communities")
+        .document(comName)
+        .updateData({"subtags": uniqueTags, "activityCount": activityCount, "eventCount": eventCount})
+        .whenComplete(() {})
+        .catchError((e) {
+          error = e.toString();
+        });
     return error;
   }
 
   Future<CommunityNewsPost> getPost(String postID) async {
     CommunityNewsPost newPost;
     DocumentSnapshot comDoc = await communityNewsDataRef.document(postID).get();
-    if (comDoc.exists){
+    if (comDoc.exists) {
       newPost = CommunityNewsPost.fromMap(comDoc.data);
     }
     return newPost;
@@ -310,17 +306,15 @@ class CommunityDataService {
       comQuery.documents.forEach((comDoc) async {
         List members = [];
         List followers = [];
-        if (comDoc.data['memberIDs'] != null){
+        if (comDoc.data['memberIDs'] != null) {
           members = comDoc.data['memberIDs'].toList(growable: true);
         }
-        if (comDoc.data['followers'] != null){
+        if (comDoc.data['followers'] != null) {
           followers = comDoc.data['followers'].toList(growable: true);
         }
         List mergedMembersList = List.from(members)..addAll(followers);
         List newMembersList = mergedMembersList.toSet().toList(growable: true);
-        await locRef.document(locDoc.documentID).collection('communities').document(comDoc.documentID).updateData({
-          'memberIDs': newMembersList
-        });
+        await locRef.document(locDoc.documentID).collection('communities').document(comDoc.documentID).updateData({'memberIDs': newMembersList});
       });
     });
   }
@@ -332,29 +326,23 @@ class CommunityDataService {
       comQuery.documents.forEach((comDoc) async {
         List members = [];
         List followers = [];
-        if (comDoc.data['memberIDs'] != null){
+        if (comDoc.data['memberIDs'] != null) {
           members = comDoc.data['memberIDs'].toList(growable: true);
         }
         members.forEach((uid) async {
           DocumentSnapshot userDoc = await usersRef.document(uid).get();
           Map<dynamic, dynamic> userData = userDoc.data['d'];
           Map<dynamic, dynamic> userComs = userData['communities'];
-          if (userComs[locDoc.documentID] != null){
+          if (userComs[locDoc.documentID] != null) {
             List userAreaComs = userComs[locDoc.documentID].toList(growable: true);
-            if (!userAreaComs.contains(comDoc.documentID)){
+            if (!userAreaComs.contains(comDoc.documentID)) {
               userAreaComs.add(comDoc.documentID);
               userComs[locDoc.documentID] = userAreaComs;
-              //print(userComs);
-              await usersRef.document(uid).updateData({
-                'd.communities': userComs
-              });
+              await usersRef.document(uid).updateData({'d.communities': userComs});
             }
           }
-
-
         });
       });
     });
   }
-
 }
