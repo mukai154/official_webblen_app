@@ -1,141 +1,292 @@
+import 'dart:async';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/models/webblen_chat_message.dart';
-import 'package:webblen/models/community_news.dart';
-import 'package:webblen/models/webblen_reward.dart';
-import 'package:webblen/user_pages/reward_payout_page.dart';
-import 'package:webblen/user_pages/shop_page.dart';
-import 'package:webblen/event_pages/event_check_in_page.dart';
-import 'package:webblen/user_pages/user_ranks_page.dart';
-import 'package:webblen/event_pages/create_reward_page.dart';
-import 'package:webblen/user_pages/user_details_page.dart';
-import 'package:webblen/event_pages/create_flash_event_page.dart';
-import 'package:webblen/user_pages/friends_page.dart';
-import 'package:webblen/user_pages/chat_page.dart';
-import 'package:webblen/user_pages/messages_page.dart';
-import 'package:webblen/community_pages/community_create_post_page.dart';
-import 'package:webblen/user_pages/notifications_page.dart';
-import 'package:webblen/user_pages/users_search_page.dart';
-import 'package:webblen/user_pages/join_waitlist_page.dart';
-import 'package:webblen/user_pages/settings_page.dart';
-import 'package:webblen/user_pages/transaction_history_page.dart';
-import 'package:webblen/models/community.dart';
-import 'package:webblen/event_pages/event_details_page.dart';
-import 'package:webblen/event_pages/create_event_page.dart';
-import 'package:webblen/event_pages/event_attendees_page.dart';
-import 'package:webblen/event_pages/event_edit_page.dart';
-import 'package:webblen/user_pages/create_ad_page.dart';
-import 'package:webblen/event_pages/create_recurring_event_page.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:location/location.dart';
+import 'package:location_permissions/location_permissions.dart';
+import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase_data/platform_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase_services/remote_messaging.dart';
+import 'package:webblen/home_pages/event_feed_page.dart';
+import 'package:webblen/home_pages/home_dashboard_page.dart';
+import 'package:webblen/home_pages/location_permissions_page.dart';
+import 'package:webblen/home_pages/location_unavailable_page.dart';
+import 'package:webblen/home_pages/network_status_page.dart';
+import 'package:webblen/home_pages/news_feed_page.dart';
+import 'package:webblen/home_pages/update_required_page.dart';
 import 'package:webblen/home_pages/wallet_page.dart';
-import 'package:webblen/user_pages/discover_page.dart';
-import 'package:webblen/community_pages/community_profile_page.dart';
-import 'package:webblen/community_pages/choose_post_type_page.dart';
-import 'package:webblen/models/event.dart';
-import 'package:webblen/community_pages/my_communities_page.dart';
-import 'package:webblen/community_pages/community_new_page.dart';
-import 'package:webblen/community_pages/community_post_comments_page.dart';
-import 'package:webblen/community_pages/invite_members_page.dart';
-import 'package:webblen/user_pages/search_page.dart';
-import 'package:webblen/community_pages/choose_community.dart';
-import 'package:webblen/home_page.dart';
-import 'package:webblen/auth_pages/choose_sim_page.dart';
-import 'package:webblen/event_pages/webblen_events_page.dart';
-import 'package:webblen/user_pages/add_com_image_page.dart';
-import 'package:webblen/models/community_request.dart';
-import 'package:webblen/community_request_pages/community_request_details_page.dart';
-import 'package:webblen/community_request_pages/community_requests_page.dart';
-import 'package:webblen/community_request_pages/create_community_request.dart';
+import 'package:webblen/models/community_news.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/services_general/services_location.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/utils/network_status.dart';
+import 'package:webblen/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
+import 'package:webblen/widgets_data_streams/stream_user_account.dart';
+import 'package:webblen/widgets_data_streams/stream_user_notifications.dart';
+import 'package:webblen/widgets_home/check_in_floating_action.dart';
+import 'package:webblen/widgets_home/user_drawer_menu.dart';
 
+import 'animations/shake_animation.dart';
+import 'user_pages/notifications_page.dart';
 
-
-class PageTransitionService{
-
-  final BuildContext context;
-  final bool isRecurring;
-  final List userIDs;
-  final String uid;
-  final List<WebblenUser> usersList;
-  final String username;
-  final String areaName;
-  final CommunityRequest comRequest;
-  final WebblenUser webblenUser;
-  final WebblenUser currentUser;
-  final WebblenChat chat;
-  final String chatDocKey;
-  final String peerUsername;
-  final String peerProfilePic;
-  final String profilePicUrl;
-  final CommunityNewsPost newsPost;
-  final WebblenReward reward;
-  final Event event;
-  final List<Event> events;
-  final RecurringEvent recurringEvent;
-  final String eventKey;
-  final bool eventIsLive;
-  final Community community;
-  final String newEventOrPost;
-  final bool viewingMembersOrAttendees;
+class HomePage extends StatefulWidget {
   final String simLocation;
   final double simLat;
   final double simLon;
+  HomePage({this.simLocation, this.simLat, this.simLon});
 
-  PageTransitionService({
-    this.context, this.username, this.isRecurring,
-    this.uid, this.usersList, this.webblenUser,
-    this.currentUser, this.chat, this.chatDocKey,
-    this.peerProfilePic, this.peerUsername, this.profilePicUrl,
-    this.newsPost, this.reward, this.event, this.recurringEvent,
-    this.eventKey, this.userIDs, this.eventIsLive, this.community,
-    this.areaName, this.newEventOrPost, this.viewingMembersOrAttendees,
-    this.simLocation, this.simLat, this.simLon, this.events, this.comRequest
-  });
+  @override
+  _HomePageState createState() => _HomePageState();
+}
 
-  void transitionToRootPage () => Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-  void transitionToLoginPage () => Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-  void transitionToChooseSim () => Navigator.push(context, MaterialPageRoute(builder: (context) => ChooseSimPage()));
-  void transitionToSim () => Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(simLocation: simLocation, simLat: simLat, simLon: simLon)));
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  bool isConnectedToNetwork = false;
+  var _homeScaffoldKey = GlobalKey<ScaffoldState>();
+  final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
+  String notifToken;
+  String simLocation = "";
+  WebblenUser currentUser;
+  bool updateRequired = false;
+  String uid;
+  NetworkImage userImage;
+  bool isLoading = true;
+  int activeUserCount;
+  double currentLat;
+  double currentLon;
+  List<CommunityNewsPost> communityNewsPosts;
+  bool didClickNotice = false;
+  bool checkInAvailable = false;
+  bool hasLocation = false;
+  bool webblenIsAvailable = true;
+  bool viewedAd = false;
+  String areaName;
+  int pageIndex = 0;
 
-  void returnToRootPage () => Navigator.of(context).popUntil((route) => route.isFirst);
-//  void transitionToEventListPage () =>  Navigator.push(context, SlideFromRightRoute(widget: EventCalendarPage(currentUser: currentUser)));
-//  void transitionToEventEditPage () =>  Navigator.push(context, SlideFromRightRoute(widget: EventEditPage(event: event, currentUser: currentUser, eventIsLive: eventIsLive)));
-  void transitionToWebblenEventsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => WebblenEventsFeedPage(currentUser: currentUser, events: events)));
-  void transitionToNewEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateEventPage(currentUser: currentUser, community: community, isRecurring: isRecurring)));
-  void transitionToNewRecurringEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateRecurringEventPage(currentUser: currentUser, community: community)));
-  void transitionToNewFlashEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => CreateFlashEventPage(currentUser: currentUser)));
-  void transitionToEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => EventDetailsPage(event: event, currentUser: currentUser, eventIsLive: eventIsLive)));
-  void transitionToReccurringEventPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) => RecurringEventDetailsPage(event: recurringEvent, currentUser: currentUser)));
-  void transitionToShopPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  ShopPage(currentUser: currentUser)));
-  void transitionToCheckInPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  EventCheckInPage(currentUser: currentUser)));
-  void transitionToEventAttendeesPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  EventAttendeesPage(currentUser: currentUser, eventKey: eventKey,)));
-  void transitionToUserRanksPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserRanksPage(simLocation: simLocation, simLat: simLat, simLon: simLon)));
-  void transitionToCreateRewardPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateRewardPage()));
-  void transitionToFriendsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  FriendsPage(uid: uid)));
-  void transitionToChatPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  Chat(chatDocKey: chatDocKey, currentUser: currentUser, peerProfilePic: peerProfilePic, peerUsername: peerUsername)));
-  void transitionToMessagesPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MessagesPage(currentUser: currentUser)));
-  void transitionToCurrentUserDetailsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CurrentUserDetailsPage(currentUser: currentUser)));
-  void transitionToUserDetailsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserDetailsPage(currentUser: currentUser, webblenUser: webblenUser)));
-  void transitionToWalletPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  WalletPage(currentUser: currentUser)));
-  void transitionToDiscoverPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  DiscoverPage(uid: uid, areaName: areaName, simLocation: simLocation, simLat: simLat, simLon: simLon)));
-  void transitionToMyCommunitiesPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  MyCommunitiesPage(uid: uid, areaName: areaName)));
-  void transitionToNewCommunityPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateCommunityPage(areaName: areaName)));
-  void transitionToChoosePostTypePage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  ChoosePostTypePage(currentUser: currentUser, community: community)));
-  void transitionToPostCommentsPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityPostCommentsPage(currentUser: currentUser, newsPost: newsPost)));
-  void transitionToCommunityProfilePage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityProfilePage(currentUser: currentUser, community: community)));
-  void transitionToCommunityInvitePage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  InviteMembersPage(currentUser: currentUser, community: community)));
-  void transitionToCommunityCreatePostPage () =>  Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityCreatePostPage(currentUser: currentUser, community: community)));
-//  void transitionToCommunityBuilderPage () => Navigator.push(context, SlideFromRightRoute(widget: CommunityCreatePostPage(currentUser: currentUser, community: community)));
-  void transitionToNotificationsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  NotificationPage(currentUser: currentUser)));
-  void transitionToSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  SearchPage(currentUser: currentUser, areaName: areaName)));
-  void transitionToUserSearchPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  UserSearchPage(currentUser: currentUser, userIDs: userIDs, userList: usersList,viewingMembersOrAttendees: viewingMembersOrAttendees)));
-  void transitionToSettingsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(currentUser: currentUser)));
-  void transitionToRewardPayoutPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  RewardPayoutPage(redeemingReward: reward,currentUser: currentUser)));
-  void transitionToTransactionHistoryPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  TransactionHistoryPage(currentUser: currentUser)));
-  void transitionToWaitListPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  JoinWaitlistPage(currentUser: currentUser)));
-  void transitionToChooseCommunityPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  ChooseCommunityPage(uid: uid, newEventOrPost: newEventOrPost)));
-  void transitionToCreateAdPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateAdPage(currentUser: currentUser)));
-  void transitionToComImagePage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  AddComImage(com: community)));
-  void transitionToCommunityRequestPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityRequestsPage(currentUser: currentUser, areaName: areaName, simLat: simLat, simLon: simLon, simLocation: simLocation)));
-  void transitionToCommunityRequestDetailsPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CommunityRequestDetailsPage(request: comRequest, currentUser: currentUser)));
-  void transitionToCreateCommunityRequestPage () => Navigator.push(context, MaterialPageRoute(builder: (context) =>  CreateCommunityRequestPage(currentUser: currentUser, areaName: areaName)));
+  final PageStorageBucket pageStorageBucket = PageStorageBucket();
+  final Key homePageKey = PageStorageKey('homeKey');
+  final Key newsPageKey = PageStorageKey('newsPageKey');
+  final Key eventsPageKey = PageStorageKey('eventsPageKey');
+  final Key walletPageKey = PageStorageKey('walletPageKey');
 
+  Future<Null> initialize() async {
+    isConnectedToNetwork = await NetworkStatus().isConnected();
+    if (isConnectedToNetwork) {
+      BaseAuth().currentUser().then((val) {
+        uid = val;
+        UserDataService().checkIfUserExists(uid).then((exists) {
+          if (exists) {
+            UserDataService().getUserByID(uid).then((user) {
+              currentUser = user;
+              checkPermissions();
+            });
+          } else {
+            Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
+          }
+        });
+      });
+    } else {
+      isLoading = false;
+      setState(() {});
+    }
+  }
+
+  checkPermissions() async {
+    LocationService().checkLocationPermissions().then((locationPermissions) async {
+      if (locationPermissions == 'PermissionStatus.unknown') {
+        String permissions = await LocationService().requestPermssion();
+        if (permissions == 'PermissionStatus.denied') {
+          hasLocation = false;
+          isLoading = false;
+          setState(() {});
+        } else {
+          loadLocation();
+        }
+      } else if (locationPermissions == 'PermissionStatus.denied') {
+        hasLocation = false;
+        isLoading = false;
+        setState(() {});
+      } else {
+        loadLocation();
+      }
+    });
+  }
+
+  Future<Null> loadLocation() async {
+    if (widget.simLocation != null) {
+      simLocation = widget.simLocation;
+      currentLat = widget.simLat;
+      currentLon = widget.simLon;
+      hasLocation = true;
+      getPlatformData(currentLat, currentLon);
+    } else {
+      LocationData location = await LocationService().getCurrentLocation(context);
+      if (location != null) {
+        hasLocation = true;
+        currentLat = location.latitude;
+        currentLon = location.longitude;
+        FirebaseMessagingService().updateFirebaseMessageToken(uid);
+        FirebaseMessagingService().configFirebaseMessaging(context, currentUser);
+        UserDataService().updateUserAppOpen(uid, currentLat, currentLon);
+//        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
+        EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result) {
+          checkInAvailable = result;
+          getPlatformData(currentLat, currentLon);
+        });
+      } else {
+        hasLocation = false;
+        isLoading = false;
+        setState(() {});
+      }
+    }
+  }
+
+  Future<Null> getPlatformData(double lat, double lon) async {
+    PlatformDataService().getAreaName(lat, lon).then((area) {
+      if (area.isEmpty) {
+        webblenIsAvailable = false;
+      }
+      areaName = area;
+      isLoading = false;
+      setState(() {});
+    });
+    PlatformDataService().isUpdateAvailable().then((updateIsAvailable) {
+      if (updateIsAvailable) {
+        setState(() {
+          updateRequired = updateIsAvailable;
+        });
+      }
+    });
+  }
+
+  bool updateAlertIsEnabled() {
+    bool showAlert = false;
+    if (!isLoading && updateRequired) {
+      showAlert = true;
+    }
+    return showAlert;
+  }
+
+  void didPressNotificationsBell() {
+    if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation) {
+      returnIndexFromNotifPage(context);
+    } else if (updateAlertIsEnabled()) {
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void didPressCheckIn() {
+    if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation) {
+      HapticFeedback.selectionClick();
+      PageTransitionService(context: context, currentUser: currentUser).transitionToCheckInPage();
+    } else if (updateAlertIsEnabled()) {
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void didPressAccountButton() {
+    if (!isLoading && currentUser != null && !updateAlertIsEnabled() && hasLocation) {
+      _homeScaffoldKey.currentState.openDrawer();
+    } else if (updateAlertIsEnabled()) {
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void returnIndexFromNotifPage(BuildContext context) async {
+    final returningPageIndex = await Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage(currentUser: currentUser)));
+    if (returningPageIndex != null) {
+      setState(() {
+        pageIndex = returningPageIndex;
+      });
+    }
+  }
+
+  void reloadData() {
+    setState(() {
+      isLoading = true;
+    });
+    initialize();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pageViews = [
+      HomeDashboardPage(
+        updateRequired: updateRequired,
+        currentUser: currentUser,
+        areaName: areaName,
+        currentLat: currentLat,
+        currentLon: currentLon,
+        key: homePageKey,
+        notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()), //() => didPressNotificationsBell(),
+        accountWidget: StreamUserAccount(uid: uid, accountAction: () => didPressAccountButton()),
+      ),
+      NewsFeedPage(
+          uid: uid,
+          key: newsPageKey,
+          discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
+      EventFeedPage(
+          currentUser: currentUser,
+          areaName: areaName,
+          key: eventsPageKey,
+          currentLat: currentLat,
+          currentLon: currentLon,
+          discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
+      WalletPage(currentUser: currentUser, key: walletPageKey)
+    ];
+
+    return Scaffold(
+      key: _homeScaffoldKey,
+      drawer: UserDrawerMenu(context: context, currentUser: currentUser).buildUserDrawerMenu(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      //() => didPressCheckIn(
+      floatingActionButton: isLoading
+          ? CustomCircleProgress(20.0, 20.0, 20.0, 20.0, FlatColors.webblenRed)
+          : checkInAvailable
+              ? ShakeAnimation(widgetToShake: CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: true))
+              : CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: false),
+      bottomNavigationBar: FABBottomAppBar(
+        centerItemText: 'Check In',
+        notchedShape: CircularNotchedRectangle(),
+        backgroundColor: Colors.white,
+        onTabSelected: (int index) {
+          setState(() {
+            pageIndex = index;
+          });
+        },
+        items: [
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.home, text: 'Home'),
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.newspaper, text: 'News'),
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.calendarDay, text: 'Events'),
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.wallet, text: 'Wallet'),
+        ],
+      ),
+      body: PageStorage(
+          bucket: pageStorageBucket,
+          child: isLoading == true
+              ? Container()
+              : !isConnectedToNetwork
+                  ? NetworkStatusPage(reloadAction: () => reloadData())
+                  : !hasLocation
+                      ? LocationPermissionsPage(reloadAction: () => reloadData(), enableLocationAction: () => LocationPermissions().openAppSettings())
+                      : !webblenIsAvailable ? LocationUnavailablePage(currentUser: currentUser) : updateRequired ? UpdateRequiredPage() : pageViews[pageIndex]),
+    );
+  }
 }
