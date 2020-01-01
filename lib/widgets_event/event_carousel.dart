@@ -19,9 +19,9 @@ class EventCarousel extends StatelessWidget {
       width: MediaQuery.of(context).size.width,
       child: Center(
         child: CarouselSlider(
-          items:  BuildEvents(context: context, events: events, size: MediaQuery.of(context).size.width * 0.40, currentUser: currentUser).build(),
-          height: MediaQuery.of(context).size.height * 0.22 + 36,
-          viewportFraction: 0.50,
+          items:  BuildEvents(context: context, events: events, size: MediaQuery.of(context).size.width * 0.42, currentUser: currentUser).build(),
+          height: MediaQuery.of(context).size.height * 0.22 + 30,
+          viewportFraction: 0.40,
           autoPlay: false,
           enlargeCenterPage: false,
           //autoPlayAnimationDuration: Duration(seconds: 2),
