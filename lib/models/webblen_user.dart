@@ -32,8 +32,6 @@ class WebblenUser {
   bool isOnWaitList;
   String messageToken;
   bool isNew;
-  Map<dynamic, dynamic> communities;
-  Map<dynamic, dynamic> followingCommunities;
   bool canMakeAds;
   int apLvl;
   double ap;
@@ -73,8 +71,6 @@ class WebblenUser {
     this.isOnWaitList,
     this.messageToken,
     this.isNew,
-    this.communities,
-    this.followingCommunities,
     this.canMakeAds,
     this.apLvl,
     this.ap,
@@ -118,8 +114,6 @@ class WebblenUser {
       isOnWaitList: data['isOnWaitList'],
       messageToken: data['messageToken'],
       isNew: data['isNew'],
-      communities: data['communities'],
-      followingCommunities: data['followingCommunities'],
       canMakeAds: data['canMakeAds'],
       ap: data['ap'],
       apLvl: data['apLvl'],
@@ -160,8 +154,6 @@ class WebblenUser {
     'isOnWaitList': this.isOnWaitList,
     'messageToken': this.messageToken,
     'isNew': this.isNew,
-    'communities': this.communities,
-    'followingCommunities': this.followingCommunities,
     'canMakeAds': this.canMakeAds,
     'ap': this.ap,
     'apLvl': this.apLvl,
