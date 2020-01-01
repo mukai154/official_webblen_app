@@ -31,7 +31,7 @@ class CommunityRequestRow extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.only(left: 16.0, top: 12.0, right: 8.0),
                       constraints: BoxConstraints(
-                          maxWidth: 400
+                          maxWidth: MediaQuery.of(context).size.width * 0.9
                       ),
                       child: Fonts().textW700(request.requestTitle, 24.0, Colors.black, TextAlign.start),
                     )
