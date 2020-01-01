@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:webblen/styles/fonts.dart';
 
 class FacebookBtn extends StatelessWidget {
 
@@ -29,7 +30,7 @@ class FacebookBtn extends StatelessWidget {
                 SizedBox(width: 16.0),
                 MediaQuery(
                   data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                  child: Text(buttonText, style: TextStyle(color: Colors.white)),
+                  child: Fonts().textW400(buttonText, 14.0, Colors.white, TextAlign.left)
                 ),
               ],
             ),
