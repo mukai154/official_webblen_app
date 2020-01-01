@@ -1,15 +1,14 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:io';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:image_picker/image_picker.dart';
-import 'package:image_cropper/image_cropper.dart';
-import 'package:webblen/styles/flat_colors.dart';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart' as path_provider;
 
 class WebblenImagePicker {
-
   final BuildContext context;
   final double ratioX;
   final double ratioY;
@@ -24,9 +23,10 @@ class WebblenImagePicker {
     File img = await ImagePicker.pickImage(source: ImageSource.gallery);
     if (img != null) {
       croppedImageFile = await cropImage(img);
-      if (croppedImageFile != null){
+      if (croppedImageFile != null) {
         croppedImageFile = await FlutterImageCompress.compressAndGetFile(
-          croppedImageFile.absolute.path, targetPath,
+          croppedImageFile.absolute.path,
+          targetPath,
           quality: 45,
         );
       }
@@ -42,9 +42,10 @@ class WebblenImagePicker {
     File img = await ImagePicker.pickImage(source: ImageSource.camera);
     if (img != null) {
       croppedImageFile = await cropImage(img);
-      if (croppedImageFile != null){
+      if (croppedImageFile != null) {
         croppedImageFile = await FlutterImageCompress.compressAndGetFile(
-          croppedImageFile.absolute.path, targetPath,
+          croppedImageFile.absolute.path,
+          targetPath,
           quality: 25,
         );
       }
@@ -55,13 +56,10 @@ class WebblenImagePicker {
   Future<File> cropImage(File img) async {
     File croppedImageFile;
     croppedImageFile = await ImageCropper.cropImage(
-        sourcePath: img.path,
-        ratioX: ratioX,
-        ratioY: ratioY,
-        toolbarTitle: 'Cropper',
-        toolbarColor: FlatColors.darkGray
+      sourcePath: img.path,
+      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
+      androidUiSettings: AndroidUiSettings(toolbarTitle: 'Crop Image', toolbarColor: Colors.white),
     );
     return croppedImageFile;
   }
-
 }
