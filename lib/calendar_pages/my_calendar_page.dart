@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:webblen/firebase_data/calender_event_data.dart';
+import 'package:webblen/firebase_data/calendar_event_data.dart';
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/event.dart';

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/firebase_data/calender_event_data.dart';
+import 'package:webblen/firebase_data/calendar_event_data.dart';
 import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';

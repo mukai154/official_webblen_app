@@ -5,9 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:random_string/random_string.dart';
+import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_notification.dart';
-
-import 'user_data.dart';
 
 class WebblenNotificationDataService {
   final CollectionReference notifRef = Firestore.instance.collection("user_notifications");

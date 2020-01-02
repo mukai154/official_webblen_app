@@ -13,7 +13,7 @@ import 'package:webblen/models/event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/utils/time.dart';
 
-import 'calender_event_data.dart';
+import 'calendar_event_data.dart';
 
 class EventDataService {
   Geoflutterfire geo = Geoflutterfire();
