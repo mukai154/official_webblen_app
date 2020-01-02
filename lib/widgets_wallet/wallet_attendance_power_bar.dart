@@ -86,7 +86,7 @@ class SmallAttendancePowerBar extends StatelessWidget {
 
   SmallAttendancePowerBar({this.currentAP, this.apLvl});
 
-  final double barHeight = 16.0;
+  final double barHeight = 10.0;
 
   @override
   Widget build(BuildContext context) {

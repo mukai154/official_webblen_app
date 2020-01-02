@@ -3,6 +3,7 @@ import 'user_details_profile_pic.dart';
 import 'package:webblen/widgets_wallet/wallet_attendance_power_bar.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
 
 class UserDetailsHeader extends StatelessWidget {
 
@@ -11,37 +12,46 @@ class UserDetailsHeader extends StatelessWidget {
   final double ap;
   final int apLvl;
   final String eventHistoryCount;
+  final String communityCount;
   final VoidCallback addFriendAction;
   final VoidCallback viewFriendsAction;
+  final bool isLoading;
 
-  UserDetailsHeader({this.username, this.userPicUrl, this.ap, this.apLvl, this.eventHistoryCount, this.addFriendAction, this.viewFriendsAction});
+  UserDetailsHeader({this.username, this.userPicUrl, this.ap, this.apLvl, this.communityCount, this.eventHistoryCount, this.addFriendAction, this.viewFriendsAction, this.isLoading});
 
   @override
   Widget build(BuildContext context) {
 
     return Container(
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
+            mainAxisAlignment:  MainAxisAlignment.center,
             children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 0.0),
-                    child: UserDetailsProfilePic(userPicUrl: userPicUrl, size: 90.0),
-                  )
-                ],
-              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
+                child: UserDetailsProfilePic(userPicUrl: userPicUrl, size: 90.0),
+              )
             ],
           ),
-          SizedBox(height: 14.0),
           Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
+              Fonts().textW700("@$username", 18.0, Colors.black, TextAlign.left),
+              SizedBox(height: 4.0),
+              isLoading
+                ? Container(
+                  margin: EdgeInsets.only(top: 4.0),
+                  height: 1.0,
+                  width: MediaQuery.of(context).size.width * 0.4,
+                  child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed))
+                : Fonts().textW500("Communities: $communityCount | Events Attended: $eventHistoryCount", 12.0, Colors.black, TextAlign.left),
+              SizedBox(height: 8.0),
               SmallAttendancePowerBar(currentAP: ap, apLvl: apLvl),
               SizedBox(height: 4.0),
-              Fonts().textW400('Attendance Power', 12.0, FlatColors.darkGray, TextAlign.center)
+              Fonts().textW300('Attendance Power', 10, Colors.black, TextAlign.left)
             ],
           ),
         ],

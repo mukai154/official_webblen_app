@@ -207,12 +207,16 @@ class _WalletPageState extends State<WalletPage> {
               children: <Widget>[
                 Container(
                   height: 70,
-                  margin: EdgeInsets.only(left: 16, top: 30, right: 16),
+                  margin: EdgeInsets.only(left: 16, top: 35, right: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Fonts().textW700('Wallet', 40, Colors.black, TextAlign.left),
+                      MediaQuery(
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                        child: Fonts().textW700('Wallet', 40, Colors.black, TextAlign.left),
+                      ),
+
                     GestureDetector(
                         onTap: () => PageTransitionService(context: context, currentUser: currentUser).transitionToShopPage(),
                         child:  Padding(
@@ -237,7 +241,7 @@ class _WalletPageState extends State<WalletPage> {
                   ),
                 ),
                 Container(
-                  margin: EdgeInsets.only(left: 16, top: 16, right: 16),
+                  margin: EdgeInsets.only(left: 16, top: 8, right: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[

@@ -1,40 +1,42 @@
 import 'dart:async';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/widgets_common/common_appbar.dart';
 import 'package:flutter/material.dart';
-import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/firebase_data/auth.dart';
-import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/platform_data.dart';
-import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services_general/services_location.dart';
-import 'package:location/location.dart';
-import 'package:webblen/models/community_news.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/widgets_home/user_drawer_menu.dart';
-import 'package:webblen/styles/flat_colors.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'home_pages/home_dashboard_page.dart';
-import 'home_pages/event_feed_page.dart';
-import 'home_pages/news_feed_page.dart';
-import 'home_pages/wallet_page.dart';
-import 'home_pages/location_permissions_page.dart';
-import 'home_pages/update_required_page.dart';
-import 'home_pages/location_unavailable_page.dart';
-import 'user_pages/notifications_page.dart';
+import 'package:location/location.dart';
+import 'package:location_permissions/location_permissions.dart';
+import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase_data/platform_data.dart';
+import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase_services/remote_messaging.dart';
+import 'package:webblen/home_pages/event_feed_page.dart';
+import 'package:webblen/home_pages/home_dashboard_page.dart';
+import 'package:webblen/home_pages/location_permissions_page.dart';
+import 'package:webblen/home_pages/location_unavailable_page.dart';
+import 'package:webblen/home_pages/network_status_page.dart';
+import 'package:webblen/home_pages/news_feed_page.dart';
+import 'package:webblen/home_pages/update_required_page.dart';
+import 'package:webblen/home_pages/wallet_page.dart';
+import 'package:webblen/models/community_news.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/services_general/services_location.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/utils/network_status.dart';
+import 'package:webblen/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/widgets_data_streams/stream_user_account.dart';
 import 'package:webblen/widgets_data_streams/stream_user_notifications.dart';
-import 'package:webblen/utils/geofencing.dart';
-import 'widgets_home/check_in_floating_action.dart';
-import 'package:webblen/firebase_services/remote_messaging.dart';
-import 'package:flutter/services.dart';
-import 'package:location_permissions/location_permissions.dart';
+import 'package:webblen/widgets_home/check_in_floating_action.dart';
+import 'package:webblen/widgets_home/user_drawer_menu.dart';
+
 import 'animations/shake_animation.dart';
+import 'user_pages/notifications_page.dart';
 
 class HomePage extends StatefulWidget {
-
   final String simLocation;
   final double simLat;
   final double simLon;
@@ -45,9 +47,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
-
+  bool isConnectedToNetwork = false;
   var _homeScaffoldKey = GlobalKey<ScaffoldState>();
-
   final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
   String notifToken;
   String simLocation = "";
@@ -75,33 +76,39 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final Key walletPageKey = PageStorageKey('walletPageKey');
 
   Future<Null> initialize() async {
-    BaseAuth().currentUser().then((val) {
-      uid = val;
-      UserDataService().checkIfUserExists(uid).then((exists){
-        if (exists) {
-          UserDataService().getUserByID(uid).then((user){
-            currentUser = user;
-            checkPermissions();
-          });
-        } else {
-          Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
-        }
+    isConnectedToNetwork = await NetworkStatus().isConnected();
+    if (isConnectedToNetwork) {
+      BaseAuth().currentUser().then((val) {
+        uid = val;
+        UserDataService().checkIfUserExists(uid).then((exists) {
+          if (exists) {
+            UserDataService().getUserByID(uid).then((user) {
+              currentUser = user;
+              checkPermissions();
+            });
+          } else {
+            Navigator.of(context).pushNamedAndRemoveUntil('/setup', (Route<dynamic> route) => false);
+          }
+        });
       });
-    });
+    } else {
+      isLoading = false;
+      setState(() {});
+    }
   }
 
   checkPermissions() async {
     LocationService().checkLocationPermissions().then((locationPermissions) async {
-      if (locationPermissions == 'PermissionStatus.unknown'){
+      if (locationPermissions == 'PermissionStatus.unknown') {
         String permissions = await LocationService().requestPermssion();
-        if (permissions == 'PermissionStatus.denied'){
+        if (permissions == 'PermissionStatus.denied') {
           hasLocation = false;
           isLoading = false;
           setState(() {});
         } else {
           loadLocation();
         }
-      } else if (locationPermissions == 'PermissionStatus.denied'){
+      } else if (locationPermissions == 'PermissionStatus.denied') {
         hasLocation = false;
         isLoading = false;
         setState(() {});
@@ -112,7 +119,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Future<Null> loadLocation() async {
-    if (widget.simLocation != null){
+    if (widget.simLocation != null) {
       simLocation = widget.simLocation;
       currentLat = widget.simLat;
       currentLon = widget.simLon;
@@ -127,8 +134,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         FirebaseMessagingService().updateFirebaseMessageToken(uid);
         FirebaseMessagingService().configFirebaseMessaging(context, currentUser);
         UserDataService().updateUserAppOpen(uid, currentLat, currentLon);
-        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
-        EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result){
+//        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
+        EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result) {
           checkInAvailable = result;
           getPlatformData(currentLat, currentLon);
         });
@@ -158,50 +165,49 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     });
   }
 
-  bool updateAlertIsEnabled(){
+  bool updateAlertIsEnabled() {
     bool showAlert = false;
-    if (!isLoading && updateRequired){
+    if (!isLoading && updateRequired) {
       showAlert = true;
     }
     return showAlert;
   }
 
-  void didPressNotificationsBell(){
-    if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation){
+  void didPressNotificationsBell() {
+    if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation) {
       returnIndexFromNotifPage(context);
-    } else if (updateAlertIsEnabled()){
+    } else if (updateAlertIsEnabled()) {
       ShowAlertDialogService().showUpdateDialog(context);
     }
   }
 
-  void didPressCheckIn(){
-    if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation){
+  void didPressCheckIn() {
+    if (!isLoading && currentUser.username != null && !updateAlertIsEnabled() && hasLocation) {
       HapticFeedback.selectionClick();
       PageTransitionService(context: context, currentUser: currentUser).transitionToCheckInPage();
-    } else if (updateAlertIsEnabled()){
+    } else if (updateAlertIsEnabled()) {
       ShowAlertDialogService().showUpdateDialog(context);
     }
   }
 
-  void didPressAccountButton(){
-    if (!isLoading && currentUser != null && !updateAlertIsEnabled() && hasLocation){
+  void didPressAccountButton() {
+    if (!isLoading && currentUser != null && !updateAlertIsEnabled() && hasLocation) {
       _homeScaffoldKey.currentState.openDrawer();
-    } else if (updateAlertIsEnabled()){
+    } else if (updateAlertIsEnabled()) {
       ShowAlertDialogService().showUpdateDialog(context);
     }
   }
 
   void returnIndexFromNotifPage(BuildContext context) async {
     final returningPageIndex = await Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationPage(currentUser: currentUser)));
-      if (returningPageIndex != null){
-        setState(() {
-          pageIndex = returningPageIndex;
-        });
-      }
-
+    if (returningPageIndex != null) {
+      setState(() {
+        pageIndex = returningPageIndex;
+      });
+    }
   }
 
-  void reloadData(){
+  void reloadData() {
     setState(() {
       isLoading = true;
     });
@@ -229,55 +235,58 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         currentLat: currentLat,
         currentLon: currentLon,
         key: homePageKey,
-        notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()),//() => didPressNotificationsBell(),
+        notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()), //() => didPressNotificationsBell(),
         accountWidget: StreamUserAccount(uid: uid, accountAction: () => didPressAccountButton()),
       ),
-      NewsFeedPage(uid: uid, key: newsPageKey,  discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
-      EventFeedPage(currentUser: currentUser, areaName: areaName, key: eventsPageKey, currentLat: currentLat, currentLon: currentLon, discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
+      NewsFeedPage(
+          uid: uid,
+          key: newsPageKey,
+          discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
+      EventFeedPage(
+          currentUser: currentUser,
+          areaName: areaName,
+          key: eventsPageKey,
+          currentLat: currentLat,
+          currentLon: currentLon,
+          discoverAction: isLoading ? null : () => PageTransitionService(context: context, uid: uid, areaName: areaName).transitionToDiscoverPage()),
       WalletPage(currentUser: currentUser, key: walletPageKey)
     ];
 
     return Scaffold(
-        key: _homeScaffoldKey,
-        drawer: UserDrawerMenu(context: context, currentUser: currentUser).buildUserDrawerMenu(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        //() => didPressCheckIn(
-        floatingActionButton: isLoading
+      key: _homeScaffoldKey,
+      drawer: UserDrawerMenu(context: context, currentUser: currentUser).buildUserDrawerMenu(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      //() => didPressCheckIn(
+      floatingActionButton: isLoading
           ? CustomCircleProgress(20.0, 20.0, 20.0, 20.0, FlatColors.webblenRed)
           : checkInAvailable
-            ? ShakeAnimation(widgetToShake: CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: true))
-            : CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: false),
-        bottomNavigationBar: FABBottomAppBar(
-          centerItemText: 'Check In',
-          notchedShape: CircularNotchedRectangle(),
-          backgroundColor: Colors.white,
-          onTabSelected: (int index) {
-            setState(() {
-              pageIndex = index;
-            });
-          },
-          items: [
-            FABBottomAppBarItem(iconData: FontAwesomeIcons.home, text: 'Home'),
-            FABBottomAppBarItem(iconData: FontAwesomeIcons.newspaper, text: 'News'),
-            FABBottomAppBarItem(iconData: FontAwesomeIcons.calendarDay, text: 'Events'),
-            FABBottomAppBarItem(iconData: FontAwesomeIcons.wallet, text: 'Wallet'),
-          ],
-        ),
-        body: PageStorage(
-            bucket: pageStorageBucket,
-            child: isLoading == true ? Container()
-                : !hasLocation
-                ? LocationPermissionsPage(reloadAction: () => reloadData(), enableLocationAction: () => LocationPermissions().openAppSettings())
-                : !webblenIsAvailable
-                ? LocationUnavailablePage(currentUser: currentUser)
-                : updateRequired
-                ? UpdateRequiredPage()
-                : pageViews[pageIndex]
-        ),
+              ? ShakeAnimation(widgetToShake: CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: true))
+              : CheckInFloatingAction(checkInAction: () => didPressCheckIn(), checkInAvailable: false),
+      bottomNavigationBar: FABBottomAppBar(
+        centerItemText: 'Check In',
+        notchedShape: CircularNotchedRectangle(),
+        backgroundColor: Colors.white,
+        onTabSelected: (int index) {
+          setState(() {
+            pageIndex = index;
+          });
+        },
+        items: [
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.home, text: 'Home'),
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.newspaper, text: 'News'),
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.calendarDay, text: 'Events'),
+          FABBottomAppBarItem(iconData: FontAwesomeIcons.wallet, text: 'Wallet'),
+        ],
+      ),
+      body: PageStorage(
+          bucket: pageStorageBucket,
+          child: isLoading == true
+              ? Container()
+              : !isConnectedToNetwork
+                  ? NetworkStatusPage(reloadAction: () => reloadData())
+                  : !hasLocation
+                      ? LocationPermissionsPage(reloadAction: () => reloadData(), enableLocationAction: () => LocationPermissions().openAppSettings())
+                      : !webblenIsAvailable ? LocationUnavailablePage(currentUser: currentUser) : updateRequired ? UpdateRequiredPage() : pageViews[pageIndex]),
     );
   }
 }
-
-
-
-

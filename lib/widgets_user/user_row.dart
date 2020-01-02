@@ -58,9 +58,12 @@ class UserRow extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     SizedBox(width: 8.0),
-                    user.username.length > 15
-                        ? Fonts().textW700("@${user.username}", 15.0, Colors.black, TextAlign.left)
-                        : Fonts().textW700("@${user.username}", 18.0, Colors.black, TextAlign.left),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child:  user.username.length > 15
+                          ? Fonts().textW700("@${user.username}", 15.0, Colors.black, TextAlign.left)
+                          : Fonts().textW700("@${user.username}", 18.0, Colors.black, TextAlign.left),
+                    ),
                     friendBadge,
                     //communityBuilderBadge,
                   ],
@@ -90,7 +93,6 @@ class UserRow extends StatelessWidget {
       child: userCard
     );
   }
-
 }
 
 class UserRowMin extends StatelessWidget {

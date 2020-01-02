@@ -60,8 +60,6 @@ class _SetupPageState extends State<SetupPage> {
         isOnWaitList: false,
         messageToken: '',
         isNew: true,
-        communities: {},
-        followingCommunities: {},
         canMakeAds: false,
         ap: 0.20,
         apLvl: 1,

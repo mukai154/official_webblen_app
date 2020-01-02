@@ -1,12 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/styles/flat_colors.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_reward.dart';
+import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
 
 class RewardCard extends StatelessWidget {
-
   final WebblenReward reward;
   final VoidCallback onClickAction;
   final bool purchased;
@@ -16,7 +14,7 @@ class RewardCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkResponse(
-      onTap: onClickAction,//() => rewardClicked(index),
+      onTap: onClickAction, //() => rewardClicked(index),
       child: new Container(
         margin: EdgeInsets.only(right: 8.0, bottom: 8.0),
         decoration: new BoxDecoration(
@@ -37,25 +35,21 @@ class RewardCard extends StatelessWidget {
           mainAxisAlignment: purchased ? MainAxisAlignment.end : MainAxisAlignment.spaceBetween,
           children: <Widget>[
             purchased
-              ? Container()
-              : Container(
-                  margin:  EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.20),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(topLeft: Radius.circular(16.0), bottomRight: Radius.circular(16.0)),
-                    color: FlatColors.webblenRed,
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Image.asset('assets/images/webblen_logo_small.png', height: 20.0, width: 20.0, fit: BoxFit.contain),
-                        SizedBox(width: 4.0),
-                        Fonts().textW500(reward.rewardCost.toStringAsFixed(2), 12.0, FlatColors.iosOffWhite, TextAlign.left),
-                      ],
+                ? Container()
+                : Container(
+                    margin: EdgeInsets.only(right: MediaQuery.of(context).size.width * 0.20),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Image.asset('assets/images/webblen_coin.png', height: 20.0, width: 20.0, fit: BoxFit.contain),
+                          SizedBox(width: 4.0),
+                          Fonts().textW500(reward.rewardCost.toStringAsFixed(2), 12.0, FlatColors.iosOffWhite, TextAlign.left),
+                        ],
+                      ),
                     ),
                   ),
-               ),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -80,5 +74,4 @@ class RewardCard extends StatelessWidget {
       ),
     );
   }
-
 }

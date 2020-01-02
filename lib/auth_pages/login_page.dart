@@ -1,29 +1,27 @@
-import 'package:flutter/material.dart';
-import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/auth_buttons/facebook_btn.dart';
-import 'package:webblen/styles/flat_colors.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/widgets_common/common_button.dart';
-import 'package:webblen/firebase_data//auth.dart';
 import 'dart:async';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:webblen/widgets_common/common_progress.dart';
-import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:google_sign_in/google_sign_in.dart';
-import 'package:webblen/auth_buttons/google_btn.dart';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:webblen/auth_buttons/facebook_btn.dart';
+import 'package:webblen/auth_buttons/google_btn.dart';
+import 'package:webblen/firebase_data//auth.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/widgets_common/common_button.dart';
+import 'package:webblen/widgets_common/common_progress.dart';
 
 class LoginPage extends StatefulWidget {
-
   @override
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-
   final loginScaffoldKey = new GlobalKey<ScaffoldState>();
   final authFormKey = new GlobalKey<FormState>();
 
@@ -54,14 +52,14 @@ class _LoginPageState extends State<LoginPage> {
     final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
       this.verificationId = verId;
       ShowAlertDialogService().showFormWidget(
-          context,
-          'Enter SMS Code',
-          TextField(
-            onChanged: (value) {
-              this.smsCode = value;
-            },
-          ),
-            () {
+        context,
+        'Enter SMS Code',
+        TextField(
+          onChanged: (value) {
+            this.smsCode = value;
+          },
+        ),
+        () {
           FirebaseAuth.instance.currentUser().then((user) {
             if (user != null) {
               Navigator.of(context).pop();
@@ -74,7 +72,6 @@ class _LoginPageState extends State<LoginPage> {
         },
       );
     };
-
 
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
       ShowAlertDialogService().showFailureDialog(context, "Verification Failed", "There was an issue verifying your phone number. Please try again");
@@ -89,7 +86,6 @@ class _LoginPageState extends State<LoginPage> {
         verificationFailed: veriFailed);
   }
 
-
   signInWithPhone() async {
     final AuthCredential credential = PhoneAuthProvider.getCredential(
       verificationId: verificationId,
@@ -97,28 +93,29 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     FirebaseAuth.instance.signInWithCredential(credential).then((user) {
-      if (user != null){
+      if (user != null) {
         PageTransitionService(context: context).transitionToRootPage();
       } else {
         ShowAlertDialogService().showFailureDialog(context, 'Oops!', 'There was an issue signing in.. Please Try Again');
       }
     }).catchError((e) {
-      setState(() {
-        isLoading = false;
-      });
+      if (this.mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
       ShowAlertDialogService().showFailureDialog(context, 'Oops!', 'Invalid Verification Code. Please Try Again.');
     });
   }
 
-  setSignInWithEmailStatus(){
-    if (signInWithEmail){
-      setState(() {
-        signInWithEmail = false;
-      });
+  setSignInWithEmailStatus() {
+    if (signInWithEmail) {
+      signInWithEmail = false;
     } else {
-      setState(() {
-        signInWithEmail = true;
-      });
+      signInWithEmail = true;
+    }
+    if (this.mounted) {
+      setState(() {});
     }
   }
 
@@ -137,7 +134,7 @@ class _LoginPageState extends State<LoginPage> {
     });
     ScaffoldState scaffold = loginScaffoldKey.currentState;
     if (validateAndSave()) {
-      if (signInWithEmail){
+      if (signInWithEmail) {
         try {
           uid = await BaseAuth().signIn(_email, _password);
           setState(() {
@@ -169,10 +166,9 @@ class _LoginPageState extends State<LoginPage> {
     setState(() {
       isLoading = true;
     });
-    print('logging in with Google...');
     ScaffoldState scaffold = loginScaffoldKey.currentState;
     GoogleSignInAccount googleAccount = await googleSignIn.signIn();
-    if (googleAccount == null){
+    if (googleAccount == null) {
       scaffold.showSnackBar(new SnackBar(
         content: new Text("Cancelled Google Login"),
         backgroundColor: Colors.red,
@@ -186,8 +182,8 @@ class _LoginPageState extends State<LoginPage> {
     GoogleSignInAuthentication googleAuth = await googleAccount.authentication;
 
     AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
-    FirebaseAuth.instance.signInWithCredential(credential).then((user){
-      if (user != null){
+    FirebaseAuth.instance.signInWithCredential(credential).then((user) {
+      if (user != null) {
         PageTransitionService(context: context).transitionToRootPage();
       } else {
         scaffold.showSnackBar(new SnackBar(
@@ -207,12 +203,12 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
     ScaffoldState scaffold = loginScaffoldKey.currentState;
-    final FacebookLoginResult result = await facebookSignIn.logInWithReadPermissions(['email']);
+    final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
         final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
-        FirebaseAuth.instance.signInWithCredential(credential).then((user){
-          if (user != null){
+        FirebaseAuth.instance.signInWithCredential(credential).then((user) {
+          if (user != null) {
             PageTransitionService(context: context).transitionToRootPage();
           } else {
             setState(() {
@@ -248,31 +244,40 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-
     // **UI ELEMENTS
     final logo = Image.asset(
       'assets/images/webblen_logo_text.jpg',
-      height: 210.0,
+      height: 200.0,
       fit: BoxFit.fitHeight,
     );
     final isLoadingProgressBar = CustomLinearProgress(progressBarColor: FlatColors.webblenRed);
 
     // **EMAIL FIELD
-    final emailField = Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+    final emailField = Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
           style: TextStyle(color: Colors.black),
+          cursorColor: Colors.black,
           keyboardType: TextInputType.emailAddress,
           autofocus: false,
           validator: (value) => value.isEmpty ? 'Email Cannot be Empty' : null,
           onSaved: (value) => _email = value,
           decoration: InputDecoration(
             border: InputBorder.none,
-            icon: Icon(Icons.email, color: Colors.black38,),
+            icon: Icon(
+              Icons.email,
+              color: Colors.black38,
+            ),
             hintText: "Email",
             hintStyle: TextStyle(color: Colors.black38),
             errorStyle: TextStyle(color: Colors.redAccent),
@@ -283,19 +288,24 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     // **PHONE FIELD
-    final phoneField = Padding(padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
+    final phoneField = Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
           controller: phoneMaskController,
           style: TextStyle(color: Colors.black),
+          cursorColor: Colors.black,
           keyboardType: TextInputType.number,
           autofocus: false,
           validator: (value) => value.isEmpty ? 'Phone Cannot be Empty' : null,
           onSaved: (value) => phoneNo = value,
           decoration: InputDecoration(
             border: InputBorder.none,
-            icon: Icon(Icons.phone, color: Colors.black38,),
+            icon: Icon(
+              Icons.phone,
+              color: Colors.black38,
+            ),
             hintText: "Phone Number",
             hintStyle: TextStyle(color: Colors.black38),
             errorStyle: TextStyle(color: Colors.redAccent),
@@ -306,25 +316,29 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     // **PASSWORD FIELD
-    final passwordField = Padding(padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+    final passwordField = Padding(
+      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
-        style: TextStyle(color: Colors.black),
-        keyboardType: TextInputType.text,
-        obscureText: true,
-        autofocus: false,
-        validator: (value) => value.isEmpty ? 'Password Cannot be Empty' : null,
-        onSaved: (value) => _password = value,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          icon: Icon(Icons.lock, color: Colors.black26,),
-          hintText: "Password",
-          hintStyle: TextStyle(color: Colors.black26),
-          errorStyle: TextStyle(color: Colors.redAccent),
-          contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          style: TextStyle(color: Colors.black),
+          keyboardType: TextInputType.text,
+          obscureText: true,
+          autofocus: false,
+          validator: (value) => value.isEmpty ? 'Password Cannot be Empty' : null,
+          onSaved: (value) => _password = value,
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            icon: Icon(
+              Icons.lock,
+              color: Colors.black38,
+            ),
+            hintText: "Password",
+            hintStyle: TextStyle(color: Colors.black38),
+            errorStyle: TextStyle(color: Colors.redAccent),
+            contentPadding: EdgeInsets.fromLTRB(10.0, 10.0, 10.0, 10.0),
+          ),
         ),
-       ),
       ),
     );
 
@@ -333,7 +347,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 45.0,
       width: MediaQuery.of(context).size.width * 0.85,
       text: signInWithEmail ? 'Sign In' : 'Send SMS Code',
-      textColor: FlatColors.darkGray,
+      textColor: Colors.black,
       backgroundColor: Colors.white,
       onPressed: () => validateAndSubmit(),
     );
@@ -344,92 +358,74 @@ class _LoginPageState extends State<LoginPage> {
     // **GOOGLE BUTTON
     final googleButton = GoogleBtn(action: loginWithGoogle);
 
-
     // **EMAIL/PHONE BUTTON
     final signInWithEmailButton = CustomColorIconButton(
-      icon: Icon(FontAwesomeIcons.envelope, color: FlatColors.darkGray, size: 18.0),
+      icon: Icon(FontAwesomeIcons.envelope, color: Colors.black, size: 18.0),
       text: "Sign in With Email",
-      textColor: FlatColors.darkGray,
-      backgroundColor: Colors.white,
-      height: 45.0,
-      width: MediaQuery.of(context).size.width * 0.85,
-      onPressed: () => setSignInWithEmailStatus(),
-    );
-    
-    final signInWithPhoneButton = CustomColorIconButton(
-      icon: Icon(FontAwesomeIcons.mobileAlt, color: FlatColors.darkGray, size: 18.0),
-      text: "Sign in With Phone",
-      textColor: FlatColors.darkGray,
+      textColor: Colors.black,
       backgroundColor: Colors.white,
       height: 45.0,
       width: MediaQuery.of(context).size.width * 0.85,
       onPressed: () => setSignInWithEmailStatus(),
     );
 
+    final signInWithPhoneButton = CustomColorIconButton(
+      icon: Icon(FontAwesomeIcons.mobileAlt, color: Colors.black, size: 18.0),
+      text: "Sign in With Phone",
+      textColor: Colors.black,
+      backgroundColor: Colors.white,
+      height: 45.0,
+      width: MediaQuery.of(context).size.width * 0.85,
+      onPressed: () => setSignInWithEmailStatus(),
+    );
 
     final orTextLabel = Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-        child: Fonts().textW400('or', 12.0, Colors.black, TextAlign.center)
-      ),
+      child: MediaQuery(data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), child: Fonts().textW400('or', 12.0, Colors.black, TextAlign.center)),
     );
 
     final authForm = Form(
       key: authFormKey,
-      child: new Column(
-        children: <Widget>[
-          SizedBox(height: 15.0),
-          emailField,
-          passwordField,
-          loginButton
-        ],
+      child: Column(
+        children: <Widget>[emailField, passwordField, loginButton],
       ),
     );
 
     final phoneAuthForm = Form(
       key: authFormKey,
-      child: new Column(
-        children: <Widget>[
-          phoneField,
-          loginButton
-        ],
+      child: Column(
+        children: <Widget>[phoneField, loginButton],
       ),
     );
 
     return Scaffold(
       key: loginScaffoldKey,
       body: Theme(
-          data: ThemeData(
-              primaryColor: Colors.white,
-              accentColor: Colors.white,
-              cursorColor: Colors.white
-          ),
-          child: Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: GestureDetector(
-                onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
-                child:  ListView(
-                  children: <Widget>[
-                    Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          isLoading ? isLoadingProgressBar : Container(),
-                          logo,
-                          signInWithEmail ? authForm : phoneAuthForm,
-                          orTextLabel,
-                          facebookButton,
-                          googleButton,
-                          signInWithEmail ? signInWithPhoneButton : signInWithEmailButton
-                        ],
-                      ),
+        data: ThemeData(primaryColor: Colors.white, accentColor: Colors.white, cursorColor: Colors.white),
+        child: Container(
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+          child: GestureDetector(
+              onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+              child: ListView(
+                children: <Widget>[
+                  Container(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        isLoading ? isLoadingProgressBar : Container(),
+                        logo,
+                        signInWithEmail ? authForm : phoneAuthForm,
+                        orTextLabel,
+                        facebookButton,
+                        googleButton,
+                        signInWithEmail ? signInWithPhoneButton : signInWithEmailButton
+                      ],
                     ),
-                  ],
-                )
-            ),
-          ),
+                  ),
+                ],
+              )),
+        ),
       ),
     );
   }
