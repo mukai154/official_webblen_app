@@ -198,7 +198,7 @@ class _NotificationPageState extends State<NotificationPage> {
   Widget build(BuildContext context) {
 
     return Scaffold(
-      appBar: WebblenAppBar().basicAppBar('Notifications'),
+      appBar: WebblenAppBar().basicAppBar('Notifications', context),
       body: Container(
         child: buildNotificationsView(),
       ),

@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'dart:async';
-import 'package:webblen/widgets_common/common_alert.dart';
-import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/utils/time_calc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/utils/create_notification.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets_common/common_button.dart';
-import 'package:webblen/widgets_common/common_progress.dart';
 import 'package:webblen/models/event.dart';
-import 'package:webblen/firebase_data/event_data.dart';
+import 'package:intl/intl.dart';
 
 class NearbyEventCheckInRow extends StatefulWidget {
 
@@ -29,10 +22,12 @@ class NearbyEventCheckInRow extends StatefulWidget {
 
 class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
 
+  DateFormat dateFormatter = DateFormat("h:mm a");
+
   @override
   Widget build(BuildContext context) {
     List attendanceCount = widget.event.attendees;
-    String endTime = TimeCalc().showTimeRemaining(widget.event.endDateInMilliseconds);
+    DateTime eventEndDateTime = DateTime.fromMillisecondsSinceEpoch(widget.event.endDateInMilliseconds);
     return GestureDetector(
       onTap: widget.viewEventAction,
       child: Container(
@@ -60,7 +55,7 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                       color: FlatColors.textFieldGray,
                       child: Padding(
                           padding: EdgeInsets.all(6.0),
-                          child: Fonts().textW500('Ends in $endTime', 12.0, Colors.black87, TextAlign.center)
+                          child: Fonts().textW500('Ends at ${dateFormatter.format(eventEndDateTime)}', 12.0, Colors.black87, TextAlign.center)
                       ),
                     ),
                   )
@@ -91,7 +86,7 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                         Container(
                           padding: EdgeInsets.all(8.0),
                           decoration: BoxDecoration(
-                            color: FlatColors.darkMountainGreen,
+                            color: Colors.white54,
                             borderRadius: BorderRadius.all(Radius.circular(25)),
                           ),
                           child: Row(
@@ -109,8 +104,8 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                         Spacer(),
                         CustomColorButton(
                           text: widget.event.attendees.contains(widget.uid) ? 'Check Out' : 'Check In',
-                          textColor: widget.event.attendees.contains(widget.uid) ? Colors.white : FlatColors.darkGray,
-                          backgroundColor: widget.event.attendees.contains(widget.uid) ? Colors.redAccent : Colors.white,
+                          textColor: Colors.white,
+                          backgroundColor: widget.event.attendees.contains(widget.uid) ? Colors.redAccent : FlatColors.darkMountainGreen,
                           height: 45.0,
                           width: 100.0,
                           hPadding: 8.0,
@@ -124,7 +119,6 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                   ],
                 ),
               ),
-
             ],
           )
       ),

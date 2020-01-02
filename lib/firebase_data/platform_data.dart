@@ -1,16 +1,16 @@
 import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
 class PlatformDataService {
-
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "7.1.0";
+    String currentVersion = "8.0.1";
     DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
     String releasedVersion = documentSnapshot.data["versionNumber"];
     bool versionIsRequired = documentSnapshot.data["versionIsRequired"];
-    if (currentVersion != releasedVersion && versionIsRequired){
+    if (currentVersion != releasedVersion && versionIsRequired) {
       updateAvailable = true;
     }
     return updateAvailable;
@@ -26,6 +26,12 @@ class PlatformDataService {
     return areaGeohash;
   }
 
+  Future<List> getAvailableCities() async {
+    DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
+    List cities = documentSnapshot.data["cities"];
+    return cities;
+  }
+
   Future<String> getAreaName(double lat, double lon) async {
     String areaName = "";
     Geoflutterfire geo = Geoflutterfire();
@@ -35,5 +41,4 @@ class PlatformDataService {
     if (nearLocations.length != 0) areaName = nearLocations.first.documentID;
     return areaName;
   }
-
 }

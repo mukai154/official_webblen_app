@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:webblen/styles/fonts.dart';
 
-class TwitterBtn extends StatelessWidget {
+class GoogleBtn extends StatelessWidget {
 
-  final String buttonText = "Login with Twitter";
-  final colorTwitter = Color.fromRGBO(29, 161, 242, 1.0);
+  final String buttonText = "Login with Google";
   final VoidCallback action;
-  TwitterBtn({this.action});
+  GoogleBtn({this.action});
 
   @override
   Widget build(BuildContext context) {
     return new Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.0, horizontal: 16.0),
+      padding: EdgeInsets.symmetric(vertical: 6.0),
       child: Material(
-        elevation: 5.0,
-        color: colorTwitter,
+        elevation: 2.0,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(25.0),
         child: InkWell(
           borderRadius: BorderRadius.circular(25.0),
@@ -25,9 +25,12 @@ class TwitterBtn extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(FontAwesomeIcons.twitter, color: Colors.white, size: 18.0),
+                Icon(FontAwesomeIcons.google, color: Colors.black, size: 18.0),
                 SizedBox(width: 16.0),
-                Text(buttonText, style: TextStyle(color: Colors.white)),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Fonts().textW400(buttonText, 16.0, Colors.black, TextAlign.left)
+                ),
               ],
             ),
           ),

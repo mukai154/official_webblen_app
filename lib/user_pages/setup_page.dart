@@ -5,7 +5,7 @@ import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets_common/common_button.dart';
 import 'dart:io';
-import 'package:webblen/widgets_common/common_flushbar.dart';
+import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -60,8 +60,6 @@ class _SetupPageState extends State<SetupPage> {
         isOnWaitList: false,
         messageToken: '',
         isNew: true,
-        communities: {},
-        followingCommunities: {},
         canMakeAds: false,
         ap: 0.20,
         apLvl: 1,
@@ -141,10 +139,11 @@ class _SetupPageState extends State<SetupPage> {
   Widget _buildUsernameField() {
     return Theme(
       data: ThemeData(
-        cursorColor: Colors.white
+        cursorColor: Colors.black
       ),
       child:  Container(
-        margin: EdgeInsets.symmetric(horizontal: 16.0),
+        height: 30.0,
+        width: MediaQuery.of(context).size.width - 16,
         child: new TextFormField(
           textCapitalization: TextCapitalization.none,
           initialValue: username,
@@ -211,21 +210,47 @@ class _SetupPageState extends State<SetupPage> {
         onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
         child: Form(
               key: usernameFormKey,
-              child: new Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  addImageButton,
-                  SizedBox(height: 35.0),
-                  _buildUsernameField(),
-                  SizedBox(height: 35.0),
-                  CustomColorButton(
-                    text: "Submit",
-                    textColor: FlatColors.darkGray,
-                    backgroundColor: Colors.white,
-                    width: 150.0,
-                    height: 45.0,
-                    onPressed: () => validateAndSubmit(),
-                  )
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          Fonts().textW600("Welcome to Webblen!", 24.0, Colors.black, TextAlign.center),
+                          SizedBox(height: 8.0),
+                          Fonts().textW400("Let's Get You Started", 16.0, Colors.black, TextAlign.center),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Column(
+                        children: <Widget>[
+                          addImageButton,
+                          SizedBox(height: 35.0),
+                          _buildUsernameField(),
+                        ],
+                      )
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      CustomColorButton(
+                        text: "Submit",
+                        textColor: FlatColors.darkGray,
+                        backgroundColor: Colors.white,
+                        width: 200.0,
+                        height: 45.0,
+                        onPressed: () => validateAndSubmit(),
+                      )
+                    ],
+                  ),
                 ],
               ),
             ),

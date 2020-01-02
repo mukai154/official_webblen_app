@@ -214,6 +214,8 @@ PODS:
   - leveldb-library (1.20)
   - location (0.0.1):
     - Flutter
+  - location_permissions (2.0.2):
+    - Flutter
   - Mantle (2.1.0):
     - Mantle/extobjc (= 2.1.0)
   - Mantle/extobjc (2.1.0)
@@ -245,7 +247,7 @@ DEPENDENCIES:
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
-  - Flutter (from `.symlinks/flutter/ios-release`)
+  - Flutter (from `.symlinks/flutter/ios`)
   - flutter_background_geolocation (from `.symlinks/plugins/flutter_background_geolocation/ios`)
   - flutter_facebook_login (from `.symlinks/plugins/flutter_facebook_login/ios`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
@@ -259,6 +261,7 @@ DEPENDENCIES:
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - location (from `.symlinks/plugins/location/ios`)
+  - location_permissions (from `.symlinks/plugins/location_permissions/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
@@ -318,7 +321,7 @@ EXTERNAL SOURCES:
   firebase_storage:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
-    :path: ".symlinks/flutter/ios-release"
+    :path: ".symlinks/flutter/ios"
   flutter_background_geolocation:
     :path: ".symlinks/plugins/flutter_background_geolocation/ios"
   flutter_facebook_login:
@@ -345,6 +348,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
+  location_permissions:
+    :path: ".symlinks/plugins/location_permissions/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   share:
@@ -359,8 +364,8 @@ SPEC CHECKSUMS:
   background_fetch: 385552e57d3bde2c7a3abd6b1edc76b87823b6c4
   Bolts: ac6567323eac61e203f6a9763667d0f711be34c8
   BoringSSL-GRPC: db8764df3204ccea016e1c8dd15d9a9ad63ff318
-  cloud_firestore: 41f84086d2e1a5c216a6af07ef050758de825ff0
-  cloud_functions: b76fb7ad69aea923d34852b1bc68abf0b0d3f1af
+  cloud_firestore: 0ac494d23db743f104b95d3291946afec187b74c
+  cloud_functions: d849499a3a984691a808f3737f54a9c2ef4011f2
   CocoaLumberjack: 2f44e60eb91c176d471fdba43b9e3eae6a721947
   contact_picker: 57db5d8b410b52a0457d88f7b15de7d3307e8f16
   device_info: 3ebad48f726348f69abd802f3334a8d1ed795fbd
@@ -368,9 +373,9 @@ SPEC CHECKSUMS:
   FBSDKLoginKit: c3079d9a4db27c492287b1eed7a4272b28cf8a59
   Firebase: 8d77bb33624ae9b62d745d82ec023de5f70f7e4f
   firebase_auth: 00d6e1ab6d890cd6d3c624df61702e3a7072d1e3
-  firebase_core: b3b02d0b5e9d01aab5e50ba7cbcf84c73cb6883c
-  firebase_messaging: 049d2d722cb4c48d62be7f7a8020fc4d7b2b9e0a
-  firebase_storage: 52033ea2e6ad58bfa852de92002598850d325c36
+  firebase_core: ae55ea92448ec8675d325da4db22cf3b4d58a54d
+  firebase_messaging: acdcd2edbe7270bae6c3a93cf6c60e86538b3064
+  firebase_storage: 52b0c06e27af628b627be28d32b4b540f6b67cf7
   FirebaseAnalytics: 629301c2b9925f3537d4093a17a72751ae5b7084
   FirebaseAnalyticsInterop: efbe45c8385ec626e29f9525e5ebd38520dfb6c1
   FirebaseAuth: 4281d6d98a90881e00710fa8d9e37c2ccdfc7d80
@@ -381,7 +386,7 @@ SPEC CHECKSUMS:
   FirebaseInstanceID: 27bed93a59b6685f5c3e0c028a878a764fd75c33
   FirebaseMessaging: 31377e05331d16dc6c9fd82554f9a5c49aa70aed
   FirebaseStorage: 926d41552072b9fee67aa645760f05f87b7ce604
-  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_background_geolocation: fc9b54bdcaedea40e324cae19e9d8aac7bc045d6
   flutter_facebook_login: be61e24a4b7d621515353c6b4583d1981bdaa3d6
   flutter_image_compress: f69d0e0e078ce52b4810695593bc861ee319ae7d
@@ -404,6 +409,7 @@ SPEC CHECKSUMS:
   image_picker: 16e5fec1fbc87fd3b297c53e4048521eaf17cd06
   leveldb-library: 08cba283675b7ed2d99629a4bc5fd052cd2bb6a5
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
+  location_permissions: 67cfaff583afbb027a9f9248196f4b79c40f3cdc
   Mantle: 2fa750afa478cd625a94230fbf1c13462f29395b
   nanopb: 2901f78ea1b7b4015c860c2fdd1ea2fee1a18d48
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259

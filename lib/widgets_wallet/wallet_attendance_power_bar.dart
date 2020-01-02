@@ -27,8 +27,8 @@ class AttendancePowerBar extends StatelessWidget {
                Row(
                  children: <Widget>[
                    Shimmer.fromColors(
-                       baseColor: FlatColors.webblenRed,
-                       highlightColor: FlatColors.firstDate,
+                       baseColor: currentAP > 0.05 ? FlatColors.darkMountainGreen : FlatColors.webblenRed,
+                       highlightColor: currentAP > 0.05 ? FlatColors.lightCarribeanGreen : FlatColors.firstDate,
                        child: Container(
                          height: barHeight,
                          width: (MediaQuery.of(context).size.width - 32) * currentAP,
@@ -86,7 +86,7 @@ class SmallAttendancePowerBar extends StatelessWidget {
 
   SmallAttendancePowerBar({this.currentAP, this.apLvl});
 
-  final double barHeight = 16.0;
+  final double barHeight = 10.0;
 
   @override
   Widget build(BuildContext context) {
@@ -104,8 +104,8 @@ class SmallAttendancePowerBar extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     Shimmer.fromColors(
-                        baseColor: FlatColors.webblenRed,
-                        highlightColor: FlatColors.firstDate,
+                        baseColor: currentAP > 0.05 ? FlatColors.darkMountainGreen : FlatColors.webblenRed,
+                        highlightColor: currentAP > 0.05 ? FlatColors.lightCarribeanGreen : FlatColors.firstDate,
                         child: Container(
                             height: barHeight,
                             width: 200 * currentAP,
@@ -181,8 +181,8 @@ class MiniAttendancePowerBar extends StatelessWidget {
                 Row(
                   children: <Widget>[
                     Shimmer.fromColors(
-                        baseColor: FlatColors.webblenRed,
-                        highlightColor: FlatColors.firstDate,
+                        baseColor: currentAP > 0.05 ? FlatColors.darkMountainGreen : FlatColors.webblenRed,
+                        highlightColor: currentAP > 0.05 ? FlatColors.lightCarribeanGreen : FlatColors.firstDate,
                         child: Container(
                             height: barHeight,
                             width: 100 * currentAP,

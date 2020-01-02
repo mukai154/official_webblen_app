@@ -81,6 +81,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         if (result != null && result.isNotEmpty){
           friends = result;
           friends.sort((userA, userB) => userA.username.compareTo(userB.username));
+          friends = friends.where((friend) => !widget.community.memberIDs.contains(friend.uid)).toList(growable: true);
           isLoading = false;
           setState(() {});
         }
@@ -101,7 +102,10 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
             onTap: this.validateAndSubmit,
             child: Padding(
               padding: EdgeInsets.only(top: 18.0, right: 16.0),
-              child: Fonts().textW500('Invite', 18.0, FlatColors.darkGray, TextAlign.center),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW500('Invite', 18.0, FlatColors.darkGray, TextAlign.center),
+              ),
             )
           )
       ),

@@ -34,7 +34,10 @@ class ChooseSimPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Fonts().textW700('Available Locations', 40, Colors.black, TextAlign.left),
+                    MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child:  Fonts().textW700('Choose an Area', 32, Colors.black, TextAlign.left),
+                    ),
                   ],
                 ),
               ),

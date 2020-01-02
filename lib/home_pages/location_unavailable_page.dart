@@ -13,6 +13,7 @@ class LocationUnavailablePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.symmetric(horizontal: 8.0),
       child: Column (
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.center,
@@ -36,7 +37,7 @@ class LocationUnavailablePage extends StatelessWidget {
             onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToWaitListPage(),
           ),
           CustomColorButton(
-            text: "View Available Locations",
+            text: "See How This Works",
             textColor: FlatColors.darkGray,
             backgroundColor: FlatColors.clouds,
             height: 40.0,

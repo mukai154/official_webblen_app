@@ -58,7 +58,20 @@ class NewsPostDataService {
   }
 
 
-
+  Future<List<CommunityNewsPost>> getNewsFeed(String uid) async {
+    List<CommunityNewsPost> posts = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getNewsFeed');
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid});
+    if (result.data != null){
+      List query =  List.from(result.data);
+      query.forEach((resultMap){
+        Map<String, dynamic> postMap =  Map<String, dynamic>.from(resultMap);
+        CommunityNewsPost post = CommunityNewsPost.fromMap(postMap);
+        posts.add(post);
+      });
+    }
+    return posts;
+  }
 
 
 

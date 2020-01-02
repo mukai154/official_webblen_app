@@ -4,9 +4,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/widgets_common/common_button.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/models/event.dart';
@@ -31,6 +29,9 @@ class CommunityProfilePage extends StatefulWidget {
 }
 
 class _CommunityProfilePageState extends State<CommunityProfilePage> with SingleTickerProviderStateMixin {
+
+  //() => PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: memberUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage(),
+  //  () => PageTransitionService(context: context, community: widget.community).transitionToComImagePage(),
 
   TabController _tabController;
   ScrollController _scrollController;
@@ -147,11 +148,68 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
     }
   }
 
+  addEventAction(){
+    Navigator.of(context).pop();
+    PageTransitionService(context: context, currentUser: widget.currentUser, community: widget.community).transitionToChoosePostTypePage();
+  }
+
+  viewMembersAction(){
+    Navigator.of(context).pop();
+    PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: memberUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage();
+  }
+
+  inviteMembersAction(){
+    Navigator.of(context).pop();
+    PageTransitionService(context: context, currentUser: widget.currentUser, community: widget.community).transitionToCommunityInvitePage();
+  }
+
+  joinAction(){
+    Navigator.of(context).pop();
+    ShowAlertDialogService().showLoadingDialog(context);
+    CommunityDataService().joinCommunity(widget.community.areaName, widget.community.name, widget.currentUser.uid).then((success){
+      if (success){
+        Navigator.of(context).pop();
+        memberUIDs.add(widget.currentUser.uid);
+        ShowAlertDialogService().showSuccessDialog(context, "You've Joined ${widget.community.areaName}/${widget.community.name}!", "You can now post news and events to this community");
+        setState(() {});
+      } else {
+        Navigator.of(context).pop();
+        ShowAlertDialogService().showFailureDialog(context, "Uh Oh!", "There was an issue... Please Try Again");
+      }
+    });
+
+  }
+
+  leaveAction(){
+    Navigator.of(context).pop();
+    ShowAlertDialogService().showDetailedConfirmationDialog(
+        context,
+        "Leave ${widget.community.name}?",
+        memberUIDs.length <= 3
+            ? "WARNING: Community's with less than 3 members are automatically disbanded"
+            :"You'll need to attend more of this community's events or be invited to rejoin",
+        "Leave",
+            (){
+          Navigator.of(context).pop();
+          ShowAlertDialogService().showLoadingDialog(context);
+          CommunityDataService().leaveCommunity(widget.community.areaName, widget.community.name, widget.currentUser.uid).then((success){
+            if (success){
+              Navigator.of(context).pop();
+              Navigator.of(context).pop();
+            } else {
+              Navigator.of(context).pop();
+              ShowAlertDialogService().showFailureDialog(context, "Uh Oh!", "There was an issue... Please Try Again");
+            }
+          });
+        },
+            () => Navigator.of(context).pop()
+    );
+  }
+
   initialize() async {
     _tabController = new TabController(length: 3, vsync: this);
     _scrollController = ScrollController();
-    memberUIDs = widget.community.memberIDs.toList(growable: true)..shuffle();
-    followerUIDs = widget.community.followers.toList(growable: true);
+    memberUIDs = widget.community.memberIDs.toList(growable: true);
     await getUpcomingCommunityEvents(false);
     await getRecurringCommunityEvents(false);
     await getCommunityNewsPosts(false);
@@ -183,147 +241,53 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
           return <Widget>[
             SliverAppBar(
               backgroundColor: Colors.white,
-              title: Fonts().textW700(widget.community.name, 24.0, Colors.black, TextAlign.center),
+              title: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700(widget.community.name, 24.0, Colors.black, TextAlign.center),
+                  ),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW400('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
+                  ),
+                ],
+              ),
               pinned: true,
               floating: true,
-              snap: false,
+              snap: true,
               brightness: Brightness.light,
-              leading: BackButton(color: FlatColors.darkGray),
+              leading: BackButton(color: Colors.black),
               actions: <Widget>[
-                widget.community.memberIDs.contains((widget.currentUser.uid))
-                ? IconButton(
-                    icon: Icon(FontAwesomeIcons.ellipsisH, color: FlatColors.darkGray, size: 24.0),
+                IconButton(
+                    icon: Icon(FontAwesomeIcons.ellipsisH, color: Colors.black, size: 24.0),
                     onPressed: (){
                       ShowAlertDialogService().showCommunityOptionsDialog(
-                              context,
-                              (){
-                                Navigator.of(context).pop();
-                                PageTransitionService(context: context, currentUser: widget.currentUser, community: widget.community).transitionToChoosePostTypePage();
-                              },
-                              (){
-                                Navigator.of(context).pop();
-                                PageTransitionService(context: context, currentUser: widget.currentUser, community: widget.community).transitionToCommunityInvitePage();
-                              },
-                              (){
-                                Navigator.of(context).pop();
-                                ShowAlertDialogService().showDetailedConfirmationDialog(
-                                    context,
-                                    "Leave ${widget.community.name}?",
-                                    memberUIDs.length <= 3
-                                        ? "WARNING: Community's with less than 3 members are automatically disbanded"
-                                        :"You'll need to attend more of this community's events or be invited to rejoin",
-                                    "Leave",
-                                    (){
-                                      Navigator.of(context).pop();
-                                      ShowAlertDialogService().showLoadingDialog(context);
-                                      CommunityDataService().leaveCommunity(widget.community.areaName, widget.community.name, widget.currentUser.uid).then((success){
-                                        if (success){
-                                          Navigator.of(context).pop();
-                                          Navigator.of(context).pop();
-                                        } else {
-                                          Navigator.of(context).pop();
-                                          ShowAlertDialogService().showFailureDialog(context, "Uh Oh!", "There was an issue... Please Try Again");
-                                        }
-                                      });
-                                    },
-                                    () => Navigator.of(context).pop()
-                                );
-                              }
+                          context,
+                         memberUIDs.contains(widget.currentUser.uid),
+                              widget.community.communityType,
+                              () => viewMembersAction(),
+                              () => PageTransitionService(context: context, community: widget.community).transitionToComImagePage(),
+                              () => addEventAction(),
+                              () => inviteMembersAction(),
+                              () => leaveAction(),
+                              () => joinAction()
                       );
                     }
-                  )
-                : Container(),
-              ],
-              expandedHeight: 270.0,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Container(
-                  margin: EdgeInsets.only(top: 24.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.all(0.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            GestureDetector(
-                              onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: memberUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage(),
-                              child: Container(
-                                width: 130.0,
-                                child: Stack(
-                                  children: <Widget>[
-                                    memberUIDs[0] != null ? UserProfilePicFromUID(uid: memberUIDs[0], size: 70.0) : Container(),
-                                    Positioned(
-                                      left: 30.0,
-                                      child: memberUIDs.length > 1 ? UserProfilePicFromUID(uid: memberUIDs[1], size: 70.0) : Container(),
-                                    ),
-                                    Positioned(
-                                      left: 60.0,
-                                      child: memberUIDs.length > 2 ? UserProfilePicFromUID(uid: memberUIDs[2], size: 70.0) : Container(),
-                                    )
-                                  ],
-                                ),
-                              ),
-                            )
-
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 8.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-
-                          GestureDetector(
-                            onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: memberUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage(),
-                            child: Fonts().textW500('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
-                          ),
-                          GestureDetector(
-                            onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, userIDs: followerUIDs, viewingMembersOrAttendees: true).transitionToUserSearchPage(),
-                            child: Fonts().textW500('${followerUIDs.length} Followers', 16.0, FlatColors.darkGray, TextAlign.center),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8.0),
-                      isAdmin
-                        ? Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          CustomColorButton(
-                            text: followerUIDs.contains(widget.currentUser.uid) ? 'Following' : 'Follow',
-                            textColor: followerUIDs.contains(widget.currentUser.uid) ? Colors.black : FlatColors.darkGray,
-                            backgroundColor: followerUIDs.contains(widget.currentUser.uid) ? FlatColors.textFieldGray : Colors.white,
-                            onPressed: followUnfollowAction,
-                            height: 35.0,
-                            width: 150.0,
-                          ),
-                          CustomColorButton(
-                            text: 'Add Com Image',
-                            textColor: Colors.black,
-                            backgroundColor: FlatColors.textFieldGray,
-                            onPressed: () => PageTransitionService(context: context, community: widget.community).transitionToComImagePage(),
-                            height: 35.0,
-                            width: 150.0,
-                          )
-                        ],
-                      )
-                          : Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget>[
-                          CustomColorButton(
-                            text: followerUIDs.contains(widget.currentUser.uid) ? 'Following' : 'Follow',
-                            textColor: followerUIDs.contains(widget.currentUser.uid) ? Colors.black : FlatColors.darkGray,
-                            backgroundColor: followerUIDs.contains(widget.currentUser.uid) ? FlatColors.textFieldGray : Colors.white,
-                            onPressed: followUnfollowAction,
-                            height: 35.0,
-                            width: 150.0,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 ),
-              ),
+              ],
+              expandedHeight: 115.0,
+//              flexibleSpace: FlexibleSpaceBar(
+//                background: Container(
+//                  margin: EdgeInsets.only(top: 64.0),
+//                  child: MediaQuery(
+//                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+//                    child: Fonts().textW400('${memberUIDs.length} Members', 16.0, FlatColors.darkGray, TextAlign.center),
+//                  ),
+//                ),
+//              ),
               bottom: TabBar(
                 indicatorColor: FlatColors.webblenRed,
                 labelColor: FlatColors.darkGray,
@@ -367,6 +331,7 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                               event: upcomingEvents[index],
                               showCommunity: false,
                               transitionToComAction: null,
+                              shareEventAction: () => PageTransitionService(context: context, currentUser: widget.currentUser, event: upcomingEvents[index]).transitionToChatInviteSharePage(),
                               eventPostAction: () => eventPostAction(upcomingEvents[index], null),
                             );
                           },
@@ -384,9 +349,15 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                             ?  ListView(
                                 children: <Widget>[
                                   SizedBox(height: 64.0),
-                                  Fonts().textW500('No Regular Events Found', 14.0, Colors.black45, TextAlign.center),
+                                  MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                    child: Fonts().textW500('No Regular Events Found', 14.0, Colors.black45, TextAlign.center),
+                                  ),
                                   SizedBox(height: 8.0),
-                                  Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                                  MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                    child: Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center)
+                                  ),
                                 ],
                               )
                             : ListView.builder(
@@ -413,9 +384,15 @@ class _CommunityProfilePageState extends State<CommunityProfilePage> with Single
                           ? ListView(
                               children: <Widget>[
                                 SizedBox(height: 64.0),
-                                Fonts().textW500('No Posts Found', 14.0, Colors.black45, TextAlign.center),
+                                MediaQuery(
+                                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                    child: Fonts().textW500('No Posts Found', 14.0, Colors.black45, TextAlign.center),
+                                ),
                                 SizedBox(height: 8.0),
-                                Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center),
+                                MediaQuery(
+                                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                                  child: Fonts().textW300('Pull Down To Refresh', 14.0, Colors.black26, TextAlign.center),
+                                ),
                               ],
                             )
                           : ListView.builder(

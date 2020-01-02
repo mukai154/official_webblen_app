@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
 
 class GoogleBtn extends StatelessWidget {
 
@@ -25,9 +25,12 @@ class GoogleBtn extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Icon(FontAwesomeIcons.google, color: FlatColors.darkGray, size: 18.0),
+                Icon(FontAwesomeIcons.google, color: Colors.black, size: 18.0),
                 SizedBox(width: 16.0),
-                Text(buttonText, style: TextStyle(color: FlatColors.darkGray)),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Fonts().textW400(buttonText, 16.0, Colors.black, TextAlign.left)
+                ),
               ],
             ),
           ),

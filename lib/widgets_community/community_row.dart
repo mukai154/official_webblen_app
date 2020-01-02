@@ -4,6 +4,7 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:webblen/firebase_data/community_data.dart';
+import 'dart:math';
 
 
 class CommunityRow extends StatefulWidget {
@@ -26,6 +27,21 @@ class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClie
     CommunityDataService().getCommunityImageURL(widget.community.areaName, widget.community.name).then((res){
       if (res != null){
         comImage = res;
+      } else {
+        int ranNum = Random().nextInt(5);
+        if (ranNum == 0){
+          comImage = 'https://i.ibb.co/hCwqSkj/undraw-energizer-2224.png';
+        } else if (ranNum == 1){
+          comImage = 'https://i.ibb.co/fMmL9ZF/undraw-ice-cream-s2rh.png';
+        } else if (ranNum == 2){
+          comImage = 'https://i.ibb.co/sQvypFr/undraw-welcoming-xvuq.png';
+        } else if (ranNum == 3){
+          comImage = 'https://i.ibb.co/V9zHrBV/undraw-imagination-ok71.png';
+        } else {
+          comImage = 'https://i.ibb.co/F6CRsHq/undraw-sunlight-tn7t.png';
+        }
+      }
+      if (this.mounted){
         setState(() {});
       }
     });
@@ -36,7 +52,6 @@ class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClie
 
   @override
   Widget build(BuildContext context) {
-    List members = widget.community.memberIDs.toList()..shuffle();
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
@@ -69,17 +84,18 @@ class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClie
                   children: <Widget>[
                     Row(
                       children: <Widget>[
-                        Fonts().textW700(widget.community.name, 20.0, Colors.black, TextAlign.left),
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Fonts().textW700(widget.community.name, 22.0, Colors.black, TextAlign.left),
+                        ),
                       ],
                     ),
                     Row(
                       children: <Widget>[
-                        Fonts().textW400('${widget.community.memberIDs.length} Active Members', 12.0, FlatColors.lightAmericanGray, TextAlign.left),
-                      ],
-                    ),
-                    Row(
-                      children: <Widget>[
-                        Fonts().textW400('${widget.community.followers.length} Followers', 12.0, FlatColors.lightAmericanGray, TextAlign.left),
+                        MediaQuery(
+                          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                          child:  Fonts().textW400('${widget.community.memberIDs.length} Members', 15.0, FlatColors.lightAmericanGray, TextAlign.left),
+                        ),
                       ],
                     ),
                   ],
@@ -104,6 +120,7 @@ class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClie
                                   width: (MediaQuery.of(context).size.width - 16) / 2.5,
                                   height: 90.0,
                                   fit: BoxFit.fitWidth,
+                                  alignment: Alignment.center,
                                 ),
                               ),
                               Container(
@@ -174,3 +191,69 @@ class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClie
     );
   }
 }
+
+class AreaRow extends StatelessWidget {
+
+  final String areaName;
+  final int numberOfCommunities;
+  final VoidCallback onTapAction;
+  AreaRow({this.areaName, this.numberOfCommunities, this.onTapAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+      child: Container(
+        height: 90.0,
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18.0),
+            boxShadow: ([
+              BoxShadow(
+                color: Colors.black12,
+                blurRadius: 1.8,
+                spreadRadius: 0.5,
+                offset: Offset(0.0, 3.0),
+              ),
+            ])
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18.0),
+          onTap: onTapAction,
+          child: Padding(
+            padding: EdgeInsets.only(left: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Fonts().textW700(areaName, 22.0, Colors.black, TextAlign.left),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: <Widget>[
+                        MediaQuery(
+                          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                          child:  Fonts().textW400('$numberOfCommunities Communities', 15.0, FlatColors.lightAmericanGray, TextAlign.left),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+

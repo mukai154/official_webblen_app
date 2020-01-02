@@ -1,32 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/styles/flat_colors.dart';
-import 'common_custom_alert.dart';
-import 'package:webblen/styles/fonts.dart';
-import 'common_button.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'common_progress.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:webblen/services_general/services_user_options.dart';
+import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/widgets_user/user_details_profile_pic.dart';
 
+import 'common_button.dart';
+import 'common_custom_alert.dart';
+import 'common_progress.dart';
 
 class FailureDialog extends StatelessWidget {
-
   final String header;
   final String body;
 
   FailureDialog({this.header, this.body});
 
-
   @override
   Widget build(BuildContext context) {
-
     return new CustomAlertDialog(
       content: new Container(
         height: 200.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -35,19 +33,24 @@ class FailureDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
-                    SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 8.0),
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -56,13 +59,13 @@ class FailureDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Ok",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                    text: "Ok",
+                    textColor: FlatColors.londonSquare,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ],
               ),
             ),
@@ -74,21 +77,18 @@ class FailureDialog extends StatelessWidget {
 }
 
 class LogoutDialog extends StatelessWidget {
-  
   final BuildContext context;
   LogoutDialog({this.context});
-  
+
   @override
   Widget build(BuildContext context) {
-
     return new CustomAlertDialog(
       content: new Container(
         height: 240.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -97,17 +97,19 @@ class LogoutDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Icon(FontAwesomeIcons.signOutAlt, color: Colors.red, size: 30.0),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                Icon(FontAwesomeIcons.signOutAlt, color: Colors.red, size: 30.0),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 8.0),
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text("Are You Sure You Want to Logout?", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("Are You Sure You Want to Logout?", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -153,10 +155,16 @@ class UpdateAvailableDialog extends StatelessWidget {
           ],
         ),
       ),
-      content: new Text("Please Update Your Current Version of Webblen to Continue", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+      content: MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+        child: Text("Please Update Your Current Version of Webblen to Continue", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+      ),
       actions: <Widget>[
-        new FlatButton(
-          child: new Text("Ok", style: Fonts.alertDialogAction),
+        FlatButton(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("Ok", style: Fonts.alertDialogAction),
+          ),
           onPressed: () {
             Navigator.of(context).pop();
           },
@@ -167,7 +175,6 @@ class UpdateAvailableDialog extends StatelessWidget {
 }
 
 class SuccessDialog extends StatelessWidget {
-
   final String header;
   final String body;
   SuccessDialog({this.header, this.body});
@@ -181,8 +188,7 @@ class SuccessDialog extends StatelessWidget {
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -190,18 +196,23 @@ class SuccessDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 16.0),
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text(body, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -212,13 +223,13 @@ class SuccessDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Ok",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                    text: "Ok",
+                    textColor: FlatColors.londonSquare,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ],
               ),
             ),
@@ -230,12 +241,10 @@ class SuccessDialog extends StatelessWidget {
 }
 
 class FlashEventSuccessDialog extends StatelessWidget {
-
   final String messageA;
   final String messageB;
   final BuildContext successContext;
   FlashEventSuccessDialog({this.messageA, this.messageB, this.successContext});
-
 
   @override
   Widget build(BuildContext context) {
@@ -246,8 +255,7 @@ class FlashEventSuccessDialog extends StatelessWidget {
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -255,18 +263,23 @@ class FlashEventSuccessDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 8.0),
-                    Text(messageA, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(messageA, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 16.0),
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text(messageB, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text(messageB, style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -277,16 +290,16 @@ class FlashEventSuccessDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Ok",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: (){
-                          Navigator.pop(context);
-                          Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-                        },
-                      ),
+                    text: "Ok",
+                    textColor: FlatColors.londonSquare,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+                    },
+                  ),
                 ],
               ),
             ),
@@ -298,25 +311,21 @@ class FlashEventSuccessDialog extends StatelessWidget {
 }
 
 class CancelActionDialog extends StatelessWidget {
-
   final String header;
   final String body;
   final VoidCallback cancelAction;
 
   CancelActionDialog({this.header, this.body, this.cancelAction});
 
-
   @override
   Widget build(BuildContext context) {
-
     return new CustomAlertDialog(
       content: Container(
         height: 190.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -325,11 +334,13 @@ class CancelActionDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Fonts().textW700(header, 18.0, Colors.black, TextAlign.center)
-                  ],
-                )
-            ),
+              children: <Widget>[
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Fonts().textW700(header, 18.0, Colors.black, TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 16.0),
             // dialog bottom
@@ -337,21 +348,21 @@ class CancelActionDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Yes",
-                        textColor: Colors.white,
-                        backgroundColor: FlatColors.webblenRed,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: cancelAction,
-                      ),
+                    text: "Yes",
+                    textColor: Colors.white,
+                    backgroundColor: FlatColors.webblenRed,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: cancelAction,
+                  ),
                   CustomColorButton(
-                        text: "Back",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: () => Navigator.pop(context),
-                      ),
+                    text: "Back",
+                    textColor: FlatColors.londonSquare,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: () => Navigator.pop(context),
+                  ),
                 ],
               ),
             ),
@@ -362,21 +373,16 @@ class CancelActionDialog extends StatelessWidget {
   }
 }
 
-
 class CancelEventDialog extends StatelessWidget {
-
-
   @override
   Widget build(BuildContext context) {
-
     return new CustomAlertDialog(
       content: new Container(
         height: 245.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -385,19 +391,24 @@ class CancelEventDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
-                    SizedBox(height: 8.0),
-                    Text("Cancel New Event?", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                Icon(FontAwesomeIcons.exclamationCircle, color: Colors.red, size: 30.0),
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text("Cancel New Event?", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 16.0),
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text("All Progress Will Be Lost", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("All Progress Will Be Lost", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -442,8 +453,7 @@ class EventUploadSuccessDialog extends StatelessWidget {
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -451,18 +461,23 @@ class EventUploadSuccessDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 8.0),
-                    Text("Event Posted!", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text("Event Posted!", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 16.0),
             Container(
               child: Column(
                 children: <Widget>[
-                  new Text("Interested Users Nearby Will be Notified", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Text("Interested Users Nearby Will be Notified", style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                  ),
                 ],
               ),
             ),
@@ -472,16 +487,15 @@ class EventUploadSuccessDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Ok",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: (){
-                          Navigator.pop(context);
-                          Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
-                        }
-                      ),
+                      text: "Ok",
+                      textColor: FlatColors.londonSquare,
+                      backgroundColor: Colors.white,
+                      height: 45.0,
+                      width: 200.0,
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.of(context).pushNamedAndRemoveUntil('/home', (Route<dynamic> route) => false);
+                      }),
                 ],
               ),
             ),
@@ -493,24 +507,18 @@ class EventUploadSuccessDialog extends StatelessWidget {
 }
 
 class EventOptionsDialog extends StatelessWidget {
-
   final VoidCallback viewAttendeesAction;
   final VoidCallback shareEventAction;
+  final VoidCallback editAction;
   final VoidCallback deleteEventAction;
 
-  EventOptionsDialog({this.viewAttendeesAction, this.shareEventAction, this.deleteEventAction});
+  EventOptionsDialog({this.viewAttendeesAction, this.shareEventAction, this.editAction, this.deleteEventAction});
 
   @override
   Widget build(BuildContext context) {
     return new CustomAlertDialog(
       content: new Container(
-        height: viewAttendeesAction == null
-            ? deleteEventAction == null
-            ? 120.0
-            : 150.0
-            : deleteEventAction == null
-            ? 160.0
-            : 250.0,
+        height: editAction == null ? deleteEventAction == null ? viewAttendeesAction == null ? shareEventAction == null ? 100 : 130 : 180 : 210 : 230,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -521,46 +529,56 @@ class EventOptionsDialog extends StatelessWidget {
           children: <Widget>[
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Fonts().textW700('Event Options', 24, Colors.black, TextAlign.center)
-                  ],
-                )
-            ),
+              children: <Widget>[
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Fonts().textW700('Event Options', 24, Colors.black, TextAlign.center),
+                ),
+              ],
+            )),
             Container(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   viewAttendeesAction != null
                       ? CustomColorIconButton(
-                        icon: Icon(FontAwesomeIcons.users, color: Colors.black, size: 16.0),
-                        text: "View Attendees",
-                        textColor: Colors.black,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: viewAttendeesAction
-                    ) : Container(),
+                          icon: Icon(FontAwesomeIcons.users, color: Colors.black, size: 16.0),
+                          text: "View Attendees",
+                          textColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: viewAttendeesAction)
+                      : Container(),
                   shareEventAction != null
                       ? CustomColorIconButton(
-                            icon: Icon(FontAwesomeIcons.share, color: Colors.black, size: 16.0),
-                            text: "Share Event",
-                            textColor: Colors.black,
-                            backgroundColor: Colors.white,
-                            height: 45.0,
-                            width: 200.0,
-                            onPressed: shareEventAction
-                        )
+                          icon: Icon(FontAwesomeIcons.share, color: Colors.black, size: 16.0),
+                          text: "Share Event",
+                          textColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: shareEventAction)
+                      : Container(),
+                  editAction != null
+                      ? CustomColorIconButton(
+                          icon: Icon(FontAwesomeIcons.edit, color: Colors.black, size: 16.0),
+                          text: "Edit Event",
+                          textColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: editAction)
                       : Container(),
                   deleteEventAction != null
                       ? CustomColorIconButton(
-                            icon: Icon(FontAwesomeIcons.trash, color: Colors.white, size: 16.0),
-                            text: "Delete Event",
-                            textColor: Colors.white,
-                            backgroundColor: Colors.red,
-                            height: 45.0,
-                            width: 200.0,
-                            onPressed: deleteEventAction
-                        )
+                          icon: Icon(FontAwesomeIcons.trash, color: Colors.white, size: 16.0),
+                          text: "Delete Event",
+                          textColor: Colors.white,
+                          backgroundColor: Colors.red,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: deleteEventAction)
                       : Container()
                 ],
               ),
@@ -573,7 +591,6 @@ class EventOptionsDialog extends StatelessWidget {
 }
 
 class InfoDialog extends StatelessWidget {
-
   final String header;
   final String body;
   InfoDialog({this.header, this.body});
@@ -587,8 +604,7 @@ class InfoDialog extends StatelessWidget {
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -596,12 +612,14 @@ class InfoDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 8.0),
             Container(
@@ -617,13 +635,12 @@ class InfoDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Ok",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: () => Navigator.pop(context)
-                      ),
+                      text: "Ok",
+                      textColor: FlatColors.londonSquare,
+                      backgroundColor: Colors.white,
+                      height: 45.0,
+                      width: 200.0,
+                      onPressed: () => Navigator.pop(context)),
                 ],
               ),
             ),
@@ -635,7 +652,6 @@ class InfoDialog extends StatelessWidget {
 }
 
 class ActionMessage extends StatelessWidget {
-
   final String messageHeader;
   final String messageA;
   final VoidCallback callback;
@@ -644,7 +660,6 @@ class ActionMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     final content = Container(
       height: 80.0,
       child: Column(
@@ -658,11 +673,23 @@ class ActionMessage extends StatelessWidget {
       title: Container(),
       content: content,
       actions: <Widget>[
-        new FlatButton(onPressed: () { Navigator.pop(context); },
-          child: new Text("Cancel", style: new TextStyle(fontWeight: FontWeight.w500)),
+        new FlatButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("Cancel", style: new TextStyle(fontWeight: FontWeight.w500)),
+          ),
         ),
-        new FlatButton(onPressed: () { callback(); },
-          child: new Text("Confirm", style: new TextStyle(fontWeight: FontWeight.w500)),
+        new FlatButton(
+          onPressed: () {
+            callback();
+          },
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("Confirm", style: new TextStyle(fontWeight: FontWeight.w500)),
+          ),
         ),
       ],
     );
@@ -684,8 +711,7 @@ class AdditionalEventInfoDialog extends StatelessWidget {
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
-          borderRadius:
-          new BorderRadius.all(new Radius.circular(32.0)),
+          borderRadius: new BorderRadius.all(new Radius.circular(32.0)),
         ),
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -694,13 +720,15 @@ class AdditionalEventInfoDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Icon(FontAwesomeIcons.users, size: 30.0, color: FlatColors.darkMountainGreen),
-                    SizedBox(height: 16.0),
-                    Text("Turnout Info", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                Icon(FontAwesomeIcons.users, size: 30.0, color: FlatColors.darkMountainGreen),
+                SizedBox(height: 16.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text("Turnout Info", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 24.0),
             Container(
@@ -713,16 +741,22 @@ class AdditionalEventInfoDialog extends StatelessWidget {
                         children: <Widget>[
                           Icon(FontAwesomeIcons.users, size: 20.0, color: FlatColors.blueGray),
                           SizedBox(width: 16.0),
-                          Text(estimatedTurnout.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          MediaQuery(
+                            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                            child: Text(estimatedTurnout.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          ),
                         ],
                       ),
                       Row(
                         children: <Widget>[
                           Icon(FontAwesomeIcons.dollarSign, size: 20.0, color: FlatColors.blueGray),
                           SizedBox(width: 2.0),
-                          eventCost == null
-                              ? Text("Free", style: Fonts.alertDialogBody, textAlign: TextAlign.center)
-                              : Text(eventCost.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          MediaQuery(
+                            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                            child: eventCost == null
+                                ? Text("Free", style: Fonts.alertDialogBody, textAlign: TextAlign.center)
+                                : Text(eventCost.toString(), style: Fonts.alertDialogBody, textAlign: TextAlign.center),
+                          ),
                         ],
                       )
                     ],
@@ -736,13 +770,12 @@ class AdditionalEventInfoDialog extends StatelessWidget {
               child: Column(
                 children: <Widget>[
                   CustomColorButton(
-                        text: "Back",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: () => Navigator.pop(context)
-                      ),
+                      text: "Back",
+                      textColor: FlatColors.londonSquare,
+                      backgroundColor: Colors.white,
+                      height: 45.0,
+                      width: 200.0,
+                      onPressed: () => Navigator.pop(context)),
                 ],
               ),
             ),
@@ -753,10 +786,8 @@ class AdditionalEventInfoDialog extends StatelessWidget {
   }
 }
 
-
 //***EVENT CHECK IN
 class EventCheckInDialog extends StatelessWidget {
-
   final String eventTitle;
   final VoidCallback confirmAction;
   EventCheckInDialog({this.eventTitle, this.confirmAction});
@@ -779,11 +810,12 @@ class EventCheckInDialog extends StatelessWidget {
             // dialog top
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Fonts().textW700("$eventTitle", 18.0, FlatColors.darkGray, TextAlign.center)
-                  ],
-                )
-            ),
+              children: <Widget>[
+                MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                    child: Fonts().textW700("$eventTitle", 18.0, FlatColors.darkGray, TextAlign.center)),
+              ],
+            )),
             // dialog centre
             SizedBox(height: 8.0),
             // dialog bottom
@@ -792,21 +824,14 @@ class EventCheckInDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
                   CustomColorButton(
-                    text: "Check In",
-                    textColor: FlatColors.darkGray,
-                    backgroundColor: Colors.white,
-                    height: 45.0,
-                    width: 200.0,
-                    onPressed: confirmAction
-                  ),
+                      text: "Check In", textColor: FlatColors.darkGray, backgroundColor: Colors.white, height: 45.0, width: 200.0, onPressed: confirmAction),
                   CustomColorButton(
                       text: "Cancel",
                       textColor: Colors.white,
                       backgroundColor: Colors.redAccent,
                       height: 45.0,
                       width: 200.0,
-                      onPressed: () => Navigator.pop(context)
-                  ),
+                      onPressed: () => Navigator.pop(context)),
                 ],
               ),
             ),
@@ -818,8 +843,6 @@ class EventCheckInDialog extends StatelessWidget {
 }
 
 class ConfirmationDialog extends StatelessWidget {
-
-
   final String header;
   final String confirmActionTitle;
   final VoidCallback confirmAction;
@@ -842,13 +865,15 @@ class ConfirmationDialog extends StatelessWidget {
           children: <Widget>[
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Icon(FontAwesomeIcons.questionCircle, size: 30.0, color: FlatColors.darkGray),
-                    SizedBox(height: 8.0),
-                    Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                Icon(FontAwesomeIcons.questionCircle, size: 30.0, color: FlatColors.darkGray),
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                ),
+              ],
+            )),
             Container(
               child: Column(
                 children: <Widget>[
@@ -859,16 +884,9 @@ class ConfirmationDialog extends StatelessWidget {
                       backgroundColor: Colors.white,
                       height: 45.0,
                       width: 200.0,
-                      onPressed: confirmAction
-                  ),
+                      onPressed: confirmAction),
                   CustomColorButton(
-                      text: "Cancel",
-                      textColor: FlatColors.clouds,
-                      backgroundColor: Colors.red,
-                      height: 45.0,
-                      width: 200.0,
-                      onPressed: cancelAction
-                  ),
+                      text: "Cancel", textColor: FlatColors.clouds, backgroundColor: Colors.red, height: 45.0, width: 200.0, onPressed: cancelAction),
                 ],
               ),
             ),
@@ -880,8 +898,6 @@ class ConfirmationDialog extends StatelessWidget {
 }
 
 class DetailedConfirmationDialog extends StatelessWidget {
-
-
   final String header;
   final String body;
   final String confirmActionTitle;
@@ -905,13 +921,15 @@ class DetailedConfirmationDialog extends StatelessWidget {
           children: <Widget>[
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
-                    SizedBox(height: 8.0),
-                    Fonts().textW500(body, 16.0, FlatColors.darkGray, TextAlign.center),
-                  ],
-                )
-            ),
+              children: <Widget>[
+                Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Fonts().textW500(body, 16.0, FlatColors.darkGray, TextAlign.center),
+                ),
+              ],
+            )),
             Container(
               child: Column(
                 children: <Widget>[
@@ -922,16 +940,9 @@ class DetailedConfirmationDialog extends StatelessWidget {
                       backgroundColor: Colors.white,
                       height: 45.0,
                       width: 200.0,
-                      onPressed: confirmAction
-                  ),
+                      onPressed: confirmAction),
                   CustomColorButton(
-                      text: "Cancel",
-                      textColor: FlatColors.clouds,
-                      backgroundColor: Colors.red,
-                      height: 45.0,
-                      width: 200.0,
-                      onPressed: cancelAction
-                  ),
+                      text: "Cancel", textColor: FlatColors.clouds, backgroundColor: Colors.red, height: 45.0, width: 200.0, onPressed: cancelAction),
                 ],
               ),
             ),
@@ -942,18 +953,30 @@ class DetailedConfirmationDialog extends StatelessWidget {
   }
 }
 
-class CommunitiyOptionsDialog extends StatelessWidget {
-
+class CommunityOptionsDialog extends StatelessWidget {
+  final bool isMember;
+  final String communityType;
+  final VoidCallback viewMembersAction;
+  final VoidCallback setComImageAction;
   final VoidCallback addAction;
   final VoidCallback inviteAction;
-  final VoidCallback leaveCommunityAction;
-  CommunitiyOptionsDialog({this.inviteAction, this.addAction, this.leaveCommunityAction});
+  final VoidCallback leaveAction;
+  final VoidCallback joinAction;
+  CommunityOptionsDialog(
+      {this.isMember,
+      this.communityType,
+      this.viewMembersAction,
+      this.setComImageAction,
+      this.inviteAction,
+      this.addAction,
+      this.leaveAction,
+      this.joinAction});
 
   @override
   Widget build(BuildContext context) {
     return new CustomAlertDialog(
       content: Container(
-        height: 190.0,
+        height: isMember ? 325.0 : 150.0,
         decoration: new BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -962,30 +985,63 @@ class CommunitiyOptionsDialog extends StatelessWidget {
         child: new Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            CustomColorButton(
-                text: "Add Post/Event",
+            isMember
+                ? CustomColorIconButton(
+                    icon: Icon(FontAwesomeIcons.calendarPlus, color: Colors.black, size: 18.0),
+                    text: "Add Post/Event",
+                    textColor: FlatColors.darkGray,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: addAction)
+                : Container(),
+            CustomColorIconButton(
+                icon: Icon(FontAwesomeIcons.users, color: Colors.black, size: 18.0),
+                text: "View Members",
                 textColor: FlatColors.darkGray,
                 backgroundColor: Colors.white,
                 height: 45.0,
                 width: 200.0,
-                onPressed: addAction
-            ),
-            CustomColorButton(
-                text: "Invite",
-                textColor: FlatColors.darkGray,
-                backgroundColor: Colors.white,
-                height: 45.0,
-                width: 200.0,
-                onPressed: inviteAction
-            ),
-            CustomColorButton(
-                text: "Leave Community",
-                textColor: Colors.white,
-                backgroundColor: FlatColors.webblenRed,
-                height: 45.0,
-                width: 200.0,
-                onPressed: leaveCommunityAction
-            ),
+                onPressed: viewMembersAction),
+            isMember
+                ? CustomColorIconButton(
+                    icon: Icon(FontAwesomeIcons.image, color: Colors.black, size: 18.0),
+                    text: "Set Community Pic",
+                    textColor: FlatColors.darkGray,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: setComImageAction)
+                : Container(),
+            isMember
+                ? CustomColorIconButton(
+                    icon: Icon(FontAwesomeIcons.userPlus, color: Colors.black, size: 18.0),
+                    text: "Invite",
+                    textColor: FlatColors.darkGray,
+                    backgroundColor: Colors.white,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: inviteAction)
+                : Container(),
+            isMember
+                ? CustomColorButton(
+                    text: "Leave Community",
+                    textColor: Colors.white,
+                    backgroundColor: FlatColors.webblenRed,
+                    height: 45.0,
+                    width: 200.0,
+                    onPressed: leaveAction)
+                : communityType == 'public'
+                    ? CustomColorButton(
+                        text: "Join Community",
+                        textColor: Colors.white,
+                        backgroundColor: FlatColors.darkMountainGreen,
+                        height: 45.0,
+                        width: 200.0,
+                        onPressed: joinAction)
+                    : Container(
+                        child: Fonts().textW400("Invite Only", 14, Colors.black54, TextAlign.center),
+                      )
           ],
         ),
       ),
@@ -994,7 +1050,6 @@ class CommunitiyOptionsDialog extends StatelessWidget {
 }
 
 class UserDetailsOptionsDialog extends StatelessWidget {
-
   final String friendRequestStatus;
   final VoidCallback addFriendAction;
   final VoidCallback confirmRequestAction;
@@ -1003,7 +1058,15 @@ class UserDetailsOptionsDialog extends StatelessWidget {
   final VoidCallback removeFriendAction;
   final VoidCallback hideFromUserAction;
   final VoidCallback blockUserAction;
-  UserDetailsOptionsDialog({this.addFriendAction, this.removeFriendAction, this.confirmRequestAction, this.denyRequestAction, this.hideFromUserAction, this.blockUserAction, this.friendRequestStatus, this.messageUserAction});
+  UserDetailsOptionsDialog(
+      {this.addFriendAction,
+      this.removeFriendAction,
+      this.confirmRequestAction,
+      this.denyRequestAction,
+      this.hideFromUserAction,
+      this.blockUserAction,
+      this.friendRequestStatus,
+      this.messageUserAction});
 
   @override
   Widget build(BuildContext context) {
@@ -1020,28 +1083,29 @@ class UserDetailsOptionsDialog extends StatelessWidget {
           children: <Widget>[
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Icon(FontAwesomeIcons.cog, size: 30.0, color: FlatColors.londonSquare),
-                    SizedBox(height: 8.0),
-                    friendRequestStatus == "receivedRequest"
+              children: <Widget>[
+                Icon(FontAwesomeIcons.cog, size: 30.0, color: FlatColors.londonSquare),
+                SizedBox(height: 8.0),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: friendRequestStatus == "receivedRequest"
                       ? Text("Pending Friend Request", style: Fonts.alertDialogHeader, textAlign: TextAlign.center)
                       : Text("Options", style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
-                  ],
-                )
-            ),
+                ),
+              ],
+            )),
             Container(
               child: Column(
                 children: <Widget>[
                   friendRequestStatus == "friends"
-                    ? CustomColorButton(
-                        text: "Message",
-                        textColor: FlatColors.londonSquare,
-                        backgroundColor: Colors.white,
-                        height: 45.0,
-                        width: 200.0,
-                        onPressed: messageUserAction
-                      )
-                    : Container(),
+                      ? CustomColorButton(
+                          text: "Message",
+                          textColor: FlatColors.londonSquare,
+                          backgroundColor: Colors.white,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: messageUserAction)
+                      : Container(),
                   friendRequestStatus == "friends"
                       ? CustomColorButton(
                           text: "Remove Friend",
@@ -1049,47 +1113,44 @@ class UserDetailsOptionsDialog extends StatelessWidget {
                           backgroundColor: Colors.red,
                           height: 45.0,
                           width: 200.0,
-                          onPressed: removeFriendAction
-                        )
+                          onPressed: removeFriendAction)
                       : friendRequestStatus == "pending"
-                      ? CustomColorButton(
-                          text: "Request Pending",
-                          textColor: FlatColors.londonSquare,
-                          backgroundColor: Colors.white,
-                          height: 45.0,
-                          width: 200.0,
-                          onPressed: null
-                        )
-                      : friendRequestStatus == "receivedRequest"
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            CustomColorButton(
-                              text: "Accept",
-                              textColor: Colors.white,
-                              backgroundColor: FlatColors.darkMountainGreen,
-                              height: 40.0,
-                              width: MediaQuery.of(context).size.width * 0.22,
-                              onPressed: confirmRequestAction,
-                            ),
-                            CustomColorButton(
-                              text: "Ignore",
-                              textColor: FlatColors.darkGray,
+                          ? CustomColorButton(
+                              text: "Request Pending",
+                              textColor: FlatColors.londonSquare,
                               backgroundColor: Colors.white,
-                              height: 40.0,
-                              width: MediaQuery.of(context).size.width * 0.22,
-                              onPressed: denyRequestAction,
-                            ),
-                          ],
-                        )
-                      : CustomColorButton(
-                          text: "Add Friend",
-                          textColor: FlatColors.londonSquare,
-                          backgroundColor: Colors.white,
-                          height: 45.0,
-                          width: 200.0,
-                          onPressed: addFriendAction
-                        ),
+                              height: 45.0,
+                              width: 200.0,
+                              onPressed: null)
+                          : friendRequestStatus == "receivedRequest"
+                              ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    CustomColorButton(
+                                      text: "Accept",
+                                      textColor: Colors.white,
+                                      backgroundColor: FlatColors.darkMountainGreen,
+                                      height: 40.0,
+                                      width: MediaQuery.of(context).size.width * 0.22,
+                                      onPressed: confirmRequestAction,
+                                    ),
+                                    CustomColorButton(
+                                      text: "Ignore",
+                                      textColor: FlatColors.darkGray,
+                                      backgroundColor: Colors.white,
+                                      height: 40.0,
+                                      width: MediaQuery.of(context).size.width * 0.22,
+                                      onPressed: denyRequestAction,
+                                    ),
+                                  ],
+                                )
+                              : CustomColorButton(
+                                  text: "Add Friend",
+                                  textColor: FlatColors.londonSquare,
+                                  backgroundColor: Colors.white,
+                                  height: 45.0,
+                                  width: 200.0,
+                                  onPressed: addFriendAction),
                 ],
               ),
             ),
@@ -1101,7 +1162,6 @@ class UserDetailsOptionsDialog extends StatelessWidget {
 }
 
 class AddImageDialog extends StatelessWidget {
-
   final VoidCallback imageFromCameraAction;
   final VoidCallback imageFromLibraryAction;
 
@@ -1122,11 +1182,11 @@ class AddImageDialog extends StatelessWidget {
           children: <Widget>[
             Container(
                 child: Column(
-                  children: <Widget>[
-                    Fonts().textW700('Add Image', 24, Colors.black, TextAlign.center)
-                  ],
-                )
-            ),
+              children: <Widget>[
+                MediaQuery(
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), child: Fonts().textW700('Add Image', 24, Colors.black, TextAlign.center)),
+              ],
+            )),
             Container(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -1138,8 +1198,7 @@ class AddImageDialog extends StatelessWidget {
                       backgroundColor: Colors.white,
                       height: 45.0,
                       width: 200.0,
-                      onPressed: imageFromCameraAction
-                  ),
+                      onPressed: imageFromCameraAction),
                   CustomColorIconButton(
                       icon: Icon(FontAwesomeIcons.images, color: Colors.black, size: 16.0),
                       text: "Gallery",
@@ -1147,8 +1206,7 @@ class AddImageDialog extends StatelessWidget {
                       backgroundColor: Colors.white,
                       height: 45.0,
                       width: 200.0,
-                      onPressed: imageFromLibraryAction
-                  ),
+                      onPressed: imageFromLibraryAction),
                 ],
               ),
             ),
@@ -1160,11 +1218,9 @@ class AddImageDialog extends StatelessWidget {
 }
 
 class ActionSuccessDialog extends StatelessWidget {
-
   final String header;
   final String body;
   final VoidCallback action;
-
 
   ActionSuccessDialog({this.header, this.body, this.action});
 
@@ -1182,23 +1238,19 @@ class ActionSuccessDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-                child: Column(
-                  children: <Widget>[
-                    Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
-                    SizedBox(height: 12.0),
-                    Fonts().textW500(body, 14.0, FlatColors.darkGray, TextAlign.center),
-                  ]
-                )
-            ),
+                child: Column(children: <Widget>[
+              MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+              ),
+              SizedBox(height: 12.0),
+              MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW500(body, 14.0, FlatColors.darkGray, TextAlign.center),
+              ),
+            ])),
             SizedBox(height: 8.0),
-            CustomColorButton(
-                text: "Ok",
-                textColor: FlatColors.darkGray,
-                backgroundColor: Colors.white,
-                height: 45.0,
-                width: 200.0,
-                onPressed: action
-            ),
+            CustomColorButton(text: "Ok", textColor: FlatColors.darkGray, backgroundColor: Colors.white, height: 45.0, width: 200.0, onPressed: action),
           ],
         ),
       ),
@@ -1207,11 +1259,9 @@ class ActionSuccessDialog extends StatelessWidget {
 }
 
 class FormActionDialog extends StatelessWidget {
-
   final String header;
   final Widget formWidget;
   final VoidCallback action;
-
 
   FormActionDialog({this.header, this.formWidget, this.action});
 
@@ -1229,23 +1279,16 @@ class FormActionDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
-                child: Column(
-                    children: <Widget>[
-                      Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
-                    ]
-                )
-            ),
+                child: Column(children: <Widget>[
+              MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW700(header, 18.0, FlatColors.darkGray, TextAlign.center),
+              ),
+            ])),
             SizedBox(height: 8.0),
             formWidget,
             SizedBox(height: 8.0),
-            CustomColorButton(
-                text: "Submit",
-                textColor: FlatColors.darkGray,
-                backgroundColor: Colors.white,
-                height: 45.0,
-                width: 200.0,
-                onPressed: action
-            ),
+            CustomColorButton(text: "Submit", textColor: FlatColors.darkGray, backgroundColor: Colors.white, height: 45.0, width: 200.0, onPressed: action),
           ],
         ),
       ),
@@ -1254,7 +1297,6 @@ class FormActionDialog extends StatelessWidget {
 }
 
 class LoadingDialog extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return CustomAlertDialog(
@@ -1279,7 +1321,6 @@ class LoadingDialog extends StatelessWidget {
 }
 
 class LoadingCommunityDialog extends StatelessWidget {
-
   final String areaName;
   final String comName;
 
@@ -1302,7 +1343,254 @@ class LoadingCommunityDialog extends StatelessWidget {
             Container(
               height: 3.0,
               child: CustomLinearProgress(progressBarColor: FlatColors.webblenRed),
-            ),          ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class AccountQRDialog extends StatelessWidget {
+  final String username;
+  final String uid;
+  final VoidCallback scanAction;
+
+  AccountQRDialog({this.username, this.uid, this.scanAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return new CustomAlertDialog(
+      content: new Container(
+        height: 300.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+                height: 150.0,
+                width: 150.0,
+                child: QrImage(
+                  data: 'addFriend.$uid-$username',
+                  version: QrVersions.auto,
+                  size: 150.0,
+                  gapless: true,
+//                  embeddedImage: AssetImage('assets/images/webblen_logo.png'),
+//                  embeddedImageStyle: QrEmbeddedImageStyle(
+//                    size: Size(80, 80),
+//                  ),
+                )),
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              child: Fonts().textW700(username, 18.0, Colors.black, TextAlign.center),
+            ),
+            SizedBox(height: 8.0),
+            CustomColorIconButton(
+              icon: Icon(FontAwesomeIcons.camera, color: Colors.black, size: 16.0),
+              text: "Scan",
+              textColor: Colors.black,
+              backgroundColor: Colors.white,
+              height: 35.0,
+              width: 200.0,
+              onPressed: scanAction,
+            ),
+            CustomColorButton(
+                text: "Close",
+                textColor: FlatColors.darkGray,
+                backgroundColor: Colors.white,
+                height: 35.0,
+                width: 200.0,
+                onPressed: () => Navigator.of(context).pop()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ScannedAccountDialog extends StatelessWidget {
+  final String username;
+  final String uid;
+  final VoidCallback addFriendAction;
+
+  ScannedAccountDialog({this.username, this.uid, this.addFriendAction});
+
+  @override
+  Widget build(BuildContext context) {
+    return new CustomAlertDialog(
+      content: new Container(
+        height: 275.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            UserProfilePicFromUID(uid: uid, size: 100.0),
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+              child: Fonts().textW700(username, 24.0, Colors.black, TextAlign.center),
+            ),
+            SizedBox(height: 8.0),
+            CustomColorButton(
+                text: "Add Friend", textColor: Colors.black, backgroundColor: Colors.white, height: 45.0, width: 200.0, onPressed: addFriendAction),
+            CustomColorButton(
+                text: "Cancel",
+                textColor: Colors.black,
+                backgroundColor: Colors.white,
+                height: 45.0,
+                width: 200.0,
+                onPressed: () => Navigator.of(context).pop()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CalendarFilterDialog extends StatelessWidget {
+  final String currentFilter;
+  final VoidCallback changeFilterToAllEvents;
+  final VoidCallback changeFilterToCreatedEvents;
+  final VoidCallback changeFilterToSavedEvents;
+  final VoidCallback changeFilterToReminders;
+
+  CalendarFilterDialog(
+      {this.currentFilter, this.changeFilterToSavedEvents, this.changeFilterToAllEvents, this.changeFilterToCreatedEvents, this.changeFilterToReminders});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return CustomAlertDialog(
+      content: Container(
+        height: 275.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CustomColorButton(
+                text: "All Events",
+                textColor: currentFilter == "all" ? Colors.white : Colors.black,
+                backgroundColor: currentFilter == "all" ? FlatColors.webblenRed : Colors.white,
+                height: 45.0,
+                width: 200.0,
+                onPressed: () {
+                  changeFilterToAllEvents();
+                  Navigator.of(context).pop();
+                }),
+            CustomColorButton(
+                text: "Saved Events",
+                textColor: currentFilter == "saved" ? Colors.white : Colors.black,
+                backgroundColor: currentFilter == "saved" ? FlatColors.webblenRed : Colors.white,
+                height: 45.0,
+                width: 200.0,
+                onPressed: () {
+                  changeFilterToSavedEvents();
+                  Navigator.of(context).pop();
+                }),
+            CustomColorButton(
+                text: "Created Events",
+                textColor: currentFilter == "created" ? Colors.white : Colors.black,
+                backgroundColor: currentFilter == "created" ? FlatColors.webblenRed : Colors.white,
+                height: 45.0,
+                width: 200.0,
+                onPressed: () {
+                  changeFilterToCreatedEvents();
+                  Navigator.of(context).pop();
+                }),
+            CustomColorButton(
+                text: "Reminders",
+                textColor: currentFilter == "reminder" ? Colors.white : Colors.black,
+                backgroundColor: currentFilter == "reminder" ? FlatColors.webblenRed : Colors.white,
+                height: 45.0,
+                width: 200.0,
+                onPressed: () {
+                  changeFilterToReminders();
+                  Navigator.of(context).pop();
+                }),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CreateEventReminderDialog extends StatelessWidget {
+  final VoidCallback createEvent;
+  final VoidCallback createReminder;
+
+  CreateEventReminderDialog({this.createEvent, this.createReminder});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return CustomAlertDialog(
+      content: Container(
+        height: 175.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CustomColorButton(text: "Create Event", textColor: Colors.black, backgroundColor: Colors.white, height: 45.0, width: 200.0, onPressed: createEvent),
+            CustomColorButton(
+              text: "Create Reminder",
+              textColor: Colors.black,
+              backgroundColor: Colors.white,
+              height: 45.0,
+              width: 200.0,
+              onPressed: createReminder,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class CalendarEventOptionsDialog extends StatelessWidget {
+  final VoidCallback editAction;
+  final VoidCallback deleteAction;
+
+  CalendarEventOptionsDialog({this.editAction, this.deleteAction});
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: implement build
+    return CustomAlertDialog(
+      content: Container(
+        height: 175.0,
+        decoration: new BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(new Radius.circular(32.0)),
+        ),
+        child: new Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            CustomColorButton(text: "Edit Reminder", textColor: Colors.black, backgroundColor: Colors.white, height: 45.0, width: 200.0, onPressed: editAction),
+            CustomColorButton(
+              text: "Delete Reminder",
+              textColor: Colors.white,
+              backgroundColor: Colors.red,
+              height: 45.0,
+              width: 200.0,
+              onPressed: deleteAction,
+            ),
+          ],
         ),
       ),
     );

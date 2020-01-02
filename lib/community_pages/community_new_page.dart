@@ -205,24 +205,27 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       return Container(
         color: Colors.white,
         margin: EdgeInsets.only(left: 8.0, right: 8.0),
-        child: new TextFormField(
-          maxLengthEnforced: true,
-          textCapitalization: TextCapitalization.none,
-          cursorColor: FlatColors.darkGray,
-          style: TextStyle(color: FlatColors.darkGray, fontSize: 24.0, fontFamily: 'Nunito', fontWeight: FontWeight.w800),
-          autofocus: false,
-          textAlign: TextAlign.left,
-          inputFormatters: [
-            LengthLimitingTextInputFormatter(30),
-            BlacklistingTextInputFormatter(RegExp("[\\-|\\ |\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
-          ],
-          onSaved: (value) => newCommunity.name = value.toLowerCase(),
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Enter Community Name",
-            hintStyle: TextStyle(color: Colors.black26),
-            counterStyle: TextStyle(fontFamily: 'Nunito'),
-            contentPadding: EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 10.0),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: TextFormField(
+            maxLengthEnforced: true,
+            textCapitalization: TextCapitalization.none,
+            cursorColor: FlatColors.darkGray,
+            style: TextStyle(color: FlatColors.darkGray, fontSize: 24.0, fontFamily: 'Nunito', fontWeight: FontWeight.w800),
+            autofocus: false,
+            textAlign: TextAlign.left,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(30),
+              BlacklistingTextInputFormatter(RegExp("[\\-|\\ |\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"))
+            ],
+            onSaved: (value) => newCommunity.name = value.toLowerCase(),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: "Enter Community Name",
+              hintStyle: TextStyle(color: Colors.black26),
+              counterStyle: TextStyle(fontFamily: 'Nunito'),
+              contentPadding: EdgeInsets.fromLTRB(8.0, 16.0, 8.0, 10.0),
+            ),
           ),
         ),
       );
@@ -255,13 +258,19 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Container(
-                            child: Fonts().textW700('Public', 18.0, FlatColors.darkGray, TextAlign.left),
+                            child: MediaQuery(
+                              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                              child: Fonts().textW700('Public', 18.0, FlatColors.darkGray, TextAlign.left),
+                            ),
                           ),
                           Container(
                             constraints: BoxConstraints(
                               maxWidth: 260.0,
                             ),
-                            child: Fonts().textW400("This community and its activities can be found by anyone. \nNew members are added by invite or after attending a certain number of your events.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            child: MediaQuery(
+                              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                              child: Fonts().textW400("This community and its activities can be found by anyone. \nNew members are added by invite or after attending a certain number of your events.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            ),
                           ),
                         ],
                       ),
@@ -288,13 +297,19 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Container(
-                            child: Fonts().textW700('Closed', 18.0, FlatColors.darkGray, TextAlign.left),
+                            child: MediaQuery(
+                              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                              child: Fonts().textW700('Closed', 18.0, FlatColors.darkGray, TextAlign.left),
+                            ),
                           ),
                           Container(
                             constraints: BoxConstraints(
                               maxWidth: 260.0,
                             ),
-                            child: Fonts().textW400("This community and its activities are hidden from discover pages. \nNew members are added by invite only.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            child: MediaQuery(
+                              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                              child: Fonts().textW400("This community and its activities are hidden from discover pages. \nNew members are added by invite only.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            ),
                           ),
                         ],
                       ),
@@ -321,13 +336,19 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Container(
-                            child: Fonts().textW700('Secret', 18.0, FlatColors.darkGray, TextAlign.left),
+                            child: MediaQuery(
+                              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                              child: Fonts().textW700('Secret', 18.0, FlatColors.darkGray, TextAlign.left),
+                            ),
                           ),
                           Container(
                             constraints: BoxConstraints(
                               maxWidth: 260.0,
                             ),
-                            child: Fonts().textW400("This community and its activities are COMPETELY hidden. New members are added by invite only. \n*NOT ELIGIBLE FOR WEBBLEN PAYOUTS.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            child: MediaQuery(
+                              data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                              child: Fonts().textW400("This community and its activities are COMPETELY hidden. New members are added by invite only. \n*NOT ELIGIBLE FOR WEBBLEN PAYOUTS.", 14.0, FlatColors.darkGray, TextAlign.left),
+                            ),
                           ),
                         ],
                       ),

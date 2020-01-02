@@ -21,7 +21,10 @@ class StatsEventHistoryCount extends StatelessWidget {
             Container(width: 3.0),
             Padding(
               padding: EdgeInsets.only(top: 3.0),
-              child: Fonts().textW500(eventHistoryCount, textSize, textColor, TextAlign.start),
+              child: MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                child: Fonts().textW500(eventHistoryCount, textSize, textColor, TextAlign.start),
+              ),
             ),
           ]
       ),

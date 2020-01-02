@@ -43,23 +43,18 @@ class RewardInfoDialog extends StatelessWidget {
                       constraints: BoxConstraints(
                         maxWidth: 130.0,
                       ),
-                      child: Material(
-                        borderRadius: BorderRadius.circular(24.0),
-                        color: FlatColors.webblenRed,
-                        child: Padding(
-                          padding: EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0, bottom: 4.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Image.asset("assets/images/transparent_logo_xxsmall.png", height: 20.0, width: 20.0),
-                              SizedBox(width: 4.0),
-                              Fonts().textW700('$rewardCost', 18.0, Colors.white, TextAlign.center)
-                            ],
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 4.0, left: 8.0, right: 8.0, bottom: 4.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Image.asset("assets/images/webblen_coin", height: 20.0, width: 20.0),
+                            SizedBox(width: 4.0),
+                            Fonts().textW700('$rewardCost', 18.0, Colors.white, TextAlign.center)
+                          ],
                           ),
                         ),
-                      ),
                     )
-
                     ],
                 ),
               ),

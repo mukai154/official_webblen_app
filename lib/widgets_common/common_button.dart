@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class CustomColorButton extends StatelessWidget {
-
   final String text;
   final double height;
   final double width;
+  final double textSize;
   final VoidCallback onPressed;
   final Color backgroundColor;
   final Color textColor;
   final double hPadding;
   final double vPadding;
 
-  CustomColorButton({this.text, this.height, this.width, this.onPressed, this.backgroundColor, this.textColor, this.hPadding, this.vPadding});
+  CustomColorButton({this.text, this.textSize, this.height, this.width, this.onPressed, this.backgroundColor, this.textColor, this.hPadding, this.vPadding});
   @override
   Widget build(BuildContext context) {
     return new Padding(
@@ -27,13 +26,18 @@ class CustomColorButton extends StatelessWidget {
           onTap: onPressed,
           child: Container(
             height: height,
-            width: width ,
+            width: width,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.all(4.0),
-                  child: Fonts().textW600(text, 16.0, textColor, TextAlign.center),
+                  child: MediaQuery(
+                      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                      child: FittedBox(
+                        child: Fonts().textW600(text, textSize != null ? textSize : 16.0, textColor, TextAlign.center),
+                        fit: BoxFit.scaleDown,
+                      )),
                 )
               ],
             ),
@@ -45,7 +49,6 @@ class CustomColorButton extends StatelessWidget {
 }
 
 class CustomColorIconButton extends StatelessWidget {
-
   final Icon icon;
   final String text;
   final double height;
@@ -68,7 +71,7 @@ class CustomColorIconButton extends StatelessWidget {
           onTap: onPressed,
           child: Container(
             height: height,
-            width: width ,
+            width: width,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -77,7 +80,10 @@ class CustomColorIconButton extends StatelessWidget {
                 text != null
                     ? Padding(
                         padding: EdgeInsets.all(8.0),
-                        child: Fonts().textW500(text, 16.0, textColor, TextAlign.center),
+                        child: MediaQuery(
+                          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                          child: Fonts().textW500(text, 16.0, textColor, TextAlign.center),
+                        ),
                       )
                     : Container()
               ],
@@ -90,7 +96,6 @@ class CustomColorIconButton extends StatelessWidget {
 }
 
 class NewEventFormButton extends StatelessWidget {
-
   final String label;
   final Color labelColor;
   final Color backgroundColor;
@@ -107,13 +112,18 @@ class NewEventFormButton extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(25.0),
         child: InkWell(
-          onTap: () { onTap(); },
+          onTap: () {
+            onTap();
+          },
           child: Container(
             height: 50.0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text(label, style: TextStyle(color: labelColor)),
+                MediaQuery(
+                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+                  child: Text(label, style: TextStyle(color: labelColor)),
+                ),
               ],
             ),
           ),
@@ -124,7 +134,6 @@ class NewEventFormButton extends StatelessWidget {
 }
 
 class FlatBackButton extends StatelessWidget {
-
   final String label;
   final Color labelColor;
   final Color backgroundColor;
@@ -132,34 +141,33 @@ class FlatBackButton extends StatelessWidget {
 
   FlatBackButton(this.label, this.labelColor, this.backgroundColor, this.onTap);
 
-
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0),
       child: FlatButton(
-        onPressed: (){ onTap(); },
+        onPressed: () {
+          onTap();
+        },
         color: Colors.transparent,
-        child: Text(label, style: TextStyle(color: labelColor, fontWeight: FontWeight.w400)),
+        child: MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: Text(label, style: TextStyle(color: labelColor, fontWeight: FontWeight.w400)),
+        ),
       ),
     );
   }
 }
 
 class PlusCircleButton extends StatelessWidget {
-
   final Color buttonColor;
   final double size;
   final VoidCallback buttonAction;
 
   PlusCircleButton({this.buttonColor, this.size, this.buttonAction});
 
-
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-        icon: Icon(Icons.add_circle_outline, color: buttonColor, size: size),
-        onPressed: buttonAction
-    );
+    return IconButton(icon: Icon(Icons.add_circle_outline, color: buttonColor, size: size), onPressed: buttonAction);
   }
 }
