@@ -1,5 +1,4 @@
 class LocalAd {
-
   String adKey;
   int datePostedInMilliseconds;
   String authorUid;
@@ -20,22 +19,22 @@ class LocalAd {
 
   LocalAd.fromMap(Map<String, dynamic> data)
       : this(
-      adKey: data['adKey'],
-      datePostedInMilliseconds: data['datePostedInMilliseconds'],
-      authorUid: data['authorUid'],
-      imageURL: data['imageURL'],
-      clicks: data['clicks'],
-      impressions: data['impressions'],
-      adURL: data['adURL']
-  );
+          adKey: data['adKey'],
+          datePostedInMilliseconds: data['datePostedInMilliseconds'],
+          authorUid: data['authorUid'],
+          imageURL: data['imageURL'],
+          clicks: data['clicks'],
+          impressions: data['impressions'],
+          adURL: data['adURL'],
+        );
 
   Map<String, dynamic> toMap() => {
-    'adKey': this.adKey,
-    'datePostedInMilliseconds': this.datePostedInMilliseconds,
-    'authorUid': this.authorUid,
-    'imageURL': this.imageURL,
-    'clicks': this.clicks,
-    'impressions': this.impressions,
-    'adURL': this.adURL
-  };
+        'adKey': this.adKey,
+        'datePostedInMilliseconds': this.datePostedInMilliseconds,
+        'authorUid': this.authorUid,
+        'imageURL': this.imageURL,
+        'clicks': this.clicks,
+        'impressions': this.impressions,
+        'adURL': this.adURL,
+      };
 }

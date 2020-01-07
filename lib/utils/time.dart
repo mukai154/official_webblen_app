@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 
 class Time {
   DateTime currentDateTime = DateTime.now();
-  DateFormat timeFormatter = new DateFormat("h:mm a");
+  DateFormat timeFormatter = DateFormat("h:mm a");
   DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
 
   String getStringFromDate(DateTime data) {
@@ -21,7 +21,8 @@ class Time {
     return timezone;
   }
 
-  Future<DateTime> convertToLocalTimeZone(DateTime dateTime, String timezone) async {
+  Future<DateTime> convertToLocalTimeZone(
+      DateTime dateTime, String timezone) async {
 //    await initializeTimeZone();
 //    String localTimeZone = await FlutterNativeTimezone.getLocalTimezone();
 //    TZDateTime givenDateTime = TZDateTime.from(dateTime, getLocation(timezone));
@@ -52,15 +53,19 @@ class Time {
 
   String showTimeRemaining(int endTimeInMilliseconds) {
     String timeRemaining;
-    DateTime givenTime = DateTime.fromMillisecondsSinceEpoch(endTimeInMilliseconds);
-    int timeDifferenceInMinutes = givenTime.difference(currentDateTime).inMinutes;
+    DateTime givenTime =
+        DateTime.fromMillisecondsSinceEpoch(endTimeInMilliseconds);
+    int timeDifferenceInMinutes =
+        givenTime.difference(currentDateTime).inMinutes;
     if (timeDifferenceInMinutes >= 60) {
       int hoursLeft = (timeDifferenceInMinutes / 60).round();
       int daysLeft = (hoursLeft / 24).round();
       int minutesLeft = timeDifferenceInMinutes - (hoursLeft * 60);
       if (hoursLeft >= 24) {
         hoursLeft = (hoursLeft - daysLeft * 24).round();
-        timeRemaining = daysLeft == 1 ? "$daysLeft day $hoursLeft hours and $minutesLeft minutes" : "$daysLeft days $hoursLeft hours and $minutesLeft minutes";
+        timeRemaining = daysLeft == 1
+            ? "$daysLeft day $hoursLeft hours and $minutesLeft minutes"
+            : "$daysLeft days $hoursLeft hours and $minutesLeft minutes";
       } else {
         timeRemaining = "$hoursLeft hour and $minutesLeft minutes";
       }
@@ -74,8 +79,10 @@ class Time {
   String getPastTimeFromMilliseconds(int timeInMilliseconds) {
     String timeDetail;
     int hours = 0;
-    DateTime givenTime = DateTime.fromMillisecondsSinceEpoch(timeInMilliseconds);
-    int timeDifferenceInMinutes = currentDateTime.difference(givenTime).inMinutes;
+    DateTime givenTime =
+        DateTime.fromMillisecondsSinceEpoch(timeInMilliseconds);
+    int timeDifferenceInMinutes =
+        currentDateTime.difference(givenTime).inMinutes;
     if (timeDifferenceInMinutes >= 60) {
       hours = (timeDifferenceInMinutes / 60).round();
     }
@@ -98,20 +105,25 @@ class Time {
   }
 
   DateTime getDateTimeFromMilliseconds(int startDateInMilliseconds) {
-    DateTime dateTime = DateTime.fromMicrosecondsSinceEpoch(startDateInMilliseconds);
+    DateTime dateTime =
+        DateTime.fromMicrosecondsSinceEpoch(startDateInMilliseconds);
     return dateTime;
   }
 
-  String getWhenEventIsHappening(int eventStartInMilliseconds, int eventEndInMilliseconds, String eventStartTime) {
+  String getWhenEventIsHappening(int eventStartInMilliseconds,
+      int eventEndInMilliseconds, String eventStartTime) {
     String eventTime = '';
     DateFormat dateFormat = DateFormat("MMM d  h:mma");
-    DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(eventStartInMilliseconds);
+    DateTime eventDateTime =
+        DateTime.fromMillisecondsSinceEpoch(eventStartInMilliseconds);
     DateTime currentDateTime = DateTime.now();
     int currentDateTimeInMilliseconds = currentDateTime.millisecondsSinceEpoch;
 
-    if (eventStartInMilliseconds - currentDateTimeInMilliseconds <= 86400000 && eventStartInMilliseconds > currentDateTimeInMilliseconds) {
+    if (eventStartInMilliseconds - currentDateTimeInMilliseconds <= 86400000 &&
+        eventStartInMilliseconds > currentDateTimeInMilliseconds) {
       if (eventDateTime.weekday == currentDateTime.weekday) {
-        if (eventStartInMilliseconds - currentDateTimeInMilliseconds <= 1800000) {
+        if (eventStartInMilliseconds - currentDateTimeInMilliseconds <=
+            1800000) {
           eventTime = 'Starting Soon...';
         } else {
           eventTime = 'Today at $eventStartTime';
@@ -123,7 +135,8 @@ class Time {
         eventDateTime.difference(currentDateTime) < Duration(days: 2) &&
         eventDateTime.weekday == currentDateTime.weekday + 1) {
       eventTime = 'Tomorrow at $eventStartTime';
-    } else if (currentDateTimeInMilliseconds >= eventStartInMilliseconds && currentDateTimeInMilliseconds <= eventEndInMilliseconds) {
+    } else if (currentDateTimeInMilliseconds >= eventStartInMilliseconds &&
+        currentDateTimeInMilliseconds <= eventEndInMilliseconds) {
       eventTime = 'Happening Now!';
     } else {
       eventTime = dateFormat.format(eventDateTime);

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 class ShakeAnimation extends StatefulWidget {
-
   final Widget widgetToShake;
   ShakeAnimation({this.widgetToShake});
 
@@ -12,8 +11,8 @@ class ShakeAnimation extends StatefulWidget {
   _ShakeAnimationState createState() => _ShakeAnimationState();
 }
 
-class _ShakeAnimationState extends State<ShakeAnimation> with SingleTickerProviderStateMixin {
-
+class _ShakeAnimationState extends State<ShakeAnimation>
+    with SingleTickerProviderStateMixin {
   AnimationController animationController;
   Animation<double> animation;
 
@@ -22,7 +21,9 @@ class _ShakeAnimationState extends State<ShakeAnimation> with SingleTickerProvid
     super.initState();
     animationController = AnimationController(
       vsync: this,
-      duration: Duration(seconds: 1),
+      duration: Duration(
+        seconds: 1,
+      ),
     )..addListener(() => setState(() {}));
 
     animation = Tween<double>(
@@ -33,18 +34,25 @@ class _ShakeAnimationState extends State<ShakeAnimation> with SingleTickerProvid
     animationController.forward();
     animation.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        await new Future.delayed(const Duration(seconds : 7));
+        await new Future.delayed(
+          const Duration(
+            seconds: 7,
+          ),
+        );
         animationController.reset();
         animationController.forward();
       }
     });
-
   }
 
   Vector3 _shake() {
     double progress = animationController.value;
     double offset = sin(progress * pi * 6);
-    return Vector3(offset * 5, 1.0, 0.0);
+    return Vector3(
+      offset * 5,
+      1.0,
+      0.0,
+    );
   }
 
   @override

@@ -12,14 +12,16 @@ import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/utils/time.dart';
-
 import 'calendar_event_data.dart';
 
 class EventDataService {
   Geoflutterfire geo = Geoflutterfire();
-  final CollectionReference pastEventsRef = Firestore.instance.collection("past_events");
-  final CollectionReference upcomingEventsRef = Firestore.instance.collection("upcoming_events");
-  final CollectionReference recurringEventRef = Firestore.instance.collection("recurring_events");
+  final CollectionReference pastEventsRef =
+      Firestore.instance.collection("past_events");
+  final CollectionReference upcomingEventsRef =
+      Firestore.instance.collection("upcoming_events");
+  final CollectionReference recurringEventRef =
+      Firestore.instance.collection("recurring_events");
   final CollectionReference userRef = Firestore.instance.collection("users");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
 
@@ -44,30 +46,52 @@ class EventDataService {
   }
 
   //***CREATE
-  Future<String> uploadEvent(File eventImage, Event event, double lat, double lon) async {
+  Future<String> uploadEvent(
+      File eventImage, Event event, double lat, double lon) async {
     String error = '';
     final String eventKey = randomAlphaNumeric(16);
     String fileName = "$eventKey.jpg";
-    String downloadUrl = await setEventImage(eventImage, fileName);
+    String downloadUrl = await setEventImage(
+      eventImage,
+      fileName,
+    );
     event.imageURL = downloadUrl;
     event.eventKey = eventKey;
-    GeoFirePoint geoFirePoint = geo.point(latitude: lat, longitude: lon);
-    event.location = geo.point(latitude: lat, longitude: lon).data;
-    await upcomingEventsRef.document(eventKey).setData({'d': event.toMap(), 'g': geoFirePoint.hash, 'l': geoFirePoint.geoPoint}).whenComplete(() async {
+    GeoFirePoint geoFirePoint = geo.point(
+      latitude: lat,
+      longitude: lon,
+    );
+    event.location = geo
+        .point(
+          latitude: lat,
+          longitude: lon,
+        )
+        .data;
+    await upcomingEventsRef.document(eventKey).setData({
+      'd': event.toMap(),
+      'g': geoFirePoint.hash,
+      'l': geoFirePoint.geoPoint
+    }).whenComplete(() async {
       if (!event.flashEvent) {
-        DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+        DateTime eventDateTime =
+            DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
         String eventDateTimeString = Time().getStringFromDate(eventDateTime);
         String timezone = await Time().getLocalTimezone();
         CalendarEvent calEvent = CalendarEvent(
-            title: event.title,
-            description: event.description,
-            data: event.communityAreaName + "/" + event.communityName,
-            key: event.eventKey,
-            timezone: timezone,
-            dateTime: eventDateTimeString,
-            type: 'created');
+          title: event.title,
+          description: event.description,
+          data: event.communityAreaName + "/" + event.communityName,
+          key: event.eventKey,
+          timezone: timezone,
+          dateTime: eventDateTimeString,
+          type: 'created',
+        );
         await CalendarEventDataService().saveEvent(event.authorUid, calEvent);
-        CommunityDataService().updateCommunityEventActivity(event.tags, event.communityAreaName, event.communityName);
+        CommunityDataService().updateCommunityEventActivity(
+          event.tags,
+          event.communityAreaName,
+          event.communityName,
+        );
       }
     }).catchError((e) {
       error = e.toString();
@@ -75,17 +99,31 @@ class EventDataService {
     return error;
   }
 
-  Future<String> uploadRecurringEvent(File eventImage, RecurringEvent event, double lat, double lon) async {
+  Future<String> uploadRecurringEvent(
+      File eventImage, RecurringEvent event, double lat, double lon) async {
     String error = '';
-    GeoFirePoint eventLoc = geo.point(latitude: lat, longitude: lon);
+    GeoFirePoint eventLoc = geo.point(
+      latitude: lat,
+      longitude: lon,
+    );
     final String eventKey = "${Random().nextInt(999999999)}";
     String fileName = "$eventKey.jpg";
-    String downloadUrl = await setEventImage(eventImage, fileName);
+    String downloadUrl = await setEventImage(
+      eventImage,
+      fileName,
+    );
     event.imageURL = downloadUrl;
     event.eventKey = eventKey;
     event.location = eventLoc.data;
-    await recurringEventRef.document(eventKey).setData(event.toMap()).whenComplete(() {
-      CommunityDataService().updateCommunityEventActivity(event.tags, event.areaName, event.comName);
+    await recurringEventRef
+        .document(eventKey)
+        .setData(event.toMap())
+        .whenComplete(() {
+      CommunityDataService().updateCommunityEventActivity(
+        event.tags,
+        event.areaName,
+        event.comName,
+      );
     }).catchError((e) {
       error = e.toString();
     });
@@ -95,7 +133,8 @@ class EventDataService {
   Future<String> setEventImage(File eventImage, String fileName) async {
     StorageReference ref = storageReference.child("events").child(fileName);
     StorageUploadTask uploadTask = ref.putFile(eventImage);
-    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+    String downloadUrl =
+        await (await uploadTask.onComplete).ref.getDownloadURL() as String;
     return downloadUrl;
   }
 
@@ -126,8 +165,11 @@ class EventDataService {
 
   Future<Event> getEventByKey(String eventKey) async {
     Event event;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getEventByKey');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventKey': eventKey}).catchError((e) {});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getEventByKey',
+    );
+    final HttpsCallableResult result = await callable
+        .call(<String, dynamic>{'eventKey': eventKey}).catchError((e) {});
     if (result != null && result.data != null) {
       Map<String, dynamic> evMap = Map<String, dynamic>.from(result.data);
       event = Event.fromMap(evMap);
@@ -137,8 +179,14 @@ class EventDataService {
 
   Future<List<Event>> getEventsFromFollowedCommunities(String uid) async {
     List<Event> events = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getEventsFromFollowedCommunities');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getEventsFromFollowedCommunities',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'uid': uid,
+      },
+    );
     if (result.data != null) {
       List query = List.from(result.data);
       query.forEach((resultMap) {
@@ -152,8 +200,14 @@ class EventDataService {
 
   Future<List<WebblenUser>> getEventAttendees(String eventID) async {
     List<WebblenUser> users = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getEventAttendees');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventID': eventID});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getEventAttendees',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'eventID': eventID,
+      },
+    );
     if (result.data != null) {
       List query = List.from(result.data);
       query.forEach((resultMap) {
@@ -165,12 +219,22 @@ class EventDataService {
     return users;
   }
 
-  Future<List<Event>> getEventsNearLocation(double lat, double lon, bool forCheckIn) async {
+  Future<List<Event>> getEventsNearLocation(
+      double lat, double lon, bool forCheckIn) async {
     List<Event> events = [];
     final HttpsCallable callable = forCheckIn
-        ? CloudFunctions.instance.getHttpsCallable(functionName: 'getEventsForCheckIn')
-        : CloudFunctions.instance.getHttpsCallable(functionName: 'getEventsNearLocation');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
+        ? CloudFunctions.instance.getHttpsCallable(
+            functionName: 'getEventsForCheckIn',
+          )
+        : CloudFunctions.instance.getHttpsCallable(
+            functionName: 'getEventsNearLocation',
+          );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'lat': lat,
+        'lon': lon,
+      },
+    );
     if (result.data != null) {
       List query = List.from(result.data);
       query.forEach((resultMap) {
@@ -184,8 +248,14 @@ class EventDataService {
 
   Future<List<Event>> getUserEventHistory(String uid) async {
     List<Event> events = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getUserEventHistory');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getUserEventHistory',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'uid': uid,
+      },
+    );
     if (result.data != null) {
       List query = List.from(result.data);
       query.forEach((resultMap) {
@@ -199,7 +269,9 @@ class EventDataService {
 
   Future<List<Event>> getExclusiveWebblenEvents() async {
     List<Event> events = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getExclusiveWebblenEvents');
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getExclusiveWebblenEvents',
+    );
     final HttpsCallableResult result = await callable.call();
     if (result.data != null) {
       List query = List.from(result.data);
@@ -214,8 +286,15 @@ class EventDataService {
 
   Future<List<Event>> getRecommendedEvents(String uid, String areaName) async {
     List<Event> events = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'getRecommendedEvents');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid, 'areaName': areaName});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getRecommendedEvents',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'uid': uid,
+        'areaName': areaName,
+      },
+    );
     if (result.data != null) {
       List query = List.from(result.data);
       query.forEach((resultMap) {
@@ -229,17 +308,30 @@ class EventDataService {
 
   Future<bool> areCheckInsAvailable(double lat, double lon) async {
     bool checkInAvailable = false;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'areCheckInsAvailable');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'lat': lat, 'lon': lon});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'areCheckInsAvailable',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'lat': lat,
+        'lon': lon,
+      },
+    );
     if (result.data != null) {
       checkInAvailable = result.data;
     }
     return checkInAvailable;
   }
 
-  Future<List<Event>> searchForEventByName(String searchTerm, String areaName) async {
+  Future<List<Event>> searchForEventByName(
+      String searchTerm, String areaName) async {
     List<Event> events = [];
-    QuerySnapshot querySnapshot = await upcomingEventsRef.where("d.title", isEqualTo: searchTerm).getDocuments();
+    QuerySnapshot querySnapshot = await upcomingEventsRef
+        .where(
+          "d.title",
+          isEqualTo: searchTerm,
+        )
+        .getDocuments();
     if (querySnapshot.documents.isNotEmpty) {
       querySnapshot.documents.forEach((docSnap) {
         Event event = Event.fromMap(docSnap.data);
@@ -249,9 +341,15 @@ class EventDataService {
     return events;
   }
 
-  Future<List<Event>> searchForEventByTag(String searchTerm, String areaName) async {
+  Future<List<Event>> searchForEventByTag(
+      String searchTerm, String areaName) async {
     List<Event> events = [];
-    QuerySnapshot querySnapshot = await upcomingEventsRef.where("d.tags", arrayContains: searchTerm).getDocuments();
+    QuerySnapshot querySnapshot = await upcomingEventsRef
+        .where(
+          "d.tags",
+          arrayContains: searchTerm,
+        )
+        .getDocuments();
     if (querySnapshot.documents.isNotEmpty) {
       querySnapshot.documents.forEach((docSnap) {
         Event event = Event.fromMap(docSnap.data);
@@ -265,19 +363,26 @@ class EventDataService {
   Future<String> updateEvent(Event event) async {
     String status = "";
     Map<String, dynamic> eventMap = event.toMap();
-    upcomingEventsRef.document(event.eventKey).setData({'d': eventMap}).whenComplete(() async {
-      DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+    upcomingEventsRef
+        .document(event.eventKey)
+        .setData({'d': eventMap}).whenComplete(() async {
+      DateTime eventDateTime =
+          DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
       String eventDateTimeString = Time().getStringFromDate(eventDateTime);
       String timezone = await Time().getLocalTimezone();
       CalendarEvent calEvent = CalendarEvent(
-          title: event.title,
-          description: event.description,
-          data: event.communityAreaName + "/" + event.communityName,
-          key: event.eventKey,
-          timezone: timezone,
-          dateTime: eventDateTimeString,
-          type: 'created');
-      await CalendarEventDataService().updateEvent(event.authorUid, calEvent);
+        title: event.title,
+        description: event.description,
+        data: event.communityAreaName + "/" + event.communityName,
+        key: event.eventKey,
+        timezone: timezone,
+        dateTime: eventDateTimeString,
+        type: 'created',
+      );
+      await CalendarEventDataService().updateEvent(
+        event.authorUid,
+        calEvent,
+      );
     }).catchError((e) {
       status = e.details;
     });
@@ -285,28 +390,51 @@ class EventDataService {
   }
 
   Future<Null> updateEventViews(String eventID) async {
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'updateEventViews');
-    await callable.call(<String, dynamic>{'eventID': eventID});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'updateEventViews',
+    );
+    await callable.call(
+      <String, dynamic>{
+        'eventID': eventID,
+      },
+    );
   }
 
   Future<Null> addEventDataField(String dataName, dynamic data) async {
     QuerySnapshot querySnapshot = await upcomingEventsRef.getDocuments();
     querySnapshot.documents.forEach((doc) {
-      upcomingEventsRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
+      upcomingEventsRef
+          .document(doc.documentID)
+          .updateData({"$dataName": data})
+          .whenComplete(() {})
+          .catchError((e) {});
     });
   }
 
   Future<Null> addRecEventDataField(String dataName, dynamic data) async {
     QuerySnapshot querySnapshot = await recurringEventRef.getDocuments();
     querySnapshot.documents.forEach((doc) {
-      recurringEventRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
+      recurringEventRef
+          .document(doc.documentID)
+          .updateData({"$dataName": data})
+          .whenComplete(() {})
+          .catchError((e) {});
     });
   }
 
-  Future<Event> checkInAndUpdateEventPayout(String eventID, String uid, double userAP) async {
+  Future<Event> checkInAndUpdateEventPayout(
+      String eventID, String uid, double userAP) async {
     Event event;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'checkInAndUpdateEventPayout');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventID': eventID, 'uid': uid, 'userAP': userAP});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'checkInAndUpdateEventPayout',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic> {
+        'eventID': eventID,
+        'uid': uid,
+        'userAP': userAP,
+      },
+    );
     if (result.data != null) {
       Map<String, dynamic> eventMap = Map<String, dynamic>.from(result.data);
       event = Event.fromMap(eventMap);
@@ -316,8 +444,15 @@ class EventDataService {
 
   Future<Event> checkoutAndUpdateEventPayout(String eventID, String uid) async {
     Event event;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(functionName: 'checkoutAndUpdateEventPayout');
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventID': eventID, 'uid': uid});
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'checkoutAndUpdateEventPayout',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic> {
+        'eventID': eventID,
+        'uid': uid,
+      },
+    );
     if (result.data != null) {
       Map<String, dynamic> eventMap = Map<String, dynamic>.from(result.data);
       event = Event.fromMap(eventMap);
@@ -340,7 +475,11 @@ class EventDataService {
 
   Future<String> deleteRecurringEvent(String eventID) async {
     String error = "";
-    await recurringEventRef.document(eventID).delete().whenComplete(() {}).catchError((e) {
+    await recurringEventRef
+        .document(eventID)
+        .delete()
+        .whenComplete(() {})
+        .catchError((e) {
       error = e.toString();
     });
     return error;

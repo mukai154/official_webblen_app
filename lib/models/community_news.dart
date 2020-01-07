@@ -1,5 +1,4 @@
 class CommunityNewsPost {
-
   int datePostedInMilliseconds;
   String title;
   String imageURL;
@@ -11,7 +10,6 @@ class CommunityNewsPost {
   String areaName;
   String postID;
 
-
   CommunityNewsPost({
     this.datePostedInMilliseconds,
     this.title,
@@ -22,33 +20,33 @@ class CommunityNewsPost {
     this.content,
     this.communityName,
     this.areaName,
-    this.postID
+    this.postID,
   });
 
   CommunityNewsPost.fromMap(Map<String, dynamic> data)
       : this(
-      datePostedInMilliseconds: data['datePostedInMilliseconds'],
-      title: data['title'],
-      imageURL: data['imageURL'],
-      newsURL: data['newsURL'],
-      username: data['username'],
-      userImageURL: data['userImageURL'],
-      content: data['content'],
-      communityName: data['communityName'],
-      areaName: data['areaName'],
-      postID: data['postID']
-  );
+          datePostedInMilliseconds: data['datePostedInMilliseconds'],
+          title: data['title'],
+          imageURL: data['imageURL'],
+          newsURL: data['newsURL'],
+          username: data['username'],
+          userImageURL: data['userImageURL'],
+          content: data['content'],
+          communityName: data['communityName'],
+          areaName: data['areaName'],
+          postID: data['postID'],
+        );
 
   Map<String, dynamic> toMap() => {
-    'datePostedInMilliseconds': this.datePostedInMilliseconds,
-    'title': this.title,
-    'imageURL': this.imageURL,
-    'newsURL': this.newsURL,
-    'userImageURL': this.userImageURL,
-    'username': this.username,
-    'content': this.content,
-    'communityName': this.communityName,
-    'areaName': this.areaName,
-    'postID': this.postID
-  };
+        'datePostedInMilliseconds': this.datePostedInMilliseconds,
+        'title': this.title,
+        'imageURL': this.imageURL,
+        'newsURL': this.newsURL,
+        'userImageURL': this.userImageURL,
+        'username': this.username,
+        'content': this.content,
+        'communityName': this.communityName,
+        'areaName': this.areaName,
+        'postID': this.postID,
+      };
 }
