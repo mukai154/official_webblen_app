@@ -10,7 +10,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:intl/intl.dart';
-
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/event.dart';
@@ -49,6 +48,8 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
   final eventFormKey = GlobalKey<FormState>();
   final calendarFormKey = GlobalKey<FormState>();
   final addressFormKey = GlobalKey<FormState>();
+
+  bool isTyping = false;
 
   //Event
   Geoflutterfire geo = Geoflutterfire();
@@ -137,9 +138,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
         headerText: "Error",
         bodyText: "Image is Required",
       ).showAlertFlushbar(context);
-    } else if (newEvent.fbSite != null ||
-        newEvent.twitterSite != null ||
-        newEvent.website != null) {
+    } else if (newEvent.fbSite != null || newEvent.twitterSite != null || newEvent.website != null) {
       bool urlIsValid = true;
       if (newEvent.fbSite != null && newEvent.fbSite.isNotEmpty) {
         urlIsValid = OpenUrl().isValidUrl(newEvent.fbSite);
@@ -238,10 +237,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
         if (error.isEmpty) {
           Navigator.of(context).pop();
           HapticFeedback.mediumImpact();
-          ShowAlertDialogService().showActionSuccessDialog(
-              context,
-              'Event Created!',
-              "We'll recommend this event to members of the community", () {
+          ShowAlertDialogService().showActionSuccessDialog(context, 'Event Created!', "We'll recommend this event to members of the community", () {
             Navigator.of(context).pop();
             Navigator.of(context).pop();
             Navigator.of(context).pop();
@@ -560,11 +556,8 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
                   width: 110.0,
                   hPadding: 0,
                   text: 'standard',
-                  textColor:
-                      eventTypeRadioVal == 0 ? Colors.white : Colors.black,
-                  backgroundColor: eventTypeRadioVal == 0
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
+                  textColor: eventTypeRadioVal == 0 ? Colors.white : Colors.black,
+                  backgroundColor: eventTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                   onPressed: () {
                     eventTypeRadioVal = 0;
                     setState(() {});
@@ -575,11 +568,8 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
                   width: 110.0,
                   hPadding: 0,
                   text: 'food/drink',
-                  textColor:
-                      eventTypeRadioVal == 1 ? Colors.white : Colors.black,
-                  backgroundColor: eventTypeRadioVal == 1
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
+                  textColor: eventTypeRadioVal == 1 ? Colors.white : Colors.black,
+                  backgroundColor: eventTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                   onPressed: () {
                     eventTypeRadioVal = 1;
                     setState(() {});
@@ -590,11 +580,8 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
                   width: 110.0,
                   hPadding: 0,
                   text: 'sale/discount',
-                  textColor:
-                      eventTypeRadioVal == 2 ? Colors.white : Colors.black,
-                  backgroundColor: eventTypeRadioVal == 2
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
+                  textColor: eventTypeRadioVal == 2 ? Colors.white : Colors.black,
+                  backgroundColor: eventTypeRadioVal == 2 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                   onPressed: () {
                     eventTypeRadioVal = 2;
                     setState(() {});
@@ -792,13 +779,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
                   right: 8.0,
                 ),
                 child: GestureDetector(
-                  child: Fonts().textW500(
-                      newEvent.startTime == null
-                          ? "Start Time"
-                          : newEvent.startTime,
-                      18.0,
-                      FlatColors.electronBlue,
-                      TextAlign.left),
+                  child: Fonts().textW500(newEvent.startTime == null ? "Start Time" : newEvent.startTime, 18.0, FlatColors.electronBlue, TextAlign.left),
                   onTap: () => showPickerDateTime(
                     context,
                     'start',
@@ -1012,12 +993,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Fonts().textW500(
-              newEvent.address == null || newEvent.address.isEmpty
-                  ? "Set Address"
-                  : "${newEvent.address}",
-              16.0,
-              FlatColors.darkGray,
-              TextAlign.center),
+              newEvent.address == null || newEvent.address.isEmpty ? "Set Address" : "${newEvent.address}", 16.0, FlatColors.darkGray, TextAlign.center),
           SizedBox(
             height: 16.0,
           ),
@@ -1048,8 +1024,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
                       ),
                     ],
                   );
-                  PlacesDetailsResponse detail =
-                      await _places.getDetailsByPlaceId(p.placeId);
+                  PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
                   setState(() {
                     lat = detail.result.geometry.location.lat;
                     lon = detail.result.geometry.location.lng;
@@ -1066,9 +1041,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
               RaisedButton(
                 color: Colors.white70,
                 onPressed: () async {
-                  LocationService()
-                      .getCurrentLocation(context)
-                      .then((location) {
+                  LocationService().getCurrentLocation(context).then((location) {
                     if (this.mounted) {
                       if (location == null) {
                         ShowAlertDialogService().showFailureDialog(
@@ -1339,11 +1312,16 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
     );
 
     return Scaffold(
-      appBar: WebblenAppBar().newEventAppBar(context, 'New Regular Event',
-          widget.community.name, 'Cancel Adding a New Event?', () {
+      appBar: WebblenAppBar().newEventAppBar(context, 'New Regular Event', widget.community.name, 'Cancel Adding a New Event?', () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
-      }),
+      },
+          isTyping
+              ? GestureDetector(
+                  onTap: () => FocusScope.of(context).unfocus(),
+                  child: Fonts().textW500('Done', 16.0, Colors.black, TextAlign.right),
+                )
+              : Container()),
       key: homeScaffoldKey,
       body: WillPopScope(
         onWillPop: () async {

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-
 import 'package:webblen/services_general/services_user_options.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 import 'package:webblen/widgets/widgets_common/common_custom_alert.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
+import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
 
 class FailureDialog extends StatelessWidget {
   final String header;
@@ -579,8 +578,7 @@ class CancelEventDialog extends StatelessWidget {
                     backgroundColor: FlatColors.webblenRed,
                     height: 45.0,
                     width: 200.0,
-                    onPressed: () =>
-                        Navigator.of(context).pushNamedAndRemoveUntil(
+                    onPressed: () => Navigator.of(context).pushNamedAndRemoveUntil(
                       '/home',
                       (Route<dynamic> route) => false,
                     ),
@@ -706,13 +704,7 @@ class EventOptionsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomAlertDialog(
       content: Container(
-        height: editAction == null
-            ? deleteEventAction == null
-                ? viewAttendeesAction == null
-                    ? shareEventAction == null ? 100 : 130
-                    : 180
-                : 210
-            : 230,
+        height: editAction == null ? deleteEventAction == null ? viewAttendeesAction == null ? shareEventAction == null ? 100 : 130 : 180 : 210 : 230,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -849,9 +841,7 @@ class InfoDialog extends StatelessWidget {
                   data: MediaQuery.of(context).copyWith(
                     textScaleFactor: 1.0,
                   ),
-                  child: Text(header,
-                      style: Fonts.alertDialogHeader,
-                      textAlign: TextAlign.center),
+                  child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
                 ),
               ],
             )),
@@ -1586,11 +1576,9 @@ class UserDetailsOptionsDialog extends StatelessWidget {
                                     CustomColorButton(
                                       text: "Accept",
                                       textColor: Colors.white,
-                                      backgroundColor:
-                                          FlatColors.darkMountainGreen,
+                                      backgroundColor: FlatColors.darkMountainGreen,
                                       height: 40.0,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.22,
+                                      width: MediaQuery.of(context).size.width * 0.22,
                                       onPressed: confirmRequestAction,
                                     ),
                                     CustomColorButton(
@@ -1598,8 +1586,7 @@ class UserDetailsOptionsDialog extends StatelessWidget {
                                       textColor: FlatColors.darkGray,
                                       backgroundColor: Colors.white,
                                       height: 40.0,
-                                      width: MediaQuery.of(context).size.width *
-                                          0.22,
+                                      width: MediaQuery.of(context).size.width * 0.22,
                                       onPressed: denyRequestAction,
                                     ),
                                   ],
@@ -1966,8 +1953,7 @@ class AccountQRDialog extends StatelessWidget {
               height: 8.0,
             ),
             CustomColorIconButton(
-              icon: Icon(FontAwesomeIcons.camera,
-                  color: Colors.black, size: 16.0),
+              icon: Icon(FontAwesomeIcons.camera, color: Colors.black, size: 16.0),
               text: "Scan",
               textColor: Colors.black,
               backgroundColor: Colors.white,
@@ -2090,9 +2076,7 @@ class CalendarFilterDialog extends StatelessWidget {
             CustomColorButton(
                 text: "All Events",
                 textColor: currentFilter == "all" ? Colors.white : Colors.black,
-                backgroundColor: currentFilter == "all"
-                    ? FlatColors.webblenRed
-                    : Colors.white,
+                backgroundColor: currentFilter == "all" ? FlatColors.webblenRed : Colors.white,
                 height: 45.0,
                 width: 200.0,
                 onPressed: () {
@@ -2101,11 +2085,8 @@ class CalendarFilterDialog extends StatelessWidget {
                 }),
             CustomColorButton(
                 text: "Saved Events",
-                textColor:
-                    currentFilter == "saved" ? Colors.white : Colors.black,
-                backgroundColor: currentFilter == "saved"
-                    ? FlatColors.webblenRed
-                    : Colors.white,
+                textColor: currentFilter == "saved" ? Colors.white : Colors.black,
+                backgroundColor: currentFilter == "saved" ? FlatColors.webblenRed : Colors.white,
                 height: 45.0,
                 width: 200.0,
                 onPressed: () {
@@ -2114,11 +2095,8 @@ class CalendarFilterDialog extends StatelessWidget {
                 }),
             CustomColorButton(
                 text: "Created Events",
-                textColor:
-                    currentFilter == "created" ? Colors.white : Colors.black,
-                backgroundColor: currentFilter == "created"
-                    ? FlatColors.webblenRed
-                    : Colors.white,
+                textColor: currentFilter == "created" ? Colors.white : Colors.black,
+                backgroundColor: currentFilter == "created" ? FlatColors.webblenRed : Colors.white,
                 height: 45.0,
                 width: 200.0,
                 onPressed: () {
@@ -2127,11 +2105,8 @@ class CalendarFilterDialog extends StatelessWidget {
                 }),
             CustomColorButton(
               text: "Reminders",
-              textColor:
-                  currentFilter == "reminder" ? Colors.white : Colors.black,
-              backgroundColor: currentFilter == "reminder"
-                  ? FlatColors.webblenRed
-                  : Colors.white,
+              textColor: currentFilter == "reminder" ? Colors.white : Colors.black,
+              backgroundColor: currentFilter == "reminder" ? FlatColors.webblenRed : Colors.white,
               height: 45.0,
               width: 200.0,
               onPressed: () {
@@ -2235,6 +2210,27 @@ class CalendarEventOptionsDialog extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class FormDialog extends StatelessWidget {
+  final Widget form;
+  FormDialog({this.form});
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomAlertDialog(
+      content: Container(
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(
+            Radius.circular(32.0),
+          ),
+        ),
+        child: form,
       ),
     );
   }

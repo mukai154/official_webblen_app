@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/event.dart';
@@ -158,6 +157,9 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
   void initState() {
     super.initState();
     loadData();
+//    EventDataService().addEventDataField("d.startDateTime", "Jan 31, 07:00 PM");
+//    EventDataService().addEventDataField("d.endDateTime", "Jan 31, 09:00 PM");
+//    EventDataService().addEventDataField("d.timezone", "America/Chicago");
   }
 
   @override
@@ -183,8 +185,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       MediaQuery(
-                        data: MediaQuery.of(context)
-                            .copyWith(textScaleFactor: 1.0),
+                        data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
                         child: widget.areaName.length <= 6
                             ? Fonts().textW700(
                                 widget.areaName,
@@ -270,9 +271,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
               : Container(
                   height: MediaQuery.of(context).size.height > 667.0
                       ? MediaQuery.of(context).size.height * 0.715
-                      : MediaQuery.of(context).size.height > 568.0
-                          ? MediaQuery.of(context).size.height * 0.67
-                          : MediaQuery.of(context).size.height * 0.60,
+                      : MediaQuery.of(context).size.height > 568.0 ? MediaQuery.of(context).size.height * 0.67 : MediaQuery.of(context).size.height * 0.60,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[

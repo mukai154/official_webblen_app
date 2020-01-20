@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 // Examples can assume:
 // enum Department { treasury, state }
@@ -260,10 +260,10 @@ class CustomAlertDialog extends StatelessWidget {
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
+        case TargetPlatform.macOS:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-          label = semanticLabel ??
-              MaterialLocalizations.of(context)?.alertDialogLabel;
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
       }
     }
 
@@ -538,10 +538,10 @@ class SimpleDialog extends StatelessWidget {
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
+        case TargetPlatform.macOS:
         case TargetPlatform.android:
         case TargetPlatform.fuchsia:
-          label =
-              semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.dialogLabel;
       }
     }
 
@@ -616,8 +616,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation) {
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     return SafeArea(
       child: Builder(builder: (BuildContext context) {
         final Widget annotatedChild = Semantics(
@@ -636,8 +635,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
   }
 
   @override
-  Widget buildTransitions(BuildContext context, Animation<double> animation,
-      Animation<double> secondaryAnimation, Widget child) {
+  Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
     return FadeTransition(
       opacity: CurvedAnimation(
         parent: animation,
@@ -680,8 +678,7 @@ Future<T> customShowDialog<T>({
   @required
       BuildContext context,
   bool barrierDismissible: true,
-  @Deprecated(
-      'Instead of using the "child" argument, return the child from a closure '
+  @Deprecated('Instead of using the "child" argument, return the child from a closure '
       'provided to the "builder" argument. This will ensure that the BuildContext '
       'is appropriate for widgets built in the dialog.')
       Widget child,

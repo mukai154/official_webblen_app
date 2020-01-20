@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -39,8 +38,7 @@ class WebblenAppBar {
     );
   }
 
-  Widget pagingAppBar(BuildContext context, String appBarTitle,
-      String nextButtonTitle, VoidCallback prevPage, VoidCallback nextPage) {
+  Widget pagingAppBar(BuildContext context, String appBarTitle, String nextButtonTitle, VoidCallback prevPage, VoidCallback nextPage) {
     return AppBar(
       elevation: 0.5,
       brightness: Brightness.light,
@@ -79,8 +77,7 @@ class WebblenAppBar {
     );
   }
 
-  Widget newEventAppBar(BuildContext context, String appBarTitle,
-      String communityName, String cancelHeader, VoidCallback cancelAction) {
+  Widget newEventAppBar(BuildContext context, String appBarTitle, String communityName, String cancelHeader, VoidCallback cancelAction, Widget actionWidget) {
     return AppBar(
       elevation: 0.5,
       brightness: Brightness.light,
@@ -105,6 +102,7 @@ class WebblenAppBar {
           );
         },
       ),
+      actions: <Widget>[actionWidget],
       bottom: PreferredSize(
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -206,11 +204,8 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
     });
   }
 
-  Widget _buildTabItem(
-      {FABBottomAppBarItem item, int index, ValueChanged<int> onPressed}) {
-    Color color = _selectedIndex == index
-        ? FlatColors.webblenRed
-        : FlatColors.lightAmericanGray;
+  Widget _buildTabItem({FABBottomAppBarItem item, int index, ValueChanged<int> onPressed}) {
+    Color color = _selectedIndex == index ? FlatColors.webblenRed : FlatColors.lightAmericanGray;
     return Expanded(
       child: SizedBox(
         height: widget.height,

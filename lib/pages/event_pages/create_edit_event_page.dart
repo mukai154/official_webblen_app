@@ -10,7 +10,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:intl/intl.dart';
-
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/event.dart';
@@ -61,6 +60,8 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
   final page6FormKey = GlobalKey<FormState>();
   final page7FormKey = GlobalKey<FormState>();
 
+  bool isTyping = false;
+
   //Event
   Geoflutterfire geo = Geoflutterfire();
   double lat;
@@ -81,6 +82,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
   String startTime = "";
   String endTime = "";
   int eventTypeRadioVal = 0;
+  int eventTicketRadioValue = 0;
   List<String> pageTitles = [
     'Event Details',
     'Add Photo',
@@ -119,11 +121,31 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
     );
   }
 
+  void addressButtonBackAction() {
+    bool hasTickets = getEventTicketValueChange();
+    if (hasTickets) {
+      _pageController.previousPage(
+        duration: Duration(
+          milliseconds: 600,
+        ),
+        curve: Curves.easeIn,
+      );
+    } else {
+      _pageController.animateToPage(2, duration: Duration(milliseconds: 600), curve: Curves.easeIn);
+    }
+  }
+
+  void dismissKeyboard() {
+    FocusScope.of(context).unfocus();
+    isTyping = false;
+    setState(() {});
+  }
+
   //Form Validations
   void validateSpecialEvent() {
     final form = page1FormKey.currentState;
     form.save();
-    newEvent.eventType = getRadioValue();
+    newEvent.eventType = getEventTypeRadioValue();
     if (newEvent.title == null || newEvent.title.isEmpty) {
       AlertFlushbar(
         headerText: "Error",
@@ -149,9 +171,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
         headerText: "Error",
         bodyText: "Event Needs an End Date",
       ).showAlertFlushbar(context);
-    } else if (newEvent.fbSite != null ||
-        newEvent.twitterSite != null ||
-        newEvent.website != null) {
+    } else if (newEvent.fbSite != null || newEvent.twitterSite != null || newEvent.website != null) {
       bool urlIsValid = true;
       if (newEvent.fbSite.isNotEmpty) {
         urlIsValid = OpenUrl().isValidUrl(newEvent.fbSite);
@@ -179,7 +199,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
     final form = page1FormKey.currentState;
     form.save();
     setState(() {
-      newEvent.recurrence = getRadioValue();
+      newEvent.recurrence = getEventTypeRadioValue();
     });
     if (newEvent.title == null || newEvent.title.isEmpty) {
       AlertFlushbar(
@@ -196,9 +216,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
         headerText: "Error",
         bodyText: "Image is Required",
       ).showAlertFlushbar(context);
-    } else if (newEvent.fbSite != null ||
-        newEvent.twitterSite != null ||
-        newEvent.website != null) {
+    } else if (newEvent.fbSite != null || newEvent.twitterSite != null || newEvent.website != null) {
       bool urlIsValid = true;
       if (newEvent.fbSite.isNotEmpty) {
         urlIsValid = OpenUrl().isValidUrl(newEvent.fbSite);
@@ -246,6 +264,19 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
     }
   }
 
+  void validateTicketStatus() {
+    bool hasTickets = getEventTicketValueChange();
+    if (hasTickets) {
+      nextPage();
+    } else {
+      _pageController.animateToPage(
+        4,
+        duration: Duration(milliseconds: 600),
+        curve: Curves.fastOutSlowIn,
+      );
+    }
+  }
+
   void validateAndSubmit() {
     final form = page7FormKey.currentState;
     form.save();
@@ -256,10 +287,8 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
       ).showAlertFlushbar(context);
     } else {
       ShowAlertDialogService().showLoadingDialog(context);
-      if (newEvent.endDateInMilliseconds == null &&
-          newEvent.startDateInMilliseconds != null) {
-        DateTime eventStart = DateTime.fromMillisecondsSinceEpoch(
-            newEvent.startDateInMilliseconds);
+      if (newEvent.endDateInMilliseconds == null && newEvent.startDateInMilliseconds != null) {
+        DateTime eventStart = DateTime.fromMillisecondsSinceEpoch(newEvent.startDateInMilliseconds);
         newEvent.startDateInMilliseconds = eventStart.millisecondsSinceEpoch;
         newEvent.endDateInMilliseconds = eventStart
             .add(
@@ -291,8 +320,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           if (error.isEmpty) {
             Navigator.of(context).pop();
             HapticFeedback.mediumImpact();
-            ShowAlertDialogService().showActionSuccessDialog(
-                context, 'Event Updated!', "Your event has been updated.", () {
+            ShowAlertDialogService().showActionSuccessDialog(context, 'Event Updated!', "Your event has been updated.", () {
               PageTransitionService(
                 context: context,
               ).returnToRootPage();
@@ -318,10 +346,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           if (error.isEmpty) {
             Navigator.of(context).pop();
             HapticFeedback.mediumImpact();
-            ShowAlertDialogService().showActionSuccessDialog(
-                context,
-                'Event Created!',
-                "Your event has been posted and added to your calendar.", () {
+            ShowAlertDialogService().showActionSuccessDialog(context, 'Event Created!', "Your event has been posted and added to your calendar.", () {
               PageTransitionService(
                 context: context,
               ).returnToRootPage();
@@ -336,18 +361,16 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           }
         });
       }
-
-      //Navigator.push(context, ScaleRoute(widget: ConfirmEventPage(newEvent: newEventPost, newEventImage: eventImage)));
     }
   }
 
-  void handleRadioValueChanged(int value) {
+  void handleEventRadioButtonChange(int value) {
     setState(() {
       eventTypeRadioVal = value;
     });
   }
 
-  String getRadioValue() {
+  String getEventTypeRadioValue() {
     String val = 'standard';
     if (eventTypeRadioVal == 1) {
       val = 'foodDrink';
@@ -355,6 +378,22 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
       val = 'saleDiscount';
     }
     return val;
+  }
+
+  void handleEventTicketValueChange(int value) {
+    setState(() {
+      eventTypeRadioVal = value;
+    });
+  }
+
+  bool getEventTicketValueChange() {
+    bool hasTickets = true;
+    if (eventTicketRadioValue == 0) {
+      hasTickets = true;
+    } else if (eventTicketRadioValue == 1) {
+      hasTickets = false;
+    }
+    return hasTickets;
   }
 
   void setEventImage(bool getImageFromCamera) async {
@@ -407,12 +446,10 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
     } else {
       if (isStartDate) {
         setState(() {
-          newEvent.startDateInMilliseconds =
-              selectedDate.millisecondsSinceEpoch;
+          newEvent.startDateInMilliseconds = selectedDate.millisecondsSinceEpoch;
         });
       } else {
-        if (selectedDate.millisecondsSinceEpoch <
-            newEvent.startDateInMilliseconds) {
+        if (selectedDate.millisecondsSinceEpoch < newEvent.startDateInMilliseconds) {
           scaffold.showSnackBar(
             SnackBar(
               content: Text(
@@ -426,8 +463,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           );
         } else {
           setState(() {
-            newEvent.endDateInMilliseconds =
-                selectedDate.millisecondsSinceEpoch;
+            newEvent.endDateInMilliseconds = selectedDate.millisecondsSinceEpoch;
           });
         }
       }
@@ -593,48 +629,40 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           top: 8.0,
           right: 8.0,
         ),
-        decoration: BoxDecoration(
-          color: FlatColors.textFieldGray,
-          borderRadius: BorderRadius.all(
-            Radius.circular(8),
-          ),
-        ),
-        child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: 1.0,
-          ),
-          child: TextFormField(
-            initialValue: newEvent != null && newEvent.title != null
-                ? newEvent.title
-                : "",
-            decoration: InputDecoration(
-              hintText: "Event Title",
-              contentPadding: EdgeInsets.only(
-                left: 8,
-                top: 8,
-                bottom: 8,
-              ),
-              border: InputBorder.none,
+        child: TextFormField(
+          onTap: () {
+            isTyping = true;
+            setState(() {});
+          },
+          initialValue: newEvent != null && newEvent.title != null ? newEvent.title : "",
+          decoration: InputDecoration(
+            hintText: "Event Title",
+            contentPadding: EdgeInsets.only(
+              left: 8,
+              top: 8,
+              bottom: 8,
             ),
-            onSaved: (value) => newEvent.title = value,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 22,
-              fontFamily: "Helvetica Neue",
-              fontWeight: FontWeight.w700,
-            ),
-            maxLines: 1,
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(30),
-              BlacklistingTextInputFormatter(
-                RegExp(
-                  "[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]",
-                ),
-              ),
-            ],
-            textInputAction: TextInputAction.done,
-            autocorrect: false,
+            border: InputBorder.none,
           ),
+          onEditingComplete: () => dismissKeyboard(),
+          onSaved: (val) => newEvent.title = val,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 22,
+            fontFamily: "Helvetica Neue",
+            fontWeight: FontWeight.w700,
+          ),
+          maxLines: 1,
+          inputFormatters: [
+            LengthLimitingTextInputFormatter(30),
+            BlacklistingTextInputFormatter(
+              RegExp(
+                "[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]",
+              ),
+            ),
+          ],
+          textInputAction: TextInputAction.done,
+          autocorrect: false,
         ),
       );
     }
@@ -650,36 +678,32 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width - 16,
         ),
-        decoration: BoxDecoration(
-          color: FlatColors.textFieldGray,
-          borderRadius: BorderRadius.all(
-            Radius.circular(8),
+        child: TextFormField(
+          onTap: () {
+            isTyping = true;
+            setState(() {});
+          },
+          initialValue: newEvent != null && newEvent.description != null ? newEvent.description : "",
+          decoration: InputDecoration(
+            hintText: "Event Description",
+            contentPadding: EdgeInsets.all(8),
+            border: InputBorder.none,
           ),
-        ),
-        child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: 1.0,
+          onEditingComplete: () => dismissKeyboard(),
+          onSaved: (val) {
+            newEvent.description = val;
+            isTyping = false;
+            setState(() {});
+          },
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16,
+            fontFamily: "Helvetica Neue",
           ),
-          child: TextFormField(
-            initialValue: newEvent != null && newEvent.description != null
-                ? newEvent.description
-                : "",
-            decoration: InputDecoration(
-              hintText: "Event Description",
-              contentPadding: EdgeInsets.all(8),
-              border: InputBorder.none,
-            ),
-            onSaved: (val) => newEvent.description = val,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 14,
-              fontFamily: "Helvetica Neue",
-            ),
-            textInputAction: TextInputAction.done,
-            keyboardType: TextInputType.multiline,
-            maxLines: null,
-            autocorrect: false,
-          ),
+          textInputAction: TextInputAction.done,
+          keyboardType: TextInputType.multiline,
+          maxLines: null,
+          autocorrect: false,
         ),
       );
     }
@@ -692,26 +716,20 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           right: 16.0,
         ),
         child: GestureDetector(
-          child: MediaQuery(
-            data: MediaQuery.of(context).copyWith(
-              textScaleFactor: 1.0,
-            ),
-            child: newEvent.startDateInMilliseconds == null
-                ? Fonts().textW500(
-                    "Start Date & Time",
-                    18.0,
-                    FlatColors.londonSquare,
-                    TextAlign.left,
-                  )
-                : Fonts().textW500(
-                    "${formatter.format(
-                      DateTime.fromMillisecondsSinceEpoch(
-                          newEvent.startDateInMilliseconds),
-                    )}",
-                    18.0,
-                    FlatColors.electronBlue,
-                    TextAlign.left),
-          ),
+          child: newEvent.startDateInMilliseconds == null
+              ? Fonts().textW500(
+                  "Start Date & Time",
+                  18.0,
+                  FlatColors.londonSquare,
+                  TextAlign.left,
+                )
+              : Fonts().textW500(
+                  "${formatter.format(
+                    DateTime.fromMillisecondsSinceEpoch(newEvent.startDateInMilliseconds),
+                  )}",
+                  18.0,
+                  FlatColors.electronBlue,
+                  TextAlign.left),
           onTap: () => showPickerDateTime(
             context,
             'start',
@@ -746,8 +764,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
                             )
                           : Fonts().textW500(
                               "${formatter.format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                    newEvent.endDateInMilliseconds),
+                                DateTime.fromMillisecondsSinceEpoch(newEvent.endDateInMilliseconds),
                               )}",
                               18.0,
                               FlatColors.electronBlue,
@@ -777,68 +794,6 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
             );
     }
 
-    Widget _buildRadioButtons() {
-      return Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16.0,
-        ),
-        child: Column(
-          children: <Widget>[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: <Widget>[
-                CustomColorButton(
-                  height: 30.0,
-                  width: 100.0,
-                  hPadding: 0,
-                  text: 'standard',
-                  textColor:
-                      eventTypeRadioVal == 0 ? Colors.white : Colors.black,
-                  backgroundColor: eventTypeRadioVal == 0
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
-                  onPressed: () {
-                    eventTypeRadioVal = 0;
-                    setState(() {});
-                  },
-                ),
-                CustomColorButton(
-                  height: 30.0,
-                  width: 100.0,
-                  hPadding: 0,
-                  text: 'food/drink',
-                  textColor:
-                      eventTypeRadioVal == 1 ? Colors.white : Colors.black,
-                  backgroundColor: eventTypeRadioVal == 1
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
-                  onPressed: () {
-                    eventTypeRadioVal = 1;
-                    setState(() {});
-                  },
-                ),
-                CustomColorButton(
-                  height: 30.0,
-                  width: 100.0,
-                  hPadding: 0,
-                  text: 'sale/discount',
-                  textColor:
-                      eventTypeRadioVal == 2 ? Colors.white : Colors.black,
-                  backgroundColor: eventTypeRadioVal == 2
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
-                  onPressed: () {
-                    eventTypeRadioVal = 2;
-                    setState(() {});
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      );
-    }
-
     Widget _buildFBUrlField() {
       return Container(
         margin: EdgeInsets.only(
@@ -846,57 +801,52 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
           top: 4.0,
           right: 8.0,
         ),
-        child: MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            textScaleFactor: 1.0,
+        child: TextFormField(
+          initialValue: "",
+          maxLines: 1,
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16.0,
+            fontFamily: 'Barlow',
+            fontWeight: FontWeight.w500,
           ),
-          child: TextFormField(
-            initialValue: "",
-            maxLines: 1,
-            style: TextStyle(
-              color: Colors.black,
-              fontSize: 16.0,
-              fontFamily: 'Barlow',
-              fontWeight: FontWeight.w500,
-            ),
-            autofocus: false,
-            onSaved: (url) {
-              if (url.isNotEmpty) {
-                if (!url.contains('http://') || !url.contains('https://')) {
-                  if (!url.contains('www.')) {
-                    url = 'http://www.' + url;
-                  } else {
-                    url = 'http://' + url;
-                  }
+          autofocus: false,
+          onSaved: (url) {
+            if (url.isNotEmpty) {
+              if (!url.contains('http://') || !url.contains('https://')) {
+                if (!url.contains('www.')) {
+                  url = 'http://www.' + url;
+                } else {
+                  url = 'http://' + url;
                 }
               }
-              newEvent.fbSite = url;
-            },
-            inputFormatters: [
-              BlacklistingTextInputFormatter(
-                RegExp(
-                  "[\\ |\\,]",
-                ),
+            }
+            newEvent.fbSite = url;
+          },
+          inputFormatters: [
+            BlacklistingTextInputFormatter(
+              RegExp(
+                "[\\ |\\,]",
               ),
-            ],
-            keyboardType: TextInputType.url,
-            decoration: InputDecoration(
-              icon: Icon(
-                FontAwesomeIcons.facebook,
-                color: FlatColors.darkGray,
-                size: 18,
-              ),
-              border: InputBorder.none,
-              hintText: "Facebook Page URL",
-              counterStyle: TextStyle(
-                fontFamily: 'Helvetica Neue',
-              ),
-              contentPadding: EdgeInsets.fromLTRB(
-                0.0,
-                10.0,
-                10.0,
-                10.0,
-              ),
+            ),
+          ],
+          keyboardType: TextInputType.url,
+          decoration: InputDecoration(
+            icon: Icon(
+              FontAwesomeIcons.facebook,
+              color: FlatColors.darkGray,
+              size: 18,
+            ),
+            border: InputBorder.none,
+            hintText: "Facebook Page URL",
+            counterStyle: TextStyle(
+              fontFamily: 'Helvetica Neue',
+            ),
+            contentPadding: EdgeInsets.fromLTRB(
+              0.0,
+              10.0,
+              10.0,
+              10.0,
             ),
           ),
         ),
@@ -1024,6 +974,100 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
       );
     }
 
+    Widget _buildEventTypeRadioButtons() {
+      return Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 16.0,
+        ),
+        child: Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                CustomColorButton(
+                  height: 30.0,
+                  width: 100.0,
+                  hPadding: 0,
+                  text: 'standard',
+                  textColor: eventTypeRadioVal == 0 ? Colors.white : Colors.black,
+                  backgroundColor: eventTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                  onPressed: () {
+                    eventTypeRadioVal = 0;
+                    setState(() {});
+                  },
+                ),
+                CustomColorButton(
+                  height: 30.0,
+                  width: 100.0,
+                  hPadding: 0,
+                  text: 'food/drink',
+                  textColor: eventTypeRadioVal == 1 ? Colors.white : Colors.black,
+                  backgroundColor: eventTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                  onPressed: () {
+                    eventTypeRadioVal = 1;
+                    setState(() {});
+                  },
+                ),
+                CustomColorButton(
+                  height: 30.0,
+                  width: 100.0,
+                  hPadding: 0,
+                  text: 'sale/discount',
+                  textColor: eventTypeRadioVal == 2 ? Colors.white : Colors.black,
+                  backgroundColor: eventTypeRadioVal == 2 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                  onPressed: () {
+                    eventTypeRadioVal = 2;
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget _buildEventTicketRadioButtons() {
+      return Container(
+        padding: EdgeInsets.symmetric(
+          vertical: 16.0,
+        ),
+        child: Column(
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                CustomColorButton(
+                  height: 30.0,
+                  width: 150.0,
+                  hPadding: 0,
+                  text: 'Yes',
+                  textColor: eventTicketRadioValue == 0 ? Colors.white : Colors.black,
+                  backgroundColor: eventTicketRadioValue == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                  onPressed: () {
+                    eventTicketRadioValue = 0;
+                    setState(() {});
+                  },
+                ),
+                CustomColorButton(
+                  height: 30.0,
+                  width: 150.0,
+                  hPadding: 0,
+                  text: 'No',
+                  textColor: eventTicketRadioValue == 1 ? Colors.white : Colors.black,
+                  backgroundColor: eventTicketRadioValue == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
+                  onPressed: () {
+                    eventTicketRadioValue = 1;
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     Widget _buildSearchAutoComplete() {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -1033,12 +1077,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
               textScaleFactor: 1.0,
             ),
             child: Fonts().textW500(
-                newEvent.address == null || newEvent.address.isEmpty
-                    ? "Set Address"
-                    : "${newEvent.address}",
-                16.0,
-                FlatColors.darkGray,
-                TextAlign.center),
+                newEvent.address == null || newEvent.address.isEmpty ? "Set Address" : "${newEvent.address}", 16.0, FlatColors.darkGray, TextAlign.center),
           ),
           SizedBox(
             height: 16.0,
@@ -1070,8 +1109,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
                       ),
                     ],
                   );
-                  PlacesDetailsResponse detail =
-                      await _places.getDetailsByPlaceId(p.placeId);
+                  PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
                   setState(() {
                     lat = detail.result.geometry.location.lat;
                     lon = detail.result.geometry.location.lng;
@@ -1094,9 +1132,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
               RaisedButton(
                 color: Colors.white70,
                 onPressed: () async {
-                  LocationService()
-                      .getCurrentLocation(context)
-                      .then((location) {
+                  LocationService().getCurrentLocation(context).then((location) {
                     if (this.mounted) {
                       if (location == null) {
                         ShowAlertDialogService().showFailureDialog(
@@ -1164,11 +1200,21 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
       "Next",
       FlatColors.blackPearl,
       Colors.white,
-      widget.isRecurring
-          ? this.validateRegularEvent
-          : this.validateSpecialEvent,
+      widget.isRecurring ? this.validateRegularEvent : this.validateSpecialEvent,
     );
     final formButton2 = NewEventFormButton(
+      "Next",
+      FlatColors.blackPearl,
+      Colors.white,
+      this.validateTags,
+    );
+    final formButton3 = NewEventFormButton(
+      "Next",
+      FlatColors.blackPearl,
+      Colors.white,
+      this.validateTicketStatus,
+    );
+    final formButton4 = NewEventFormButton(
       "Next",
       FlatColors.blackPearl,
       Colors.white,
@@ -1186,6 +1232,121 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
       Colors.white,
       this.previousPage,
     );
+    final addressBackButton = FlatBackButton(
+      "Back",
+      FlatColors.blackPearl,
+      Colors.white,
+      this.addressButtonBackAction,
+    );
+
+    Widget buildTicketForm() {
+      return GestureDetector(
+        onTap: () => FocusNode().unfocus(),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.50,
+          width: 150,
+          child: ListView(
+            shrinkWrap: true,
+            children: <Widget>[
+              TextFormField(
+                textAlign: TextAlign.center,
+                initialValue: null,
+                decoration: InputDecoration(
+                  hintText: "Ticket Name",
+                  border: InputBorder.none,
+                ),
+                onSaved: null,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 22,
+                  fontFamily: "Helvetica Neue",
+                  fontWeight: FontWeight.w700,
+                ),
+                maxLines: 1,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(30),
+                  BlacklistingTextInputFormatter(
+                    RegExp(
+                      "[\\-|\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]",
+                    ),
+                  ),
+                ],
+                textInputAction: TextInputAction.done,
+                autocorrect: false,
+              ),
+              Divider(color: Colors.black, thickness: 0.2),
+              TextFormField(
+                initialValue: null,
+                decoration: InputDecoration(
+                  hintText: "Ticket Description (Optional)",
+                  border: InputBorder.none,
+                ),
+                onSaved: null,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Helvetica Neue",
+                ),
+                textInputAction: TextInputAction.done,
+                keyboardType: TextInputType.multiline,
+                maxLines: 5,
+                autocorrect: false,
+              ),
+              Divider(color: Colors.black, thickness: 0.2),
+              SizedBox(height: 8.0),
+              Fonts().textW600("Quantity Available", 18.0, Colors.black, TextAlign.left),
+              TextFormField(
+                textAlign: TextAlign.left,
+                initialValue: null,
+                decoration: InputDecoration(
+                  hintText: "100",
+                  border: InputBorder.none,
+                ),
+                onSaved: null,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Helvetica Neue",
+                  fontWeight: FontWeight.w400,
+                ),
+                maxLines: 1,
+                inputFormatters: [WhitelistingTextInputFormatter.digitsOnly],
+                textInputAction: TextInputAction.done,
+                autocorrect: false,
+              ),
+              Divider(color: Colors.black, thickness: 0.2),
+              SizedBox(height: 8.0),
+              Fonts().textW600("Ticket Price", 18.0, Colors.black, TextAlign.left),
+              TextFormField(
+                textAlign: TextAlign.left,
+                keyboardType: TextInputType.numberWithOptions(signed: false, decimal: true),
+                initialValue: null,
+                decoration: InputDecoration(
+                  hintText: "9.99",
+                  border: InputBorder.none,
+                ),
+                onSaved: null,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontFamily: "Helvetica Neue",
+                  fontWeight: FontWeight.w400,
+                ),
+                maxLines: 1,
+                textInputAction: TextInputAction.done,
+                autocorrect: false,
+              ),
+              NewEventFormButton(
+                "Create Ticket",
+                FlatColors.blackPearl,
+                Colors.white,
+                null,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     //**Title, Description, Dates, URLS
     final eventFormPage1 = Container(
@@ -1200,8 +1361,9 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
             children: <Widget>[
               addImageButton(),
               _buildEventTitleField(),
-              SizedBox(
-                height: 8.0,
+              Divider(
+                indent: 8.0,
+                endIndent: 8.0,
               ),
               _buildEventDescriptionField(),
               Padding(
@@ -1222,7 +1384,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
                   ),
                 ),
               ),
-              _buildRadioButtons(),
+              _buildEventTypeRadioButtons(),
               Padding(
                 padding: EdgeInsets.only(
                   left: 16.0,
@@ -1273,23 +1435,112 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
 
     //**Tags Page
     final eventFormPage2 = Container(
-      child: ListView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.all(10),
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                _buildTagsField(),
+              ],
+            ),
           ),
-          _buildTagsField(),
-          Padding(
-            padding: EdgeInsets.all(10),
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                formButton2,
+                backButton,
+              ],
+            ),
           ),
-          formButton2,
-          backButton,
+          Expanded(
+            flex: 1,
+            child: Container(),
+          ),
+        ],
+      ),
+    );
+
+    //**Ask About Tickets Page
+    final eventFormPage3 = Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Fonts().textW700(
+                  "Will This Event Have Tickets?",
+                  18.0,
+                  FlatColors.darkGray,
+                  TextAlign.center,
+                ),
+                _buildEventTicketRadioButtons()
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                formButton3,
+                backButton,
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Container(),
+          ),
+        ],
+      ),
+    );
+
+    //**Tickets Page
+    final eventFormPage4 = Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                GestureDetector(
+                  onTap: () => ShowAlertDialogService().showFormDialog(context, buildTicketForm()),
+                  child: Fonts().textW500("Create New Ticket", 18.0, FlatColors.electronBlue, TextAlign.left),
+                ),
+                //_buildEventTicketRadioButtons()
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                formButton3,
+                backButton,
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Container(),
+          ),
         ],
       ),
     );
 
     //**Address Page
-    final eventFormPage3 = Container(
+    final eventFormPage5 = Container(
       child: ListView(
         children: <Widget>[
           Form(
@@ -1401,7 +1652,7 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
                   height: 30.0,
                 ),
                 submitButton,
-                backButton,
+                addressBackButton,
               ],
             ),
           ),
@@ -1418,28 +1669,31 @@ class _CreateEditEventPageState extends State<CreateEditEventPage> {
             context,
             widget.eventToEdit != null ? 'Editing Event' : 'New Event',
             widget.eventToEdit != null
-                ? widget.eventToEdit.communityAreaName +
-                    "/" +
-                    widget.eventToEdit.communityName
+                ? widget.eventToEdit.communityAreaName + "/" + widget.eventToEdit.communityName
                 : widget.community.areaName + "/" + widget.community.name,
             'Cancel Adding a New Event?', () {
           Navigator.of(context).pop();
           Navigator.of(context).pop();
-        }),
+        },
+            isTyping
+                ? GestureDetector(
+                    onTap: () => dismissKeyboard(),
+                    child: Container(
+                      margin: EdgeInsets.only(right: 16.0, top: 12.0),
+                      child: Fonts().textW700('Done', 18.0, Colors.blueAccent, TextAlign.right),
+                    ))
+                : Container()),
         key: homeScaffoldKey,
-        body: WillPopScope(
-          onWillPop: () async {
-            return false;
-          },
-          child: PageView(
-            physics: NeverScrollableScrollPhysics(),
-            controller: _pageController,
-            children: [
-              eventFormPage1,
-              eventFormPage2,
-              eventFormPage3,
-            ],
-          ),
+        body: PageView(
+          physics: NeverScrollableScrollPhysics(),
+          controller: _pageController,
+          children: [
+            eventFormPage1,
+            eventFormPage2,
+            eventFormPage3,
+            eventFormPage4,
+            eventFormPage5,
+          ],
         ),
       ),
     );
