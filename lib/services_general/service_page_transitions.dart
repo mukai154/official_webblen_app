@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart';
-
+import 'package:webblen/home_page.dart';
+import 'package:webblen/models/calendar_event.dart';
+import 'package:webblen/models/community.dart';
+import 'package:webblen/models/community_news.dart';
+import 'package:webblen/models/community_request.dart';
+import 'package:webblen/models/event.dart';
+import 'package:webblen/models/webblen_chat_message.dart';
+import 'package:webblen/models/webblen_reward.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/auth_pages/choose_sim_page.dart';
 import 'package:webblen/pages/calendar_pages/my_calendar_page.dart';
 import 'package:webblen/pages/calendar_pages/reminder_page.dart';
@@ -17,6 +25,11 @@ import 'package:webblen/pages/community_pages/my_communities_page.dart';
 import 'package:webblen/pages/community_request_pages/community_request_details_page.dart';
 import 'package:webblen/pages/community_request_pages/community_requests_page.dart';
 import 'package:webblen/pages/community_request_pages/create_community_request.dart';
+import 'package:webblen/pages/earnings_pages/bank_account_details_page.dart';
+import 'package:webblen/pages/earnings_pages/debit_card_details_page.dart';
+import 'package:webblen/pages/earnings_pages/earnings_info_page.dart';
+import 'package:webblen/pages/earnings_pages/earnings_page.dart';
+import 'package:webblen/pages/earnings_pages/payout_methods_page.dart';
 import 'package:webblen/pages/event_pages/create_edit_event_page.dart';
 import 'package:webblen/pages/event_pages/create_flash_event_page.dart';
 import 'package:webblen/pages/event_pages/create_recurring_event_page.dart';
@@ -25,16 +38,7 @@ import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
 import 'package:webblen/pages/event_pages/webblen_events_page.dart';
-import 'package:webblen/home_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
-import 'package:webblen/models/calendar_event.dart';
-import 'package:webblen/models/community.dart';
-import 'package:webblen/models/community_news.dart';
-import 'package:webblen/models/community_request.dart';
-import 'package:webblen/models/event.dart';
-import 'package:webblen/models/webblen_chat_message.dart';
-import 'package:webblen/models/webblen_reward.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/user_pages/add_com_image_page.dart';
 import 'package:webblen/pages/user_pages/create_ad_page.dart';
 import 'package:webblen/pages/user_pages/discover_page.dart';
@@ -310,6 +314,43 @@ class PageTransitionService {
           builder: (context) => TransactionHistoryPage(
             currentUser: currentUser,
           ),
+        ),
+      );
+
+  void transitionToEarningsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EarningsPage(
+            currentUser: currentUser,
+          ),
+        ),
+      );
+
+  void transitionToEarningsInfoPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EarningsInfoPage(),
+        ),
+      );
+
+  void transitionToPayoutMethodsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PayoutMethodsPage(currentUser: currentUser),
+        ),
+      );
+
+  void transitionToBankAccoutDetailsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => BankAccountDetailsPage(currentUser: currentUser),
+        ),
+      );
+
+  void transitionToDebitCardDetailsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DebitCardDetailsPage(currentUser: currentUser),
         ),
       );
 

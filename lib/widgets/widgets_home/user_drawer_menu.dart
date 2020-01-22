@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:contact_picker/contact_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -27,8 +26,7 @@ class UserDrawerMenu {
 
   final ContactPicker _contactPicker = new ContactPicker();
 
-  Widget menuRow(
-      Icon icon, String optionName, Color optionColor, VoidCallback onTap) {
+  Widget menuRow(Icon icon, String optionName, Color optionColor, VoidCallback onTap) {
     return ListTile(
       leading: Container(
         constraints: BoxConstraints(
@@ -87,8 +85,7 @@ class UserDrawerMenu {
                                 left: 6.0,
                               ),
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
                                   currentUser.profile_pic != null
                                       ? InkWell(
@@ -118,15 +115,14 @@ class UserDrawerMenu {
                                       size: 24.0,
                                     ),
                                     onPressed: () {
-                                      ShowAlertDialogService()
-                                          .showAccountQRDialog(
-                                              context,
-                                              currentUser.username,
-                                              currentUser.uid,
-                                              () => PageTransitionService(
-                                                    context: context,
-                                                    currentUser: currentUser,
-                                                  ).openWebblenScanner());
+                                      ShowAlertDialogService().showAccountQRDialog(
+                                          context,
+                                          currentUser.username,
+                                          currentUser.uid,
+                                          () => PageTransitionService(
+                                                context: context,
+                                                currentUser: currentUser,
+                                              ).openWebblenScanner());
                                     },
                                   ),
                                 ],
@@ -169,8 +165,7 @@ class UserDrawerMenu {
                                 top: 6.0,
                               ),
                               child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: <Widget>[
                                   MiniAttendancePowerBar(
@@ -181,9 +176,7 @@ class UserDrawerMenu {
                                     width: 18.0,
                                   ),
                                   StatsEventHistoryCount(
-                                    eventHistoryCount: currentUser
-                                        .eventHistory.length
-                                        .toString(),
+                                    eventHistoryCount: currentUser.eventHistory.length.toString(),
                                     textColor: Colors.black,
                                     textSize: 14.0,
                                     iconSize: 20.0,
@@ -199,8 +192,7 @@ class UserDrawerMenu {
                                     width: 18.0,
                                   ),
                                   ShowAmountOfWebblen(
-                                    amount: currentUser.eventPoints
-                                        .toStringAsFixed(2),
+                                    amount: currentUser.eventPoints.toStringAsFixed(2),
                                     textColor: Colors.black,
                                     textSize: 14.0,
                                     iconSize: 24.0,
@@ -269,14 +261,12 @@ class UserDrawerMenu {
                                 arrayContains: currentUser.uid,
                               )
                               .snapshots(),
-                          builder: (context,
-                              AsyncSnapshot<QuerySnapshot> userChats) {
+                          builder: (context, AsyncSnapshot<QuerySnapshot> userChats) {
                             if (!userChats.hasData) return Container();
                             Widget hasMessagesWidget = Container();
                             userChats.data.documents.forEach((chatDoc) {
                               List seenBy = chatDoc.data['seenBy'];
-                              if (!seenBy.contains(currentUser.uid) &&
-                                  chatDoc.data['isActive']) {
+                              if (!seenBy.contains(currentUser.uid) && chatDoc.data['isActive']) {
                                 hasMessagesWidget = Icon(
                                   FontAwesomeIcons.solidCircle,
                                   color: FlatColors.webblenRed,
@@ -339,6 +329,24 @@ class UserDrawerMenu {
                   height: 1.0,
                   color: Colors.black12,
                 ),
+                currentUser.canMakeAds
+                    ? menuRow(
+                        Icon(
+                          FontAwesomeIcons.university,
+                          color: FlatColors.blackPearl,
+                          size: 18.0,
+                        ),
+                        'Earnings',
+                        FlatColors.blackPearl,
+                        () {
+                          Navigator.pop(context);
+                          PageTransitionService(
+                            context: context,
+                            currentUser: currentUser,
+                          ).transitionToEarningsPage();
+                        },
+                      )
+                    : Container(),
                 currentUser.canMakeAds
                     ? menuRow(
                         Icon(
@@ -410,29 +418,13 @@ class UserDrawerMenu {
                         height: 0,
                         width: 0,
                       ),
-//              currentUser != null && currentUser.isCommunityBuilder
-//                  ? menuRow(
-//                        Icon(FontAwesomeIcons.newspaper, color: FlatColors.blackPearl, size: 18.0),
-//                        'Post News',
-//                        FlatColors.blackPearl,
-//                          () {
-//                            Navigator.pop(context);
-//                            PageTransitionService(context: context, currentUser: currentUser).transitionToCommunityBuilderPage();
-//                          },
-//                      )
-//                  : Container(height: 0, width: 0),
                 menuRow(
-                  Icon(FontAwesomeIcons.questionCircle,
-                      color: currentUser.isNew
-                          ? FlatColors.darkMountainGreen
-                          : FlatColors.blackPearl,
-                      size: 18.0),
+                  Icon(FontAwesomeIcons.questionCircle, color: currentUser.isNew ? FlatColors.darkMountainGreen : FlatColors.blackPearl, size: 18.0),
                   'Help/FAQ',
                   FlatColors.blackPearl,
                   () {
                     Navigator.pop(context);
-                    OpenUrl().launchInWebViewOrVC(
-                        context, 'https://www.webblen.io/faq');
+                    OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq');
                   },
                 ),
                 menuRow(
