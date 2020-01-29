@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:stripe_payment/stripe_payment.dart';
 import 'package:webblen/models/debit_card_info.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
@@ -19,13 +20,37 @@ class DebitCardDetailsPage extends StatefulWidget {
 }
 
 class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
+  PaymentMethod _paymentMethod;
   WebblenUser currentUser;
   DebitCardInfo userDebitCardInfo;
+
+  void setError(dynamic error) {
+//Handle your errors
+  }
+
+  void addStripeCard() {
+    print('testing...');
+    StripePayment.paymentRequestWithCardForm(CardFormPaymentRequest()).then((paymentMethod) {
+      //_scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('Received ${paymentMethod.id}')));
+      setState(() {
+        _paymentMethod = paymentMethod;
+      });
+      print(paymentMethod.card.funding);
+      print(paymentMethod.card.last4);
+    });
+  }
 
   @override
   void initState() {
     super.initState();
     currentUser = widget.currentUser;
+    StripePayment.setOptions(
+      StripeOptions(
+        publishableKey: "pk_test_gYHQOvqAIkPEMVGQRehk3nj4009Kfodta1",
+        merchantId: "test",
+        androidPayMode: 'test',
+      ),
+    );
   }
 
   Widget debitCardInfoBubble(DebitCardInfo debitCardInfo) {
@@ -106,7 +131,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
             backgroundColor: FlatColors.webblenRed,
             height: 40.0,
             width: 175.0,
-            onPressed: null,
+            onPressed: () => addStripeCard(),
           ),
           SizedBox(
             height: 32.0,

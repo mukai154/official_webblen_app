@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/models/banking_info.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_appbar.dart';
@@ -102,7 +103,7 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
             backgroundColor: FlatColors.webblenRed,
             height: 40.0,
             width: 175.0,
-            onPressed: null,
+            onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSetUpDirectDepostiPage(),
           ),
           SizedBox(
             height: 32.0,

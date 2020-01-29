@@ -30,6 +30,7 @@ import 'package:webblen/pages/earnings_pages/debit_card_details_page.dart';
 import 'package:webblen/pages/earnings_pages/earnings_info_page.dart';
 import 'package:webblen/pages/earnings_pages/earnings_page.dart';
 import 'package:webblen/pages/earnings_pages/payout_methods_page.dart';
+import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/event_pages/create_edit_event_page.dart';
 import 'package:webblen/pages/event_pages/create_flash_event_page.dart';
 import 'package:webblen/pages/event_pages/create_recurring_event_page.dart';
@@ -346,6 +347,20 @@ class PageTransitionService {
           builder: (context) => BankAccountDetailsPage(currentUser: currentUser),
         ),
       );
+
+  void transitionToSetUpDirectDepostiPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SetUpDirectDepositPage(currentUser: currentUser),
+        ),
+      );
+
+//  void transitionToSetUpInstantDepositPage() => Navigator.push(
+//    context,
+//    MaterialPageRoute(
+//      builder: (context) => BankAccountDetailsPage(currentUser: currentUser),
+//      ),
+//    );
 
   void transitionToDebitCardDetailsPage() => Navigator.push(
         context,
