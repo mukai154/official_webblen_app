@@ -7,7 +7,7 @@ class ShowAlertDialogService {
   Future<bool> showAlert(BuildContext context, Widget alertWidget, bool isDismissible) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: isDismissible, // user must tap button!
+        barrierDismissible: isDismissible,
         builder: (BuildContext context) {
           return alertWidget;
         });
@@ -16,7 +16,7 @@ class ShowAlertDialogService {
   Future<bool> showSuccessDialog(BuildContext context, String header, String body) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, // user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return SuccessDialog(
             header: header,
@@ -28,7 +28,7 @@ class ShowAlertDialogService {
   Future<bool> showFailureDialog(BuildContext context, String header, String body) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, // user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return FailureDialog(
             header: header,
@@ -40,7 +40,7 @@ class ShowAlertDialogService {
   Future<bool> showCancelEventDialog(BuildContext context) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, // user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return CancelEventDialog();
         });
@@ -49,7 +49,7 @@ class ShowAlertDialogService {
   Future<bool> showInfoDialog(BuildContext context, String header, String body) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, // user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return InfoDialog(
             header: header,
@@ -61,7 +61,7 @@ class ShowAlertDialogService {
   Future<bool> showUpdateDialog(BuildContext context) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, // user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return UpdateAvailableDialog();
         });
@@ -70,7 +70,7 @@ class ShowAlertDialogService {
   Future<bool> showLoadingDialog(BuildContext context) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return LoadingDialog();
         });
@@ -79,7 +79,7 @@ class ShowAlertDialogService {
   Future<bool> showLoadingCommunityDialog(BuildContext context, String areaName, String comName) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return LoadingCommunityDialog(
             areaName: areaName,
@@ -91,7 +91,7 @@ class ShowAlertDialogService {
   Future<bool> showLogoutDialog(BuildContext context) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return LogoutDialog(context: context);
         });
@@ -100,7 +100,7 @@ class ShowAlertDialogService {
   Future<bool> showCancelDialog(BuildContext context, String header, VoidCallback action) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return CancelActionDialog(
             header: header,
@@ -122,7 +122,7 @@ class ShowAlertDialogService {
   ) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return CommunityOptionsDialog(
             isMember: isMember,
@@ -146,7 +146,7 @@ class ShowAlertDialogService {
   ) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return ConfirmationDialog(
             header: header,
@@ -167,7 +167,7 @@ class ShowAlertDialogService {
   ) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return DetailedConfirmationDialog(
             header: header,
@@ -182,7 +182,7 @@ class ShowAlertDialogService {
   Future<bool> showActionSuccessDialog(BuildContext context, String header, String body, VoidCallback action) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return ActionSuccessDialog(
             header: header,
@@ -195,7 +195,7 @@ class ShowAlertDialogService {
   Future<bool> showFormWidget(BuildContext context, String header, Widget formWidget, VoidCallback action) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: false, //// user must tap button!
+        barrierDismissible: false,
         builder: (BuildContext context) {
           return FormActionDialog(
             header: header,
@@ -208,7 +208,7 @@ class ShowAlertDialogService {
   Future<bool> showImageSelectDialog(BuildContext context, VoidCallback imageFromCameraAction, VoidCallback imageFromLibraryAction) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return AddImageDialog(
             imageFromCameraAction: imageFromCameraAction,
@@ -226,7 +226,7 @@ class ShowAlertDialogService {
   ) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return EventOptionsDialog(
             viewAttendeesAction: viewAttendeesAction,
@@ -240,7 +240,7 @@ class ShowAlertDialogService {
   Future<bool> showAccountQRDialog(BuildContext context, String username, String uid, VoidCallback scanAction) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return AccountQRDialog(
             username: username,
@@ -253,7 +253,7 @@ class ShowAlertDialogService {
   Future<bool> showScannedAccount(BuildContext context, String username, String uid, VoidCallback addFriendAction) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return ScannedAccountDialog(
             username: username,
@@ -288,7 +288,7 @@ class ShowAlertDialogService {
   Future<bool> showCreateEventReminderDialog(BuildContext context, VoidCallback createEvent, VoidCallback createReminder) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return CreateEventReminderDialog(
             createEvent: createEvent,
@@ -300,7 +300,7 @@ class ShowAlertDialogService {
   Future<bool> showCalendarEventOptions(BuildContext context, VoidCallback edit, VoidCallback delete) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return CalendarEventOptionsDialog(
             editAction: edit,
@@ -312,11 +312,20 @@ class ShowAlertDialogService {
   Future<bool> showFormDialog(BuildContext context, Widget form) {
     return showDialog<bool>(
         context: context,
-        barrierDismissible: true, //// user must tap button!
+        barrierDismissible: true,
         builder: (BuildContext context) {
           return FormDialog(
             form: form,
           );
+        });
+  }
+
+  Future<bool> showCheckExampleDialog(BuildContext context) {
+    return showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return CheckExampleDialog();
         });
   }
 }

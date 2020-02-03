@@ -2235,3 +2235,37 @@ class FormDialog extends StatelessWidget {
     );
   }
 }
+
+class CheckExampleDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return CustomAlertDialog(
+      content: Container(
+        height: 200.0,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaleFactor: 1.0,
+              ),
+              child: Fonts().textW500(
+                "You Can Find Your Routing & Account Number on a Bank Check",
+                18.0,
+                FlatColors.darkGray,
+                TextAlign.center,
+              ),
+            ),
+            SizedBox(height: 16.0),
+            Container(
+              child: Image.asset(
+                "assets/images/check_example.png",
+                fit: BoxFit.contain,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

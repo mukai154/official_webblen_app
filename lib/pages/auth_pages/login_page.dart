@@ -6,17 +6,15 @@ import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
 import 'package:webblen/firebase_data//auth.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_button.dart';
-import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/auth_buttons/auth_btn.dart';
 import 'package:webblen/widgets/auth_buttons/facebook_btn.dart';
 import 'package:webblen/widgets/auth_buttons/google_btn.dart';
+import 'package:webblen/widgets/widgets_common/common_button.dart';
+import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -76,8 +74,7 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
-      ShowAlertDialogService().showFailureDialog(context, "Verification Failed",
-          "There was an issue verifying your phone number. Please try again");
+      ShowAlertDialogService().showFailureDialog(context, "Verification Failed", "There was an issue verifying your phone number. Please try again");
     };
 
     await FirebaseAuth.instance.verifyPhoneNumber(
@@ -99,8 +96,7 @@ class _LoginPageState extends State<LoginPage> {
       if (user != null) {
         PageTransitionService(context: context).transitionToRootPage();
       } else {
-        ShowAlertDialogService().showFailureDialog(context, 'Oops!',
-            'There was an issue signing in.. Please Try Again');
+        ShowAlertDialogService().showFailureDialog(context, 'Oops!', 'There was an issue signing in.. Please Try Again');
       }
     }).catchError((e) {
       if (this.mounted) {
@@ -108,8 +104,7 @@ class _LoginPageState extends State<LoginPage> {
           isLoading = false;
         });
       }
-      ShowAlertDialogService().showFailureDialog(
-          context, 'Oops!', 'Invalid Verification Code. Please Try Again.');
+      ShowAlertDialogService().showFailureDialog(context, 'Oops!', 'Invalid Verification Code. Please Try Again.');
     });
   }
 
@@ -186,8 +181,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     GoogleSignInAuthentication googleAuth = await googleAccount.authentication;
 
-    AuthCredential credential = GoogleAuthProvider.getCredential(
-        idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+    AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
     FirebaseAuth.instance.signInWithCredential(credential).then((user) {
       if (user != null) {
         PageTransitionService(context: context).transitionToRootPage();
@@ -212,8 +206,7 @@ class _LoginPageState extends State<LoginPage> {
     final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
-        final AuthCredential credential = FacebookAuthProvider.getCredential(
-            accessToken: result.accessToken.token);
+        final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
         FirebaseAuth.instance.signInWithCredential(credential).then((user) {
           if (user != null) {
             PageTransitionService(context: context).transitionToRootPage();
@@ -221,8 +214,7 @@ class _LoginPageState extends State<LoginPage> {
             setState(() {
               isLoading = false;
             });
-            ShowAlertDialogService().showFailureDialog(context, 'Oops!',
-                'There was an issue signing in with Facebook. Please Try Again');
+            ShowAlertDialogService().showFailureDialog(context, 'Oops!', 'There was an issue signing in with Facebook. Please Try Again');
           }
         });
         break;
@@ -265,8 +257,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 200.0,
       fit: BoxFit.fitHeight,
     );
-    final isLoadingProgressBar =
-        CustomLinearProgress(progressBarColor: FlatColors.webblenRed);
+    final isLoadingProgressBar = CustomLinearProgress(progressBarColor: FlatColors.webblenRed);
 
     // **EMAIL FIELD
     final emailField = Padding(
@@ -333,8 +324,7 @@ class _LoginPageState extends State<LoginPage> {
           keyboardType: TextInputType.text,
           obscureText: true,
           autofocus: false,
-          validator: (value) =>
-              value.isEmpty ? 'Password Cannot be Empty' : null,
+          validator: (value) => value.isEmpty ? 'Password Cannot be Empty' : null,
           onSaved: (value) => _password = value,
           decoration: InputDecoration(
             border: InputBorder.none,
@@ -491,9 +481,7 @@ class _LoginPageState extends State<LoginPage> {
                       orTextLabel,
                       facebookButton,
                       googleButton,
-                      signInWithEmail
-                          ? signInWithPhoneButton
-                          : signInWithEmailButton
+                      signInWithEmail ? signInWithPhoneButton : signInWithEmailButton
                     ],
                   ),
                 ),

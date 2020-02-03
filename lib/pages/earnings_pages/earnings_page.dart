@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:webblen/firebase_data/stripe_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/stripe_services.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_appbar.dart';
@@ -28,38 +28,56 @@ class _EarningsPageState extends State<EarningsPage> {
   void initState() {
     super.initState();
     currentUser = widget.currentUser;
+    StripeDataService().checkIfStripeSetup(currentUser.uid).then((res) {
+      stripeAccountIsSetup = res;
+      setState(() {});
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: WebblenAppBar().actionAppBar(
-        'Earnings',
-        Row(
-          children: <Widget>[
-            IconButton(
-              icon: Icon(FontAwesomeIcons.piggyBank, color: FlatColors.darkGray, size: 24.0),
-              onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToPayoutMethodsPage(),
+    return StreamBuilder(
+        stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+        builder: (context, userSnapshot) {
+          if (!userSnapshot.hasData)
+            return Scaffold(
+              appBar: WebblenAppBar().actionAppBar(
+                'Earnings',
+                IconButton(
+                  icon: Icon(FontAwesomeIcons.questionCircle, color: Colors.black, size: 24.0),
+                  onPressed: () => PageTransitionService(context: context).transitionToEarningsInfoPage(),
+                ),
+              ),
+              body: Container(
+                color: Colors.white,
+              ),
+            );
+          var userData = userSnapshot.data;
+          double accountBalance = 0.001;
+          if (userData.data != null) {
+            accountBalance = userData.data['balance'];
+          }
+          return Scaffold(
+            appBar: WebblenAppBar().actionAppBar(
+              'Earnings',
+              Row(
+                children: <Widget>[
+                  userData.data != null
+                      ? IconButton(
+                          icon: Icon(FontAwesomeIcons.university, color: Colors.black, size: 24.0),
+                          onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToPayoutMethodsPage(),
+                        )
+                      : Container(),
+                  IconButton(
+                    icon: Icon(FontAwesomeIcons.questionCircle, color: Colors.black, size: 24.0),
+                    onPressed: () => PageTransitionService(context: context).transitionToEarningsInfoPage(),
+                  ),
+                ],
+              ),
             ),
-            IconButton(
-              icon: Icon(FontAwesomeIcons.questionCircle, color: FlatColors.darkGray, size: 24.0),
-              onPressed: () => PageTransitionService(context: context).transitionToEarningsInfoPage(),
-            ),
-          ],
-        ),
-      ),
-      body: Container(
-        color: Colors.white,
-        child: StreamBuilder(
-            stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
-            builder: (context, userSnapshot) {
-              if (!userSnapshot.hasData) return Text("Loading...");
-              var userData = userSnapshot.data;
-              double accountBalance = 0.001;
-              if (userData.data != null) {
-                accountBalance = userData.data['balance'];
-              }
-              return userData.data == null
+            body: Container(
+              color: Colors.white,
+              child: userData.data == null
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
@@ -71,7 +89,7 @@ class _EarningsPageState extends State<EarningsPage> {
                           textColor: Colors.black,
                           backgroundColor: Colors.white,
                           height: 45.0,
-                          onPressed: () => StripeServices().connectToStripeAccount(context, widget.currentUser.uid),
+                          onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToInitialAccountSetupPage(),
                         ),
                       ],
                     )
@@ -117,9 +135,9 @@ class _EarningsPageState extends State<EarningsPage> {
                           TextAlign.center,
                         ),
                       ],
-                    );
-            }),
-      ),
-    );
+                    ),
+            ),
+          );
+        });
   }
 }

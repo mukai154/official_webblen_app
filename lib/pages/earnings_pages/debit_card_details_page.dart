@@ -54,8 +54,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
   }
 
   Widget debitCardInfoBubble(DebitCardInfo debitCardInfo) {
-    String cardNumber = debitCardInfo.cardNumber.toString();
-    String last4OfCardNumber = "**** **** **** " + cardNumber.substring(cardNumber.length - 4, cardNumber.length);
+    String last4OfCardNumber = "**** **** **** " + debitCardInfo.last4;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       decoration: BoxDecoration(
@@ -78,7 +77,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
             TextAlign.right,
           ),
           Fonts().textW700(
-            debitCardInfo.nameOnCard,
+            debitCardInfo.name,
             24.0,
             Colors.black,
             TextAlign.right,
@@ -141,25 +140,66 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
     );
   }
 
+  Widget noCardFoundBubble() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.black38, width: 0.3),
+        borderRadius: BorderRadius.all(
+          Radius.circular(16.0),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          SizedBox(
+            height: 32.0,
+          ),
+          Fonts().textW500(
+            "Add a Card to Be Eligible for Instant Deposits",
+            16.0,
+            Colors.black38,
+            TextAlign.right,
+          ),
+          SizedBox(
+            height: 16.0,
+          ),
+          CustomColorButton(
+            text: "Add Card",
+            textColor: Colors.white,
+            backgroundColor: FlatColors.webblenRed,
+            height: 40.0,
+            width: 175.0,
+            onPressed: () => addStripeCard(),
+          ),
+          SizedBox(
+            height: 32.0,
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().basicAppBar("Debit Card Details", context),
       body: Container(
         child: StreamBuilder(
-            stream: Firestore.instance.collection("debit_card_info").document(widget.currentUser.uid).snapshots(),
+            stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData)
                 return Text(
                   "Loading...",
                 );
               Map<String, dynamic> userData = userSnapshot.data.data;
-              DebitCardInfo cardInfo = DebitCardInfo.fromMap(userData);
+              DebitCardInfo cardInfo = userData['card_info'] == null ? null : DebitCardInfo.fromMap(userData);
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   SizedBox(height: 16.0),
-                  debitCardInfoBubble(cardInfo),
+                  cardInfo == null ? noCardFoundBubble() : debitCardInfoBubble(cardInfo),
                 ],
               );
             }),

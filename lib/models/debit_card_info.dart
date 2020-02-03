@@ -1,36 +1,36 @@
 class DebitCardInfo {
-  String uid;
-  String nameOnCard;
-  int cardNumber;
+  String brand;
   int expMonth;
   int expYear;
-  int cvc;
+  String last4;
+  int funding;
+  String name;
 
   DebitCardInfo({
-    this.uid,
-    this.nameOnCard,
-    this.cardNumber,
+    this.brand,
     this.expMonth,
     this.expYear,
-    this.cvc,
+    this.last4,
+    this.funding,
+    this.name,
   });
 
   DebitCardInfo.fromMap(Map<String, dynamic> data)
       : this(
-          uid: data['uid'],
-          nameOnCard: data['nameOnCard'],
-          cardNumber: data['cardNumber'],
+          brand: data['brand'],
           expMonth: data['expMonth'],
           expYear: data['expYear'],
-          cvc: data['cvc'],
+          last4: data['last4'],
+          funding: data['funding'],
+          name: data['name'],
         );
 
   Map<String, dynamic> toMap() => {
-        'uid': this.uid,
-        'nameOnCard': this.nameOnCard,
-        'cardNumber': this.cardNumber,
+        'brand': this.brand,
         'expMonth': this.expMonth,
         'expYear': this.expYear,
-        'cvc': this.cvc,
+        'last4': this.last4,
+        'funding': this.funding,
+        'name': this.name,
       };
 }

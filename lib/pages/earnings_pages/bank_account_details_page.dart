@@ -30,8 +30,7 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
   }
 
   Widget bankInfoBubble(BankingInfo bankingInfo) {
-    String accountNumber = bankingInfo.accountNumber.toString();
-    String last4OfAccountNumber = "......." + accountNumber.substring(accountNumber.length - 4, accountNumber.length);
+    String last4OfAccountNumber = "......." + bankingInfo.last4;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
       decoration: BoxDecoration(
@@ -53,7 +52,7 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
             TextAlign.right,
           ),
           Fonts().textW700(
-            bankingInfo.nameOnAccount,
+            bankingInfo.accountHolderName == null ? "" : bankingInfo.accountHolderName,
             24.0,
             Colors.black,
             TextAlign.right,
@@ -89,7 +88,8 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
             TextAlign.center,
           ),
           Fonts().textW600(
-            bankingInfo.verified ? "Your identity is verified and you are receiving payments." : "unverified",
+            "Your identity is verified and you are receiving payments.",
+            //bankingInfo.verified ? "Your identity is verified and you are receiving payments." : "unverified",
             16.0,
             Colors.black,
             TextAlign.center,
@@ -103,7 +103,48 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
             backgroundColor: FlatColors.webblenRed,
             height: 40.0,
             width: 175.0,
-            onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSetUpDirectDepostiPage(),
+            onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSetUpDirectDepositPage(),
+          ),
+          SizedBox(
+            height: 32.0,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget noBankinInfoFoundBubble() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.black38, width: 0.3),
+        borderRadius: BorderRadius.all(
+          Radius.circular(16.0),
+        ),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          SizedBox(
+            height: 32.0,
+          ),
+          Fonts().textW500(
+            "Add Your Banking Information to Be Eligible for Direct Deposits",
+            16.0,
+            Colors.black38,
+            TextAlign.right,
+          ),
+          SizedBox(
+            height: 16.0,
+          ),
+          CustomColorButton(
+            text: "Add Card",
+            textColor: Colors.white,
+            backgroundColor: FlatColors.webblenRed,
+            height: 40.0,
+            width: 175.0,
+            onPressed: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSetUpDirectDepositPage(),
           ),
           SizedBox(
             height: 32.0,
@@ -119,14 +160,14 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
       appBar: WebblenAppBar().basicAppBar("Bank Account Details", context),
       body: Container(
         child: StreamBuilder(
-            stream: Firestore.instance.collection("banking_info").document(widget.currentUser.uid).snapshots(),
+            stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData)
                 return Text(
                   "Loading...",
                 );
               Map<String, dynamic> userData = userSnapshot.data.data;
-              BankingInfo bankingInfo = BankingInfo.fromMap(userData);
+              BankingInfo bankingInfo = userData['bankInfo'] == null ? null : BankingInfo.fromMap(Map<String, dynamic>.from(userData['bankInfo']));
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[

@@ -1,36 +1,32 @@
 class BankingInfo {
-  String uid;
-  String nameOnAccount;
-  int routingNumber;
-  int accountNumber;
+  String accountHolderName;
+  String routingNumber;
+  String last4;
   String bankName;
-  bool verified;
+  //bool verified;
 
   BankingInfo({
-    this.uid,
-    this.nameOnAccount,
+    this.accountHolderName,
     this.routingNumber,
-    this.accountNumber,
+    this.last4,
     this.bankName,
-    this.verified,
+    //this.verified,
   });
 
   BankingInfo.fromMap(Map<String, dynamic> data)
       : this(
-          uid: data['uid'],
-          nameOnAccount: data['nameOnAccount'],
+          accountHolderName: data['accountHolderName'],
           routingNumber: data['routingNumber'],
-          accountNumber: data['accountNumber'],
+          last4: data['last4'],
           bankName: data['bankName'],
-          verified: data['verified'],
+          //verified: data['verified'],
         );
 
   Map<String, dynamic> toMap() => {
-        'uid': this.uid,
-        'nameOnAccount': this.nameOnAccount,
+        'accountHolderName': this.accountHolderName,
         'routingNumber': this.routingNumber,
-        'accountNumber': this.accountNumber,
+        'last4': this.last4,
         'bankName': this.bankName,
-        'verified': this.verified
+        //'verified': this.verified
       };
 }
