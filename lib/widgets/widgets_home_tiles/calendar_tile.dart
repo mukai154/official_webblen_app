@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/styles/fonts.dart';
 
-class MyCommunitiesTile extends StatelessWidget {
+class CalendarTile extends StatelessWidget {
   final VoidCallback onTap;
 
-  MyCommunitiesTile({
+  CalendarTile({
     this.onTap,
   });
 
@@ -14,11 +13,15 @@ class MyCommunitiesTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.16,
+        margin: EdgeInsets.symmetric(
+          vertical: 4.0,
+        ),
+        height: MediaQuery.of(context).size.height * 0.18,
         width: (MediaQuery.of(context).size.width - 16) / 2 - 14.0,
+        //margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/community_background.png"),
+            image: AssetImage("assets/images/calendar.png"),
             fit: BoxFit.cover,
           ),
           boxShadow: ([
@@ -40,13 +43,13 @@ class MyCommunitiesTile extends StatelessWidget {
                 left: 8.0,
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   MediaQuery(
                     child: Fonts().textW700(
-                      'My Communities',
-                      16.0,
+                      'My Calendar',
+                      18.0,
                       Colors.black,
                       TextAlign.left,
                     ),

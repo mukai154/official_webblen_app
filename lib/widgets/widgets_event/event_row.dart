@@ -2,7 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-
 import 'package:webblen/models/event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
@@ -31,14 +30,10 @@ class ComEventRow extends StatelessWidget {
   Widget build(BuildContext context) {
     DateFormat timeFormatter = DateFormat("h:mma");
     int currentDateTime = DateTime.now().millisecondsSinceEpoch;
-    DateTime eventStartDateTime =
-        DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+    DateTime eventStartDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
     bool isHappeningNow = false;
     if (event.endDateInMilliseconds != null) {
-      isHappeningNow = (event.startDateInMilliseconds < currentDateTime &&
-              event.endDateInMilliseconds > currentDateTime)
-          ? true
-          : false;
+      isHappeningNow = (event.startDateInMilliseconds < currentDateTime && event.endDateInMilliseconds > currentDateTime) ? true : false;
     }
     return GestureDetector(
       onTap: eventPostAction,
@@ -167,14 +162,10 @@ class ComEventRow extends StatelessWidget {
                         child: Row(
                           children: [
                             currentDateTime > event.startDateInMilliseconds
-                                ? event.attendees == null ||
-                                        event.attendees.isEmpty
-                                    ? Fonts().textW500('0 Check Ins', 12.0,
-                                        Colors.black, TextAlign.center)
+                                ? event.attendees == null || event.attendees.isEmpty
+                                    ? Fonts().textW500('0 Check Ins', 12.0, Colors.black, TextAlign.center)
                                     : Fonts().textW500(
-                                        event.attendees.length == 1
-                                            ? '${event.attendees.length} Check Ins'
-                                            : '${event.attendees.length} Check Ins',
+                                        event.attendees.length == 1 ? '${event.attendees.length} Check Ins' : '${event.attendees.length} Check Ins',
                                         14.0,
                                         Colors.black,
                                         TextAlign.center)
@@ -337,8 +328,7 @@ class EventChatRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DateFormat timeFormatter = DateFormat("h:mma");
-    DateTime eventStartDateTime =
-        DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+    DateTime eventStartDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
 
     return GestureDetector(
       onTap: eventPostAction,

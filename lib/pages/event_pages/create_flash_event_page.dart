@@ -2,18 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/event.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
-import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
 import 'package:webblen/widgets/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
+import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
 
 class CreateFlashEventPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -99,15 +98,14 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
         newEvent,
         currentLat,
         currentLon,
+        null,
+        null,
       )
           .then((error) {
         if (error.isEmpty) {
           Navigator.of(context).pop();
           HapticFeedback.mediumImpact();
-          ShowAlertDialogService().showActionSuccessDialog(
-              context,
-              'Flash Event Created!',
-              'Check In. Get Paid. You Know the Rest...', () {
+          ShowAlertDialogService().showActionSuccessDialog(context, 'Flash Event Created!', 'Check In. Get Paid. You Know the Rest...', () {
             Navigator.of(context).pop();
             Navigator.of(context).pop();
             Navigator.pop(
@@ -181,9 +179,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                 text: 'standard',
                 textSize: 12.0,
                 textColor: eventTypeRadioVal == 0 ? Colors.white : Colors.black,
-                backgroundColor: eventTypeRadioVal == 0
-                    ? FlatColors.webblenRed
-                    : FlatColors.textFieldGray,
+                backgroundColor: eventTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                 onPressed: () {
                   eventTypeRadioVal = 0;
                   setState(() {});
@@ -196,9 +192,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                 text: 'food/drink',
                 textSize: 12.0,
                 textColor: eventTypeRadioVal == 1 ? Colors.white : Colors.black,
-                backgroundColor: eventTypeRadioVal == 1
-                    ? FlatColors.webblenRed
-                    : FlatColors.textFieldGray,
+                backgroundColor: eventTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                 onPressed: () {
                   eventTypeRadioVal = 1;
                   setState(() {});
@@ -211,9 +205,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
                 text: 'sale/discount',
                 textSize: 12.0,
                 textColor: eventTypeRadioVal == 2 ? Colors.white : Colors.black,
-                backgroundColor: eventTypeRadioVal == 2
-                    ? FlatColors.webblenRed
-                    : FlatColors.textFieldGray,
+                backgroundColor: eventTypeRadioVal == 2 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                 onPressed: () {
                   eventTypeRadioVal = 2;
                   setState(() {});
@@ -244,8 +236,7 @@ class _CreateFlashEventPageState extends State<CreateFlashEventPage> {
   Widget build(BuildContext context) {
     Widget addImageButton() {
       return GestureDetector(
-        onTap: () => ShowAlertDialogService().showImageSelectDialog(
-            context, () => setEventImage(true), () => setEventImage(false)),
+        onTap: () => ShowAlertDialogService().showImageSelectDialog(context, () => setEventImage(true), () => setEventImage(false)),
         child: Container(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.width,

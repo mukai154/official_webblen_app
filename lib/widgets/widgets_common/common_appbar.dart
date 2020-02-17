@@ -152,6 +152,51 @@ class WebblenAppBar {
     );
   }
 
+  Widget ticketScannerAppBar(BuildContext context, String appBarTitle, String eventName) {
+    return AppBar(
+      elevation: 0.5,
+      brightness: Brightness.light,
+      backgroundColor: Colors.white,
+      title: Fonts().textW700(
+        appBarTitle,
+        20.0,
+        Colors.black,
+        TextAlign.center,
+      ),
+      leading: BackButton(
+        color: Colors.black,
+      ),
+      bottom: PreferredSize(
+        child: Container(
+          width: MediaQuery.of(context).size.width,
+          color: FlatColors.iosOffWhite,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Divider(
+                height: 2.0,
+                thickness: 0,
+                color: Colors.black12,
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: 2.0,
+                ),
+                child: Fonts().textW500(
+                  eventName,
+                  14.0,
+                  Colors.black54,
+                  TextAlign.center,
+                ),
+              ),
+            ],
+          ),
+        ),
+        preferredSize: Size.fromHeight(12.0),
+      ),
+    );
+  }
+
   // ** APP BAR
 }
 

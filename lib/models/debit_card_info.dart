@@ -1,10 +1,10 @@
 class DebitCardInfo {
   String brand;
-  int expMonth;
-  int expYear;
+  String expMonth;
+  String expYear;
   String last4;
-  int funding;
-  String name;
+  String funding;
+  //String name;
 
   DebitCardInfo({
     this.brand,
@@ -12,7 +12,7 @@ class DebitCardInfo {
     this.expYear,
     this.last4,
     this.funding,
-    this.name,
+    //this.name,
   });
 
   DebitCardInfo.fromMap(Map<String, dynamic> data)
@@ -22,7 +22,7 @@ class DebitCardInfo {
           expYear: data['expYear'],
           last4: data['last4'],
           funding: data['funding'],
-          name: data['name'],
+          //name: data['name'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -31,6 +31,6 @@ class DebitCardInfo {
         'expYear': this.expYear,
         'last4': this.last4,
         'funding': this.funding,
-        'name': this.name,
+        //'name': this.name,
       };
 }

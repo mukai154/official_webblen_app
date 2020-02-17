@@ -6,11 +6,8 @@ import 'package:geoflutterfire/geoflutterfire.dart';
 class PlatformDataService {
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "8.0.1";
-    DocumentSnapshot documentSnapshot = await Firestore.instance
-        .collection("app_release_info")
-        .document("general")
-        .get();
+    String currentVersion = "9.0.0";
+    DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
     String releasedVersion = documentSnapshot.data["versionNumber"];
     bool versionIsRequired = documentSnapshot.data["versionIsRequired"];
     if (currentVersion != releasedVersion && versionIsRequired) {
@@ -26,8 +23,7 @@ class PlatformDataService {
       latitude: lat,
       longitude: lon,
     );
-    CollectionReference locRef =
-        Firestore.instance.collection("available_locations");
+    CollectionReference locRef = Firestore.instance.collection("available_locations");
     List<DocumentSnapshot> nearLocations = await geo
         .collection(
           collectionRef: locRef,
@@ -38,16 +34,12 @@ class PlatformDataService {
           field: 'location',
         )
         .first;
-    if (nearLocations.length != 0)
-      areaGeohash = nearLocations.first.data['location']['geohash'];
+    if (nearLocations.length != 0) areaGeohash = nearLocations.first.data['location']['geohash'];
     return areaGeohash;
   }
 
   Future<List> getAvailableCities() async {
-    DocumentSnapshot documentSnapshot = await Firestore.instance
-        .collection("app_release_info")
-        .document("general")
-        .get();
+    DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
     List cities = documentSnapshot.data["cities"];
     return cities;
   }
@@ -59,8 +51,7 @@ class PlatformDataService {
       latitude: lat,
       longitude: lon,
     );
-    CollectionReference locRef =
-        Firestore.instance.collection("available_locations");
+    CollectionReference locRef = Firestore.instance.collection("available_locations");
     List<DocumentSnapshot> nearLocations = await geo
         .collection(collectionRef: locRef)
         .within(

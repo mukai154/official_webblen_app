@@ -75,7 +75,7 @@ class EarningsInfoPage extends StatelessWidget {
               height: 4.0,
             ),
             Fonts().textW400(
-              "You have the ability to cashout your earnings daily for a fee of 1% the total deposit. This allows you to receive your earnings from ticket sales on demand from Webblen rather than waiting a week via direct deposit.",
+              "You have the ability to cashout your earnings daily for a fee of up to 1.5% the total deposit. This allows you to receive your earnings from ticket sales on demand from Webblen rather than waiting a week via direct deposit.",
               14,
               Colors.black87,
               TextAlign.left,

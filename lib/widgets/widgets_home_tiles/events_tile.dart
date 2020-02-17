@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/styles/fonts.dart';
 
-class DiscoverTile extends StatelessWidget {
+class EventsTile extends StatelessWidget {
   final VoidCallback onTap;
 
-  DiscoverTile({
+  EventsTile({
     this.onTap,
   });
 
@@ -14,12 +13,12 @@ class DiscoverTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: MediaQuery.of(context).size.height * 0.14,
+        height: MediaQuery.of(context).size.height * 0.18,
         width: MediaQuery.of(context).size.width - 32.0,
         //margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage("assets/images/discover_background.png"),
+            image: AssetImage("assets/images/events.png"),
             fit: BoxFit.cover,
           ),
           boxShadow: ([
@@ -51,7 +50,7 @@ class DiscoverTile extends StatelessWidget {
                   children: <Widget>[
                     MediaQuery(
                       child: Fonts().textW700(
-                        'Discover',
+                        'Events',
                         24.0,
                         Colors.black,
                         TextAlign.left,

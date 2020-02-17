@@ -133,13 +133,13 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
             "Add Your Banking Information to Be Eligible for Direct Deposits",
             16.0,
             Colors.black38,
-            TextAlign.right,
+            TextAlign.center,
           ),
           SizedBox(
             height: 16.0,
           ),
           CustomColorButton(
-            text: "Add Card",
+            text: "Add Banking Info",
             textColor: Colors.white,
             backgroundColor: FlatColors.webblenRed,
             height: 40.0,
@@ -172,7 +172,7 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   SizedBox(height: 16.0),
-                  bankInfoBubble(bankingInfo),
+                  bankingInfo == null ? noBankinInfoFoundBubble() : bankInfoBubble(bankingInfo),
                 ],
               );
             }),

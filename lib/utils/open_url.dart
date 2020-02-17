@@ -2,14 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-
 import 'package:webblen/services_general/services_show_alert.dart';
 
 class OpenUrl {
   bool isValidUrl(String url) {
     bool isValid = true;
-    var urlPattern =
-        r"(https?|http)://([-A-Z0-9.]+)(/[-A-Z0-9+&@#/%=~_|!:,.;]*)?(\?[A-Z0-9+&@#/%=~_|!:‌​,.;]*)?";
+    var urlPattern = r"(https?|http)://([-A-Z0-9.]+)(/[-A-Z0-9+&@#/%=~_|!:,.;]*)?(\?[A-Z0-9+&@#/%=~_|!:‌​,.;]*)?";
     isValid = RegExp(urlPattern, caseSensitive: false).hasMatch(url);
     return isValid;
   }
@@ -37,8 +35,8 @@ class OpenUrl {
       await launch(
         url,
         forceSafariVC: true,
-        forceWebView: true,
-        statusBarBrightness: Brightness.light,
+        //forceWebView: true,
+        //statusBarBrightness: Brightness.light,
       );
     } else {
       ShowAlertDialogService().showFailureDialog(

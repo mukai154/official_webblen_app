@@ -192,6 +192,20 @@ class ShowAlertDialogService {
         });
   }
 
+  Future<bool> showCustomActionDialog(BuildContext context, String header, String body, String buttonText, VoidCallback action) {
+    return showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return CustomActionDialog(
+            header: header,
+            body: body,
+            action: action,
+            buttonText: buttonText,
+          );
+        });
+  }
+
   Future<bool> showFormWidget(BuildContext context, String header, Widget formWidget, VoidCallback action) {
     return showDialog<bool>(
         context: context,
@@ -221,6 +235,7 @@ class ShowAlertDialogService {
     BuildContext context,
     VoidCallback viewAttendeesAction,
     VoidCallback shareEventAction,
+    VoidCallback shareLinkAction,
     VoidCallback editAction,
     VoidCallback deleteEventAction,
   ) {
@@ -231,13 +246,14 @@ class ShowAlertDialogService {
           return EventOptionsDialog(
             viewAttendeesAction: viewAttendeesAction,
             shareEventAction: shareEventAction,
+            shareLinkAction: shareLinkAction,
             editAction: editAction,
             deleteEventAction: deleteEventAction,
           );
         });
   }
 
-  Future<bool> showAccountQRDialog(BuildContext context, String username, String uid, VoidCallback scanAction) {
+  Future<bool> showAccountQRDialog(BuildContext context, String username, String uid, VoidCallback scanAction, VoidCallback scanForTicketsAction) {
     return showDialog<bool>(
         context: context,
         barrierDismissible: true,
@@ -246,6 +262,7 @@ class ShowAlertDialogService {
             username: username,
             uid: uid,
             scanAction: scanAction,
+            scanForTicketsAction: scanForTicketsAction,
           );
         });
   }

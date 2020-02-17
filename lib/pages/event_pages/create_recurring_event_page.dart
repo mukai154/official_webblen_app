@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:flutter_picker/flutter_picker.dart';
 import 'package:flutter_tags/tag.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -20,6 +19,7 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/utils/strings.dart';
+import 'package:webblen/utils/time.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
@@ -225,7 +225,7 @@ class _CreateRecurringEventPageState extends State<CreateRecurringEventPage> {
       newEvent.radius = newEvent.radius * 1.01;
       newEvent.eventType = getEventType();
       newEvent.recurrenceType = getRecurrenceType();
-      newEvent.timezone = await FlutterNativeTimezone.getLocalTimezone();
+      newEvent.timezone = await Time().getLocalTimezone();
       EventDataService()
           .uploadRecurringEvent(
         eventImage,

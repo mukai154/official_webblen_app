@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -16,9 +15,11 @@ import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
 
 class SettingsPage extends StatefulWidget {
   final WebblenUser currentUser;
+  final Key key;
 
   SettingsPage({
     this.currentUser,
+    this.key,
   });
 
   @override
@@ -61,11 +62,9 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<String> uploadUserImage(File userImage, String fileName) async {
     setState(() {});
     StorageReference storageReference = FirebaseStorage.instance.ref();
-    StorageReference ref =
-        storageReference.child("profile_pics").child(fileName);
+    StorageReference ref = storageReference.child("profile_pics").child(fileName);
     StorageUploadTask uploadTask = ref.putFile(userImage);
-    String downloadUrl =
-        await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
     return downloadUrl;
   }
 
@@ -134,16 +133,14 @@ class _SettingsPageState extends State<SettingsPage> {
                         child: Stack(
                           children: <Widget>[
                             InkWell(
-                              onTap: () => ShowAlertDialogService()
-                                  .showImageSelectDialog(
+                              onTap: () => ShowAlertDialogService().showImageSelectDialog(
                                 context,
                                 () => changeUserProfilePic(true),
                                 () => changeUserProfilePic(false),
                               ),
                               child: newUserImage == null
                                   ? UserDetailsProfilePic(
-                                      userPicUrl:
-                                          widget.currentUser.profile_pic,
+                                      userPicUrl: widget.currentUser.profile_pic,
                                       size: 100.0,
                                     )
                                   : CircleAvatar(
@@ -212,8 +209,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         Switch(
                           value: widget.currentUser.notifyWalletDeposits,
-                          onChanged: (val) =>
-                              UserDataService().updateNotificationPermission(
+                          onChanged: (val) => UserDataService().updateNotificationPermission(
                             widget.currentUser.uid,
                             "notifyWalletDeposits",
                             val,
@@ -238,8 +234,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         Switch(
                           value: widget.currentUser.notifyFriendRequests,
-                          onChanged: (val) =>
-                              UserDataService().updateNotificationPermission(
+                          onChanged: (val) => UserDataService().updateNotificationPermission(
                             widget.currentUser.uid,
                             "notifyFriendRequests",
                             val,
@@ -264,8 +259,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         Switch(
                           value: widget.currentUser.notifyNewMessages,
-                          onChanged: (val) =>
-                              UserDataService().updateNotificationPermission(
+                          onChanged: (val) => UserDataService().updateNotificationPermission(
                             widget.currentUser.uid,
                             "notifyNewMessages",
                             val,
@@ -290,8 +284,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         Switch(
                           value: widget.currentUser.notifyFlashEvents,
-                          onChanged: (val) =>
-                              UserDataService().updateNotificationPermission(
+                          onChanged: (val) => UserDataService().updateNotificationPermission(
                             widget.currentUser.uid,
                             "notifyFlashEvents",
                             val,
@@ -316,8 +309,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         Switch(
                           value: widget.currentUser.notifySuggestedEvents,
-                          onChanged: (val) =>
-                              UserDataService().updateNotificationPermission(
+                          onChanged: (val) => UserDataService().updateNotificationPermission(
                             widget.currentUser.uid,
                             "notifySuggestedEvents",
                             val,

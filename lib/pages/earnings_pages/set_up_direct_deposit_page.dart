@@ -31,9 +31,11 @@ class _SetUpDirectDepositPageState extends State<SetUpDirectDepositPage> {
   List<String> accountHolderTypes = ['individual', 'company'];
 
   void validateAndSubmitForm() {
+    ShowAlertDialogService().showLoadingDialog(context);
     bankingForm.currentState.save();
     ScaffoldState scaffoldState = scaffoldKey.currentState;
     if (accountHolderName == null || accountHolderName.isEmpty) {
+      Navigator.of(context).pop();
       scaffoldState.showSnackBar(
         SnackBar(
           content: Text("Please Enter a Name for the Account"),
@@ -42,6 +44,7 @@ class _SetUpDirectDepositPageState extends State<SetUpDirectDepositPage> {
         ),
       );
     } else if (routingNumber == null || routingNumber.length != 9) {
+      Navigator.of(context).pop();
       scaffoldState.showSnackBar(
         SnackBar(
           content: Text("Please Enter a Valid Routing Number"),
@@ -50,6 +53,7 @@ class _SetUpDirectDepositPageState extends State<SetUpDirectDepositPage> {
         ),
       );
     } else if (accountNumber == null || accountNumber.isEmpty) {
+      Navigator.of(context).pop();
       scaffoldState.showSnackBar(
         SnackBar(
           content: Text("Please Enter a Valid Account Number"),
@@ -61,7 +65,14 @@ class _SetUpDirectDepositPageState extends State<SetUpDirectDepositPage> {
       StripeDataService()
           .submitBankingInfoToStripe(currentUser.uid, stripeUID, accountHolderName, accountHolderType, routingNumber, accountNumber)
           .then((status) {
-        Navigator.of(context).pop();
+        print(status);
+        if (status == "passed") {
+          Navigator.of(context).pop();
+          Navigator.of(context).pop();
+        } else {
+          Navigator.of(context).pop();
+          ShowAlertDialogService().showFailureDialog(context, "There was an Issue Adding Your Account", "Please Verify Your Info and Try Again.");
+        }
       });
     }
   }
@@ -185,6 +196,7 @@ class _SetUpDirectDepositPageState extends State<SetUpDirectDepositPage> {
         maxLines: 1,
         inputFormatters: [
           WhitelistingTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(9),
         ],
         textInputAction: TextInputAction.done,
         autocorrect: false,

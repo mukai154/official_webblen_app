@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:stripe_payment/stripe_payment.dart';
+import 'package:webblen/firebase_data/stripe_data.dart';
 import 'package:webblen/models/debit_card_info.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
+import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class DebitCardDetailsPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -20,7 +22,8 @@ class DebitCardDetailsPage extends StatefulWidget {
 }
 
 class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
-  PaymentMethod _paymentMethod;
+  bool isLoading = true;
+  String stripeUID;
   WebblenUser currentUser;
   DebitCardInfo userDebitCardInfo;
 
@@ -28,29 +31,26 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
 //Handle your errors
   }
 
-  void addStripeCard() {
-    print('testing...');
-    StripePayment.paymentRequestWithCardForm(CardFormPaymentRequest()).then((paymentMethod) {
-      //_scaffoldKey.currentState.showSnackBar(SnackBar(content: Text('Received ${paymentMethod.id}')));
-      setState(() {
-        _paymentMethod = paymentMethod;
-      });
-      print(paymentMethod.card.funding);
-      print(paymentMethod.card.last4);
-    });
-  }
+  void addStripeCard() {}
 
   @override
   void initState() {
     super.initState();
     currentUser = widget.currentUser;
-    StripePayment.setOptions(
-      StripeOptions(
-        publishableKey: "pk_test_gYHQOvqAIkPEMVGQRehk3nj4009Kfodta1",
-        merchantId: "test",
-        androidPayMode: 'test',
-      ),
-    );
+//    StripePayment.setOptions(
+//      StripeOptions(
+//        publishableKey: "pk_test_gYHQOvqAIkPEMVGQRehk3nj4009Kfodta1",
+//        merchantId: "test",
+//        androidPayMode: 'test',
+//      ),
+//    );
+    StripeDataService().getStripeUID(currentUser.uid).then((val) {
+      if (val != null) {
+        stripeUID = val;
+      }
+      isLoading = false;
+      setState(() {});
+    });
   }
 
   Widget debitCardInfoBubble(DebitCardInfo debitCardInfo) {
@@ -68,22 +68,22 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[
           SizedBox(
-            height: 32.0,
+            height: 16.0,
           ),
           Fonts().textW500(
-            "Name on Card",
+            "Card Type",
             16.0,
             Colors.black38,
-            TextAlign.right,
+            TextAlign.center,
           ),
           Fonts().textW700(
-            debitCardInfo.name,
+            debitCardInfo.brand.toUpperCase(),
             24.0,
             Colors.black,
-            TextAlign.right,
+            TextAlign.center,
           ),
           SizedBox(
-            height: 32.0,
+            height: 16.0,
           ),
           Fonts().textW500(
             "Card Details",
@@ -101,7 +101,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
             height: 4.0,
           ),
           Fonts().textW700(
-            "Expiration Date: 03/20", //debitCardInfo.expMonth.toString() + "/" + debitCardInfo.expYear.toString(),
+            "Expiration Date: ${debitCardInfo.expMonth}/${debitCardInfo.expYear}", //debitCardInfo.expMonth.toString() + "/" + debitCardInfo.expYear.toString(),
             16.0,
             Colors.black,
             TextAlign.center,
@@ -130,7 +130,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
             backgroundColor: FlatColors.webblenRed,
             height: 40.0,
             width: 175.0,
-            onPressed: () => addStripeCard(),
+            onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToSetUpInstantDepositPage(),
           ),
           SizedBox(
             height: 32.0,
@@ -171,7 +171,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
             backgroundColor: FlatColors.webblenRed,
             height: 40.0,
             width: 175.0,
-            onPressed: () => addStripeCard(),
+            onPressed: () => PageTransitionService(context: context, currentUser: currentUser).transitionToSetUpInstantDepositPage(),
           ),
           SizedBox(
             height: 32.0,
@@ -186,23 +186,25 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
     return Scaffold(
       appBar: WebblenAppBar().basicAppBar("Debit Card Details", context),
       body: Container(
-        child: StreamBuilder(
-            stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
-            builder: (context, userSnapshot) {
-              if (!userSnapshot.hasData)
-                return Text(
-                  "Loading...",
-                );
-              Map<String, dynamic> userData = userSnapshot.data.data;
-              DebitCardInfo cardInfo = userData['card_info'] == null ? null : DebitCardInfo.fromMap(userData);
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: <Widget>[
-                  SizedBox(height: 16.0),
-                  cardInfo == null ? noCardFoundBubble() : debitCardInfoBubble(cardInfo),
-                ],
-              );
-            }),
+        child: isLoading
+            ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed)
+            : StreamBuilder(
+                stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData)
+                    return Text(
+                      "Loading...",
+                    );
+                  Map<String, dynamic> userData = userSnapshot.data.data;
+                  DebitCardInfo cardInfo = userData['cardInfo'] == null ? null : DebitCardInfo.fromMap(Map<String, dynamic>.from(userData['cardInfo']));
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      SizedBox(height: 16.0),
+                      cardInfo == null ? noCardFoundBubble() : debitCardInfoBubble(cardInfo),
+                    ],
+                  );
+                }),
       ),
     );
   }

@@ -10,19 +10,21 @@ import 'package:random_string/random_string.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/event.dart';
+import 'package:webblen/models/event_ticket.dart';
+import 'package:webblen/models/event_ticket_distribution.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/utils/time.dart';
+
 import 'calendar_event_data.dart';
 
 class EventDataService {
   Geoflutterfire geo = Geoflutterfire();
-  final CollectionReference pastEventsRef =
-      Firestore.instance.collection("past_events");
-  final CollectionReference upcomingEventsRef =
-      Firestore.instance.collection("upcoming_events");
-  final CollectionReference recurringEventRef =
-      Firestore.instance.collection("recurring_events");
+  final CollectionReference pastEventsRef = Firestore.instance.collection("past_events");
+  final CollectionReference upcomingEventsRef = Firestore.instance.collection("upcoming_events");
+  final CollectionReference recurringEventRef = Firestore.instance.collection("recurring_events");
+  final CollectionReference ticketDistroRef = Firestore.instance.collection("ticket_distros");
   final CollectionReference userRef = Firestore.instance.collection("users");
+  final CollectionReference purchasedTicketsRef = Firestore.instance.collection("purchased_tickets");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
 
   getAttendanceMultiplier(int attendanceCount) {
@@ -46,8 +48,7 @@ class EventDataService {
   }
 
   //***CREATE
-  Future<String> uploadEvent(
-      File eventImage, Event event, double lat, double lon) async {
+  Future<String> uploadEvent(File eventImage, Event event, double lat, double lon, List tickets, List fees) async {
     String error = '';
     final String eventKey = randomAlphaNumeric(16);
     String fileName = "$eventKey.jpg";
@@ -67,14 +68,9 @@ class EventDataService {
           longitude: lon,
         )
         .data;
-    await upcomingEventsRef.document(eventKey).setData({
-      'd': event.toMap(),
-      'g': geoFirePoint.hash,
-      'l': geoFirePoint.geoPoint
-    }).whenComplete(() async {
+    await upcomingEventsRef.document(eventKey).setData({'d': event.toMap(), 'g': geoFirePoint.hash, 'l': geoFirePoint.geoPoint}).whenComplete(() async {
       if (!event.flashEvent) {
-        DateTime eventDateTime =
-            DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+        DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
         String eventDateTimeString = Time().getStringFromDate(eventDateTime);
         String timezone = await Time().getLocalTimezone();
         CalendarEvent calEvent = CalendarEvent(
@@ -92,6 +88,9 @@ class EventDataService {
           event.communityAreaName,
           event.communityName,
         );
+        if (tickets != null && tickets.isNotEmpty) {
+          await uploadEventTickets(eventKey, tickets, fees);
+        }
       }
     }).catchError((e) {
       error = e.toString();
@@ -99,8 +98,7 @@ class EventDataService {
     return error;
   }
 
-  Future<String> uploadRecurringEvent(
-      File eventImage, RecurringEvent event, double lat, double lon) async {
+  Future<String> uploadRecurringEvent(File eventImage, RecurringEvent event, double lat, double lon) async {
     String error = '';
     GeoFirePoint eventLoc = geo.point(
       latitude: lat,
@@ -115,10 +113,7 @@ class EventDataService {
     event.imageURL = downloadUrl;
     event.eventKey = eventKey;
     event.location = eventLoc.data;
-    await recurringEventRef
-        .document(eventKey)
-        .setData(event.toMap())
-        .whenComplete(() {
+    await recurringEventRef.document(eventKey).setData(event.toMap()).whenComplete(() {
       CommunityDataService().updateCommunityEventActivity(
         event.tags,
         event.areaName,
@@ -130,12 +125,71 @@ class EventDataService {
     return error;
   }
 
+  Future<String> uploadEventTickets(String eventID, List tickets, List fees) async {
+    String error = "";
+    DocumentSnapshot ticketDistro = await ticketDistroRef.document(eventID).get();
+    if (ticketDistro.exists) {
+      await ticketDistroRef.document(eventID).updateData({
+        "fees": fees,
+        "tickets": tickets,
+      }).catchError((e) {
+        error = e;
+      });
+    } else {
+      await ticketDistroRef.document(eventID).setData({
+        "eventID": eventID,
+        "fees": fees,
+        "tickets": tickets,
+        "usedTicketIDs": [],
+        "validTicketIDs": [],
+      }).catchError((e) {
+        error = e;
+      });
+      return error;
+    }
+  }
+
   Future<String> setEventImage(File eventImage, String fileName) async {
     StorageReference ref = storageReference.child("events").child(fileName);
     StorageUploadTask uploadTask = ref.putFile(eventImage);
-    String downloadUrl =
-        await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
     return downloadUrl;
+  }
+
+  Future<String> completeTicketPurchase(String uid, List<Map<String, dynamic>> ticketsToPurchase, Event event) async {
+    String error = "";
+    DocumentSnapshot documentSnapshot = await ticketDistroRef.document(event.eventKey).get();
+    EventTicketDistribution ticketDistro = EventTicketDistribution.fromMap(documentSnapshot.data);
+    List validTicketIDs = ticketDistro.validTicketIDs.toList(growable: true);
+    ticketsToPurchase.forEach((purchasedTicket) async {
+      String ticketName = purchasedTicket['ticketName'];
+      int ticketIndex = ticketDistro.tickets.indexWhere((ticket) => ticket["ticketName"] == ticketName);
+      int ticketPurchaseQty = purchasedTicket['qty'];
+      int ticketAvailableQty = int.parse(purchasedTicket['ticketQuantity']);
+      String newTicketAvailableQty = (ticketAvailableQty - ticketPurchaseQty).toString();
+      ticketDistro.tickets[ticketIndex]['ticketQuantity'] = newTicketAvailableQty;
+      for (int i = ticketPurchaseQty; i >= 1; i--) {
+        String ticketID = randomAlphaNumeric(32);
+        validTicketIDs.add(ticketID);
+        EventTicket newTicket = EventTicket(
+          ticketID: ticketID,
+          ticketName: ticketName,
+          purchaserUID: uid,
+          eventID: event.eventKey,
+          eventImageURL: event.imageURL,
+          eventTitle: event.title,
+          address: event.address,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          startTime: event.startTime,
+          endTime: event.endTime,
+          timezone: event.timezone,
+        );
+        await purchasedTicketsRef.document(ticketID).setData(newTicket.toMap());
+      }
+      await ticketDistroRef.document(event.eventKey).updateData({"tickets": ticketDistro.tickets, "validTicketIDs": validTicketIDs});
+    });
+    return error;
   }
 
   //***READ
@@ -163,13 +217,38 @@ class EventDataService {
     return eventExists;
   }
 
+  Future<List<EventTicket>> getPurchasedTickets(String uid) async {
+    List<EventTicket> tickets = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getPurchasedTickets',
+    );
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'uid': uid}).catchError((e) {});
+    if (result != null && result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> res = Map<String, dynamic>.from(resultMap);
+        EventTicket ticket = EventTicket.fromMap(res);
+        tickets.add(ticket);
+      });
+    }
+    return tickets;
+  }
+
+  Future<EventTicketDistribution> getEventTicketDistro(String eventKey) async {
+    EventTicketDistribution eventTicketDistro;
+    DocumentSnapshot docSnap = await ticketDistroRef.document(eventKey).get();
+    if (docSnap.exists) {
+      eventTicketDistro = EventTicketDistribution.fromMap(docSnap.data);
+    }
+    return eventTicketDistro;
+  }
+
   Future<Event> getEventByKey(String eventKey) async {
     Event event;
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
       functionName: 'getEventByKey',
     );
-    final HttpsCallableResult result = await callable
-        .call(<String, dynamic>{'eventKey': eventKey}).catchError((e) {});
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{'eventKey': eventKey}).catchError((e) {});
     if (result != null && result.data != null) {
       Map<String, dynamic> evMap = Map<String, dynamic>.from(result.data);
       event = Event.fromMap(evMap);
@@ -181,6 +260,48 @@ class EventDataService {
     List<Event> events = [];
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
       functionName: 'getEventsFromFollowedCommunities',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'uid': uid,
+      },
+    );
+    if (result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> evMap = Map<String, dynamic>.from(resultMap);
+        Event event = Event.fromMap(evMap);
+        events.add(event);
+      });
+    }
+    return events;
+  }
+
+  Future<List<Event>> getCreatedEvents(String uid) async {
+    List<Event> events = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getCreatedEvents',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'uid': uid,
+      },
+    );
+    if (result.data != null) {
+      List query = List.from(result.data);
+      query.forEach((resultMap) {
+        Map<String, dynamic> evMap = Map<String, dynamic>.from(resultMap);
+        Event event = Event.fromMap(evMap);
+        events.add(event);
+      });
+    }
+    return events;
+  }
+
+  Future<List<Event>> getEventsForTicketScans(String uid) async {
+    List<Event> events = [];
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'getEventsForTicketScans',
     );
     final HttpsCallableResult result = await callable.call(
       <String, dynamic>{
@@ -219,8 +340,7 @@ class EventDataService {
     return users;
   }
 
-  Future<List<Event>> getEventsNearLocation(
-      double lat, double lon, bool forCheckIn) async {
+  Future<List<Event>> getEventsNearLocation(double lat, double lon, bool forCheckIn) async {
     List<Event> events = [];
     final HttpsCallable callable = forCheckIn
         ? CloudFunctions.instance.getHttpsCallable(
@@ -323,8 +443,7 @@ class EventDataService {
     return checkInAvailable;
   }
 
-  Future<List<Event>> searchForEventByName(
-      String searchTerm, String areaName) async {
+  Future<List<Event>> searchForEventByName(String searchTerm, String areaName) async {
     List<Event> events = [];
     QuerySnapshot querySnapshot = await upcomingEventsRef
         .where(
@@ -341,8 +460,7 @@ class EventDataService {
     return events;
   }
 
-  Future<List<Event>> searchForEventByTag(
-      String searchTerm, String areaName) async {
+  Future<List<Event>> searchForEventByTag(String searchTerm, String areaName) async {
     List<Event> events = [];
     QuerySnapshot querySnapshot = await upcomingEventsRef
         .where(
@@ -360,14 +478,11 @@ class EventDataService {
   }
 
   //**UPDATE
-  Future<String> updateEvent(Event event) async {
+  Future<String> updateEvent(Event event, List tickets, List fees) async {
     String status = "";
     Map<String, dynamic> eventMap = event.toMap();
-    upcomingEventsRef
-        .document(event.eventKey)
-        .setData({'d': eventMap}).whenComplete(() async {
-      DateTime eventDateTime =
-          DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
+    upcomingEventsRef.document(event.eventKey).setData({'d': eventMap}).whenComplete(() async {
+      DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(event.startDateInMilliseconds);
       String eventDateTimeString = Time().getStringFromDate(eventDateTime);
       String timezone = await Time().getLocalTimezone();
       CalendarEvent calEvent = CalendarEvent(
@@ -383,6 +498,9 @@ class EventDataService {
         event.authorUid,
         calEvent,
       );
+      if (tickets != null && tickets.isNotEmpty) {
+        await uploadEventTickets(event.eventKey, tickets, fees);
+      }
     }).catchError((e) {
       status = e.details;
     });
@@ -400,36 +518,39 @@ class EventDataService {
     );
   }
 
+  Future<String> updateScannedTickets(String eventKey, List validTickets, List usedTickets) async {
+    String error = "";
+    await ticketDistroRef.document(eventKey).updateData({
+      "validTicketIDs": validTickets,
+      "usedTicketIDs": usedTickets,
+    }).catchError((e) {
+      error = e;
+    });
+    return error;
+  }
+
   Future<Null> addEventDataField(String dataName, dynamic data) async {
-    QuerySnapshot querySnapshot = await upcomingEventsRef.getDocuments();
+    QuerySnapshot querySnapshot = await pastEventsRef.getDocuments();
+    print(querySnapshot.documents.length);
     querySnapshot.documents.forEach((doc) {
-      upcomingEventsRef
-          .document(doc.documentID)
-          .updateData({"$dataName": data})
-          .whenComplete(() {})
-          .catchError((e) {});
+      pastEventsRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
     });
   }
 
   Future<Null> addRecEventDataField(String dataName, dynamic data) async {
     QuerySnapshot querySnapshot = await recurringEventRef.getDocuments();
     querySnapshot.documents.forEach((doc) {
-      recurringEventRef
-          .document(doc.documentID)
-          .updateData({"$dataName": data})
-          .whenComplete(() {})
-          .catchError((e) {});
+      recurringEventRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
     });
   }
 
-  Future<Event> checkInAndUpdateEventPayout(
-      String eventID, String uid, double userAP) async {
+  Future<Event> checkInAndUpdateEventPayout(String eventID, String uid, double userAP) async {
     Event event;
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
       functionName: 'checkInAndUpdateEventPayout',
     );
     final HttpsCallableResult result = await callable.call(
-      <String, dynamic> {
+      <String, dynamic>{
         'eventID': eventID,
         'uid': uid,
         'userAP': userAP,
@@ -448,7 +569,7 @@ class EventDataService {
       functionName: 'checkoutAndUpdateEventPayout',
     );
     final HttpsCallableResult result = await callable.call(
-      <String, dynamic> {
+      <String, dynamic>{
         'eventID': eventID,
         'uid': uid,
       },
@@ -475,11 +596,7 @@ class EventDataService {
 
   Future<String> deleteRecurringEvent(String eventID) async {
     String error = "";
-    await recurringEventRef
-        .document(eventID)
-        .delete()
-        .whenComplete(() {})
-        .catchError((e) {
+    await recurringEventRef.document(eventID).delete().whenComplete(() {}).catchError((e) {
       error = e.toString();
     });
     return error;

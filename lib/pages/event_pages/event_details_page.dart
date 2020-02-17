@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
-
+import 'package:share/share.dart';
 import 'package:webblen/firebase_data/calendar_event_data.dart';
 import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase_services/dynamic_links.dart';
 import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/event.dart';
+import 'package:webblen/models/event_ticket_distribution.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_location.dart';
@@ -18,6 +20,7 @@ import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/utils/time.dart';
 import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/widgets_common/common_button.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
 
 class EventDetailsPage extends StatefulWidget {
@@ -40,6 +43,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
   double eventLat = 0.0;
   double eventLon = 0.0;
+  EventTicketDistribution eventTicketDistro;
+  List<Map<String, dynamic>> tickets;
 
   Widget eventCaption() {
     return Padding(
@@ -130,6 +135,15 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     ).transitionToChatInviteSharePage();
   }
 
+  void shareLinkAction() async {
+    Navigator.of(context).pop();
+    ShowAlertDialogService().showLoadingDialog(context);
+    DynamicLinks().createDynamicLink(widget.event.eventKey, widget.event.title, widget.event.description, widget.event.imageURL).then((link) {
+      Navigator.of(context).pop();
+      Share.share(link.toString());
+    });
+  }
+
   void addEventToCalendar() async {
     ShowAlertDialogService().showLoadingDialog(context);
     String timezone = await Time().getLocalTimezone();
@@ -178,8 +192,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   }
 
   void deleteEventAction() {
-    ShowAlertDialogService()
-        .showConfirmationDialog(context, "Delete this event?", 'Delete', () {
+    ShowAlertDialogService().showConfirmationDialog(context, "Delete this event?", 'Delete', () {
       EventDataService().deleteEvent(widget.event.eventKey).then((error) {
         if (error.isEmpty) {
           PageTransitionService(context: context).returnToRootPage();
@@ -200,31 +213,90 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   showEventOptions() {
     ShowAlertDialogService().showEventOptionsDialog(
         context,
-        widget.event.startDateInMilliseconds <
-                DateTime.now().millisecondsSinceEpoch
-            ? viewAttendeesAction
-            : null,
+        widget.event.startDateInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
         shareEventAction,
-        widget.event.startDateInMilliseconds >
-                    DateTime.now().millisecondsSinceEpoch &&
-                widget.currentUser.uid == widget.event.authorUid
+        shareLinkAction,
+        widget.event.startDateInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == widget.event.authorUid
             ? editEventAction
             : null,
-        widget.currentUser.uid == widget.event.authorUid &&
-                widget.event.startDateInMilliseconds >
-                    DateTime.now().millisecondsSinceEpoch
+        widget.currentUser.uid == widget.event.authorUid && widget.event.startDateInMilliseconds > DateTime.now().millisecondsSinceEpoch
             ? deleteEventAction
             : null);
+  }
+
+  Widget ticketBuilder(EventTicketDistribution ticketDistro) {
+    return Container(
+      child: ListView.builder(
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: ticketDistro.tickets.length,
+          itemBuilder: (BuildContext context, int index) {
+            return GestureDetector(
+              onTap: null,
+              child: Container(
+                margin: EdgeInsets.only(bottom: 16.0),
+                height: 60.0,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Container(
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                FontAwesomeIcons.ticketAlt,
+                                color: Colors.black,
+                                size: 18.0,
+                              ),
+                              SizedBox(width: 16.0),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Fonts().textW500(
+                                    ticketDistro.tickets[index]["ticketName"],
+                                    18.0,
+                                    Colors.black,
+                                    TextAlign.left,
+                                  ),
+                                  Fonts().textW300(
+                                    ticketDistro.tickets[index]["ticketQuantity"] == "0"
+                                        ? "${ticketDistro.tickets[index]["ticketPrice"]} each | Amount Available: SOLD OUT"
+                                        : "${ticketDistro.tickets[index]["ticketPrice"]} each | Amount Available: ${ticketDistro.tickets[index]["ticketQuantity"]}",
+                                    12.0,
+                                    Colors.black,
+                                    TextAlign.left,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(FontAwesomeIcons.plusCircle, color: FlatColors.darkMountainGreen, size: 18.0),
+                          onPressed: null,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 4.0),
+                    Divider(
+                      height: 1.0,
+                      thickness: 1.0,
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+    );
   }
 
   @override
   void initState() {
     super.initState();
-    eventLat =
-        LocationService().getLatFromGeopoint(widget.event.location['geopoint']);
-    eventLon =
-        LocationService().getLonFromGeopoint(widget.event.location['geopoint']);
-    setState(() {});
+    eventLat = LocationService().getLatFromGeopoint(widget.event.location['geopoint']);
+    eventLon = LocationService().getLonFromGeopoint(widget.event.location['geopoint']);
   }
 
   @override
@@ -233,18 +305,13 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       return ListView(
         children: <Widget>[
           Container(
-            height: MediaQuery.of(context).size.width - 32,
-            margin: EdgeInsets.only(
-              top: 8,
-              left: 16.0,
-              right: 16.0,
-            ),
+            height: MediaQuery.of(context).size.width,
+            width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               image: DecorationImage(
                 image: CachedNetworkImageProvider(widget.event.imageURL),
                 fit: BoxFit.cover,
               ),
-              borderRadius: BorderRadius.circular(16.0),
             ),
           ),
           widget.event.recurrence == 'none'
@@ -287,10 +354,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                           SizedBox(
                             height: 4.0,
                           ),
-                          currentDateTime >
-                                      widget.event.startDateInMilliseconds &&
-                                  currentDateTime <
-                                      widget.event.endDateInMilliseconds
+                          currentDateTime > widget.event.startDateInMilliseconds && currentDateTime < widget.event.endDateInMilliseconds
                               ? Container(
                                   width: 20,
                                   height: 20,
@@ -307,10 +371,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                           SizedBox(
                             width: 4.0,
                           ),
-                          currentDateTime >
-                                      widget.event.startDateInMilliseconds &&
-                                  currentDateTime <
-                                      widget.event.endDateInMilliseconds
+                          currentDateTime > widget.event.startDateInMilliseconds && currentDateTime < widget.event.endDateInMilliseconds
                               ? Container(
                                   margin: EdgeInsets.only(
                                     right: 4,
@@ -400,8 +461,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                               ? Container()
                               : Container(
                                   constraints: BoxConstraints(
-                                    maxWidth:
-                                        MediaQuery.of(context).size.width * 0.8,
+                                    maxWidth: MediaQuery.of(context).size.width * 0.8,
                                   ),
                                   child: Fonts().textW400(
                                     '${widget.event.address.replaceAll(', USA', '').replaceAll(', United States', '')}',
@@ -423,8 +483,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     top: 4.0,
                   ),
                   child: InkWell(
-                    onTap: () => OpenUrl().openMaps(
-                        context, eventLat.toString(), eventLon.toString()),
+                    onTap: () => OpenUrl().openMaps(context, eventLat.toString(), eventLon.toString()),
                     child: Fonts().textW500(
                       'View in Maps',
                       14.0,
@@ -463,8 +522,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       ),
                       child: Fonts().textW400(
                         formatter.format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                              widget.event.startDateInMilliseconds),
+                          DateTime.fromMillisecondsSinceEpoch(widget.event.startDateInMilliseconds),
                         ),
                         16.0,
                         Colors.black,
@@ -476,9 +534,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               ],
             ),
           ),
-          widget.eventIsLive ||
-                  widget.event.startDateInMilliseconds == null ||
-                  currentDateTime > widget.event.endDateInMilliseconds
+          widget.eventIsLive || widget.event.startDateInMilliseconds == null || currentDateTime > widget.event.endDateInMilliseconds
               ? Container()
               : Padding(
                   padding: EdgeInsets.only(
@@ -495,9 +551,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     ),
                   ),
                 ),
-          widget.event.fbSite.isNotEmpty ||
-                  widget.event.twitterSite.isNotEmpty ||
-                  widget.event.website.isNotEmpty
+          widget.event.fbSite.isNotEmpty || widget.event.twitterSite.isNotEmpty || widget.event.website.isNotEmpty
               ? Padding(
                   padding: EdgeInsets.only(
                     left: 16.0,
@@ -589,19 +643,67 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     }
 
     return Scaffold(
-      appBar: WebblenAppBar().actionAppBar(
-        widget.event.title,
-        IconButton(
-          icon: Icon(
-            FontAwesomeIcons.ellipsisH,
-            size: 18.0,
-            color: Colors.black,
+        appBar: WebblenAppBar().actionAppBar(
+          widget.event.title,
+          IconButton(
+            icon: Icon(
+              FontAwesomeIcons.ellipsisH,
+              size: 18.0,
+              color: Colors.black,
+            ),
+            onPressed: () => showEventOptions(),
           ),
-          onPressed: () => showEventOptions(),
         ),
-      ),
-      body: eventView(),
-    );
+        body: eventView(),
+        bottomNavigationBar: widget.event.hasTickets != null && widget.event.hasTickets
+            ? Container(
+                height: 80.0,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(
+                      color: FlatColors.textFieldGray,
+                      width: 1.5,
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 16.0,
+                    bottom: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Fonts().textW700("Tickets Available", 16.0, Colors.black, TextAlign.left),
+                          Fonts().textW300("on Webblen", 14.0, Colors.black, TextAlign.left),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          CustomColorButton(
+                            text: "View Tickets",
+                            textSize: 14.0,
+                            textColor: Colors.white,
+                            backgroundColor: FlatColors.webblenRed,
+                            height: 35.0,
+                            width: MediaQuery.of(context).size.width * 0.4,
+                            onPressed: () =>
+                                PageTransitionService(context: context, event: widget.event, currentUser: widget.currentUser).transitionToTicketSelectionPage(),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : Container(height: 0));
   }
 }
 
@@ -696,8 +798,7 @@ class RecurringEventDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     void deleteEventAction() {
       Navigator.of(context).pop();
-      ShowAlertDialogService()
-          .showConfirmationDialog(context, "Delete this event?", 'Delete', () {
+      ShowAlertDialogService().showConfirmationDialog(context, "Delete this event?", 'Delete', () {
         EventDataService().deleteRecurringEvent(event.eventKey).then((error) {
           if (error.isEmpty) {
             Navigator.of(context).pop();
@@ -719,6 +820,7 @@ class RecurringEventDetailsPage extends StatelessWidget {
     showEventOptions() {
       ShowAlertDialogService().showEventOptionsDialog(
         context,
+        null,
         null,
         null,
         null,
@@ -777,8 +879,7 @@ class RecurringEventDetailsPage extends StatelessWidget {
                           ? Container()
                           : Container(
                               constraints: BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width * 0.8,
+                                maxWidth: MediaQuery.of(context).size.width * 0.8,
                               ),
                               child: Fonts().textW400(
                                 '${event.address.replaceAll(', USA', '').replaceAll(', United States', '')}',
@@ -817,9 +918,7 @@ class RecurringEventDetailsPage extends StatelessWidget {
                   top: 24.0,
                 ),
                 child: eventDate(context)),
-            event.fbSite.isNotEmpty ||
-                    event.twitterSite.isNotEmpty ||
-                    event.website.isNotEmpty
+            event.fbSite.isNotEmpty || event.twitterSite.isNotEmpty || event.website.isNotEmpty
                 ? Padding(
                     padding: EdgeInsets.only(
                       left: 16.0,

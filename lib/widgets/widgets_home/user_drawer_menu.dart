@@ -18,10 +18,12 @@ import 'package:webblen/widgets/widgets_webblen/webblen_coin.dart';
 class UserDrawerMenu {
   final BuildContext context;
   final WebblenUser currentUser;
+  final hasEarningsAccount;
 
   UserDrawerMenu({
     this.context,
     this.currentUser,
+    this.hasEarningsAccount,
   });
 
   final ContactPicker _contactPicker = new ContactPicker();
@@ -116,13 +118,17 @@ class UserDrawerMenu {
                                     ),
                                     onPressed: () {
                                       ShowAlertDialogService().showAccountQRDialog(
-                                          context,
-                                          currentUser.username,
-                                          currentUser.uid,
-                                          () => PageTransitionService(
-                                                context: context,
-                                                currentUser: currentUser,
-                                              ).openWebblenScanner());
+                                        context,
+                                        currentUser.username,
+                                        currentUser.uid,
+                                        () => PageTransitionService(
+                                          context: context,
+                                          currentUser: currentUser,
+                                        ).openWebblenScanner(),
+                                        hasEarningsAccount
+                                            ? () => PageTransitionService(context: context, currentUser: currentUser).transitionToScanForEventsPage()
+                                            : null,
+                                      );
                                     },
                                   ),
                                 ],
@@ -292,18 +298,18 @@ class UserDrawerMenu {
                 ),
                 menuRow(
                   Icon(
-                    FontAwesomeIcons.calendar,
+                    FontAwesomeIcons.ticketAlt,
                     color: FlatColors.blackPearl,
                     size: 18.0,
                   ),
-                  'Calendar',
+                  'My Tickets',
                   FlatColors.blackPearl,
                   () {
                     Navigator.pop(context);
                     PageTransitionService(
                       context: context,
                       currentUser: currentUser,
-                    ).transitionToCalendarPage();
+                    ).transitionToUserTicketsPage();
                   },
                 ),
                 menuRow(
@@ -365,22 +371,6 @@ class UserDrawerMenu {
                         },
                       )
                     : Container(),
-                menuRow(
-                  Icon(
-                    FontAwesomeIcons.cog,
-                    color: FlatColors.blackPearl,
-                    size: 18.0,
-                  ),
-                  'Settings',
-                  FlatColors.blackPearl,
-                  () {
-                    Navigator.pop(context);
-                    PageTransitionService(
-                      context: context,
-                      currentUser: currentUser,
-                    ).transitionToSettingsPage();
-                  },
-                ),
                 menuRow(
                   Icon(
                     FontAwesomeIcons.comments,

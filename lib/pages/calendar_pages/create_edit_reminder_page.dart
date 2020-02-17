@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:flutter_picker/Picker.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
-
 import 'package:webblen/firebase_data/calendar_event_data.dart';
 import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -106,10 +104,7 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
           textScaleFactor: 1.0,
         ),
         child: TextFormField(
-          initialValue: newCalendarEvent.title != null &&
-                  newCalendarEvent.title.isNotEmpty
-              ? newCalendarEvent.title
-              : "",
+          initialValue: newCalendarEvent.title != null && newCalendarEvent.title.isNotEmpty ? newCalendarEvent.title : "",
           decoration: InputDecoration(
             hintText: "Title",
             contentPadding: EdgeInsets.only(
@@ -151,10 +146,7 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
           textScaleFactor: 1.0,
         ),
         child: TextFormField(
-          initialValue: newCalendarEvent.description != null &&
-                  newCalendarEvent.description.isNotEmpty
-              ? newCalendarEvent.description
-              : "",
+          initialValue: newCalendarEvent.description != null && newCalendarEvent.description.isNotEmpty ? newCalendarEvent.description : "",
           decoration: InputDecoration(
             hintText: "Description",
             contentPadding: EdgeInsets.all(8),
@@ -180,8 +172,7 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
     final form = formKey.currentState;
     form.save();
     ScaffoldState scaffold = scaffoldKey.currentState;
-    if (selectedDateTime.isBefore(DateTime.now()) &&
-        widget.preSelectedEvent == null) {
+    if (selectedDateTime.isBefore(DateTime.now()) && widget.preSelectedEvent == null) {
       Navigator.of(context).pop();
       scaffold.showSnackBar(
         SnackBar(
@@ -194,8 +185,7 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
           ),
         ),
       );
-    } else if (newCalendarEvent.title == null ||
-        newCalendarEvent.title.isEmpty) {
+    } else if (newCalendarEvent.title == null || newCalendarEvent.title.isEmpty) {
       Navigator.of(context).pop();
       scaffold.showSnackBar(
         SnackBar(
@@ -208,8 +198,7 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
           ),
         ),
       );
-    } else if (newCalendarEvent.description == null ||
-        newCalendarEvent.description.isEmpty) {
+    } else if (newCalendarEvent.description == null || newCalendarEvent.description.isEmpty) {
       Navigator.of(context).pop();
       scaffold.showSnackBar(
         SnackBar(
@@ -223,15 +212,12 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
         ),
       );
     } else {
-      newCalendarEvent.timezone =
-          await FlutterNativeTimezone.getLocalTimezone();
+      newCalendarEvent.timezone = await Time().getLocalTimezone();
       if (widget.preSelectedEvent == null) {
         newCalendarEvent.key = randomAlphaNumeric(16);
       }
       newCalendarEvent.type = 'reminder';
-      CalendarEventDataService()
-          .saveEvent(widget.currentUser.uid, newCalendarEvent)
-          .then((error) {
+      CalendarEventDataService().saveEvent(widget.currentUser.uid, newCalendarEvent).then((error) {
         if (error.isEmpty) {
           CreateNotification().createTimedNotification(
               randomBetween(
@@ -269,8 +255,7 @@ class _CreateEditReminderPageState extends State<CreateEditReminderPage> {
     );
     if (widget.preSelectedEvent != null) {
       newCalendarEvent = widget.preSelectedEvent;
-      selectedDateTime =
-          Time().getDateTimeFromString(newCalendarEvent.dateTime);
+      selectedDateTime = Time().getDateTimeFromString(newCalendarEvent.dateTime);
     } else {
       selectedDateTime = preDateTime;
       newCalendarEvent.dateTime = formatter.format(preDateTime);

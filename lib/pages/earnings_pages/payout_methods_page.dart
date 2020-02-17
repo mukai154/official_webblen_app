@@ -108,7 +108,7 @@ class _PayoutMethodsPageState extends State<PayoutMethodsPage> {
                         )
                       : infoBubble(
                           "Instant Deposit",
-                          "Instant deposit is set up. Earnings are transferred to Debit Card ending in XXXX upon request.",
+                          "Instant deposit is set up. Earnings are transferred to Debit Card ending in ${cardInfo['last4']} upon request.",
                           true,
                           () => PageTransitionService(context: context, currentUser: currentUser).transitionToDebitCardDetailsPage(),
                         ),

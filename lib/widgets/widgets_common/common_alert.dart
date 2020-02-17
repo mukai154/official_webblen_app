@@ -22,7 +22,7 @@ class FailureDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return new CustomAlertDialog(
       content: Container(
-        height: 200.0,
+        height: 230.0,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -50,11 +50,7 @@ class FailureDialog extends StatelessWidget {
                     data: MediaQuery.of(context).copyWith(
                       textScaleFactor: 1.0,
                     ),
-                    child: Text(
-                      header,
-                      style: Fonts.alertDialogHeader,
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Fonts().textW700(header, 18, Colors.black, TextAlign.center),
                   ),
                 ],
               ),
@@ -70,11 +66,7 @@ class FailureDialog extends StatelessWidget {
                     data: MediaQuery.of(context).copyWith(
                       textScaleFactor: 1.0,
                     ),
-                    child: Text(
-                      body,
-                      style: Fonts.alertDialogBody,
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Fonts().textW400(body, 16, Colors.black, TextAlign.center),
                   ),
                 ],
               ),
@@ -690,12 +682,14 @@ class EventUploadSuccessDialog extends StatelessWidget {
 class EventOptionsDialog extends StatelessWidget {
   final VoidCallback viewAttendeesAction;
   final VoidCallback shareEventAction;
+  final VoidCallback shareLinkAction;
   final VoidCallback editAction;
   final VoidCallback deleteEventAction;
 
   EventOptionsDialog({
     this.viewAttendeesAction,
     this.shareEventAction,
+    this.shareLinkAction,
     this.editAction,
     this.deleteEventAction,
   });
@@ -704,7 +698,7 @@ class EventOptionsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomAlertDialog(
       content: Container(
-        height: editAction == null ? deleteEventAction == null ? viewAttendeesAction == null ? shareEventAction == null ? 100 : 130 : 180 : 210 : 230,
+        height: editAction == null ? deleteEventAction == null ? viewAttendeesAction == null ? shareEventAction == null ? 150 : 180 : 220 : 280 : 310,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -764,6 +758,21 @@ class EventOptionsDialog extends StatelessWidget {
                           height: 45.0,
                           width: 200.0,
                           onPressed: shareEventAction,
+                        )
+                      : Container(),
+                  shareLinkAction != null
+                      ? CustomColorIconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.link,
+                            color: Colors.black,
+                            size: 16.0,
+                          ),
+                          text: "Share Link",
+                          textColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: shareLinkAction,
                         )
                       : Container(),
                   editAction != null
@@ -1764,6 +1773,83 @@ class ActionSuccessDialog extends StatelessWidget {
   }
 }
 
+class CustomActionDialog extends StatelessWidget {
+  final String header;
+  final String body;
+  final String buttonText;
+  final VoidCallback action;
+
+  CustomActionDialog({
+    this.header,
+    this.body,
+    this.buttonText,
+    this.action,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomAlertDialog(
+      content: Container(
+        height: 180.0,
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(
+            Radius.circular(32.0),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Container(
+              child: Column(
+                children: <Widget>[
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaleFactor: 1.0,
+                    ),
+                    child: Fonts().textW700(
+                      header,
+                      18.0,
+                      FlatColors.darkGray,
+                      TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 12.0,
+                  ),
+                  MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      textScaleFactor: 1.0,
+                    ),
+                    child: Fonts().textW500(
+                      body,
+                      14.0,
+                      FlatColors.darkGray,
+                      TextAlign.center,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            CustomColorButton(
+              text: buttonText,
+              textColor: FlatColors.darkGray,
+              backgroundColor: Colors.white,
+              height: 45.0,
+              width: 200.0,
+              onPressed: action,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class FormActionDialog extends StatelessWidget {
   final String header;
   final Widget formWidget;
@@ -1779,7 +1865,7 @@ class FormActionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomAlertDialog(
       content: Container(
-        height: 150.0,
+        height: 225.0,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -1903,18 +1989,20 @@ class AccountQRDialog extends StatelessWidget {
   final String username;
   final String uid;
   final VoidCallback scanAction;
+  final VoidCallback scanForTicketsAction;
 
   AccountQRDialog({
     this.username,
     this.uid,
     this.scanAction,
+    this.scanForTicketsAction,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomAlertDialog(
       content: Container(
-        height: 300.0,
+        height: scanForTicketsAction == null ? 300.0 : 350.0,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -1933,10 +2021,6 @@ class AccountQRDialog extends StatelessWidget {
                   version: QrVersions.auto,
                   size: 150.0,
                   gapless: true,
-//                  embeddedImage: AssetImage('assets/images/webblen_logo.png'),
-//                  embeddedImageStyle: QrEmbeddedImageStyle(
-//                    size: Size(80, 80),
-//                  ),
                 )),
             MediaQuery(
               data: MediaQuery.of(context).copyWith(
@@ -1954,18 +2038,29 @@ class AccountQRDialog extends StatelessWidget {
             ),
             CustomColorIconButton(
               icon: Icon(FontAwesomeIcons.camera, color: Colors.black, size: 16.0),
-              text: "Scan",
+              text: "Add Friend",
               textColor: Colors.black,
               backgroundColor: Colors.white,
-              height: 35.0,
+              height: 40.0,
               width: 200.0,
               onPressed: scanAction,
             ),
+            scanForTicketsAction == null
+                ? Container()
+                : CustomColorIconButton(
+                    icon: Icon(FontAwesomeIcons.ticketAlt, color: Colors.black, size: 16.0),
+                    text: "Scan For Tickets",
+                    textColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    height: 40.0,
+                    width: 200.0,
+                    onPressed: scanForTicketsAction,
+                  ),
             CustomColorButton(
               text: "Close",
               textColor: FlatColors.darkGray,
               backgroundColor: Colors.white,
-              height: 35.0,
+              height: 40.0,
               width: 200.0,
               onPressed: () => Navigator.of(context).pop(),
             ),

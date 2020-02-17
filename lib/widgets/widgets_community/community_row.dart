@@ -2,7 +2,6 @@ import 'dart:math';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/styles/flat_colors.dart';
@@ -22,10 +21,8 @@ class CommunityRow extends StatefulWidget {
   _CommunityRowState createState() => _CommunityRowState();
 }
 
-class _CommunityRowState extends State<CommunityRow>
-    with AutomaticKeepAliveClientMixin {
-  String comImage =
-      'https://digitalsynopsis.com/wp-content/uploads/2017/02/beautiful-color-gradients-backgrounds-018-cloudy-knoxville.png';
+class _CommunityRowState extends State<CommunityRow> with AutomaticKeepAliveClientMixin {
+  String comImage = 'https://digitalsynopsis.com/wp-content/uploads/2017/02/beautiful-color-gradients-backgrounds-018-cloudy-knoxville.png';
 
   @override
   void initState() {
@@ -106,7 +103,7 @@ class _CommunityRowState extends State<CommunityRow>
                           fit: BoxFit.scaleDown,
                           child: Fonts().textW700(
                             widget.community.name,
-                            22.0,
+                            20.0,
                             Colors.black,
                             TextAlign.left,
                           ),
@@ -135,8 +132,7 @@ class _CommunityRowState extends State<CommunityRow>
                   children: <Widget>[
                     widget.community.status == 'active'
                         ? Container(
-                            width:
-                                (MediaQuery.of(context).size.width - 16) / 2.5,
+                            width: (MediaQuery.of(context).size.width - 16) / 2.5,
                             child: Stack(
                               children: <Widget>[
                                 comImage == null
@@ -148,11 +144,7 @@ class _CommunityRowState extends State<CommunityRow>
                                         ),
                                         child: CachedNetworkImage(
                                           imageUrl: comImage,
-                                          width: (MediaQuery.of(context)
-                                                      .size
-                                                      .width -
-                                                  16) /
-                                              2.5,
+                                          width: (MediaQuery.of(context).size.width - 16) / 2.5,
                                           height: 90.0,
                                           fit: BoxFit.fitWidth,
                                           alignment: Alignment.center,
@@ -197,8 +189,7 @@ class _CommunityRowState extends State<CommunityRow>
                                             top: 65.0,
                                           ),
                                           child: Material(
-                                            borderRadius:
-                                                BorderRadius.circular(24.0),
+                                            borderRadius: BorderRadius.circular(24.0),
                                             color: FlatColors.textFieldGray,
                                             child: Padding(
                                               padding: EdgeInsets.symmetric(

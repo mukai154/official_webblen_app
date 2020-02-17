@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:admob_flutter/admob_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
@@ -8,10 +11,9 @@ import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/utils/strings.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_event/event_carousel.dart';
 import 'package:webblen/widgets/widgets_home_tiles/all_tiles.dart';
-import 'package:webblen/widgets/widgets_home_tiles/webblen_events_tile.dart';
 
 class HomeDashboardPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -39,6 +41,7 @@ class HomeDashboardPage extends StatefulWidget {
 }
 
 class _HomeDashboardPageState extends State<HomeDashboardPage> {
+  AdmobBannerSize bannerSize;
   List<LocalAd> ads = [];
   List<WebblenUser> randomNearbyUsers = [];
   List<Event> webblenEvents = [];
@@ -82,18 +85,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     });
   }
 
-  void didPressDiscoverTile() {
-    if (widget.currentUser != null && !widget.updateRequired) {
-      PageTransitionService(
-        context: context,
-        uid: widget.currentUser.uid,
-        areaName: widget.areaName,
-      ).transitionToDiscoverPage();
-    } else if (updateAlertIsEnabled()) {
-      ShowAlertDialogService().showUpdateDialog(context);
-    }
-  }
-
   void didPressSearchTile() {
     if (widget.currentUser != null && !widget.updateRequired) {
       PageTransitionService(
@@ -106,13 +97,37 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     }
   }
 
-  void didPressMyCommunitiesTile() {
+  void didPressCommunitiesTile() {
     if (widget.currentUser != null && !widget.updateRequired) {
       PageTransitionService(
         context: context,
         uid: widget.currentUser.uid,
         areaName: widget.areaName,
-      ).transitionToMyCommunitiesPage();
+      ).transitionToCommunitiesPage();
+    } else if (updateAlertIsEnabled()) {
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void didPressEventsTile() {
+    if (widget.currentUser != null && !widget.updateRequired) {
+      PageTransitionService(
+        context: context,
+        currentUser: widget.currentUser,
+        lat: widget.currentLat,
+        lon: widget.currentLon,
+      ).transitionToEventsPage();
+    } else if (updateAlertIsEnabled()) {
+      ShowAlertDialogService().showUpdateDialog(context);
+    }
+  }
+
+  void didPressCalendarTile() {
+    if (widget.currentUser != null && !widget.updateRequired) {
+      PageTransitionService(
+        context: context,
+        currentUser: widget.currentUser,
+      ).transitionToCalendarPage();
     } else if (updateAlertIsEnabled()) {
       ShowAlertDialogService().showUpdateDialog(context);
     }
@@ -130,36 +145,44 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     }
   }
 
-  void didPressCommunityActivityTile() {
-    if (widget.currentUser != null && !widget.updateRequired) {
-      PageTransitionService(
-        context: context,
-        currentUser: widget.currentUser,
-      ).transitionToUserRanksPage();
-    } else if (updateAlertIsEnabled()) {
-      ShowAlertDialogService().showUpdateDialog(context);
-    }
-  }
+//  void didPressCommunityActivityTile() {
+//    if (widget.currentUser != null && !widget.updateRequired) {
+//      PageTransitionService(
+//        context: context,
+//        currentUser: widget.currentUser,
+//      ).transitionToUserRanksPage();
+//    } else if (updateAlertIsEnabled()) {
+//      ShowAlertDialogService().showUpdateDialog(context);
+//    }
+//  }
 
-  void didPressWebblenEventsTile() {
-    if (widget.currentUser != null && !widget.updateRequired) {
-      PageTransitionService(
-        context: context,
-        currentUser: widget.currentUser,
-        events: webblenEvents,
-      ).transitionToWebblenEventsPage();
-    } else if (updateAlertIsEnabled()) {
-      ShowAlertDialogService().showUpdateDialog(context);
-    }
-  }
+//  void didPressWebblenEventsTile() {
+//    if (widget.currentUser != null && !widget.updateRequired) {
+//      PageTransitionService(
+//        context: context,
+//        currentUser: widget.currentUser,
+//        events: webblenEvents,
+//      ).transitionToWebblenEventsPage();
+//    } else if (updateAlertIsEnabled()) {
+//      ShowAlertDialogService().showUpdateDialog(context);
+//    }
+//  }
 
   @override
   void initState() {
     super.initState();
     loadData();
-//    EventDataService().addEventDataField("d.startDateTime", "Jan 31, 07:00 PM");
-//    EventDataService().addEventDataField("d.endDateTime", "Jan 31, 09:00 PM");
-//    EventDataService().addEventDataField("d.timezone", "America/Chicago");
+    if (Platform.isIOS) {
+      Admob.initialize('ca-app-pub-2136415475966451~5144610810');
+    } else if (Platform.isAndroid) {
+      Admob.initialize('ca-app-pub-2136415475966451~9434499178');
+    }
+    bannerSize = AdmobBannerSize.BANNER;
+//    EventDataService().addEventDataField("d.startDate", "Jan 31");
+//    EventDataService().addEventDataField("d.endDate", "Jan 31");
+//    EventDataService().addEventDataField("d.startTime", "7:00 PM");
+//    EventDataService().addEventDataField("d.endTime", "9:00 PM");
+//    EventDataService().addEventDataField("d.timezone", "CST");
   }
 
   @override
@@ -273,7 +296,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                       ? MediaQuery.of(context).size.height * 0.715
                       : MediaQuery.of(context).size.height > 568.0 ? MediaQuery.of(context).size.height * 0.67 : MediaQuery.of(context).size.height * 0.60,
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.symmetric(
@@ -283,8 +306,22 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
-                            DiscoverTile(
-                              onTap: () => didPressDiscoverTile(),
+                            EventsTile(
+                              onTap: () => didPressEventsTile(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 2.0,
+                          horizontal: 16.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            CommunitiesTile(
+                              onTap: () => didPressCommunitiesTile(),
                             ),
                           ],
                         ),
@@ -296,8 +333,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            MyCommunitiesTile(
-                              onTap: () => didPressMyCommunitiesTile(),
+                            CalendarTile(
+                              onTap: () => didPressCalendarTile(),
                             ),
                             CommunityRequestTile(
                               onTap: () => didPressCommunityRequestTile(),
@@ -305,42 +342,52 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                           ],
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: <Widget>[
-                          Container(
-                            //width: MediaQuery.of(context).size.width/1.5,
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                left: 16.0,
-                                top: 16.0,
-                                bottom: 8.0,
-                              ),
-                              child: MediaQuery(
-                                data: MediaQuery.of(context).copyWith(
-                                  textScaleFactor: 1.0,
-                                ),
-                                child: Fonts().textW700(
-                                  'Events You Might Like',
-                                  18.0,
-                                  Colors.black,
-                                  TextAlign.left,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
+                      Container(
+                        //margin: EdgeInsets.only(top: 8.0),
+                        child: AdmobBanner(
+                          adUnitId: Strings().getAdMobBannerID(),
+                          adSize: bannerSize,
+                          listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+//            handleEvent(event, args, 'Banner');
+                          },
+                        ),
                       ),
-                      webblenEvents.isEmpty
-                          ? recommendedEvents.isEmpty
-                              ? Container()
-                              : EventCarousel(
-                                  events: recommendedEvents,
-                                  currentUser: widget.currentUser,
-                                )
-                          : WebblenEventsTile(
-                              onTap: () => didPressWebblenEventsTile(),
-                            ),
+//                      Row(
+//                        mainAxisAlignment: MainAxisAlignment.start,
+//                        children: <Widget>[
+//                          Container(
+//                            //width: MediaQuery.of(context).size.width/1.5,
+//                            child: Padding(
+//                              padding: EdgeInsets.only(
+//                                left: 16.0,
+//                                top: 16.0,
+//                                bottom: 8.0,
+//                              ),
+//                              child: MediaQuery(
+//                                data: MediaQuery.of(context).copyWith(
+//                                  textScaleFactor: 1.0,
+//                                ),
+//                                child: Fonts().textW700(
+//                                  'Events You Might Like',
+//                                  18.0,
+//                                  Colors.black,
+//                                  TextAlign.left,
+//                                ),
+//                              ),
+//                            ),
+//                          ),
+//                        ],
+//                      ),
+//                      webblenEvents.isEmpty
+//                          ? recommendedEvents.isEmpty
+//                              ? Container()
+//                              : EventCarousel(
+//                                  events: recommendedEvents,
+//                                  currentUser: widget.currentUser,
+//                                )
+//                          : WebblenEventsTile(
+//                              onTap: () => didPressWebblenEventsTile(),
+//                            ),
                     ],
                   ),
                 ),
