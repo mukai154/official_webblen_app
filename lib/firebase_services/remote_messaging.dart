@@ -6,10 +6,9 @@ import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 
 class FirebaseMessagingService {
-
   final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
-  final CollectionReference notificationRef = Firestore.instance.collection(
-      "user_notifications");
+  final CollectionReference notificationRef =
+      Firestore.instance.collection("user_notifications");
 
 //** FIREBASE MESSAGING  */
   configFirebaseMessaging(BuildContext context, WebblenUser currentUser) {
@@ -34,23 +33,25 @@ class FirebaseMessagingService {
     );
 
     firebaseMessaging.requestNotificationPermissions(
-        const IosNotificationSettings(
-            sound: false,
-            alert: true,
-            badge: true
-        )
+      const IosNotificationSettings(
+        sound: false,
+        alert: true,
+        badge: true,
+      ),
     );
-    firebaseMessaging.onIosSettingsRegistered.listen((
-        IosNotificationSettings iosSetting) {
+    firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings iosSetting) {
       //print('ios settings registered');
     });
   }
 
-  updateFirebaseMessageToken(String uid){
+  updateFirebaseMessageToken(String uid) {
     CreateNotification().initializeNotificationSettings();
-    firebaseMessaging.getToken().then((token){
-      UserDataService().setUserCloudMessageToken(uid, token);
+    firebaseMessaging.getToken().then((token) {
+      UserDataService().setUserCloudMessageToken(
+        uid,
+        token,
+      );
     });
   }
-
 }

@@ -9,14 +9,17 @@ class AlgoliaSearch {
   Future<List<Map<String, dynamic>>> queryEvents(String searchTerm) async {
     List<Map<String, dynamic>> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('upcoming_events').search(searchTerm);
+      AlgoliaQuery query =
+          algolia.instance.index('upcoming_events').search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         Map<String, dynamic> dataMap = {};
         dataMap['resultType'] = 'event';
         dataMap['resultHeader'] = snapshot.data['d']['title'];
         dataMap['imageData'] = snapshot.data['d']['imageURL'];
-        dataMap['communityData'] = snapshot.data['d']['communityAreaName'] + "/" + snapshot.data['d']['communityName'];
+        dataMap['communityData'] = snapshot.data['d']['communityAreaName'] +
+            "/" +
+            snapshot.data['d']['communityName'];
         dataMap['key'] = snapshot.data['d']['eventKey'];
         results.add(dataMap);
       });
@@ -27,7 +30,8 @@ class AlgoliaSearch {
   Future<List<Map<String, dynamic>>> queryCommunities(String searchTerm) async {
     List<Map<String, dynamic>> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('communities').search(searchTerm);
+      AlgoliaQuery query =
+          algolia.instance.index('communities').search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         Map<String, dynamic> dataMap = {};

@@ -1,9 +1,8 @@
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:intl/intl.dart';
 
 class Time {
   DateTime currentDateTime = DateTime.now();
-  DateFormat timeFormatter = new DateFormat("h:mm a");
+  DateFormat timeFormatter = DateFormat("h:mm a");
   DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
 
   String getStringFromDate(DateTime data) {
@@ -16,8 +15,10 @@ class Time {
     return dateTime;
   }
 
-  Future<String> getLocalTimezone() async {
-    String timezone = await FlutterNativeTimezone.getLocalTimezone();
+  String getLocalTimezone() {
+    String timezone = DateTime.now().timeZoneName;
+    print(timezone);
+    //String timezone = await FlutterNativeTimezone.getLocalTimezone();
     return timezone;
   }
 

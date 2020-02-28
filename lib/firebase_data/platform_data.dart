@@ -6,7 +6,7 @@ import 'package:geoflutterfire/geoflutterfire.dart';
 class PlatformDataService {
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "8.0.1";
+    String currentVersion = "9.0.0";
     DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
     String releasedVersion = documentSnapshot.data["versionNumber"];
     bool versionIsRequired = documentSnapshot.data["versionIsRequired"];
@@ -19,9 +19,21 @@ class PlatformDataService {
   Future<String> getAreaGeoshash(double lat, double lon) async {
     String areaGeohash = "";
     Geoflutterfire geo = Geoflutterfire();
-    GeoFirePoint center = geo.point(latitude: lat, longitude: lon);
+    GeoFirePoint center = geo.point(
+      latitude: lat,
+      longitude: lon,
+    );
     CollectionReference locRef = Firestore.instance.collection("available_locations");
-    List<DocumentSnapshot> nearLocations = await geo.collection(collectionRef: locRef).within(center: center, radius: 20, field: 'location').first;
+    List<DocumentSnapshot> nearLocations = await geo
+        .collection(
+          collectionRef: locRef,
+        )
+        .within(
+          center: center,
+          radius: 20,
+          field: 'location',
+        )
+        .first;
     if (nearLocations.length != 0) areaGeohash = nearLocations.first.data['location']['geohash'];
     return areaGeohash;
   }
@@ -35,9 +47,19 @@ class PlatformDataService {
   Future<String> getAreaName(double lat, double lon) async {
     String areaName = "";
     Geoflutterfire geo = Geoflutterfire();
-    GeoFirePoint center = geo.point(latitude: lat, longitude: lon);
+    GeoFirePoint center = geo.point(
+      latitude: lat,
+      longitude: lon,
+    );
     CollectionReference locRef = Firestore.instance.collection("available_locations");
-    List<DocumentSnapshot> nearLocations = await geo.collection(collectionRef: locRef).within(center: center, radius: 20, field: 'location').first;
+    List<DocumentSnapshot> nearLocations = await geo
+        .collection(collectionRef: locRef)
+        .within(
+          center: center,
+          radius: 20,
+          field: 'location',
+        )
+        .first;
     if (nearLocations.length != 0) areaName = nearLocations.first.documentID;
     return areaName;
   }

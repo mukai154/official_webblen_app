@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:webblen/user_pages/setup_page.dart';
 
-import 'auth_pages/login_page.dart';
-import 'home_page.dart';
-import 'root_page.dart';
-import 'styles/flat_colors.dart';
+import 'package:webblen/home_page.dart';
+import 'package:webblen/root_page.dart';
+import 'package:webblen/pages/auth_pages/login_page.dart';
+import 'package:webblen/pages/user_pages/setup_page.dart';
+import 'package:webblen/styles/flat_colors.dart';
 
-void main() => runApp(new WebblenApp());
+void main() => runApp(WebblenApp());
 
 class WebblenApp extends StatelessWidget {
   @override
@@ -25,11 +25,11 @@ class WebblenApp extends StatelessWidget {
         accentColor: FlatColors.darkGray,
       ),
       home: RootPage(),
-      routes: <String, WidgetBuilder>{
-        '/home': (BuildContext context) => new HomePage(),
-        '/root': (BuildContext context) => new RootPage(),
-        '/login': (BuildContext context) => new LoginPage(),
-        '/setup': (BuildContext context) => new SetupPage(),
+      routes: <String, WidgetBuilder> {
+        '/home': (BuildContext context) => HomePage(),
+        '/root': (BuildContext context) => RootPage(),
+        '/login': (BuildContext context) => LoginPage(),
+        '/setup': (BuildContext context) => SetupPage(),
       },
     );
   }

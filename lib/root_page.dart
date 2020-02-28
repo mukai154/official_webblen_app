@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/firebase_data/auth.dart';
-import 'auth_pages/splash_page.dart';
-import 'home_page.dart';
 
+import 'package:webblen/home_page.dart';
+import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/pages/auth_pages/splash_page.dart';
 
 class RootPage extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => new _RootPageState();
+  State<StatefulWidget> createState() => _RootPageState();
 }
 
 enum AuthStatus {
@@ -16,7 +16,6 @@ enum AuthStatus {
 }
 
 class _RootPageState extends State<RootPage> {
-
   AuthStatus authStatus = AuthStatus.notDetermined;
 
   @override
@@ -24,7 +23,8 @@ class _RootPageState extends State<RootPage> {
     super.initState();
     BaseAuth().currentUser().then((userId) {
       setState(() {
-        authStatus = userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
+        authStatus =
+            userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
       });
     });
   }
@@ -35,9 +35,9 @@ class _RootPageState extends State<RootPage> {
       case AuthStatus.notDetermined:
         return _buildWaitingScreen();
       case AuthStatus.notSignedIn:
-        return new SplashPage();
+        return SplashPage();
       case AuthStatus.signedIn:
-        return new HomePage();
+        return HomePage();
     }
   }
 
@@ -49,5 +49,4 @@ class _RootPageState extends State<RootPage> {
       ),
     );
   }
-
 }

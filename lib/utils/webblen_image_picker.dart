@@ -13,14 +13,20 @@ class WebblenImagePicker {
   final double ratioX;
   final double ratioY;
 
-  WebblenImagePicker({this.context, this.ratioX, this.ratioY});
+  WebblenImagePicker({
+    this.context,
+    this.ratioX,
+    this.ratioY,
+  });
 
   Future<File> retrieveImageFromLibrary() async {
     imageCache.clear();
     var dir = await path_provider.getTemporaryDirectory();
     var targetPath = dir.absolute.path + "/temp.png";
     File croppedImageFile;
-    File img = await ImagePicker.pickImage(source: ImageSource.gallery);
+    File img = await ImagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
     if (img != null) {
       croppedImageFile = await cropImage(img);
       if (croppedImageFile != null) {
@@ -39,7 +45,9 @@ class WebblenImagePicker {
     var dir = await path_provider.getTemporaryDirectory();
     var targetPath = dir.absolute.path + "/temp.png";
     File croppedImageFile;
-    File img = await ImagePicker.pickImage(source: ImageSource.camera);
+    File img = await ImagePicker.pickImage(
+      source: ImageSource.camera,
+    );
     if (img != null) {
       croppedImageFile = await cropImage(img);
       if (croppedImageFile != null) {
@@ -57,8 +65,14 @@ class WebblenImagePicker {
     File croppedImageFile;
     croppedImageFile = await ImageCropper.cropImage(
       sourcePath: img.path,
-      aspectRatio: CropAspectRatio(ratioX: 1, ratioY: 1),
-      androidUiSettings: AndroidUiSettings(toolbarTitle: 'Crop Image', toolbarColor: Colors.white),
+      aspectRatio: CropAspectRatio(
+        ratioX: 1,
+        ratioY: 1,
+      ),
+      androidUiSettings: AndroidUiSettings(
+        toolbarTitle: 'Crop Image',
+        toolbarColor: Colors.white,
+      ),
     );
     return croppedImageFile;
   }

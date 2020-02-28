@@ -2,9 +2,9 @@ import 'package:intl/intl.dart';
 
 class TimeCalc {
   DateTime currentDateTime = DateTime.now();
-  DateFormat dateFormatter = new DateFormat("MM/dd/yyyy");
-  DateFormat timeFormatter = new DateFormat("h:mm a");
-  DateFormat dateTimeFormatter = new DateFormat("MM/dd/yyyy h:mm a");
+  DateFormat dateFormatter = DateFormat("MM/dd/yyyy");
+  DateFormat timeFormatter = DateFormat("h:mm a");
+  DateFormat dateTimeFormatter = DateFormat("MM/dd/yyyy h:mm a");
   DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
 
   String getStringFromDate(DateTime data) {
