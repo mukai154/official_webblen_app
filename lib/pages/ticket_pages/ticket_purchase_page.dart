@@ -207,7 +207,7 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
                       Container(
                         //width: 95,
                         child: Fonts().textW400(
-                          "+ \$$ticketCharge",
+                          "+ \$${ticketCharge.toStringAsFixed(2)}",
                           16.0,
                           Colors.black,
                           TextAlign.left,
@@ -278,7 +278,7 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
           Container(
             //width: 95,
             child: Fonts().textW400(
-              "+ \$${(salesTax + userPlatformFees).toStringAsFixed(2)}",
+              "+ \$${(salesTax + userPlatformFees + 0.49).toStringAsFixed(2)}",
               16.0,
               Colors.black,
               TextAlign.left,
