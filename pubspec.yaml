@@ -10,6 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
 
+  #Core Dependencies
+  provider: ^4.0.4
+
   #Firestore Dependencies
   cloud_firestore: ^0.12.10
   firebase_storage: ^3.0.8
@@ -22,7 +25,7 @@ dependencies:
   #Payment Dependencies
   flutter_credit_card: 0.1.1
   stripe_sdk: ^2.4.2
-  flutter_appauth: ^0.6.0
+#  flutter_appauth: ^0.6.0
 
   #Social Dependencies
   google_sign_in: ^4.0.11
@@ -41,24 +44,24 @@ dependencies:
   google_maps_webservice: ^0.0.15
 
   #Image Dependencies
-  cached_network_image: ^2.0.0-rc
-  image_cropper: ^1.1.0
-  image_picker: ^0.6.1+11
-  flutter_image_compress: ^0.6.3
+#  cached_network_image: ^2.0.0-rc
+#  image_cropper: ^1.1.0
+#  image_picker: ^0.6.1+11
+#  flutter_image_compress: ^0.6.3
   
   #Video Dependencies
-  youtube_player_flutter: ^6.0.3+2
+#  youtube_player_flutter: ^6.0.3+2
 
   #QR READ/RENDER
-  qr_flutter: ^3.1.0
-  qr_code_scanner:
-    git:
-      url: https://github.com/kamilpowalowski/qr_code_scanner.git
+#  qr_flutter: ^3.1.0
+#  qr_code_scanner:
+#    git:
+#      url: https://github.com/kamilpowalowski/qr_code_scanner.git
 
   #Phone Util Dependencies
   flutter_local_notifications: ^0.8.4
   url_launcher: ^5.4.1
-  contact_picker: ^0.0.2
+#  contact_picker: ^0.0.2
   share: ^0.6.1+1
   flutter_sms: ^1.0.1
   connectivity: ^0.4.4
@@ -72,17 +75,9 @@ dependencies:
   algolia: ^0.1.7
   font_awesome_flutter: 8.5.0
   flutter_tags: ^0.4.3
-  carousel_slider: ^1.4.1
   liquid_pull_to_refresh: ^1.1.1
-  shimmer: ^1.0.1
   hidden_drawer_menu:  ^1.1.2
-  flutter_masked_text: ^0.8.0
-  flushbar: 1.8.0
-  animated_text_kit: ^1.3.1
-  intl: ^0.16.0
-  percent_indicator: ^2.1.1+1
-  random_string: ^1.1.0
-  slimy_card: ^1.0.2
+
 
 dev_dependencies:
   flutter_test:

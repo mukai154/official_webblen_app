@@ -1,52 +1,26 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:webblen/models/webblen_user.dart';
 
-import 'package:webblen/home_page.dart';
-import 'package:webblen/firebase_data/auth.dart';
-import 'package:webblen/pages/auth_pages/splash_page.dart';
+import 'firebase/data/webblen_user_data.dart';
+import 'pages/auth/splash_page.dart';
+import 'pages/home/home_page.dart';
 
-class RootPage extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => _RootPageState();
-}
-
-enum AuthStatus {
-  notDetermined,
-  notSignedIn,
-  signedIn,
-}
-
-class _RootPageState extends State<RootPage> {
-  AuthStatus authStatus = AuthStatus.notDetermined;
-
-  @override
-  initState() {
-    super.initState();
-    BaseAuth().currentUser().then((userId) {
-      setState(() {
-        authStatus =
-            userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
-      });
-    });
-  }
-
+class RootPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    switch (authStatus) {
-      case AuthStatus.notDetermined:
-        return _buildWaitingScreen();
-      case AuthStatus.notSignedIn:
-        return SplashPage();
-      case AuthStatus.signedIn:
-        return HomePage();
+    FirebaseUser user = Provider.of<FirebaseUser>(context);
+    bool isLoggedIn = user != null;
+    if (isLoggedIn) {
+      return StreamProvider<WebblenUser>.value(
+        value: WebblenUserData().streamCurrentUser(user.uid),
+        child: HomePage(
+          currentUserUID: user.uid,
+        ),
+      );
+    } else {
+      return SplashPage();
     }
-  }
-
-  Widget _buildWaitingScreen() {
-    return Scaffold(
-      body: Container(
-        alignment: Alignment.center,
-        child: CircularProgressIndicator(),
-      ),
-    );
   }
 }

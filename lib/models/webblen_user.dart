@@ -102,15 +102,13 @@ class WebblenUser {
           notifyNewMessages: data['notifyNewMessages'],
           lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
           messageNotificationCount: data['messageNotificationCount'],
-          friendRequestNotificationCount:
-              data['friendRequestNotificationCount'],
+          friendRequestNotificationCount: data['friendRequestNotificationCount'],
           achievementNotificationCount: data['achievementNotificationCount'],
           eventNotificationCount: data['eventNotificationCount'],
           walletNotificationCount: data['walletNotificationCount'],
           isCommunityBuilder: data['isCommunityBuilder'],
           isNewCommunityBuilder: data['isNewCommunityBuilder'],
-          communityBuilderNotificationCount:
-              data['communityBuilderNotificationCount'],
+          communityBuilderNotificationCount: data['communityBuilderNotificationCount'],
           notificationCount: data['notificationCount'],
           isOnWaitList: data['isOnWaitList'],
           messageToken: data['messageToken'],
@@ -149,8 +147,7 @@ class WebblenUser {
         'eventNotificationCount': this.eventNotificationCount,
         'walletNotificationCount': this.walletNotificationCount,
         'isCommunityBuilder': this.isCommunityBuilder,
-        'communityBuilderNotificationCount':
-            this.communityBuilderNotificationCount,
+        'communityBuilderNotificationCount': this.communityBuilderNotificationCount,
         'isNewCommunityBuilder': this.isNewCommunityBuilder,
         'notificationCount': this.notificationCount,
         'isOnWaitList': this.isOnWaitList,

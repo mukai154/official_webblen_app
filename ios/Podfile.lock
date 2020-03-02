@@ -186,8 +186,6 @@ PODS:
   - connectivity (0.0.1):
     - Flutter
     - Reachability
-  - contact_picker (0.0.1):
-    - Flutter
   - FBSDKCoreKit (5.15.1):
     - FBSDKCoreKit/Basics (= 5.15.1)
     - FBSDKCoreKit/Core (= 5.15.1)
@@ -310,28 +308,19 @@ PODS:
     - FirebaseCore (~> 6.0)
     - GTMSessionFetcher/Core (~> 1.1)
   - Flutter (1.0.0)
-  - flutter_appauth (0.0.1):
-    - AppAuth (= 1.2.0)
-    - Flutter
   - flutter_facebook_login (0.0.1):
     - FBSDKCoreKit (~> 5.5)
     - FBSDKLoginKit (~> 5.5)
     - Flutter
-  - flutter_image_compress (0.0.1):
-    - Flutter
-    - Mantle
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_sms (1.1.0):
     - Flutter
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
   - geocoder (0.0.1):
     - Flutter
   - geoflutterfire (0.0.1):
     - Flutter
-  - Google-Mobile-Ads-SDK (7.55.0):
+  - Google-Mobile-Ads-SDK (7.56.0):
     - GoogleAppMeasurement (~> 6.0)
   - google_sign_in (0.0.1):
     - Flutter
@@ -392,43 +381,27 @@ PODS:
   - GTMSessionFetcher/Core (1.3.1)
   - GTMSessionFetcher/Full (1.3.1):
     - GTMSessionFetcher/Core (= 1.3.1)
-  - image_cropper (0.0.1):
-    - Flutter
-    - TOCropViewController (~> 2.5.1)
-  - image_picker (0.0.1):
-    - Flutter
   - leveldb-library (1.22)
   - location (0.0.1):
     - Flutter
   - location_permissions (2.0.3):
     - Flutter
-  - Mantle (2.1.1):
-    - Mantle/extobjc (= 2.1.1)
-  - Mantle/extobjc (2.1.1)
-  - MTBBarcodeScanner (5.0.11)
   - nanopb (0.3.9011):
     - nanopb/decode (= 0.3.9011)
     - nanopb/encode (= 0.3.9011)
   - nanopb/decode (0.3.9011)
   - nanopb/encode (0.3.9011)
-  - path_provider (0.0.1):
-    - Flutter
   - Protobuf (3.11.4)
-  - qr_code_scanner (0.0.2):
-    - Flutter
-    - MTBBarcodeScanner
   - Reachability (3.2)
   - share (0.5.2):
     - Flutter
-  - sqflite (0.0.1):
-    - Flutter
-    - FMDB (~> 2.7.2)
-  - TOCropViewController (2.5.2)
   - uni_links (0.0.1):
     - Flutter
   - url_launcher (0.0.1):
     - Flutter
-  - webview_flutter (0.0.1):
+  - url_launcher_macos (0.0.1):
+    - Flutter
+  - url_launcher_web (0.0.1):
     - Flutter
 
 DEPENDENCIES:
@@ -436,32 +409,25 @@ DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
   - cloud_functions (from `.symlinks/plugins/cloud_functions/ios`)
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
-  - contact_picker (from `.symlinks/plugins/contact_picker/ios`)
   - firebase_auth (from `.symlinks/plugins/firebase_auth/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_dynamic_links (from `.symlinks/plugins/firebase_dynamic_links/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - firebase_storage (from `.symlinks/plugins/firebase_storage/ios`)
   - Flutter (from `Flutter`)
-  - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_facebook_login (from `.symlinks/plugins/flutter_facebook_login/ios`)
-  - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_sms (from `.symlinks/plugins/flutter_sms/ios`)
   - geocoder (from `.symlinks/plugins/geocoder/ios`)
   - geoflutterfire (from `.symlinks/plugins/geoflutterfire/ios`)
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
-  - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
-  - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - location (from `.symlinks/plugins/location/ios`)
   - location_permissions (from `.symlinks/plugins/location_permissions/ios`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - share (from `.symlinks/plugins/share/ios`)
-  - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
-  - webview_flutter (from `.symlinks/plugins/webview_flutter/ios`)
+  - url_launcher_macos (from `.symlinks/plugins/url_launcher_macos/ios`)
+  - url_launcher_web (from `.symlinks/plugins/url_launcher_web/ios`)
 
 SPEC REPOS:
   trunk:
@@ -484,7 +450,6 @@ SPEC REPOS:
     - FirebaseInstanceID
     - FirebaseMessaging
     - FirebaseStorage
-    - FMDB
     - Google-Mobile-Ads-SDK
     - GoogleAppMeasurement
     - GoogleDataTransport
@@ -496,12 +461,9 @@ SPEC REPOS:
     - GTMAppAuth
     - GTMSessionFetcher
     - leveldb-library
-    - Mantle
-    - MTBBarcodeScanner
     - nanopb
     - Protobuf
     - Reachability
-    - TOCropViewController
 
 EXTERNAL SOURCES:
   admob_flutter:
@@ -512,8 +474,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/cloud_functions/ios"
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
-  contact_picker:
-    :path: ".symlinks/plugins/contact_picker/ios"
   firebase_auth:
     :path: ".symlinks/plugins/firebase_auth/ios"
   firebase_core:
@@ -526,12 +486,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/firebase_storage/ios"
   Flutter:
     :path: Flutter
-  flutter_appauth:
-    :path: ".symlinks/plugins/flutter_appauth/ios"
   flutter_facebook_login:
     :path: ".symlinks/plugins/flutter_facebook_login/ios"
-  flutter_image_compress:
-    :path: ".symlinks/plugins/flutter_image_compress/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_sms:
@@ -542,28 +498,20 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geoflutterfire/ios"
   google_sign_in:
     :path: ".symlinks/plugins/google_sign_in/ios"
-  image_cropper:
-    :path: ".symlinks/plugins/image_cropper/ios"
-  image_picker:
-    :path: ".symlinks/plugins/image_picker/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
   location_permissions:
     :path: ".symlinks/plugins/location_permissions/ios"
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
-  qr_code_scanner:
-    :path: ".symlinks/plugins/qr_code_scanner/ios"
   share:
     :path: ".symlinks/plugins/share/ios"
-  sqflite:
-    :path: ".symlinks/plugins/sqflite/ios"
   uni_links:
     :path: ".symlinks/plugins/uni_links/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
-  webview_flutter:
-    :path: ".symlinks/plugins/webview_flutter/ios"
+  url_launcher_macos:
+    :path: ".symlinks/plugins/url_launcher_macos/ios"
+  url_launcher_web:
+    :path: ".symlinks/plugins/url_launcher_web/ios"
 
 SPEC CHECKSUMS:
   abseil: 18063d773f5366ff8736a050fe035a28f635fd27
@@ -573,7 +521,6 @@ SPEC CHECKSUMS:
   cloud_firestore: 187530401afa261d255791ea75580591e345fa7b
   cloud_functions: 632a5f80a5688f79ec0c7417c4943f20857726d0
   connectivity: 6e94255659cc86dcbef1d452ad3e0491bb1b3e75
-  contact_picker: 57db5d8b410b52a0457d88f7b15de7d3307e8f16
   FBSDKCoreKit: 1d5acf7c9d7a2f92bb1a242dc60cae5b7adb91df
   FBSDKLoginKit: f1ea8026a58b52d30c9f2e6a58ca7d813619fb83
   Firebase: 0219bb4782eb1406f1b9b0628a2e625484ce910d
@@ -596,15 +543,12 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 089b7a4991425783384acc8bcefcd78c0af913bd
   FirebaseStorage: 93fe2f8190a01bfb2b2c4932df7d679744c4ef1d
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  flutter_appauth: df12d7d65012a380f1ab11311866cfcbfd55370f
   flutter_facebook_login: cfb5659f686b1c575ef205c6b6fd20db9679d3c4
-  flutter_image_compress: f69d0e0e078ce52b4810695593bc861ee319ae7d
   flutter_local_notifications: 9e4738ce2471c5af910d961a6b7eadcf57c50186
   flutter_sms: 91ce41530f55c85d6524d82307a5d555844c086a
-  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   geocoder: 3cfab70531a0b367e917bafe82df4c30f6d4c45a
   geoflutterfire: 2a6493e01fb6eef1a6c9046b1baf9a943d0c5ffe
-  Google-Mobile-Ads-SDK: 09d1c182f144b456fce626f9234ab4d35397ea10
+  Google-Mobile-Ads-SDK: 65e335fadc97c5a91a9d4546214bfd3a2fb11047
   google_sign_in: decaf71f56e22fb1dc179de062177ae6df415716
   GoogleAppMeasurement: db118eb61a97dd8c4f7014e368d3c335cbbcf80a
   GoogleDataTransport: 47fe3b8e1673e5187dfd615656a3c5034f150d69
@@ -615,25 +559,18 @@ SPEC CHECKSUMS:
   gRPC-Core: c9aef9a261a1247e881b18059b84d597293c9947
   GTMAppAuth: 4deac854479704f348309e7b66189e604cf5e01e
   GTMSessionFetcher: cea130bbfe5a7edc8d06d3f0d17288c32ffe9925
-  image_cropper: 966bf742cd9cee8d78010ec5c67dd9e7826e6b19
-  image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   location_permissions: 195ff2a1182fa9029ef3f2653156961ee5a1e40b
-  Mantle: 35238ae6f2e2b2d474fa7b67fee82a59fea71915
-  MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   nanopb: 18003b5e52dab79db540fe93fe9579f399bd1ccd
-  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
   Protobuf: 176220c526ad8bd09ab1fb40a978eac3fef665f7
-  qr_code_scanner: 16107718bdad7d708cdf6a5eacdca24b56cdf471
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   share: bae0a282aab4483288913fc4dc0b935d4b491f2e
-  sqflite: ff1d9da63c06588cc8d1faf7256d741f16989d5a
-  TOCropViewController: e9da34f484aedd4e5d5a8ab230ba217cfe16c729
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher: a1c0cc845906122c4784c542523d8cacbded5626
-  webview_flutter: db3aba222b23e4dc432e0c5882834123dc50ff9f
+  url_launcher_macos: fd7894421cd39320dce5f292fc99ea9270b2a313
+  url_launcher_web: e5527357f037c87560776e36436bf2b0288b965c
 
 PODFILE CHECKSUM: ea1b5c706143f5a03cd76e90145935ec6e35aca3
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.0
