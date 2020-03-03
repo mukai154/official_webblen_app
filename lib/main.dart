@@ -26,6 +26,9 @@ class WebblenApp extends StatelessWidget {
           brightness: Brightness.light,
           primaryColor: FlatColors.webblenRed,
           accentColor: FlatColors.darkGray,
+          textTheme: Theme.of(context).textTheme.apply(
+                fontFamily: "Helvetica Neue",
+              ),
         ),
         home: RootPage(),
         routes: <String, WidgetBuilder>{

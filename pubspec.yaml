@@ -44,7 +44,7 @@ dependencies:
   google_maps_webservice: ^0.0.15
 
   #Image Dependencies
-#  cached_network_image: ^2.0.0-rc
+  cached_network_image: ^2.0.0
 #  image_cropper: ^1.1.0
 #  image_picker: ^0.6.1+11
 #  flutter_image_compress: ^0.6.3
@@ -73,6 +73,7 @@ dependencies:
 
   #Other Dependencies
   algolia: ^0.1.7
+  shimmer: ^1.1.0
   font_awesome_flutter: 8.5.0
   flutter_tags: ^0.4.3
   liquid_pull_to_refresh: ^1.1.1

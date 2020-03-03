@@ -25,14 +25,15 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  GlobalKey homeScaffoldKey = GlobalKey<ScaffoldState>();
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+  var homeScaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoading = true;
   bool isConnectedToNetwork = false;
   bool updateRequired = false;
   bool hasLocationPermission = false;
   bool checkInAvailable = false;
   LocationData locationData;
+  String cityName;
   int pageIndex = 0;
 
   final PageStorageBucket pageStorageBucket = PageStorageBucket();
@@ -55,6 +56,7 @@ class _HomePageState extends State<HomePage> {
         if (hasLocationPermission) {
           //Get Location Data
           locationData = await DeviceLocationService().getCurrentLocation(context);
+          cityName = await DeviceLocationService().getCityFromLatLon(locationData.latitude, locationData.longitude);
         }
       }
     }
@@ -75,7 +77,14 @@ class _HomePageState extends State<HomePage> {
 
     //Dashboard Tabs
     final pageTabs = [
-      MainTab(),
+      MainTab(
+        key: mainPageKey,
+        cityName: cityName != null ? cityName : "",
+        uid: currentUser != null ? currentUser.uid : null,
+        userImageURL: currentUser != null ? currentUser.profile_pic : null,
+        didPressUserImage: () => homeScaffoldKey.currentState.openDrawer(),
+        didPressNotifBell: null,
+      ),
       NewsTab(),
       WalletTab(),
       AccountTab(),
@@ -84,7 +93,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       key: homeScaffoldKey,
       drawer: UserDrawerMenu(context: context, currentUser: currentUser, hasEarningsAccount: false).buildUserDrawerMenu(),
-      body: Container(),
+      body: PageStorage(
+        bucket: pageStorageBucket,
+        child: !isConnectedToNetwork ? Container() : !hasLocationPermission ? Container() : updateRequired ? Container() : pageTabs[pageIndex],
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: checkInAvailable
           ? ShakeAnimation(

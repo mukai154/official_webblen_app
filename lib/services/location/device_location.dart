@@ -69,6 +69,15 @@ class DeviceLocationService {
     return foundAddress;
   }
 
+  Future<String> getCityFromLatLon(double lat, double lon) async {
+    String city;
+    Coordinates coordinates = Coordinates(lat, lon);
+    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var address = addresses.first;
+    city = address.locality;
+    return city;
+  }
+
   Future<String> getZipFromLatLon(double lat, double lon) async {
     String zip;
     Coordinates coordinates = Coordinates(lat, lon);
