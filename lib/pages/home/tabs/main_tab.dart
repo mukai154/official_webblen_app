@@ -4,8 +4,7 @@ import 'package:admob_flutter/admob_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/utils/values/strings.dart';
 import 'package:webblen/widgets/home/app_bar/main_app_bar.dart';
-//import 'package:webblen/widgets/widgets_common/common_progress.dart';
-//import 'package:webblen/widgets/widgets_home_tiles/all_tiles.dart';
+import 'package:webblen/widgets/home/tiles/all_tiles.dart';
 
 class MainTab extends StatefulWidget {
   final String uid;
@@ -128,121 +127,71 @@ class _MainTabState extends State<MainTab> {
                 didPressNotifBell: widget.didPressNotifBell,
                 didPressUserImage: widget.didPressUserImage,
               )),
-//          GestureDetector(
-//            onTap: () => PageTransitionService(
-//              context: context,
-//              currentUser: widget.currentUser,
-//              areaName: widget.areaName,
-//            ).transitionToSearchPage(),
-//            child: SearchTile(),
-//          ),
-//          isLoading
-//              ? Column(
-//                  children: <Widget>[
-//                    Padding(
-//                      padding: EdgeInsets.only(
-//                        top: 8.0,
-//                      ),
-//                      child: CustomLinearProgress(
-//                        progressBarColor: FlatColors.webblenRed,
-//                      ),
-//                    ),
-//                  ],
-//                )
-//              : Container(
-//                  height: MediaQuery.of(context).size.height > 667.0
-//                      ? MediaQuery.of(context).size.height * 0.715
-//                      : MediaQuery.of(context).size.height > 568.0 ? MediaQuery.of(context).size.height * 0.67 : MediaQuery.of(context).size.height * 0.60,
-//                  child: Column(
-//                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-//                    children: <Widget>[
-//                      Padding(
-//                        padding: EdgeInsets.symmetric(
-//                          vertical: 2.0,
-//                          horizontal: 16.0,
-//                        ),
-//                        child: Row(
-//                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                          children: <Widget>[
-//                            EventsTile(
-//                              onTap: () => didPressEventsTile(),
-//                            ),
-//                          ],
-//                        ),
-//                      ),
-//                      Padding(
-//                        padding: EdgeInsets.symmetric(
-//                          vertical: 2.0,
-//                          horizontal: 16.0,
-//                        ),
-//                        child: Row(
-//                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//                          children: <Widget>[
-//                            CommunitiesTile(
-//                              onTap: () => didPressCommunitiesTile(),
-//                            ),
-//                          ],
-//                        ),
-//                      ),
-//                      Padding(
-//                        padding: EdgeInsets.symmetric(
-//                          horizontal: 16.0,
-//                        ),
-//                        child: Row(
-//                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                          children: <Widget>[
-//                            CalendarTile(
-//                              onTap: () => didPressCalendarTile(),
-//                            ),
-//                            CommunityRequestTile(
-//                              onTap: () => didPressCommunityRequestTile(),
-//                            ),
-//                          ],
-//                        ),
-//                      ),
+          GestureDetector(
+            onTap: null,
+            child: SearchTile(),
+          ),
           Container(
-            child: AdmobBanner(
-              adUnitId: Strings().getAdMobBannerID(),
-              adSize: bannerSize,
-              listener: (AdmobAdEvent event, Map<String, dynamic> args) {},
+            height: MediaQuery.of(context).size.height > 667.0
+                ? MediaQuery.of(context).size.height * 0.715
+                : MediaQuery.of(context).size.height > 568.0 ? MediaQuery.of(context).size.height * 0.67 : MediaQuery.of(context).size.height * 0.60,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 2.0,
+                    horizontal: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      EventsTile(
+                        onTap: () => didPressEventsTile(),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 2.0,
+                    horizontal: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: <Widget>[
+                      CommunitiesTile(
+                        onTap: () => didPressCommunitiesTile(),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.0,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      CalendarTile(
+                        onTap: () => didPressCalendarTile(),
+                      ),
+                      HaveAnIdeaTile(
+                        onTap: () => didPressCalendarTile(),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  child: AdmobBanner(
+                    adUnitId: Strings().getAdMobBannerID(),
+                    adSize: bannerSize,
+                    listener: (AdmobAdEvent event, Map<String, dynamic> args) {},
+                  ),
+                ),
+              ],
             ),
           ),
-//                      Row(
-//                        mainAxisAlignment: MainAxisAlignment.start,
-//                        children: <Widget>[
-//                          Container(
-//                            //width: MediaQuery.of(context).size.width/1.5,
-//                            child: Padding(
-//                              padding: EdgeInsets.only(
-//                                left: 16.0,
-//                                top: 16.0,
-//                                bottom: 8.0,
-//                              ),
-//                              child: MediaQuery(
-//                                data: MediaQuery.of(context).copyWith(
-//                                  textScaleFactor: 1.0,
-//                                ),
-//                                child: Fonts().textW700(
-//                                  'Events You Might Like',
-//                                  18.0,
-//                                  Colors.black,
-//                                  TextAlign.left,
-//                                ),
-//                              ),
-//                            ),
-//                          ),
-//                        ],
-//                      ),
-//                      webblenEvents.isEmpty
-//                          ? recommendedEvents.isEmpty
-//                              ? Container()
-//                              : EventCarousel(
-//                                  events: recommendedEvents,
-//                                  currentUser: widget.currentUser,
-//                                )
-//                          : WebblenEventsTile(
-//                              onTap: () => didPressWebblenEventsTile(),
-//                            ),
         ],
       ),
     );

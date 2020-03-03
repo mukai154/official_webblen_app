@@ -77,11 +77,11 @@ class Strings {
 
   String getAdMobBannerID() {
     if (Platform.isIOS) {
-      return 'ca-app-pub-2136415475966451/7219950981';
-      //return 'ca-app-pub-3940256099942544/2934735716';
+//      return 'ca-app-pub-2136415475966451/7219950981';
+      return 'ca-app-pub-3940256099942544/2934735716';
     } else if (Platform.isAndroid) {
-      return 'ca-app-pub-2136415475966451/5844673029';
-      //return 'ca-app-pub-3940256099942544/6300978111';
+//      return 'ca-app-pub-2136415475966451/5844673029';
+      return 'ca-app-pub-3940256099942544/6300978111';
     }
     return null;
   }
