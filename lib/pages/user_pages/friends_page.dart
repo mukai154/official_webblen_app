@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
@@ -24,8 +23,7 @@ class FriendsPage extends StatefulWidget {
   _FriendsPageState createState() => _FriendsPageState();
 }
 
-class _FriendsPageState extends State<FriendsPage>
-    with SingleTickerProviderStateMixin {
+class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStateMixin {
   bool showLoadingDialog;
   StreamSubscription userStream;
   WebblenUser currentUser;
@@ -64,8 +62,7 @@ class _FriendsPageState extends State<FriendsPage>
   getFriends(List friendIDs) async {
     UserDataService().getUsersFromList(currentUser.friends).then((result) {
       friendList = result;
-      friendList
-          .sort((userA, userB) => userA.username.compareTo(userB.username));
+      friendList.sort((userA, userB) => userA.username.compareTo(userB.username));
       loadingFriends = false;
       if (this.mounted) {
         setState(() {});
@@ -94,7 +91,7 @@ class _FriendsPageState extends State<FriendsPage>
                         context: context,
                         currentUser: currentUser,
                         webblenUser: friendList[index],
-                      ).transitionToUserDetailsPage(),
+                      ).transitionToUserPage(),
                       sendUserFriendRequest: null,
                       isFriendsWithUser: true,
                     ),

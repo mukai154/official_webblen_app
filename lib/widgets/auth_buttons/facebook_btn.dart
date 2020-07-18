@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/styles/fonts.dart';
 
 class FacebookBtn extends StatelessWidget {
-
   final String buttonText = "Login with Facebook";
   final colorFacebook = Color.fromRGBO(59, 89, 152, 1.0);
   final VoidCallback action;
@@ -16,10 +15,12 @@ class FacebookBtn extends StatelessWidget {
       child: Material(
         elevation: 2.0,
         color: colorFacebook,
-        borderRadius: BorderRadius.circular(25.0),
+        borderRadius: BorderRadius.circular(14.0),
         child: InkWell(
-          borderRadius: BorderRadius.circular(25.0),
-          onTap: () { action(); },
+          borderRadius: BorderRadius.circular(14.0),
+          onTap: () {
+            action();
+          },
           child: Container(
             height: 45.0,
             width: MediaQuery.of(context).size.width * 0.85,
@@ -29,9 +30,7 @@ class FacebookBtn extends StatelessWidget {
                 Icon(FontAwesomeIcons.facebook, color: Colors.white, size: 18.0),
                 SizedBox(width: 16.0),
                 MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                  child: Fonts().textW400(buttonText, 14.0, Colors.white, TextAlign.left)
-                ),
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), child: Fonts().textW700(buttonText, 15.0, Colors.white, TextAlign.left)),
               ],
             ),
           ),

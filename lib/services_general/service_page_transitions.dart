@@ -4,17 +4,15 @@ import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/community_news.dart';
 import 'package:webblen/models/community_request.dart';
-import 'package:webblen/models/event.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/pages/auth_pages/choose_sim_page.dart';
 import 'package:webblen/pages/calendar_pages/my_calendar_page.dart';
 import 'package:webblen/pages/calendar_pages/reminder_page.dart';
 import 'package:webblen/pages/chat_pages/chat_invite_share_page.dart';
 import 'package:webblen/pages/chat_pages/chat_page.dart';
 import 'package:webblen/pages/chat_pages/chats_index_page.dart';
-import 'package:webblen/pages/community_pages/choose_post_type_page.dart';
 import 'package:webblen/pages/community_pages/communities_in_area_page.dart';
 import 'package:webblen/pages/community_pages/communities_page.dart';
 import 'package:webblen/pages/community_pages/community_create_post_page.dart';
@@ -30,37 +28,30 @@ import 'package:webblen/pages/earnings_pages/bank_account_details_page.dart';
 import 'package:webblen/pages/earnings_pages/debit_card_details_page.dart';
 import 'package:webblen/pages/earnings_pages/earnings_info_page.dart';
 import 'package:webblen/pages/earnings_pages/earnings_page.dart';
+import 'package:webblen/pages/earnings_pages/payments_history_page.dart';
 import 'package:webblen/pages/earnings_pages/payout_methods_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_instant_deposit_page.dart';
-import 'package:webblen/pages/event_pages/create_edit_event_page.dart';
-import 'package:webblen/pages/event_pages/create_flash_event_page.dart';
-import 'package:webblen/pages/event_pages/create_recurring_event_page.dart';
-import 'package:webblen/pages/event_pages/create_reward_page.dart';
+import 'package:webblen/pages/event_pages/create_event_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
 import 'package:webblen/pages/event_pages/events_page.dart';
-import 'package:webblen/pages/event_pages/webblen_events_page.dart';
-import 'package:webblen/pages/home_pages/settings_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
-import 'package:webblen/pages/ticket_pages/scan_for_events_page.dart';
+import 'package:webblen/pages/ticket_pages/event_tickets_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
-import 'package:webblen/pages/ticket_pages/user_tickets_page.dart';
 import 'package:webblen/pages/user_pages/add_com_image_page.dart';
-import 'package:webblen/pages/user_pages/create_ad_page.dart';
 import 'package:webblen/pages/user_pages/discover_page.dart';
 import 'package:webblen/pages/user_pages/friends_page.dart';
-import 'package:webblen/pages/user_pages/join_waitlist_page.dart';
 import 'package:webblen/pages/user_pages/notifications_page.dart';
 import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
+import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/pages/user_pages/shop_page.dart';
 import 'package:webblen/pages/user_pages/transaction_history_page.dart';
-import 'package:webblen/pages/user_pages/user_details_page.dart';
-import 'package:webblen/pages/user_pages/user_ranks_page.dart';
+import 'package:webblen/pages/user_pages/user_page.dart';
 import 'package:webblen/pages/user_pages/users_search_page.dart';
 import 'package:webblen/utils/ticket_scanner.dart';
 import 'package:webblen/utils/webblen_scanner.dart';
@@ -84,11 +75,9 @@ class PageTransitionService {
   final String profilePicUrl;
   final CommunityNewsPost newsPost;
   final WebblenReward reward;
-  final Event event;
+  final WebblenEvent event;
   final CalendarEvent calendarEvent;
-  final List<Event> events;
-  final RecurringEvent recurringEvent;
-  final String eventKey;
+  final String eventID;
   final bool eventIsLive;
   final Community community;
   final List<Community> communities;
@@ -96,9 +85,6 @@ class PageTransitionService {
   final bool viewingMembersOrAttendees;
   final double lat;
   final double lon;
-  final String simLocation;
-  final double simLat;
-  final double simLon;
   final List<Map<String, dynamic>> ticketsToPurchase;
   final List eventFees;
 
@@ -119,8 +105,7 @@ class PageTransitionService {
     this.newsPost,
     this.reward,
     this.event,
-    this.recurringEvent,
-    this.eventKey,
+    this.eventID,
     this.userIDs,
     this.eventIsLive,
     this.community,
@@ -129,10 +114,6 @@ class PageTransitionService {
     this.viewingMembersOrAttendees,
     this.lat,
     this.lon,
-    this.simLocation,
-    this.simLat,
-    this.simLon,
-    this.events,
     this.comRequest,
     this.communities,
     this.calendarEvent,
@@ -151,21 +132,10 @@ class PageTransitionService {
         (Route<dynamic> route) => false,
       );
 
-  void transitionToChooseSim() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChooseSimPage(),
-        ),
-      );
-
   void transitionToSim() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(
-            simLocation: simLocation,
-            simLat: simLat,
-            simLon: simLon,
-          ),
+          builder: (context) => HomePage(),
         ),
       );
 
@@ -197,6 +167,17 @@ class PageTransitionService {
       );
 
   //EVENTS
+  void transitionToPublishedEventPage() => Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => EventsPage(
+            currentUser: currentUser,
+            currentLat: lat,
+            currentLon: lon,
+          ),
+        ),
+      );
+
   void transitionToEventsPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -208,43 +189,11 @@ class PageTransitionService {
         ),
       );
 
-  void transitionToWebblenEventsPage() => Navigator.push(
+  void transitionToCreateEventPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => WebblenEventsFeedPage(
-            currentUser: currentUser,
-            events: events,
-          ),
-        ),
-      );
-
-  void transitionToCreateEditEventPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateEditEventPage(
-            currentUser: currentUser,
-            community: community,
-            isRecurring: isRecurring,
-            eventToEdit: event,
-          ),
-        ),
-      );
-
-  void transitionToNewRecurringEventPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateRecurringEventPage(
-            currentUser: currentUser,
-            community: community,
-          ),
-        ),
-      );
-
-  void transitionToNewFlashEventPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateFlashEventPage(
-            currentUser: currentUser,
+          builder: (context) => CreateEventPage(
+            eventID: eventID,
           ),
         ),
       );
@@ -253,18 +202,7 @@ class PageTransitionService {
         context,
         MaterialPageRoute(
           builder: (context) => EventDetailsPage(
-            event: event,
-            currentUser: currentUser,
-            eventIsLive: eventIsLive,
-          ),
-        ),
-      );
-
-  void transitionToReccurringEventPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RecurringEventDetailsPage(
-            event: recurringEvent,
+            eventID: eventID,
             currentUser: currentUser,
           ),
         ),
@@ -284,7 +222,7 @@ class PageTransitionService {
         MaterialPageRoute(
           builder: (context) => EventAttendeesPage(
             currentUser: currentUser,
-            eventKey: eventKey,
+            eventID: eventID,
           ),
         ),
       );
@@ -311,10 +249,11 @@ class PageTransitionService {
         ),
       );
 
-  void transitionToScanForEventsPage() => Navigator.push(
+  void transitionToEventTicketsPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ScanForEventsPage(
+          builder: (context) => WalletEventTicketsPage(
+            eventID: eventID,
             currentUser: currentUser,
           ),
         ),
@@ -334,15 +273,6 @@ class PageTransitionService {
         context,
         MaterialPageRoute(
           builder: (context) => TicketInfoPage(),
-        ),
-      );
-
-  void transitionToUserTicketsPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserTicketsPage(
-            currentUser: currentUser,
-          ),
         ),
       );
 
@@ -426,6 +356,13 @@ class PageTransitionService {
         ),
       );
 
+  void transitionToPaymentHistoryPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentHistoryPage(),
+        ),
+      );
+
   void transitionToBankAccoutDetailsPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -455,17 +392,6 @@ class PageTransitionService {
       );
 
   //USERS
-  void transitionToUserRanksPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => UserRanksPage(
-            simLocation: simLocation,
-            simLat: simLat,
-            simLon: simLon,
-          ),
-        ),
-      );
-
   void transitionToFriendsPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -475,38 +401,21 @@ class PageTransitionService {
         ),
       );
 
-  void transitionToCurrentUserDetailsPage() => Navigator.push(
+  void transitionToCurrentUserPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CurrentUserDetailsPage(
+          builder: (context) => CurrentUserPage(
             currentUser: currentUser,
           ),
         ),
       );
 
-  void transitionToUserDetailsPage() => Navigator.push(
+  void transitionToUserPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => UserDetailsPage(
+          builder: (context) => UserPage(
             currentUser: currentUser,
             webblenUser: webblenUser,
-          ),
-        ),
-      );
-
-  //REWARDS & ADS
-  void transitionToCreateRewardPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateRewardPage(),
-        ),
-      );
-
-  void transitionToCreateAdPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateAdPage(
-            currentUser: currentUser,
           ),
         ),
       );
@@ -548,9 +457,6 @@ class PageTransitionService {
           builder: (context) => DiscoverPage(
             uid: uid,
             areaName: areaName,
-            simLocation: simLocation,
-            simLat: simLat,
-            simLon: simLon,
           ),
         ),
       );
@@ -571,16 +477,6 @@ class PageTransitionService {
         MaterialPageRoute(
           builder: (context) => CreateCommunityPage(
             areaName: areaName,
-          ),
-        ),
-      );
-
-  void transitionToChoosePostTypePage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChoosePostTypePage(
-            currentUser: currentUser,
-            community: community,
           ),
         ),
       );
@@ -675,15 +571,6 @@ class PageTransitionService {
         ),
       );
 
-  void transitionToWaitListPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => JoinWaitlistPage(
-            currentUser: currentUser,
-          ),
-        ),
-      );
-
   //VOTING & REQUESTS
   void transitionToCommunityRequestPage() => Navigator.push(
         context,
@@ -691,9 +578,6 @@ class PageTransitionService {
           builder: (context) => CommunityRequestsPage(
             currentUser: currentUser,
             areaName: areaName,
-            simLat: simLat,
-            simLon: simLon,
-            simLocation: simLocation,
           ),
         ),
       );

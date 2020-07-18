@@ -13,7 +13,6 @@ class FlatColors {
   static final darkMountainGreen = Color.fromRGBO(16, 172, 132, 1.0);
   static final lightCarribeanGreen = Color.fromRGBO(29, 209, 161, 1.0);
   static final redOrange = Color.fromRGBO(255, 63, 52, 1.0);
-  static final webblenRed = Color.fromRGBO(255, 87, 87, 1.0);
   static final webblenRedPink = Color.fromRGBO(255, 65, 108, 1.0);
   static final webblenOrange = Color.fromRGBO(255, 75, 43, 1.0);
   static final webblenOrangePink = Color.fromRGBO(255, 88, 88, 1.0);
@@ -41,4 +40,10 @@ class FlatColors {
   static final blueInneundo = Color.fromRGBO(165, 177, 194, 1.0);
   static final textFieldGray = Color.fromARGB(255, 241, 241, 241);
   static final transparent = Color(0x00000000);
+
+  static final webblenRed = Color.fromRGBO(253, 36, 61, 1.0);
+  static final webblenMatteBlue = Color.fromRGBO(63, 61, 86, 1.0);
+  static final webblenLightGray = Color.fromRGBO(63, 61, 86, 1.0);
+  static final webblenMidGray = Color.fromRGBO(182, 182, 189, 1.0);
+  static final webblenDarkGray = Color.fromRGBO(25, 25, 25, 1.0);
 }

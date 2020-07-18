@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:webblen/firebase_data/calendar_event_data.dart';
 import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 
 import 'create_edit_reminder_page.dart';
 
 class ReminderPage extends StatefulWidget {
   final CalendarEvent event;
   final WebblenUser currentUser;
-  
+
   ReminderPage({
     this.event,
     this.currentUser,
@@ -91,10 +90,7 @@ class _ReminderPageState extends State<ReminderPage> {
     )
         .then((error) {
       Navigator.of(context).pop();
-      ShowAlertDialogService().showActionSuccessDialog(
-          context,
-          "Reminder Deleted!",
-          "This reminder is no longer in your calendar.", () {
+      ShowAlertDialogService().showActionSuccessDialog(context, "Reminder Deleted!", "This reminder is no longer in your calendar.", () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
       });

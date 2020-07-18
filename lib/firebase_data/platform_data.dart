@@ -4,44 +4,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 
 class PlatformDataService {
+  CollectionReference appReleaseRef = Firestore().collection("app_release_info");
+
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "9.0.0";
-    DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
+    String currentVersion = "9.0.1";
+    DocumentSnapshot documentSnapshot = await appReleaseRef.document("general").get();
     String releasedVersion = documentSnapshot.data["versionNumber"];
     bool versionIsRequired = documentSnapshot.data["versionIsRequired"];
     if (currentVersion != releasedVersion && versionIsRequired) {
       updateAvailable = true;
     }
     return updateAvailable;
-  }
-
-  Future<String> getAreaGeoshash(double lat, double lon) async {
-    String areaGeohash = "";
-    Geoflutterfire geo = Geoflutterfire();
-    GeoFirePoint center = geo.point(
-      latitude: lat,
-      longitude: lon,
-    );
-    CollectionReference locRef = Firestore.instance.collection("available_locations");
-    List<DocumentSnapshot> nearLocations = await geo
-        .collection(
-          collectionRef: locRef,
-        )
-        .within(
-          center: center,
-          radius: 20,
-          field: 'location',
-        )
-        .first;
-    if (nearLocations.length != 0) areaGeohash = nearLocations.first.data['location']['geohash'];
-    return areaGeohash;
-  }
-
-  Future<List> getAvailableCities() async {
-    DocumentSnapshot documentSnapshot = await Firestore.instance.collection("app_release_info").document("general").get();
-    List cities = documentSnapshot.data["cities"];
-    return cities;
   }
 
   Future<String> getAreaName(double lat, double lon) async {
@@ -62,5 +36,26 @@ class PlatformDataService {
         .first;
     if (nearLocations.length != 0) areaName = nearLocations.first.documentID;
     return areaName;
+  }
+
+  Future<double> getEventTicketFee() async {
+    double eventTicketFee;
+    DocumentSnapshot snapshot = await appReleaseRef.document('general').get();
+    eventTicketFee = snapshot.data['ticketFee'];
+    return eventTicketFee;
+  }
+
+  Future<double> getTaxRate() async {
+    double taxRate;
+    DocumentSnapshot snapshot = await appReleaseRef.document('general').get();
+    taxRate = snapshot.data['taxRate'];
+    return taxRate;
+  }
+
+  Future<String> getStripePubKey() async {
+    String pubKey;
+    DocumentSnapshot snapshot = await appReleaseRef.document('stripe').get();
+    pubKey = snapshot.data['pubKey'];
+    return pubKey;
   }
 }

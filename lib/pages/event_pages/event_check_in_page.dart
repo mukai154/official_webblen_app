@@ -2,18 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-
-import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase/data/event_data.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/models/event.dart';
+import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
+import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_event/event_check_in_row.dart';
 import 'package:webblen/widgets/widgets_event/event_no_check_in_found.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
-import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class EventCheckInPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -30,7 +29,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
   bool isLoading = true;
   double currentLat;
   double currentLon;
-  List<Event> events = [];
+  List<WebblenEvent> events = [];
 
   Future<Null> getEventsForCheckIn() async {
     EventDataService()
@@ -45,8 +44,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
         setState(() {});
       } else {
         events = result;
-        events.sort((eventA, eventB) => eventA.startDateInMilliseconds
-            .compareTo(eventB.startDateInMilliseconds));
+        events.sort((eventA, eventB) => eventA.startDateTimeInMilliseconds.compareTo(eventB.startDateTimeInMilliseconds));
         isLoading = false;
         setState(() {});
       }
@@ -58,17 +56,16 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
     getEventsForCheckIn();
   }
 
-  void checkIntoEvent(Event event) async {
+  void checkIntoEvent(WebblenEvent event) async {
     ShowAlertDialogService().showLoadingDialog(context);
     EventDataService()
         .checkInAndUpdateEventPayout(
-      event.eventKey,
+      event.id,
       widget.currentUser.uid,
       widget.currentUser.ap,
     )
         .then((result) {
-      int eventIndex =
-          events.indexWhere((event) => event.eventKey == result.eventKey);
+      int eventIndex = events.indexWhere((event) => event.id == result.id);
       events[eventIndex] = result;
       Navigator.of(context).pop();
       setState(() {});
@@ -76,16 +73,15 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
     });
   }
 
-  void checkoutOfEvent(Event event) async {
+  void checkoutOfEvent(WebblenEvent event) async {
     ShowAlertDialogService().showLoadingDialog(context);
     EventDataService()
         .checkoutAndUpdateEventPayout(
-      event.eventKey,
+      event.id,
       widget.currentUser.uid,
     )
         .then((result) {
-      int eventIndex =
-          events.indexWhere((event) => event.eventKey == result.eventKey);
+      int eventIndex = events.indexWhere((event) => event.id == result.id);
       events[eventIndex] = result;
       Navigator.of(context).pop();
       setState(() {});
@@ -114,10 +110,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
       appBar: WebblenAppBar().actionAppBar(
         'Check In',
         IconButton(
-          onPressed: () => PageTransitionService(
-            context: context,
-            uid: widget.currentUser.uid,
-          ).transitionToNewFlashEventPage(),
+          onPressed: null,
           icon: Icon(
             FontAwesomeIcons.plusSquare,
             size: 24.0,
@@ -139,11 +132,8 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
                     ? ListView(
                         children: <Widget>[
                           EventNoCheckInFound(
-                              createFlashEventAction: () =>
-                                  PageTransitionService(
-                                    context: context,
-                                    uid: widget.currentUser.uid,
-                                  ).transitionToNewFlashEventPage())
+                            createEventAction: null,
+                          )
                         ],
                       )
                     : ListView.builder(
@@ -159,12 +149,11 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
                             viewEventAction: () => PageTransitionService(
                               context: context,
                               currentUser: widget.currentUser,
-                              event: events[index],
+                              event: null, //events[index],
                               eventIsLive: false,
                             ).transitionToEventPage(),
                             checkInAction: () => checkIntoEvent(events[index]),
-                            checkoutAction: () =>
-                                checkoutOfEvent(events[index]),
+                            checkoutAction: () => checkoutOfEvent(events[index]),
                           );
                         },
                       ),

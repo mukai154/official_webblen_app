@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -79,6 +78,7 @@ class _SetupPageState extends State<SetupPage> {
   }
 
   validateAndSubmit() async {
+    bool usernameExists = false;
     final form = usernameFormKey.currentState;
     ScaffoldState scaffold = homeScaffoldKey.currentState;
     form.save();
@@ -111,31 +111,23 @@ class _SetupPageState extends State<SetupPage> {
       );
     } else {
       username = username.toLowerCase().trim();
-      await UserDataService()
-          .checkIfUsernameExists(
-        username.replaceAll(
-          RegExp(r"\s+\b|\b\s"),
-          "",
-        ),
-      )
-          .then((exists) {
-        if (exists) {
-          Navigator.of(context).pop();
-          scaffold.showSnackBar(
-            SnackBar(
-              content: Text(
-                "This Username is Already Taken",
-              ),
-              backgroundColor: Colors.red,
-              duration: Duration(
-                seconds: 3,
-              ),
+      usernameExists = await UserDataService().checkIfUsernameExists(username);
+      if (usernameExists) {
+        Navigator.of(context).pop();
+        scaffold.showSnackBar(
+          SnackBar(
+            content: Text(
+              "This Username is Already Taken",
             ),
-          );
-        } else {
-          submitUsernameAndImage();
-        }
-      });
+            backgroundColor: Colors.red,
+            duration: Duration(
+              seconds: 3,
+            ),
+          ),
+        );
+      } else {
+        submitUsernameAndImage();
+      }
     }
   }
 
@@ -227,7 +219,7 @@ class _SetupPageState extends State<SetupPage> {
   @override
   void initState() {
     super.initState();
-    BaseAuth().currentUser().then((userID) {
+    BaseAuth().getCurrentUserID().then((userID) {
       setState(() {
         uid = userID;
       });

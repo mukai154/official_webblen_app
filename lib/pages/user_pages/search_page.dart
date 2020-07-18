@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/algolia/algolia_search.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase_data/community_data.dart';
-import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -72,17 +71,13 @@ class _SearchPageState extends State<SearchPage> {
     ShowAlertDialogService().showLoadingDialog(context);
     UserDataService().getUserByID(uid).then((user) {
       Navigator.of(context).pop();
-      PageTransitionService(
-              context: context,
-              currentUser: widget.currentUser,
-              webblenUser: user)
-          .transitionToUserDetailsPage();
+      PageTransitionService(context: context, currentUser: widget.currentUser, webblenUser: user).transitionToUserPage();
     });
   }
 
-  void transitionToEventDetails(String eventKey) {
+  void transitionToEventDetails(String eventID) {
     ShowAlertDialogService().showLoadingDialog(context);
-    EventDataService().getEventByKey(eventKey).then((event) {
+    EventDataService().getEvent(eventID).then((event) {
       Navigator.of(context).pop();
       if (event == null) {
         ShowAlertDialogService().showFailureDialog(
@@ -274,11 +269,8 @@ class _SearchPageState extends State<SearchPage> {
                   tapAction: allResults[index]['resultType'] == 'people'
                       ? () => transitionToUserDetails(allResults[index]['key'])
                       : allResults[index]['resultType'] == 'event'
-                          ? () =>
-                              transitionToEventDetails(allResults[index]['key'])
-                          : () => transitionToCommunityPage(
-                              allResults[index]['data'],
-                              allResults[index]['resultHeader']),
+                          ? () => transitionToEventDetails(allResults[index]['key'])
+                          : () => transitionToCommunityPage(allResults[index]['data'], allResults[index]['resultHeader']),
                   addFriendAction: null,
                 );
               }));

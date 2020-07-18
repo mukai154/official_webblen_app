@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
-
 import 'package:webblen/firebase_data/comment_data.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
@@ -13,7 +12,7 @@ import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class CommunityCreatePostPage extends StatefulWidget {
@@ -26,8 +25,7 @@ class CommunityCreatePostPage extends StatefulWidget {
   });
 
   @override
-  _CommunityCreatePostPageState createState() =>
-      _CommunityCreatePostPageState();
+  _CommunityCreatePostPageState createState() => _CommunityCreatePostPageState();
 }
 
 class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
@@ -78,8 +76,7 @@ class _CommunityCreatePostPageState extends State<CommunityCreatePostPage> {
           ),
         ),
       );
-    } else if (newsPost.newsURL.isNotEmpty &&
-        !OpenUrl().isValidUrl(newsPost.newsURL)) {
+    } else if (newsPost.newsURL.isNotEmpty && !OpenUrl().isValidUrl(newsPost.newsURL)) {
       scaffold.showSnackBar(
         SnackBar(
           content: MediaQuery(

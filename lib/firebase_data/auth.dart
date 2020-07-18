@@ -23,7 +23,7 @@ class BaseAuth {
     return user.uid;
   }
 
-  Future<String> currentUser() async {
+  Future<String> getCurrentUserID() async {
     FirebaseUser user = await firebaseAuth.currentUser();
     return user != null ? user.uid : null;
   }

@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import 'package:webblen/firebase_data/community_request_data.dart';
 import 'package:webblen/models/community_request.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class CreateCommunityRequestPage extends StatefulWidget {
   final WebblenUser currentUser;
   final String areaName;
-  
+
   CreateCommunityRequestPage({
     this.currentUser,
     this.areaName,
   });
 
   @override
-  _CreateCommunityRequestPageState createState() =>
-      _CreateCommunityRequestPageState();
+  _CreateCommunityRequestPageState createState() => _CreateCommunityRequestPageState();
 }
 
-class _CreateCommunityRequestPageState
-    extends State<CreateCommunityRequestPage> {
+class _CreateCommunityRequestPageState extends State<CreateCommunityRequestPage> {
   //Firebase
   CommunityRequest newRequest = CommunityRequest(
     status: 'pending',
@@ -80,8 +77,7 @@ class _CreateCommunityRequestPageState
       newRequest.uid = widget.currentUser.uid;
       newRequest.areaName = widget.areaName;
       newRequest.requestType = getRadioValue();
-      newRequest.datePostedInMilliseconds =
-          DateTime.now().millisecondsSinceEpoch;
+      newRequest.datePostedInMilliseconds = DateTime.now().millisecondsSinceEpoch;
       uploadRequest(newRequest);
     }
   }
@@ -107,9 +103,7 @@ class _CreateCommunityRequestPageState
         //RequestCommentDataService().startChat(request.requestID);
         Navigator.of(context).pop();
         HapticFeedback.mediumImpact();
-        ShowAlertDialogService().showActionSuccessDialog(
-            context, 'Request Pending', 'Your Request is now Pending Review',
-            () {
+        ShowAlertDialogService().showActionSuccessDialog(context, 'Request Pending', 'Your Request is now Pending Review', () {
           Navigator.of(context).pop();
           Navigator.of(context).pop();
         });
@@ -235,9 +229,7 @@ class _CreateCommunityRequestPageState
                   width: 125.0,
                   text: widget.areaName,
                   textColor: reqTypeRadioVal == 0 ? Colors.white : Colors.black,
-                  backgroundColor: reqTypeRadioVal == 0
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
+                  backgroundColor: reqTypeRadioVal == 0 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                   onPressed: () {
                     reqTypeRadioVal = 0;
                     setState(() {});
@@ -251,9 +243,7 @@ class _CreateCommunityRequestPageState
                   width: 125.0,
                   text: 'Webblen',
                   textColor: reqTypeRadioVal == 1 ? Colors.white : Colors.black,
-                  backgroundColor: reqTypeRadioVal == 1
-                      ? FlatColors.webblenRed
-                      : FlatColors.textFieldGray,
+                  backgroundColor: reqTypeRadioVal == 1 ? FlatColors.webblenRed : FlatColors.textFieldGray,
                   onPressed: () {
                     reqTypeRadioVal = 1;
                     setState(() {});

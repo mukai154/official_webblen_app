@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_progress.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_user/user_row.dart';
 
 class InviteMembersPage extends StatefulWidget {
@@ -61,8 +60,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         });
       });
       Navigator.of(context).pop();
-      ShowAlertDialogService().showActionSuccessDialog(
-          context, "Users Invited!", "Way to grow your community!", () {
+      ShowAlertDialogService().showActionSuccessDialog(context, "Users Invited!", "Way to grow your community!", () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
       });
@@ -75,9 +73,7 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
         searchResults = friends;
       });
     } else {
-      searchResults = friends
-          .where((user) => user.username.contains(value.toLowerCase()))
-          .toList();
+      searchResults = friends.where((user) => user.username.contains(value.toLowerCase())).toList();
       setState(() {});
     }
   }
@@ -85,19 +81,12 @@ class _InviteMembersPageState extends State<InviteMembersPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentUser.friends != null ||
-        widget.currentUser.friends.isNotEmpty) {
-      UserDataService()
-          .getUsersFromList(widget.currentUser.friends)
-          .then((result) {
+    if (widget.currentUser.friends != null || widget.currentUser.friends.isNotEmpty) {
+      UserDataService().getUsersFromList(widget.currentUser.friends).then((result) {
         if (result != null && result.isNotEmpty) {
           friends = result;
-          friends
-              .sort((userA, userB) => userA.username.compareTo(userB.username));
-          friends = friends
-              .where(
-                  (friend) => !widget.community.memberIDs.contains(friend.uid))
-              .toList(
+          friends.sort((userA, userB) => userA.username.compareTo(userB.username));
+          friends = friends.where((friend) => !widget.community.memberIDs.contains(friend.uid)).toList(
                 growable: true,
               );
           isLoading = false;

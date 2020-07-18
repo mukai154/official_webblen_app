@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/widgets/widgets_user/user_row.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
+import 'package:webblen/widgets/widgets_user/user_row.dart';
 
 class UserSearchPage extends StatefulWidget {
   final List userIDs;
@@ -115,7 +114,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
         context: context,
         currentUser: widget.currentUser,
         webblenUser: webblenUser,
-      ).transitionToUserDetailsPage();
+      ).transitionToUserPage();
     }
 
     return Scaffold(
@@ -149,8 +148,7 @@ class _UserSearchPageState extends State<UserSearchPage> {
               itemCount: searchResults.length,
               itemBuilder: (context, i) {
                 bool isFriendsWithUser = false;
-                if (searchResults[i].friends != null &&
-                    searchResults[i].friends.contains(widget.currentUser.uid)) {
+                if (searchResults[i].friends != null && searchResults[i].friends.contains(widget.currentUser.uid)) {
                   isFriendsWithUser = true;
                 }
                 return Padding(
@@ -159,10 +157,8 @@ class _UserSearchPageState extends State<UserSearchPage> {
                   ),
                   child: UserRow(
                     user: searchResults[i],
-                    transitionToUserDetails: () =>
-                        transitionToUserDetails(searchResults[i]),
-                    sendUserFriendRequest: () =>
-                        sendFriendRequest(searchResults[i]),
+                    transitionToUserDetails: () => transitionToUserDetails(searchResults[i]),
+                    sendUserFriendRequest: () => sendFriendRequest(searchResults[i]),
                     isFriendsWithUser: isFriendsWithUser,
                   ),
                 );

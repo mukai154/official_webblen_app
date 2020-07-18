@@ -8,7 +8,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class SetUpInstantDepositPage extends StatefulWidget {

@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/models/event.dart';
+import 'package:webblen/firebase/data/event_data.dart';
+import 'package:webblen/firebase/data/ticket_data.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class TicketScanner extends StatefulWidget {
   final WebblenUser currentUser;
-  final Event event;
+  final WebblenEvent event;
 
   TicketScanner({
     this.currentUser,
@@ -33,7 +34,7 @@ class _TicketScannerState extends State<TicketScanner> {
   QRViewController controller;
 
   void loadTicketDistro() async {
-    EventDataService().getEventTicketDistro(widget.event.eventKey).then((res) {
+    EventDataService().getEventTicketDistro(widget.event.id).then((res) {
       validTicketIDs = res.validTicketIDs.toList(growable: true);
       print(validTicketIDs);
       usedTicketIDs = res.usedTicketIDs.toList(growable: true);
@@ -48,7 +49,7 @@ class _TicketScannerState extends State<TicketScanner> {
     if (validTicketIDs.contains(scannedTicket)) {
       validTicketIDs.remove(scannedTicket);
       usedTicketIDs.add(scannedTicket);
-      EventDataService().updateScannedTickets(widget.event.eventKey, validTicketIDs, usedTicketIDs).then((error) {
+      TicketDataService().updateScannedTickets(widget.event.id, validTicketIDs, usedTicketIDs).then((error) {
         //Navigator.of(context).pop();
         if (error.isEmpty) {
           HapticFeedback.lightImpact();

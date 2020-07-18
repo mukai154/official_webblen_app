@@ -10,7 +10,7 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/time.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 
 class CreateEditReminderPage extends StatefulWidget {
   final WebblenUser currentUser;

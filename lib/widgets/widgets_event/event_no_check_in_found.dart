@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class EventNoCheckInFound extends StatelessWidget {
-  final VoidCallback createFlashEventAction;
+  final VoidCallback createEventAction;
 
   EventNoCheckInFound({
-    this.createFlashEventAction,
+    this.createEventAction,
   });
 
   @override
@@ -33,12 +32,12 @@ class EventNoCheckInFound extends StatelessWidget {
           height: 8.0,
         ),
         CustomColorButton(
-          text: "Create Flash Event",
+          text: "Create Event",
           textColor: FlatColors.darkGray,
           backgroundColor: Colors.white,
           height: 45.0,
           width: 200.0,
-          onPressed: createFlashEventAction,
+          onPressed: createEventAction,
         ),
       ],
     );

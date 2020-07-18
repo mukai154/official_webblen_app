@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/community.dart';
-import 'package:webblen/models/event.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
@@ -31,8 +30,8 @@ class MyEventsPage extends StatefulWidget {
 class _MyEventsPageState extends State<MyEventsPage> {
   WebblenUser currentUser;
   bool isLoading = true;
-  List<Event> savedEvents = [];
-  List<Event> createdEvents = [];
+  List<WebblenEvent> savedEvents = [];
+  List<WebblenEvent> createdEvents = [];
   List<String> areaNames = [];
 
   initialize() async {
@@ -186,9 +185,7 @@ class _MyEventsPageState extends State<MyEventsPage> {
                               itemBuilder: (context, index) {
                                 return AreaRow(
                                   areaName: areaNames[index],
-                                  numberOfCommunities:
-                                      getCommunitiesInArea(areaNames[index])
-                                          .length,
+                                  numberOfCommunities: getCommunitiesInArea(areaNames[index]).length,
                                   onTapAction: () => PageTransitionService(
                                     context: context,
                                     currentUser: currentUser,

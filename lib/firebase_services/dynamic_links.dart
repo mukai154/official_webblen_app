@@ -4,7 +4,7 @@ class DynamicLinks {
   Future<Uri> createDynamicLink(String eventKey, String eventTitle, String eventDesc, String imageURL) async {
     final DynamicLinkParameters parameters = DynamicLinkParameters(
       uriPrefix: 'https://webblenevents.page.link',
-      link: Uri.parse('https://webblen.io/'),
+      link: Uri.parse('https://app.webblen.io/#/event?id=$eventKey'),
       androidParameters: AndroidParameters(
         packageName: 'com.webblen.events.webblen',
         minimumVersion: 125,

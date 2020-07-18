@@ -1,26 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:table_calendar/table_calendar.dart';
-
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase_data/calendar_event_data.dart';
-import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/models/calendar_event.dart';
-import 'package:webblen/models/event.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/time.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_calendar/calendar_event_row.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 import 'create_edit_reminder_page.dart';
 
 class MyCalendarPage extends StatefulWidget {
   final WebblenUser currentUser;
-  
+
   MyCalendarPage({
     this.currentUser,
   });
@@ -29,8 +28,7 @@ class MyCalendarPage extends StatefulWidget {
   _MyCalendarPageState createState() => _MyCalendarPageState();
 }
 
-class _MyCalendarPageState extends State<MyCalendarPage>
-    with SingleTickerProviderStateMixin {
+class _MyCalendarPageState extends State<MyCalendarPage> with SingleTickerProviderStateMixin {
   bool isLoading = true;
   CalendarController calendarController = CalendarController();
   Map<DateTime, List> allEvents = {};
@@ -77,9 +75,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
         growable: true,
       );
       eventsOnDay.add(event);
-      if (eventDateTime.day == _selectedDay.day &&
-          eventDateTime.month == _selectedDay.month &&
-          eventDateTime.year == _selectedDay.year) {
+      if (eventDateTime.day == _selectedDay.day && eventDateTime.month == _selectedDay.month && eventDateTime.year == _selectedDay.year) {
         _selectedEvents.add(event);
       }
       allEvents[eventDay] = eventsOnDay;
@@ -98,13 +94,13 @@ class _MyCalendarPageState extends State<MyCalendarPage>
         eventIsLive: false,
       ).transitionToReminderPage();
     } else {
-      Event webblenEvent = await EventDataService().getEventByKey(event.key);
+      WebblenEvent webblenEvent = await EventDataService().getEvent(event.key);
       Navigator.of(context).pop();
       if (webblenEvent != null) {
         PageTransitionService(
           context: context,
           currentUser: widget.currentUser,
-          event: webblenEvent,
+          eventID: webblenEvent.id,
           eventIsLive: false,
         ).transitionToEventPage();
       } else {
@@ -124,9 +120,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
     allEvents = {};
     setState(() {});
     final _selectedDay = DateTime.now();
-    CalendarEventDataService()
-        .getUserCalendarEvents(widget.currentUser.uid)
-        .then((res) {
+    CalendarEventDataService().getUserCalendarEvents(widget.currentUser.uid).then((res) {
       res.forEach((event) {
         if (filter == 'all' || filter == event.type) {
           DateTime eventDateTime = Time().getDateTimeFromString(event.dateTime);
@@ -143,9 +137,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
               growable: true,
             );
             eventsOnDay.add(event);
-            if (eventDateTime.day == _selectedDay.day &&
-                eventDateTime.month == _selectedDay.month &&
-                eventDateTime.year == _selectedDay.year) {
+            if (eventDateTime.day == _selectedDay.day && eventDateTime.month == _selectedDay.month && eventDateTime.year == _selectedDay.year) {
               _selectedEvents.add(event);
             }
             allEvents[eventDay] = eventsOnDay;
@@ -195,8 +187,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
       itemBuilder: (context, index) {
         return CalendarEventRow(
           event: _selectedEvents[index],
-          onTapAction: () =>
-              transitionToEventDetailsPage(_selectedEvents[index]),
+          onTapAction: () => transitionToEventDetailsPage(_selectedEvents[index]),
         );
       },
       itemCount: _selectedEvents.length,
@@ -252,8 +243,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
                   color: Colors.black,
                   size: 18.0,
                 ),
-                onPressed: () =>
-                    ShowAlertDialogService().showCalendarFilterDialog(
+                onPressed: () => ShowAlertDialogService().showCalendarFilterDialog(
                   context,
                   filter,
                   () => filterEvents("all"),
@@ -268,8 +258,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
                   color: Colors.black,
                   size: 18.0,
                 ),
-                onPressed: () =>
-                    ShowAlertDialogService().showCreateEventReminderDialog(
+                onPressed: () => ShowAlertDialogService().showCreateEventReminderDialog(
                   context,
                   () => transitionToNewEventPage(null),
                   () => transitionToNewReminderPage(null),
@@ -291,13 +280,7 @@ class _MyCalendarPageState extends State<MyCalendarPage>
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Fonts().textW500(
-                        filter == 'all'
-                            ? 'All Events'
-                            : filter == 'saved'
-                                ? 'Saved Events'
-                                : filter == 'created'
-                                    ? 'Created Events'
-                                    : 'Reminders',
+                        filter == 'all' ? 'All Events' : filter == 'saved' ? 'Saved Events' : filter == 'created' ? 'Created Events' : 'Reminders',
                         14.0,
                         Colors.black54,
                         TextAlign.center,

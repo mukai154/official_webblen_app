@@ -4,34 +4,33 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
+import 'package:webblen/firebase/data/event_data.dart';
+import 'package:webblen/firebase/data/ticket_data.dart';
 import 'package:webblen/firebase_data/calendar_event_data.dart';
-import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/firebase_services/dynamic_links.dart';
 import 'package:webblen/models/calendar_event.dart';
-import 'package:webblen/models/event.dart';
-import 'package:webblen/models/event_ticket_distribution.dart';
+import 'package:webblen/models/ticket_distro.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/utils/time.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
+import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
 
 class EventDetailsPage extends StatefulWidget {
-  final Event event;
+  final String eventID;
   final WebblenUser currentUser;
-  final bool eventIsLive;
 
   EventDetailsPage({
-    this.event,
+    this.eventID,
     this.currentUser,
-    this.eventIsLive,
   });
 
   @override
@@ -39,11 +38,14 @@ class EventDetailsPage extends StatefulWidget {
 }
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
+  bool isLoading = true;
+  WebblenEvent event;
   int currentDateTime = DateTime.now().millisecondsSinceEpoch;
   DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
+  bool eventIsLive = false;
   double eventLat = 0.0;
   double eventLon = 0.0;
-  EventTicketDistribution eventTicketDistro;
+  TicketDistro eventTicketDistro;
   List<Map<String, dynamic>> tickets;
 
   Widget eventCaption() {
@@ -63,7 +65,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             TextAlign.left,
           ),
           Fonts().textW500(
-            widget.event.description,
+            event.desc,
             18.0,
             Colors.black,
             TextAlign.left,
@@ -93,10 +95,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             SizedBox(
               height: 4.0,
             ),
-            widget.event.startDateInMilliseconds == null
+            event.startDateTimeInMilliseconds == null
                 ? Container()
                 : Fonts().textW500(
-                    '${formatter.format(DateTime.fromMillisecondsSinceEpoch(widget.event.startDateInMilliseconds))}',
+                    '${formatter.format(DateTime.fromMillisecondsSinceEpoch(event.startDateTimeInMilliseconds))}',
                     18.0,
                     FlatColors.darkGray,
                     TextAlign.left,
@@ -111,17 +113,15 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     Navigator.of(context).pop();
     PageTransitionService(
       context: context,
-      event: widget.event,
-      currentUser: widget.currentUser,
-      isRecurring: false,
-    ).transitionToCreateEditEventPage();
+      eventID: event.id,
+    ).transitionToCreateEventPage();
   }
 
   void viewAttendeesAction() {
     Navigator.of(context).pop();
     PageTransitionService(
       context: context,
-      eventKey: widget.event.eventKey,
+      eventID: event.id,
       currentUser: widget.currentUser,
     ).transitionToEventAttendeesPage();
   }
@@ -131,17 +131,17 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     PageTransitionService(
       context: context,
       currentUser: widget.currentUser,
-      event: widget.event,
+      event: event,
     ).transitionToChatInviteSharePage();
   }
 
   void shareLinkAction() async {
     Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    DynamicLinks().createDynamicLink(widget.event.eventKey, widget.event.title, widget.event.description, widget.event.imageURL).then((link) {
-      Navigator.of(context).pop();
-      Share.share(link.toString());
-    });
+    Share.share("https://app.webblen.io/#/event?id=${event.id}");
+//    DynamicLinks().createDynamicLink(event.id, event.title, event.desc, event.imageURL).then((link) {
+//      Navigator.of(context).pop();
+//      Share.share("https://app.webblen.io/#/event?id=${event.id}");
+//    });
   }
 
   void addEventToCalendar() async {
@@ -149,20 +149,20 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     String timezone = await Time().getLocalTimezone();
     CreateNotification().createTimedNotification(
       randomBetween(0, 99),
-      widget.event.startDateInMilliseconds - 900000,
-      widget.event.title,
+      event.startDateTimeInMilliseconds - 900000,
+      event.title,
       "Event Starts in 15 Minutes!",
       '',
     );
     CalendarEvent calEvent = CalendarEvent(
-      title: widget.event.title,
-      description: widget.event.description,
-      data: widget.event.communityAreaName + "/" + widget.event.communityName,
-      key: widget.event.eventKey,
+      title: event.title,
+      description: event.desc,
+      data: null,
+      key: event.id,
       timezone: timezone,
       dateTime: formatter.format(
         DateTime.fromMillisecondsSinceEpoch(
-          widget.event.startDateInMilliseconds,
+          event.startDateTimeInMilliseconds,
         ),
       ),
       type: 'saved',
@@ -193,7 +193,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   void deleteEventAction() {
     ShowAlertDialogService().showConfirmationDialog(context, "Delete this event?", 'Delete', () {
-      EventDataService().deleteEvent(widget.event.eventKey).then((error) {
+      EventDataService().deleteEvent(event.id).then((error) {
         if (error.isEmpty) {
           PageTransitionService(context: context).returnToRootPage();
         } else {
@@ -213,18 +213,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   showEventOptions() {
     ShowAlertDialogService().showEventOptionsDialog(
         context,
-        widget.event.startDateInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
+        event.startDateTimeInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
         shareEventAction,
         shareLinkAction,
-        widget.event.startDateInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == widget.event.authorUid
-            ? editEventAction
-            : null,
-        widget.currentUser.uid == widget.event.authorUid && widget.event.startDateInMilliseconds > DateTime.now().millisecondsSinceEpoch
-            ? deleteEventAction
-            : null);
+        event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == event.authorID ? editEventAction : null,
+        widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch ? deleteEventAction : null);
   }
 
-  Widget ticketBuilder(EventTicketDistribution ticketDistro) {
+  Widget ticketBuilder(TicketDistro ticketDistro) {
     return Container(
       child: ListView.builder(
           physics: NeverScrollableScrollPhysics(),
@@ -295,8 +291,19 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   @override
   void initState() {
     super.initState();
-    eventLat = LocationService().getLatFromGeopoint(widget.event.location['geopoint']);
-    eventLon = LocationService().getLonFromGeopoint(widget.event.location['geopoint']);
+    EventDataService().getEvent(widget.eventID).then((res) {
+      event = res;
+      if (event.hasTickets) {
+        TicketDataService().getEventTicketDistro(widget.eventID).then((res) {
+          eventTicketDistro = res;
+          isLoading = false;
+          setState(() {});
+        });
+      } else {
+        isLoading = false;
+        setState(() {});
+      }
+    });
   }
 
   @override
@@ -309,101 +316,34 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             width: MediaQuery.of(context).size.width,
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: CachedNetworkImageProvider(widget.event.imageURL),
+                image: CachedNetworkImageProvider(event.imageURL),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          widget.event.recurrence == 'none'
-              ? Padding(
-                  padding: EdgeInsets.only(
-                    left: 16.0,
-                    top: 8.0,
-                    right: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          Material(
-                            borderRadius: BorderRadius.circular(24.0),
-                            color: FlatColors.textFieldGray,
-                            child: Padding(
-                              padding: EdgeInsets.all(6.0),
-                              child: widget.event.flashEvent
-                                  ? Fonts().textW500(
-                                      'FLASH EVENT',
-                                      14.0,
-                                      Colors.black,
-                                      TextAlign.center,
-                                    )
-                                  : Fonts().textW500(
-                                      '${widget.event.communityAreaName}/${widget.event.communityName}',
-                                      14.0,
-                                      Colors.black,
-                                      TextAlign.center,
-                                    ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SizedBox(
-                            height: 4.0,
-                          ),
-                          currentDateTime > widget.event.startDateInMilliseconds && currentDateTime < widget.event.endDateInMilliseconds
-                              ? Container(
-                                  width: 20,
-                                  height: 20,
-                                  margin: EdgeInsets.only(
-                                    left: 4,
-                                  ),
-                                  child: Image.asset(
-                                    "assets/images/webblen_logo.png",
-                                    fit: BoxFit.none,
-                                  ),
-                                )
-                              : Container(),
-                          //Spacer(),
-                          SizedBox(
-                            width: 4.0,
-                          ),
-                          currentDateTime > widget.event.startDateInMilliseconds && currentDateTime < widget.event.endDateInMilliseconds
-                              ? Container(
-                                  margin: EdgeInsets.only(
-                                    right: 4,
-                                  ),
-                                  child: Fonts().textW400(
-                                    '${widget.event.eventPayout.toStringAsFixed(2)}',
-                                    16.0,
-                                    Colors.white,
-                                    TextAlign.left,
-                                  ),
-                                )
-                              : Container(
-                                  margin: EdgeInsets.only(
-                                    right: 11,
-                                  ),
-                                  child: Row(
-                                    children: <Widget>[
-                                      Fonts().textW500(
-                                        '${widget.event.views} views',
-                                        16.0,
-                                        Colors.black54,
-                                        TextAlign.left,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ],
-                  ),
-                )
-              : Container(),
+          SizedBox(height: 8.0),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: CustomText(
+              context: context,
+              text: event.category,
+              textColor: Colors.black,
+              textAlign: TextAlign.left,
+              fontSize: 24.0,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: CustomText(
+              context: context,
+              text: event.type,
+              textColor: Colors.black38,
+              textAlign: TextAlign.left,
+              fontSize: 14.0,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(
               left: 16.0,
@@ -420,7 +360,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                   TextAlign.left,
                 ),
                 Fonts().textW500(
-                  widget.event.description,
+                  event.desc,
                   16.0,
                   Colors.black,
                   TextAlign.left,
@@ -428,7 +368,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               ],
             ),
           ),
-          widget.eventIsLive
+          eventIsLive
               ? Container()
               : Padding(
                   padding: EdgeInsets.only(
@@ -440,7 +380,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     children: <Widget>[
                       Column(
                         children: <Widget>[
-                          widget.event.address == null
+                          event.streetAddress == null
                               ? Container()
                               : Icon(
                                   FontAwesomeIcons.directions,
@@ -457,17 +397,19 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                           SizedBox(
                             height: 4.0,
                           ),
-                          widget.event.address == null
+                          event.streetAddress == null
                               ? Container()
                               : Container(
                                   constraints: BoxConstraints(
                                     maxWidth: MediaQuery.of(context).size.width * 0.8,
                                   ),
-                                  child: Fonts().textW400(
-                                    '${widget.event.address.replaceAll(', USA', '').replaceAll(', United States', '')}',
-                                    16.0,
-                                    Colors.black,
-                                    TextAlign.left,
+                                  child: CustomText(
+                                    context: context,
+                                    text: '${event.streetAddress.replaceAll(', USA', '').replaceAll(', United States', '')}',
+                                    textColor: Colors.black,
+                                    textAlign: TextAlign.left,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w400,
                                   ),
                                 ),
                         ],
@@ -475,7 +417,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     ],
                   ),
                 ),
-          widget.eventIsLive || widget.event.address == null
+          eventIsLive || event.streetAddress == null
               ? Container()
               : Padding(
                   padding: EdgeInsets.only(
@@ -520,13 +462,13 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       constraints: BoxConstraints(
                         maxWidth: MediaQuery.of(context).size.width * 0.8,
                       ),
-                      child: Fonts().textW400(
-                        formatter.format(
-                          DateTime.fromMillisecondsSinceEpoch(widget.event.startDateInMilliseconds),
-                        ),
-                        16.0,
-                        Colors.black,
-                        TextAlign.left,
+                      child: CustomText(
+                        context: context,
+                        text: '${event.startDate} ${event.startTime} ${event.timezone}',
+                        textColor: Colors.black,
+                        textAlign: TextAlign.left,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
@@ -534,7 +476,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
               ],
             ),
           ),
-          widget.eventIsLive || widget.event.startDateInMilliseconds == null || currentDateTime > widget.event.endDateInMilliseconds
+          eventIsLive || event.startDateTimeInMilliseconds == null //|| currentDateTime > event.endDateInMilliseconds
               ? Container()
               : Padding(
                   padding: EdgeInsets.only(
@@ -551,7 +493,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                     ),
                   ),
                 ),
-          widget.event.fbSite.isNotEmpty || widget.event.twitterSite.isNotEmpty || widget.event.website.isNotEmpty
+          event.fbUsername.isNotEmpty || event.twitterUsername.isNotEmpty || event.website.isNotEmpty
               ? Padding(
                   padding: EdgeInsets.only(
                     left: 16.0,
@@ -574,11 +516,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                widget.event.fbSite.isNotEmpty
+                event.fbUsername != null && event.fbUsername.isNotEmpty
                     ? GestureDetector(
                         onTap: () => OpenUrl().launchInWebViewOrVC(
                           context,
-                          widget.event.fbSite,
+                          event.fbUsername,
                         ),
                         child: IconBubble(
                           icon: Icon(
@@ -591,16 +533,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         ),
                       )
                     : Container(),
-                widget.event.fbSite.isNotEmpty
+                event.fbUsername != null && event.fbUsername.isNotEmpty
                     ? SizedBox(
                         width: 16.0,
                       )
                     : Container(),
-                widget.event.twitterSite.isNotEmpty
+                event.twitterUsername != null && event.twitterUsername.isNotEmpty
                     ? GestureDetector(
                         onTap: () => OpenUrl().launchInWebViewOrVC(
                           context,
-                          widget.event.twitterSite,
+                          event.twitterUsername,
                         ),
                         child: IconBubble(
                           icon: Icon(
@@ -613,16 +555,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         ),
                       )
                     : Container(),
-                widget.event.twitterSite.isNotEmpty
+                event.twitterUsername != null && event.twitterUsername.isNotEmpty
                     ? SizedBox(
                         width: 16.0,
                       )
                     : Container(),
-                widget.event.website.isNotEmpty
+                event.website != null && event.website.isNotEmpty
                     ? GestureDetector(
                         onTap: () => OpenUrl().launchInWebViewOrVC(
                           context,
-                          widget.event.website,
+                          event.website,
                         ),
                         child: IconBubble(
                           icon: Icon(
@@ -644,7 +586,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
     return Scaffold(
         appBar: WebblenAppBar().actionAppBar(
-          widget.event.title,
+          isLoading ? '' : event.title,
           IconButton(
             icon: Icon(
               FontAwesomeIcons.ellipsisH,
@@ -654,8 +596,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             onPressed: () => showEventOptions(),
           ),
         ),
-        body: eventView(),
-        bottomNavigationBar: widget.event.hasTickets != null && widget.event.hasTickets
+        body: isLoading ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed) : eventView(),
+        bottomNavigationBar: !isLoading && event.hasTickets != null && event.hasTickets
             ? Container(
                 height: 80.0,
                 decoration: BoxDecoration(
@@ -695,7 +637,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                             height: 35.0,
                             width: MediaQuery.of(context).size.width * 0.4,
                             onPressed: () =>
-                                PageTransitionService(context: context, event: widget.event, currentUser: widget.currentUser).transitionToTicketSelectionPage(),
+                                PageTransitionService(context: context, event: event, currentUser: widget.currentUser).transitionToTicketSelectionPage(),
                           ),
                         ],
                       ),
@@ -704,327 +646,5 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 ),
               )
             : Container(height: 0));
-  }
-}
-
-class RecurringEventDetailsPage extends StatelessWidget {
-  final RecurringEvent event;
-  final WebblenUser currentUser;
-
-  RecurringEventDetailsPage({
-    this.event,
-    this.currentUser,
-  });
-
-  Widget eventCaption() {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16.0,
-        right: 16.0,
-        top: 16.0,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Fonts().textW700(
-            'Details',
-            24.0,
-            Colors.black,
-            TextAlign.left,
-          ),
-          Fonts().textW500(
-            event.description,
-            18.0,
-            Colors.black,
-            TextAlign.left,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget eventDate(BuildContext context) {
-    return Row(
-      children: <Widget>[
-        Column(
-          children: <Widget>[
-            Icon(
-              FontAwesomeIcons.calendar,
-              size: 24.0,
-              color: Colors.black,
-            ),
-          ],
-        ),
-        SizedBox(
-          width: 4.0,
-        ),
-        Column(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(
-                left: 6.0,
-              ),
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.8,
-              ),
-              child: event.recurrenceType == 'daily'
-                  ? Fonts().textW400(
-                      'Everyday from ${event.startTime} to ${event.endTime}',
-                      14.0,
-                      Colors.black,
-                      TextAlign.start,
-                    )
-                  : event.recurrenceType == 'weekly'
-                      ? Fonts().textW400(
-                          'Every ${event.dayOfTheWeek} from  ${event.startTime} to ${event.endTime}',
-                          14.0,
-                          Colors.black,
-                          TextAlign.start,
-                        )
-                      : Fonts().textW400(
-                          'Every ${event.dayOfTheMonth} ${event.dayOfTheWeek} from  ${event.startTime} to ${event.endTime}',
-                          14.0,
-                          Colors.black,
-                          TextAlign.start,
-                        ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    void deleteEventAction() {
-      Navigator.of(context).pop();
-      ShowAlertDialogService().showConfirmationDialog(context, "Delete this event?", 'Delete', () {
-        EventDataService().deleteRecurringEvent(event.eventKey).then((error) {
-          if (error.isEmpty) {
-            Navigator.of(context).pop();
-            Navigator.of(context).pop();
-          } else {
-            Navigator.of(context).pop();
-            ShowAlertDialogService().showFailureDialog(
-              context,
-              'Uh Oh',
-              'There was an issue deleting this event. Please try again',
-            );
-          }
-        });
-      }, () {
-        Navigator.of(context).pop();
-      });
-    }
-
-    showEventOptions() {
-      ShowAlertDialogService().showEventOptionsDialog(
-        context,
-        null,
-        null,
-        null,
-        null,
-        deleteEventAction,
-      );
-    }
-
-    Widget eventView() {
-      return Container(
-        color: Colors.white,
-        child: ListView(
-          children: <Widget>[
-            Container(
-              height: 300.0,
-              width: MediaQuery.of(context).size.width - 16,
-              child: Stack(
-                children: <Widget>[
-                  CachedNetworkImage(
-                    imageUrl: event.imageURL,
-                    fit: BoxFit.cover,
-                    height: 300.0,
-                    width: MediaQuery.of(context).size.width,
-                  ),
-                ],
-              ),
-            ),
-            eventCaption(),
-            Padding(
-              padding: EdgeInsets.only(
-                left: 16.0,
-                top: 16.0,
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Column(
-                    children: <Widget>[
-                      event.address == null
-                          ? Container()
-                          : Icon(
-                              FontAwesomeIcons.directions,
-                              size: 24.0,
-                              color: Colors.black,
-                            ),
-                    ],
-                  ),
-                  SizedBox(
-                    width: 8.0,
-                  ),
-                  Column(
-                    children: <Widget>[
-                      SizedBox(
-                        height: 4.0,
-                      ),
-                      event.address == null
-                          ? Container()
-                          : Container(
-                              constraints: BoxConstraints(
-                                maxWidth: MediaQuery.of(context).size.width * 0.8,
-                              ),
-                              child: Fonts().textW400(
-                                '${event.address.replaceAll(', USA', '').replaceAll(', United States', '')}',
-                                14.0,
-                                Colors.black,
-                                TextAlign.left,
-                              ),
-                            ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(
-                left: 16.0,
-                top: 8.0,
-              ),
-              child: InkWell(
-                onTap: () => OpenUrl().openMaps(
-                  context,
-                  event.location['geopoint'].latitude.toString(),
-                  event.location['geopoint'].longitude.toString(),
-                ),
-                child: Fonts().textW500(
-                  ' View in Maps',
-                  14.0,
-                  FlatColors.webblenDarkBlue,
-                  TextAlign.left,
-                ),
-              ),
-            ),
-            Padding(
-                padding: EdgeInsets.only(
-                  left: 16.0,
-                  top: 24.0,
-                ),
-                child: eventDate(context)),
-            event.fbSite.isNotEmpty || event.twitterSite.isNotEmpty || event.website.isNotEmpty
-                ? Padding(
-                    padding: EdgeInsets.only(
-                      left: 16.0,
-                      top: 24.0,
-                    ),
-                    child: Fonts().textW700(
-                      'Additional Info',
-                      18.0,
-                      Colors.black,
-                      TextAlign.left,
-                    ),
-                  )
-                : Container(),
-            Padding(
-              padding: EdgeInsets.only(
-                left: 16.0,
-                top: 8.0,
-                bottom: 32.0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  event.fbSite.isNotEmpty
-                      ? GestureDetector(
-                          onTap: () => OpenUrl().launchInWebViewOrVC(
-                            context,
-                            event.fbSite,
-                          ),
-                          child: IconBubble(
-                            icon: Icon(
-                              FontAwesomeIcons.facebookF,
-                              size: 20.0,
-                              color: Colors.white,
-                            ),
-                            color: FlatColors.facebookBlue,
-                            size: 35.0,
-                          ),
-                        )
-                      : Container(),
-                  event.fbSite.isNotEmpty
-                      ? SizedBox(
-                          width: 16.0,
-                        )
-                      : Container(),
-                  event.twitterSite.isNotEmpty
-                      ? GestureDetector(
-                          onTap: () => OpenUrl().launchInWebViewOrVC(
-                            context,
-                            event.twitterSite,
-                          ),
-                          child: IconBubble(
-                            icon: Icon(
-                              FontAwesomeIcons.twitter,
-                              size: 18.0,
-                              color: Colors.white,
-                            ),
-                            color: FlatColors.twinkleBlue,
-                            size: 35.0,
-                          ),
-                        )
-                      : Container(),
-                  event.twitterSite.isNotEmpty
-                      ? SizedBox(
-                          width: 16.0,
-                        )
-                      : Container(),
-                  event.website.isNotEmpty
-                      ? GestureDetector(
-                          onTap: () => OpenUrl().launchInWebViewOrVC(
-                            context,
-                            event.website,
-                          ),
-                          child: IconBubble(
-                            icon: Icon(
-                              FontAwesomeIcons.link,
-                              size: 18.0,
-                              color: Colors.white,
-                            ),
-                            color: FlatColors.darkGray,
-                            size: 35.0,
-                          ),
-                        )
-                      : Container(),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return Scaffold(
-      appBar: WebblenAppBar().actionAppBar(
-        event.title,
-        currentUser.uid == event.authorUid
-            ? IconButton(
-                icon: Icon(
-                  FontAwesomeIcons.ellipsisH,
-                  size: 18.0,
-                  color: Colors.black,
-                ),
-                onPressed: () => showEventOptions(),
-              )
-            : Container(),
-      ),
-      body: eventView(),
-    );
   }
 }

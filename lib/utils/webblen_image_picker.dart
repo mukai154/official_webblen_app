@@ -3,10 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
 
 class WebblenImagePicker {
   final BuildContext context;
@@ -19,44 +17,26 @@ class WebblenImagePicker {
     this.ratioY,
   });
 
+  final ImagePicker imagePicker = ImagePicker();
+
   Future<File> retrieveImageFromLibrary() async {
     imageCache.clear();
-    var dir = await path_provider.getTemporaryDirectory();
-    var targetPath = dir.absolute.path + "/temp.png";
     File croppedImageFile;
-    File img = await ImagePicker.pickImage(
-      source: ImageSource.gallery,
-    );
+    final pickedFile = await imagePicker.getImage(source: ImageSource.gallery);
+    File img = File(pickedFile.path);
     if (img != null) {
       croppedImageFile = await cropImage(img);
-      if (croppedImageFile != null) {
-        croppedImageFile = await FlutterImageCompress.compressAndGetFile(
-          croppedImageFile.absolute.path,
-          targetPath,
-          quality: 45,
-        );
-      }
     }
     return croppedImageFile;
   }
 
   Future<File> retrieveImageFromCamera() async {
     imageCache.clear();
-    var dir = await path_provider.getTemporaryDirectory();
-    var targetPath = dir.absolute.path + "/temp.png";
     File croppedImageFile;
-    File img = await ImagePicker.pickImage(
-      source: ImageSource.camera,
-    );
+    final pickedFile = await imagePicker.getImage(source: ImageSource.camera);
+    File img = File(pickedFile.path);
     if (img != null) {
       croppedImageFile = await cropImage(img);
-      if (croppedImageFile != null) {
-        croppedImageFile = await FlutterImageCompress.compressAndGetFile(
-          croppedImageFile.absolute.path,
-          targetPath,
-          quality: 25,
-        );
-      }
     }
     return croppedImageFile;
   }
@@ -69,6 +49,11 @@ class WebblenImagePicker {
         ratioX: 1,
         ratioY: 1,
       ),
+      iosUiSettings: IOSUiSettings(
+        minimumAspectRatio: 1.0,
+      ),
+      compressFormat: ImageCompressFormat.png,
+      compressQuality: 50,
       androidUiSettings: AndroidUiSettings(
         toolbarTitle: 'Crop Image',
         toolbarColor: Colors.white,

@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/styles/flat_colors.dart';
 
 class Fonts {
-  Widget textW300(
-      String text, double size, Color textColor, TextAlign alignment) {
+  Widget textW300(String text, double size, Color textColor, TextAlign alignment) {
     return Text(
       text,
       style: TextStyle(
@@ -16,8 +15,7 @@ class Fonts {
     );
   }
 
-  Widget textW400(
-      String text, double size, Color textColor, TextAlign alignment) {
+  Widget textW400(String text, double size, Color textColor, TextAlign alignment) {
     return Text(
       text,
       style: TextStyle(
@@ -30,8 +28,7 @@ class Fonts {
     );
   }
 
-  Widget textW500(
-      String text, double size, Color textColor, TextAlign alignment) {
+  Widget textW500(String text, double size, Color textColor, TextAlign alignment) {
     return Text(
       text,
       style: TextStyle(
@@ -45,8 +42,7 @@ class Fonts {
     );
   }
 
-  Widget textW600(
-      String text, double size, Color textColor, TextAlign alignment) {
+  Widget textW600(String text, double size, Color textColor, TextAlign alignment) {
     return Text(
       text,
       style: TextStyle(
@@ -60,8 +56,7 @@ class Fonts {
     );
   }
 
-  Widget textW700(
-      String text, double size, Color textColor, TextAlign alignment) {
+  Widget textW700(String text, double size, Color textColor, TextAlign alignment) {
     return Text(
       text,
       style: TextStyle(
@@ -77,14 +72,14 @@ class Fonts {
 
   static final alertDialogHeader = new TextStyle(
     fontSize: 20.0,
-    fontWeight: FontWeight.w600,
-    color: FlatColors.blackPearl,
+    fontWeight: FontWeight.w700,
+    color: Colors.black,
   );
 
   static final alertDialogBody = new TextStyle(
-    fontSize: 18.0,
-    fontWeight: FontWeight.w400,
-    color: FlatColors.londonSquare,
+    fontSize: 16.0,
+    fontWeight: FontWeight.w500,
+    color: Colors.black,
   );
 
   static final alertDialogBodySmall = new TextStyle(

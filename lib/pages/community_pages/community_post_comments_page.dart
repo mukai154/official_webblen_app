@@ -4,8 +4,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-
 import 'package:webblen/firebase_data/comment_data.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
@@ -18,10 +16,11 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
 import 'package:webblen/widgets/widgets_data_streams/stream_comment_data.dart';
 import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class CommunityPostCommentsPage extends StatefulWidget {
   final CommunityNewsPost newsPost;
@@ -33,8 +32,7 @@ class CommunityPostCommentsPage extends StatefulWidget {
   });
 
   @override
-  _CommunityPostCommentsPageState createState() =>
-      _CommunityPostCommentsPageState();
+  _CommunityPostCommentsPageState createState() => _CommunityPostCommentsPageState();
 }
 
 class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
@@ -57,7 +55,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
           context: context,
           currentUser: widget.currentUser,
           webblenUser: result,
-        ).transitionToUserDetailsPage();
+        ).transitionToUserPage();
       } else {
         Navigator.of(context).pop();
         ShowAlertDialogService().showFailureDialog(
@@ -91,11 +89,8 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
   }
 
   Future uploadFile() async {
-    String fileName = widget.newsPost.postID +
-        "-" +
-        DateTime.now().millisecondsSinceEpoch.toString();
-    StorageReference reference =
-        FirebaseStorage.instance.ref().child('comment_pics').child(fileName);
+    String fileName = widget.newsPost.postID + "-" + DateTime.now().millisecondsSinceEpoch.toString();
+    StorageReference reference = FirebaseStorage.instance.ref().child('comment_pics').child(fileName);
     StorageUploadTask uploadTask = reference.putFile(commentImage);
     StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
     storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
@@ -121,11 +116,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
 
   void onSendMessage(String content, String type, String key) {
     int commentSentTime = DateTime.now().millisecondsSinceEpoch;
-    String commentKey = key == null
-        ? widget.newsPost.postID +
-            "-" +
-            DateTime.now().millisecondsSinceEpoch.toString()
-        : key;
+    String commentKey = key == null ? widget.newsPost.postID + "-" + DateTime.now().millisecondsSinceEpoch.toString() : key;
 
     if (content.trim() != '') {
       textEditingController.clear();
@@ -296,10 +287,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
                   textScaleFactor: 1.0,
                 ),
                 child: TextField(
-                  style: TextStyle(
-                      color: FlatColors.blackPearl,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w500),
+                  style: TextStyle(color: FlatColors.blackPearl, fontSize: 18.0, fontWeight: FontWeight.w500),
                   controller: textEditingController,
                   maxLines: null,
                   decoration: InputDecoration.collapsed(
@@ -396,15 +384,14 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.newsPost.newsURL != null &&
-        widget.newsPost.newsURL.contains('youtube.com')) {
+    if (widget.newsPost.newsURL != null && widget.newsPost.newsURL.contains('youtube.com')) {
       youtubeVideoID = YoutubePlayer.convertUrlToId(widget.newsPost.newsURL);
       vidController = YoutubePlayerController(
         initialVideoId: youtubeVideoID,
         flags: YoutubePlayerFlags(
           mute: false,
           autoPlay: false,
-          forceHideAnnotation: true,
+          //forceHideAnnotation: true,
         ),
       );
       setState(() {});
@@ -423,9 +410,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
                   size: 16.0,
                   color: Colors.black38,
                 ),
-                onPressed: () => ShowAlertDialogService()
-                    .showConfirmationDialog(
-                        context, "Delete this Post?", "Delete", () {
+                onPressed: () => ShowAlertDialogService().showConfirmationDialog(context, "Delete this Post?", "Delete", () {
                   Navigator.of(context).pop();
                   ShowAlertDialogService().showLoadingDialog(context);
                   CommunityDataService()
@@ -443,8 +428,7 @@ class _CommunityPostCommentsPageState extends State<CommunityPostCommentsPage> {
                         "There was an issue deleting this post. Please Try Again.",
                       );
                     } else {
-                      CommentDataService()
-                          .deleteComments(widget.newsPost.postID);
+                      CommentDataService().deleteComments(widget.newsPost.postID);
                       Navigator.of(context).pop();
                       Navigator.of(context).pop();
                     }

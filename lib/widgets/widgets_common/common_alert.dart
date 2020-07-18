@@ -4,6 +4,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:webblen/services_general/services_user_options.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 import 'package:webblen/widgets/widgets_common/common_custom_alert.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
@@ -828,7 +829,7 @@ class InfoDialog extends StatelessWidget {
     return CustomAlertDialog(
       content: Container(
         width: 260.0,
-        height: 240.0,
+        height: 260.0,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -850,7 +851,14 @@ class InfoDialog extends StatelessWidget {
                   data: MediaQuery.of(context).copyWith(
                     textScaleFactor: 1.0,
                   ),
-                  child: Text(header, style: Fonts.alertDialogHeader, textAlign: TextAlign.center),
+                  child: CustomText(
+                    context: context,
+                    text: header,
+                    textColor: Colors.black,
+                    textAlign: TextAlign.center,
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.w700,
+                  ),
                 ),
               ],
             )),
@@ -861,10 +869,13 @@ class InfoDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  Text(
-                    body,
-                    style: Fonts.alertDialogBody,
+                  CustomText(
+                    context: context,
+                    text: body,
+                    textColor: Colors.black,
                     textAlign: TextAlign.center,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
                   ),
                 ],
               ),
@@ -876,7 +887,7 @@ class InfoDialog extends StatelessWidget {
                 children: <Widget>[
                   CustomColorButton(
                     text: "Ok",
-                    textColor: FlatColors.londonSquare,
+                    textColor: Colors.black,
                     backgroundColor: Colors.white,
                     height: 45.0,
                     width: 200.0,

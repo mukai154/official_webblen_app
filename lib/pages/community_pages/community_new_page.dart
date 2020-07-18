@@ -4,18 +4,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-
+import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets/widgets_user/user_row.dart';
 
 class CreateCommunityPage extends StatefulWidget {
@@ -76,21 +75,14 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   }
 
   Future<Null> initialize() async {
-    BaseAuth().currentUser().then((uid) {
-      Firestore.instance
-          .collection("webblen_user")
-          .document(uid)
-          .get()
-          .then((userDoc) {
+    BaseAuth().getCurrentUserID().then((uid) {
+      Firestore.instance.collection("webblen_user").document(uid).get().then((userDoc) {
         if (userDoc.exists) {
           UserDataService().getUserByID(uid).then((result) {
             currentUser = result;
-            UserDataService()
-                .getUsersFromList(currentUser.friends)
-                .then((result) {
+            UserDataService().getUsersFromList(currentUser.friends).then((result) {
               friends = result;
-              friends.sort(
-                  (userA, userB) => userA.username.compareTo(userB.username));
+              friends.sort((userA, userB) => userA.username.compareTo(userB.username));
               isLoading = false;
               setState(() {});
             });
@@ -136,8 +128,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           Navigator.of(context).pop();
           AlertFlushbar(
             headerText: "Error",
-            bodyText:
-                "The community ${newCommunity.name} already exists in this area",
+            bodyText: "The community ${newCommunity.name} already exists in this area",
           ).showAlertFlushbar(context);
         } else {
           Navigator.of(context).pop();
@@ -174,8 +165,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     } else {
       ShowAlertDialogService().showLoadingDialog(context);
       newCommunity.areaName = widget.areaName;
-      newCommunity.lastActivityTimeInMilliseconds =
-          DateTime.now().millisecondsSinceEpoch;
+      newCommunity.lastActivityTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
       newCommunity.followers = [currentUser.uid];
       newCommunity.memberIDs = [currentUser.uid];
       newCommunity.areaName = widget.areaName;
@@ -207,11 +197,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                 .then((error) {
               if (error.isEmpty) {
                 Navigator.of(context).pop();
-                ShowAlertDialogService().showActionSuccessDialog(
-                    context,
-                    "Community Created!",
-                    "Your Community Will be Live After 2 Other Members join!",
-                    () {
+                ShowAlertDialogService().showActionSuccessDialog(context, "Community Created!", "Your Community Will be Live After 2 Other Members join!", () {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 });
@@ -292,8 +278,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
             inputFormatters: [
               LengthLimitingTextInputFormatter(30),
               BlacklistingTextInputFormatter(
-                RegExp(
-                    "[\\-|\\ |\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"),
+                RegExp("[\\-|\\ |\\#|\\[|\\]|\\%|\\^|\\*|\\+|\\=|\\_|\\~|\\<|\\>|\\,|\\@|\\(|\\)|\\'|\\{|\\}|\\.]"),
               ),
             ],
             onSaved: (value) => newCommunity.name = value.toLowerCase(),
@@ -544,8 +529,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         "Create Community",
         pageIndex == 0 ? "Next" : "Finish",
         pageIndex == 0
-            ? () => ShowAlertDialogService().showCancelDialog(
-                    context, 'Cancel Create a New Community?', () {
+            ? () => ShowAlertDialogService().showCancelDialog(context, 'Cancel Create a New Community?', () {
                   Navigator.of(context).pop();
                   Navigator.of(context).pop();
                 })

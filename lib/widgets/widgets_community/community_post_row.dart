@@ -1,8 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
-
 import 'package:webblen/models/community_news.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
@@ -11,6 +9,7 @@ import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/time_calc.dart';
 import 'package:webblen/widgets/widgets_data_streams/stream_comment_data.dart';
 import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class CommunityPostRow extends StatefulWidget {
   final CommunityNewsPost newsPost;
@@ -39,8 +38,7 @@ class _CommunityPostRowState extends State<CommunityPostRow> {
   @override
   void initState() {
     super.initState();
-    if (widget.newsPost.newsURL != null &&
-        widget.newsPost.newsURL.contains('youtube.com')) {
+    if (widget.newsPost.newsURL != null && widget.newsPost.newsURL.contains('youtube.com')) {
       youtubeVideoID = YoutubePlayer.convertUrlToId(widget.newsPost.newsURL);
       isYoutubeVideo = true;
       vidController = YoutubePlayerController(
@@ -48,7 +46,7 @@ class _CommunityPostRowState extends State<CommunityPostRow> {
         flags: YoutubePlayerFlags(
           mute: true,
           autoPlay: false,
-          forceHideAnnotation: true,
+          //forceHideAnnotation: true,
           disableDragSeek: false,
           enableCaption: true,
         ),

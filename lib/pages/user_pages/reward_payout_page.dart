@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:webblen/firebase_data/transaction_data.dart';
 import 'package:webblen/firebase_data/reward_data.dart';
+import 'package:webblen/firebase_data/transaction_data.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class RewardPayoutPage extends StatefulWidget {
@@ -32,8 +31,7 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
 
   String showFormDepositLabel() {
     String formDepositType = "";
-    if (widget.redeemingReward.rewardType == 'giftCard' ||
-        widget.redeemingReward.rewardType == 'paypal') {
+    if (widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal') {
       formDepositType = "Email:";
     } else if (widget.redeemingReward.rewardType == 'venmo') {
       formDepositType = "Venmo Username:";
@@ -45,8 +43,7 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
 
   String showFormDepositNameHint() {
     String formDepositNameHint = "";
-    if (widget.redeemingReward.rewardType == 'giftCard' ||
-        widget.redeemingReward.rewardType == 'paypal') {
+    if (widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal') {
       formDepositNameHint = "email address";
     } else if (widget.redeemingReward.rewardType == 'venmo') {
       formDepositNameHint = "venmo username";
@@ -135,18 +132,15 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
                   style: TextStyle(
                     color: FlatColors.darkGray,
                   ),
-                  keyboardType:
-                      widget.redeemingReward.rewardType == 'giftCard' ||
-                              widget.redeemingReward.rewardType == 'paypal'
-                          ? TextInputType.emailAddress
-                          : TextInputType.text,
+                  keyboardType: widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal'
+                      ? TextInputType.emailAddress
+                      : TextInputType.text,
                   autofocus: false,
                   validator: (value) => value.isEmpty ? 'Required' : null,
                   onSaved: (value) => formDepositNameInput = value,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    icon: widget.redeemingReward.rewardType == 'giftCard' ||
-                            widget.redeemingReward.rewardType == 'paypal'
+                    icon: widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal'
                         ? Icon(
                             FontAwesomeIcons.envelope,
                             color: FlatColors.darkGray,
@@ -174,11 +168,9 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
                   style: TextStyle(
                     color: FlatColors.darkGray,
                   ),
-                  keyboardType:
-                      widget.redeemingReward.rewardType == 'giftCard' ||
-                              widget.redeemingReward.rewardType == 'paypal'
-                          ? TextInputType.emailAddress
-                          : TextInputType.text,
+                  keyboardType: widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal'
+                      ? TextInputType.emailAddress
+                      : TextInputType.text,
                   autofocus: false,
                   validator: (value) => value.isEmpty ? 'Required' : null,
                   onSaved: (value) => formDepositNameInputConfirmation = value,

@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/styles/fonts.dart';
 
 class GoogleBtn extends StatelessWidget {
-
   final String buttonText = "Login with Google";
   final VoidCallback action;
   GoogleBtn({this.action});
@@ -15,10 +14,12 @@ class GoogleBtn extends StatelessWidget {
       child: Material(
         elevation: 2.0,
         color: Colors.white,
-        borderRadius: BorderRadius.circular(25.0),
+        borderRadius: BorderRadius.circular(14.0),
         child: InkWell(
-          borderRadius: BorderRadius.circular(25.0),
-          onTap: () { action(); },
+          borderRadius: BorderRadius.circular(14.0),
+          onTap: () {
+            action();
+          },
           child: Container(
             height: 45.0,
             width: MediaQuery.of(context).size.width * 0.85,
@@ -28,9 +29,7 @@ class GoogleBtn extends StatelessWidget {
                 Icon(FontAwesomeIcons.google, color: Colors.black, size: 18.0),
                 SizedBox(width: 16.0),
                 MediaQuery(
-                  data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                  child: Fonts().textW400(buttonText, 16.0, Colors.black, TextAlign.left)
-                ),
+                    data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0), child: Fonts().textW700(buttonText, 16.0, Colors.black, TextAlign.left)),
               ],
             ),
           ),

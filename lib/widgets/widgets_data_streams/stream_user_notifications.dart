@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-import 'package:webblen/widgets/widgets_notifications/notification_bell.dart';
+import 'package:webblen/widgets/widgets_notifications/notification_icon.dart';
 
 class StreamUserNotifications extends StatelessWidget {
   final String uid;
@@ -36,7 +35,7 @@ class StreamUserNotifications extends StatelessWidget {
               right: 8.0,
               top: 6.0,
             ),
-            child: NotificationBell(
+            child: NotificationIcon(
               notificationCount: notifCount == null ? 0 : notifCount,
             ),
           ),

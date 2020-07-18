@@ -1,16 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_notifications/notification_row.dart';
 
@@ -42,8 +41,7 @@ class _NotificationPageState extends State<NotificationPage> {
               isEqualTo: widget.currentUser.uid,
             )
             .snapshots(),
-        builder:
-            (BuildContext context, AsyncSnapshot<QuerySnapshot> notifSnapshot) {
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> notifSnapshot) {
           List<DocumentSnapshot> notifDocs = [];
           if (!notifSnapshot.hasData)
             return LoadingScreen(
@@ -51,26 +49,20 @@ class _NotificationPageState extends State<NotificationPage> {
               loadingDescription: "Loading...",
             );
           notifDocs = notifSnapshot.data.documents.toList();
-          notifDocs.sort((notifDocA, notifDocB) => notifDocB
-              .data['notificationExpDate']
-              .compareTo(notifDocA.data['notificationExpDate']));
+          notifDocs.sort((notifDocA, notifDocB) => notifDocB.data['notificationExpDate'].compareTo(notifDocA.data['notificationExpDate']));
           return notifDocs.isEmpty
-              ? buildEmptyListView(
-                  "There's Nothing to See Here...", "paper_plane")
+              ? buildEmptyListView("There's Nothing to See Here...", "paper_plane")
               : ListView(
                   children: notifDocs.map((DocumentSnapshot notifDoc) {
-                    WebblenNotification notif =
-                        WebblenNotification.fromMap(notifDoc.data);
+                    WebblenNotification notif = WebblenNotification.fromMap(notifDoc.data);
                     if (notif.notificationSeen == false) {
-                      WebblenNotificationDataService()
-                          .updateNotificationStatus(notif.notificationKey);
+                      WebblenNotificationDataService().updateNotificationStatus(notif.notificationKey);
                     }
                     Widget notifWidget;
                     if (notif.notificationType == "friendRequest") {
                       notifWidget = InviteRequestNotificationRow(
                         notification: notif,
-                        notifAction: () =>
-                            transitionToUserDetails(notif.notificationData),
+                        notifAction: () => transitionToUserDetails(notif.notificationData),
                         confirmRequest: () => confirmFriendRequest(notif),
                         denyRequest: () => denyFriendRequest(notif),
                       );
@@ -106,8 +98,7 @@ class _NotificationPageState extends State<NotificationPage> {
           Container(
             height: 85.0,
             width: 85.0,
-            child: Image.asset("assets/images/$pictureName.png",
-                fit: BoxFit.scaleDown),
+            child: Image.asset("assets/images/$pictureName.png", fit: BoxFit.scaleDown),
           ),
           SizedBox(height: 16.0),
           Fonts().textW500(
@@ -228,7 +219,7 @@ class _NotificationPageState extends State<NotificationPage> {
         context: context,
         currentUser: widget.currentUser,
         webblenUser: user,
-      ).transitionToUserDetailsPage();
+      ).transitionToUserPage();
     });
   }
 
@@ -237,9 +228,7 @@ class _NotificationPageState extends State<NotificationPage> {
     //      FirebaseNotificationsService().deleteNotification(notifKey);
     if (notifType == "deposit") {
       Navigator.pop(context, 3);
-    } else if (notifType == "newPost" ||
-        notifType == "newEvent" ||
-        notifType == "invite") {
+    } else if (notifType == "newPost" || notifType == "newEvent" || notifType == "invite") {
       int stringIndex = notif.notificationData.indexOf(".");
       String areaName = notif.notificationData.substring(
         0,
@@ -276,9 +265,7 @@ class _NotificationPageState extends State<NotificationPage> {
           );
         }
       });
-    } else if (notifType == "newPostComment" &&
-        (notif.notificationSender != null ||
-            notif.notificationSender.isNotEmpty)) {
+    } else if (notifType == "newPostComment" && (notif.notificationSender != null || notif.notificationSender.isNotEmpty)) {
       CommunityDataService().getPost(notif.notificationSender).then((post) {
         if (post != null) {
           PageTransitionService(

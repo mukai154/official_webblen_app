@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:webblen/firebase_data/event_data.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/models/event.dart';
-import 'package:webblen/models/event_ticket_distribution.dart';
+import 'package:webblen/models/ticket_distro.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class TicketSelectionPage extends StatefulWidget {
   final WebblenUser currentUser;
-  final Event event;
+  final WebblenEvent event;
 
   TicketSelectionPage({
     this.currentUser,
@@ -37,7 +37,7 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
   //Event Info
   WebblenUser eventHost;
   DateFormat formatter = DateFormat('MMM dd, yyyy h:mm a');
-  EventTicketDistribution ticketDistro;
+  TicketDistro ticketDistro;
 
   //payments
   List<String> ticketPurchaseAmounts = ['0', '1', '2', '3', '4'];
@@ -136,9 +136,9 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    UserDataService().getUserByID(widget.event.authorUid).then((res) {
+    UserDataService().getUserByID(widget.event.authorID).then((res) {
       eventHost = res;
-      EventDataService().getEventTicketDistro(widget.event.eventKey).then((res) {
+      EventDataService().getEventTicketDistro(widget.event.id).then((res) {
         ticketDistro = res;
         print(ticketDistro);
         ticketDistro.tickets.forEach((ticket) {
@@ -182,8 +182,8 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
                           children: <Widget>[
                             Fonts().textW400("Hosted By ", 16.0, Colors.black, TextAlign.left),
                             GestureDetector(
-                              onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser, webblenUser: eventHost)
-                                  .transitionToUserDetailsPage(),
+                              onTap: () =>
+                                  PageTransitionService(context: context, currentUser: widget.currentUser, webblenUser: eventHost).transitionToUserPage(),
                               child: Fonts().textW400("@${eventHost.username}", 16.0, FlatColors.webblenRed, TextAlign.left),
                             ),
                           ],
@@ -193,7 +193,7 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
                         ),
                         Fonts().textW300(
                           formatter.format(
-                            DateTime.fromMillisecondsSinceEpoch(widget.event.startDateInMilliseconds),
+                            DateTime.fromMillisecondsSinceEpoch(widget.event.startDateTimeInMilliseconds),
                           ),
                           14.0,
                           Colors.black,

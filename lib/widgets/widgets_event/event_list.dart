@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/models/event.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -10,7 +9,7 @@ import 'package:webblen/widgets/widgets_event/event_row.dart';
 
 class EventList extends StatelessWidget {
   final WebblenUser currentUser;
-  final List<Event> events;
+  final List<WebblenEvent> events;
   final VoidCallback refreshData;
 
   EventList({

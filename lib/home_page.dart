@@ -8,8 +8,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
 import 'package:location_permissions/location_permissions.dart';
 import 'package:webblen/animations/shake_animation.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase_data/auth.dart';
-import 'package:webblen/firebase_data/event_data.dart';
 import 'package:webblen/firebase_data/platform_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_services/remote_messaging.dart';
@@ -17,38 +17,27 @@ import 'package:webblen/models/community_news.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/home_pages/home_dashboard_page.dart';
 import 'package:webblen/pages/home_pages/location_permissions_page.dart';
-import 'package:webblen/pages/home_pages/location_unavailable_page.dart';
 import 'package:webblen/pages/home_pages/network_status_page.dart';
 import 'package:webblen/pages/home_pages/news_feed_page.dart';
-import 'package:webblen/pages/home_pages/settings_page.dart';
 import 'package:webblen/pages/home_pages/update_required_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
 import 'package:webblen/pages/user_pages/notifications_page.dart';
+import 'package:webblen/services/device_permissions.dart';
+import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/utils/network_status.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_data_streams/stream_user_account.dart';
 import 'package:webblen/widgets/widgets_data_streams/stream_user_notifications.dart';
 import 'package:webblen/widgets/widgets_home/check_in_floating_action.dart';
-import 'package:webblen/widgets/widgets_home/user_drawer_menu.dart';
 
 import 'firebase_data/stripe_data.dart';
+import 'pages/user_pages/user_page.dart';
 
 class HomePage extends StatefulWidget {
-  final String simLocation;
-  final double simLat;
-  final double simLon;
-
-  HomePage({
-    this.simLocation,
-    this.simLat,
-    this.simLon,
-  });
-
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -81,12 +70,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   final Key homePageKey = PageStorageKey('homeKey');
   final Key newsPageKey = PageStorageKey('newsPageKey');
   final Key walletPageKey = PageStorageKey('walletPageKey');
-  final Key settingsPageKey = PageStorageKey('settingsPageKey');
+  final Key userPageKey = PageStorageKey('userPageKey');
 
   Future<Null> initialize() async {
     isConnectedToNetwork = await NetworkStatus().isConnected();
     if (isConnectedToNetwork) {
-      BaseAuth().currentUser().then((val) {
+      BaseAuth().getCurrentUserID().then((val) {
         uid = val;
         UserDataService().checkIfUserExists(uid).then((exists) {
           if (exists) {
@@ -114,8 +103,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
 
     if (deepLink != null) {
       ShowAlertDialogService().showLoadingDialog(context);
-      String eventKey = deepLink.path;
-      EventDataService().getEventByKey(eventKey).then((res) {
+      String eventID = deepLink.path;
+      EventDataService().getEvent(eventID).then((res) {
         Navigator.of(context).pop();
         PageTransitionService(context: context, currentUser: currentUser, eventIsLive: false).transitionToEventPage();
       });
@@ -125,8 +114,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       final Uri deepLink = dynamicLink?.link;
       if (deepLink != null) {
         ShowAlertDialogService().showLoadingDialog(context);
-        String eventKey = deepLink.path;
-        EventDataService().getEventByKey(eventKey).then((res) {
+        String eventID = deepLink.path;
+        EventDataService().getEvent(eventID).then((res) {
           Navigator.of(context).pop();
           PageTransitionService(context: context, currentUser: currentUser, eventIsLive: false).transitionToEventPage();
         });
@@ -137,9 +126,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   checkPermissions() async {
-    LocationService().checkLocationPermissions().then((locationPermissions) async {
+    DevicePermissions().checkLocationPermissions().then((locationPermissions) async {
+      print(locationPermissions);
       if (locationPermissions == 'PermissionStatus.unknown') {
-        String permissions = await LocationService().requestPermssion();
+        String permissions = await DevicePermissions().requestPermssion();
         if (permissions == 'PermissionStatus.denied') {
           hasLocation = false;
           isLoading = false;
@@ -158,43 +148,40 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Future<Null> loadLocation() async {
-    if (widget.simLocation != null) {
-      simLocation = widget.simLocation;
-      currentLat = widget.simLat;
-      currentLon = widget.simLon;
+    LocationData location = await LocationService().getCurrentLocation(context);
+    if (location != null) {
       hasLocation = true;
-      getPlatformData(currentLat, currentLon);
-    } else {
-      LocationData location = await LocationService().getCurrentLocation(context);
-      if (location != null) {
-        hasLocation = true;
-        currentLat = location.latitude;
-        currentLon = location.longitude;
-        FirebaseMessagingService().updateFirebaseMessageToken(uid);
-        FirebaseMessagingService().configFirebaseMessaging(
-          context,
-          currentUser,
-        );
-        UserDataService().updateUserAppOpen(
-          uid,
-          currentLat,
-          currentLon,
-        );
-        StripeDataService().checkIfStripeSetup(uid).then((res) {
-          hasEarningsAccount = res;
-          EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result) {
-            checkInAvailable = result;
-            getPlatformData(currentLat, currentLon);
-          });
-        });
-        initDynamicLinks();
-//        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
-
-      } else {
-        hasLocation = false;
+      currentLat = location.latitude;
+      currentLon = location.longitude;
+      LocationService().getCityNameFromLatLon(currentLat, currentLon).then((res) {
+        areaName = res;
         isLoading = false;
         setState(() {});
-      }
+      });
+      FirebaseMessagingService().updateFirebaseMessageToken(uid);
+      FirebaseMessagingService().configFirebaseMessaging(
+        context,
+        currentUser,
+      );
+      UserDataService().updateUserAppOpen(
+        uid,
+        currentLat,
+        currentLon,
+      );
+      StripeDataService().checkIfStripeSetup(uid).then((res) {
+        hasEarningsAccount = res;
+        EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result) {
+          checkInAvailable = result;
+          getPlatformData(currentLat, currentLon);
+        });
+      });
+      initDynamicLinks();
+//        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
+
+    } else {
+      hasLocation = false;
+      isLoading = false;
+      setState(() {});
     }
   }
 
@@ -210,6 +197,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       }
       areaName = area;
       isLoading = false;
+      setState(() {});
       setState(() {});
     });
     PlatformDataService().isUpdateAvailable().then((updateIsAvailable) {
@@ -301,11 +289,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         currentLat: currentLat,
         currentLon: currentLon,
         key: homePageKey,
-        notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()), //() => didPressNotificationsBell(),
-        accountWidget: StreamUserAccount(
-          uid: uid,
-          accountAction: () => didPressAccountButton(),
-        ),
+        notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()), //() => didPressNotificationsBell(),,
       ),
       NewsFeedPage(
         uid: uid,
@@ -322,23 +306,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         currentUser: currentUser,
         key: walletPageKey,
       ),
-      SettingsPage(
+      CurrentUserPage(
         currentUser: currentUser,
-        key: settingsPageKey,
+        key: userPageKey,
       ),
-      WalletPage(
-        currentUser: currentUser,
-        key: walletPageKey,
-      )
     ];
 
     return Scaffold(
       key: _homeScaffoldKey,
-      drawer: UserDrawerMenu(
-        context: context,
-        currentUser: currentUser,
-        hasEarningsAccount: hasEarningsAccount,
-      ).buildUserDrawerMenu(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       //() => didPressCheckIn(
       floatingActionButton: isLoading
@@ -364,6 +339,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         centerItemText: 'Check In',
         notchedShape: CircularNotchedRectangle(),
         backgroundColor: Colors.white,
+        selectedColor: FlatColors.webblenRed,
         onTabSelected: (int index) {
           setState(() {
             pageIndex = index;
@@ -383,7 +359,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             text: 'Wallet',
           ),
           FABBottomAppBarItem(
-            iconData: FontAwesomeIcons.userAlt,
+            customWidget: StreamUserAccount(
+              uid: uid,
+              isLoading: isLoading,
+              useBorderColor: pageIndex == 3 ? true : false, //() => didPressAccountButton(),
+            ),
             text: 'Account',
           ),
         ],
@@ -399,11 +379,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         reloadAction: () => reloadData(),
                         enableLocationAction: () => LocationPermissions().openAppSettings(),
                       )
-                    : !webblenIsAvailable
-                        ? LocationUnavailablePage(
-                            currentUser: currentUser,
-                          )
-                        : updateRequired ? UpdateRequiredPage() : pageViews[pageIndex],
+                    : updateRequired ? UpdateRequiredPage() : pageViews[pageIndex],
       ),
     );
   }

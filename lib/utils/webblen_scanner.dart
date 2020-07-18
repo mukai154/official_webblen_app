@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
-
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 
 class WebblenScanner extends StatefulWidget {
   final WebblenUser currentUser;
@@ -50,10 +49,7 @@ class _WebblenScannerState extends State<WebblenScanner> {
             .then((error) {
           Navigator.of(context).pop();
           if (error.isEmpty) {
-            ShowAlertDialogService().showActionSuccessDialog(
-                context,
-                "Friend Request Sent!",
-                username + " Will Need to Confirm Your Request", () {
+            ShowAlertDialogService().showActionSuccessDialog(context, "Friend Request Sent!", username + " Will Need to Confirm Your Request", () {
               Navigator.of(context).pop();
               Navigator.of(context).pop();
             });

@@ -1,10 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
-import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/models/event.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/styles/flat_colors.dart';
@@ -108,7 +107,7 @@ class BuildSentMessage extends StatelessWidget {
           ),
           child: EventMessage(
             currentUser: currentUser,
-            eventKey: chatMessage.messageContent,
+            eventID: chatMessage.messageContent,
           ),
         ),
       ],
@@ -117,8 +116,7 @@ class BuildSentMessage extends StatelessWidget {
 
   Widget buildSentMessage() {
     bool showTime = false;
-    if (DateTime.now().millisecondsSinceEpoch - chatMessage.timestamp >
-        18000000) {
+    if (DateTime.now().millisecondsSinceEpoch - chatMessage.timestamp > 18000000) {
       showTime = true;
     }
     return Column(
@@ -133,8 +131,7 @@ class BuildSentMessage extends StatelessWidget {
                       vertical: 8.0,
                     ),
                     child: Fonts().textW400(
-                      TimeCalc()
-                          .getPastTimeFromMilliseconds(chatMessage.timestamp),
+                      TimeCalc().getPastTimeFromMilliseconds(chatMessage.timestamp),
                       12.0,
                       FlatColors.lightAmericanGray,
                       TextAlign.right,
@@ -145,11 +142,7 @@ class BuildSentMessage extends StatelessWidget {
             : Container(),
         chatMessage.messageType == "text"
             ? textMessage()
-            : chatMessage.messageType == "image"
-                ? imageMessage()
-                : chatMessage.messageType == "initial"
-                    ? Container()
-                    : eventMessage(),
+            : chatMessage.messageType == "image" ? imageMessage() : chatMessage.messageType == "initial" ? Container() : eventMessage(),
       ],
     );
   }
@@ -266,7 +259,7 @@ class BuildReceivedMessage extends StatelessWidget {
             ),
             child: EventMessage(
               currentUser: currentUser,
-              eventKey: chatMessage.messageContent,
+              eventID: chatMessage.messageContent,
             ),
           ),
         ),
@@ -276,8 +269,7 @@ class BuildReceivedMessage extends StatelessWidget {
 
   Widget buildReceivedMessage() {
     bool showTime = false;
-    if (DateTime.now().millisecondsSinceEpoch - chatMessage.timestamp >
-        18000000) {
+    if (DateTime.now().millisecondsSinceEpoch - chatMessage.timestamp > 18000000) {
       showTime = true;
     }
     return Container(
@@ -291,8 +283,7 @@ class BuildReceivedMessage extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.symmetric(vertical: 8.0),
                       child: Fonts().textW400(
-                        TimeCalc()
-                            .getPastTimeFromMilliseconds(chatMessage.timestamp),
+                        TimeCalc().getPastTimeFromMilliseconds(chatMessage.timestamp),
                         12.0,
                         FlatColors.lightAmericanGray,
                         TextAlign.right,
@@ -307,11 +298,7 @@ class BuildReceivedMessage extends StatelessWidget {
                 uid: chatMessage.uid,
                 size: 45,
               ),
-              chatMessage.messageType == "text"
-                  ? textMessage()
-                  : chatMessage.messageType == "initial"
-                      ? Container()
-                      : eventMessage()
+              chatMessage.messageType == "text" ? textMessage() : chatMessage.messageType == "initial" ? Container() : eventMessage()
             ],
           ),
         ],
@@ -331,11 +318,11 @@ class BuildReceivedMessage extends StatelessWidget {
 
 class EventMessage extends StatefulWidget {
   final WebblenUser currentUser;
-  final String eventKey;
+  final String eventID;
 
   EventMessage({
     this.currentUser,
-    this.eventKey,
+    this.eventID,
   });
 
   @override
@@ -344,12 +331,12 @@ class EventMessage extends StatefulWidget {
 
 class _EventMessageState extends State<EventMessage> {
   bool isLoading = true;
-  Event event;
+  WebblenEvent event;
 
   @override
   void initState() {
     super.initState();
-    EventDataService().getEventByKey(widget.eventKey).then((res) {
+    EventDataService().getEvent(widget.eventID).then((res) {
       event = res;
       isLoading = false;
       if (this.mounted) {
@@ -378,7 +365,7 @@ class _EventMessageState extends State<EventMessage> {
             : GestureDetector(
                 onTap: () => PageTransitionService(
                   context: context,
-                  event: event,
+                  event: null,
                   eventIsLive: false,
                   currentUser: widget.currentUser,
                 ).transitionToEventPage(),

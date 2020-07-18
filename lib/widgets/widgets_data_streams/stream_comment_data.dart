@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/comment_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/comment.dart';
@@ -22,8 +21,7 @@ class StreamCommentData extends StatelessWidget {
     this.scrollController,
   });
 
-  final CollectionReference commentRef =
-      Firestore.instance.collection('comments');
+  final CollectionReference commentRef = Firestore.instance.collection('comments');
 
   transitionToUserPage(BuildContext context, String uid) async {
     UserDataService().getUserByID(uid).then((user) {
@@ -32,7 +30,7 @@ class StreamCommentData extends StatelessWidget {
           context: context,
           currentUser: currentUser,
           webblenUser: user,
-        ).transitionToUserDetailsPage();
+        ).transitionToUserPage();
       }
     });
   }
@@ -147,8 +145,7 @@ class StreamCommentCountData extends StatelessWidget {
     this.postID,
   });
 
-  final CollectionReference commentRef =
-      Firestore.instance.collection('comments');
+  final CollectionReference commentRef = Firestore.instance.collection('comments');
 
   @override
   Widget build(BuildContext context) {
@@ -201,8 +198,7 @@ class StreamRequestCommentData extends StatelessWidget {
     this.scrollController,
   });
 
-  final CollectionReference commentRef =
-      Firestore.instance.collection('request_comments');
+  final CollectionReference commentRef = Firestore.instance.collection('request_comments');
 
   transitionToUserPage(BuildContext context, String uid) async {
     UserDataService().getUserByID(uid).then((user) {
@@ -211,7 +207,7 @@ class StreamRequestCommentData extends StatelessWidget {
           context: context,
           currentUser: currentUser,
           webblenUser: user,
-        ).transitionToUserDetailsPage();
+        ).transitionToUserPage();
       }
     });
   }
@@ -323,8 +319,7 @@ class StreamRequestCommentCountData extends StatelessWidget {
     this.requestID,
   });
 
-  final CollectionReference commentRef =
-      Firestore.instance.collection('request_comments');
+  final CollectionReference commentRef = Firestore.instance.collection('request_comments');
 
   @override
   Widget build(BuildContext context) {

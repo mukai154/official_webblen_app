@@ -1,21 +1,19 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/models/webblen_user.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webblen/firebase_services/file_uploader.dart';
+import 'package:webblen/models/webblen_user.dart';
 
 class UserDataService {
   Geoflutterfire geo = Geoflutterfire();
-  final CollectionReference userRef =
-      Firestore.instance.collection("webblen_user");
+  final CollectionReference userRef = Firestore.instance.collection("webblen_user");
   final CollectionReference eventRef = Firestore.instance.collection("events");
-  final CollectionReference notifRef =
-      Firestore.instance.collection("user_notifications");
+  final CollectionReference notifRef = Firestore.instance.collection("user_notifications");
 
   final StorageReference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
@@ -32,8 +30,11 @@ class UserDataService {
   }
 
   //***CREATE
-  Future<bool> createNewUser(
-      File userImage, WebblenUser user, String uid) async {
+  Stream<WebblenUser> streamCurrentUser(String uid) {
+    return userRef.document(uid).snapshots().map((snapshot) => WebblenUser.fromMap(Map<String, dynamic>.from(snapshot.data['d'])));
+  }
+
+  Future<bool> createNewUser(File userImage, WebblenUser user, String uid) async {
     bool success = true;
     StorageReference storageReference = FirebaseStorage.instance.ref();
     String fileName = "$uid.jpg";
@@ -173,79 +174,14 @@ class UserDataService {
     return url;
   }
 
-  Future<List<WebblenUser>> getNearbyUsers(double lat, double lon) async {
-    List<WebblenUser> users = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'getNearbyUsers',
-    );
-    final HttpsCallableResult result = await callable.call(
-      <String, dynamic>{
-        'lat': lat,
-        'lon': lon,
-      },
-    );
-    if (result.data != null) {
-      List query = List.from(json.decode(result.data));
-      query.forEach((resultMap) {
-        Map<String, dynamic> userMap = Map<String, dynamic>.from(resultMap);
-        WebblenUser user = WebblenUser.fromMap(userMap);
-        users.add(user);
-      });
-    }
-    return users;
-  }
-
-  Future<String> getNumberOfNearbyUsers(double lat, double lon) async {
-    String numOfNearbyUsers = '0';
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'getNumberOfNearbyUsers',
-    );
-    final HttpsCallableResult result = await callable.call(
-      <String, dynamic>{
-        'lat': lat,
-        'lon': lon,
-      },
-    );
-    if (result.data != null) {
-      numOfNearbyUsers = result.data.toString();
-    }
-    return numOfNearbyUsers;
-  }
-
-  Future<List<WebblenUser>> get10RandomUsers(double lat, double lon) async {
-    List<WebblenUser> users = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'get10RandomUsers',
-    );
-    final HttpsCallableResult result = await callable.call(
-      <String, dynamic>{
-        'lat': lat,
-        'lon': lon,
-      },
-    );
-    if (result.data != null) {
-      List query = List.from(json.decode(result.data));
-      query.forEach((resultMap) {
-        Map<String, dynamic> userMap = Map<String, dynamic>.from(resultMap);
-        WebblenUser user = WebblenUser.fromMap(userMap);
-        users.add(user);
-      });
-    }
-    return users;
-  }
-
   Future<Null> updateNotifTime(String uid) async {
-    userRef.document(uid).updateData({
-      'lastNotificationTimeInMilliseconds':
-          DateTime.now().millisecondsSinceEpoch
-    });
+    userRef.document(uid).updateData({'lastNotificationTimeInMilliseconds': DateTime.now().millisecondsSinceEpoch});
   }
 
   Future<int> getLastNotifTime(String uid) async {
     int lastNotifInMilliseconds;
     await userRef.document(uid).get().then((userDoc) {
-      lastNotifInMilliseconds =
-          userDoc.data['lastNotificationTimeInMilliseconds'];
+      lastNotifInMilliseconds = userDoc.data['lastNotificationTimeInMilliseconds'];
     });
     return lastNotifInMilliseconds;
   }
@@ -284,8 +220,7 @@ class UserDataService {
     });
   }
 
-  Future<String> updateUserProfilePic(
-      String uid, String username, String downloadUrl) async {
+  Future<String> updateUserProfilePic(String uid, String username, String downloadUrl) async {
     String error;
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
       functionName: 'updateUserProfilePic',
@@ -332,22 +267,13 @@ class UserDataService {
   Future<Null> addUserDataField(String dataName, dynamic data) async {
     QuerySnapshot querySnapshot = await userRef.getDocuments();
     querySnapshot.documents.forEach((doc) {
-      userRef
-          .document(doc.documentID)
-          .updateData({"$dataName": data})
-          .whenComplete(() {})
-          .catchError((e) {});
+      userRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
     });
   }
 
-  Future<String> setUserCloudMessageToken(
-      String uid, String messageToken) async {
+  Future<String> setUserCloudMessageToken(String uid, String messageToken) async {
     String status = "";
-    userRef
-        .document(uid)
-        .updateData({"d.messageToken": messageToken})
-        .whenComplete(() {})
-        .catchError((e) {
+    userRef.document(uid).updateData({"d.messageToken": messageToken}).whenComplete(() {}).catchError((e) {
           status = e.details;
         });
     return status;
@@ -364,12 +290,8 @@ class UserDataService {
     ownUserFriendsList.remove(uid);
     otherUserFriendsList.remove(currentUid);
 
-    await userRef
-        .document(uid)
-        .updateData({"d.friends": otherUserFriendsList}).whenComplete(() {
-      userRef
-          .document(currentUid)
-          .updateData({"d.friends": ownUserFriendsList}).whenComplete(() {
+    await userRef.document(uid).updateData({"d.friends": otherUserFriendsList}).whenComplete(() {
+      userRef.document(currentUid).updateData({"d.friends": ownUserFriendsList}).whenComplete(() {
         requestStatus = "success";
       }).catchError((e) {
         requestStatus = e.details;
@@ -410,55 +332,8 @@ class UserDataService {
     return friendStatus;
   }
 
-  Future<String> joinWaitList(String uid, double lat, double lon, String email,
-      String phoneNo, String zipCode) async {
-    String error = '';
-    final CollectionReference waitListRef =
-        Firestore.instance.collection("waitlist");
-    await waitListRef.document(uid).get().then((snapshot) {
-      if (snapshot.exists) {
-        error = "You're Already on Our Waitlist!";
-      } else {
-        if (email == null) {
-          waitListRef.document(uid).setData({
-            "lat": lat,
-            "lon": lon,
-            "phoneNo": phoneNo,
-            "zipCode": zipCode,
-          }).whenComplete(() {
-            userRef
-                .document(uid)
-                .updateData({"isOnWaitList": true}).whenComplete(() {});
-          }).catchError((e) {
-            error = e.details;
-          });
-        } else {
-          waitListRef
-              .document(uid)
-              .setData({
-                "lat": lat,
-                "lon": lon,
-                "email": email,
-                "zipCode": zipCode,
-              })
-              .whenComplete(() {})
-              .catchError((e) {
-                error = e.details;
-              });
-        }
-      }
-    });
-
-    return error;
-  }
-
-  Future<Null> updateNotificationPermission(
-      String uid, String notif, bool status) async {
-    userRef
-        .document(uid)
-        .updateData({notif: status})
-        .whenComplete(() {})
-        .catchError((e) {});
+  Future<Null> updateNotificationPermission(String uid, String notif, bool status) async {
+    userRef.document(uid).updateData({notif: status}).whenComplete(() {}).catchError((e) {});
   }
 
 //  Future<Null> updateUserField() async {

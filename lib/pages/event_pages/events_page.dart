@@ -1,17 +1,22 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:webblen/firebase_data/community_data.dart';
-import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/models/event.dart';
+import 'package:share/share.dart';
+import 'package:webblen/constants/custom_colors.dart';
+import 'package:webblen/constants/strings.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_button.dart';
+import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
+import 'package:webblen/widgets/common/containers/text_field_container.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
+import 'package:webblen/widgets/events/event_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_event/event_row.dart';
+import 'package:webblen/widgets/widgets_home_tiles/search_tile.dart';
 
 class EventsPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -35,113 +40,356 @@ class EventsPage extends StatefulWidget {
 class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateMixin {
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
-  ScrollController _scrollController;
-//  List<Event> events = [];
-  List<Event> myEvents = [];
-  List<Event> standardEvents = [];
-  List<Event> foodDrinkEvents = [];
-  List<Event> saleDiscountEvents = [];
-  bool isLoading = true;
+  ScrollController eventsScrollController;
+  ScrollController myEventsScrollController;
+  int resultsPerPage = 10;
+  String areaName = "My Current Location";
+  String areaCodeFilter;
+  String eventTypeFilter = "None";
+  String eventCategoryFilter = "None";
+  //Event Results
+  CollectionReference eventsRef = Firestore.instance.collection("events");
 
-  Future<Null> getEvents() async {
-    EventDataService()
-        .getEventsNearLocation(
-      widget.currentLat,
-      widget.currentLon,
-      false,
-    )
-        .then((result) {
-      if (result.isEmpty) {
-        isLoading = false;
-        setState(() {});
-      } else {
-        standardEvents = result.where((e) => e.eventType == 'standard').toList(growable: true);
-        foodDrinkEvents = result.where((e) => e.eventType == 'foodDrink').toList(growable: true);
-        saleDiscountEvents = result.where((e) => e.eventType == 'saleDiscount').toList(growable: true);
-        standardEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
-        foodDrinkEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
-        saleDiscountEvents.sort((eventA, eventB) => eventA.startDateInMilliseconds.compareTo(eventB.startDateInMilliseconds));
-        EventDataService().getCreatedEvents(widget.currentUser.uid).then((res) {
-          myEvents = res;
-          myEvents.sort((eventA, eventB) => eventB.startDateInMilliseconds.compareTo(eventA.startDateInMilliseconds));
-          isLoading = false;
-          setState(() {});
-        });
-      }
-    });
+  List<DocumentSnapshot> eventResults = [];
+  List<DocumentSnapshot> myEventResults = [];
+  DocumentSnapshot lastEventDocSnap;
+  DocumentSnapshot lastMyEventDocSnap;
+  bool isLoading = true;
+  bool loadingAdditionalEvents = false;
+  bool moreEventsAvailable = true;
+  bool loadingAdditionalMyEvents = false;
+  bool moreMyEventsAvailable = true;
+
+  getEvents() async {
+    Query eventsQuery;
+    if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
+      eventsQuery =
+          eventsRef.where('d.nearbyZipcodes', arrayContains: areaCodeFilter).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+    } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
+      print(eventTypeFilter);
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.type', isEqualTo: eventTypeFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .limit(resultsPerPage);
+    } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.category', isEqualTo: eventCategoryFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .limit(resultsPerPage);
+    } else {
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.type', isEqualTo: eventTypeFilter)
+          .where('d.category', isEqualTo: eventCategoryFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .limit(resultsPerPage);
+    }
+    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+    if (querySnapshot.documents.isNotEmpty) {
+      lastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+      eventResults = querySnapshot.documents;
+    }
+    isLoading = false;
+    setState(() {});
+  }
+
+  getMyEvents() async {
+    Query eventsQuery =
+        eventsRef.where("d.authorID", isEqualTo: widget.currentUser.uid).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+    if (querySnapshot.documents.isNotEmpty) {
+      lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+      myEventResults = querySnapshot.documents;
+    }
+    isLoading = false;
+    setState(() {});
+  }
+
+  getAdditionalEvents() async {
+    if (isLoading || !moreEventsAvailable || loadingAdditionalEvents) {
+      return;
+    }
+    loadingAdditionalEvents = true;
+    setState(() {});
+    Query eventsQuery;
+    if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .startAfterDocument(lastEventDocSnap)
+          .limit(resultsPerPage);
+    } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.type', isEqualTo: eventTypeFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .startAfterDocument(lastEventDocSnap)
+          .limit(resultsPerPage);
+    } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.category', isEqualTo: eventCategoryFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .startAfterDocument(lastEventDocSnap)
+          .limit(resultsPerPage);
+    } else {
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.type', isEqualTo: eventTypeFilter)
+          .where('d.category', isEqualTo: eventCategoryFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .startAfterDocument(lastEventDocSnap)
+          .limit(resultsPerPage);
+    }
+
+    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+    lastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+    eventResults.addAll(querySnapshot.documents);
+    if (querySnapshot.documents.length == 0) {
+      moreEventsAvailable = false;
+    }
+    loadingAdditionalEvents = false;
+    setState(() {});
+  }
+
+  getAdditionalMyEvents() async {
+    if (isLoading || !moreEventsAvailable || loadingAdditionalMyEvents) {
+      return;
+    }
+    loadingAdditionalMyEvents = true;
+    setState(() {});
+    Query eventsQuery = eventsRef
+        .where("d.authorID", isEqualTo: widget.currentUser.uid)
+        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .startAfterDocument(lastMyEventDocSnap)
+        .limit(resultsPerPage);
+
+    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+    lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+    myEventResults.addAll(querySnapshot.documents);
+    if (querySnapshot.documents.length == 0) {
+      moreMyEventsAvailable = false;
+    }
+    loadingAdditionalMyEvents = false;
+    setState(() {});
   }
 
   Future<void> refreshData() async {
-    standardEvents = [];
-    foodDrinkEvents = [];
-    saleDiscountEvents = [];
-    myEvents = [];
+    eventResults = [];
+    myEventResults = [];
+    getMyEvents();
     getEvents();
   }
 
-  void transitionToCommunityPage(Event event) async {
-    ShowAlertDialogService().showLoadingCommunityDialog(
-      context,
-      event.communityAreaName,
-      event.communityName,
+  Future<void> refreshFromPreferences() async {
+    Navigator.of(context).pop();
+    isLoading = true;
+    setState(() {});
+    eventResults = [];
+    getEvents();
+  }
+
+//  void transitionToShareEventPage(Event event) async {
+//    PageTransitionService(
+//      context: context,
+//      currentUser: widget.currentUser,
+//      event: event,
+//    ).transitionToChatInviteSharePage();
+//  }
+
+  showEventPreferenceDialog() {
+    Widget widget = Container(
+      height: 325.0,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          CustomText(
+            context: context,
+            text: "Event Preferences",
+            textColor: Colors.black,
+            textAlign: TextAlign.center,
+            fontSize: 24.0,
+            fontWeight: FontWeight.w700,
+          ),
+          SizedBox(height: 16.0),
+          CustomText(
+            context: context,
+            text: "Location:",
+            textColor: Colors.black,
+            textAlign: TextAlign.left,
+            fontSize: 16.0,
+            fontWeight: FontWeight.w700,
+          ),
+          SizedBox(height: 4.0),
+          GestureDetector(
+            onTap: null,
+            child: TextFieldContainer(
+              height: 30.0,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  CustomText(
+                    context: context,
+                    text: "$areaName",
+                    textColor: Colors.black,
+                    textAlign: TextAlign.left,
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          SizedBox(height: 16.0),
+          CustomText(
+            context: context,
+            text: "Category:",
+            textColor: Colors.black,
+            textAlign: TextAlign.left,
+            fontSize: 16.0,
+            fontWeight: FontWeight.w700,
+          ),
+          SizedBox(height: 4.0),
+          TextFieldContainer(
+            height: 35,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 6,
+              ),
+              child: DropdownButton(
+                  style: TextStyle(fontSize: 12.0, color: Colors.black),
+                  isExpanded: true,
+                  underline: Container(),
+                  value: eventCategoryFilter,
+                  items: Strings.eventCategoryFilters.map((String val) {
+                    return DropdownMenuItem<String>(
+                      value: val,
+                      child: Text(val),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      eventCategoryFilter = val;
+                    });
+                    Navigator.of(context).pop();
+                    showEventPreferenceDialog();
+                  }),
+            ),
+          ),
+          SizedBox(height: 16.0),
+          CustomText(
+            context: context,
+            text: "Type:",
+            textColor: Colors.black,
+            textAlign: TextAlign.left,
+            fontSize: 16.0,
+            fontWeight: FontWeight.w700,
+          ),
+          SizedBox(height: 4.0),
+          TextFieldContainer(
+            height: 35,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                vertical: 6,
+              ),
+              child: DropdownButton(
+                  style: TextStyle(fontSize: 12.0, color: Colors.black),
+                  isExpanded: true,
+                  underline: Container(),
+                  value: eventTypeFilter,
+                  items: Strings.eventTypeFilters.map((String val) {
+                    return DropdownMenuItem<String>(
+                      value: val,
+                      child: Text(val),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      eventTypeFilter = val;
+                    });
+                    Navigator.of(context).pop();
+                    showEventPreferenceDialog();
+                  }),
+            ),
+          ),
+          SizedBox(height: 16.0),
+          CustomColorButton(
+            text: "Apply",
+            textColor: Colors.white,
+            backgroundColor: CustomColors.darkMountainGreen,
+            height: 45.0,
+            width: 200.0,
+            onPressed: () => refreshFromPreferences(),
+          ),
+        ],
+      ),
     );
-    CommunityDataService()
-        .getCommunityByName(
-      event.communityAreaName,
-      event.communityName,
-    )
-        .then((com) {
-      if (com != null) {
-        Navigator.of(context).pop();
-        PageTransitionService(
-          context: context,
-          currentUser: widget.currentUser,
-          community: com,
-        ).transitionToCommunityProfilePage();
-      } else {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          'Uh Oh...',
-          'There was an issue loading this community. Please try again later',
-        );
-      }
-    });
+    ShowAlertDialogService().showFormDialog(context, widget);
   }
 
-  void transitionToShareEventPage(Event event) async {
-    PageTransitionService(
-      context: context,
-      currentUser: widget.currentUser,
-      event: event,
-    ).transitionToChatInviteSharePage();
-  }
-
-  Widget listEvents(List<Event> eventsToList) {
+  Widget listEvents() {
     return LiquidPullToRefresh(
-      color: FlatColors.webblenRed,
+      color: CustomColors.webblenRed,
       onRefresh: refreshData,
-      child: new ListView.builder(
+      child: ListView.builder(
+        controller: eventsScrollController,
         key: UniqueKey(),
         shrinkWrap: true,
         padding: EdgeInsets.only(
           top: 4.0,
           bottom: 4.0,
         ),
-        itemCount: eventsToList.length,
+        itemCount: eventResults.length,
         itemBuilder: (context, index) {
-          return ComEventRow(
-              event: eventsToList[index],
-              showCommunity: true,
-              currentUser: widget.currentUser,
-              transitionToComAction: () => transitionToCommunityPage(eventsToList[index]),
-              shareEventAction: () => transitionToShareEventPage(eventsToList[index]),
-              eventPostAction: () => PageTransitionService(
-                    context: context,
-                    currentUser: widget.currentUser,
-                    event: eventsToList[index],
-                    eventIsLive: false,
-                  ).transitionToEventPage());
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(eventResults[index].data['d']));
+          return Padding(
+            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
+            child: EventBlock(
+              event: event,
+              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+              viewEventTickets: null,
+              numOfTicsForEvent: null,
+              eventImgSize: MediaQuery.of(context).size.width - 16,
+              eventDescHeight: 120.0,
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget listMyEvents() {
+    return LiquidPullToRefresh(
+      color: CustomColors.webblenRed,
+      onRefresh: refreshData,
+      child: ListView.builder(
+        controller: myEventsScrollController,
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: myEventResults.length,
+        itemBuilder: (context, index) {
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(myEventResults[index].data['d']));
+          return Padding(
+            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: myEventResults.length - 1 == index ? 16.0 : 0),
+            child: EventBlock(
+              event: event,
+              shareEvent: null,
+              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+              viewEventTickets: null,
+              numOfTicsForEvent: null,
+              eventImgSize: MediaQuery.of(context).size.width - 16,
+              eventDescHeight: 120.0,
+            ),
+          );
         },
       ),
     );
@@ -151,94 +399,123 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _tabController = new TabController(
-      length: 4,
+      length: 2,
       vsync: this,
     );
-    _scrollController = ScrollController();
-    //EventDataService().convertEventData();
-    getEvents();
+    eventsScrollController = ScrollController();
+    myEventsScrollController = ScrollController();
+    eventsScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * eventsScrollController.position.maxScrollExtent;
+      if (eventsScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalEvents();
+      }
+    });
+    myEventsScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * myEventsScrollController.position.maxScrollExtent;
+      if (myEventsScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalMyEvents();
+      }
+    });
+    LocationService().getZipFromLatLon(widget.currentLat, widget.currentLon).then((res) {
+      areaCodeFilter = res;
+      getMyEvents();
+      getEvents();
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
     _tabController.dispose();
-    _scrollController.dispose();
+    eventsScrollController.dispose();
+    myEventsScrollController.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
-      elevation: 0.5,
-      brightness: Brightness.light,
-      backgroundColor: Colors.white,
-      title: Fonts().textW700(
-        "Events",
-        24.0,
-        Colors.black,
-        TextAlign.center,
-      ),
-      leading: BackButton(
-        color: Colors.black,
-      ),
-      actions: <Widget>[
-        Row(
-          children: <Widget>[
-            IconButton(
-              onPressed: () => PageTransitionService(
-                context: context,
-                currentUser: widget.currentUser,
-                areaName: widget.areaName,
-              ).transitionToSearchPage(),
-              icon: Icon(
-                FontAwesomeIcons.search,
-                size: 20.0,
-                color: Colors.black,
-              ),
-            ),
-            IconButton(
-              onPressed: () => PageTransitionService(
-                context: context,
-                uid: widget.currentUser.uid,
-                action: 'newEvent',
-              ).transitionToMyCommunitiesPage(),
-              icon: Icon(
-                FontAwesomeIcons.plus,
-                size: 20.0,
-                color: Colors.black,
-              ),
-            ),
-          ],
+        elevation: 0.5,
+        brightness: Brightness.light,
+        backgroundColor: Colors.white,
+        title: Fonts().textW700(
+          "Events",
+          24.0,
+          Colors.black,
+          TextAlign.center,
         ),
-      ],
-      bottom: TabBar(
-        indicatorColor: FlatColors.webblenRed,
-        labelColor: FlatColors.darkGray,
-        isScrollable: true,
-        labelStyle: TextStyle(
-          fontFamily: 'Barlow',
-          fontWeight: FontWeight.w500,
+        leading: BackButton(
+          color: Colors.black,
         ),
-        tabs: [
-          Tab(
-            text: 'Nearby Events',
-          ),
-          Tab(
-            text: 'Food/Drink Specials',
-          ),
-          Tab(
-            text: 'Sales & Discounts',
-          ),
-          Tab(
-            text: 'My Events',
+        actions: <Widget>[
+          Row(
+            children: <Widget>[
+              IconButton(
+                onPressed: () => showEventPreferenceDialog(),
+                icon: Icon(
+                  FontAwesomeIcons.slidersH,
+                  size: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+              IconButton(
+                onPressed: () => PageTransitionService(
+                  context: context,
+                ).transitionToCreateEventPage(),
+                icon: Icon(
+                  FontAwesomeIcons.plus,
+                  size: 20.0,
+                  color: Colors.black,
+                ),
+              ),
+            ],
           ),
         ],
-        controller: _tabController,
-      ),
-    );
+        bottom: PreferredSize(
+          child: Column(
+            children: [
+              GestureDetector(
+                onTap: () => PageTransitionService(
+                  context: context,
+                  currentUser: widget.currentUser,
+                  areaName: widget.areaName,
+                ).transitionToSearchPage(),
+                child: SearchTile(),
+              ),
+              TabBar(
+                controller: _tabController,
+                indicatorColor: CustomColors.webblenRed,
+                labelColor: CustomColors.darkGray,
+                isScrollable: true,
+                tabs: [
+                  Tab(
+                    child: CustomText(
+                      context: context,
+                      text: "Events",
+                      textColor: Colors.black,
+                      textAlign: TextAlign.center,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  Tab(
+                    child: CustomText(
+                      context: context,
+                      text: "My Events",
+                      textColor: Colors.black,
+                      textAlign: TextAlign.center,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          preferredSize: Size.fromHeight(85.0),
+        ));
 
     return DefaultTabController(
-      length: 4,
+      length: 2,
       child: Scaffold(
         appBar: appBar,
         body: TabBarView(
@@ -253,10 +530,10 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                       context: context,
                       loadingDescription: 'Loading Events...',
                     )
-                  : standardEvents.isEmpty
+                  : eventResults.isEmpty
                       ? Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
+                            SizedBox(height: 32.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
@@ -264,41 +541,40 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                                   constraints: BoxConstraints(
                                     maxWidth: MediaQuery.of(context).size.width - 16,
                                   ),
-                                  child: Fonts().textW300(
-                                    "No Community You're Following Has Upcoming Events",
-                                    16.0,
-                                    FlatColors.lightAmericanGray,
-                                    TextAlign.center,
+                                  child: CustomText(
+                                    context: context,
+                                    text: "We Could Not Find Any Events According to Your Preferences",
+                                    textColor: Colors.black,
+                                    textAlign: TextAlign.center,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 )
                               ],
                             ),
+                            SizedBox(height: 8.0),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: <Widget>[
-                                CustomColorButton(
-                                  text: 'Post a Flash Event',
-                                  textColor: FlatColors.darkGray,
-                                  backgroundColor: Colors.white,
-                                  height: 45.0,
-                                  width: 300,
-                                  hPadding: 8.0,
-                                  vPadding: 8.0,
-                                  onPressed: () => () => PageTransitionService(
-                                        context: context,
-                                        uid: widget.currentUser.uid,
-                                      ).transitionToNewFlashEventPage(),
-                                )
+                                GestureDetector(
+                                  onTap: () => showEventPreferenceDialog(),
+                                  child: CustomText(
+                                    context: context,
+                                    text: "Change My Preferences",
+                                    textColor: Colors.blueAccent,
+                                    textAlign: TextAlign.center,
+                                    underline: false,
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ],
                             ),
                           ],
                         )
-                      : Container(
-                          color: Colors.white,
-                          child: listEvents(standardEvents),
-                        ),
+                      : listEvents(),
             ),
-            //FOOD DRINK SPECIALS
+            //MY EVENTS
             Container(
               key: PageStorageKey('key1'),
               color: Colors.white,
@@ -307,159 +583,35 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                       context: context,
                       loadingDescription: 'Loading Events...',
                     )
-                  : foodDrinkEvents.isEmpty
+                  : myEventResults.isEmpty
                       ? Column(
                           children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                SizedBox(height: 64.0),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width - 16,
-                                  ),
-                                  child: Fonts().textW300(
-                                    "We Couldn't Find Any Food or Drink Specials Nearby ",
-                                    14.0,
-                                    FlatColors.lightAmericanGray,
-                                    TextAlign.center,
-                                  ),
-                                ),
-                              ],
+                            SizedBox(height: 32.0),
+                            CustomText(
+                              context: context,
+                              text: "You Have Not Made Any Events",
+                              textColor: Colors.black,
+                              textAlign: TextAlign.center,
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w500,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                CustomColorButton(
-                                  text: 'Post a Flash Food/Drink Special',
-                                  textColor: FlatColors.darkGray,
-                                  backgroundColor: Colors.white,
-                                  height: 45.0,
-                                  width: 300,
-                                  hPadding: 8.0,
-                                  vPadding: 8.0,
-                                  onPressed: () => PageTransitionService(
-                                    context: context,
-                                    uid: widget.currentUser.uid,
-                                  ).transitionToNewFlashEventPage(),
-                                ),
-                              ],
-                            )
+                            SizedBox(height: 8.0),
+                            GestureDetector(
+                              onTap: () => PageTransitionService(
+                                context: context,
+                              ).transitionToCreateEventPage(),
+                              child: CustomText(
+                                context: context,
+                                text: "Create an Event",
+                                textColor: Colors.blueAccent,
+                                textAlign: TextAlign.center,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ],
                         )
-                      : Container(
-                          color: Colors.white,
-                          child: listEvents(foodDrinkEvents),
-                        ),
-            ),
-            //SALES & DISCOUNT EVENTS
-            Container(
-              key: PageStorageKey('key2'),
-              color: Colors.white,
-              child: isLoading
-                  ? LoadingScreen(
-                      context: context,
-                      loadingDescription: 'Loading Events...',
-                    )
-                  : saleDiscountEvents.isEmpty
-                      ? Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                SizedBox(height: 64.0),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width - 16,
-                                  ),
-                                  child: Fonts().textW300(
-                                    "We Couldn't Find Any Sales or Discounts Nearby",
-                                    14.0,
-                                    FlatColors.lightAmericanGray,
-                                    TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                CustomColorButton(
-                                  text: 'Post a Flash Sale/Promotion',
-                                  textColor: FlatColors.darkGray,
-                                  backgroundColor: Colors.white,
-                                  height: 45.0,
-                                  width: 300,
-                                  hPadding: 8.0,
-                                  vPadding: 8.0,
-                                  onPressed: () => PageTransitionService(
-                                    context: context,
-                                    uid: widget.currentUser.uid,
-                                  ).transitionToNewFlashEventPage(),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      : Container(
-                          color: Colors.white,
-                          child: listEvents(saleDiscountEvents),
-                        ),
-            ),
-            //MY EVENTS
-            Container(
-              key: PageStorageKey('key3'),
-              color: Colors.white,
-              child: isLoading
-                  ? LoadingScreen(
-                      context: context,
-                      loadingDescription: 'Loading Events...',
-                    )
-                  : myEvents.isEmpty
-                      ? Column(
-                          children: <Widget>[
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                SizedBox(height: 64.0),
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width - 16,
-                                  ),
-                                  child: Fonts().textW300(
-                                    "Loading Your Events...",
-                                    14.0,
-                                    FlatColors.lightAmericanGray,
-                                    TextAlign.center,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                CustomColorButton(
-                                  text: 'Create an Event',
-                                  textColor: FlatColors.darkGray,
-                                  backgroundColor: Colors.white,
-                                  height: 45.0,
-                                  width: 300,
-                                  hPadding: 8.0,
-                                  vPadding: 8.0,
-                                  onPressed: () => PageTransitionService(
-                                    context: context,
-                                    uid: widget.currentUser.uid,
-                                    action: 'newEvent',
-                                  ).transitionToMyCommunitiesPage(),
-                                ),
-                              ],
-                            )
-                          ],
-                        )
-                      : Container(
-                          color: Colors.white,
-                          child: listEvents(myEvents),
-                        ),
+                      : listMyEvents(),
             ),
           ],
         ),

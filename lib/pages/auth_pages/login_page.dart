@@ -13,7 +13,7 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/auth_buttons/facebook_btn.dart';
 import 'package:webblen/widgets/auth_buttons/google_btn.dart';
-import 'package:webblen/widgets/widgets_common/common_button.dart';
+import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class LoginPage extends StatefulWidget {
@@ -29,7 +29,6 @@ class _LoginPageState extends State<LoginPage> {
   GoogleSignIn googleSignIn = GoogleSignIn(
     scopes: <String>[
       'email',
-      'https://www.googleapis.com/auth/contacts.readonly',
     ],
   );
 
@@ -74,7 +73,10 @@ class _LoginPageState extends State<LoginPage> {
     };
 
     final PhoneVerificationFailed veriFailed = (AuthException exception) {
+      print(exception.message);
+      isLoading = false;
       ShowAlertDialogService().showFailureDialog(context, "Verification Failed", "There was an issue verifying your phone number. Please try again");
+      setState(() {});
     };
 
     await FirebaseAuth.instance.verifyPhoneNumber(
@@ -350,36 +352,12 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.white,
       onPressed: () => validateAndSubmit(),
     );
-    // final loginButton = AuthBtn(
-    //   action: () => validateAndSubmit(),
-    //   buttonText: signInWithEmail ? 'Sign In' : 'Send SMS Code',
-    // );
 
     // **FACEBOOK BUTTON
     final facebookButton = FacebookBtn(action: loginWithFacebook);
-    // final facebookButton = AuthBtn(
-    //   action: loginWithFacebook,
-    //   buttonText: 'Login with Facebook',
-    //   textColor: Colors.white,
-    //   icon: Icon(
-    //     FontAwesomeIcons.facebook,
-    //     color: Colors.white,
-    //     size: 18.0,
-    //   ),
-    //   color: Color.fromRGBO(59, 89, 152, 1.0),
-    // );
 
     // **GOOGLE BUTTON
     final googleButton = GoogleBtn(action: loginWithGoogle);
-    // final googleButton = AuthBtn(
-    //   action: loginWithGoogle,
-    //   buttonText: 'Login with Google',
-    //   icon: Icon(
-    //     FontAwesomeIcons.google,
-    //     color: Colors.black,
-    //     size: 18.0,
-    //   ),
-    // );
 
     //**EMAIL/PHONE BUTTON
     final signInWithEmailButton = CustomColorIconButton(
@@ -391,15 +369,6 @@ class _LoginPageState extends State<LoginPage> {
       width: MediaQuery.of(context).size.width * 0.85,
       onPressed: () => setSignInWithEmailStatus(),
     );
-    // final signInWithEmailButton = AuthBtn(
-    //   action: () => setSignInWithEmailStatus(),
-    //   buttonText: 'Sign in With Email',
-    //   icon: Icon(
-    //     FontAwesomeIcons.envelope,
-    //     color: Colors.black,
-    //     size: 18.0,
-    //   ),
-    // );
 
     final signInWithPhoneButton = CustomColorIconButton(
       icon: Icon(FontAwesomeIcons.mobileAlt, color: Colors.black, size: 18.0),
@@ -410,15 +379,6 @@ class _LoginPageState extends State<LoginPage> {
       width: MediaQuery.of(context).size.width * 0.85,
       onPressed: () => setSignInWithEmailStatus(),
     );
-    // final signInWithPhoneButton = AuthBtn(
-    //   action: () => setSignInWithEmailStatus(),
-    //   buttonText: 'Sign in With Phone',
-    //   icon: Icon(
-    //     FontAwesomeIcons.mobileAlt,
-    //     color: Colors.black,
-    //     size: 18.0,
-    //   ),
-    // );
 
     final orTextLabel = Padding(
       padding: EdgeInsets.symmetric(vertical: 8.0),

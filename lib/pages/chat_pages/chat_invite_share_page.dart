@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/chat_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/models/event.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/chat_pages/chat_page.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_user/user_row.dart';
 
 class ChatInviteSharePage extends StatefulWidget {
   final WebblenUser currentUser;
-  final Event event;
-  
+  final WebblenEvent event;
+
   ChatInviteSharePage({
     this.currentUser,
     this.event,
@@ -36,8 +35,7 @@ class _ChatInviteSharePageState extends State<ChatInviteSharePage> {
 
   void validateAndSubmit() {
     if (invitedUsers.isEmpty) {
-      AlertFlushbar(headerText: "Error", bodyText: "Choose Someone to Message")
-          .showAlertFlushbar(context);
+      AlertFlushbar(headerText: "Error", bodyText: "Choose Someone to Message").showAlertFlushbar(context);
     } else {
       ShowAlertDialogService().showLoadingDialog(context);
       if (!invitedUsers.contains(widget.currentUser.uid)) {
@@ -54,9 +52,7 @@ class _ChatInviteSharePageState extends State<ChatInviteSharePage> {
   void startNewChat() {
     ChatDataService().checkIfChatExists(invitedUsers).then((chatKey) {
       if (chatKey == null) {
-        ChatDataService()
-            .createChat(widget.currentUser.uid, invitedUsers)
-            .then((res) {
+        ChatDataService().createChat(widget.currentUser.uid, invitedUsers).then((res) {
           if (res != null && res != 'error') {
             Navigator.of(context).pop();
             Navigator.of(context).pushReplacement(
@@ -88,9 +84,7 @@ class _ChatInviteSharePageState extends State<ChatInviteSharePage> {
   void shareEvent() {
     ChatDataService().checkIfChatExists(invitedUsers).then((chatKey) {
       if (chatKey == null) {
-        ChatDataService()
-            .createChat(widget.currentUser.uid, invitedUsers)
-            .then((res) {
+        ChatDataService().createChat(widget.currentUser.uid, invitedUsers).then((res) {
           if (res != null && res != 'error') {
             ChatDataService()
                 .sendMessage(
@@ -98,7 +92,7 @@ class _ChatInviteSharePageState extends State<ChatInviteSharePage> {
               widget.currentUser.username,
               widget.currentUser.uid,
               DateTime.now().millisecondsSinceEpoch,
-              widget.event.eventKey,
+              widget.event.id,
               "eventShare",
             )
                 .then((error) {
@@ -137,7 +131,7 @@ class _ChatInviteSharePageState extends State<ChatInviteSharePage> {
           widget.currentUser.username,
           widget.currentUser.uid,
           DateTime.now().millisecondsSinceEpoch,
-          widget.event.eventKey,
+          widget.event.id,
           "eventShare",
         )
             .then((error) {
@@ -184,11 +178,8 @@ class _ChatInviteSharePageState extends State<ChatInviteSharePage> {
   @override
   void initState() {
     super.initState();
-    if (widget.currentUser.friends != null ||
-        widget.currentUser.friends.isNotEmpty) {
-      UserDataService()
-          .getUsersFromList(widget.currentUser.friends)
-          .then((result) {
+    if (widget.currentUser.friends != null || widget.currentUser.friends.isNotEmpty) {
+      UserDataService().getUsersFromList(widget.currentUser.friends).then((result) {
         if (result != null && result.isNotEmpty) {
           friends = result;
           friends.sort(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 
 class EarningsInfoPage extends StatelessWidget {
   @override

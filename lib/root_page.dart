@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:webblen/home_page.dart';
 import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/home_page.dart';
 import 'package:webblen/pages/auth_pages/splash_page.dart';
 
 class RootPage extends StatefulWidget {
@@ -21,10 +20,9 @@ class _RootPageState extends State<RootPage> {
   @override
   initState() {
     super.initState();
-    BaseAuth().currentUser().then((userId) {
+    BaseAuth().getCurrentUserID().then((userId) {
       setState(() {
-        authStatus =
-            userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
+        authStatus = userId != null ? AuthStatus.signedIn : AuthStatus.notSignedIn;
       });
     });
   }

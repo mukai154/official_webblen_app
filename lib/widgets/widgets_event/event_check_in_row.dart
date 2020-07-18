@@ -1,14 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
-import 'package:webblen/models/event.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class NearbyEventCheckInRow extends StatefulWidget {
-  final Event event;
+  final WebblenEvent event;
   final String uid;
   final VoidCallback viewEventAction;
   final VoidCallback checkInAction;
@@ -32,8 +31,7 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
   @override
   Widget build(BuildContext context) {
     List attendanceCount = widget.event.attendees;
-    DateTime eventEndDateTime =
-        DateTime.fromMillisecondsSinceEpoch(widget.event.endDateInMilliseconds);
+    DateTime eventEndDateTime = DateTime.fromMillisecondsSinceEpoch(widget.event.startDateTimeInMilliseconds + 7200000);
     return GestureDetector(
       onTap: widget.viewEventAction,
       child: Container(
@@ -72,11 +70,7 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                     color: FlatColors.textFieldGray,
                     child: Padding(
                       padding: EdgeInsets.all(6.0),
-                      child: Fonts().textW500(
-                          'Ends at ${dateFormatter.format(eventEndDateTime)}',
-                          12.0,
-                          Colors.black87,
-                          TextAlign.center),
+                      child: Fonts().textW500('Ends at ${dateFormatter.format(eventEndDateTime)}', 12.0, Colors.black87, TextAlign.center),
                     ),
                   ),
                 ),
@@ -139,9 +133,7 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                                     TextAlign.center,
                                   )
                                 : Fonts().textW500(
-                                    attendanceCount.length == 1
-                                        ? '${attendanceCount.length} Check Ins'
-                                        : '${attendanceCount.length} Check Ins',
+                                    attendanceCount.length == 1 ? '${attendanceCount.length} Check Ins' : '${attendanceCount.length} Check Ins',
                                     14.0,
                                     Colors.white,
                                     TextAlign.center,
@@ -151,21 +143,14 @@ class _NearbyEventCheckInRowState extends State<NearbyEventCheckInRow> {
                       ),
                       Spacer(),
                       CustomColorButton(
-                        text: widget.event.attendees.contains(widget.uid)
-                            ? 'Check Out'
-                            : 'Check In',
+                        text: widget.event.attendees.contains(widget.uid) ? 'Check Out' : 'Check In',
                         textColor: Colors.white,
-                        backgroundColor:
-                            widget.event.attendees.contains(widget.uid)
-                                ? Colors.redAccent
-                                : FlatColors.darkMountainGreen,
+                        backgroundColor: widget.event.attendees.contains(widget.uid) ? Colors.redAccent : FlatColors.darkMountainGreen,
                         height: 45.0,
                         width: 100.0,
                         hPadding: 8.0,
                         vPadding: 0.0,
-                        onPressed: widget.event.attendees.contains(widget.uid)
-                            ? widget.checkoutAction
-                            : widget.checkInAction,
+                        onPressed: widget.event.attendees.contains(widget.uid) ? widget.checkoutAction : widget.checkInAction,
                       ),
                       SizedBox(
                         width: 8.0,

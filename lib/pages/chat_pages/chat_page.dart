@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/chat_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
@@ -11,8 +10,8 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_chat/chat_row.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
 import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
 
 class ChatPage extends StatefulWidget {
@@ -36,8 +35,7 @@ class _ChatPageState extends State<ChatPage> {
   WebblenChat chat;
   List<DocumentSnapshot> messages;
 
-  final TextEditingController textEditingController =
-      TextEditingController();
+  final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
   final FocusNode focusNode = FocusNode();
 
@@ -65,8 +63,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future uploadFile() async {
     String fileName = DateTime.now().millisecondsSinceEpoch.toString();
-    StorageReference reference =
-        FirebaseStorage.instance.ref().child('message_pics').child(fileName);
+    StorageReference reference = FirebaseStorage.instance.ref().child('message_pics').child(fileName);
     StorageUploadTask uploadTask = reference.putFile(imageFile);
     StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
     storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
@@ -93,11 +90,7 @@ class _ChatPageState extends State<ChatPage> {
     if (content.trim() != '') {
       textEditingController.clear();
 
-      var messageReference = Firestore.instance
-          .collection('chats')
-          .document(chat.chatDocKey)
-          .collection('messages')
-          .document(messageSentTime.toString());
+      var messageReference = Firestore.instance.collection('chats').document(chat.chatDocKey).collection('messages').document(messageSentTime.toString());
 
       Firestore.instance.runTransaction((transaction) async {
         await transaction.set(
@@ -163,8 +156,7 @@ class _ChatPageState extends State<ChatPage> {
               padding: EdgeInsets.all(10.0),
               itemBuilder: (context, index) {
                 Widget messageWidget;
-                WebblenChatMessage chatMessage =
-                    WebblenChatMessage.fromMap(messages[index].data);
+                WebblenChatMessage chatMessage = WebblenChatMessage.fromMap(messages[index].data);
                 if (chatMessage.uid == widget.currentUser.uid) {
                   messageWidget = BuildSentMessage(
                     currentUser: widget.currentUser,

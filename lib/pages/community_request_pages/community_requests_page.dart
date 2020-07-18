@@ -4,17 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-
 import 'package:webblen/firebase_data/community_request_data.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/models/community_request.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_location.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
-import 'package:webblen/widgets/widgets_community/community_request_row.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
+import 'package:webblen/widgets/widgets_community/community_request_row.dart';
 
 class CommunityRequestsPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -69,15 +68,12 @@ class _CommunityRequestsPageState extends State<CommunityRequestsPage> {
     allRequests = [];
 //    popularRequests = [];
 //    recentRequests = [];
-    await CommunityRequestDataService()
-        .getComRequests(widget.areaName)
-        .then((result) {
+    await CommunityRequestDataService().getComRequests(widget.areaName).then((result) {
       allRequests = result;
 //      popularRequests = result;
 //      recentRequests = result;
 //      recentRequests.sort((reqA, reqB) => reqA.datePostedInMilliseconds.compareTo(reqA.datePostedInMilliseconds));
-      allRequests.sort(
-          (reqA, reqB) => reqB.upVotes.length.compareTo(reqA.upVotes.length));
+      allRequests.sort((reqA, reqB) => reqB.upVotes.length.compareTo(reqA.upVotes.length));
       isLoading = false;
       if (this.mounted) {
         setState(() {});

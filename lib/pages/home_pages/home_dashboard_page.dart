@@ -2,16 +2,12 @@ import 'dart:io';
 
 import 'package:admob_flutter/admob_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:webblen/firebase_data/event_data.dart';
-import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/models/event.dart';
-import 'package:webblen/models/local_ad.dart';
+import 'package:webblen/constants/strings.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/utils/strings.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_home_tiles/all_tiles.dart';
 
@@ -22,7 +18,6 @@ class HomeDashboardPage extends StatefulWidget {
   final Key key;
   final double currentLat;
   final double currentLon;
-  final Widget accountWidget;
   final Widget notifWidget;
 
   HomeDashboardPage({
@@ -32,7 +27,6 @@ class HomeDashboardPage extends StatefulWidget {
     this.currentLat,
     this.currentLon,
     this.key,
-    this.accountWidget,
     this.notifWidget,
   });
 
@@ -42,12 +36,7 @@ class HomeDashboardPage extends StatefulWidget {
 
 class _HomeDashboardPageState extends State<HomeDashboardPage> {
   AdmobBannerSize bannerSize;
-  List<LocalAd> ads = [];
-  List<WebblenUser> randomNearbyUsers = [];
-  List<Event> webblenEvents = [];
-  List<Event> recommendedEvents = [];
-  String nearbyUserCount;
-  bool isLoading = true;
+  bool isLoading = false;
 
   bool updateAlertIsEnabled() {
     bool showAlert = false;
@@ -55,34 +44,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
       showAlert = true;
     }
     return showAlert;
-  }
-
-  loadData() {
-    EventDataService().getExclusiveWebblenEvents().then((res) {
-      webblenEvents = res;
-      //GET Recommended Events
-      EventDataService()
-          .getRecommendedEvents(
-        widget.currentUser.uid,
-        widget.areaName,
-      )
-          .then((res) {
-        recommendedEvents = res;
-        //GET Number of Nearby Users
-        UserDataService()
-            .getNumberOfNearbyUsers(
-          widget.currentLat,
-          widget.currentLon,
-        )
-            .then((res) {
-          nearbyUserCount = res;
-          if (this.mounted) {
-            isLoading = false;
-            setState(() {});
-          }
-        });
-      });
-    });
   }
 
   void didPressSearchTile() {
@@ -145,33 +106,10 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
     }
   }
 
-//  void didPressCommunityActivityTile() {
-//    if (widget.currentUser != null && !widget.updateRequired) {
-//      PageTransitionService(
-//        context: context,
-//        currentUser: widget.currentUser,
-//      ).transitionToUserRanksPage();
-//    } else if (updateAlertIsEnabled()) {
-//      ShowAlertDialogService().showUpdateDialog(context);
-//    }
-//  }
-
-//  void didPressWebblenEventsTile() {
-//    if (widget.currentUser != null && !widget.updateRequired) {
-//      PageTransitionService(
-//        context: context,
-//        currentUser: widget.currentUser,
-//        events: webblenEvents,
-//      ).transitionToWebblenEventsPage();
-//    } else if (updateAlertIsEnabled()) {
-//      ShowAlertDialogService().showUpdateDialog(context);
-//    }
-//  }
-
   @override
   void initState() {
     super.initState();
-    loadData();
+    //loadData();
     if (Platform.isIOS) {
       Admob.initialize('ca-app-pub-2136415475966451~5144610810');
     } else if (Platform.isAndroid) {
@@ -257,16 +195,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 1,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      widget.accountWidget,
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
@@ -347,47 +275,9 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> {
                         child: AdmobBanner(
                           adUnitId: Strings().getAdMobBannerID(),
                           adSize: bannerSize,
-                          listener: (AdmobAdEvent event, Map<String, dynamic> args) {
-//            handleEvent(event, args, 'Banner');
-                          },
+                          listener: (AdmobAdEvent event, Map<String, dynamic> args) {},
                         ),
                       ),
-//                      Row(
-//                        mainAxisAlignment: MainAxisAlignment.start,
-//                        children: <Widget>[
-//                          Container(
-//                            //width: MediaQuery.of(context).size.width/1.5,
-//                            child: Padding(
-//                              padding: EdgeInsets.only(
-//                                left: 16.0,
-//                                top: 16.0,
-//                                bottom: 8.0,
-//                              ),
-//                              child: MediaQuery(
-//                                data: MediaQuery.of(context).copyWith(
-//                                  textScaleFactor: 1.0,
-//                                ),
-//                                child: Fonts().textW700(
-//                                  'Events You Might Like',
-//                                  18.0,
-//                                  Colors.black,
-//                                  TextAlign.left,
-//                                ),
-//                              ),
-//                            ),
-//                          ),
-//                        ],
-//                      ),
-//                      webblenEvents.isEmpty
-//                          ? recommendedEvents.isEmpty
-//                              ? Container()
-//                              : EventCarousel(
-//                                  events: recommendedEvents,
-//                                  currentUser: widget.currentUser,
-//                                )
-//                          : WebblenEventsTile(
-//                              onTap: () => didPressWebblenEventsTile(),
-//                            ),
                     ],
                   ),
                 ),

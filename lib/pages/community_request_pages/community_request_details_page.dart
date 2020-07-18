@@ -2,18 +2,17 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/comment_data.dart';
 import 'package:webblen/models/comment.dart';
 import 'package:webblen/models/community_request.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
-import 'package:webblen/widgets/widgets_common/common_appbar.dart';
-import 'package:webblen/widgets/widgets_data_streams/stream_comment_data.dart';
+import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
+import 'package:webblen/widgets/widgets_data_streams/stream_comment_data.dart';
 
 class CommunityRequestDetailsPage extends StatefulWidget {
   final CommunityRequest request;
@@ -25,12 +24,10 @@ class CommunityRequestDetailsPage extends StatefulWidget {
   });
 
   @override
-  _CommunityRequestDetailsPageState createState() =>
-      _CommunityRequestDetailsPageState();
+  _CommunityRequestDetailsPageState createState() => _CommunityRequestDetailsPageState();
 }
 
-class _CommunityRequestDetailsPageState
-    extends State<CommunityRequestDetailsPage> {
+class _CommunityRequestDetailsPageState extends State<CommunityRequestDetailsPage> {
   File commentImage;
   String commentImageUrl;
 
@@ -61,11 +58,8 @@ class _CommunityRequestDetailsPageState
   }
 
   Future uploadFile() async {
-    String fileName = widget.request.requestID +
-        "-" +
-        DateTime.now().millisecondsSinceEpoch.toString();
-    StorageReference reference =
-        FirebaseStorage.instance.ref().child('request_pics').child(fileName);
+    String fileName = widget.request.requestID + "-" + DateTime.now().millisecondsSinceEpoch.toString();
+    StorageReference reference = FirebaseStorage.instance.ref().child('request_pics').child(fileName);
     StorageUploadTask uploadTask = reference.putFile(commentImage);
     StorageTaskSnapshot storageTaskSnapshot = await uploadTask.onComplete;
     storageTaskSnapshot.ref.getDownloadURL().then((downloadUrl) {
@@ -91,11 +85,7 @@ class _CommunityRequestDetailsPageState
 
   void onSendMessage(String content, String type, String key) {
     int commentSentTime = DateTime.now().millisecondsSinceEpoch;
-    String commentKey = key == null
-        ? widget.request.requestID +
-            "-" +
-            DateTime.now().millisecondsSinceEpoch.toString()
-        : key;
+    String commentKey = key == null ? widget.request.requestID + "-" + DateTime.now().millisecondsSinceEpoch.toString() : key;
 
     if (content.trim() != '') {
       textEditingController.clear();

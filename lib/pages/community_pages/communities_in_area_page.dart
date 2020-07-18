@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -42,13 +41,8 @@ class _CommunitiesInAreaPageState extends State<CommunitiesInAreaPage> {
 
   Future<void> getUserCommunities() async {
     activeUserComs = [];
-    await CommunityDataService()
-        .getUserCommunities(widget.currentUser.uid)
-        .then((result) {
-      activeUserComs = result
-          .where((com) =>
-              com.status == 'active' && com.areaName == widget.areaName)
-          .toList();
+    await CommunityDataService().getUserCommunities(widget.currentUser.uid).then((result) {
+      activeUserComs = result.where((com) => com.status == 'active' && com.areaName == widget.areaName).toList();
       isLoading = false;
       setState(() {});
     });
@@ -75,11 +69,7 @@ class _CommunitiesInAreaPageState extends State<CommunitiesInAreaPage> {
           textScaleFactor: 1.0,
         ),
         child: Fonts().textW700(
-          widget.action == 'newEvent'
-              ? 'New Event'
-              : widget.action == 'newPost'
-                  ? 'New Post'
-                  : 'My Communities in ${widget.areaName}',
+          widget.action == 'newEvent' ? 'New Event' : widget.action == 'newPost' ? 'New Post' : 'My Communities in ${widget.areaName}',
           20.0,
           Colors.black,
           TextAlign.center,
@@ -142,25 +132,17 @@ class _CommunitiesInAreaPageState extends State<CommunitiesInAreaPage> {
                       return CommunityRow(
                         showAreaName: true,
                         community: activeUserComs[index],
-                        onClickAction: widget.action == 'newEvent'
+                        onClickAction: widget.action == 'newPost'
                             ? () => PageTransitionService(
                                   context: context,
                                   currentUser: widget.currentUser,
                                   community: activeUserComs[index],
-                                  isRecurring: false,
-                                  action: widget.action,
-                                ).transitionToCreateEditEventPage()
-                            : widget.action == 'newPost'
-                                ? () => PageTransitionService(
-                                      context: context,
-                                      currentUser: widget.currentUser,
-                                      community: activeUserComs[index],
-                                    ).transitionToCommunityCreatePostPage()
-                                : () => PageTransitionService(
-                                      context: context,
-                                      currentUser: widget.currentUser,
-                                      community: activeUserComs[index],
-                                    ).transitionToCommunityProfilePage(),
+                                ).transitionToCommunityCreatePostPage()
+                            : () => PageTransitionService(
+                                  context: context,
+                                  currentUser: widget.currentUser,
+                                  community: activeUserComs[index],
+                                ).transitionToCommunityProfilePage(),
                       );
                     },
                   ),
