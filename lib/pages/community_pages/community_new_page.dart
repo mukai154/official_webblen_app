@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
@@ -41,7 +40,6 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   final page2FormKey = GlobalKey<FormState>();
 
   //Event
-  Geoflutterfire geo = Geoflutterfire();
   double lat;
   double lon;
   Community newCommunity = Community();

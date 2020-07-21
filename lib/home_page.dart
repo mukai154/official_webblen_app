@@ -186,26 +186,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   Future<Null> getPlatformData(double lat, double lon) async {
-    PlatformDataService()
-        .getAreaName(
-      lat,
-      lon,
-    )
-        .then((area) {
-      if (area.isEmpty) {
-        webblenIsAvailable = false;
-      }
-      areaName = area;
-      isLoading = false;
-      setState(() {});
-      setState(() {});
-    });
     PlatformDataService().isUpdateAvailable().then((updateIsAvailable) {
       if (updateIsAvailable) {
-        setState(() {
-          updateRequired = updateIsAvailable;
-        });
+        updateRequired = updateIsAvailable;
       }
+      isLoading = false;
+      setState(() {});
     });
   }
 

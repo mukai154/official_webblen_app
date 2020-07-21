@@ -5,12 +5,11 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:webblen/firebase_services/file_uploader.dart';
 import 'package:webblen/models/webblen_user.dart';
 
 class UserDataService {
-  Geoflutterfire geo = Geoflutterfire();
+  //Geoflutterfire geo = Geoflutterfire();
   final CollectionReference userRef = Firestore.instance.collection("webblen_user");
   final CollectionReference eventRef = Firestore.instance.collection("events");
   final CollectionReference notifRef = Firestore.instance.collection("user_notifications");
@@ -45,7 +44,7 @@ class UserDataService {
       'profile_pics',
     );
     user.profile_pic = downloadUrl.toString();
-    GeoPoint geoPoint = GeoFirePoint(0, 0).geoPoint;
+    //GeoPoint geoPoint = GeoFirePoint(0, 0).geoPoint;
     await Firestore.instance
         .collection("webblen_user")
         .document(uid)
@@ -53,7 +52,7 @@ class UserDataService {
           'appOpenInMilliseconds': DateTime.now().millisecondsSinceEpoch,
           'd': user.toMap(),
           'g': '',
-          'l': geoPoint,
+          'l': null,
           'lastAPRechargeInMilliseconds': DateTime.now().millisecondsSinceEpoch
         })
         .whenComplete(() {})
@@ -212,10 +211,10 @@ class UserDataService {
 
   Future<Null> updateUserAppOpen(String uid, double lat, double lon) async {
     int appOpenInMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    GeoFirePoint geoFirePoint = GeoFirePoint(lat, lon);
+    //GeoFirePoint geoFirePoint = GeoFirePoint(lat, lon);
     userRef.document(uid).updateData({
-      'g': geoFirePoint.hash,
-      'l': geoFirePoint.geoPoint,
+      'g': null,
+      'l': null,
       'appOpenInMilliseconds': appOpenInMilliseconds,
     });
   }

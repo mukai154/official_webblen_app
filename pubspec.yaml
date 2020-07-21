@@ -27,17 +27,18 @@ dependencies:
   #Social Dependencies
   google_sign_in: ^4.0.11
   flutter_facebook_login: ^3.0.0
-#  flutter_twitter_login:
-#      git: https://github.com/eudangeld/flutter_twitter_login.git
+  apple_sign_in: ^0.1.0
+  #  flutter_twitter_login:
+  #      git: https://github.com/eudangeld/flutter_twitter_login.git
 
   #Location Dependencies
   location: ^3.0.2
   location_permissions: ^3.0.0
   geoflutterfire: ^2.0.3+5
   geocoder: ^0.2.1
-#  flutter_background_geolocation: ^1.3.2
+  #  flutter_background_geolocation: ^1.3.2
   flutter_google_places:
-      git: https://github.com/mukai154/flutter_google_places.git
+    git: https://github.com/mukai154/flutter_google_places.git
   google_maps_webservice: ^0.0.15
 
   #Image Dependencies
@@ -45,7 +46,7 @@ dependencies:
   image_cropper: ^1.1.0
   image_picker: ^0.6.1+11
   flutter_image_compress: ^0.6.3
-  
+
   #Video Dependencies
   youtube_player_flutter: ^6.0.3+2
 
@@ -95,15 +96,15 @@ flutter:
   assets:
     - assets/images/
   fonts:
-      - family: Helvetica Neue
-        fonts:
-          - asset: assets/fonts/HelveticaNeueThin.ttf
-            weight: 300
-          - asset: assets/fonts/HelveticaNeueLight.ttf
-            weight: 400
-          - asset: assets/fonts/HelveticaNeue.ttf
-            weight: 500
-          - asset: assets/fonts/HelveticaNeueMedium.ttf
-            weight: 600
-          - asset: assets/fonts/HelveticaNeueBold.ttf
-            weight: 700
+    - family: Helvetica Neue
+      fonts:
+        - asset: assets/fonts/HelveticaNeueThin.ttf
+          weight: 300
+        - asset: assets/fonts/HelveticaNeueLight.ttf
+          weight: 400
+        - asset: assets/fonts/HelveticaNeue.ttf
+          weight: 500
+        - asset: assets/fonts/HelveticaNeueMedium.ttf
+          weight: 600
+        - asset: assets/fonts/HelveticaNeueBold.ttf
+          weight: 700

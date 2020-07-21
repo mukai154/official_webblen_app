@@ -1,19 +1,24 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:apple_sign_in/apple_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase_data//auth.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
-import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/utils/open_url.dart';
+import 'package:webblen/widgets/auth_buttons/apple_btn.dart';
 import 'package:webblen/widgets/auth_buttons/facebook_btn.dart';
 import 'package:webblen/widgets/auth_buttons/google_btn.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 class LoginPage extends StatefulWidget {
@@ -246,6 +251,60 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  void loginWithApple() async {
+    setState(() {
+      isLoading = true;
+    });
+    ScaffoldState scaffold = loginScaffoldKey.currentState;
+    final AuthorizationResult result = await AppleSignIn.performRequests([
+      AppleIdRequest(requestedScopes: [Scope.email])
+    ]);
+    switch (result.status) {
+      case AuthorizationStatus.authorized:
+        final AppleIdCredential appleIdCredential = result.credential;
+        OAuthProvider oAuthProvider = OAuthProvider(providerId: "apple.com");
+        final AuthCredential credential = oAuthProvider.getCredential(
+          idToken: String.fromCharCodes(appleIdCredential.identityToken),
+          accessToken: String.fromCharCodes(appleIdCredential.authorizationCode),
+        );
+        FirebaseAuth.instance.signInWithCredential(credential).then((user) {
+          if (user != null) {
+            PageTransitionService(context: context).transitionToRootPage();
+          } else {
+            setState(() {
+              isLoading = false;
+            });
+            ShowAlertDialogService().showFailureDialog(context, 'Oops!', 'There was an issue signing in with Apple. Please Try Again');
+          }
+        });
+        break;
+      case AuthorizationStatus.cancelled:
+        scaffold.showSnackBar(SnackBar(
+          content: Text("Cancelled Apple Login"),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ));
+        setState(() {
+          isLoading = false;
+        });
+        break;
+      case AuthorizationStatus.error:
+        print(result.error);
+        scaffold.showSnackBar(SnackBar(
+          content: MediaQuery(
+            data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+            child: Text("There was an Issue Logging Into Apple"),
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 3),
+        ));
+        setState(() {
+          isLoading = false;
+        });
+        break;
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
@@ -259,7 +318,7 @@ class _LoginPageState extends State<LoginPage> {
       height: 200.0,
       fit: BoxFit.fitHeight,
     );
-    final isLoadingProgressBar = CustomLinearProgress(progressBarColor: FlatColors.webblenRed);
+    final isLoadingProgressBar = CustomLinearProgress(progressBarColor: CustomColors.webblenRed);
 
     // **EMAIL FIELD
     final emailField = Padding(
@@ -290,7 +349,7 @@ class _LoginPageState extends State<LoginPage> {
 
     // **PHONE FIELD
     final phoneField = Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
         child: TextFormField(
@@ -356,6 +415,9 @@ class _LoginPageState extends State<LoginPage> {
     // **FACEBOOK BUTTON
     final facebookButton = FacebookBtn(action: loginWithFacebook);
 
+    // **APPLE BUTTON
+    final appleButton = AppleBtn(action: loginWithApple);
+
     // **GOOGLE BUTTON
     final googleButton = GoogleBtn(action: loginWithGoogle);
 
@@ -386,11 +448,13 @@ class _LoginPageState extends State<LoginPage> {
         data: MediaQuery.of(context).copyWith(
           textScaleFactor: 1.0,
         ),
-        child: Fonts().textW400(
-          'or',
-          12.0,
-          Colors.black,
-          TextAlign.center,
+        child: CustomText(
+          context: context,
+          text: 'or',
+          textColor: CustomColors.londonSquare,
+          textAlign: TextAlign.left,
+          fontSize: 12.0,
+          fontWeight: FontWeight.w400,
         ),
       ),
     );
@@ -416,6 +480,36 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
 
+    final serviceAgreement = Container(
+      child: RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+          children: [
+            TextSpan(
+              text: 'By Registering, You agree to the ',
+              style: TextStyle(color: Colors.black),
+            ),
+            TextSpan(
+              text: 'Terms and Conditions ',
+              style: TextStyle(color: Colors.blue),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => OpenUrl().launchInWebViewOrVC(context, OpenUrl().launchInWebViewOrVC(context, 'https://webblen.io/terms-and-conditions')),
+            ),
+            TextSpan(
+              text: 'and ',
+              style: TextStyle(color: Colors.black),
+            ),
+            TextSpan(
+              text: 'Privacy Policy. ',
+              style: TextStyle(color: Colors.blue),
+              recognizer: TapGestureRecognizer()
+                ..onTap = () => OpenUrl().launchInWebViewOrVC(context, OpenUrl().launchInWebViewOrVC(context, 'https://webblen.io/privacy-policy')),
+            ),
+          ],
+        ),
+      ),
+    );
+
     return Scaffold(
       key: loginScaffoldKey,
       body: Theme(
@@ -432,16 +526,21 @@ class _LoginPageState extends State<LoginPage> {
             child: ListView(
               children: <Widget>[
                 Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       isLoading ? isLoadingProgressBar : Container(),
+                      SizedBox(height: 32.0),
                       logo,
                       signInWithEmail ? authForm : phoneAuthForm,
                       orTextLabel,
                       facebookButton,
+                      Platform.isIOS ? appleButton : Container(),
                       googleButton,
-                      signInWithEmail ? signInWithPhoneButton : signInWithEmailButton
+                      signInWithEmail ? signInWithPhoneButton : signInWithEmailButton,
+                      SizedBox(height: 16.0),
+                      serviceAgreement,
                     ],
                   ),
                 ),

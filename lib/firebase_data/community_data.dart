@@ -5,14 +5,12 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/community_news.dart';
 
 import 'webblen_notification_data.dart';
 
 class CommunityDataService {
-  Geoflutterfire geo = Geoflutterfire();
   final CollectionReference locRef = Firestore.instance.collection("locations");
   final CollectionReference eventRef = Firestore.instance.collection("events");
   final CollectionReference usersRef = Firestore.instance.collection("webblen_user");

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:geoflutterfire/geoflutterfire.dart';
 
 class PlatformDataService {
   CollectionReference appReleaseRef = Firestore().collection("app_release_info");
@@ -16,26 +15,6 @@ class PlatformDataService {
       updateAvailable = true;
     }
     return updateAvailable;
-  }
-
-  Future<String> getAreaName(double lat, double lon) async {
-    String areaName = "";
-    Geoflutterfire geo = Geoflutterfire();
-    GeoFirePoint center = geo.point(
-      latitude: lat,
-      longitude: lon,
-    );
-    CollectionReference locRef = Firestore.instance.collection("available_locations");
-    List<DocumentSnapshot> nearLocations = await geo
-        .collection(collectionRef: locRef)
-        .within(
-          center: center,
-          radius: 20,
-          field: 'location',
-        )
-        .first;
-    if (nearLocations.length != 0) areaName = nearLocations.first.documentID;
-    return areaName;
   }
 
   Future<double> getEventTicketFee() async {
