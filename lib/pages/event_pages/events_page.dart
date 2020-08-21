@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -37,7 +38,8 @@ class EventsPage extends StatefulWidget {
   _EventsPageState createState() => _EventsPageState();
 }
 
-class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateMixin {
+class _EventsPageState extends State<EventsPage>
+    with SingleTickerProviderStateMixin {
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
   ScrollController eventsScrollController;
@@ -63,8 +65,10 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   getEvents() async {
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
-      eventsQuery =
-          eventsRef.where('d.nearbyZipcodes', arrayContains: areaCodeFilter).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       print(eventTypeFilter);
       eventsQuery = eventsRef
@@ -86,9 +90,11 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     }
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+    QuerySnapshot querySnapshot =
+        await eventsQuery.getDocuments().catchError((e) => print(e));
     if (querySnapshot.documents.isNotEmpty) {
-      lastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+      lastEventDocSnap =
+          querySnapshot.documents[querySnapshot.documents.length - 1];
       eventResults = querySnapshot.documents;
     }
     isLoading = false;
@@ -96,11 +102,15 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   }
 
   getMyEvents() async {
-    Query eventsQuery =
-        eventsRef.where("d.authorID", isEqualTo: widget.currentUser.uid).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+    Query eventsQuery = eventsRef
+        .where("d.authorID", isEqualTo: widget.currentUser.uid)
+        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .limit(resultsPerPage);
+    QuerySnapshot querySnapshot =
+        await eventsQuery.getDocuments().catchError((e) => print(e));
     if (querySnapshot.documents.isNotEmpty) {
-      lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+      lastMyEventDocSnap =
+          querySnapshot.documents[querySnapshot.documents.length - 1];
       myEventResults = querySnapshot.documents;
     }
     isLoading = false;
@@ -144,8 +154,10 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
           .limit(resultsPerPage);
     }
 
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+    QuerySnapshot querySnapshot =
+        await eventsQuery.getDocuments().catchError((e) => print(e));
+    lastEventDocSnap =
+        querySnapshot.documents[querySnapshot.documents.length - 1];
     eventResults.addAll(querySnapshot.documents);
     if (querySnapshot.documents.length == 0) {
       moreEventsAvailable = false;
@@ -166,8 +178,10 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
         .startAfterDocument(lastMyEventDocSnap)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+    QuerySnapshot querySnapshot =
+        await eventsQuery.getDocuments().catchError((e) => print(e));
+    lastMyEventDocSnap =
+        querySnapshot.documents[querySnapshot.documents.length - 1];
     myEventResults.addAll(querySnapshot.documents);
     if (querySnapshot.documents.length == 0) {
       moreMyEventsAvailable = false;
@@ -345,18 +359,59 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
         ),
         itemCount: eventResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(eventResults[index].data['d']));
+          WebblenEvent event = WebblenEvent.fromMap(
+              Map<String, dynamic>.from(eventResults[index].data['d']));
+          bool isOwner =
+              event.authorID == widget.currentUser.uid ? true : false;
           return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
-            child: EventBlock(
-              event: event,
-              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-              viewEventTickets: null,
-              numOfTicsForEvent: null,
-              eventImgSize: MediaQuery.of(context).size.width - 16,
-              eventDescHeight: 120.0,
-            ),
+            padding: EdgeInsets.only(
+                top: 16.0,
+                left: 8.0,
+                right: 8.0,
+                bottom: eventResults.length - 1 == index ? 16.0 : 0),
+            child: event.isDigitalEvent
+                ? EventBlock(
+                    event: event,
+                    shareEvent: () => Share.share(
+                        "https://app.webblen.io/#/event?id=${event.id}"),
+                    viewEventDetails: event.startDateTimeInMilliseconds <
+                            DateTime.now().millisecondsSinceEpoch
+                        ? () => PageTransitionService(
+                                context: context,
+                                currentUser: widget.currentUser,
+                                eventID: event.id)
+                            .transitionToEventPage()
+                        : null,
+                    viewEventTickets: null,
+                    goToDigitalEvent: event.startDateTimeInMilliseconds >=
+                            DateTime.now().millisecondsSinceEpoch
+                        ? () => PageTransitionService(
+                              context: context,
+                              currentUser: widget.currentUser,
+                              event: event,
+                              clientRole: isOwner
+                                  ? ClientRole.Broadcaster
+                                  : ClientRole.Broadcaster,
+                            ).transitionToDigitalEventPage()
+                        : null,
+                    numOfTicsForEvent: null,
+                    eventImgSize: MediaQuery.of(context).size.width - 16,
+                    eventDescHeight: 120.0,
+                  )
+                : EventBlock(
+                    event: event,
+                    shareEvent: () => Share.share(
+                        "https://app.webblen.io/#/event?id=${event.id}"),
+                    viewEventDetails: () => PageTransitionService(
+                            context: context,
+                            currentUser: widget.currentUser,
+                            eventID: event.id)
+                        .transitionToEventPage(),
+                    viewEventTickets: null,
+                    numOfTicsForEvent: null,
+                    eventImgSize: MediaQuery.of(context).size.width - 16,
+                    eventDescHeight: 120.0,
+                  ),
           );
         },
       ),
@@ -377,18 +432,59 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
         ),
         itemCount: myEventResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(myEventResults[index].data['d']));
+          WebblenEvent event = WebblenEvent.fromMap(
+              Map<String, dynamic>.from(myEventResults[index].data['d']));
+          bool isOwner =
+              event.authorID == widget.currentUser.uid ? true : false;
           return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: myEventResults.length - 1 == index ? 16.0 : 0),
-            child: EventBlock(
-              event: event,
-              shareEvent: null,
-              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-              viewEventTickets: null,
-              numOfTicsForEvent: null,
-              eventImgSize: MediaQuery.of(context).size.width - 16,
-              eventDescHeight: 120.0,
-            ),
+            padding: EdgeInsets.only(
+                top: 16.0,
+                left: 8.0,
+                right: 8.0,
+                bottom: myEventResults.length - 1 == index ? 16.0 : 0),
+            child: event.isDigitalEvent
+                ? EventBlock(
+                    event: event,
+                    shareEvent: () => Share.share(
+                        "https://app.webblen.io/#/event?id=${event.id}"),
+                    viewEventDetails: event.startDateTimeInMilliseconds <
+                            DateTime.now().millisecondsSinceEpoch
+                        ? () => PageTransitionService(
+                                context: context,
+                                currentUser: widget.currentUser,
+                                eventID: event.id)
+                            .transitionToEventPage()
+                        : null,
+                    viewEventTickets: null,
+                    goToDigitalEvent: event.startDateTimeInMilliseconds >=
+                            DateTime.now().millisecondsSinceEpoch
+                        ? () => PageTransitionService(
+                              context: context,
+                              currentUser: widget.currentUser,
+                              event: event,
+                              clientRole: isOwner
+                                  ? ClientRole.Broadcaster
+                                  : ClientRole.Broadcaster,
+                            ).transitionToDigitalEventPage()
+                        : null,
+                    numOfTicsForEvent: null,
+                    eventImgSize: MediaQuery.of(context).size.width - 16,
+                    eventDescHeight: 120.0,
+                  )
+                : EventBlock(
+                    event: event,
+                    shareEvent: () => Share.share(
+                        "https://app.webblen.io/#/event?id=${event.id}"),
+                    viewEventDetails: () => PageTransitionService(
+                            context: context,
+                            currentUser: widget.currentUser,
+                            eventID: event.id)
+                        .transitionToEventPage(),
+                    viewEventTickets: null,
+                    numOfTicsForEvent: null,
+                    eventImgSize: MediaQuery.of(context).size.width - 16,
+                    eventDescHeight: 120.0,
+                  ),
           );
         },
       ),
@@ -405,18 +501,22 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
     eventsScrollController = ScrollController();
     myEventsScrollController = ScrollController();
     eventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * eventsScrollController.position.maxScrollExtent;
+      double triggerFetchMoreSize =
+          0.9 * eventsScrollController.position.maxScrollExtent;
       if (eventsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalEvents();
       }
     });
     myEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * myEventsScrollController.position.maxScrollExtent;
+      double triggerFetchMoreSize =
+          0.9 * myEventsScrollController.position.maxScrollExtent;
       if (myEventsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalMyEvents();
       }
     });
-    LocationService().getZipFromLatLon(widget.currentLat, widget.currentLon).then((res) {
+    LocationService()
+        .getZipFromLatLon(widget.currentLat, widget.currentLon)
+        .then((res) {
       areaCodeFilter = res;
       getMyEvents();
       getEvents();
@@ -539,11 +639,13 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                               children: <Widget>[
                                 Container(
                                   constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width - 16,
+                                    maxWidth:
+                                        MediaQuery.of(context).size.width - 16,
                                   ),
                                   child: CustomText(
                                     context: context,
-                                    text: "We Could Not Find Any Events According to Your Preferences",
+                                    text:
+                                        "We Could Not Find Any Events According to Your Preferences",
                                     textColor: Colors.black,
                                     textAlign: TextAlign.center,
                                     fontSize: 16.0,

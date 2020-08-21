@@ -246,6 +246,11 @@ class EventDataService {
     return event;
   }
 
+  Future updateEvent(WebblenEvent data, String id) async {
+    await eventsRef.document(id).updateData(data.toMap());
+    return;
+  }
+
   //***DELETE
   Future<String> deleteEvent(String eventID) async {
     String error = "";

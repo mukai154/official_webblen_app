@@ -12,14 +12,25 @@ class EventBlock extends StatelessWidget {
   final int numOfTicsForEvent;
   final VoidCallback viewEventTickets;
   final VoidCallback viewEventDetails;
+  final VoidCallback goToDigitalEvent;
   final VoidCallback shareEvent;
   final double eventImgSize;
   final double eventDescHeight;
-  EventBlock({this.event, this.numOfTicsForEvent, this.viewEventTickets, this.viewEventDetails, this.shareEvent, this.eventImgSize, this.eventDescHeight});
+  EventBlock(
+      {this.event,
+      this.numOfTicsForEvent,
+      this.viewEventTickets,
+      this.viewEventDetails,
+      this.goToDigitalEvent,
+      this.shareEvent,
+      this.eventImgSize,
+      this.eventDescHeight});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: viewEventTickets == null ? viewEventDetails : viewEventTickets,
+      onTap: event.isDigitalEvent
+          ? goToDigitalEvent != null ? goToDigitalEvent : viewEventDetails
+          : viewEventTickets == null ? viewEventDetails : viewEventTickets,
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 8.0),
         width: eventImgSize,
@@ -40,7 +51,9 @@ class EventBlock extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             ClipRRect(
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(8.0),
+                  topRight: Radius.circular(8.0)),
               child: CachedNetworkImage(
                 imageUrl: event.imageURL,
                 fit: BoxFit.cover,
@@ -94,7 +107,8 @@ class EventBlock extends StatelessWidget {
                   SizedBox(height: 4.0),
                   CustomText(
                     context: context,
-                    text: "${event.startDate} | ${event.startTime} ${event.timezone}",
+                    text:
+                        "${event.startDate} | ${event.startTime} ${event.timezone}",
                     textColor: Colors.black45,
                     textAlign: TextAlign.left,
                     fontSize: 14.0,
@@ -162,7 +176,13 @@ class EventTicketBlock extends StatelessWidget {
   final VoidCallback viewEventDetails;
   final VoidCallback shareEvent;
   final double eventDescHeight;
-  EventTicketBlock({this.event, this.numOfTicsForEvent, this.viewEventTickets, this.viewEventDetails, this.shareEvent, this.eventDescHeight});
+  EventTicketBlock(
+      {this.event,
+      this.numOfTicsForEvent,
+      this.viewEventTickets,
+      this.viewEventDetails,
+      this.shareEvent,
+      this.eventDescHeight});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -230,7 +250,8 @@ class EventTicketBlock extends StatelessWidget {
                   SizedBox(height: 4.0),
                   CustomText(
                     context: context,
-                    text: "${event.startDate} | ${event.startTime} ${event.timezone}",
+                    text:
+                        "${event.startDate} | ${event.startTime} ${event.timezone}",
                     textColor: Colors.black45,
                     textAlign: TextAlign.left,
                     fontSize: 14.0,

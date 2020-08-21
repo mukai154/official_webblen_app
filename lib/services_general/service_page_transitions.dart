@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/models/calendar_event.dart';
@@ -33,6 +34,7 @@ import 'package:webblen/pages/earnings_pages/payout_methods_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_instant_deposit_page.dart';
 import 'package:webblen/pages/event_pages/create_event_page.dart';
+import 'package:webblen/pages/event_pages/digital_event_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
@@ -87,6 +89,7 @@ class PageTransitionService {
   final double lon;
   final List<Map<String, dynamic>> ticketsToPurchase;
   final List eventFees;
+  final ClientRole clientRole;
 
   PageTransitionService({
     this.context,
@@ -119,6 +122,7 @@ class PageTransitionService {
     this.calendarEvent,
     this.ticketsToPurchase,
     this.eventFees,
+    this.clientRole,
   });
 
   //ROOT PAGES
@@ -204,6 +208,17 @@ class PageTransitionService {
           builder: (context) => EventDetailsPage(
             eventID: eventID,
             currentUser: currentUser,
+          ),
+        ),
+      );
+
+  void transitionToDigitalEventPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DigitalEventPage(
+            currentUser: currentUser,
+            event: event,
+            role: clientRole,
           ),
         ),
       );

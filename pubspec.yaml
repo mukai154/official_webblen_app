@@ -49,6 +49,7 @@ dependencies:
 
   #Video Dependencies
   youtube_player_flutter: ^6.0.3+2
+  agora_rtc_engine: ^1.0.13
 
   #QR READ/RENDER
   qr_flutter: ^3.1.0
@@ -86,6 +87,7 @@ dependencies:
   percent_indicator: ^2.1.1+1
   random_string: ^1.1.0
   responsive_grid: ^1.1.1
+  permission_handler: ^5.0.1+1
 
 dev_dependencies:
   flutter_test:
