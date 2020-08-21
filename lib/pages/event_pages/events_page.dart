@@ -5,12 +5,14 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/constants/strings.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
@@ -59,6 +61,29 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   bool moreEventsAvailable = true;
   bool loadingAdditionalMyEvents = false;
   bool moreMyEventsAvailable = true;
+
+  transitionToCreateEventPage() {
+    ShowAlertDialogService().showLoadingDialog(context);
+    WebblenUserData().checkIfUserCanSellTickets(widget.currentUser.uid).then((canSellTickets) {
+      if (canSellTickets) {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context).transitionToCreateEventPage();
+      } else {
+        Navigator.of(context).pop();
+        ShowAlertDialogService().showCustomActionDialog(
+          context,
+          "Earnings Account Required",
+          "Please Setup Your Earnings Account Before Creating an Event",
+          "Setup Earnings Account",
+          () {
+            Navigator.of(context).pop();
+            OpenUrl()
+                .launchInWebViewOrVC(context, "https://us-central1-webblen-events.cloudfunctions.net/connectStripeCustomAccount?uid=${widget.currentUser.uid}");
+          },
+        );
+      }
+    });
+  }
 
   getEvents() async {
     Query eventsQuery;
@@ -458,9 +483,7 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                 ),
               ),
               IconButton(
-                onPressed: () => PageTransitionService(
-                  context: context,
-                ).transitionToCreateEventPage(),
+                onPressed: () => transitionToCreateEventPage(),
                 icon: Icon(
                   FontAwesomeIcons.plus,
                   size: 20.0,
@@ -597,9 +620,7 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                             ),
                             SizedBox(height: 8.0),
                             GestureDetector(
-                              onTap: () => PageTransitionService(
-                                context: context,
-                              ).transitionToCreateEventPage(),
+                              onTap: () => transitionToCreateEventPage(),
                               child: CustomText(
                                 context: context,
                                 text: "Create an Event",

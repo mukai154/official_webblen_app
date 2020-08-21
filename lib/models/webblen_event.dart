@@ -39,6 +39,7 @@ class WebblenEvent {
   String timezone;
   String privacy;
   bool reported;
+  String webAppLink;
 
   WebblenEvent({
     this.id,
@@ -81,6 +82,7 @@ class WebblenEvent {
     this.timezone,
     this.privacy,
     this.reported,
+    this.webAppLink,
   });
 
   WebblenEvent.fromMap(Map<String, dynamic> data)
@@ -125,6 +127,7 @@ class WebblenEvent {
           timezone: data['timezone'],
           privacy: data['privacy'],
           reported: data['reported'],
+          webAppLink: data['webAppLink'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -168,5 +171,6 @@ class WebblenEvent {
         'timezone': this.timezone,
         'privacy': this.privacy,
         'reported': this.reported,
+        'webAppLink': this.webAppLink,
       };
 }

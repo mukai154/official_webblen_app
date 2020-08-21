@@ -44,6 +44,18 @@ class WebblenUserData {
     return accountIsSetup;
   }
 
+  Future<bool> checkIfUserCanSellTickets(String uid) async {
+    bool canSellTickets = false;
+    DocumentSnapshot documentSnapshot = await stripeRef.document(uid).get();
+    if (documentSnapshot.exists) {
+      Map<String, dynamic> docData = documentSnapshot.data;
+      if (docData['stripeUID'] != null) {
+        canSellTickets = true;
+      }
+    }
+    return canSellTickets;
+  }
+
   Future<bool> checkIfUsernameExists(String username) async {
     bool usernameExists = false;
     QuerySnapshot snapshot = await userRef.where("d.username", isEqualTo: username).getDocuments();

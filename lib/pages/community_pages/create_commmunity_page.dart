@@ -17,6 +17,7 @@ import 'package:webblen/constants/timezones.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/models/community.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -30,25 +31,23 @@ import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 
-import 'event_details_page.dart';
-
-class CreateEventPage extends StatefulWidget {
-  final String eventID;
-  CreateEventPage({this.eventID});
+class CreateCommunityPage extends StatefulWidget {
+  final String comID;
+  CreateCommunityPage({this.comID});
 
   @override
-  _CreateEventPageState createState() => _CreateEventPageState();
+  _CreateCommunityPageState createState() => _CreateCommunityPageState();
 }
 
-class _CreateEventPageState extends State<CreateEventPage> {
+class _CreateCommunityPageState extends State<CreateCommunityPage> {
   String currentUID;
   bool isLoading = true;
   bool isTypingMultiLine = false;
   TextEditingController controller = TextEditingController();
   GlobalKey formKey = GlobalKey<FormState>();
   //Event Details
-  WebblenEvent newEvent;
-  String eventTitle;
+  WebblenCommunity community;
+  String comName;
   String eventDesc;
   String eventImgURL;
   String eventChatID;
@@ -1711,7 +1710,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         Navigator.of(context).pop();
         ShowAlertDialogService().showActionSuccessDialog(context, "Event Uploaded", "Your Event Has Successfully Been Uploaded", () {
           Navigator.of(context).pop();
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
+          //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
         });
 
         //newEvent.navigateToEvent(newEvent.id);

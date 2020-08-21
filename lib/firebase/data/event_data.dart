@@ -18,17 +18,21 @@ class EventDataService {
 
   //CREATE
   Future<WebblenEvent> uploadEvent(WebblenEvent newEvent, String zipPostalCode, File eventImageFile, TicketDistro ticketDistro) async {
-    print("uploading event...");
-    print(zipPostalCode);
     String error;
     List nearbyZipcodes = [];
-    String newEventID = newEvent.id == null ? randomAlphaNumeric(12) : newEvent.id;
-    newEvent.id = newEventID;
+    String newEventID;
+    if (newEvent.id == null || newEvent.id.isEmpty) {
+      newEventID = randomAlphaNumeric(12);
+      newEvent.id = newEventID;
+    } else {
+      newEventID = newEvent.id;
+    }
     if (eventImageFile != null) {
       String eventFileName = "${newEvent.id}.jpg";
       String eventImageURL = await uploadEventImage(eventImageFile, eventFileName);
       newEvent.imageURL = eventImageURL;
     }
+    newEvent.webAppLink = 'https://app.webblen.io/event?id=$newEventID';
     if (!newEvent.isDigitalEvent && zipPostalCode != null) {
       List listOfAreaCodes = await LocationService().findNearestZipcodes(zipPostalCode);
       if (listOfAreaCodes != null) {

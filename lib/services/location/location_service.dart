@@ -61,6 +61,26 @@ class LocationService {
     return zips;
   }
 
+  Future<Map<String, dynamic>> reverseGeocodeLatLon(double lat, double lon) async {
+    Map<String, dynamic> data;
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'reverseGeocodeLatLon',
+    );
+
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'lat': lat,
+        'lon': lon,
+      },
+    ).catchError((e) {
+      print(e);
+    });
+    if (result != null) {
+      data = result.data['data'][0];
+    }
+    return data;
+  }
+
   Future<String> getAddressFromLatLon(double lat, double lon) async {
     String foundAddress;
     Coordinates coordinates = Coordinates(lat, lon);

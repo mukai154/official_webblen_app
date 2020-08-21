@@ -16,9 +16,9 @@ import 'package:webblen/pages/chat_pages/chats_index_page.dart';
 import 'package:webblen/pages/community_pages/communities_in_area_page.dart';
 import 'package:webblen/pages/community_pages/communities_page.dart';
 import 'package:webblen/pages/community_pages/community_create_post_page.dart';
-import 'package:webblen/pages/community_pages/community_new_page.dart';
 import 'package:webblen/pages/community_pages/community_post_comments_page.dart';
 import 'package:webblen/pages/community_pages/community_profile_page.dart';
+import 'package:webblen/pages/community_pages/create_commmunity_page.dart';
 import 'package:webblen/pages/community_pages/invite_members_page.dart';
 import 'package:webblen/pages/community_pages/my_communities_page.dart';
 import 'package:webblen/pages/community_request_pages/community_request_details_page.dart';
@@ -475,9 +475,7 @@ class PageTransitionService {
   void transitionToNewCommunityPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CreateCommunityPage(
-            areaName: areaName,
-          ),
+          builder: (context) => CreateCommunityPage(),
         ),
       );
 

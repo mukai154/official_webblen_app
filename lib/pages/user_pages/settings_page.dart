@@ -381,10 +381,10 @@ class _SettingsPageState extends State<SettingsPage> {
 //                  ),
                         StreamBuilder(
                           stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
-                          builder: (context, snapshot) {
+                          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                             if (!snapshot.hasData) return Container();
-                            var stripeData = snapshot.data;
-                            return stripeData == null
+                            var stripeAccountExists = snapshot.data.exists;
+                            return !stripeAccountExists
                                 ? Container(
                                     child: Column(
                                       children: [
@@ -396,7 +396,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         SizedBox(height: 8.0),
                                         optionRow(
                                           Icon(FontAwesomeIcons.briefcase, color: CustomColors.blackPearl, size: 18.0),
-                                          'Convert to Business Account',
+                                          'Create Earnings Account',
                                           CustomColors.blackPearl,
                                           () {
                                             OpenUrl().launchInWebViewOrVC(context, stripeConnectURL);

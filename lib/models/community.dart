@@ -43,8 +43,7 @@ class Community {
           last100Events: data['last100Events'],
           subtags: data['subtags'],
           memberIDs: data['memberIDs'],
-          lastActivityTimeInMilliseconds:
-              data['lastActivityTimeInMilliseconds'],
+          lastActivityTimeInMilliseconds: data['lastActivityTimeInMilliseconds'],
           isPrivate: data['isPrivate'],
           communityType: data['communityType'],
           areaName: data['areaName'],
@@ -65,5 +64,78 @@ class Community {
         'isPrivate': this.isPrivate,
         'communityType': this.communityType,
         'areaName': this.areaName,
+      };
+}
+
+class WebblenCommunity {
+  String id;
+  String name;
+  List members;
+  List admin;
+  List postIDs;
+  List pendingSharedEvents;
+  List nearbyZipcodes;
+  List nearbyCities;
+  String comImgURL;
+  List tags;
+  bool isPrivate;
+  String status;
+  bool reported;
+  int activityCount;
+  int lastActivityTimeInMilliseconds;
+
+  WebblenCommunity({
+    this.id,
+    this.name,
+    this.members,
+    this.admin,
+    this.postIDs,
+    this.pendingSharedEvents,
+    this.nearbyZipcodes,
+    this.nearbyCities,
+    this.comImgURL,
+    this.tags,
+    this.isPrivate,
+    this.status,
+    this.reported,
+    this.activityCount,
+    this.lastActivityTimeInMilliseconds,
+  });
+
+  WebblenCommunity.fromMap(Map<String, dynamic> data)
+      : this(
+          id: data['id'],
+          name: data['name'],
+          members: data['members'],
+          admin: data['admin'],
+          postIDs: data['postIDs'],
+          pendingSharedEvents: data['pendingSharedEvents'],
+          nearbyZipcodes: data['nearbyZipcodes'],
+          nearbyCities: data['nearbyCities'],
+          comImgURL: data['comImgURL'],
+          tags: data['tags'],
+          isPrivate: data['isPrivate'],
+          status: data['status'],
+          reported: data['reported'],
+          activityCount: data['activityCount'],
+          lastActivityTimeInMilliseconds: data['lastActivityTimeInMilliseconds'],
+        );
+
+  Map<String, dynamic> toMap() => {
+        'id': this.id,
+        'name': this.name,
+        'members': this.members,
+        'admin': this.admin,
+        'postIDs': this.postIDs,
+        'pendingSharedEvents': this.pendingSharedEvents,
+        'nearbyZipcodes': this.nearbyZipcodes,
+        'nearbyCities': this.nearbyCities,
+        'comImgURL': this.comImgURL,
+        'tags': this.tags,
+        'isPrivate': this.isPrivate,
+        'status': this.status,
+        'reported': this.reported,
+        'activityCount': this.activityCount,
+        'lastActivityTimeInMilliseconds': this.lastActivityTimeInMilliseconds,
       };
 }

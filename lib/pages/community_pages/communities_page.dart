@@ -182,7 +182,6 @@ class _CommunitiesPageState extends State<CommunitiesPage> {
             IconButton(
               onPressed: () => PageTransitionService(
                 context: context,
-                areaName: widget.areaName,
               ).transitionToNewCommunityPage(),
               icon: Icon(
                 FontAwesomeIcons.plus,
