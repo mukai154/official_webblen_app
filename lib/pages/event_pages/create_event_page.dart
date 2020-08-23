@@ -20,7 +20,6 @@ import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
@@ -68,7 +67,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
   List sharedComs = [];
   List tags = [];
   int eventClicks = 0;
-  String webAppLink;
 
   //Date & Time Details
   DateTime selectedDateTime = DateTime(
@@ -155,16 +153,19 @@ class _CreateEventPageState extends State<CreateEventPage> {
     );
     PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
     eventAddress = detail.result.formattedAddress;
+    detail.result.addressComponents.forEach((element) {
+      print(element.longName);
+    });
+    zipPostalCode = detail.result.addressComponents[7].shortName;
+    if (zipPostalCode.length != 5) {
+      zipPostalCode = detail.result.addressComponents[6].shortName;
+    }
+    //print(zipPostalCode);
+    city = detail.result.addressComponents[3].longName;
+    province = detail.result.addressComponents[5].shortName;
     lat = detail.result.geometry.location.lat;
     lon = detail.result.geometry.location.lng;
-    CustomAlerts().showLoadingAlert(context, "Setting Location...");
-    Map<String, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
-    Navigator.of(context).pop();
-    zipPostalCode = locationData['zipcode'];
-    city = locationData['city'];
-    province = locationData['administrativeLevels']['level1short'];
-    lat = detail.result.geometry.location.lat;
-    lon = detail.result.geometry.location.lng;
+    setState(() {});
   }
 
   Widget addImageButton() {
@@ -323,7 +324,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       children: <Widget>[
         CustomText(
           context: context,
-          text: "This is a Digital/Online Event",
+          text: "This is a Virtual Event",
           textColor: Colors.black,
           textAlign: TextAlign.left,
           fontSize: 14.0,
@@ -1702,7 +1703,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
       timezone: timezone,
       privacy: privacy,
       reported: false,
-      webAppLink: webAppLink == null ? null : webAppLink,
     );
     WebblenUser currentUser = await WebblenUserData().getUserByID(currentUID);
     print(currentUser.uid);
@@ -1733,9 +1733,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
       CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Set the Location of this Event");
     } else if (!isDigitalEvent && (zipPostalCode.length != 5)) {
       CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Provide a Better Address for this Event");
-    } else if (isDigitalEvent && (digitalEventLink == null || digitalEventLink.isEmpty)) {
-      CustomAlerts().showErrorAlert(context, "Event URL Link Error", "Please Provide the Link to this Event");
-    } else if (eventDesc == null || eventDesc.isEmpty) {
+    }
+    // else if (isDigitalEvent &&
+    //     (digitalEventLink == null || digitalEventLink.isEmpty)) {
+    //   CustomAlerts().showErrorAlert(context, "Event URL Link Error",
+    //       "Please Provide the Link to this Event");
+    // }
+    else if (eventDesc == null || eventDesc.isEmpty) {
       CustomAlerts().showErrorAlert(context, "Event Description Missing", "Please Set the Description for this Event");
     } else if (eventCategory == 'Select Event Category') {
       CustomAlerts().showErrorAlert(context, "Event Category Missing", "Please Set the Category for this Event");
@@ -1787,7 +1791,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
             endTime = res.endTime;
             timezone = res.timezone;
             privacy = res.privacy;
-            webAppLink = res.webAppLink;
             if (res.hasTickets) {
               EventDataService().getEventTicketDistro(res.id).then((res) {
                 ticketDistro = res;
@@ -1873,8 +1876,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                 eventTitleField(),
                                 SizedBox(height: 16.0),
                                 //EVENT LOCATION
-                                isDigitalEvent ? fieldHeader("Event URL Link", true) : fieldHeader("Location", true),
-                                isDigitalEvent ? eventDigitalLinkField() : eventLocationField(),
+                                isDigitalEvent ? Container() : fieldHeader("Location", true),
+                                isDigitalEvent ? Container() : eventLocationField(),
                                 isDigitalEvent ? Container() : SizedBox(height: 16.0),
                                 isDigitalEvent ? Container() : fieldHeader("Venue Name/Details (Optional)", false),
                                 isDigitalEvent ? Container() : eventVenueNameField(),

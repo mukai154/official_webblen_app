@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -39,8 +40,9 @@ class EventDetailsPage extends StatefulWidget {
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
   bool isLoading = true;
+  bool eventStarted = false;
   WebblenEvent event;
-  int currentDateTime = DateTime.now().millisecondsSinceEpoch;
+  int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
   DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
   bool eventIsLive = false;
   double eventLat = 0.0;
@@ -293,6 +295,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     super.initState();
     EventDataService().getEvent(widget.eventID).then((res) {
       event = res;
+      if (event.startDateTimeInMilliseconds < currentDateTimeInMilliseconds) {
+        eventStarted = true;
+      }
       if (event.hasTickets) {
         TicketDataService().getEventTicketDistro(widget.eventID).then((res) {
           eventTicketDistro = res;
@@ -585,66 +590,175 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     }
 
     return Scaffold(
-        appBar: WebblenAppBar().actionAppBar(
-          isLoading ? '' : event.title,
-          IconButton(
-            icon: Icon(
-              FontAwesomeIcons.ellipsisH,
-              size: 18.0,
-              color: Colors.black,
-            ),
-            onPressed: () => showEventOptions(),
+      appBar: WebblenAppBar().actionAppBar(
+        isLoading ? '' : event.title,
+        IconButton(
+          icon: Icon(
+            FontAwesomeIcons.ellipsisH,
+            size: 18.0,
+            color: Colors.black,
           ),
+          onPressed: () => showEventOptions(),
         ),
-        body: isLoading ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed) : eventView(),
-        bottomNavigationBar: !isLoading && event.hasTickets != null && event.hasTickets
-            ? Container(
-                height: 80.0,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(
-                      color: FlatColors.textFieldGray,
-                      width: 1.5,
-                    ),
-                  ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: 16.0,
-                    bottom: 16.0,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Fonts().textW700("Tickets Available", 16.0, Colors.black, TextAlign.left),
-                          Fonts().textW300("on Webblen", 14.0, Colors.black, TextAlign.left),
-                        ],
-                      ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          CustomColorButton(
-                            text: "View Tickets",
-                            textSize: 14.0,
-                            textColor: Colors.white,
-                            backgroundColor: FlatColors.webblenRed,
-                            height: 35.0,
-                            width: MediaQuery.of(context).size.width * 0.4,
-                            onPressed: () =>
-                                PageTransitionService(context: context, event: event, currentUser: widget.currentUser).transitionToTicketSelectionPage(),
+      ),
+      body: isLoading ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed) : eventView(),
+      bottomNavigationBar: !isLoading
+          ? event.hasTickets
+              ? eventStarted == false
+                  ? Container(
+                      height: 80.0,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border(
+                          top: BorderSide(
+                            color: FlatColors.textFieldGray,
+                            width: 1.5,
                           ),
-                        ],
+                        ),
                       ),
-                    ],
-                  ),
-                ),
-              )
-            : Container(height: 0));
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: 16.0,
+                          bottom: 16.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Fonts().textW700("Tickets Available", 16.0, Colors.black, TextAlign.left),
+                                Fonts().textW300("on Webblen", 14.0, Colors.black, TextAlign.left),
+                              ],
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                CustomColorButton(
+                                  text: "View Tickets",
+                                  textSize: 14.0,
+                                  textColor: Colors.white,
+                                  backgroundColor: FlatColors.webblenRed,
+                                  height: 35.0,
+                                  width: MediaQuery.of(context).size.width * 0.4,
+                                  onPressed: () =>
+                                      PageTransitionService(context: context, event: event, currentUser: widget.currentUser).transitionToTicketSelectionPage(),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : Container()
+              : event.isDigitalEvent
+                  ? event.authorID == widget.currentUser.uid
+                      ? Container(
+                          height: 80.0,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border(
+                              top: BorderSide(
+                                color: FlatColors.textFieldGray,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: 16.0,
+                              bottom: 16.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Fonts().textW700("Streaming this Event", 16.0, Colors.black, TextAlign.left),
+                                    Fonts().textW300("on Webblen", 14.0, Colors.black, TextAlign.left),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    CustomColorButton(
+                                      text: "Start Stream",
+                                      textSize: 14.0,
+                                      textColor: Colors.white,
+                                      backgroundColor: FlatColors.webblenRed,
+                                      height: 35.0,
+                                      width: MediaQuery.of(context).size.width * 0.4,
+                                      onPressed: () => PageTransitionService(
+                                        context: context,
+                                        currentUser: widget.currentUser,
+                                        event: event,
+                                        clientRole: ClientRole.Broadcaster,
+                                      ).transitionToDigitalEventPage(),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                      : Container(
+                          height: 80.0,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border(
+                              top: BorderSide(
+                                color: FlatColors.textFieldGray,
+                                width: 1.5,
+                              ),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              left: 16.0,
+                              bottom: 16.0,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Fonts().textW700("Virtual Event", 16.0, Colors.black, TextAlign.left),
+                                    Fonts().textW300("on Webblen", 14.0, Colors.black, TextAlign.left),
+                                  ],
+                                ),
+                                Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    CustomColorButton(
+                                      text: "Watch Now",
+                                      textSize: 14.0,
+                                      textColor: Colors.white,
+                                      backgroundColor: FlatColors.electronBlue,
+                                      height: 35.0,
+                                      width: MediaQuery.of(context).size.width * 0.4,
+                                      onPressed: () => PageTransitionService(
+                                        context: context,
+                                        currentUser: widget.currentUser,
+                                        event: event,
+                                        clientRole: ClientRole.Audience,
+                                      ).transitionToDigitalEventPage(),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                  : Container()
+          : Container(),
+    );
   }
 }

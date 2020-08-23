@@ -7,7 +7,6 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/constants/strings.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -18,30 +17,20 @@ import 'package:webblen/widgets/events/event_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_home_tiles/search_tile.dart';
 
-class EventsPage extends StatefulWidget {
+class DigitalEventsPage extends StatefulWidget {
   final WebblenUser currentUser;
-  final double currentLat;
-  final double currentLon;
-  final String areaName;
-  final Key key;
 
-  EventsPage({
+  DigitalEventsPage({
     this.currentUser,
-    this.currentLat,
-    this.currentLon,
-    this.areaName,
-    this.key,
   });
 
   @override
-  _EventsPageState createState() => _EventsPageState();
+  _DigitalEventsPageState createState() => _DigitalEventsPageState();
 }
 
-class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateMixin {
+class _DigitalEventsPageState extends State<DigitalEventsPage> with SingleTickerProviderStateMixin {
   final PageStorageBucket bucket = PageStorageBucket();
-  TabController _tabController;
   ScrollController eventsScrollController;
-  ScrollController myEventsScrollController;
   int resultsPerPage = 10;
   String areaName = "My Current Location";
   String areaCodeFilter;
@@ -51,9 +40,7 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   CollectionReference eventsRef = Firestore.instance.collection("events");
 
   List<DocumentSnapshot> eventResults = [];
-  List<DocumentSnapshot> myEventResults = [];
   DocumentSnapshot lastEventDocSnap;
-  DocumentSnapshot lastMyEventDocSnap;
   bool isLoading = true;
   bool loadingAdditionalEvents = false;
   bool moreEventsAvailable = true;
@@ -63,24 +50,23 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   getEvents() async {
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
-      eventsQuery =
-          eventsRef.where('d.nearbyZipcodes', arrayContains: areaCodeFilter).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+      eventsQuery = eventsRef.where('d.isDigitalEvent', isEqualTo: true).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       print(eventTypeFilter);
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
@@ -95,18 +81,6 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
     setState(() {});
   }
 
-  getMyEvents() async {
-    Query eventsQuery =
-        eventsRef.where("d.authorID", isEqualTo: widget.currentUser.uid).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    if (querySnapshot.documents.isNotEmpty) {
-      lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-      myEventResults = querySnapshot.documents;
-    }
-    isLoading = false;
-    setState(() {});
-  }
-
   getAdditionalEvents() async {
     if (isLoading || !moreEventsAvailable || loadingAdditionalEvents) {
       return;
@@ -116,27 +90,27 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastEventDocSnap)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
@@ -154,32 +128,8 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
     setState(() {});
   }
 
-  getAdditionalMyEvents() async {
-    if (isLoading || !moreEventsAvailable || loadingAdditionalMyEvents) {
-      return;
-    }
-    loadingAdditionalMyEvents = true;
-    setState(() {});
-    Query eventsQuery = eventsRef
-        .where("d.authorID", isEqualTo: widget.currentUser.uid)
-        .orderBy('d.startDateTimeInMilliseconds', descending: false)
-        .startAfterDocument(lastMyEventDocSnap)
-        .limit(resultsPerPage);
-
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-    myEventResults.addAll(querySnapshot.documents);
-    if (querySnapshot.documents.length == 0) {
-      moreMyEventsAvailable = false;
-    }
-    loadingAdditionalMyEvents = false;
-    setState(() {});
-  }
-
   Future<void> refreshData() async {
     eventResults = [];
-    myEventResults = [];
-    getMyEvents();
     getEvents();
   }
 
@@ -190,14 +140,6 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
     eventResults = [];
     getEvents();
   }
-
-//  void transitionToShareEventPage(Event event) async {
-//    PageTransitionService(
-//      context: context,
-//      currentUser: widget.currentUser,
-//      event: event,
-//    ).transitionToChatInviteSharePage();
-//  }
 
   showEventPreferenceDialog() {
     Widget widget = Container(
@@ -346,51 +288,9 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
         itemCount: eventResults.length,
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(eventResults[index].data['d']));
-          return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
-            child: event.isDigitalEvent
-                ? EventBlock(
-                    event: event,
-                    shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                    viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                    viewEventTickets: null,
-                    numOfTicsForEvent: null,
-                    eventImgSize: MediaQuery.of(context).size.width - 16,
-                    eventDescHeight: 120.0,
-                  )
-                : EventBlock(
-                    event: event,
-                    shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                    viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                    viewEventTickets: null,
-                    numOfTicsForEvent: null,
-                    eventImgSize: MediaQuery.of(context).size.width - 16,
-                    eventDescHeight: 120.0,
-                  ),
-          );
-        },
-      ),
-    );
-  }
-
-  Widget listMyEvents() {
-    return LiquidPullToRefresh(
-      color: CustomColors.webblenRed,
-      onRefresh: refreshData,
-      child: ListView.builder(
-        controller: myEventsScrollController,
-        key: UniqueKey(),
-        shrinkWrap: true,
-        padding: EdgeInsets.only(
-          top: 4.0,
-          bottom: 4.0,
-        ),
-        itemCount: myEventResults.length,
-        itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(myEventResults[index].data['d']));
           bool isOwner = event.authorID == widget.currentUser.uid ? true : false;
           return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: myEventResults.length - 1 == index ? 16.0 : 0),
+            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
             child: event.isDigitalEvent
                 ? EventBlock(
                     event: event,
@@ -419,37 +319,20 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    _tabController = new TabController(
-      length: 2,
-      vsync: this,
-    );
     eventsScrollController = ScrollController();
-    myEventsScrollController = ScrollController();
     eventsScrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * eventsScrollController.position.maxScrollExtent;
       if (eventsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalEvents();
       }
     });
-    myEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * myEventsScrollController.position.maxScrollExtent;
-      if (myEventsScrollController.position.pixels > triggerFetchMoreSize) {
-        getAdditionalMyEvents();
-      }
-    });
-    LocationService().getZipFromLatLon(widget.currentLat, widget.currentLon).then((res) {
-      areaCodeFilter = res;
-      getMyEvents();
-      getEvents();
-    });
+    getEvents();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _tabController.dispose();
     eventsScrollController.dispose();
-    myEventsScrollController.dispose();
   }
 
   @override
@@ -459,7 +342,7 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
         brightness: Brightness.light,
         backgroundColor: Colors.white,
         title: Fonts().textW700(
-          "Events",
+          "Virtual Events",
           24.0,
           Colors.black,
           TextAlign.center,
@@ -498,143 +381,70 @@ class _EventsPageState extends State<EventsPage> with SingleTickerProviderStateM
                 onTap: () => PageTransitionService(
                   context: context,
                   currentUser: widget.currentUser,
-                  areaName: widget.areaName,
+                  areaName: "",
                 ).transitionToSearchPage(),
                 child: SearchTile(),
               ),
-              TabBar(
-                controller: _tabController,
-                indicatorColor: CustomColors.webblenRed,
-                labelColor: CustomColors.darkGray,
-                isScrollable: true,
-                tabs: [
-                  Tab(
-                    child: CustomText(
-                      context: context,
-                      text: "Events",
-                      textColor: Colors.black,
-                      textAlign: TextAlign.center,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Tab(
-                    child: CustomText(
-                      context: context,
-                      text: "My Events",
-                      textColor: Colors.black,
-                      textAlign: TextAlign.center,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
-              ),
             ],
           ),
-          preferredSize: Size.fromHeight(85.0),
+          preferredSize: Size.fromHeight(35.0),
         ));
 
     return DefaultTabController(
       length: 2,
       child: Scaffold(
         appBar: appBar,
-        body: TabBarView(
-          controller: _tabController,
-          children: <Widget>[
-            //EVENTS
-            Container(
-              key: PageStorageKey('key0'),
-              color: Colors.white,
-              child: isLoading
-                  ? LoadingScreen(
-                      context: context,
-                      loadingDescription: 'Loading Events...',
-                    )
-                  : eventResults.isEmpty
-                      ? Column(
+        body: Container(
+          key: PageStorageKey('key0'),
+          color: Colors.white,
+          child: isLoading
+              ? LoadingScreen(
+                  context: context,
+                  loadingDescription: 'Loading Events...',
+                )
+              : eventResults.isEmpty
+                  ? Column(
+                      children: <Widget>[
+                        SizedBox(height: 32.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            SizedBox(height: 32.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width - 16,
-                                  ),
-                                  child: CustomText(
-                                    context: context,
-                                    text: "We Could Not Find Any Events According to Your Preferences",
-                                    textColor: Colors.black,
-                                    textAlign: TextAlign.center,
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                )
-                              ],
-                            ),
-                            SizedBox(height: 8.0),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                GestureDetector(
-                                  onTap: () => showEventPreferenceDialog(),
-                                  child: CustomText(
-                                    context: context,
-                                    text: "Change My Preferences",
-                                    textColor: Colors.blueAccent,
-                                    textAlign: TextAlign.center,
-                                    underline: false,
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        )
-                      : listEvents(),
-            ),
-            //MY EVENTS
-            Container(
-              key: PageStorageKey('key1'),
-              color: Colors.white,
-              child: isLoading
-                  ? LoadingScreen(
-                      context: context,
-                      loadingDescription: 'Loading Events...',
-                    )
-                  : myEventResults.isEmpty
-                      ? Column(
-                          children: <Widget>[
-                            SizedBox(height: 32.0),
-                            CustomText(
-                              context: context,
-                              text: "You Have Not Made Any Events",
-                              textColor: Colors.black,
-                              textAlign: TextAlign.center,
-                              fontSize: 16.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                            SizedBox(height: 8.0),
-                            GestureDetector(
-                              onTap: () => PageTransitionService(
-                                context: context,
-                              ).transitionToCreateEventPage(),
+                            Container(
+                              constraints: BoxConstraints(
+                                maxWidth: MediaQuery.of(context).size.width - 16,
+                              ),
                               child: CustomText(
                                 context: context,
-                                text: "Create an Event",
+                                text: "We Could Not Find Any Events According to Your Preferences",
+                                textColor: Colors.black,
+                                textAlign: TextAlign.center,
+                                fontSize: 16.0,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          ],
+                        ),
+                        SizedBox(height: 8.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () => showEventPreferenceDialog(),
+                              child: CustomText(
+                                context: context,
+                                text: "Change My Preferences",
                                 textColor: Colors.blueAccent,
                                 textAlign: TextAlign.center,
+                                underline: false,
                                 fontSize: 16.0,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
-                        )
-                      : listMyEvents(),
-            ),
-          ],
+                        ),
+                      ],
+                    )
+                  : listEvents(),
         ),
       ),
     );

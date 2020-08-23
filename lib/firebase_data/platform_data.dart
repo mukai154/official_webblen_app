@@ -37,4 +37,11 @@ class PlatformDataService {
     pubKey = snapshot.data['pubKey'];
     return pubKey;
   }
+
+  Future<String> getAgoraAppID() async {
+    String appID;
+    DocumentSnapshot snapshot = await appReleaseRef.document('agora').get();
+    appID = snapshot.data['appID'];
+    return appID;
+  }
 }

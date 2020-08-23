@@ -30,14 +30,8 @@ class StreamUserNotifications extends StatelessWidget {
         int notifCount = notifSnapshot.data.documents.length;
         return GestureDetector(
           onTap: notifAction,
-          child: Padding(
-            padding: EdgeInsets.only(
-              right: 8.0,
-              top: 6.0,
-            ),
-            child: NotificationIcon(
-              notificationCount: notifCount == null ? 0 : notifCount,
-            ),
+          child: NotificationIcon(
+            notificationCount: notifCount == null ? 0 : notifCount,
           ),
         );
       },

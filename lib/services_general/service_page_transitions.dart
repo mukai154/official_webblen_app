@@ -1,3 +1,4 @@
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/models/calendar_event.dart';
@@ -16,9 +17,9 @@ import 'package:webblen/pages/chat_pages/chats_index_page.dart';
 import 'package:webblen/pages/community_pages/communities_in_area_page.dart';
 import 'package:webblen/pages/community_pages/communities_page.dart';
 import 'package:webblen/pages/community_pages/community_create_post_page.dart';
+import 'package:webblen/pages/community_pages/community_new_page.dart';
 import 'package:webblen/pages/community_pages/community_post_comments_page.dart';
 import 'package:webblen/pages/community_pages/community_profile_page.dart';
-import 'package:webblen/pages/community_pages/create_commmunity_page.dart';
 import 'package:webblen/pages/community_pages/invite_members_page.dart';
 import 'package:webblen/pages/community_pages/my_communities_page.dart';
 import 'package:webblen/pages/community_request_pages/community_request_details_page.dart';
@@ -33,6 +34,8 @@ import 'package:webblen/pages/earnings_pages/payout_methods_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_instant_deposit_page.dart';
 import 'package:webblen/pages/event_pages/create_event_page.dart';
+import 'package:webblen/pages/event_pages/digital_event_page.dart';
+import 'package:webblen/pages/event_pages/digital_events_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
@@ -87,6 +90,7 @@ class PageTransitionService {
   final double lon;
   final List<Map<String, dynamic>> ticketsToPurchase;
   final List eventFees;
+  final ClientRole clientRole;
 
   PageTransitionService({
     this.context,
@@ -119,6 +123,7 @@ class PageTransitionService {
     this.calendarEvent,
     this.ticketsToPurchase,
     this.eventFees,
+    this.clientRole,
   });
 
   //ROOT PAGES
@@ -189,6 +194,15 @@ class PageTransitionService {
         ),
       );
 
+  void transitionToDigitalEventsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DigitalEventsPage(
+            currentUser: currentUser,
+          ),
+        ),
+      );
+
   void transitionToCreateEventPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -204,6 +218,17 @@ class PageTransitionService {
           builder: (context) => EventDetailsPage(
             eventID: eventID,
             currentUser: currentUser,
+          ),
+        ),
+      );
+
+  void transitionToDigitalEventPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DigitalEventPage(
+            currentUser: currentUser,
+            event: event,
+            role: clientRole,
           ),
         ),
       );
@@ -475,7 +500,9 @@ class PageTransitionService {
   void transitionToNewCommunityPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => CreateCommunityPage(),
+          builder: (context) => CreateCommunityPage(
+            areaName: areaName,
+          ),
         ),
       );
 

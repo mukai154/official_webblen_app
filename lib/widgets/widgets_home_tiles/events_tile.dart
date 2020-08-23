@@ -50,7 +50,7 @@ class EventsTile extends StatelessWidget {
                   children: <Widget>[
                     MediaQuery(
                       child: Fonts().textW700(
-                        'Events',
+                        'Live Events',
                         24.0,
                         Colors.black,
                         TextAlign.left,

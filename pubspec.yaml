@@ -18,6 +18,7 @@ dependencies:
   firebase_dynamic_links: ^0.5.1
   cloud_functions: ^0.5.0
   admob_flutter: ^0.3.4
+  flutter_native_admob: ^2.1.0+3
 
   #Payment Dependencies
   flutter_credit_card: 0.1.1
@@ -49,6 +50,7 @@ dependencies:
 
   #Video Dependencies
   youtube_player_flutter: ^6.0.3+2
+  agora_rtc_engine: ^1.0.13
 
   #QR READ/RENDER
   qr_flutter: ^3.1.0

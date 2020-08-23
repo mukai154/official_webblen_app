@@ -46,7 +46,7 @@ class CommunitiesTile extends StatelessWidget {
                 children: <Widget>[
                   MediaQuery(
                     child: Fonts().textW700(
-                      'Communities',
+                      'Virtual Events',
                       24.0,
                       Colors.black,
                       TextAlign.left,

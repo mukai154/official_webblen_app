@@ -344,14 +344,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             iconData: FontAwesomeIcons.wallet,
             text: 'Wallet',
           ),
-          FABBottomAppBarItem(
-            customWidget: StreamUserAccount(
-              uid: uid,
-              isLoading: isLoading,
-              useBorderColor: pageIndex == 3 ? true : false, //() => didPressAccountButton(),
-            ),
-            text: 'Account',
-          ),
+          isConnectedToNetwork
+              ? FABBottomAppBarItem(
+                  customWidget: StreamUserAccount(
+                    uid: uid,
+                    isLoading: isLoading,
+                    useBorderColor: pageIndex == 3 ? true : false, //() => didPressAccountButton(),
+                  ),
+                  text: 'Account',
+                )
+              : FABBottomAppBarItem(
+                  customWidget: Container(),
+                  text: 'Account',
+                )
         ],
       ),
       body: PageStorage(

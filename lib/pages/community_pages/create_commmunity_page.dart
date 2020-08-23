@@ -182,7 +182,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
         decoration: BoxDecoration(
           color: Colors.black12,
         ),
-        child: widget.eventID != null
+        child: widget.comID != null
             ? eventImgFile == null
                 ? CachedNetworkImage(
                     imageUrl: eventImgURL,
@@ -297,15 +297,15 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     return TextFieldContainer(
       child: TextFormField(
         onTap: () {},
-        initialValue: eventTitle,
+        initialValue: comName,
         cursorColor: Colors.black,
         validator: (value) => value.isEmpty ? 'Field Cannot be Empty' : null,
         onChanged: (value) {
           setState(() {
-            eventTitle = value.trim();
+            comName = value.trim();
           });
         },
-        onSaved: (value) => eventTitle = value.trim(),
+        onSaved: (value) => comName = value.trim(),
         inputFormatters: [
           LengthLimitingTextInputFormatter(75),
         ],
@@ -1661,12 +1661,12 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
       timeFormatter.parse(startTime).minute,
     );
     WebblenEvent newEvent = WebblenEvent(
-      id: widget.eventID == null ? null : widget.eventID,
+      id: widget.comID == null ? null : widget.comID,
       authorID: currentUID,
       chatID: eventChatID == null ? null : eventChatID,
       hasTickets: ticketDistro.tickets.isNotEmpty ? true : false,
       flashEvent: false,
-      title: eventTitle,
+      title: comName,
       desc: eventDesc,
       imageURL: eventImgURL == null ? null : eventImgURL,
       isDigitalEvent: isDigitalEvent,
@@ -1726,7 +1726,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
     //bool addressIsValid = setEventAddress();
     if (eventImgFile == null && eventImgURL == null) {
       CustomAlerts().showErrorAlert(context, "Event Image Missing", "Please Set the Image for this Event");
-    } else if (eventTitle == null || eventTitle.isEmpty) {
+    } else if (comName == null || comName.isEmpty) {
       CustomAlerts().showErrorAlert(context, "Event Title Missing", "Please Give this Event a Title");
     } else if (!isDigitalEvent && (eventAddress == null || eventAddress.isEmpty)) {
       CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Set the Location of this Event");
@@ -1754,10 +1754,10 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
           currentUID = res;
         });
       }
-      if (widget.eventID != null) {
-        EventDataService().getEvent(widget.eventID).then((res) {
+      if (widget.comID != null) {
+        EventDataService().getEvent(widget.comID).then((res) {
           if (res != null) {
-            eventTitle = res.title;
+            comName = res.title;
             eventDesc = res.desc;
             eventChatID = res.chatID;
             eventImgURL = res.imageURL;
@@ -1819,7 +1819,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().newEventAppBar(
-          context, widget.eventID != null ? 'Editing Event' : 'New Event', widget.eventID != null ? 'Cancel Editing this Event?' : 'Cancel Adding a New Event?',
+          context, widget.comID != null ? 'Editing Event' : 'New Event', widget.comID != null ? 'Cancel Editing this Event?' : 'Cancel Adding a New Event?',
           () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
@@ -1945,7 +1945,7 @@ class _CreateCommunityPageState extends State<CreateCommunityPage> {
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 2.0),
                                       child: CustomColorButton(
-                                        text: widget.eventID == null ? "Create Event" : "Update Event",
+                                        text: widget.comID == null ? "Create Event" : "Update Event",
                                         textColor: Colors.black,
                                         backgroundColor: Colors.white,
                                         height: 35.0,

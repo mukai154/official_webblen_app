@@ -74,13 +74,15 @@
 	<key>NSCalendarsUsageDescription</key>
 	<string>Webblen Would Like Access to Your Calendar to Add Events</string>
 	<key>NSCameraUsageDescription</key>
-	<string>this will enable you to take selfies or photos to  attach to posts, events, and your account.</string>
+	<string>this will enable you to take take photos and stream video for your account and events.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Webblen Would Like to Access Your Location to Let You Know About Events Happening Around You</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Webblen Would Like to Access Your Location to Let You Know About Events Happening Around You</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Webblen Would Like to Access Your Location to Let You Know About Events Happening Around You</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Webblen Would Like to Access Your Microphone for Streaming Video</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Webblen Would Like to Access Your Motion Activity to Let You Check Into Events</string>
 	<key>NSPhotoLibraryUsageDescription</key>
