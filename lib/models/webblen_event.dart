@@ -1,7 +1,6 @@
 class WebblenEvent {
   String id;
   String authorID;
-  String chatID;
   bool hasTickets;
   bool flashEvent;
   bool isDigitalEvent;
@@ -40,11 +39,11 @@ class WebblenEvent {
   String privacy;
   bool reported;
   String webAppLink;
+  List savedBy;
 
   WebblenEvent({
     this.id,
     this.authorID,
-    this.chatID,
     this.hasTickets,
     this.flashEvent,
     this.isDigitalEvent,
@@ -83,13 +82,13 @@ class WebblenEvent {
     this.privacy,
     this.reported,
     this.webAppLink,
+    this.savedBy,
   });
 
   WebblenEvent.fromMap(Map<String, dynamic> data)
       : this(
           id: data['id'],
           authorID: data['authorID'],
-          chatID: data['chatID'],
           hasTickets: data['hasTickets'],
           flashEvent: data['flashEvent'],
           isDigitalEvent: data['isDigitalEvent'],
@@ -128,12 +127,12 @@ class WebblenEvent {
           privacy: data['privacy'],
           reported: data['reported'],
           webAppLink: data['webAppLink'],
+          savedBy: data['savedBy'],
         );
 
   Map<String, dynamic> toMap() => {
         'id': this.id,
         'authorID': this.authorID,
-        'chatID': this.chatID,
         'hasTickets': this.hasTickets,
         'flashEvent': this.flashEvent,
         'isDigitalEvent': this.isDigitalEvent,
@@ -172,5 +171,6 @@ class WebblenEvent {
         'privacy': this.privacy,
         'reported': this.reported,
         'webAppLink': this.webAppLink,
+        'savedBy': this.savedBy,
       };
 }

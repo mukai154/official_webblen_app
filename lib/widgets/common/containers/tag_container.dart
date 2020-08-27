@@ -12,20 +12,20 @@ class TagContainer extends StatelessWidget {
     return width == null
         ? Container(
             padding: EdgeInsets.all(2.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(8.0)),
-              border: Border.all(
-                color: CustomColors.electronBlue,
-                width: 2.0,
-              ),
-            ),
+//            decoration: BoxDecoration(
+//              borderRadius: BorderRadius.all(Radius.circular(8.0)),
+//              border: Border.all(
+//                color: CustomColors.electronBlue,
+//                width: 2.0,
+//              ),
+//            ),
             child: CustomText(
               context: context,
               text: tag,
               textColor: color,
               textAlign: TextAlign.center,
-              fontSize: 12.0,
-              fontWeight: FontWeight.w700,
+              fontSize: 14.0,
+              fontWeight: FontWeight.w500,
             ),
           )
         : Container(

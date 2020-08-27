@@ -7,8 +7,6 @@ import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/ticket_data.dart';
-import 'package:webblen/firebase_data/calendar_event_data.dart';
-import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -128,14 +126,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     ).transitionToEventAttendeesPage();
   }
 
-  void shareEventAction() {
-    Navigator.of(context).pop();
-    PageTransitionService(
-      context: context,
-      currentUser: widget.currentUser,
-      event: event,
-    ).transitionToChatInviteSharePage();
-  }
+//  void shareEventAction() {
+//    Navigator.of(context).pop();
+//    PageTransitionService(
+//      context: context,
+//      currentUser: widget.currentUser,
+//      event: event,
+//    ).transitionToChatInviteSharePage();
+//  }
 
   void shareLinkAction() async {
     Navigator.of(context).pop();
@@ -156,41 +154,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       "Event Starts in 15 Minutes!",
       '',
     );
-    CalendarEvent calEvent = CalendarEvent(
-      title: event.title,
-      description: event.desc,
-      data: null,
-      key: event.id,
-      timezone: timezone,
-      dateTime: formatter.format(
-        DateTime.fromMillisecondsSinceEpoch(
-          event.startDateTimeInMilliseconds,
-        ),
-      ),
-      type: 'saved',
-    );
-
-    CalendarEventDataService()
-        .saveEvent(
-      widget.currentUser.uid,
-      calEvent,
-    )
-        .then((e) {
-      Navigator.of(context).pop();
-      if (e.isEmpty) {
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Event Saved!",
-          "This Event is Now in Your Calendar",
-        );
-      } else {
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "Uh Oh!",
-          'There was an issue saving this event. Please try again later',
-        );
-      }
-    });
   }
 
   void deleteEventAction() {
@@ -216,7 +179,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     ShowAlertDialogService().showEventOptionsDialog(
         context,
         event.startDateTimeInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
-        shareEventAction,
+        null, //shareEventAction,
         shareLinkAction,
         event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == event.authorID ? editEventAction : null,
         widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch ? deleteEventAction : null);
@@ -295,6 +258,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     super.initState();
     EventDataService().getEvent(widget.eventID).then((res) {
       event = res;
+      print(event);
       if (event.startDateTimeInMilliseconds < currentDateTimeInMilliseconds) {
         eventStarted = true;
       }
@@ -311,284 +275,284 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Widget eventView() {
-      return ListView(
-        children: <Widget>[
-          Container(
-            height: MediaQuery.of(context).size.width,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: CachedNetworkImageProvider(event.imageURL),
-                fit: BoxFit.cover,
+  Widget eventView() {
+    return ListView(
+      children: <Widget>[
+        Container(
+          height: MediaQuery.of(context).size.width,
+          width: MediaQuery.of(context).size.width,
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: CachedNetworkImageProvider(event.imageURL),
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        SizedBox(height: 8.0),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: CustomText(
+            context: context,
+            text: event.category,
+            textColor: Colors.black,
+            textAlign: TextAlign.left,
+            fontSize: 24.0,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: CustomText(
+            context: context,
+            text: event.type,
+            textColor: Colors.black38,
+            textAlign: TextAlign.left,
+            fontSize: 14.0,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            right: 16.0,
+            top: 16.0,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Fonts().textW700(
+                'Details',
+                24.0,
+                Colors.black,
+                TextAlign.left,
               ),
-            ),
+              Fonts().textW500(
+                event.desc,
+                16.0,
+                Colors.black,
+                TextAlign.left,
+              ),
+            ],
           ),
-          SizedBox(height: 8.0),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: CustomText(
-              context: context,
-              text: event.category,
-              textColor: Colors.black,
-              textAlign: TextAlign.left,
-              fontSize: 24.0,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: CustomText(
-              context: context,
-              text: event.type,
-              textColor: Colors.black38,
-              textAlign: TextAlign.left,
-              fontSize: 14.0,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              right: 16.0,
-              top: 16.0,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Fonts().textW700(
-                  'Details',
-                  24.0,
-                  Colors.black,
-                  TextAlign.left,
+        ),
+        eventIsLive
+            ? Container()
+            : Padding(
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  top: 16.0,
                 ),
-                Fonts().textW500(
-                  event.desc,
-                  16.0,
-                  Colors.black,
-                  TextAlign.left,
-                ),
-              ],
-            ),
-          ),
-          eventIsLive
-              ? Container()
-              : Padding(
-                  padding: EdgeInsets.only(
-                    left: 16.0,
-                    top: 16.0,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      Column(
-                        children: <Widget>[
-                          event.streetAddress == null
-                              ? Container()
-                              : Icon(
-                                  FontAwesomeIcons.directions,
-                                  size: 24.0,
-                                  color: Colors.black,
-                                ),
-                        ],
-                      ),
-                      SizedBox(
-                        width: 8.0,
-                      ),
-                      Column(
-                        children: <Widget>[
-                          SizedBox(
-                            height: 4.0,
-                          ),
-                          event.streetAddress == null
-                              ? Container()
-                              : Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: MediaQuery.of(context).size.width * 0.8,
-                                  ),
-                                  child: CustomText(
-                                    context: context,
-                                    text: '${event.streetAddress.replaceAll(', USA', '').replaceAll(', United States', '')}',
-                                    textColor: Colors.black,
-                                    textAlign: TextAlign.left,
-                                    fontSize: 16.0,
-                                    fontWeight: FontWeight.w400,
-                                  ),
-                                ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-          eventIsLive || event.streetAddress == null
-              ? Container()
-              : Padding(
-                  padding: EdgeInsets.only(
-                    left: 16.0,
-                    top: 4.0,
-                  ),
-                  child: InkWell(
-                    onTap: () => OpenUrl().openMaps(context, eventLat.toString(), eventLon.toString()),
-                    child: Fonts().textW500(
-                      'View in Maps',
-                      14.0,
-                      FlatColors.webblenDarkBlue,
-                      TextAlign.left,
-                    ),
-                  ),
-                ),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 18.0,
-              top: 24.0,
-            ),
-            child: Row(
-              children: <Widget>[
-                Column(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: <Widget>[
-                    Icon(
-                      FontAwesomeIcons.calendar,
-                      size: 20.0,
-                      color: Colors.black,
+                    Column(
+                      children: <Widget>[
+                        event.streetAddress == null
+                            ? Container()
+                            : Icon(
+                                FontAwesomeIcons.directions,
+                                size: 24.0,
+                                color: Colors.black,
+                              ),
+                      ],
                     ),
-                  ],
-                ),
-                SizedBox(
-                  width: 8.0,
-                ),
-                Column(
-                  children: <Widget>[
                     SizedBox(
-                      height: 4.0,
+                      width: 8.0,
                     ),
-                    Container(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.of(context).size.width * 0.8,
-                      ),
-                      child: CustomText(
-                        context: context,
-                        text: '${event.startDate} ${event.startTime} ${event.timezone}',
-                        textColor: Colors.black,
-                        textAlign: TextAlign.left,
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w400,
-                      ),
+                    Column(
+                      children: <Widget>[
+                        SizedBox(
+                          height: 4.0,
+                        ),
+                        event.streetAddress == null
+                            ? Container()
+                            : Container(
+                                constraints: BoxConstraints(
+                                  maxWidth: MediaQuery.of(context).size.width * 0.8,
+                                ),
+                                child: CustomText(
+                                  context: context,
+                                  text: '${event.streetAddress.replaceAll(', USA', '').replaceAll(', United States', '')}',
+                                  textColor: Colors.black,
+                                  textAlign: TextAlign.left,
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          eventIsLive || event.startDateTimeInMilliseconds == null //|| currentDateTime > event.endDateInMilliseconds
-              ? Container()
-              : Padding(
-                  padding: EdgeInsets.only(
-                    left: 16.0,
-                    top: 2.0,
-                  ),
-                  child: InkWell(
-                    onTap: () => addEventToCalendar(),
-                    child: Fonts().textW500(
-                      'Add to Calendar',
-                      14.0,
-                      FlatColors.webblenDarkBlue,
-                      TextAlign.left,
-                    ),
-                  ),
+              ),
+        eventIsLive || event.streetAddress == null
+            ? Container()
+            : Padding(
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  top: 4.0,
                 ),
-          event.fbUsername.isNotEmpty || event.twitterUsername.isNotEmpty || event.website.isNotEmpty
-              ? Padding(
-                  padding: EdgeInsets.only(
-                    left: 16.0,
-                    top: 24.0,
-                  ),
-                  child: Fonts().textW700(
-                    'Additional Info',
-                    18.0,
-                    FlatColors.darkGray,
+                child: InkWell(
+                  onTap: () => OpenUrl().openMaps(context, eventLat.toString(), eventLon.toString()),
+                  child: Fonts().textW500(
+                    'View in Maps',
+                    14.0,
+                    FlatColors.webblenDarkBlue,
                     TextAlign.left,
                   ),
-                )
-              : Container(),
-          Padding(
-            padding: EdgeInsets.only(
-              left: 16.0,
-              top: 8.0,
-              bottom: 32.0,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              children: <Widget>[
-                event.fbUsername != null && event.fbUsername.isNotEmpty
-                    ? GestureDetector(
-                        onTap: () => OpenUrl().launchInWebViewOrVC(
-                          context,
-                          event.fbUsername,
-                        ),
-                        child: IconBubble(
-                          icon: Icon(
-                            FontAwesomeIcons.facebookF,
-                            size: 20.0,
-                            color: Colors.white,
-                          ),
-                          color: FlatColors.darkGray,
-                          size: 35.0,
-                        ),
-                      )
-                    : Container(),
-                event.fbUsername != null && event.fbUsername.isNotEmpty
-                    ? SizedBox(
-                        width: 16.0,
-                      )
-                    : Container(),
-                event.twitterUsername != null && event.twitterUsername.isNotEmpty
-                    ? GestureDetector(
-                        onTap: () => OpenUrl().launchInWebViewOrVC(
-                          context,
-                          event.twitterUsername,
-                        ),
-                        child: IconBubble(
-                          icon: Icon(
-                            FontAwesomeIcons.twitter,
-                            size: 18.0,
-                            color: Colors.white,
-                          ),
-                          color: FlatColors.darkGray,
-                          size: 35.0,
-                        ),
-                      )
-                    : Container(),
-                event.twitterUsername != null && event.twitterUsername.isNotEmpty
-                    ? SizedBox(
-                        width: 16.0,
-                      )
-                    : Container(),
-                event.website != null && event.website.isNotEmpty
-                    ? GestureDetector(
-                        onTap: () => OpenUrl().launchInWebViewOrVC(
-                          context,
-                          event.website,
-                        ),
-                        child: IconBubble(
-                          icon: Icon(
-                            FontAwesomeIcons.link,
-                            size: 18.0,
-                            color: Colors.white,
-                          ),
-                          color: FlatColors.darkGray,
-                          size: 35.0,
-                        ),
-                      )
-                    : Container(),
-              ],
-            ),
+                ),
+              ),
+        Padding(
+          padding: EdgeInsets.only(
+            left: 18.0,
+            top: 24.0,
           ),
-        ],
-      );
-    }
+          child: Row(
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Icon(
+                    FontAwesomeIcons.calendar,
+                    size: 20.0,
+                    color: Colors.black,
+                  ),
+                ],
+              ),
+              SizedBox(
+                width: 8.0,
+              ),
+              Column(
+                children: <Widget>[
+                  SizedBox(
+                    height: 4.0,
+                  ),
+                  Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.8,
+                    ),
+                    child: CustomText(
+                      context: context,
+                      text: '${event.startDate} ${event.startTime} ${event.timezone}',
+                      textColor: Colors.black,
+                      textAlign: TextAlign.left,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        eventIsLive || event.startDateTimeInMilliseconds == null //|| currentDateTime > event.endDateInMilliseconds
+            ? Container()
+            : Padding(
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  top: 2.0,
+                ),
+                child: InkWell(
+                  onTap: () => addEventToCalendar(),
+                  child: Fonts().textW500(
+                    'Add to Calendar',
+                    14.0,
+                    FlatColors.webblenDarkBlue,
+                    TextAlign.left,
+                  ),
+                ),
+              ),
+        event.fbUsername.isNotEmpty || event.twitterUsername.isNotEmpty || event.website.isNotEmpty
+            ? Padding(
+                padding: EdgeInsets.only(
+                  left: 16.0,
+                  top: 24.0,
+                ),
+                child: Fonts().textW700(
+                  'Additional Info',
+                  18.0,
+                  FlatColors.darkGray,
+                  TextAlign.left,
+                ),
+              )
+            : Container(),
+        Padding(
+          padding: EdgeInsets.only(
+            left: 16.0,
+            top: 8.0,
+            bottom: 32.0,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              event.fbUsername != null && event.fbUsername.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () => OpenUrl().launchInWebViewOrVC(
+                        context,
+                        event.fbUsername,
+                      ),
+                      child: IconBubble(
+                        icon: Icon(
+                          FontAwesomeIcons.facebookF,
+                          size: 20.0,
+                          color: Colors.white,
+                        ),
+                        color: FlatColors.darkGray,
+                        size: 35.0,
+                      ),
+                    )
+                  : Container(),
+              event.fbUsername != null && event.fbUsername.isNotEmpty
+                  ? SizedBox(
+                      width: 16.0,
+                    )
+                  : Container(),
+              event.twitterUsername != null && event.twitterUsername.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () => OpenUrl().launchInWebViewOrVC(
+                        context,
+                        event.twitterUsername,
+                      ),
+                      child: IconBubble(
+                        icon: Icon(
+                          FontAwesomeIcons.twitter,
+                          size: 18.0,
+                          color: Colors.white,
+                        ),
+                        color: FlatColors.darkGray,
+                        size: 35.0,
+                      ),
+                    )
+                  : Container(),
+              event.twitterUsername != null && event.twitterUsername.isNotEmpty
+                  ? SizedBox(
+                      width: 16.0,
+                    )
+                  : Container(),
+              event.website != null && event.website.isNotEmpty
+                  ? GestureDetector(
+                      onTap: () => OpenUrl().launchInWebViewOrVC(
+                        context,
+                        event.website,
+                      ),
+                      child: IconBubble(
+                        icon: Icon(
+                          FontAwesomeIcons.link,
+                          size: 18.0,
+                          color: Colors.white,
+                        ),
+                        color: FlatColors.darkGray,
+                        size: 35.0,
+                      ),
+                    )
+                  : Container(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(
         isLoading ? '' : event.title,
@@ -652,7 +616,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         ),
                       ),
                     )
-                  : Container()
+                  : Container(height: 0, width: 0)
               : event.isDigitalEvent
                   ? event.authorID == widget.currentUser.uid
                       ? Container(
@@ -757,8 +721,8 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                             ),
                           ),
                         )
-                  : Container()
-          : Container(),
+                  : Container(height: 0, width: 0)
+          : Container(height: 0, width: 0),
     );
   }
 }

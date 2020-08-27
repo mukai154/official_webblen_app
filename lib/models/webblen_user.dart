@@ -36,6 +36,8 @@ class WebblenUser {
   double ap;
   int lastPayoutTimeInMilliseconds;
   int eventsToLvlUp;
+  List following;
+  List followers;
 
   WebblenUser({
     this.blockedUsers,
@@ -75,6 +77,8 @@ class WebblenUser {
     this.ap,
     this.lastPayoutTimeInMilliseconds,
     this.eventsToLvlUp,
+    this.following,
+    this.followers,
   });
 
   WebblenUser.fromMap(Map<String, dynamic> data)
@@ -120,6 +124,8 @@ class WebblenUser {
           apLvl: data['apLvl'],
           lastPayoutTimeInMilliseconds: data['lastPayoutTimeInMilliseconds'],
           eventsToLvlUp: data['eventsToLvlUp'],
+          following: data['following'],
+          followers: data['followers'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -161,5 +167,7 @@ class WebblenUser {
         'apLvl': this.apLvl,
         'lastPayoutTimeInMilliseconds': this.lastPayoutTimeInMilliseconds,
         'eventsToLvlUp': this.eventsToLvlUp,
+        'following': this.following,
+        'followers': this.followers,
       };
 }

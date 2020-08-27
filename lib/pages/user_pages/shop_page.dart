@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/firebase_data/reward_data.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -31,8 +30,7 @@ class _ShopPageState extends State<ShopPage> {
   bool isLoading = true;
   bool purchaseIsLoading = false;
 
-  Future<bool> showRewardPurchaseDialog(
-      BuildContext context, WebblenReward reward) {
+  Future<bool> showRewardPurchaseDialog(BuildContext context, WebblenReward reward) {
     return showDialog<bool>(
         context: context,
         barrierDismissible: false, // user must tap button!
@@ -43,9 +41,7 @@ class _ShopPageState extends State<ShopPage> {
             rewardImageURL: reward.rewardImagePath,
             rewardCost: reward.rewardCost.toStringAsFixed(2),
             purchaseAction: () {
-              reward.rewardCategory == "charity"
-                  ? showCharityDialog(context)
-                  : purchaseRewardDialog(reward);
+              reward.rewardCategory == "charity" ? showCharityDialog(context) : purchaseRewardDialog(reward);
             },
             dismissAction: () => dismissPurchaseDialog(context),
           );
@@ -180,10 +176,7 @@ class _ShopPageState extends State<ShopPage> {
             horizontal: 4.0,
           ),
           child: StreamBuilder(
-            stream: Firestore.instance
-                .collection("webblen_user")
-                .document(widget.currentUser.uid)
-                .snapshots(),
+            stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData)
                 return Text(
@@ -236,13 +229,13 @@ class _ShopPageState extends State<ShopPage> {
                   TextAlign.center,
                 ),
                 Fonts().textW400(
-                  "Sorry! Our Shop is Closed at the Moment.",
+                  "We Are Currently Working on Being Able to Pay You for Your Attendance and Involvement with Webblen",
                   14.0,
                   Colors.black,
                   TextAlign.center,
                 ),
                 Fonts().textW400(
-                  "It'll Be Open Again Spring 2020 ☀️💐",
+                  "We'll Let You Know When Our Shop is Open and Ready! 💵🙌",
                   14.0,
                   Colors.black,
                   TextAlign.center,

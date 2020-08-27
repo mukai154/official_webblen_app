@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shimmer/shimmer.dart';
-
 import 'package:webblen/styles/flat_colors.dart';
 
 class CheckInFloatingAction extends StatelessWidget {
   final bool checkInAvailable;
+  final bool isVirtualEventCheckIn;
   final VoidCallback checkInAction;
 
   CheckInFloatingAction({
     this.checkInAvailable,
+    this.isVirtualEventCheckIn,
     this.checkInAction,
   });
 
@@ -18,8 +18,8 @@ class CheckInFloatingAction extends StatelessWidget {
     return InkWell(
       onTap: checkInAction,
       child: Container(
-        height: 70.0,
-        width: 70.0,
+        height: isVirtualEventCheckIn ? 50 : 70.0,
+        width: isVirtualEventCheckIn ? 50 : 70.0,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.all(
             Radius.circular(35.0),
@@ -48,12 +48,12 @@ class CheckInFloatingAction extends StatelessWidget {
               ? Icon(
                   FontAwesomeIcons.mapMarkerAlt,
                   color: Colors.white,
-                  size: 30.0,
+                  size: isVirtualEventCheckIn ? 20.0 : 30.0,
                 )
               : Icon(
                   FontAwesomeIcons.mapMarkerAlt,
                   color: FlatColors.lightAmericanGray,
-                  size: 30.0,
+                  size: isVirtualEventCheckIn ? 20.0 : 30.0,
                 ),
         ),
       ),

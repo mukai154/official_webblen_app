@@ -7,7 +7,7 @@ import 'package:webblen/styles/fonts.dart';
 class WebblenAppBar {
   Widget basicAppBar(String appBarTitle, BuildContext context) {
     return AppBar(
-      elevation: 0.5,
+      elevation: 0.0,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
       title: MediaQuery(
@@ -27,20 +27,9 @@ class WebblenAppBar {
     );
   }
 
-  Widget homeAppBar(Widget leadingWidget, Widget logo, Widget trailingWidget) {
-    return AppBar(
-      elevation: 0.5,
-      brightness: Brightness.dark,
-      backgroundColor: Colors.white,
-      title: logo,
-      leading: leadingWidget,
-      actions: <Widget>[trailingWidget],
-    );
-  }
-
   Widget streamBroadcasterAppbar(Widget leadingWidget, Widget trailingWidget) {
     return AppBar(
-      elevation: 0.5,
+      elevation: 0.0,
       brightness: Brightness.dark,
       backgroundColor: CustomColors.transparent,
       title: Container(),
@@ -119,7 +108,7 @@ class WebblenAppBar {
 
   Widget actionAppBar(String appBarTitle, Widget actionWidget) {
     return AppBar(
-      elevation: 0.5,
+      elevation: 0.0,
       brightness: Brightness.light,
       backgroundColor: Colors.white,
       title: Fonts().textW700(
@@ -209,8 +198,8 @@ class FABBottomAppBar extends StatefulWidget {
   FABBottomAppBar({
     this.items,
     this.centerItemText,
-    this.height: 50.0,
-    this.iconSize: 30.0,
+    this.height: 40.0,
+    this.iconSize: 22.0,
     this.backgroundColor,
     this.color,
     this.selectedColor,
@@ -235,7 +224,7 @@ class FABBottomAppBarState extends State<FABBottomAppBar> {
   }
 
   Widget _buildTabItem({FABBottomAppBarItem item, int index, ValueChanged<int> onPressed}) {
-    Color color = _selectedIndex == index ? CustomColors.webblenRed : CustomColors.lightAmericanGray;
+    Color color = _selectedIndex == index ? CustomColors.webblenRed : CustomColors.darkGray;
     return Expanded(
       child: SizedBox(
         height: widget.height,

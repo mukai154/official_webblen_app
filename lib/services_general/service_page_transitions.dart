@@ -1,30 +1,11 @@
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/home_page.dart';
-import 'package:webblen/models/calendar_event.dart';
 import 'package:webblen/models/community.dart';
-import 'package:webblen/models/community_news.dart';
-import 'package:webblen/models/community_request.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/pages/calendar_pages/my_calendar_page.dart';
-import 'package:webblen/pages/calendar_pages/reminder_page.dart';
-import 'package:webblen/pages/chat_pages/chat_invite_share_page.dart';
-import 'package:webblen/pages/chat_pages/chat_page.dart';
-import 'package:webblen/pages/chat_pages/chats_index_page.dart';
-import 'package:webblen/pages/community_pages/communities_in_area_page.dart';
-import 'package:webblen/pages/community_pages/communities_page.dart';
-import 'package:webblen/pages/community_pages/community_create_post_page.dart';
-import 'package:webblen/pages/community_pages/community_new_page.dart';
-import 'package:webblen/pages/community_pages/community_post_comments_page.dart';
-import 'package:webblen/pages/community_pages/community_profile_page.dart';
-import 'package:webblen/pages/community_pages/invite_members_page.dart';
-import 'package:webblen/pages/community_pages/my_communities_page.dart';
-import 'package:webblen/pages/community_request_pages/community_request_details_page.dart';
-import 'package:webblen/pages/community_request_pages/community_requests_page.dart';
-import 'package:webblen/pages/community_request_pages/create_community_request.dart';
 import 'package:webblen/pages/earnings_pages/bank_account_details_page.dart';
 import 'package:webblen/pages/earnings_pages/debit_card_details_page.dart';
 import 'package:webblen/pages/earnings_pages/earnings_info_page.dart';
@@ -35,20 +16,16 @@ import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_instant_deposit_page.dart';
 import 'package:webblen/pages/event_pages/create_event_page.dart';
 import 'package:webblen/pages/event_pages/digital_event_page.dart';
-import 'package:webblen/pages/event_pages/digital_events_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
-import 'package:webblen/pages/event_pages/events_page.dart';
+import 'package:webblen/pages/home_pages/notifications_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
 import 'package:webblen/pages/ticket_pages/event_tickets_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
-import 'package:webblen/pages/user_pages/add_com_image_page.dart';
-import 'package:webblen/pages/user_pages/discover_page.dart';
 import 'package:webblen/pages/user_pages/friends_page.dart';
-import 'package:webblen/pages/user_pages/notifications_page.dart';
 import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
@@ -68,7 +45,6 @@ class PageTransitionService {
   final List<WebblenUser> usersList;
   final String username;
   final String areaName;
-  final CommunityRequest comRequest;
   final WebblenUser webblenUser;
   final WebblenUser currentUser;
   final WebblenChat chat;
@@ -76,10 +52,8 @@ class PageTransitionService {
   final String peerUsername;
   final String peerProfilePic;
   final String profilePicUrl;
-  final CommunityNewsPost newsPost;
   final WebblenReward reward;
   final WebblenEvent event;
-  final CalendarEvent calendarEvent;
   final String eventID;
   final bool eventIsLive;
   final Community community;
@@ -106,7 +80,6 @@ class PageTransitionService {
     this.peerProfilePic,
     this.peerUsername,
     this.profilePicUrl,
-    this.newsPost,
     this.reward,
     this.event,
     this.eventID,
@@ -118,9 +91,7 @@ class PageTransitionService {
     this.viewingMembersOrAttendees,
     this.lat,
     this.lon,
-    this.comRequest,
     this.communities,
-    this.calendarEvent,
     this.ticketsToPurchase,
     this.eventFees,
     this.clientRole,
@@ -172,37 +143,6 @@ class PageTransitionService {
       );
 
   //EVENTS
-  void transitionToPublishedEventPage() => Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EventsPage(
-            currentUser: currentUser,
-            currentLat: lat,
-            currentLon: lon,
-          ),
-        ),
-      );
-
-  void transitionToEventsPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => EventsPage(
-            currentUser: currentUser,
-            currentLat: lat,
-            currentLon: lon,
-          ),
-        ),
-      );
-
-  void transitionToDigitalEventsPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DigitalEventsPage(
-            currentUser: currentUser,
-          ),
-        ),
-      );
-
   void transitionToCreateEventPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -298,25 +238,6 @@ class PageTransitionService {
         context,
         MaterialPageRoute(
           builder: (context) => TicketInfoPage(),
-        ),
-      );
-
-  //CALENDAR
-  void transitionToCalendarPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MyCalendarPage(
-            currentUser: currentUser,
-          ),
-        ),
-      );
-  void transitionToReminderPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ReminderPage(
-            event: calendarEvent,
-            currentUser: currentUser,
-          ),
         ),
       );
 
@@ -426,15 +347,6 @@ class PageTransitionService {
         ),
       );
 
-  void transitionToCurrentUserPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CurrentUserPage(
-            currentUser: currentUser,
-          ),
-        ),
-      );
-
   void transitionToUserPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -445,134 +357,12 @@ class PageTransitionService {
         ),
       );
 
-  //CHATS
-  void transitionToChatInviteSharePage() => Navigator.push(
+  void transitionToCurrentUserPage() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ChatInviteSharePage(
+          builder: (context) => CurrentUserPage(
             currentUser: currentUser,
-            event: event,
-          ),
-        ),
-      );
-
-  void transitionToChatPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatPage(
-            currentUser: currentUser,
-            chatKey: chatKey,
-          ),
-        ),
-      );
-
-  void transitionToChatIndexPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ChatsIndexPage(
-            currentUser: currentUser,
-          ),
-        ),
-      );
-
-  //COMMUNITIES
-  void transitionToDiscoverPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DiscoverPage(
-            uid: uid,
-            areaName: areaName,
-          ),
-        ),
-      );
-
-  void transitionToMyCommunitiesPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => MyCommunitiesPage(
-            uid: uid,
-            action: action,
-            areaName: areaName,
-          ),
-        ),
-      );
-
-  void transitionToNewCommunityPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateCommunityPage(
-            areaName: areaName,
-          ),
-        ),
-      );
-
-  void transitionToPostCommentsPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunityPostCommentsPage(
-            currentUser: currentUser,
-            newsPost: newsPost,
-          ),
-        ),
-      );
-
-  void transitionToCommunityProfilePage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunityProfilePage(
-            currentUser: currentUser,
-            community: community,
-          ),
-        ),
-      );
-
-  void transitionToCommunityInvitePage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InviteMembersPage(
-            currentUser: currentUser,
-            community: community,
-          ),
-        ),
-      );
-
-  void transitionToCommunitiesPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunitiesPage(
-            uid: uid,
-            areaName: areaName,
-          ),
-        ),
-      );
-
-  void transitionToCommunityCreatePostPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunityCreatePostPage(
-            currentUser: currentUser,
-            community: community,
-          ),
-        ),
-      );
-
-  void transitionToComImagePage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => AddComImage(
-            com: community,
-          ),
-        ),
-      );
-
-  void transitionToCommunitiesInAreaPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunitiesInAreaPage(
-            currentUser: currentUser,
-            action: action,
-            areaName: areaName,
-            communities: communities,
+            webblenUser: webblenUser,
           ),
         ),
       );
@@ -592,37 +382,6 @@ class PageTransitionService {
         MaterialPageRoute(
           builder: (context) => SettingsPage(
             currentUser: currentUser,
-          ),
-        ),
-      );
-
-  //VOTING & REQUESTS
-  void transitionToCommunityRequestPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunityRequestsPage(
-            currentUser: currentUser,
-            areaName: areaName,
-          ),
-        ),
-      );
-
-  void transitionToCommunityRequestDetailsPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CommunityRequestDetailsPage(
-            request: comRequest,
-            currentUser: currentUser,
-          ),
-        ),
-      );
-
-  void transitionToCreateCommunityRequestPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CreateCommunityRequestPage(
-            currentUser: currentUser,
-            areaName: areaName,
           ),
         ),
       );

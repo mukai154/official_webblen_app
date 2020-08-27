@@ -20,6 +20,7 @@ import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
@@ -153,16 +154,14 @@ class _CreateEventPageState extends State<CreateEventPage> {
     );
     PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
     eventAddress = detail.result.formattedAddress;
-    detail.result.addressComponents.forEach((element) {
-      print(element.longName);
-    });
-    zipPostalCode = detail.result.addressComponents[7].shortName;
-    if (zipPostalCode.length != 5) {
-      zipPostalCode = detail.result.addressComponents[6].shortName;
-    }
-    //print(zipPostalCode);
-    city = detail.result.addressComponents[3].longName;
-    province = detail.result.addressComponents[5].shortName;
+    lat = detail.result.geometry.location.lat;
+    lon = detail.result.geometry.location.lng;
+    CustomAlerts().showLoadingAlert(context, "Setting Location...");
+    Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
+    Navigator.of(context).pop();
+    zipPostalCode = locationData['zipcode'];
+    city = locationData['city'];
+    province = locationData['administrativeLevels']['level1short'];
     lat = detail.result.geometry.location.lat;
     lon = detail.result.geometry.location.lng;
     setState(() {});
@@ -1665,7 +1664,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
     WebblenEvent newEvent = WebblenEvent(
       id: widget.eventID == null ? null : widget.eventID,
       authorID: currentUID,
-      chatID: eventChatID == null ? null : eventChatID,
       hasTickets: ticketDistro.tickets.isNotEmpty ? true : false,
       flashEvent: false,
       title: eventTitle,
@@ -1732,6 +1730,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     } else if (!isDigitalEvent && (eventAddress == null || eventAddress.isEmpty)) {
       CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Set the Location of this Event");
     } else if (!isDigitalEvent && (zipPostalCode.length != 5)) {
+      print(zipPostalCode);
       CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Provide a Better Address for this Event");
     }
     // else if (isDigitalEvent &&
@@ -1764,7 +1763,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
           if (res != null) {
             eventTitle = res.title;
             eventDesc = res.desc;
-            eventChatID = res.chatID;
             eventImgURL = res.imageURL;
             isDigitalEvent = res.isDigitalEvent;
             digitalEventLink = res.digitalEventLink;

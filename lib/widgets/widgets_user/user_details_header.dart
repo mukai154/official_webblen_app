@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
-import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/styles/flat_colors.dart';
+import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_wallet/wallet_attendance_power_bar.dart';
 import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_wallet/wallet_attendance_power_bar.dart';
 
 class UserDetailsHeader extends StatelessWidget {
   final String username;
@@ -12,7 +11,7 @@ class UserDetailsHeader extends StatelessWidget {
   final double ap;
   final int apLvl;
   final String eventHistoryCount;
-  final String communityCount;
+  final String hostedEventCount;
   final VoidCallback addFriendAction;
   final VoidCallback viewFriendsAction;
   final bool isLoading;
@@ -22,7 +21,7 @@ class UserDetailsHeader extends StatelessWidget {
     this.userPicUrl,
     this.ap,
     this.apLvl,
-    this.communityCount,
+    this.hostedEventCount,
     this.eventHistoryCount,
     this.addFriendAction,
     this.viewFriendsAction,
@@ -70,7 +69,7 @@ class UserDetailsHeader extends StatelessWidget {
                       ),
                     )
                   : Fonts().textW500(
-                      "Communities: $communityCount | Events Attended: $eventHistoryCount",
+                      "Hosted Events: $hostedEventCount | Events Attended: $eventHistoryCount",
                       12.0,
                       Colors.black,
                       TextAlign.left,

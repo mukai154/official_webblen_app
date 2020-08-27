@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/firebase/data/event_data.dart';
-import 'package:webblen/firebase_data/community_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -92,32 +91,6 @@ class _SearchPageState extends State<SearchPage> {
           event: event,
           eventIsLive: false,
         ).transitionToEventPage();
-      }
-    });
-  }
-
-  void transitionToCommunityPage(String areaName, String comName) {
-    ShowAlertDialogService().showLoadingDialog(context);
-    CommunityDataService()
-        .getCommunityByName(
-      areaName,
-      comName,
-    )
-        .then((com) {
-      Navigator.of(context).pop();
-      if (com == null) {
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "Woops! 😬",
-          "This Community No Longer Exists",
-        );
-      } else {
-        PageTransitionService(
-          context: context,
-          currentUser: widget.currentUser,
-          community: com,
-          areaName: areaName,
-        ).transitionToCommunityProfilePage();
       }
     });
   }
@@ -268,9 +241,7 @@ class _SearchPageState extends State<SearchPage> {
                   resultData: allResults[index],
                   tapAction: allResults[index]['resultType'] == 'people'
                       ? () => transitionToUserDetails(allResults[index]['key'])
-                      : allResults[index]['resultType'] == 'event'
-                          ? () => transitionToEventDetails(allResults[index]['key'])
-                          : () => transitionToCommunityPage(allResults[index]['data'], allResults[index]['resultHeader']),
+                      : () => transitionToEventDetails(allResults[index]['key']),
                   addFriendAction: null,
                 );
               }));

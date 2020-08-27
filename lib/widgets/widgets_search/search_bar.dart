@@ -1,7 +1,7 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 
-class SearchTile extends StatelessWidget {
+class SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,7 +39,6 @@ class SearchTile extends StatelessWidget {
                     seconds: 20,
                   ),
                   text: [
-                    "Find Communities",
                     "Find Events",
                     "Find Things to Do",
                     "Find Friends",
@@ -50,8 +49,7 @@ class SearchTile extends StatelessWidget {
                     color: Colors.black26,
                   ),
                   textAlign: TextAlign.start,
-                  alignment:
-                      AlignmentDirectional.topStart // or Alignment.topLeft
+                  alignment: AlignmentDirectional.topStart // or Alignment.topLeft
                   ),
               data: MediaQuery.of(context).copyWith(
                 textScaleFactor: 1.0,

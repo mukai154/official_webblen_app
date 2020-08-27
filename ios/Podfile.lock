@@ -158,12 +158,6 @@ PODS:
     - abseil/base/base_internal
     - abseil/base/config
     - abseil/meta/type_traits
-  - admob_flutter (0.3.4):
-    - Firebase/AdMob
-    - Firebase/Analytics
-    - FirebaseAnalytics (~> 6.1.3)
-    - Flutter
-    - Google-Mobile-Ads-SDK (~> 7.50)
   - agora_rtc_engine (1.0.13):
     - AgoraRtcEngine_iOS_Crypto (= 2.9.1)
     - Flutter
@@ -204,11 +198,6 @@ PODS:
     - FBSDKLoginKit/Login (= 5.15.1)
   - FBSDKLoginKit/Login (5.15.1):
     - FBSDKCoreKit (~> 5.0)
-  - Firebase/AdMob (6.14.0):
-    - Firebase/CoreOnly
-    - Google-Mobile-Ads-SDK (~> 7.50)
-  - Firebase/Analytics (6.14.0):
-    - Firebase/Core
   - Firebase/Auth (6.14.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 6.4.1)
@@ -455,11 +444,8 @@ PODS:
     - Flutter
   - url_launcher (0.0.1):
     - Flutter
-  - webview_media (0.0.1):
-    - Flutter
 
 DEPENDENCIES:
-  - admob_flutter (from `.symlinks/plugins/admob_flutter/ios`)
   - agora_rtc_engine (from `.symlinks/plugins/agora_rtc_engine/ios`)
   - apple_sign_in (from `.symlinks/plugins/apple_sign_in/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
@@ -491,7 +477,6 @@ DEPENDENCIES:
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher (from `.symlinks/plugins/url_launcher/ios`)
-  - webview_media (from `.symlinks/plugins/webview_media/ios`)
 
 SPEC REPOS:
   trunk:
@@ -540,8 +525,6 @@ SPEC REPOS:
     - TOCropViewController
 
 EXTERNAL SOURCES:
-  admob_flutter:
-    :path: ".symlinks/plugins/admob_flutter/ios"
   agora_rtc_engine:
     :path: ".symlinks/plugins/agora_rtc_engine/ios"
   apple_sign_in:
@@ -604,12 +587,9 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/uni_links/ios"
   url_launcher:
     :path: ".symlinks/plugins/url_launcher/ios"
-  webview_media:
-    :path: ".symlinks/plugins/webview_media/ios"
 
 SPEC CHECKSUMS:
   abseil: 18063d773f5366ff8736a050fe035a28f635fd27
-  admob_flutter: 8033bcca85371a0554aa99d525a83a4770e679f0
   agora_rtc_engine: 4e1678a60aeb2c868cb37181eeb79f9e8788306d
   AgoraRtcEngine_iOS_Crypto: c2bca616406c6dda9ae254d59637a18ba0fae8f0
   AppAuth: bce82c76043657c99d91e7882e8a9e1a93650cd4
@@ -683,7 +663,6 @@ SPEC CHECKSUMS:
   TOCropViewController: 2a1ae1242600b1f2d996fd91a5268b2309a33b5c
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
-  webview_media: 33604c2c1805f41bd0c6749c4d7de24b8cb4d81d
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 

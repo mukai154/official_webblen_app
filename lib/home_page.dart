@@ -13,15 +13,13 @@ import 'package:webblen/firebase_data/auth.dart';
 import 'package:webblen/firebase_data/platform_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/firebase_services/remote_messaging.dart';
-import 'package:webblen/models/community_news.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/home_pages/home_dashboard_page.dart';
 import 'package:webblen/pages/home_pages/location_permissions_page.dart';
 import 'package:webblen/pages/home_pages/network_status_page.dart';
-import 'package:webblen/pages/home_pages/news_feed_page.dart';
+import 'package:webblen/pages/home_pages/notifications_page.dart';
 import 'package:webblen/pages/home_pages/update_required_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
-import 'package:webblen/pages/user_pages/notifications_page.dart';
 import 'package:webblen/services/device_permissions.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
@@ -56,7 +54,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   int activeUserCount;
   double currentLat;
   double currentLon;
-  List<CommunityNewsPost> communityNewsPosts;
   bool didClickNotice = false;
   bool checkInAvailable = false;
   bool hasLocation = false;
@@ -275,18 +272,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         currentLat: currentLat,
         currentLon: currentLon,
         key: homePageKey,
-        notifWidget: StreamUserNotifications(uid: uid, notifAction: () => didPressNotificationsBell()), //() => didPressNotificationsBell(),,
+        notifWidget: StreamUserNotifications(uid: uid, notifAction: null), //() => didPressNotificationsBell(),,
       ),
-      NewsFeedPage(
-        uid: uid,
-        key: newsPageKey,
-        discoverAction: isLoading
-            ? null
-            : () => PageTransitionService(
-                  context: context,
-                  uid: uid,
-                  areaName: areaName,
-                ).transitionToDiscoverPage(),
+      NotificationPage(
+        currentUser: currentUser,
+        //key: newsPageKey,
       ),
       WalletPage(
         currentUser: currentUser,
@@ -294,7 +284,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ),
       CurrentUserPage(
         currentUser: currentUser,
-        key: userPageKey,
+        backButtonIsDisabled: true,
       ),
     ];
 
@@ -320,6 +310,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               : CheckInFloatingAction(
                   checkInAction: () => didPressCheckIn(),
                   checkInAvailable: false,
+                  isVirtualEventCheckIn: false,
                 ),
       bottomNavigationBar: FABBottomAppBar(
         centerItemText: 'Check In',
@@ -337,8 +328,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             text: 'Home',
           ),
           FABBottomAppBarItem(
-            iconData: FontAwesomeIcons.newspaper,
-            text: 'News',
+            customWidget: StreamUserNotifications(
+              uid: uid,
+              pageIsActive: pageIndex == 1 ? true : false,
+              notifAction: null,
+            ),
+            text: 'Notifications',
           ),
           FABBottomAppBarItem(
             iconData: FontAwesomeIcons.wallet,

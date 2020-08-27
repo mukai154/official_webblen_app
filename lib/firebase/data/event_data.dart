@@ -246,9 +246,28 @@ class EventDataService {
     return event;
   }
 
+  //UPDATE
+
   Future updateEvent(WebblenEvent data, String id) async {
     await eventsRef.document(id).updateData(data.toMap());
     return;
+  }
+
+  Future<String> saveOrUnsaveEvent(WebblenEvent event, String uid) async {
+    String error;
+    List savedByIDs = [];
+    if (event.savedBy != null) {
+      savedByIDs = event.savedBy;
+    }
+    if (savedByIDs.contains(uid)) {
+      savedByIDs.remove(uid);
+    } else {
+      savedByIDs.add(uid);
+    }
+    await eventsRef.document(event.id).updateData({"d.savedBy": savedByIDs}).catchError((e) {
+      error = e.toString();
+    });
+    return error;
   }
 
   //***DELETE
@@ -263,6 +282,72 @@ class EventDataService {
     });
     return error;
   }
+
+//  Future<String> transferOldEventData() async {
+//    String error = "";
+//    CollectionReference oldEventsRef = Firestore().collection("past_events");
+//    QuerySnapshot querySnapshot = await oldEventsRef.getDocuments();
+//    querySnapshot.documents.forEach((doc) async {
+//      int eventStartDateTimeInMilliseconds = doc.data['d']['startDateInMilliseconds'];
+//      DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(eventStartDateTimeInMilliseconds);
+//      DateFormat formatter = DateFormat('MMM dd, yyyy');
+//      WebblenEvent event = WebblenEvent(
+//        id: doc.data['d']['eventKey'],
+//        actualTurnout: doc.data['d']['actualTurnout'],
+//        authorID: doc.data['d']['authorUid'],
+//        attendees: doc.data['d']['attendees'],
+//        streetAddress: doc.data['d']['address'],
+//        webAppLink: 'https://app.webblen.io/#/event?id=${doc.data['d']['eventKey']}',
+//        category: "Film, Media, & Entertainment",
+//        checkInRadius: 10.5,
+//        digitalEventLink: null,
+//        startDate: formatter.format(eventDateTime),
+//        endDate: formatter.format(eventDateTime),
+//        startTime: doc.data['d']['startTime'],
+//        endTime: doc.data['d']['endTime'],
+//        eventPayout: doc.data['d']['eventPayout'],
+//        fbUsername: "",
+//        instaUsername: "",
+//        website: "",
+//        twitterUsername: "",
+//        flashEvent: doc.data['d']['flashEvent'],
+//        hasTickets: false,
+//        imageURL: doc.data['d']['imageURL'],
+//        isDigitalEvent: false,
+//        lat: null,
+//        lon: null,
+//        nearbyZipcodes: [
+//          '58047',
+//          '58104',
+//          '56560',
+//          '58059',
+//          '58103',
+//          '58102',
+//          '56561',
+//        ],
+//        sharedComs: [],
+//        startDateTimeInMilliseconds: eventStartDateTimeInMilliseconds,
+//        tags: [],
+//        venueName: null,
+//        privacy: doc.data['d']['privacy'],
+//        estimatedTurnout: 0,
+//        clicks: doc.data['d']['views'],
+//        city: doc.data['d']['communityAreaName'],
+//        province: 'ND',
+//        desc: doc.data['d']['description'],
+//        recurrence: doc.data['d']['recurrence'],
+//        reported: false,
+//        timezone: 'CDT',
+//        title: doc.data['d']['title'],
+//        type: 'Other',
+//      );
+//      await eventsRef.document(event.id).setData({
+//        'd': event.toMap(),
+//        'g': doc.data['g'],
+//        'l': doc.data['l'],
+//      });
+//    });
+//  }
 
 //  Future<Null> addEventDataField(String dataName, dynamic data) async {
 //    QuerySnapshot querySnapshot = await pastEventsRef.getDocuments();
