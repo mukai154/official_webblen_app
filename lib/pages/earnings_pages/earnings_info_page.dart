@@ -44,6 +44,18 @@ class EarningsInfoPage extends StatelessWidget {
               Colors.black87,
               TextAlign.left,
             ),
+            Fonts().textW400(
+              "- You have sold tickets for your event(s).",
+              14,
+              Colors.black87,
+              TextAlign.left,
+            ),
+            Fonts().textW400(
+              "- You have received gifts or donations through for your stream(s).",
+              14,
+              Colors.black87,
+              TextAlign.left,
+            ),
             SizedBox(
               height: 32.0,
             ),
@@ -57,7 +69,14 @@ class EarningsInfoPage extends StatelessWidget {
               height: 4.0,
             ),
             Fonts().textW400(
-              "You get paid on a weekly basis for tickets you distribute on the mobile app, Webblen. Payouts are completed betweet Monday - Sunday of the previous week (ending Sunday at midnight CST). Payments are transferred at that time directly to your bank account through Direct Deposit, and usually take 2-3 days to show up in your bank account. Payments should appear in your bank account by Wednesday night.",
+              "You get paid for tickets you distribute and donations/gifts you receive through live streams. You get paid on a weekly basis for tickets while money received through donations or gifts are paid out monthly.",
+              14,
+              Colors.black87,
+              TextAlign.left,
+            ),
+            SizedBox(height: 8.0),
+            Fonts().textW400(
+              "Payouts are completed between Monday - Sunday of the previous week (ending Sunday at midnight CST). Payments are transferred at that time directly to your bank account through Direct Deposit, and usually take 2-3 days to show up in your bank account. Payments should appear in your bank account by Wednesday night.",
               14,
               Colors.black87,
               TextAlign.left,
@@ -75,13 +94,13 @@ class EarningsInfoPage extends StatelessWidget {
               height: 4.0,
             ),
             Fonts().textW400(
-              "You have the ability to cashout your earnings daily for a fee of up to 1.5% the total deposit. This allows you to receive your earnings from ticket sales on demand from Webblen rather than waiting a week via direct deposit.",
+              "You have the ability to cashout your earnings daily for a fee of up to 1.5% the total deposit. This allows you to receive your earnings from ticket sales, gifts, and donations on demand from Webblen rather than waiting for a direct deposit.",
               14,
               Colors.black87,
               TextAlign.left,
             ),
             SizedBox(
-              height: 4.0,
+              height: 8.0,
             ),
             Fonts().textW400(
               "You must have a valid debit card - not a prepaid card - to use Webblen's instant deposit service.",

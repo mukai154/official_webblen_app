@@ -345,4 +345,13 @@ class ShowAlertDialogService {
           return CheckExampleDialog();
         });
   }
+
+  Future<bool> showNewEventOrStreamDialog(BuildContext context, VoidCallback createEvent, VoidCallback createStream) {
+    return showDialog<bool>(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return CreateEventOrStreamDialog(createEvent: createEvent, createStream: createStream);
+        });
+  }
 }

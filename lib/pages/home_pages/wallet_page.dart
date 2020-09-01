@@ -25,10 +25,8 @@ import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
-import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_reward/reward_card.dart';
 import 'package:webblen/widgets/widgets_reward/reward_purchase.dart';
-import 'package:webblen/widgets/widgets_wallet/wallet_attendance_power_bar.dart';
 
 class WalletPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -629,7 +627,7 @@ class _WalletPageState extends State<WalletPage> {
                                         SizedBox(width: 8.0),
                                         GestureDetector(
                                           onTap: () => ShowAlertDialogService().showInfoDialog(context, "USD Balance",
-                                              "Your USD balance is the amount of money you've earned through Webblen via ticket sales."),
+                                              "Your USD balance is the amount of money you've earned via ticket sales or stream donations."),
                                           child: Icon(
                                             FontAwesomeIcons.questionCircle,
                                             color: Colors.black38,
@@ -691,43 +689,11 @@ class _WalletPageState extends State<WalletPage> {
                               SizedBox(width: 8.0),
                               GestureDetector(
                                 onTap: () => ShowAlertDialogService().showInfoDialog(context, "What is Webblen?",
-                                    "Webblen are tokens that can be transferred or traded at anytime.  You need Webblen in order to create new events and communities."),
+                                    "Webblen are tokens you earn for attending events, streaming, and building your community. Webblen can be used to buy rewards in our shop."),
                                 child: Icon(
                                   FontAwesomeIcons.questionCircle,
                                   color: Colors.black38,
                                   size: 16.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            height: 16.0,
-                          ),
-                          AttendancePowerBar(
-                            currentAP: ap,
-                            apLvl: apLvl,
-                          ),
-                          SizedBox(
-                            height: 8.0,
-                          ),
-                          Row(
-                            children: [
-                              CustomText(
-                                context: context,
-                                text: 'Attendance Power',
-                                textColor: Colors.black,
-                                textAlign: TextAlign.left,
-                                fontSize: 16.0,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              SizedBox(width: 8.0),
-                              GestureDetector(
-                                onTap: () => ShowAlertDialogService().showInfoDialog(context, "What is Attendance Power?",
-                                    "Attenance power (AP) is multiplier that increases the value of the events you attend. The higher your AP, the more your attendance is worth. Increase your AP by attending events regularly."),
-                                child: Icon(
-                                  FontAwesomeIcons.questionCircle,
-                                  color: Colors.black38,
-                                  size: 18.0,
                                 ),
                               ),
                             ],
@@ -766,44 +732,6 @@ class _WalletPageState extends State<WalletPage> {
                                       ),
                                     )
                                   : ticketEventGrid(),
-                          SizedBox(height: 32.0),
-                          Row(
-                            //mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Fonts().textW700(
-                                'Rewards',
-                                28,
-                                Colors.black,
-                                TextAlign.center,
-                              ),
-                              isLoadingRewards
-                                  ? Container()
-                                  : Padding(
-                                      padding: EdgeInsets.only(
-                                        top: 4.0,
-                                      ),
-                                      child: IconButton(
-                                        onPressed: () => loadRewards(),
-                                        icon: Icon(
-                                          FontAwesomeIcons.syncAlt,
-                                          size: 16.0,
-                                          color: Colors.black45,
-                                        ),
-                                      ),
-                                    ),
-                            ],
-                          ),
-                          isLoadingRewards
-                              ? Center(
-                                  child: CustomCircleProgress(
-                                    30.0,
-                                    30.0,
-                                    30.0,
-                                    30.0,
-                                    Colors.black26,
-                                  ),
-                                )
-                              : buildWalletRewards(),
                           SizedBox(height: 32.0),
                         ],
                       ),

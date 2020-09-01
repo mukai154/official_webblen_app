@@ -147,7 +147,7 @@ class Strings {
   ];
 
   static final List<String> eventTypes = [
-    'Select Event Type',
+    'Select Type',
     'Appearance/Signing',
     'Attraction',
     'Camp, Trip, or Retreat',
@@ -197,7 +197,7 @@ class Strings {
   ];
 
   static final List<String> eventCategories = [
-    'Select Event Category',
+    'Select Category',
     'Auto, Boat, & Air',
     'Business/Professional',
     'Charity/Causes',

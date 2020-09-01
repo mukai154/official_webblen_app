@@ -65,8 +65,10 @@ class PageTransitionService {
   final List<Map<String, dynamic>> ticketsToPurchase;
   final List eventFees;
   final ClientRole clientRole;
+  final bool isStream;
 
   PageTransitionService({
+    this.isStream,
     this.context,
     this.action,
     this.username,
@@ -148,6 +150,7 @@ class PageTransitionService {
         MaterialPageRoute(
           builder: (context) => CreateEventPage(
             eventID: eventID,
+            isStream: isStream,
           ),
         ),
       );

@@ -213,34 +213,32 @@ class _ShopPageState extends State<ShopPage> {
     return Scaffold(
       appBar: appBar,
       body: Container(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  height: 64.0,
-                ),
-                Fonts().textW700(
-                  "Shop Is Currently Unavailable",
-                  24.0,
-                  Colors.black,
-                  TextAlign.center,
-                ),
-                Fonts().textW400(
-                  "We Are Currently Working on Being Able to Pay You for Your Attendance and Involvement with Webblen",
-                  14.0,
-                  Colors.black,
-                  TextAlign.center,
-                ),
-                Fonts().textW400(
-                  "We'll Let You Know When Our Shop is Open and Ready! 💵🙌",
-                  14.0,
-                  Colors.black,
-                  TextAlign.center,
-                ),
-              ],
+            SizedBox(
+              height: 64.0,
+            ),
+            Fonts().textW700(
+              "Shop Is Currently Unavailable",
+              24.0,
+              Colors.black,
+              TextAlign.center,
+            ),
+            SizedBox(height: 8.0),
+            Fonts().textW400(
+              "We Are Currently Working on Being Able to Pay You for Your Attendance and Involvement with Webblen",
+              14.0,
+              Colors.black,
+              TextAlign.center,
+            ),
+            SizedBox(height: 8.0),
+            Fonts().textW400(
+              "We'll Let You Know When Our Shop is Open and Ready! 💵🙌",
+              14.0,
+              Colors.black,
+              TextAlign.center,
             ),
           ],
         ),

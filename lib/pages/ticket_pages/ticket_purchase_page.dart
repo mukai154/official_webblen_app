@@ -774,8 +774,8 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
 
   void completePurchase() {
     StripePaymentService().completeTicketPurchase(widget.currentUser.uid, widget.ticketsToPurchase, widget.event).then((res) {
-      ShowAlertDialogService().showActionSuccessDialog(
-          context, "Purchase Successful!", "Your Tickets Can Be Found in Your Wallet. \n Don't forget to check your email as well 😉", () {
+      ShowAlertDialogService()
+          .showActionSuccessDialog(context, "Purchase Successful!", "Your Tickets are in Your Wallet. \n A Receipt Has Been Emailed to You.", () {
         Navigator.of(context).pop();
         PageTransitionService(context: context).returnToRootPage();
       });

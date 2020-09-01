@@ -34,7 +34,8 @@ import 'event_details_page.dart';
 
 class CreateEventPage extends StatefulWidget {
   final String eventID;
-  CreateEventPage({this.eventID});
+  final bool isStream;
+  CreateEventPage({this.eventID, this.isStream});
 
   @override
   _CreateEventPageState createState() => _CreateEventPageState();
@@ -42,8 +43,10 @@ class CreateEventPage extends StatefulWidget {
 
 class _CreateEventPageState extends State<CreateEventPage> {
   String currentUID;
+  bool hasEarningsAccount = false;
   bool isLoading = true;
   bool isTypingMultiLine = false;
+  ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
   GlobalKey formKey = GlobalKey<FormState>();
   //Event Details
@@ -116,8 +119,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
   //Additional Info & Social Links
   String privacy = 'public';
   List<String> privacyOptions = ['public', 'private'];
-  String eventType = 'Select Event Type';
-  String eventCategory = 'Select Event Category';
+  String eventType = 'Select Type';
+  String eventCategory = 'Select Category';
   String fbUsername;
   String twitterUsername;
   String instaUsername;
@@ -311,33 +314,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
           LengthLimitingTextInputFormatter(75),
         ],
         decoration: InputDecoration(
-          hintText: "Name of the Event",
+          hintText: widget.isStream ? "Name of the Stream" : "Name of the Event",
           border: InputBorder.none,
         ),
       ),
-    );
-  }
-
-  Widget isDigitalEventCheckBox() {
-    return Row(
-      children: <Widget>[
-        CustomText(
-          context: context,
-          text: "This is a Virtual Event",
-          textColor: Colors.black,
-          textAlign: TextAlign.left,
-          fontSize: 14.0,
-          fontWeight: FontWeight.w500,
-        ),
-        Checkbox(
-          activeColor: CustomColors.webblenRed,
-          value: isDigitalEvent,
-          onChanged: (val) {
-            isDigitalEvent = val;
-            setState(() {});
-          },
-        ),
-      ],
     );
   }
 
@@ -721,7 +701,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
           });
         },
         decoration: InputDecoration(
-          hintText: "Event Information and Details",
+          hintText: widget.isStream ? "Stream Info & Details" : "Event Info & Details",
           border: InputBorder.none,
         ),
       ),
@@ -743,7 +723,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Container(
-            width: 175,
+            width: 150,
             child: CustomText(
               context: context,
               text: formType == "ticket" ? "Ticket Name" : formType == "fee" ? "Fee Name" : "Discount Code Name",
@@ -810,7 +790,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-                    width: 175,
+                    width: 150,
                     child: CustomText(
                       context: context,
                       text: ticketDistro.tickets[index]["ticketName"],
@@ -878,7 +858,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-                    width: 175,
+                    width: 150,
                     child: CustomText(
                       context: context,
                       text: ticketDistro.fees[index]["feeName"],
@@ -938,7 +918,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
-                    width: 175,
+                    width: 150,
                     child: CustomText(
                       context: context,
                       text: ticketDistro.discountCodes[index]["discountCodeName"],
@@ -1002,7 +982,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 TextFieldContainer(
-                  width: 175,
+                  width: 150,
                   child: TextFormField(
                     onTap: () {
                       isTypingMultiLine = false;
@@ -1095,7 +1075,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextFieldContainer(
-                  width: 175,
+                  width: 150,
                   child: TextFormField(
                     onTap: () {
                       isTypingMultiLine = false;
@@ -1174,7 +1154,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 TextFieldContainer(
-                  width: 175,
+                  width: 150,
                   child: TextFormField(
                     onTap: () {
                       isTypingMultiLine = false;
@@ -1654,7 +1634,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   //CREATE EVENT
   createEvent() async {
-    CustomAlerts().showLoadingAlert(context, "Uploading Event...");
+    CustomAlerts().showLoadingAlert(context, widget.isStream ? "Setting Up Stream..." : "Uploading Event...");
     DateTime startDateTime = DateTime(
       selectedStartDate.year,
       selectedStartDate.day,
@@ -1669,7 +1649,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       title: eventTitle,
       desc: eventDesc,
       imageURL: eventImgURL == null ? null : eventImgURL,
-      isDigitalEvent: isDigitalEvent,
+      isDigitalEvent: widget.isStream ? true : false,
       digitalEventLink: digitalEventLink,
       venueName: venueName,
       streetAddress: eventAddress,
@@ -1707,14 +1687,21 @@ class _CreateEventPageState extends State<CreateEventPage> {
     EventDataService().uploadEvent(newEvent, zipPostalCode, eventImgFile, ticketDistro).then((res) {
       if (res != null) {
         Navigator.of(context).pop();
-        ShowAlertDialogService().showActionSuccessDialog(context, "Event Uploaded", "Your Event Has Successfully Been Uploaded", () {
-          Navigator.of(context).pop();
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
-        });
+        widget.isStream
+            ? ShowAlertDialogService().showActionSuccessDialog(context, "Stream Uploaded", "Your Stream Has Successfully Been Uploaded", () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
+              })
+            : ShowAlertDialogService().showActionSuccessDialog(context, "Event Uploaded", "Your Event Has Successfully Been Uploaded", () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
+              });
 
         //newEvent.navigateToEvent(newEvent.id);
       } else {
-        CustomAlerts().showErrorAlert(context, "Event Submission Error", "There was an issue creating your event. Please try again");
+        widget.isStream
+            ? CustomAlerts().showErrorAlert(context, "Stream Submission Error", "There was an issue creating your stream. Please try again")
+            : CustomAlerts().showErrorAlert(context, "Event Submission Error", "There was an issue creating your event. Please try again");
       }
     });
   }
@@ -1724,26 +1711,34 @@ class _CreateEventPageState extends State<CreateEventPage> {
     formState.save();
     //bool addressIsValid = setEventAddress();
     if (eventImgFile == null && eventImgURL == null) {
-      CustomAlerts().showErrorAlert(context, "Event Image Missing", "Please Set the Image for this Event");
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Stream Image Missing", "Please Set the Image for this Stream")
+          : CustomAlerts().showErrorAlert(context, "Event Image Missing", "Please Set the Image for this Event");
     } else if (eventTitle == null || eventTitle.isEmpty) {
-      CustomAlerts().showErrorAlert(context, "Event Title Missing", "Please Give this Event a Title");
-    } else if (!isDigitalEvent && (eventAddress == null || eventAddress.isEmpty)) {
-      CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Set the Location of this Event");
-    } else if (!isDigitalEvent && (zipPostalCode.length != 5)) {
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Stream Title Missing", "Please Give this Stream a Title")
+          : CustomAlerts().showErrorAlert(context, "Event Title Missing", "Please Give this Event a Title");
+    } else if (eventAddress == null || eventAddress.isEmpty) {
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Location Error", "Please Define the Audience Location of this Stream")
+          : CustomAlerts().showErrorAlert(context, "Location Error", "Please Define the Location of this Event");
+    } else if (zipPostalCode.length != 5) {
       print(zipPostalCode);
-      CustomAlerts().showErrorAlert(context, "Event Address Error", "Please Provide a Better Address for this Event");
-    }
-    // else if (isDigitalEvent &&
-    //     (digitalEventLink == null || digitalEventLink.isEmpty)) {
-    //   CustomAlerts().showErrorAlert(context, "Event URL Link Error",
-    //       "Please Provide the Link to this Event");
-    // }
-    else if (eventDesc == null || eventDesc.isEmpty) {
-      CustomAlerts().showErrorAlert(context, "Event Description Missing", "Please Set the Description for this Event");
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Location Error", "Please Define a Better Audience Location for this Stream")
+          : CustomAlerts().showErrorAlert(context, "Location Error", "Please Define a Better Location for this Event");
+    } else if (eventDesc == null || eventDesc.isEmpty) {
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Stream Description Missing", "Please Set the Description for this Stream")
+          : CustomAlerts().showErrorAlert(context, "Event Description Missing", "Please Set the Description for this Event");
     } else if (eventCategory == 'Select Event Category') {
-      CustomAlerts().showErrorAlert(context, "Event Category Missing", "Please Set the Category for this Event");
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Stream Category Missing", "Please Set the Category for this Stream")
+          : CustomAlerts().showErrorAlert(context, "Event Category Missing", "Please Set the Category for this Event");
     } else if (eventType == "Select Event Type") {
-      CustomAlerts().showErrorAlert(context, "Event Type Missing", "Please Select What Type of Event This Is.");
+      widget.isStream
+          ? CustomAlerts().showErrorAlert(context, "Stream Type Missing", "Please Select What Type of Stream This Is.")
+          : CustomAlerts().showErrorAlert(context, "Event Type Missing", "Please Select What Type of Event This Is.");
     } else {
       createEvent();
     }
@@ -1756,6 +1751,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
       if (res != null) {
         setState(() {
           currentUID = res;
+        });
+        WebblenUserData().getStripeUID(currentUID).then((res) {
+          if (res != null && res.isNotEmpty) {
+            hasEarningsAccount = true;
+            setState(() {});
+          }
         });
       }
       if (widget.eventID != null) {
@@ -1821,8 +1822,11 @@ class _CreateEventPageState extends State<CreateEventPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().newEventAppBar(
-          context, widget.eventID != null ? 'Editing Event' : 'New Event', widget.eventID != null ? 'Cancel Editing this Event?' : 'Cancel Adding a New Event?',
-          () {
+          context,
+          widget.eventID != null ? widget.isStream ? 'Editing Stream' : 'Editing Event' : widget.isStream ? 'New Stream' : 'New Event',
+          widget.eventID != null
+              ? widget.isStream ? 'Cancel Editing Stream?' : 'Cancel Editing Event?'
+              : widget.isStream ? 'Cancel Adding New Stream?' : 'Cancel Adding New Event?', () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
       },
@@ -1845,6 +1849,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
         child: Form(
           key: formKey,
           child: ListView(
+            controller: scrollController,
             shrinkWrap: true,
             children: <Widget>[
               isLoading
@@ -1867,21 +1872,20 @@ class _CreateEventPageState extends State<CreateEventPage> {
                             child: Column(
                               children: [
                                 SizedBox(height: 24.0),
-                                sectionHeader("1", "Event Details"),
+                                widget.isStream ? sectionHeader("1", "Stream Details") : sectionHeader("1", "Event Details"),
                                 //EVENT TITLE
                                 SizedBox(height: 16.0),
-                                fieldHeader("Event Title", true),
+                                widget.isStream ? fieldHeader("Stream Title", true) : fieldHeader("Event Title", true),
                                 eventTitleField(),
                                 SizedBox(height: 16.0),
                                 //EVENT LOCATION
-                                isDigitalEvent ? Container() : fieldHeader("Location", true),
-                                isDigitalEvent ? Container() : eventLocationField(),
-                                isDigitalEvent ? Container() : SizedBox(height: 16.0),
-                                isDigitalEvent ? Container() : fieldHeader("Venue Name/Details (Optional)", false),
-                                isDigitalEvent ? Container() : eventVenueNameField(),
-                                isDigitalEventCheckBox(),
+                                widget.isStream ? fieldHeader("Audience Location", true) : fieldHeader("Location", true),
+                                eventLocationField(),
+                                widget.isStream ? Container() : SizedBox(height: 16.0),
+                                widget.isStream ? Container() : fieldHeader("Venue Name/Details (Optional)", false),
+                                widget.isStream ? Container() : eventVenueNameField(),
                                 SizedBox(height: 16.0),
-                                fieldHeader("Event Description", true),
+                                widget.isStream ? fieldHeader("Stream Description", true) : fieldHeader("Event Description", true),
                                 eventDescriptionField(),
                                 SizedBox(height: 16.0),
                                 //EVENT DATE & TIME
@@ -1910,17 +1914,18 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                 ticketDistro.discountCodes.length > 0 ? discountListBuilder() : Container(),
                                 showDiscountCodeForm ? discountCodeForm() : Container(),
                                 SizedBox(height: (ticketDistro.tickets.length != null && ticketDistro.tickets.length > 0) ? 16.0 : 0.0),
-                                showTicketForm || showFeeForm || showDiscountCodeForm ? Container() : ticketActions(),
+                                showTicketForm || showFeeForm || showDiscountCodeForm || widget.isStream ? Container() : ticketActions(),
+                                widget.isStream ? fieldHeader("*Temporarily Unavailable for Live Streams", false) : Container(),
                                 SizedBox(height: 40.0),
                                 sectionHeader("3", "Additional Info"),
                                 SizedBox(height: 16.0),
-                                fieldHeader("Event Privacy", true),
+                                widget.isStream ? fieldHeader("Stream Privacy", true) : fieldHeader("Event Privacy", true),
                                 eventPrivacyDropdown(),
                                 SizedBox(height: 16.0),
-                                fieldHeader("Event Category", true),
+                                widget.isStream ? fieldHeader("Stream Category", true) : fieldHeader("Event Category", true),
                                 eventCategoryDropDown(),
                                 SizedBox(height: 16.0),
-                                fieldHeader("Event Type", true),
+                                widget.isStream ? fieldHeader("Stream Type", true) : fieldHeader("Event Type", true),
                                 eventTypeDropDown(),
                                 SizedBox(height: 32.0),
                                 fieldHeader("Social Links (Optional)", false),
@@ -1947,7 +1952,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 2.0),
                                       child: CustomColorButton(
-                                        text: widget.eventID == null ? "Create Event" : "Update Event",
+                                        text: widget.eventID == null
+                                            ? widget.isStream ? "Create Stream" : "Create Event"
+                                            : widget.isStream ? "Update Stream" : "Update Event",
                                         textColor: Colors.black,
                                         backgroundColor: Colors.white,
                                         height: 35.0,

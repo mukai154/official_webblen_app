@@ -869,13 +869,10 @@ class InfoDialog extends StatelessWidget {
             Container(
               child: Column(
                 children: <Widget>[
-                  CustomText(
-                    context: context,
-                    text: body,
-                    textColor: Colors.black,
+                  Text(
+                    body,
+                    style: Fonts.alertDialogBody,
                     textAlign: TextAlign.center,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
                   ),
                 ],
               ),
@@ -973,6 +970,63 @@ class ActionMessage extends StatelessWidget {
 }
 
 //***EVENT INFO
+class CreateEventOrStreamDialog extends StatelessWidget {
+  final VoidCallback createEvent;
+  final VoidCallback createStream;
+
+  CreateEventOrStreamDialog({
+    this.createEvent,
+    this.createStream,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomAlertDialog(
+      content: Container(
+        height: 150,
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          color: const Color(0xFFFFFF),
+          borderRadius: BorderRadius.all(
+            Radius.circular(32.0),
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            CustomColorIconButton(
+              icon: Icon(
+                FontAwesomeIcons.calendar,
+                color: Colors.black,
+                size: 16.0,
+              ),
+              text: "New Event",
+              textColor: Colors.black,
+              backgroundColor: Colors.white,
+              height: 45.0,
+              width: 200.0,
+              onPressed: createEvent,
+            ),
+            CustomColorIconButton(
+              icon: Icon(
+                FontAwesomeIcons.video,
+                color: Colors.black,
+                size: 16.0,
+              ),
+              text: "New Stream",
+              textColor: Colors.black,
+              backgroundColor: Colors.white,
+              height: 45.0,
+              width: 200.0,
+              onPressed: createStream,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class AdditionalEventInfoDialog extends StatelessWidget {
   final int estimatedTurnout;
   final double eventCost;

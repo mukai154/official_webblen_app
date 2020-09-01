@@ -65,7 +65,7 @@ class _EventBlockState extends State<EventBlock> {
 
     final double size = 120;
     return GestureDetector(
-      onTap: null, //widget.viewEventTickets == null ? widget.viewEventDetails : widget.viewEventTickets,
+      onTap: widget.viewEventTickets == null ? widget.viewEventDetails : widget.viewEventTickets,
       child: Container(
         height: size,
         // width: MediaQuery.of(context).size.width - 32,

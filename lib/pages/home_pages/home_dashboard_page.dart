@@ -60,6 +60,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   String eventTypeFilter = "None";
   String eventCategoryFilter = "None";
   //Event Results
+  int dateTimeInMilliseconds2hoursAgo = DateTime.now().millisecondsSinceEpoch - 7400000;
   CollectionReference eventsRef = Firestore.instance.collection("events");
   List<DocumentSnapshot> liveEventResults = [];
   List<DocumentSnapshot> virtualEventResults = [];
@@ -85,12 +86,16 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   getLiveEvents() async {
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
-      eventsQuery =
-          eventsRef.where('d.nearbyZipcodes', arrayContains: areaCodeFilter).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+      eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       print(eventTypeFilter);
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
@@ -98,6 +103,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else {
@@ -105,6 +111,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     }
@@ -120,18 +127,24 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   getVirtualEvents() async {
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef.where('d.isDigitalEvent', isEqualTo: true).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+      eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: true)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       print(eventTypeFilter);
       eventsQuery = eventsRef
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.category', isEqualTo: eventCategoryFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else {
@@ -139,6 +152,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     }
@@ -153,8 +167,11 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
 
   getSavedEvents() async {
     Query eventsQuery;
-    eventsQuery =
-        eventsRef.where('d.savedBy', arrayContains: widget.currentUser.uid).orderBy('d.startDateTimeInMilliseconds', descending: false).limit(resultsPerPage);
+    eventsQuery = eventsRef
+        .where('d.savedBy', arrayContains: widget.currentUser.uid)
+        .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .limit(resultsPerPage);
     QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
     if (querySnapshot.documents.isNotEmpty) {
       lastSavedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
@@ -188,12 +205,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
@@ -201,6 +220,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
@@ -208,6 +228,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     } else {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
@@ -235,6 +256,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.isDigitalEvent', isEqualTo: true)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
@@ -242,6 +264,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       eventsQuery = eventsRef
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
@@ -249,6 +272,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       eventsQuery = eventsRef
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.category', isEqualTo: eventCategoryFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
@@ -257,6 +281,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
+          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
@@ -280,6 +305,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     setState(() {});
     Query eventsQuery = eventsRef
         .where("d.savedBy", isEqualTo: widget.currentUser.uid)
+        .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
         .orderBy('d.startDateTimeInMilliseconds', descending: false)
         .startAfterDocument(lastSavedEventDocSnap)
         .limit(resultsPerPage);
@@ -316,18 +342,12 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
 //    setState(() {});
 //  }
 
-  Future<void> refreshLiveEventData() async {
+  Future<void> refreshData() async {
     liveEventResults = [];
-    getLiveEvents();
-  }
-
-  Future<void> refreshVirtualEventData() async {
     virtualEventResults = [];
-    getVirtualEvents();
-  }
-
-  Future<void> refreshSavedEventData() async {
     savedEventResults = [];
+    getLiveEvents();
+    getVirtualEvents();
     getSavedEvents();
   }
 
@@ -474,152 +494,51 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   }
 
   Widget listLiveEvents() {
-    return LiquidPullToRefresh(
-      color: CustomColors.webblenRed,
-      onRefresh: refreshLiveEventData,
-      child: ListView.builder(
-        controller: liveEventsScrollController,
-        key: UniqueKey(),
-        shrinkWrap: true,
-        itemCount: liveEventResults.length,
-        itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(liveEventResults[index].data['d']));
-          double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
-          if (num == num.roundToDouble() && num != 0) {
-            return Padding(
-              padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
-              child: Container(
-                child: Column(
-                  children: [
-                    Container(
-                      height: 70,
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(bottom: 20.0),
-                      child: NativeAdmob(
-                        // Your ad unit id
-                        loading: Container(),
-                        adUnitID: 'ca-app-pub-3940256099942544/3986624511',
-                        numberAds: 3,
-                        controller: nativeAdController,
-                        type: NativeAdmobType.banner,
-                      ),
-                    ),
-                    EventBlock(
-                      currentUID: widget.currentUser.uid,
-                      event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                      viewEventDetails: () =>
-                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
-              child: EventBlock(
-                currentUID: widget.currentUser.uid,
-                event: event,
-                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                viewEventTickets: null,
-                numOfTicsForEvent: null,
-                eventImgSize: MediaQuery.of(context).size.width - 16,
-                eventDescHeight: 120.0,
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  Widget listVirtualEvents() {
-    return LiquidPullToRefresh(
-      color: CustomColors.webblenRed,
-      onRefresh: refreshVirtualEventData,
-      child: ListView.builder(
-        controller: virtualEventsScrollController,
-        key: UniqueKey(),
-        shrinkWrap: true,
-        itemCount: virtualEventResults.length,
-        itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(virtualEventResults[index].data['d']));
-          double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
-          if (num == num.roundToDouble() && num != 0) {
-            return Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
-              child: Container(
-                child: Column(
-                  children: [
-                    Container(
-                      height: 70,
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(bottom: 20.0),
-                      child: NativeAdmob(
-                        // Your ad unit id
-                        loading: Container(),
-                        adUnitID: 'ca-app-pub-3940256099942544/3986624511',
-                        numberAds: 3,
-                        controller: nativeAdController,
-                        type: NativeAdmobType.banner,
-                      ),
-                    ),
-                    EventBlock(
-                      currentUID: widget.currentUser.uid,
-                      event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                      viewEventDetails: () =>
-                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
-              child: EventBlock(
-                currentUID: widget.currentUser.uid,
-                event: event,
-                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                viewEventTickets: null,
-                numOfTicsForEvent: null,
-                eventImgSize: MediaQuery.of(context).size.width - 16,
-                eventDescHeight: 120.0,
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  Widget listSavedEvents() {
-    return LiquidPullToRefresh(
-      color: CustomColors.webblenRed,
-      onRefresh: refreshSavedEventData,
-      child: ListView.builder(
-        controller: savedEventsScrollController,
-        key: UniqueKey(),
-        shrinkWrap: true,
-        itemCount: savedEventResults.length,
-        itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(savedEventResults[index].data['d']));
+    return ListView.builder(
+      controller: liveEventsScrollController,
+      key: UniqueKey(),
+      shrinkWrap: true,
+      itemCount: liveEventResults.length,
+      itemBuilder: (context, index) {
+        WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(liveEventResults[index].data['d']));
+        double num = index / 15;
+        print(num == num.roundToDouble() && num != 0);
+        if (num == num.roundToDouble() && num != 0) {
           return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: savedEventResults.length - 1 == index ? 16.0 : 0),
+            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
+            child: Container(
+              child: Column(
+                children: [
+                  Container(
+                    height: 70,
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.only(bottom: 20.0),
+                    child: NativeAdmob(
+                      // Your ad unit id
+                      loading: Container(),
+                      adUnitID: 'ca-app-pub-3940256099942544/3986624511',
+                      numberAds: 3,
+                      controller: nativeAdController,
+                      type: NativeAdmobType.banner,
+                    ),
+                  ),
+                  EventBlock(
+                    currentUID: widget.currentUser.uid,
+                    event: event,
+                    shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+                    viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                    viewEventTickets: null,
+                    numOfTicsForEvent: null,
+                    eventImgSize: MediaQuery.of(context).size.width - 16,
+                    eventDescHeight: 120.0,
+                  ),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return Padding(
+            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
             child: EventBlock(
               currentUID: widget.currentUser.uid,
               event: event,
@@ -631,8 +550,109 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
               eventDescHeight: 120.0,
             ),
           );
-        },
-      ),
+        }
+      },
+    );
+  }
+
+  Widget listVirtualEvents() {
+    return ListView.builder(
+      controller: virtualEventsScrollController,
+      key: UniqueKey(),
+      shrinkWrap: true,
+      itemCount: virtualEventResults.length,
+      itemBuilder: (context, index) {
+        WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(virtualEventResults[index].data['d']));
+        double num = index / 15;
+        print(num == num.roundToDouble() && num != 0);
+        if (num == num.roundToDouble() && num != 0) {
+          return Padding(
+            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
+            child: Container(
+              child: Column(
+                children: [
+                  Container(
+                    height: 70,
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.only(bottom: 20.0),
+                    child: NativeAdmob(
+                      // Your ad unit id
+                      loading: Container(),
+                      adUnitID: 'ca-app-pub-3940256099942544/3986624511',
+                      numberAds: 3,
+                      controller: nativeAdController,
+                      type: NativeAdmobType.banner,
+                    ),
+                  ),
+                  EventBlock(
+                    currentUID: widget.currentUser.uid,
+                    event: event,
+                    shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+                    viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                    viewEventTickets: null,
+                    numOfTicsForEvent: null,
+                    eventImgSize: MediaQuery.of(context).size.width - 16,
+                    eventDescHeight: 120.0,
+                  ),
+                ],
+              ),
+            ),
+          );
+        } else {
+          return Padding(
+            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
+            child: EventBlock(
+              currentUID: widget.currentUser.uid,
+              event: event,
+              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+              viewEventTickets: null,
+              numOfTicsForEvent: null,
+              eventImgSize: MediaQuery.of(context).size.width - 16,
+              eventDescHeight: 120.0,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget listSavedEvents() {
+    return ListView.builder(
+      controller: savedEventsScrollController,
+      key: UniqueKey(),
+      shrinkWrap: true,
+      itemCount: savedEventResults.length,
+      itemBuilder: (context, index) {
+        WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(savedEventResults[index].data['d']));
+        return Padding(
+          padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: savedEventResults.length - 1 == index ? 16.0 : 0),
+          child: EventBlock(
+            currentUID: widget.currentUser.uid,
+            event: event,
+            shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+            viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+            viewEventTickets: null,
+            numOfTicsForEvent: null,
+            eventImgSize: MediaQuery.of(context).size.width - 16,
+            eventDescHeight: 120.0,
+          ),
+        );
+      },
+    );
+  }
+
+  showNewEventOrStreamDialog() {
+    ShowAlertDialogService().showNewEventOrStreamDialog(
+      context,
+      () {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, isStream: false).transitionToCreateEventPage();
+      },
+      () {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, isStream: true).transitionToCreateEventPage();
+      },
     );
   }
 
@@ -712,12 +732,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       getVirtualEvents();
       getLiveEvents();
     });
-//    if (Platform.isIOS) {
-//      Admob.initialize('ca-app-pub-2136415475966451~5144610810');
-//    } else if (Platform.isAndroid) {
-//      Admob.initialize('ca-app-pub-2136415475966451~9434499178');
-//    }
-//    bannerSize = AdmobBannerSize.BANNER;
   }
 
   @override
@@ -825,9 +839,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => PageTransitionService(
-                                context: context,
-                              ).transitionToCreateEventPage(),
+                              onTap: () => showNewEventOrStreamDialog(),
                               child: Icon(
                                 FontAwesomeIcons.plus,
                                 size: 20.0,
@@ -856,7 +868,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                     Tab(
                       child: CustomText(
                         context: context,
-                        text: "Live",
+                        text: "Events",
                         textColor: Colors.black,
                         textAlign: TextAlign.center,
                         fontSize: 15.0,
@@ -866,7 +878,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                     Tab(
                       child: CustomText(
                         context: context,
-                        text: "Virtual",
+                        text: "Streams",
                         textColor: Colors.black,
                         textAlign: TextAlign.center,
                         fontSize: 15.0,
@@ -889,194 +901,158 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
             ),
           ),
           Expanded(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              child: DefaultTabController(
-                length: 3,
-                child: TabBarView(
-                  controller: _tabController,
-                  children: <Widget>[
-                    //LIVE EVENTS
-                    Container(
-                      key: PageStorageKey('key0'),
-                      color: Colors.white,
-                      child: isLoading
-                          ? LoadingScreen(
-                              context: context,
-                              loadingDescription: 'Loading Live Events...',
-                            )
-                          : liveEventResults.isEmpty
-                              ? Column(
-                                  children: <Widget>[
-                                    SizedBox(height: 32.0),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context).size.width - 16,
+            child: LiquidPullToRefresh(
+              onRefresh: refreshData,
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: DefaultTabController(
+                  length: 3,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: <Widget>[
+                      //LIVE EVENTS
+                      Container(
+                        key: PageStorageKey('key0'),
+                        color: Colors.white,
+                        child: isLoading
+                            ? LoadingScreen(
+                                context: context,
+                                loadingDescription: 'Loading Live Events...',
+                              )
+                            : liveEventResults.isEmpty
+                                ? Column(
+                                    children: <Widget>[
+                                      SizedBox(height: 32.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                            ),
+                                            child: CustomText(
+                                              context: context,
+                                              text: "We Could Not Find Any Live Events According to Your Preferences",
+                                              textColor: Colors.black,
+                                              textAlign: TextAlign.center,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 8.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          GestureDetector(
+                                            onTap: () => showEventPreferenceDialog(),
+                                            child: CustomText(
+                                              context: context,
+                                              text: "Change My Preferences",
+                                              textColor: Colors.blueAccent,
+                                              textAlign: TextAlign.center,
+                                              underline: false,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
-                                          child: CustomText(
-                                            context: context,
-                                            text: "We Could Not Find Any Live Events According to Your Preferences",
-                                            textColor: Colors.black,
-                                            textAlign: TextAlign.center,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                : listLiveEvents(),
+                      ),
+                      //VIRTUAL EVENTS
+                      Container(
+                        key: PageStorageKey('key1'),
+                        color: Colors.white,
+                        child: isLoading
+                            ? LoadingScreen(
+                                context: context,
+                                loadingDescription: 'Loading Virtual Events...',
+                              )
+                            : virtualEventResults.isEmpty
+                                ? Column(
+                                    children: <Widget>[
+                                      SizedBox(height: 32.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                            ),
+                                            child: CustomText(
+                                              context: context,
+                                              text: "We Could Not Find Any Virtual Events According to Your Preferences",
+                                              textColor: Colors.black,
+                                              textAlign: TextAlign.center,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 8.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          GestureDetector(
+                                            onTap: () => showEventPreferenceDialog(),
+                                            child: CustomText(
+                                              context: context,
+                                              text: "Change My Preferences",
+                                              textColor: Colors.blueAccent,
+                                              textAlign: TextAlign.center,
+                                              underline: false,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        GestureDetector(
-                                          onTap: () => showEventPreferenceDialog(),
-                                          child: CustomText(
-                                            context: context,
-                                            text: "Change My Preferences",
-                                            textColor: Colors.blueAccent,
-                                            textAlign: TextAlign.center,
-                                            underline: false,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : listLiveEvents(),
-                    ),
-                    //VIRTUAL EVENTS
-                    Container(
-                      key: PageStorageKey('key1'),
-                      color: Colors.white,
-                      child: isLoading
-                          ? LoadingScreen(
-                              context: context,
-                              loadingDescription: 'Loading Virtual Events...',
-                            )
-                          : virtualEventResults.isEmpty
-                              ? Column(
-                                  children: <Widget>[
-                                    SizedBox(height: 32.0),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context).size.width - 16,
-                                          ),
-                                          child: CustomText(
-                                            context: context,
-                                            text: "We Could Not Find Any Virtual Events According to Your Preferences",
-                                            textColor: Colors.black,
-                                            textAlign: TextAlign.center,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                    SizedBox(height: 8.0),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        GestureDetector(
-                                          onTap: () => showEventPreferenceDialog(),
-                                          child: CustomText(
-                                            context: context,
-                                            text: "Change My Preferences",
-                                            textColor: Colors.blueAccent,
-                                            textAlign: TextAlign.center,
-                                            underline: false,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : listVirtualEvents(),
-                    ),
-                    //SAVED EVENTS
-                    Container(
-                      key: PageStorageKey('key2'),
-                      color: Colors.white,
-                      child: isLoading
-                          ? LoadingScreen(
-                              context: context,
-                              loadingDescription: 'Loading Saved Events...',
-                            )
-                          : savedEventResults.isEmpty
-                              ? Column(
-                                  children: <Widget>[
-                                    SizedBox(height: 32.0),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxWidth: MediaQuery.of(context).size.width - 16,
-                                          ),
-                                          child: CustomText(
-                                            context: context,
-                                            text: "You Do Not Have Any Upcoming Events Saved",
-                                            textColor: Colors.black,
-                                            textAlign: TextAlign.center,
-                                            fontSize: 16.0,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ],
-                                )
-                              : listSavedEvents(),
-                    ),
-                    //FOLLOWING EVENTS
-//                    Container(
-//                      key: PageStorageKey('key3'),
-//                      color: Colors.white,
-//                      child: isLoading
-//                          ? LoadingScreen(
-//                              context: context,
-//                              loadingDescription: 'Loading Events...',
-//                            )
-//                          : myEventResults.isEmpty
-//                              ? Column(
-//                                  children: <Widget>[
-//                                    SizedBox(height: 32.0),
-//                                    CustomText(
-//                                      context: context,
-//                                      text: "You Have Not Made Any Events",
-//                                      textColor: Colors.black,
-//                                      textAlign: TextAlign.center,
-//                                      fontSize: 16.0,
-//                                      fontWeight: FontWeight.w500,
-//                                    ),
-//                                    SizedBox(height: 8.0),
-//                                    GestureDetector(
-//                                      onTap: () => PageTransitionService(
-//                                        context: context,
-//                                      ).transitionToCreateEventPage(),
-//                                      child: CustomText(
-//                                        context: context,
-//                                        text: "Create an Event",
-//                                        textColor: Colors.blueAccent,
-//                                        textAlign: TextAlign.center,
-//                                        fontSize: 16.0,
-//                                        fontWeight: FontWeight.w500,
-//                                      ),
-//                                    ),
-//                                  ],
-//                                )
-//                              : listMyEvents(),
-//                    ),
-                  ],
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                : listVirtualEvents(),
+                      ),
+                      //SAVED EVENTS
+                      Container(
+                        key: PageStorageKey('key2'),
+                        color: Colors.white,
+                        child: isLoading
+                            ? LoadingScreen(
+                                context: context,
+                                loadingDescription: 'Loading Saved Events...',
+                              )
+                            : savedEventResults.isEmpty
+                                ? Column(
+                                    children: <Widget>[
+                                      SizedBox(height: 32.0),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                            ),
+                                            child: CustomText(
+                                              context: context,
+                                              text: "You Do Not Have Any Upcoming Events Saved",
+                                              textColor: Colors.black,
+                                              textAlign: TextAlign.center,
+                                              fontSize: 16.0,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  )
+                                : listSavedEvents(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
