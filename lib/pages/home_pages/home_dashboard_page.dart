@@ -88,7 +88,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
@@ -96,14 +96,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .where('d.type', isEqualTo: eventTypeFilter)
+          //.where('d.type', isEqualTo: eventTypeFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else {
@@ -111,7 +111,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     }
@@ -205,14 +205,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
@@ -220,7 +220,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
@@ -228,7 +228,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     } else {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
           .orderBy('d.startDateTimeInMilliseconds', descending: false)

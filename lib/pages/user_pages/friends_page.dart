@@ -93,7 +93,6 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
                         webblenUser: friendList[index],
                       ).transitionToUserPage(),
                       sendUserFriendRequest: null,
-                      isFriendsWithUser: true,
                     ),
                     itemCount: friendList.length,
                   ),
@@ -146,7 +145,7 @@ class _FriendsPageState extends State<FriendsPage> with SingleTickerProviderStat
             usersList: friendList,
             currentUser: currentUser,
             viewingMembersOrAttendees: false,
-          ).transitionToUserSearchPage(),
+          ).transitionToUserListPage(),
         ),
       ],
     );

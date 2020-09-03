@@ -65,6 +65,31 @@ class WebblenUserData {
     return usernameExists;
   }
 
+  Future<List> getFollowingList(String uid) async {
+    List followingList;
+    DocumentSnapshot documentSnapshot = await userRef.document(uid).get();
+    if (documentSnapshot.exists) {
+      Map<String, dynamic> docData = documentSnapshot.data;
+      WebblenUser user = WebblenUser.fromMap(Map<String, dynamic>.from(docData['d']));
+      followingList = user.following;
+    }
+    return followingList;
+  }
+
+  Future<String> updateFollowing(String currentUID, String userUID, List currentUserFollowingList, List userFollowerList) async {
+    String error;
+    await userRef.document(currentUID).updateData({"d.following": currentUserFollowingList});
+    await userRef.document(userUID).updateData({"d.followers": userFollowerList});
+    return error;
+  }
+
+  Future<Null> transitionFriendsToFollowers() async {
+    QuerySnapshot snapshot = await userRef.getDocuments();
+    snapshot.documents.forEach((doc) async {
+      await userRef.document(doc.documentID).updateData({"d.following": doc.data['d']['friends'], "d.followers": doc.data['d']['friends']}).catchError((e) {});
+    });
+  }
+
 //  Future<String> updateUserImg(File userImgFile, String uid) async {
 //    String error = "";
 //    String userImgURL = await ImageUploadService().uploadImageToFirebaseStorage(userImgFile, UserImgFile, uid);

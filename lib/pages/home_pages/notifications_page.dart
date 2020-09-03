@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/webblen_notification_data.dart';
+import 'package:webblen/firebase/services/notifications.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';

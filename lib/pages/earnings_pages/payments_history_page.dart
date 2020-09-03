@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/utils/time_calc.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';

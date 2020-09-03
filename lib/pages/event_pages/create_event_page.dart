@@ -16,7 +16,7 @@ import 'package:webblen/constants/strings.dart';
 import 'package:webblen/constants/timezones.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
-import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -82,6 +82,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   DateFormat dateFormatter = DateFormat('MMM dd, yyyy');
   DateFormat timeFormatter = DateFormat('h:mm a');
+  DateFormat dateTimeFormatter = DateFormat('MMM dd, yyyy h:mm a');
   int startDateTimeInMilliseconds;
   DateTime selectedStartDate = DateTime.now();
   DateTime selectedEndDate = DateTime.now();
@@ -1635,12 +1636,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
   //CREATE EVENT
   createEvent() async {
     CustomAlerts().showLoadingAlert(context, widget.isStream ? "Setting Up Stream..." : "Uploading Event...");
-    DateTime startDateTime = DateTime(
-      selectedStartDate.year,
-      selectedStartDate.day,
-      timeFormatter.parse(startTime).hour,
-      timeFormatter.parse(startTime).minute,
-    );
+    String fullStartDateTime = startDate + " " + startTime;
+    print(fullStartDateTime);
+    String fullEndDateTime = endDate + " " + endTime;
+    DateTime startDateTime = dateTimeFormatter.parse(fullStartDateTime);
+    print(startDateTime.millisecondsSinceEpoch);
+    DateTime endDateTime = dateTimeFormatter.parse(fullEndDateTime);
+
     WebblenEvent newEvent = WebblenEvent(
       id: widget.eventID == null ? null : widget.eventID,
       authorID: currentUID,
@@ -1674,6 +1676,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       eventPayout: 0.0001,
       recurrence: 'none',
       startDateTimeInMilliseconds: startDateTime.millisecondsSinceEpoch,
+      endDateTimeInMilliseconds: endDateTime.millisecondsSinceEpoch,
       startDate: startDate,
       startTime: startTime,
       endDate: endDate,
@@ -1681,6 +1684,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       timezone: timezone,
       privacy: privacy,
       reported: false,
+      paidOut: false,
     );
     WebblenUser currentUser = await WebblenUserData().getUserByID(currentUID);
     print(currentUser.uid);
@@ -1837,7 +1841,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
                     margin: EdgeInsets.only(right: 16.0, top: 16.0),
                     child: CustomText(
                       context: context,
-                      text: "Done",
+                      text: "Dismiss",
                       textColor: Colors.blueAccent,
                       textAlign: TextAlign.left,
                       fontSize: 18.0,

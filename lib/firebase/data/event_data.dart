@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:random_string/random_string.dart';
 import 'package:webblen/models/event_ticket.dart';
 import 'package:webblen/models/ticket_distro.dart';
@@ -24,6 +25,7 @@ class EventDataService {
     List nearbyZipcodes = [];
     String newEventID = newEvent.id == null ? randomAlphaNumeric(12) : newEvent.id;
     newEvent.id = newEventID;
+    newEvent.webAppLink = 'https://app.webblen.io/#/event?id=${newEvent.id}';
     if (eventImageFile != null) {
       String eventFileName = "${newEvent.id}.jpg";
       String eventImageURL = await uploadEventImage(eventImageFile, eventFileName);
@@ -145,31 +147,77 @@ class EventDataService {
     return eventTickets;
   }
 
-  Future<List<WebblenEvent>> getEventsNearLocation(double lat, double lon, bool forCheckIn) async {
+//  Future<List<WebblenEvent>> getEventsNearLocation(double lat, double lon) async {
+//    print(lat);
+//    final geo = Geoflutterfire();
+//    int milli = DateTime.now().millisecondsSinceEpoch;
+//    var query = Firestore.instance
+//        .collection('events')
+//        .where("nearbyZipcodes", arrayContains: '58102')
+//        .where("d.startDateTimeInMilliseconds", isLessThan: milli)
+//        .where("d.endDateTimeInMilliseconds", isGreaterThan: milli);
+//
+//    var eventGeoRef = geo.collection(collectionRef: query.reference());
+//    GeoFirePoint geoPoint = geo.point(latitude: lat, longitude: lon);
+//    List events;
+//    await eventGeoRef.within(center: geoPoint, radius: 50, field: 'l', strictMode: false).first.then((documents) {
+//      print(documents.length);
+//    }).catchError((e) {
+//      print(e);
+//    });
+//    return events;
+//  }
+
+  Future<List<WebblenEvent>> getEventsNearLocation(double lat, double lon) async {
+    final geoFlutterFire = Geoflutterfire();
+    GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
     List<WebblenEvent> events = [];
-    final HttpsCallable callable = forCheckIn
-        ? CloudFunctions.instance.getHttpsCallable(
-            functionName: 'getEventsForCheckIn',
-          )
-        : CloudFunctions.instance.getHttpsCallable(
-            functionName: 'getEventsNearLocation',
-          );
-    final HttpsCallableResult result = await callable.call(
-      <String, dynamic>{
-        'lat': lat,
-        'lon': lon,
-      },
-    );
-    if (result.data != null) {
-      List query = List.from(result.data);
-      query.forEach((resultMap) {
-        Map<String, dynamic> eventMap = Map<String, dynamic>.from(resultMap);
-        WebblenEvent event = WebblenEvent.fromMap(eventMap);
-        events.add(event);
-      });
-    }
+    int milli = DateTime.now().millisecondsSinceEpoch;
+    QuerySnapshot snapshot = await eventsRef
+        .where("d.nearbyZipcodes", arrayContains: '58102')
+        .where("d.isDigitalEvent", isEqualTo: false)
+        .where("d.endDateTimeInMilliseconds", isGreaterThan: milli)
+        .getDocuments()
+        .catchError((e) {
+      print(e);
+    });
+    snapshot.documents.forEach((doc) {
+      WebblenEvent event = WebblenEvent.fromMap(doc.data['d']);
+      if (event.startDateTimeInMilliseconds < milli) {
+        double distanceFromPoint = geoPoint.distance(lat: event.lat, lng: event.lon);
+        if (distanceFromPoint < 5.0) {
+          events.add(event);
+        }
+      }
+    });
     return events;
   }
+
+//  Future<List<WebblenEvent>> getEventsNearLocation(double lat, double lon, bool forCheckIn) async {
+//    List<WebblenEvent> events = [];
+//    final HttpsCallable callable = forCheckIn
+//        ? CloudFunctions.instance.getHttpsCallable(
+//            functionName: 'getEventsForCheckIn',
+//          )
+//        : CloudFunctions.instance.getHttpsCallable(
+//            functionName: 'getEventsNearLocation',
+//          );
+//    final HttpsCallableResult result = await callable.call(
+//      <String, dynamic>{
+//        'lat': lat,
+//        'lon': lon,
+//      },
+//    );
+//    if (result.data != null) {
+//      List query = List.from(result.data);
+//      query.forEach((resultMap) {
+//        Map<String, dynamic> eventMap = Map<String, dynamic>.from(resultMap);
+//        WebblenEvent event = WebblenEvent.fromMap(eventMap);
+//        events.add(event);
+//      });
+//    }
+//    return events;
+//  }
 
   Future<List<WebblenEvent>> getUserEventHistory(String uid) async {
     List<WebblenEvent> events = [];

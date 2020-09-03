@@ -31,6 +31,7 @@ class WebblenEvent {
   double eventPayout;
   String recurrence;
   int startDateTimeInMilliseconds;
+  int endDateTimeInMilliseconds;
   String startDate;
   String startTime;
   String endDate;
@@ -40,6 +41,7 @@ class WebblenEvent {
   bool reported;
   String webAppLink;
   List savedBy;
+  bool paidOut;
 
   WebblenEvent({
     this.id,
@@ -74,6 +76,7 @@ class WebblenEvent {
     this.eventPayout,
     this.recurrence,
     this.startDateTimeInMilliseconds,
+    this.endDateTimeInMilliseconds,
     this.startDate,
     this.startTime,
     this.endDate,
@@ -83,6 +86,7 @@ class WebblenEvent {
     this.reported,
     this.webAppLink,
     this.savedBy,
+    this.paidOut,
   });
 
   WebblenEvent.fromMap(Map<String, dynamic> data)
@@ -119,6 +123,7 @@ class WebblenEvent {
           eventPayout: data['eventPayout'],
           recurrence: data['recurrence'],
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
+          endDateTimeInMilliseconds: data['endDateTimeInMilliseconds'],
           startDate: data['startDate'],
           startTime: data['startTime'],
           endDate: data['endDate'],
@@ -128,6 +133,7 @@ class WebblenEvent {
           reported: data['reported'],
           webAppLink: data['webAppLink'],
           savedBy: data['savedBy'],
+          paidOut: data['paidOut'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -163,6 +169,7 @@ class WebblenEvent {
         'eventPayout': this.eventPayout,
         'recurrence': this.recurrence,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
+        'endDateTimeInMilliseconds': this.endDateTimeInMilliseconds,
         'startDate': this.startDate,
         'startTime': this.startTime,
         'endDate': this.endDate,
@@ -172,5 +179,6 @@ class WebblenEvent {
         'reported': this.reported,
         'webAppLink': this.webAppLink,
         'savedBy': this.savedBy,
+        'paidOut': this.paidOut,
       };
 }

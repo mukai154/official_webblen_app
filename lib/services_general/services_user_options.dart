@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/auth.dart';
-import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 
 class UserOptionsService {
@@ -23,28 +21,28 @@ class UserOptionsService {
     ShowAlertDialogService().showLoadingDialog(context);
     await UserDataService().getUsername(uid).then((currentUsername) {
       if (currentUsername != null) {
-        WebblenNotificationDataService()
-            .sendFriendRequest(
-          uid,
-          peerUid,
-          peerUsername,
-        )
-            .then((requestStatus) {
-          Navigator.of(context).pop();
-          if (requestStatus == "success") {
-            ShowAlertDialogService().showSuccessDialog(
-                context,
-                "Friend Request Sent!",
-                peerUsername + " Will Need to Confirm Your Request");
-            friendRequestStatus = "pending";
-          } else {
-            ShowAlertDialogService().showFailureDialog(
-              context,
-              "Request Failed",
-              requestStatus,
-            );
-          }
-        });
+//        WebblenNotificationDataService()
+//            .sendFriendRequest(
+//          uid,
+//          peerUid,
+//          peerUsername,
+//        )
+//            .then((requestStatus) {
+//          Navigator.of(context).pop();
+//          if (requestStatus == "success") {
+//            ShowAlertDialogService().showSuccessDialog(
+//                context,
+//                "Friend Request Sent!",
+//                peerUsername + " Will Need to Confirm Your Request");
+//            friendRequestStatus = "pending";
+//          } else {
+//            ShowAlertDialogService().showFailureDialog(
+//              context,
+//              "Request Failed",
+//              requestStatus,
+//            );
+//          }
+//        });
       } else {
         ShowAlertDialogService().showFailureDialog(
           context,
@@ -69,29 +67,29 @@ class UserOptionsService {
     ShowAlertDialogService().showLoadingDialog(context);
     await UserDataService().getUsername(uid).then((currentUsername) {
       if (currentUsername != null) {
-        WebblenNotificationDataService()
-            .sendFriendRequest(
-          uid,
-          peerUid,
-          peerUsername,
-        )
-            .then((requestStatus) {
-          Navigator.of(context).pop();
-          if (requestStatus == "success") {
-            ShowAlertDialogService().showSuccessDialog(
-              context,
-              "Friend Request Sent!",
-              peerUsername + " Will Need to Confirm Your Request",
-            );
-            friendRequestStatus = "pending";
-          } else {
-            ShowAlertDialogService().showFailureDialog(
-              context,
-              "Request Failed",
-              requestStatus,
-            );
-          }
-        });
+//        WebblenNotificationDataService()
+//            .sendFriendRequest(
+//          uid,
+//          peerUid,
+//          peerUsername,
+//        )
+//            .then((requestStatus) {
+//          Navigator.of(context).pop();
+//          if (requestStatus == "success") {
+//            ShowAlertDialogService().showSuccessDialog(
+//              context,
+//              "Friend Request Sent!",
+//              peerUsername + " Will Need to Confirm Your Request",
+//            );
+//            friendRequestStatus = "pending";
+//          } else {
+//            ShowAlertDialogService().showFailureDialog(
+//              context,
+//              "Request Failed",
+//              requestStatus,
+//            );
+//          }
+//        });
       } else {
         ShowAlertDialogService().showFailureDialog(
           context,

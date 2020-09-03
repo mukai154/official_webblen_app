@@ -7,12 +7,11 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
 import 'package:location_permissions/location_permissions.dart';
-import 'package:webblen/animations/shake_animation.dart';
 import 'package:webblen/firebase/data/event_data.dart';
-import 'package:webblen/firebase_data/auth.dart';
-import 'package:webblen/firebase_data/platform_data.dart';
+import 'package:webblen/firebase/data/platform_data.dart';
+import 'package:webblen/firebase/services/auth.dart';
+import 'package:webblen/firebase/services/remote_messaging.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_services/remote_messaging.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/home_pages/home_dashboard_page.dart';
 import 'package:webblen/pages/home_pages/location_permissions_page.dart';
@@ -300,18 +299,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               20.0,
               FlatColors.webblenRed,
             )
-          : checkInAvailable
-              ? ShakeAnimation(
-                  widgetToShake: CheckInFloatingAction(
-                    checkInAction: () => didPressCheckIn(),
-                    checkInAvailable: true,
-                  ),
-                )
-              : CheckInFloatingAction(
-                  checkInAction: () => didPressCheckIn(),
-                  checkInAvailable: false,
-                  isVirtualEventCheckIn: false,
-                ),
+          : CheckInFloatingAction(
+              checkInAction: () => didPressCheckIn(),
+              checkInAvailable: false,
+              isVirtualEventCheckIn: false,
+            ),
       bottomNavigationBar: FABBottomAppBar(
         centerItemText: 'Check In',
         notchedShape: CircularNotchedRectangle(),

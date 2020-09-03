@@ -360,6 +360,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                       width: 8.0,
                     ),
                     Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         SizedBox(
                           height: 4.0,
@@ -378,6 +379,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w400,
                                 ),
+                              ),
+                        event.venueName == null
+                            ? Container()
+                            : CustomText(
+                                context: context,
+                                text: '${event.venueName}',
+                                textColor: Colors.black54,
+                                textAlign: TextAlign.left,
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w400,
                               ),
                       ],
                     ),

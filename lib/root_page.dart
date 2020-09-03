@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/pages/auth_pages/splash_page.dart';
 

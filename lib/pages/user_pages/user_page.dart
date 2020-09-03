@@ -9,8 +9,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/webblen_notification_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
@@ -57,6 +56,8 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   CollectionReference eventsRef = Firestore.instance.collection("events");
   List<DocumentSnapshot> hostedEventResults = [];
   List<DocumentSnapshot> pastEventResults = [];
+  List followingList = [];
+  List userFollowersList = [];
   DocumentSnapshot lastHostedEventDocSnap;
   DocumentSnapshot lastPastEventDocSnap;
   bool loadingAdditionalHostedEvents = false;
@@ -67,6 +68,18 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   //ADMOB
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
+
+  followUnfollowAction() async {
+    if (followingList.contains(user.uid)) {
+      followingList.remove(user.uid);
+      userFollowersList.remove(widget.currentUser.uid);
+    } else {
+      followingList.add(user.uid);
+      userFollowersList.add(widget.currentUser.uid);
+    }
+    setState(() {});
+    WebblenUserData().updateFollowing(widget.currentUser.uid, user.uid, followingList, userFollowersList);
+  }
 
   getHostedEvents() async {
     Query eventsQuery;
@@ -134,13 +147,6 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
     }
     loadingAdditionalPastEvents = false;
     setState(() {});
-  }
-
-  Future<void> refreshData() async {
-    hostedEventResults = [];
-    pastEventResults = [];
-    getHostedEvents();
-    getPastEvents();
   }
 
   Widget listHostedEvents() {
@@ -281,156 +287,12 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
     );
   }
 
-//  void transitionToMessenger(String chatDocKey) {
-//    ChatDataService().updateSeenMessage(chatDocKey, widget.currentUser.uid);
-//    PageTransitionService(
-//      context: context,
-//      currentUser: widget.currentUser,
-//      chatKey: chatDocKey,
-//    ).transitionToChatPage();
-//  }
-
-  Future<Null> deleteFriendConfirmation() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showConfirmationDialog(
-      context,
-      "Are You Sure You Want to no longer be friends with @${user.username}?",
-      "Remove Friend",
-      () => removeFriend(),
-      () => Navigator.of(context).pop(),
-    );
+  Future<void> refreshData() async {
+    hostedEventResults = [];
+    pastEventResults = [];
+    getHostedEvents();
+    getPastEvents();
   }
-
-  Future<Null> sendFriendRequest() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    WebblenNotificationDataService()
-        .sendFriendRequest(
-      widget.currentUser.uid,
-      user.uid,
-      widget.currentUser.username,
-    )
-        .then((error) {
-      Navigator.of(context).pop();
-      if (error.isEmpty) {
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Friend Request Sent!",
-          "@" + user.username + " Will Need to Confirm Your Request",
-        );
-        friendRequestStatus = "pending";
-        setState(() {});
-      } else {
-        ShowAlertDialogService().showFailureDialog(context, "Request Failed", error);
-      }
-    });
-  }
-
-  Future<Null> removeFriend() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService()
-        .removeFriend(
-      widget.currentUser.uid,
-      user.uid,
-    )
-        .then((requestStatus) {
-      Navigator.of(context).pop();
-      if (requestStatus == null) {
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Friend Deleted",
-          "You and @" + user.username + " are no longer friends",
-        );
-        friendRequestStatus = "not friends";
-        setState(() {});
-      } else {
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "Request Failed",
-          requestStatus,
-        );
-      }
-    });
-  }
-
-  confirmFriendRequest() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    WebblenNotificationDataService()
-        .acceptFriendRequest(
-      widget.currentUser.uid,
-      user.uid,
-      null,
-    )
-        .then((success) {
-      if (success) {
-        friendRequestStatus = "friends";
-        setState(() {});
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Friend Added!",
-          "You and @" + user.username + " are now friends",
-        );
-      } else {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "There was an Issue!",
-          "Please Try Again Later",
-        );
-      }
-    });
-  }
-
-  denyFriendRequest() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    WebblenNotificationDataService()
-        .denyFriendRequest(
-      widget.currentUser.uid,
-      user.uid,
-      null,
-    )
-        .then((success) {
-      if (success) {
-        friendRequestStatus = "not friends";
-        setState(() {});
-        Navigator.of(context).pop();
-      } else {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "There was an Issue!",
-          "Please Try Again Later",
-        );
-      }
-    });
-  }
-
-//  void messageUser() {
-//    ShowAlertDialogService().showLoadingDialog(context);
-//    ChatDataService().checkIfChatExists([
-//      widget.currentUser.uid,
-//      widget.webblenUser.uid,
-//    ]).then((chatKey) {
-//      if (chatKey != null && chatKey.isNotEmpty) {
-//        Navigator.of(context).pop();
-//        Navigator.of(context).pop();
-//        transitionToMessenger(chatKey);
-//      } else {
-//        ChatDataService().createChat(widget.currentUser.uid, [
-//          widget.currentUser.uid,
-//          widget.webblenUser.uid,
-//        ]).then((chatKey) {
-//          Navigator.of(context).pop();
-//          Navigator.of(context).pop();
-//          transitionToMessenger(chatKey);
-//        });
-//      }
-//    });
-//  }
 
   @override
   void initState() {
@@ -444,18 +306,12 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
       setState(() {
         user = widget.webblenUser;
       });
-      UserDataService()
-          .checkFriendStatus(
-        widget.currentUser.uid,
-        widget.webblenUser.uid,
-      )
-          .then((friendStatus) {
-        friendRequestStatus = friendStatus;
-        if (friendStatus == "friends") {
-          isFriendsWithUser = true;
-        }
-      });
     }
+    followingList = widget.currentUser.following.toList(growable: true);
+    WebblenUserData().getFollowingList(widget.currentUser.uid).then((res) {
+      userFollowersList = res;
+      setState(() {});
+    });
     if (Platform.isIOS) {
       adMobUnitID = 'ca-app-pub-2136415475966451/5262349288';
     } else if (Platform.isAndroid) {
@@ -552,13 +408,13 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                     onTap: () => ShowAlertDialogService().showAlert(
                                       context,
                                       UserDetailsOptionsDialog(
-                                        addFriendAction: () => sendFriendRequest(),
+                                        addFriendAction: null, //() => sendFriendRequest(),
                                         friendRequestStatus: friendRequestStatus,
-                                        confirmRequestAction: () => confirmFriendRequest(),
-                                        denyRequestAction: () => denyFriendRequest(),
+                                        confirmRequestAction: null, //() => confirmFriendRequest(),
+                                        denyRequestAction: null, //() => denyFriendRequest(),
                                         blockUserAction: null,
                                         hideFromUserAction: null,
-                                        removeFriendAction: () => deleteFriendConfirmation(),
+                                        removeFriendAction: null, //() => deleteFriendConfirmation(),
                                         messageUserAction: null, //messageUser,
                                       ),
                                       true,
@@ -578,16 +434,41 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
               ),
             ),
             Container(
-              child: UserDetailsHeader(
-                username: user.username,
-                userPicUrl: user.profile_pic,
-                ap: user.ap,
-                apLvl: user.apLvl,
-                eventHistoryCount: user.eventHistory.length.toString(),
-                hostedEventCount: "0", //communities.length.toString(),
-                viewFriendsAction: null,
-                addFriendAction: null,
-                isLoading: isLoading,
+              child: StreamBuilder(
+                stream: Firestore.instance.collection("webblen_user").document(user.uid).snapshots(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData)
+                    return Text(
+                      "Loading...",
+                    );
+                  var userData = userSnapshot.data;
+                  List following = userData['d']["following"];
+                  List followers = userData['d']["followers"];
+                  return Container(
+                    child: UserDetailsHeader(
+                      isOwner: isOwner,
+                      username: user.username,
+                      userPicUrl: user.profile_pic,
+                      uid: user.uid,
+                      followersLength: followers.length,
+                      followingLength: following.length,
+                      followUnfollowAction: () => followUnfollowAction(),
+                      viewFollowersAction: () => PageTransitionService(
+                        context: context,
+                        userIDs: followers,
+                        pageTitle: "Followers",
+                        currentUser: widget.currentUser,
+                      ).transitionToUserListPage(),
+                      viewFolllowingAction: () => PageTransitionService(
+                        context: context,
+                        userIDs: following,
+                        currentUser: widget.currentUser,
+                        pageTitle: "Following",
+                      ).transitionToUserListPage(),
+                      isFollowing: followingList == null ? null : followingList.contains(user.uid) ? true : false,
+                    ),
+                  );
+                },
               ),
             ),
             Container(
@@ -596,29 +477,16 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                 children: [
                   TabBar(
                     controller: _tabController,
+                    labelPadding: EdgeInsets.symmetric(horizontal: 60.0),
                     indicatorColor: CustomColors.webblenRed,
                     labelColor: CustomColors.darkGray,
                     isScrollable: true,
                     tabs: [
                       Tab(
-                        child: CustomText(
-                          context: context,
-                          text: "Hosted Events",
-                          textColor: Colors.black,
-                          textAlign: TextAlign.center,
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        child: Icon(FontAwesomeIcons.bars, color: Colors.black, size: 16.0),
                       ),
                       Tab(
-                        child: CustomText(
-                          context: context,
-                          text: "Past Events",
-                          textColor: Colors.black,
-                          textAlign: TextAlign.center,
-                          fontSize: 15.0,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        child: Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.black, size: 16.0),
                       ),
                     ],
                   ),
@@ -631,6 +499,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                 child: DefaultTabController(
                   length: 2,
                   child: TabBarView(
+                    controller: _tabController,
                     children: <Widget>[
                       //Hosted EVENTS
                       Container(
@@ -654,7 +523,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                             ),
                                             child: CustomText(
                                               context: context,
-                                              text: "@${user.username} Has Not Hosted Any Events",
+                                              text: "@${user.username} Has Not Hosted Any Streams/Events",
                                               textColor: Colors.black,
                                               textAlign: TextAlign.center,
                                               fontSize: 16.0,
@@ -689,7 +558,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                             ),
                                             child: CustomText(
                                               context: context,
-                                              text: "@${user.username} Has Not Hosted Any Events",
+                                              text: "@${user.username} Has Not Hosted Any Streams/Events",
                                               textColor: Colors.black,
                                               textAlign: TextAlign.center,
                                               fontSize: 16.0,
@@ -740,6 +609,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   ScrollController hostedEventsScrollController;
   ScrollController pastEventsScrollController;
   int resultsPerPage = 10;
+  List followingList = [];
+  List userFollowersList = [];
 
   //User Relationship
   bool isFriendsWithUser = false;
@@ -759,6 +630,18 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   //ADMOB
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
+
+  followUnfollowAction() async {
+    if (followingList.contains(user.uid)) {
+      followingList.remove(user.uid);
+      userFollowersList.remove(widget.currentUser.uid);
+    } else {
+      followingList.add(user.uid);
+      userFollowersList.add(widget.currentUser.uid);
+    }
+    setState(() {});
+    WebblenUserData().updateFollowing(widget.currentUser.uid, user.uid, followingList, userFollowersList);
+  }
 
   getHostedEvents() async {
     Query eventsQuery;
@@ -826,13 +709,6 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     }
     loadingAdditionalPastEvents = false;
     setState(() {});
-  }
-
-  Future<void> refreshData() async {
-    hostedEventResults = [];
-    pastEventResults = [];
-    getHostedEvents();
-    getPastEvents();
   }
 
   Widget listHostedEvents() {
@@ -973,156 +849,12 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     );
   }
 
-//  void transitionToMessenger(String chatDocKey) {
-//    ChatDataService().updateSeenMessage(chatDocKey, widget.currentUser.uid);
-//    PageTransitionService(
-//      context: context,
-//      currentUser: widget.currentUser,
-//      chatKey: chatDocKey,
-//    ).transitionToChatPage();
-//  }
-
-  Future<Null> deleteFriendConfirmation() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showConfirmationDialog(
-      context,
-      "Are You Sure You Want to no longer be friends with @${user.username}?",
-      "Remove Friend",
-      () => removeFriend(),
-      () => Navigator.of(context).pop(),
-    );
+  Future<void> refreshData() async {
+    hostedEventResults = [];
+    pastEventResults = [];
+    getHostedEvents();
+    getPastEvents();
   }
-
-  Future<Null> sendFriendRequest() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    WebblenNotificationDataService()
-        .sendFriendRequest(
-      widget.currentUser.uid,
-      user.uid,
-      widget.currentUser.username,
-    )
-        .then((error) {
-      Navigator.of(context).pop();
-      if (error.isEmpty) {
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Friend Request Sent!",
-          "@" + user.username + " Will Need to Confirm Your Request",
-        );
-        friendRequestStatus = "pending";
-        setState(() {});
-      } else {
-        ShowAlertDialogService().showFailureDialog(context, "Request Failed", error);
-      }
-    });
-  }
-
-  Future<Null> removeFriend() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService()
-        .removeFriend(
-      widget.currentUser.uid,
-      user.uid,
-    )
-        .then((requestStatus) {
-      Navigator.of(context).pop();
-      if (requestStatus == null) {
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Friend Deleted",
-          "You and @" + user.username + " are no longer friends",
-        );
-        friendRequestStatus = "not friends";
-        setState(() {});
-      } else {
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "Request Failed",
-          requestStatus,
-        );
-      }
-    });
-  }
-
-  confirmFriendRequest() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    WebblenNotificationDataService()
-        .acceptFriendRequest(
-      widget.currentUser.uid,
-      user.uid,
-      null,
-    )
-        .then((success) {
-      if (success) {
-        friendRequestStatus = "friends";
-        setState(() {});
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showSuccessDialog(
-          context,
-          "Friend Added!",
-          "You and @" + user.username + " are now friends",
-        );
-      } else {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "There was an Issue!",
-          "Please Try Again Later",
-        );
-      }
-    });
-  }
-
-  denyFriendRequest() async {
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showLoadingDialog(context);
-    WebblenNotificationDataService()
-        .denyFriendRequest(
-      widget.currentUser.uid,
-      user.uid,
-      null,
-    )
-        .then((success) {
-      if (success) {
-        friendRequestStatus = "not friends";
-        setState(() {});
-        Navigator.of(context).pop();
-      } else {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "There was an Issue!",
-          "Please Try Again Later",
-        );
-      }
-    });
-  }
-
-//  void messageUser() {
-//    ShowAlertDialogService().showLoadingDialog(context);
-//    ChatDataService().checkIfChatExists([
-//      widget.currentUser.uid,
-//      widget.webblenUser.uid,
-//    ]).then((chatKey) {
-//      if (chatKey != null && chatKey.isNotEmpty) {
-//        Navigator.of(context).pop();
-//        Navigator.of(context).pop();
-//        transitionToMessenger(chatKey);
-//      } else {
-//        ChatDataService().createChat(widget.currentUser.uid, [
-//          widget.currentUser.uid,
-//          widget.webblenUser.uid,
-//        ]).then((chatKey) {
-//          Navigator.of(context).pop();
-//          Navigator.of(context).pop();
-//          transitionToMessenger(chatKey);
-//        });
-//      }
-//    });
-//  }
 
   @override
   void initState() {
@@ -1136,18 +868,13 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
       setState(() {
         user = widget.webblenUser;
       });
-      UserDataService()
-          .checkFriendStatus(
-        widget.currentUser.uid,
-        widget.webblenUser.uid,
-      )
-          .then((friendStatus) {
-        friendRequestStatus = friendStatus;
-        if (friendStatus == "friends") {
-          isFriendsWithUser = true;
-        }
-      });
     }
+    followingList = widget.currentUser.following.toList(growable: true);
+    WebblenUserData().getFollowingList(widget.currentUser.uid).then((res) {
+      userFollowersList = res;
+      setState(() {});
+    });
+
     if (Platform.isIOS) {
       adMobUnitID = 'ca-app-pub-2136415475966451/5262349288';
     } else if (Platform.isAndroid) {
@@ -1192,7 +919,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     );
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(
-        "People",
+        "@${user.username}",
         isOwner
             ? Container()
             : Padding(
@@ -1201,13 +928,13 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                   onTap: () => ShowAlertDialogService().showAlert(
                     context,
                     UserDetailsOptionsDialog(
-                      addFriendAction: () => sendFriendRequest(),
+                      addFriendAction: null, //() => sendFriendRequest(),
                       friendRequestStatus: friendRequestStatus,
-                      confirmRequestAction: () => confirmFriendRequest(),
-                      denyRequestAction: () => denyFriendRequest(),
+                      confirmRequestAction: null, //() => confirmFriendRequest(),
+                      denyRequestAction: null, //() => denyFriendRequest(),
                       blockUserAction: null,
                       hideFromUserAction: null,
-                      removeFriendAction: () => deleteFriendConfirmation(),
+                      removeFriendAction: null, //() => deleteFriendConfirmation(),
                       messageUserAction: null, //messageUser,
                     ),
                     true,
@@ -1229,18 +956,41 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Container(
-                child: UserDetailsHeader(
-                  username: user.username,
-                  userPicUrl: user.profile_pic,
-                  ap: user.ap,
-                  apLvl: user.apLvl,
-                  eventHistoryCount: user.eventHistory.length.toString(),
-                  hostedEventCount: "0", //communities.length.toString(),
-                  viewFriendsAction: null,
-                  addFriendAction: null,
-                  isLoading: isLoading,
-                ),
+              StreamBuilder(
+                stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
+                builder: (context, userSnapshot) {
+                  if (!userSnapshot.hasData)
+                    return Text(
+                      "Loading...",
+                    );
+                  var userData = userSnapshot.data;
+                  List following = userData['d']["following"];
+                  List followers = userData['d']["followers"];
+                  return Container(
+                    child: UserDetailsHeader(
+                      isOwner: isOwner,
+                      username: user.username,
+                      userPicUrl: user.profile_pic,
+                      uid: user.uid,
+                      followersLength: followers.length,
+                      followingLength: following.length,
+                      followUnfollowAction: () => followUnfollowAction(),
+                      viewFollowersAction: () => PageTransitionService(
+                        context: context,
+                        userIDs: followers,
+                        pageTitle: "Followers",
+                        currentUser: widget.currentUser,
+                      ).transitionToUserListPage(),
+                      viewFolllowingAction: () => PageTransitionService(
+                        context: context,
+                        userIDs: following,
+                        currentUser: widget.currentUser,
+                        pageTitle: "Following",
+                      ).transitionToUserListPage(),
+                      isFollowing: following.contains(user.uid) ? true : false,
+                    ),
+                  );
+                },
               ),
               Container(
                 child: Row(
@@ -1248,29 +998,16 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                   children: [
                     TabBar(
                       controller: _tabController,
+                      labelPadding: EdgeInsets.symmetric(horizontal: 60.0),
                       indicatorColor: CustomColors.webblenRed,
                       labelColor: CustomColors.darkGray,
                       isScrollable: true,
                       tabs: [
                         Tab(
-                          child: CustomText(
-                            context: context,
-                            text: "Hosted Events",
-                            textColor: Colors.black,
-                            textAlign: TextAlign.center,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          child: Icon(FontAwesomeIcons.bars, color: Colors.black, size: 16.0),
                         ),
                         Tab(
-                          child: CustomText(
-                            context: context,
-                            text: "Past Events",
-                            textColor: Colors.black,
-                            textAlign: TextAlign.center,
-                            fontSize: 15.0,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          child: Icon(FontAwesomeIcons.mapMarkerAlt, color: Colors.black, size: 16.0),
                         ),
                       ],
                     ),
@@ -1283,6 +1020,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                   child: DefaultTabController(
                     length: 2,
                     child: TabBarView(
+                      controller: _tabController,
                       children: <Widget>[
                         //Hosted EVENTS
                         Container(
@@ -1306,10 +1044,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                               ),
                                               child: CustomText(
                                                 context: context,
-                                                text: "@${user.username} Has Not Hosted Any Events",
+                                                text: "@${user.username} Has Not Hosted Any Streams or Events",
                                                 textColor: Colors.black,
                                                 textAlign: TextAlign.center,
-                                                fontSize: 16.0,
+                                                fontSize: 14.0,
                                                 fontWeight: FontWeight.w500,
                                               ),
                                             )

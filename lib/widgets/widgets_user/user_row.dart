@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
 import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
-import 'package:webblen/widgets/widgets_user/user_details_badges.dart';
 
 class UserRow extends StatelessWidget {
   final WebblenUser user;
   final VoidCallback transitionToUserDetails;
   final VoidCallback sendUserFriendRequest;
-  final bool isFriendsWithUser;
   final TextStyle headerTextStyle = TextStyle(
     fontWeight: FontWeight.w600,
     fontSize: 20.0,
@@ -33,24 +30,10 @@ class UserRow extends StatelessWidget {
     this.user,
     this.transitionToUserDetails,
     this.sendUserFriendRequest,
-    this.isFriendsWithUser,
   });
 
   @override
   Widget build(BuildContext context) {
-//    final communityBuilderBadge = new Container(
-//      child: user.isCommunityBuilder ? UserDetailsBadge(badgeType: "communityBuilder", size: 18.0) : Container(),
-//    );
-
-    final friendBadge = Container(
-      child: isFriendsWithUser
-          ? UserDetailsBadge(
-              badgeType: "friend",
-              size: 16.0,
-            )
-          : Container(),
-    );
-
     final userCard = Container(
       color: Colors.white,
       margin: EdgeInsets.only(
@@ -103,27 +86,9 @@ class UserRow extends StatelessWidget {
                               TextAlign.left,
                             ),
                     ),
-                    friendBadge,
                     //communityBuilderBadge,
                   ],
                 ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Column(
-              children: <Widget>[
-                isFriendsWithUser
-                    ? Container()
-                    : IconButton(
-                        icon: Icon(
-                          Icons.person_add,
-                          size: 24.0,
-                          color: Colors.black12,
-                        ),
-                        onPressed: sendUserFriendRequest,
-                      ),
               ],
             ),
           ),

@@ -1,97 +1,121 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/widgets_common/common_progress.dart';
+import 'package:webblen/constants/custom_colors.dart';
+import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
-import 'package:webblen/widgets/widgets_wallet/wallet_attendance_power_bar.dart';
 
 class UserDetailsHeader extends StatelessWidget {
+  final String uid;
   final String username;
   final String userPicUrl;
-  final double ap;
-  final int apLvl;
-  final String eventHistoryCount;
-  final String hostedEventCount;
-  final VoidCallback addFriendAction;
-  final VoidCallback viewFriendsAction;
-  final bool isLoading;
+  final VoidCallback followUnfollowAction;
+  final VoidCallback viewFollowersAction;
+  final VoidCallback viewFolllowingAction;
+  final int followersLength;
+  final int followingLength;
+  final bool isOwner;
+  final bool isFollowing;
 
   UserDetailsHeader({
+    this.uid,
     this.username,
     this.userPicUrl,
-    this.ap,
-    this.apLvl,
-    this.hostedEventCount,
-    this.eventHistoryCount,
-    this.addFriendAction,
-    this.viewFriendsAction,
-    this.isLoading,
+    this.followUnfollowAction,
+    this.viewFollowersAction,
+    this.viewFolllowingAction,
+    this.followersLength,
+    this.followingLength,
+    this.isOwner,
+    this.isFollowing,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      margin: EdgeInsets.symmetric(horizontal: 32.0),
+      child: Column(
         children: <Widget>[
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
-                child: UserDetailsProfilePic(
-                  userPicUrl: userPicUrl,
-                  size: 90.0,
-                ),
-              )
-            ],
+          Padding(
+            padding: EdgeInsets.fromLTRB(8.0, 8.0, 0.0, 0.0),
+            child: UserDetailsProfilePic(
+              userPicUrl: userPicUrl,
+              size: 90.0,
+            ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Fonts().textW700(
-                "@$username",
-                18.0,
-                Colors.black,
-                TextAlign.left,
-              ),
-              SizedBox(height: 4.0),
-              isLoading
-                  ? Container(
-                      margin: EdgeInsets.only(
-                        top: 4.0,
+          SizedBox(height: 16.0),
+          isOwner
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                      onTap: viewFollowersAction,
+                      child: Column(
+                        children: [
+                          CustomText(
+                            context: context,
+                            text: "$followersLength",
+                            textColor: Colors.black,
+                            textAlign: TextAlign.center,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          CustomText(
+                            context: context,
+                            text: "Followers",
+                            textColor: Colors.black,
+                            textAlign: TextAlign.center,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ],
                       ),
-                      height: 1.0,
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      child: CustomLinearProgress(
-                        progressBarColor: FlatColors.webblenRed,
-                      ),
-                    )
-                  : Fonts().textW500(
-                      "Hosted Events: $hostedEventCount | Events Attended: $eventHistoryCount",
-                      12.0,
-                      Colors.black,
-                      TextAlign.left,
                     ),
-              SizedBox(
-                height: 8.0,
-              ),
-              SmallAttendancePowerBar(
-                currentAP: ap,
-                apLvl: apLvl,
-              ),
-              SizedBox(
-                height: 4.0,
-              ),
-              Fonts().textW300(
-                'Attendance Power',
-                10,
-                Colors.black,
-                TextAlign.left,
-              ),
-            ],
-          ),
+                    SizedBox(width: 32.0),
+                    GestureDetector(
+                      onTap: viewFolllowingAction,
+                      child: Column(
+                        children: [
+                          CustomText(
+                            context: context,
+                            text: "$followingLength",
+                            textColor: Colors.black,
+                            textAlign: TextAlign.center,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          CustomText(
+                            context: context,
+                            text: "Following",
+                            textColor: Colors.black,
+                            textAlign: TextAlign.center,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                )
+              : isFollowing == null
+                  ? Container()
+                  : isFollowing
+                      ? CustomColorButton(
+                          text: "Unfollow",
+                          textColor: CustomColors.lightAmericanGray,
+                          backgroundColor: Colors.white,
+                          height: 35.0,
+                          width: MediaQuery.of(context).size.width * 0.35,
+                          onPressed: followUnfollowAction,
+                        )
+                      : CustomColorButton(
+                          text: "Follow",
+                          textColor: Colors.white,
+                          backgroundColor: CustomColors.electronBlue,
+                          height: 35.0,
+                          width: MediaQuery.of(context).size.width * 0.35,
+                          onPressed: followUnfollowAction,
+                        ),
+          SizedBox(height: 16.0),
         ],
       ),
     );

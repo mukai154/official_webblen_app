@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -95,51 +94,10 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
-  void sendFriendRequest(WebblenUser peerUser) async {
-    ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService()
-        .checkFriendStatus(
-      widget.currentUser.uid,
-      peerUser.uid,
-    )
-        .then((friendStatus) {
-      if (friendStatus == "pending") {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "Request Pending",
-          "You already have a pending friend request",
-        );
-      } else {
-        WebblenNotificationDataService()
-            .sendFriendRequest(
-          widget.currentUser.uid,
-          peerUser.uid,
-          widget.currentUser.username,
-        )
-            .then((error) {
-          Navigator.of(context).pop();
-          if (error.isEmpty) {
-            ShowAlertDialogService().showSuccessDialog(
-              context,
-              "Friend Request Sent!",
-              "@" + peerUser.username + " Will Need to Confirm Your Request",
-            );
-          } else {
-            ShowAlertDialogService().showFailureDialog(
-              context,
-              "Request Failed",
-              error,
-            );
-          }
-        });
-      }
-    });
-  }
-
   @override
   void initState() {
     super.initState();
+    //WebblenUserData().transitionFriendsToFollowers();
 //    PlatformDataService().getAvailableCities().then((res){
 //      availableCities = res;
 //      isLoading = false;

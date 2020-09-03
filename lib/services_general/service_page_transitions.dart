@@ -31,8 +31,8 @@ import 'package:webblen/pages/user_pages/search_page.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/pages/user_pages/shop_page.dart';
 import 'package:webblen/pages/user_pages/transaction_history_page.dart';
+import 'package:webblen/pages/user_pages/user_list_page.dart';
 import 'package:webblen/pages/user_pages/user_page.dart';
-import 'package:webblen/pages/user_pages/users_search_page.dart';
 import 'package:webblen/utils/ticket_scanner.dart';
 import 'package:webblen/utils/webblen_scanner.dart';
 
@@ -66,6 +66,7 @@ class PageTransitionService {
   final List eventFees;
   final ClientRole clientRole;
   final bool isStream;
+  final String pageTitle;
 
   PageTransitionService({
     this.isStream,
@@ -97,6 +98,7 @@ class PageTransitionService {
     this.ticketsToPurchase,
     this.eventFees,
     this.clientRole,
+    this.pageTitle,
   });
 
   //ROOT PAGES
@@ -132,14 +134,13 @@ class PageTransitionService {
         ),
       );
 
-  void transitionToUserSearchPage() => Navigator.push(
+  void transitionToUserListPage() => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => UserSearchPage(
             currentUser: currentUser,
             userIDs: userIDs,
-            userList: usersList,
-            viewingMembersOrAttendees: viewingMembersOrAttendees,
+            pageTitle: pageTitle,
           ),
         ),
       );

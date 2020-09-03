@@ -10,8 +10,8 @@ import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
+import 'package:webblen/widgets/events/event_check_in_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_event/event_check_in_row.dart';
 import 'package:webblen/widgets/widgets_event/event_no_check_in_found.dart';
 
 class EventCheckInPage extends StatefulWidget {
@@ -36,7 +36,6 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
         .getEventsNearLocation(
       currentLat,
       currentLon,
-      true,
     )
         .then((result) {
       if (result.isEmpty) {
@@ -143,17 +142,12 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
                         ),
                         itemCount: events.length,
                         itemBuilder: (context, index) {
-                          return NearbyEventCheckInRow(
+                          return EventCheckInBlock(
                             event: events[index],
-                            uid: widget.currentUser.uid,
-                            viewEventAction: () => PageTransitionService(
-                              context: context,
-                              currentUser: widget.currentUser,
-                              event: null, //events[index],
-                              eventIsLive: false,
-                            ).transitionToEventPage(),
-                            checkInAction: () => checkIntoEvent(events[index]),
-                            checkoutAction: () => checkoutOfEvent(events[index]),
+                            currentUID: widget.currentUser.uid,
+                            userAP: widget.currentUser.ap,
+                            viewEventDetails: () =>
+                                PageTransitionService(context: context, currentUser: widget.currentUser, eventID: events[index].id).transitionToEventPage(),
                           );
                         },
                       ),

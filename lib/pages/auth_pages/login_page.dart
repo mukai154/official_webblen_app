@@ -10,7 +10,7 @@ import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/firebase_data//auth.dart';
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/open_url.dart';

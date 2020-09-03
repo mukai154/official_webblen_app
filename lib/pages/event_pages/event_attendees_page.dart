@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase_data/user_data.dart';
-import 'package:webblen/firebase_data/webblen_notification_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -49,7 +48,7 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
       userIDs: attendeeIDs,
       currentUser: widget.currentUser,
       viewingMembersOrAttendees: true,
-    ).transitionToUserSearchPage();
+    ).transitionToUserListPage();
   }
 
   void sendFriendRequest(WebblenUser peerUser) async {
@@ -68,28 +67,28 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
           "You already have a pending friend request",
         );
       } else {
-        WebblenNotificationDataService()
-            .sendFriendRequest(
-          widget.currentUser.uid,
-          widget.currentUser.username,
-          peerUser.uid,
-        )
-            .then((requestStatus) {
-          Navigator.of(context).pop();
-          if (requestStatus == "success") {
-            ShowAlertDialogService().showSuccessDialog(
-              context,
-              "Friend Request Sent!",
-              "@" + peerUser.username + " Will Need to Confirm Your Request",
-            );
-          } else {
-            ShowAlertDialogService().showFailureDialog(
-              context,
-              "Request Failed",
-              requestStatus,
-            );
-          }
-        });
+//        WebblenNotificationDataService()
+//            .sendFriendRequest(
+//          widget.currentUser.uid,
+//          widget.currentUser.username,
+//          peerUser.uid,
+//        )
+//            .then((requestStatus) {
+//          Navigator.of(context).pop();
+//          if (requestStatus == "success") {
+//            ShowAlertDialogService().showSuccessDialog(
+//              context,
+//              "Friend Request Sent!",
+//              "@" + peerUser.username + " Will Need to Confirm Your Request",
+//            );
+//          } else {
+//            ShowAlertDialogService().showFailureDialog(
+//              context,
+//              "Request Failed",
+//              requestStatus,
+//            );
+//          }
+//        });
       }
     });
   }
@@ -170,7 +169,6 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
                       itemBuilder: (context, index) {
                         return UserRow(
                           user: eventAttendees[index],
-                          isFriendsWithUser: widget.currentUser.friends.contains(eventAttendees[index].uid),
                           sendUserFriendRequest: () => sendFriendRequest(eventAttendees[index]),
                           transitionToUserDetails: () => transitionToUserDetails(eventAttendees[index]),
                         );

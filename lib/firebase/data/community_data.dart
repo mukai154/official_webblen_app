@@ -6,7 +6,7 @@
 //import 'package:cloud_functions/cloud_functions.dart';
 //import 'package:firebase_storage/firebase_storage.dart';
 //import 'package:random_string/random_string.dart';
-//import 'package:webblen/firebase_data/webblen_notification_data.dart';
+//import 'package:webblen/firebase_data/notifications.dart';
 //import 'package:webblen/models/community.dart';
 //import 'package:webblen/models/community_news.dart';
 //import 'package:webblen/services/location/location_service.dart';

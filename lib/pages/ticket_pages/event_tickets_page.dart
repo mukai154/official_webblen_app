@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
-import 'package:webblen/firebase_data/auth.dart';
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/models/event_ticket.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
