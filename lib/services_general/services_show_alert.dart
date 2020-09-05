@@ -76,14 +76,13 @@ class ShowAlertDialogService {
         });
   }
 
-  Future<bool> showLoadingCommunityDialog(BuildContext context, String areaName, String comName) {
+  Future<bool> showLoadingInfoDialog(BuildContext context, String info) {
     return showDialog<bool>(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return LoadingCommunityDialog(
-            areaName: areaName,
-            comName: comName,
+          return LoadingInfoDialog(
+            info: info,
           );
         });
   }

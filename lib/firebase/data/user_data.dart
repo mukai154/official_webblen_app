@@ -90,6 +90,25 @@ class WebblenUserData {
     });
   }
 
+  Future<Null> changeEventPointsToWebblen() async {
+    QuerySnapshot snapshot = await userRef.getDocuments();
+    snapshot.documents.forEach((doc) async {
+      await userRef.document(doc.documentID).updateData({"d.webblen": doc.data['d']['eventPoints']}).catchError((e) {});
+    });
+  }
+
+  Future<String> depositWebblen(double depositAmount, String uid) async {
+    String error;
+    DocumentSnapshot snapshot = await userRef.document(uid).get();
+    WebblenUser user = WebblenUser.fromMap(snapshot.data['d']);
+    double initialBalance = user.webblen == null ? 0.00001 : user.webblen;
+    double newBalance = depositAmount + initialBalance;
+    await userRef.document(uid).updateData({"d.webblen": newBalance}).catchError((e) {
+      error = e.toString();
+    });
+    return error;
+  }
+
 //  Future<String> updateUserImg(File userImgFile, String uid) async {
 //    String error = "";
 //    String userImgURL = await ImageUploadService().uploadImageToFirebaseStorage(userImgFile, UserImgFile, uid);

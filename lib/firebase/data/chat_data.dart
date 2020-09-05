@@ -33,6 +33,34 @@ class ChatDataService {
     return error;
   }
 
+  Future<String> checkIntoStream(String eventID, String uid, String username) async {
+    String error;
+    EventChatMessage message = EventChatMessage(
+      senderUID: uid,
+      username: 'system',
+      message: '@$username has checked in',
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+    );
+    await eventChatRef.document(eventID).collection("messages").document(message.timePostedInMilliseconds.toString()).setData(message.toMap()).catchError((e) {
+      error = e.details;
+    });
+    return error;
+  }
+
+  Future<String> checkoutOfStream(String eventID, String uid, String username) async {
+    String error;
+    EventChatMessage message = EventChatMessage(
+      senderUID: uid,
+      username: 'system',
+      message: '@$username has checked out',
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+    );
+    await eventChatRef.document(eventID).collection("messages").document(message.timePostedInMilliseconds.toString()).setData(message.toMap()).catchError((e) {
+      error = e.details;
+    });
+    return error;
+  }
+
   Future<String> sendEventChatMessage(String eventID, EventChatMessage message) async {
     String error;
     await eventChatRef.document(eventID).collection("messages").document(message.timePostedInMilliseconds.toString()).setData(message.toMap()).catchError((e) {

@@ -122,8 +122,10 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     PageTransitionService(
       context: context,
       eventID: event.id,
+      userIDs: event.attendees,
       currentUser: widget.currentUser,
-    ).transitionToEventAttendeesPage();
+      pageTitle: "Attendees",
+    ).transitionToUserListPage();
   }
 
 //  void shareEventAction() {

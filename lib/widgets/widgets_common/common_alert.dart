@@ -2005,13 +2005,11 @@ class LoadingDialog extends StatelessWidget {
   }
 }
 
-class LoadingCommunityDialog extends StatelessWidget {
-  final String areaName;
-  final String comName;
+class LoadingInfoDialog extends StatelessWidget {
+  final String info;
 
-  LoadingCommunityDialog({
-    this.areaName,
-    this.comName,
+  LoadingInfoDialog({
+    this.info,
   });
 
   @override
@@ -2029,7 +2027,7 @@ class LoadingCommunityDialog extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Fonts().textW500(
-              'Loading $areaName/$comName...',
+              info,
               14.0,
               Colors.black,
               TextAlign.center,

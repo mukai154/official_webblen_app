@@ -3,6 +3,7 @@ class WebblenUser {
   String username;
   String uid;
   String profile_pic;
+  double webblen;
   double eventPoints;
   double impactPoints;
   int lastCheckInTimeInMilliseconds;
@@ -44,6 +45,7 @@ class WebblenUser {
     this.username,
     this.uid,
     this.profile_pic,
+    this.webblen,
     this.eventPoints,
     this.impactPoints,
     this.lastCheckInTimeInMilliseconds,
@@ -87,6 +89,7 @@ class WebblenUser {
           username: data['username'],
           uid: data['uid'],
           profile_pic: data['profile_pic'],
+          webblen: data['webblen'] == null ? null : data['webblen'] * 1.00,
           eventPoints: data['eventPoints'] * 1.00,
           impactPoints: data['impactPoints'] * 1.00,
 //      userLat: data['userLat'],
@@ -106,15 +109,13 @@ class WebblenUser {
           notifyNewMessages: data['notifyNewMessages'],
           lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
           messageNotificationCount: data['messageNotificationCount'],
-          friendRequestNotificationCount:
-              data['friendRequestNotificationCount'],
+          friendRequestNotificationCount: data['friendRequestNotificationCount'],
           achievementNotificationCount: data['achievementNotificationCount'],
           eventNotificationCount: data['eventNotificationCount'],
           walletNotificationCount: data['walletNotificationCount'],
           isCommunityBuilder: data['isCommunityBuilder'],
           isNewCommunityBuilder: data['isNewCommunityBuilder'],
-          communityBuilderNotificationCount:
-              data['communityBuilderNotificationCount'],
+          communityBuilderNotificationCount: data['communityBuilderNotificationCount'],
           notificationCount: data['notificationCount'],
           isOnWaitList: data['isOnWaitList'],
           messageToken: data['messageToken'],
@@ -133,6 +134,7 @@ class WebblenUser {
         'username': this.username,
         'uid': this.uid,
         'profile_pic': this.profile_pic,
+        'webblen': this.webblen,
         'eventPoints': this.eventPoints,
         'impactPoints': this.impactPoints,
         'lastCheckInTimeInMilliseconds': this.lastCheckInTimeInMilliseconds,
@@ -155,8 +157,7 @@ class WebblenUser {
         'eventNotificationCount': this.eventNotificationCount,
         'walletNotificationCount': this.walletNotificationCount,
         'isCommunityBuilder': this.isCommunityBuilder,
-        'communityBuilderNotificationCount':
-            this.communityBuilderNotificationCount,
+        'communityBuilderNotificationCount': this.communityBuilderNotificationCount,
         'isNewCommunityBuilder': this.isNewCommunityBuilder,
         'notificationCount': this.notificationCount,
         'isOnWaitList': this.isOnWaitList,

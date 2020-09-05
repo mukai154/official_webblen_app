@@ -6,12 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:webblen/firebase/data/chat_data.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/event_chat_message.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/in_app_purchases/in_app_purchases.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_home/check_in_floating_action.dart';
@@ -53,6 +56,29 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
   int startChatAfterTimeInMilliseconds;
   BottomSheetMode bottomSheetMode = BottomSheetMode.rewards;
 
+  //In-App Purchases
+  InAppPurchaseConnection iap = InAppPurchaseConnection.instance;
+  bool iapAvailable = true;
+  List<PurchaseDetails> pastPurchases = [];
+  List<ProductDetails> products;
+  StreamSubscription pastPurchaseStream;
+
+  @override
+  void initState() {
+    super.initState();
+    // initialize agora sdk
+    startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    setState(() {});
+    initialize();
+    initializeIAP();
+    ChatDataService().joinChatStream(
+      widget.event.id,
+      widget.currentUser.uid,
+      widget.role == ClientRole.Broadcaster ? true : false,
+      widget.currentUser.username,
+    );
+  }
+
   @override
   void dispose() {
     // clear users
@@ -62,22 +88,47 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     AgoraRtcEngine.destroy();
     chatViewController.dispose();
     chatController.dispose();
+    pastPurchaseStream.cancel();
     super.dispose();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // initialize agora sdk
-    startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    setState(() {});
-    initialize();
-    ChatDataService().joinChatStream(
+  void checkIntoEvent() async {
+    ShowAlertDialogService().showLoadingInfoDialog(context, "Checking Into Stream...");
+
+    EventDataService()
+        .checkInAndUpdateEventPayout(
       widget.event.id,
       widget.currentUser.uid,
-      widget.role == ClientRole.Broadcaster ? true : false,
-      widget.currentUser.username,
-    );
+      widget.currentUser.ap,
+    )
+        .then((result) {
+      ChatDataService().checkIntoStream(
+        widget.event.id,
+        widget.currentUser.uid,
+        widget.currentUser.username,
+      );
+      Navigator.of(context).pop();
+      HapticFeedback.mediumImpact();
+    });
+  }
+
+  void checkoutOfEvent() async {
+    ShowAlertDialogService().showLoadingInfoDialog(context, "Checking Out of Stream...");
+    EventDataService()
+        .checkoutAndUpdateEventPayout(
+      widget.event.id,
+      widget.currentUser.uid,
+    )
+        .then((result) {
+      ChatDataService().checkoutOfStream(
+        widget.event.id,
+        widget.currentUser.uid,
+        widget.currentUser.username,
+      );
+      Navigator.of(context).pop();
+      setState(() {});
+      HapticFeedback.mediumImpact();
+    });
   }
 
   void dismissKeyboard() {
@@ -134,6 +185,17 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     );
   }
 
+  void initializeIAP() async {
+    // Check availability of In App Purchases
+    iapAvailable = await iap.isAvailable();
+    if (iapAvailable) {
+      products = await InAppPurchaseService().loadProductsForSale(iap);
+      pastPurchases = await InAppPurchaseService().loadPastPurchases(iap);
+      print('Past Purchases: $pastPurchases');
+      setState(() {});
+    }
+  }
+
   Future<void> initialize() async {
     agoraAppID = 'f10ecda2344b4c039df6d33953a3f598';
     host = await WebblenUserData().getUserByID(widget.event.authorID);
@@ -149,7 +211,6 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
 
   /// Create agora sdk instance and initialize
   Future<void> _initAgoraRtcEngine() async {
-    print(widget.role);
     await AgoraRtcEngine.create(agoraAppID);
     await AgoraRtcEngine.enableVideo();
     await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
@@ -336,46 +397,67 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     );
   }
 
-  Widget _gridItem(int itemNum) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey[850],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                height: 20,
-                width: 20,
-                child: Image.asset(
-                  'assets/images/webblen_coin.png',
+  purchaseProduct(String prodID) async {
+    ShowAlertDialogService().showLoadingDialog(context);
+    ProductDetails prod = products.firstWhere((product) => product.id == prodID);
+    InAppPurchaseService().purchaseProduct(prod, iap, widget.currentUser.uid).then((err) {
+      if (err == null) {
+        InAppPurchaseService().loadPastPurchases(iap).then((res) {
+          pastPurchases = res;
+          InAppPurchaseService().verifyPurchase(widget.currentUser.uid, prodID, pastPurchases, iap).then((err) {
+            Navigator.of(context).pop();
+            print(err);
+          });
+        });
+      } else {
+        Navigator.of(context).pop();
+      }
+    });
+  }
+
+  Widget _gridItem(int itemNum, String prodID) {
+    return GestureDetector(
+      onTap: () => purchaseProduct(prodID),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey[850],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: 20,
+                  width: 20,
+                  child: Image.asset(
+                    'assets/images/webblen_coin.png',
+                  ),
                 ),
-              ),
-              SizedBox(width: 2),
-              Text(
-                itemNum == 1 ? '1' : itemNum == 2 ? '5' : itemNum == 3 ? '25' : itemNum == 4 ? '50' : '100',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white,
-                  fontWeight: FontWeight.normal,
+                SizedBox(width: 2),
+                Text(
+                  itemNum == 1 ? '1' : itemNum == 2 ? '5' : itemNum == 3 ? '25' : itemNum == 4 ? '50' : '100',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white,
+                    fontWeight: FontWeight.normal,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          SizedBox(height: 4),
-          Text(
-            itemNum == 1 ? '\$0.99' : itemNum == 2 ? '\$4.99' : itemNum == 3 ? '\$24.99' : itemNum == 4 ? '\$49.99' : '\$99.99',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-              fontWeight: FontWeight.w300,
+              ],
             ),
-          )
-        ],
+            SizedBox(height: 4),
+            Text(
+              itemNum == 1 ? '\$0.99' : itemNum == 2 ? '\$4.99' : itemNum == 3 ? '\$24.99' : itemNum == 4 ? '\$49.99' : '\$99.99',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey,
+                fontWeight: FontWeight.w300,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -574,11 +656,11 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                                             crossAxisSpacing: 8,
                                             mainAxisSpacing: 18,
                                             children: [
-                                              _gridItem(1),
-                                              _gridItem(2),
-                                              _gridItem(3),
-                                              _gridItem(4),
-                                              _gridItem(5),
+                                              _gridItem(1, 'webblen_1'),
+                                              _gridItem(2, 'webblen_5'),
+                                              _gridItem(3, 'webblen_25'),
+                                              _gridItem(4, 'webblen_50'),
+                                              _gridItem(5, 'webblen_100'),
                                             ],
                                           ),
                                         ),
@@ -610,10 +692,24 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                   },
                 ),
                 SizedBox(height: 8),
-                CheckInFloatingAction(
-                  checkInAvailable: true,
-                  isVirtualEventCheckIn: true,
-                  checkInAction: didPressCheckIn,
+                StreamBuilder(
+                  stream: Firestore.instance.collection("events").document(widget.event.id).snapshots(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return Container();
+                    var eventData = snapshot.data;
+                    List attendees = eventData['d']['attendees'];
+                    return attendees.contains(widget.currentUser.uid)
+                        ? AltCheckInFloatingAction(
+                            checkInAvailable: true,
+                            isVirtualEventCheckIn: true,
+                            checkInAction: () => checkoutOfEvent(),
+                          )
+                        : CheckInFloatingAction(
+                            checkInAvailable: true,
+                            isVirtualEventCheckIn: true,
+                            checkInAction: () => checkIntoEvent(),
+                          );
+                  },
                 ),
               ],
             ),
@@ -661,56 +757,6 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     if (chatViewController.hasClients) {
       chatViewController.jumpTo(chatViewController.position.maxScrollExtent);
     }
-  }
-
-  void didPressCheckIn() {
-    List attendees = widget.event.attendees;
-    final currentUserUid = widget.currentUser.uid;
-    if (!attendees.contains(currentUserUid)) {
-      attendees.add(currentUserUid);
-    }
-    EventDataService().updateEvent(
-        WebblenEvent(
-          id: widget.event.id,
-          authorID: widget.event.authorID,
-          hasTickets: widget.event.hasTickets,
-          flashEvent: widget.event.flashEvent,
-          isDigitalEvent: widget.event.isDigitalEvent,
-          digitalEventLink: widget.event.digitalEventLink,
-          title: widget.event.title,
-          desc: widget.event.desc,
-          imageURL: widget.event.imageURL,
-          venueName: widget.event.venueName,
-          nearbyZipcodes: widget.event.nearbyZipcodes,
-          streetAddress: widget.event.streetAddress,
-          city: widget.event.city,
-          province: widget.event.province,
-          lat: widget.event.lat,
-          lon: widget.event.lon,
-          sharedComs: widget.event.sharedComs,
-          tags: widget.event.tags,
-          type: widget.event.type,
-          category: widget.event.category,
-          clicks: widget.event.clicks,
-          website: widget.event.website,
-          fbUsername: widget.event.fbUsername,
-          instaUsername: widget.event.instaUsername,
-          checkInRadius: widget.event.checkInRadius,
-          estimatedTurnout: widget.event.estimatedTurnout,
-          actualTurnout: widget.event.actualTurnout,
-          attendees: attendees,
-          eventPayout: widget.event.eventPayout,
-          recurrence: widget.event.recurrence,
-          startDateTimeInMilliseconds: widget.event.startDateTimeInMilliseconds,
-          startDate: widget.event.startDate,
-          startTime: widget.event.startTime,
-          endDate: widget.event.endDate,
-          endTime: widget.event.endTime,
-          timezone: widget.event.timezone,
-          privacy: widget.event.privacy,
-          reported: widget.event.reported,
-        ),
-        widget.event.id);
   }
 
   void _onCallEnd(BuildContext context) {
@@ -790,6 +836,7 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                 children: [
                   Container(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
                           height: 25,
@@ -859,6 +906,22 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                               ),
                             ],
                           ),
+                        ),
+                        StreamBuilder(
+                          stream: Firestore.instance.collection("events").document(widget.event.id).snapshots(),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) return Container();
+                            var eventData = snapshot.data;
+                            List attendees = eventData['d']['attendees'];
+                            return CustomText(
+                              context: context,
+                              text: "${attendees.length} Check Ins",
+                              textColor: Colors.white70,
+                              textAlign: TextAlign.left,
+                              fontSize: 14.0,
+                              fontWeight: FontWeight.w500,
+                            );
+                          },
                         ),
                       ],
                     ),

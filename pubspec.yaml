@@ -21,6 +21,7 @@ dependencies:
 
   #Payment Dependencies
   flutter_credit_card: 0.1.1
+  in_app_purchase: ^0.3.4+5
   stripe_sdk: ^2.4.2
   flutter_appauth: ^0.6.0
 
