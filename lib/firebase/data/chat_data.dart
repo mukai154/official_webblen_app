@@ -68,7 +68,4 @@ class ChatDataService {
     });
     return error;
   }
-
-  //READ
-
 }

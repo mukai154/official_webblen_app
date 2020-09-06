@@ -151,6 +151,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       currentLon = location.longitude;
       LocationService().getCityNameFromLatLon(currentLat, currentLon).then((res) {
         areaName = res;
+        print(areaName);
         isLoading = false;
         setState(() {});
       });
@@ -267,7 +268,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       HomeDashboardPage(
         updateRequired: updateRequired,
         currentUser: currentUser,
-        areaName: areaName,
+        areaName: areaName == null ? "Home" : areaName,
         currentLat: currentLat,
         currentLon: currentLon,
         key: homePageKey,

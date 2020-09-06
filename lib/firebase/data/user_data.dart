@@ -101,9 +101,9 @@ class WebblenUserData {
     String error;
     DocumentSnapshot snapshot = await userRef.document(uid).get();
     WebblenUser user = WebblenUser.fromMap(snapshot.data['d']);
-    double initialBalance = user.webblen == null ? 0.00001 : user.webblen;
+    double initialBalance = user.eventPoints == null ? 0.00001 : user.eventPoints;
     double newBalance = depositAmount + initialBalance;
-    await userRef.document(uid).updateData({"d.webblen": newBalance}).catchError((e) {
+    await userRef.document(uid).updateData({"d.eventPoints": newBalance}).catchError((e) {
       error = e.toString();
     });
     return error;

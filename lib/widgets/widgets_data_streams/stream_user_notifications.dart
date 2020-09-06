@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/widgets/common/text/custom_text.dart';
 
 class StreamUserNotifications extends StatelessWidget {
   final String uid;
@@ -48,28 +47,15 @@ class StreamUserNotifications extends StatelessWidget {
                 ),
               ),
               Positioned(
-                top: 12.0,
+                top: 0.0,
                 right: 0.0,
                 child: notifCount != null && notifCount > 0
                     ? Container(
-                        height: 20.0,
-                        width: 20.0,
+                        height: 10.0,
+                        width: 10.0,
                         decoration: BoxDecoration(
                           color: CustomColors.webblenRed,
                           shape: BoxShape.circle,
-                        ),
-                        child: Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(4.0),
-                            child: CustomText(
-                              context: context,
-                              text: notifCount.toString(),
-                              textColor: Colors.white,
-                              textAlign: TextAlign.center,
-                              fontSize: 12.0,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
                         ),
                       )
                     : Container(

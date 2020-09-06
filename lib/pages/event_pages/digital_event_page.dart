@@ -5,12 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:webblen/firebase/data/chat_data.dart';
 import 'package:webblen/firebase/data/event_data.dart';
+import 'package:webblen/firebase/data/gift_donations_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/event_chat_message.dart';
+import 'package:webblen/models/gift_donation.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/in_app_purchases/in_app_purchases.dart';
@@ -42,6 +44,8 @@ class DigitalEventPage extends StatefulWidget {
 }
 
 class _DigitalEventPageState extends State<DigitalEventPage> {
+  bool showGift = true;
+  bool completingPurchase = false;
   bool isLoading = true;
   bool isCommenting = false;
   WebblenUser host;
@@ -57,40 +61,13 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
   BottomSheetMode bottomSheetMode = BottomSheetMode.rewards;
 
   //In-App Purchases
-  InAppPurchaseConnection iap = InAppPurchaseConnection.instance;
-  bool iapAvailable = true;
-  List<PurchaseDetails> pastPurchases = [];
-  List<ProductDetails> products;
-  StreamSubscription pastPurchaseStream;
-
-  @override
-  void initState() {
-    super.initState();
-    // initialize agora sdk
-    startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    setState(() {});
-    initialize();
-    initializeIAP();
-    ChatDataService().joinChatStream(
-      widget.event.id,
-      widget.currentUser.uid,
-      widget.role == ClientRole.Broadcaster ? true : false,
-      widget.currentUser.username,
-    );
-  }
-
-  @override
-  void dispose() {
-    // clear users
-    _users.clear();
-    // destroy sdk
-    AgoraRtcEngine.leaveChannel();
-    AgoraRtcEngine.destroy();
-    chatViewController.dispose();
-    chatController.dispose();
-    pastPurchaseStream.cancel();
-    super.dispose();
-  }
+  StreamSubscription _purchaseUpdatedSubscription;
+  StreamSubscription _purchaseErrorSubscription;
+  StreamSubscription _conectionSubscription;
+  final List<String> _productLists = ['webblen_1', 'webblen_5', 'webblen_25', 'webblen_50', 'webblen_100'];
+  String _platformVersion = 'Unknown';
+  List<IAPItem> _items = [];
+  List<PurchasedItem> _purchases = [];
 
   void checkIntoEvent() async {
     ShowAlertDialogService().showLoadingInfoDialog(context, "Checking Into Stream...");
@@ -135,6 +112,73 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     FocusScope.of(context).unfocus();
     isCommenting = false;
     setState(() {});
+  }
+
+  void giftStreamer(double giftAmount) {
+    Navigator.of(context).pop();
+    GiftDonation giftDonation = GiftDonation(
+      senderUID: widget.currentUser.uid,
+      receiverUID: host.uid,
+      giftAmount: giftAmount,
+      giftName: "Texs",
+      senderUsername: "@${widget.currentUser.username}",
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+    );
+    GiftDonationsDataService().sendGift(widget.event.id, giftDonation);
+  }
+
+  void purchaseProduct(String prodID) {
+    completingPurchase = true;
+    ShowAlertDialogService().showLoadingDialog(context);
+    setState(() {});
+    FlutterInappPurchase.instance.requestPurchase(prodID);
+  }
+
+  void _getItems() async {
+    List<IAPItem> items = await FlutterInappPurchase.instance.getProducts(_productLists);
+    for (var item in items) {
+      print('${item.toString()}');
+      this._items.add(item);
+    }
+  }
+
+  Future _getProduct() async {
+    List<IAPItem> items = await FlutterInappPurchase.instance.getProducts(_productLists);
+    for (var item in items) {
+      print('${item.toString()}');
+      this._items.add(item);
+    }
+
+    setState(() {
+      this._items = items;
+      this._purchases = [];
+    });
+  }
+
+  Future _getPurchases() async {
+    List<PurchasedItem> items = await FlutterInappPurchase.instance.getAvailablePurchases();
+    for (var item in items) {
+      print('${item.toString()}');
+      this._purchases.add(item);
+    }
+
+    setState(() {
+      this._items = [];
+      this._purchases = items;
+    });
+  }
+
+  Future _getPurchaseHistory() async {
+    List<PurchasedItem> items = await FlutterInappPurchase.instance.getPurchaseHistory();
+    for (var item in items) {
+      print('${item.toString()}');
+      this._purchases.add(item);
+    }
+
+    setState(() {
+      this._items = [];
+      this._purchases = items;
+    });
   }
 
   //VIDEO STREAM WIDGETS
@@ -185,15 +229,68 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     );
   }
 
-  void initializeIAP() async {
-    // Check availability of In App Purchases
-    iapAvailable = await iap.isAvailable();
-    if (iapAvailable) {
-      products = await InAppPurchaseService().loadProductsForSale(iap);
-      pastPurchases = await InAppPurchaseService().loadPastPurchases(iap);
-      print('Past Purchases: $pastPurchases');
-      setState(() {});
+  void initializeFlutterIAP() async {
+    String platformVersion;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      platformVersion = await FlutterInappPurchase.instance.platformVersion;
+    } on PlatformException {
+      platformVersion = 'Failed to get platform version.';
     }
+
+    // prepare
+    var result = await FlutterInappPurchase.instance.initConnection;
+    print('result: $result');
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) return;
+
+    setState(() {
+      _platformVersion = platformVersion;
+    });
+
+    // refresh items for android
+    try {
+      String msg = await FlutterInappPurchase.instance.consumeAllItems;
+      print('consumeAllItems: $msg');
+    } catch (err) {
+      print('consumeAllItems error: $err');
+    }
+
+    _conectionSubscription = FlutterInappPurchase.connectionUpdated.listen((connected) {
+      print('connected: $connected');
+    });
+
+    _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated.listen((productItem) {
+      String productID = productItem.productId;
+      FlutterInappPurchase.instance.finishTransaction(productItem);
+      InAppPurchaseService().completeInAppPurchase(productID, widget.currentUser.uid).then((error) {
+        if (error != null) {
+          print(error);
+        }
+        if (completingPurchase) {
+          Navigator.of(context).pop();
+          HapticFeedback.mediumImpact();
+          completingPurchase = false;
+          setState(() {});
+        }
+      });
+      print('purchase-updated: $productItem');
+    });
+
+    _purchaseErrorSubscription = FlutterInappPurchase.purchaseError.listen((purchaseError) {
+      if (completingPurchase) {
+        Navigator.of(context).pop();
+        completingPurchase = false;
+        setState(() {});
+      }
+      print('purchase-error: $purchaseError');
+    });
+    _getItems();
+    _getPurchases();
+    _getPurchaseHistory();
   }
 
   Future<void> initialize() async {
@@ -335,84 +432,71 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     return Container();
   }
 
-  Widget _awardIcon(int awardNum) {
-    return Column(
-      children: [
-        Container(
-          height: 50,
-          width: 50,
-          child: Image.asset(
-            awardNum == 1
-                ? 'assets/images/heart_icon.png'
-                : awardNum == 2
-                    ? 'assets/images/double_heart_icon.png'
-                    : awardNum == 3
-                        ? 'assets/images/confetti_icon.png'
-                        : awardNum == 4
-                            ? 'assets/images/dj_icon.png'
-                            : awardNum == 5
-                                ? 'assets/images/wolf_icon.png'
-                                : awardNum == 6
-                                    ? 'assets/images/eagle_icon.png'
-                                    : awardNum == 7 ? 'assets/images/heart_fire_icon.png' : 'assets/images/webblen_coin.png',
-          ),
-        ),
-        SizedBox(height: 4),
-        Text(
-          awardNum == 1
-              ? 'Love'
-              : awardNum == 2
-                  ? 'More Love'
-                  : awardNum == 3
-                      ? 'Confetti'
-                      : awardNum == 4 ? 'Party' : awardNum == 5 ? 'Wolf' : awardNum == 6 ? 'Eagle' : awardNum == 7 ? 'Much Love' : 'Webblen',
-          style: TextStyle(
-            fontSize: 14,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 4),
-        Row(
+  Widget _awardIcon(int awardNum, double giftAmount) {
+    return Container(
+      child: GestureDetector(
+        onTap: () => giftStreamer(giftAmount),
+        child: Column(
           children: [
+            Container(
+              height: 50,
+              width: 50,
+              child: Image.asset(
+                awardNum == 1
+                    ? 'assets/images/heart_icon.png'
+                    : awardNum == 2
+                        ? 'assets/images/double_heart_icon.png'
+                        : awardNum == 3
+                            ? 'assets/images/confetti_icon.png'
+                            : awardNum == 4
+                                ? 'assets/images/dj_icon.png'
+                                : awardNum == 5
+                                    ? 'assets/images/wolf_icon.png'
+                                    : awardNum == 6
+                                        ? 'assets/images/eagle_icon.png'
+                                        : awardNum == 7 ? 'assets/images/heart_fire_icon.png' : 'assets/images/webblen_coin.png',
+              ),
+            ),
+            SizedBox(height: 4),
             Text(
               awardNum == 1
-                  ? '0.10'
+                  ? 'Love'
                   : awardNum == 2
-                      ? '0.50'
-                      : awardNum == 3 ? '5' : awardNum == 4 ? '25' : awardNum == 5 ? '50' : awardNum == 6 ? '100' : awardNum == 7 ? '500' : '1',
-              style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
-            ),
-            SizedBox(width: 4),
-            Container(
-              height: 15,
-              width: 15,
-              child: Image.asset(
-                'assets/images/webblen_coin.png',
+                      ? 'More Love'
+                      : awardNum == 3
+                          ? 'Confetti'
+                          : awardNum == 4 ? 'Party' : awardNum == 5 ? 'Wolf' : awardNum == 6 ? 'Eagle' : awardNum == 7 ? 'Much Love' : 'Webblen',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
+            ),
+            SizedBox(height: 4),
+            Row(
+              children: [
+                Text(
+                  awardNum == 1
+                      ? '0.10'
+                      : awardNum == 2
+                          ? '0.50'
+                          : awardNum == 3 ? '5' : awardNum == 4 ? '25' : awardNum == 5 ? '50' : awardNum == 6 ? '100' : awardNum == 7 ? '500' : '1',
+                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
+                ),
+                SizedBox(width: 4),
+                Container(
+                  height: 15,
+                  width: 15,
+                  child: Image.asset(
+                    'assets/images/webblen_coin.png',
+                  ),
+                ),
+              ],
             ),
           ],
         ),
-      ],
+      ),
     );
-  }
-
-  purchaseProduct(String prodID) async {
-    ShowAlertDialogService().showLoadingDialog(context);
-    ProductDetails prod = products.firstWhere((product) => product.id == prodID);
-    InAppPurchaseService().purchaseProduct(prod, iap, widget.currentUser.uid).then((err) {
-      if (err == null) {
-        InAppPurchaseService().loadPastPurchases(iap).then((res) {
-          pastPurchases = res;
-          InAppPurchaseService().verifyPurchase(widget.currentUser.uid, prodID, pastPurchases, iap).then((err) {
-            Navigator.of(context).pop();
-            print(err);
-          });
-        });
-      } else {
-        Navigator.of(context).pop();
-      }
-    });
   }
 
   Widget _gridItem(int itemNum, String prodID) {
@@ -510,20 +594,20 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            _awardIcon(1),
-                                            _awardIcon(2),
-                                            _awardIcon(3),
-                                            _awardIcon(4),
+                                            _awardIcon(1, 0.10),
+                                            _awardIcon(2, 0.50),
+                                            _awardIcon(3, 5.0001),
+                                            _awardIcon(4, 25.0001),
                                           ],
                                         ),
                                         SizedBox(height: 16),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                           children: [
-                                            _awardIcon(5),
-                                            _awardIcon(6),
-                                            _awardIcon(7),
-                                            _awardIcon(8),
+                                            _awardIcon(5, 50.0001),
+                                            _awardIcon(6, 100.0001),
+                                            _awardIcon(7, 500.0001),
+                                            _awardIcon(8, 1.0001),
                                           ],
                                         ),
                                         SizedBox(height: 32),
@@ -774,17 +858,58 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
     AgoraRtcEngine.switchCamera();
   }
 
+  runTimer() {
+    showGift = true;
+    setState(() {});
+    Future.delayed(Duration(seconds: 3), () {
+      showGift = false;
+      setState(() {});
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // initialize agora sdk
+    startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    setState(() {});
+    initialize();
+    initializeFlutterIAP();
+    ChatDataService().joinChatStream(
+      widget.event.id,
+      widget.currentUser.uid,
+      widget.role == ClientRole.Broadcaster ? true : false,
+      widget.currentUser.username,
+    );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    // clear users
+    _users.clear();
+    // destroy sdk
+    AgoraRtcEngine.leaveChannel();
+    AgoraRtcEngine.destroy();
+    chatViewController.dispose();
+    chatController.dispose();
+    if (_conectionSubscription != null) {
+      _conectionSubscription.cancel();
+      _conectionSubscription = null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     SchedulerBinding.instance.addPostFrameCallback((_) => scrollToChatMessage());
+
     Widget eventChat() {
       return StreamBuilder(
         stream: Firestore.instance
             .collection("event_chats")
             .document(widget.event.id)
             .collection("messages")
-            .where('timePostedInMilliseconds', isGreaterThan: startChatAfterTimeInMilliseconds - 300000)
-            .orderBy("timePostedInMilliseconds", descending: false)
+            .where('timePostedInMilliseconds', isGreaterThan: startChatAfterTimeInMilliseconds)
             .snapshots(),
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (!snapshot.hasData || snapshot.data.documents.isEmpty) return Container();
@@ -815,6 +940,45 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                         Colors.white,
                         TextAlign.left,
                       ),
+              );
+            },
+          );
+        },
+      );
+    }
+
+    Widget giftsAndDonationsStream() {
+      return StreamBuilder(
+        stream: Firestore.instance
+            .collection("gift_donations")
+            .document(widget.event.id)
+            .collection("gift_donations")
+            .where('timePostedInMilliseconds', isGreaterThan: startChatAfterTimeInMilliseconds - 300000)
+            .orderBy("timePostedInMilliseconds", descending: false)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData || snapshot.data.documents.isEmpty) return Container();
+          return ListView.builder(
+            //controller: chatViewController,
+            itemCount: 1, //snapshot.data.documents.length,
+            itemBuilder: (context, index) {
+              String senderUsername = snapshot.data.documents.last.data['senderUsername'];
+              String giftName = snapshot.data.documents.last.data['giftName'];
+              String giftAmount = snapshot.data.documents.last.data['giftAmount'].toStringAsFixed(2);
+              return AnimatedOpacity(
+                child: Container(
+                  child: Fonts().textW400(
+                    '$senderUsername gifted $giftAmount Webblen',
+                    14.0,
+                    Colors.blue,
+                    TextAlign.left,
+                  ),
+                  //                  width: 200.0,
+                  //                  height: 200.0,
+                  //color: Colors.green,
+                ),
+                duration: Duration(seconds: 5),
+                opacity: 0.0,
               );
             },
           );
@@ -930,9 +1094,14 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-//                        isCommenting
-//                            ? Container()
-//                            :
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24.0), bottomRight: Radius.circular(24.0)),
+                          ),
+                          height: isCommenting ? 100 : 250,
+                          width: MediaQuery.of(context).size.width * 0.7,
+                          child: giftsAndDonationsStream(),
+                        ),
                         Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(bottomLeft: Radius.circular(24.0), bottomRight: Radius.circular(24.0)),

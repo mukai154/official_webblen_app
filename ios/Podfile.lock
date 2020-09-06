@@ -316,6 +316,8 @@ PODS:
     - Flutter
     - Mantle
     - SDWebImageWebPCoder
+  - flutter_inapp_purchase (0.0.1):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_native_admob (0.0.1):
@@ -398,8 +400,6 @@ PODS:
     - TOCropViewController (~> 2.5.2)
   - image_picker (0.0.1):
     - Flutter
-  - in_app_purchase (0.0.1):
-    - Flutter
   - leveldb-library (1.22)
   - libwebp (1.1.0):
     - libwebp/demux (= 1.1.0)
@@ -463,6 +463,7 @@ DEPENDENCIES:
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_facebook_login (from `.symlinks/plugins/flutter_facebook_login/ios`)
   - flutter_image_compress (from `.symlinks/plugins/flutter_image_compress/ios`)
+  - flutter_inapp_purchase (from `.symlinks/plugins/flutter_inapp_purchase/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_native_admob (from `.symlinks/plugins/flutter_native_admob/ios`)
   - flutter_sms (from `.symlinks/plugins/flutter_sms/ios`)
@@ -471,7 +472,6 @@ DEPENDENCIES:
   - google_sign_in (from `.symlinks/plugins/google_sign_in/ios`)
   - image_cropper (from `.symlinks/plugins/image_cropper/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
-  - in_app_purchase (from `.symlinks/plugins/in_app_purchase/ios`)
   - location (from `.symlinks/plugins/location/ios`)
   - location_permissions (from `.symlinks/plugins/location_permissions/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
@@ -558,6 +558,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_facebook_login/ios"
   flutter_image_compress:
     :path: ".symlinks/plugins/flutter_image_compress/ios"
+  flutter_inapp_purchase:
+    :path: ".symlinks/plugins/flutter_inapp_purchase/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_native_admob:
@@ -574,8 +576,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_cropper/ios"
   image_picker:
     :path: ".symlinks/plugins/image_picker/ios"
-  in_app_purchase:
-    :path: ".symlinks/plugins/in_app_purchase/ios"
   location:
     :path: ".symlinks/plugins/location/ios"
   location_permissions:
@@ -629,6 +629,7 @@ SPEC CHECKSUMS:
   flutter_appauth: df12d7d65012a380f1ab11311866cfcbfd55370f
   flutter_facebook_login: cfb5659f686b1c575ef205c6b6fd20db9679d3c4
   flutter_image_compress: 082f8daaf6c1b0c9fe798251c750ef0ecd98d7ae
+  flutter_inapp_purchase: 5c6a1ac3f11b11d0c8c0321c0c41c1f05805e4c8
   flutter_local_notifications: 9e4738ce2471c5af910d961a6b7eadcf57c50186
   flutter_native_admob: 384f39f8b8dc0a96624c7cfa4cd255205e7c3da5
   flutter_sms: 91ce41530f55c85d6524d82307a5d555844c086a
@@ -648,7 +649,6 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 6f5c8abbab8a9bce4bb3f057e317728ec6182b10
   image_cropper: 3c16d7651730ffe85897f5a1c4e2547e6b54989a
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
-  in_app_purchase: 3e2155afa9d03d4fa32d9e62d567885080ce97d6
   leveldb-library: 55d93ee664b4007aac644a782d11da33fba316f7
   libwebp: 946cb3063cea9236285f7e9a8505d806d30e07f3
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
