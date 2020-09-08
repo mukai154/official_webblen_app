@@ -9,7 +9,6 @@ import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/firebase/data/chat_data.dart';
 import 'package:webblen/firebase/data/event_data.dart';
-import 'package:webblen/firebase/data/gift_donations_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/event_chat_message.dart';
 import 'package:webblen/models/gift_donation.dart';
@@ -120,11 +119,11 @@ class _DigitalEventPageState extends State<DigitalEventPage> {
       senderUID: widget.currentUser.uid,
       receiverUID: host.uid,
       giftAmount: giftAmount,
-      giftName: "Texs",
+      //giftName: "Texs",
       senderUsername: "@${widget.currentUser.username}",
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
     );
-    GiftDonationsDataService().sendGift(widget.event.id, giftDonation);
+    //GiftDonationsDataService().sendGift(widget.event.id, giftDonation);
   }
 
   void purchaseProduct(String prodID) {

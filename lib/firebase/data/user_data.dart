@@ -25,6 +25,16 @@ class WebblenUserData {
     return user;
   }
 
+  Future<String> getUserImgByID(String uid) async {
+    String userImgURL;
+    DocumentSnapshot documentSnapshot = await userRef.document(uid).get();
+    if (documentSnapshot.exists) {
+      Map<String, dynamic> docData = documentSnapshot.data;
+      userImgURL = docData['d']['profile_pic'];
+    }
+    return userImgURL;
+  }
+
   Future<String> getStripeUID(String uid) async {
     String stripeUID;
     DocumentSnapshot documentSnapshot = await stripeRef.document(uid).get();

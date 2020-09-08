@@ -13,9 +13,16 @@ class ChatDataService {
       message: isHost ? '@$username has started streaming!' : '@$username has joined',
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
     );
+
     await eventChatRef.document(eventID).collection("messages").document(message.timePostedInMilliseconds.toString()).setData(message.toMap()).catchError((e) {
       error = e.details;
     });
+    DocumentSnapshot snapshot = await eventChatRef.document(eventID).get();
+    List activeMembers = !snapshot.exists || snapshot.data['activeMembers'] == null ? [] : snapshot.data['activeMembers'].toList(growable: true);
+    if (!activeMembers.contains(uid)) {
+      activeMembers.add(uid);
+    }
+    await eventChatRef.document(eventID).setData({"activeMembers": activeMembers});
     return error;
   }
 
@@ -30,6 +37,12 @@ class ChatDataService {
     await eventChatRef.document(eventID).collection("messages").document(message.timePostedInMilliseconds.toString()).setData(message.toMap()).catchError((e) {
       error = e.details;
     });
+    DocumentSnapshot snapshot = await eventChatRef.document(eventID).get();
+    List activeMembers = !snapshot.exists || snapshot.data['activeMembers'] == null ? [] : snapshot.data['activeMembers'].toList(growable: true);
+    if (activeMembers.contains(uid)) {
+      activeMembers.remove(uid);
+    }
+    await eventChatRef.document(eventID).setData({"activeMembers": activeMembers});
     return error;
   }
 

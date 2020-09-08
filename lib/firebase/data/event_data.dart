@@ -13,6 +13,7 @@ import 'package:webblen/services/location/location_service.dart';
 
 class EventDataService {
   final CollectionReference eventsRef = Firestore().collection("events");
+  final CollectionReference activeStreamRef = Firestore().collection("active_streams");
   final CollectionReference ticketsRef = Firestore().collection("purchased_tickets");
   final CollectionReference ticketDistroRef = Firestore().collection("ticket_distros");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
@@ -292,6 +293,26 @@ class EventDataService {
       event = WebblenEvent.fromMap(eventMap);
     }
     return event;
+  }
+
+  Future<String> createActiveLiveStream(String id, String uid, String username, String userImgURL, int timeInMilliseconds) async {
+    String error;
+    await activeStreamRef.document(id).setData({
+      "id": id,
+      "uid": uid,
+      "username": username,
+      "userImgURL": userImgURL,
+      "timeInMilliseconds": timeInMilliseconds,
+    }).catchError((e) {
+      error = e.toString();
+    });
+    return error;
+  }
+
+  Future<String> endActiveStream(String id) async {
+    String error;
+    await activeStreamRef.document(id).delete();
+    return error;
   }
 
   //UPDATE

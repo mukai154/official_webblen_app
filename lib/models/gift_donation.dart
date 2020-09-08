@@ -3,7 +3,7 @@ class GiftDonation {
   String receiverUID;
   String senderUsername;
   double giftAmount;
-  String giftName;
+  int giftID;
   int timePostedInMilliseconds;
 
   GiftDonation({
@@ -11,7 +11,7 @@ class GiftDonation {
     this.receiverUID,
     this.senderUsername,
     this.giftAmount,
-    this.giftName,
+    this.giftID,
     this.timePostedInMilliseconds,
   });
 
@@ -21,7 +21,7 @@ class GiftDonation {
           receiverUID: data['receiverUID'],
           senderUsername: data['senderUsername'],
           giftAmount: data['giftAmount'],
-          giftName: data['giftName'],
+          giftID: data['giftID'],
           timePostedInMilliseconds: data['timePostedInMilliseconds'],
         );
 
@@ -30,7 +30,7 @@ class GiftDonation {
         'receiverUID': this.receiverUID,
         'senderUsername': this.senderUsername,
         'giftAmount': this.giftAmount,
-        'giftName': this.giftName,
+        'giftID': this.giftID,
         'timePostedInMilliseconds': this.timePostedInMilliseconds,
       };
 }

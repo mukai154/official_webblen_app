@@ -15,7 +15,9 @@ import 'package:webblen/pages/earnings_pages/payout_methods_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_instant_deposit_page.dart';
 import 'package:webblen/pages/event_pages/create_event_page.dart';
+import 'package:webblen/pages/event_pages/digital_event_host_page.dart';
 import 'package:webblen/pages/event_pages/digital_event_page.dart';
+import 'package:webblen/pages/event_pages/digital_event_viewer_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
@@ -162,6 +164,26 @@ class PageTransitionService {
           builder: (context) => EventDetailsPage(
             eventID: eventID,
             currentUser: currentUser,
+          ),
+        ),
+      );
+
+  void transitionToDigitalEventHostPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DigitalEventHostPage(
+            currentUser: currentUser,
+            event: event,
+          ),
+        ),
+      );
+
+  void transitionToDigitalEventViewerPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DigitalEventViewerPage(
+            currentUser: currentUser,
+            event: event,
           ),
         ),
       );
