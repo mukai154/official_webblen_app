@@ -15,7 +15,6 @@ import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
-import 'package:webblen/widgets/widgets_common/common_flushbar.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
 import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
 
@@ -91,10 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
         .then((e) {
       if (e != null) {
         Navigator.of(context).pop();
-        AlertFlushbar(
-          headerText: "Submit Error",
-          bodyText: 'There was an issue uploading a new pic',
-        ).showAlertFlushbar(context);
+        ShowAlertDialogService().showFailureDialog(context, "Error", "There was an issue uploading a new pic");
       } else {
         Navigator.of(context).pop();
       }
@@ -163,205 +159,163 @@ class _SettingsPageState extends State<SettingsPage> {
                 ? CustomLinearProgress(progressBarColor: CustomColors.webblenRed)
                 : Form(
                     key: settingsFormKey,
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                    child: StreamBuilder(
+                      stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
+                      builder: (context, userSnapshot) {
+                        if (!userSnapshot.hasData)
+                          return Text(
+                            "Loading...",
+                          );
+                        var userData = userSnapshot.data;
+                        return Column(
                           children: <Widget>[
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    top: 16.0,
+                                    bottom: 4.0,
+                                  ),
+                                  child: Stack(
+                                    children: <Widget>[
+                                      InkWell(
+                                        onTap: () => ShowAlertDialogService().showImageSelectDialog(
+                                          context,
+                                          () => changeUserProfilePic(true),
+                                          () => changeUserProfilePic(false),
+                                        ),
+                                        child: newUserImage == null
+                                            ? UserDetailsProfilePic(
+                                                userPicUrl: userData['d']['profile_pic'],
+                                                size: 100.0,
+                                              )
+                                            : CircleAvatar(
+                                                backgroundImage: FileImage(newUserImage),
+                                                radius: 50.0,
+                                              ),
+                                      ),
+                                      Positioned(
+                                        right: 0.0,
+                                        top: 0.0,
+                                        child: IconBubble(
+                                          icon: Icon(
+                                            Icons.camera_alt,
+                                            color: Colors.black,
+                                            size: 16.0,
+                                          ),
+                                          color: CustomColors.clouds,
+                                          size: 30.0,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
                             Padding(
                               padding: EdgeInsets.only(
-                                top: 16.0,
-                                bottom: 4.0,
+                                bottom: 24.0,
                               ),
-                              child: Stack(
+                              child: Fonts().textW700(
+                                "@${widget.currentUser.username}",
+                                24.0,
+                                Colors.black,
+                                TextAlign.left,
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.only(
+                                left: 16.0,
+                                right: 16.0,
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  InkWell(
-                                    onTap: () => ShowAlertDialogService().showImageSelectDialog(
-                                      context,
-                                      () => changeUserProfilePic(true),
-                                      () => changeUserProfilePic(false),
-                                    ),
-                                    child: newUserImage == null
-                                        ? UserDetailsProfilePic(
-                                            userPicUrl: widget.currentUser.profile_pic,
-                                            size: 100.0,
-                                          )
-                                        : CircleAvatar(
-                                            backgroundImage: FileImage(newUserImage),
-                                            radius: 50.0,
-                                          ),
+                                  Fonts().textW500(
+                                    "Notification Preferences",
+                                    14.0,
+                                    Colors.black,
+                                    TextAlign.center,
                                   ),
-                                  Positioned(
-                                    right: 0.0,
-                                    top: 0.0,
-                                    child: IconBubble(
-                                      icon: Icon(
-                                        Icons.camera_alt,
-                                        color: Colors.black,
-                                        size: 16.0,
-                                      ),
-                                      color: CustomColors.clouds,
-                                      size: 30.0,
-                                    ),
-                                  )
                                 ],
                               ),
-                            )
-                          ],
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            bottom: 24.0,
-                          ),
-                          child: Fonts().textW700(
-                            "@${widget.currentUser.username}",
-                            24.0,
-                            Colors.black,
-                            TextAlign.left,
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            left: 16.0,
-                            right: 16.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Fonts().textW500(
-                                "Notification Preferences",
-                                14.0,
-                                Colors.black,
-                                TextAlign.center,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 32.0,
                               ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Fonts().textW700(
-                                "Wallet Deposits",
-                                18.0,
-                                Colors.black,
-                                TextAlign.left,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Fonts().textW700(
+                                    "Wallet Deposits",
+                                    18.0,
+                                    Colors.black,
+                                    TextAlign.left,
+                                  ),
+                                  Switch(
+                                    value: userData['notifyDeposits'] == null ? true : userData['notifyDeposits'],
+                                    onChanged: (val) => UserDataService().updateNotificationPermission(
+                                      widget.currentUser.uid,
+                                      "notifyDeposits",
+                                      val,
+                                    ),
+                                    activeColor: CustomColors.webblenRed,
+                                  ),
+                                ],
                               ),
-                              Switch(
-                                value: widget.currentUser.notifyWalletDeposits,
-                                onChanged: (val) => UserDataService().updateNotificationPermission(
-                                  widget.currentUser.uid,
-                                  "notifyWalletDeposits",
-                                  val,
-                                ),
-                                activeColor: CustomColors.webblenRed,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 32.0,
                               ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Fonts().textW700(
-                                "Friend Requests",
-                                18.0,
-                                Colors.black,
-                                TextAlign.left,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Fonts().textW700(
+                                    "New Followers",
+                                    18.0,
+                                    Colors.black,
+                                    TextAlign.left,
+                                  ),
+                                  Switch(
+                                    value: userData['notifyNewFollowers'] == null ? true : userData['notifyNewFollowers'],
+                                    onChanged: (val) => UserDataService().updateNotificationPermission(
+                                      widget.currentUser.uid,
+                                      "notifyNewFollowers",
+                                      val,
+                                    ),
+                                    activeColor: CustomColors.webblenRed,
+                                  ),
+                                ],
                               ),
-                              Switch(
-                                value: widget.currentUser.notifyFriendRequests,
-                                onChanged: (val) => UserDataService().updateNotificationPermission(
-                                  widget.currentUser.uid,
-                                  "notifyFriendRequests",
-                                  val,
-                                ),
-                                activeColor: CustomColors.webblenRed,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 32.0,
                               ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Fonts().textW700(
-                                "New Messages",
-                                18.0,
-                                Colors.black,
-                                TextAlign.left,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Fonts().textW700(
+                                    "Nearby Events & Streams",
+                                    18.0,
+                                    Colors.black,
+                                    TextAlign.left,
+                                  ),
+                                  Switch(
+                                    value: widget.currentUser.notifyNewMessages,
+                                    onChanged: (val) => UserDataService().updateNotificationPermission(
+                                      widget.currentUser.uid,
+                                      "notifyNearbyEvents",
+                                      val,
+                                    ),
+                                    activeColor: CustomColors.webblenRed,
+                                  ),
+                                ],
                               ),
-                              Switch(
-                                value: widget.currentUser.notifyNewMessages,
-                                onChanged: (val) => UserDataService().updateNotificationPermission(
-                                  widget.currentUser.uid,
-                                  "notifyNewMessages",
-                                  val,
-                                ),
-                                activeColor: CustomColors.webblenRed,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Fonts().textW700(
-                                "Flash Events",
-                                18.0,
-                                Colors.black,
-                                TextAlign.left,
-                              ),
-                              Switch(
-                                value: widget.currentUser.notifyFlashEvents,
-                                onChanged: (val) => UserDataService().updateNotificationPermission(
-                                  widget.currentUser.uid,
-                                  "notifyFlashEvents",
-                                  val,
-                                ),
-                                activeColor: CustomColors.webblenRed,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 32.0,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Fonts().textW700(
-                                "Suggested Events",
-                                18.0,
-                                Colors.black,
-                                TextAlign.left,
-                              ),
-                              Switch(
-                                value: widget.currentUser.notifySuggestedEvents,
-                                onChanged: (val) => UserDataService().updateNotificationPermission(
-                                  widget.currentUser.uid,
-                                  "notifySuggestedEvents",
-                                  val,
-                                ),
-                                activeColor: CustomColors.webblenRed,
-                              ),
-                            ],
-                          ),
-                        ),
+                            ),
 
 //                  optionRow(
 //                    Icon(
@@ -379,71 +333,73 @@ class _SettingsPageState extends State<SettingsPage> {
 //                      );
 //                    },
 //                  ),
-                        StreamBuilder(
-                          stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
-                          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-                            if (!snapshot.hasData) return Container();
-                            var stripeAccountExists = snapshot.data.exists;
-                            return !stripeAccountExists
-                                ? Container(
-                                    child: Column(
-                                      children: [
-                                        SizedBox(height: 16.0),
-                                        Container(
-                                          color: Colors.black12,
-                                          height: 0.5,
+                            StreamBuilder(
+                              stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+                              builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+                                if (!snapshot.hasData) return Container();
+                                var stripeAccountExists = snapshot.data.exists;
+                                return !stripeAccountExists
+                                    ? Container(
+                                        child: Column(
+                                          children: [
+                                            SizedBox(height: 16.0),
+                                            Container(
+                                              color: Colors.black12,
+                                              height: 0.5,
+                                            ),
+                                            SizedBox(height: 8.0),
+                                            optionRow(
+                                              Icon(FontAwesomeIcons.briefcase, color: CustomColors.blackPearl, size: 18.0),
+                                              'Create Earnings Account',
+                                              CustomColors.blackPearl,
+                                              () {
+                                                OpenUrl().launchInWebViewOrVC(context, stripeConnectURL);
+                                              },
+                                            ),
+                                          ],
                                         ),
-                                        SizedBox(height: 8.0),
-                                        optionRow(
-                                          Icon(FontAwesomeIcons.briefcase, color: CustomColors.blackPearl, size: 18.0),
-                                          'Create Earnings Account',
-                                          CustomColors.blackPearl,
-                                          () {
-                                            OpenUrl().launchInWebViewOrVC(context, stripeConnectURL);
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                : Container();
-                          },
-                        ),
-                        SizedBox(height: 8.0),
-                        Container(
-                          color: Colors.black12,
-                          height: 0.5,
-                        ),
-                        SizedBox(height: 8.0),
-                        optionRow(
-                          Icon(FontAwesomeIcons.questionCircle, color: CustomColors.blackPearl, size: 18.0),
-                          'Help/FAQ',
-                          CustomColors.blackPearl,
-                          () {
-                            OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq');
-                          },
-                        ),
-                        SizedBox(height: 8.0),
-                        Container(
-                          color: Colors.black12,
-                          height: 0.5,
-                        ),
-                        SizedBox(height: 8.0),
-                        optionRow(
-                          Icon(
-                            FontAwesomeIcons.signOutAlt,
-                            color: CustomColors.blackPearl,
-                            size: 18.0,
-                          ),
-                          'logout',
-                          CustomColors.blackPearl,
-                          () => ShowAlertDialogService().showLogoutDialog(context),
-                        ),
-                        SizedBox(height: 8.0),
-                        Container(
-                          color: Colors.black12,
-                          height: 0.5,
-                        ),
-                      ],
+                                      )
+                                    : Container();
+                              },
+                            ),
+                            SizedBox(height: 8.0),
+                            Container(
+                              color: Colors.black12,
+                              height: 0.5,
+                            ),
+                            SizedBox(height: 8.0),
+                            optionRow(
+                              Icon(FontAwesomeIcons.questionCircle, color: CustomColors.blackPearl, size: 18.0),
+                              'Help/FAQ',
+                              CustomColors.blackPearl,
+                              () {
+                                OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq');
+                              },
+                            ),
+                            SizedBox(height: 8.0),
+                            Container(
+                              color: Colors.black12,
+                              height: 0.5,
+                            ),
+                            SizedBox(height: 8.0),
+                            optionRow(
+                              Icon(
+                                FontAwesomeIcons.signOutAlt,
+                                color: CustomColors.blackPearl,
+                                size: 18.0,
+                              ),
+                              'logout',
+                              CustomColors.blackPearl,
+                              () => ShowAlertDialogService().showLogoutDialog(context),
+                            ),
+                            SizedBox(height: 8.0),
+                            Container(
+                              color: Colors.black12,
+                              height: 0.5,
+                            ),
+                          ],
+                        );
+                      },
                     ),
                   ),
           ],

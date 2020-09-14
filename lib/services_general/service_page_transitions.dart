@@ -21,13 +21,13 @@ import 'package:webblen/pages/event_pages/digital_event_viewer_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
+import 'package:webblen/pages/home_pages/feedback_page.dart';
 import 'package:webblen/pages/home_pages/notifications_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
 import 'package:webblen/pages/ticket_pages/event_tickets_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
-import 'package:webblen/pages/user_pages/friends_page.dart';
 import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
@@ -364,15 +364,6 @@ class PageTransitionService {
       );
 
   //USERS
-  void transitionToFriendsPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => FriendsPage(
-            uid: uid,
-          ),
-        ),
-      );
-
   void transitionToUserPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -407,6 +398,15 @@ class PageTransitionService {
         context,
         MaterialPageRoute(
           builder: (context) => SettingsPage(
+            currentUser: currentUser,
+          ),
+        ),
+      );
+
+  void transitionTFeedbackPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FeedbackPage(
             currentUser: currentUser,
           ),
         ),

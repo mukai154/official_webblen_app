@@ -20,6 +20,7 @@ import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
@@ -43,6 +44,7 @@ class CreateEventPage extends StatefulWidget {
 
 class _CreateEventPageState extends State<CreateEventPage> {
   String currentUID;
+  WebblenUser currentUser;
   bool hasEarningsAccount = false;
   bool isLoading = true;
   bool isTypingMultiLine = false;
@@ -164,6 +166,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
     Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
     Navigator.of(context).pop();
     zipPostalCode = locationData['zipcode'];
+    print(zipPostalCode);
     city = locationData['city'];
     province = locationData['administrativeLevels']['level1short'];
     lat = detail.result.geometry.location.lat;
@@ -1288,13 +1291,37 @@ class _CreateEventPageState extends State<CreateEventPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          CustomColorButton(
-            text: "Add Ticket",
-            textColor: Colors.black,
-            backgroundColor: Colors.white,
-            height: 35.0,
-            onPressed: () => changeFormStatus("ticketForm"),
-          ),
+          hasEarningsAccount
+              ? CustomColorButton(
+                  text: "Add Ticket",
+                  textColor: Colors.black,
+                  backgroundColor: Colors.white,
+                  height: 35.0,
+                  onPressed: () => changeFormStatus("ticketForm"),
+                )
+              : Container(
+                  child: Column(
+                    children: [
+                      CustomText(
+                        context: context,
+                        text: "Want to Sell Tickets?",
+                        textColor: Colors.black,
+                        textAlign: TextAlign.left,
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      SizedBox(height: 8.0),
+                      CustomColorButton(
+                        text: "Create Earnings Account",
+                        textColor: Colors.black,
+                        backgroundColor: Colors.white,
+                        width: 300,
+                        height: 35.0,
+                        onPressed: () => Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => SettingsPage(currentUser: currentUser))),
+                      )
+                    ],
+                  ),
+                ),
           SizedBox(height: 8.0),
           ticketDistro.tickets.length > 0
               ? CustomColorButton(
@@ -1756,11 +1783,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
         setState(() {
           currentUID = res;
         });
-        WebblenUserData().getStripeUID(currentUID).then((res) {
-          if (res != null && res.isNotEmpty) {
-            hasEarningsAccount = true;
-            setState(() {});
-          }
+        WebblenUserData().checkIfUserCanSellTickets(currentUID).then((res) {
+          hasEarningsAccount = res;
+          setState(() {});
+        });
+        WebblenUserData().getUserByID(currentUID).then((res) {
+          currentUser = res;
+          setState(() {});
         });
       }
       if (widget.eventID != null) {

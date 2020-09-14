@@ -31,6 +31,20 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
   double currentLon;
   List<WebblenEvent> events = [];
 
+  showNewEventOrStreamDialog() {
+    ShowAlertDialogService().showNewEventOrStreamDialog(
+      context,
+      () {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, isStream: false).transitionToCreateEventPage();
+      },
+      () {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, isStream: true).transitionToCreateEventPage();
+      },
+    );
+  }
+
   Future<Null> getEventsForCheckIn() async {
     EventDataService()
         .getEventsNearLocation(
@@ -109,7 +123,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
       appBar: WebblenAppBar().actionAppBar(
         'Check In',
         IconButton(
-          onPressed: null,
+          onPressed: () => showNewEventOrStreamDialog(),
           icon: Icon(
             FontAwesomeIcons.plusSquare,
             size: 24.0,
@@ -131,7 +145,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
                     ? ListView(
                         children: <Widget>[
                           EventNoCheckInFound(
-                            createEventAction: null,
+                            createEventAction: () => showNewEventOrStreamDialog(),
                           )
                         ],
                       )

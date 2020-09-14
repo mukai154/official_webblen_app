@@ -32,7 +32,7 @@ class EventDataService {
       String eventImageURL = await uploadEventImage(eventImageFile, eventFileName);
       newEvent.imageURL = eventImageURL;
     }
-    if (!newEvent.isDigitalEvent && zipPostalCode != null) {
+    if (zipPostalCode != null) {
       List listOfAreaCodes = await LocationService().findNearestZipcodes(zipPostalCode);
       if (listOfAreaCodes != null) {
         nearbyZipcodes = listOfAreaCodes;
@@ -295,13 +295,14 @@ class EventDataService {
     return event;
   }
 
-  Future<String> createActiveLiveStream(String id, String uid, String username, String userImgURL, int timeInMilliseconds) async {
+  Future<String> createActiveLiveStream(String id, String uid, String username, String userImgURL, List nearbyZipcodes, int timeInMilliseconds) async {
     String error;
     await activeStreamRef.document(id).setData({
       "id": id,
       "uid": uid,
       "username": username,
       "userImgURL": userImgURL,
+      "nearbyZipcodes": nearbyZipcodes,
       "timeInMilliseconds": timeInMilliseconds,
     }).catchError((e) {
       error = e.toString();
@@ -313,6 +314,18 @@ class EventDataService {
     String error;
     await activeStreamRef.document(id).delete();
     return error;
+  }
+
+  Future<Null> notifyFollowersStreamIsLive(String eventID, String uid) async {
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'notifyFollowersStreamIsLive',
+    );
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'eventID': eventID,
+        'uid': uid,
+      },
+    );
   }
 
   //UPDATE

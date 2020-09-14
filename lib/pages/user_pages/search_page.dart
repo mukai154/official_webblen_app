@@ -33,7 +33,6 @@ class _SearchPageState extends State<SearchPage> {
   List<Map<String, dynamic>> allResults = [];
   List<Map<String, dynamic>> eventResults = [];
   List<Map<String, dynamic>> userResults = [];
-  List<Map<String, dynamic>> communityResults = [];
   String resultType;
   bool searchPerformed = false;
   String searchFilter = '';
@@ -54,9 +53,7 @@ class _SearchPageState extends State<SearchPage> {
     } else {
       eventResults = await AlgoliaSearch().queryEvents(searchVal);
       userResults = await AlgoliaSearch().queryUsers(searchVal);
-      communityResults = await AlgoliaSearch().queryCommunities(searchVal);
       allResults = [
-        communityResults,
         eventResults,
         userResults,
       ].expand((x) => x).toList();
@@ -87,7 +84,7 @@ class _SearchPageState extends State<SearchPage> {
         PageTransitionService(
           context: context,
           currentUser: widget.currentUser,
-          event: event,
+          eventID: eventID,
           eventIsLive: false,
         ).transitionToEventPage();
       }
@@ -98,11 +95,6 @@ class _SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     //WebblenUserData().transitionFriendsToFollowers();
-//    PlatformDataService().getAvailableCities().then((res){
-//      availableCities = res;
-//      isLoading = false;
-//      setState(() {});
-//    });
   }
 
   @override
@@ -153,38 +145,6 @@ class _SearchPageState extends State<SearchPage> {
       );
     }
 
-//    Widget searchTypes(){
-//      return Row(
-//        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-//        children: <Widget>[
-//          CustomColorButton(
-//            text: "Users",
-//            textColor: FlatColors.darkGray,
-//            backgroundColor: Colors.white,
-//            onPressed: () => searchUsers(),
-//            width: 110.0,
-//            hPadding: 4.0,
-//          ),
-//          CustomColorButton(
-//            text: "Communities",
-//            textColor: FlatColors.darkGray,
-//            backgroundColor: Colors.white,
-//            onPressed: () => searchCommunities(),
-//            width: 110.0,
-//            hPadding: 4.0,
-//          ),
-//          CustomColorButton(
-//            text: "Events",
-//            textColor: searchFilter == 'events' ? Colors.white : FlatColors.darkGray,
-//            backgroundColor: searchFilter == 'events' ? FlatColors.webblenRed : Colors.white,
-//            onPressed: () => searchEvents(),
-//            width: 110.0,
-//            hPadding: 4.0,
-//          ),
-//        ],
-//      );
-//    }
-
     Widget searchResults() {
       return Flexible(
           //decoration: new BoxDecoration(border: new Border.all(width: 2.0)),
@@ -197,39 +157,12 @@ class _SearchPageState extends State<SearchPage> {
               itemBuilder: (context, index) {
                 return SearchResultRow(
                   resultData: allResults[index],
-                  tapAction: allResults[index]['resultType'] == 'people'
+                  tapAction: allResults[index]['resultType'] == 'user'
                       ? () => transitionToUserDetails(allResults[index]['key'])
                       : () => transitionToEventDetails(allResults[index]['key']),
                   addFriendAction: null,
                 );
               }));
-//      return ListView.builder(
-//          shrinkWrap: true,
-//          itemCount: searchFilter == ''
-//            ? allResults.length
-//            : searchFilter == 'events'
-//            ? eventResults.length
-//            : searchFilter == 'users'
-//            ? userResults.length
-//            : communityResults.length,
-//          itemBuilder: (BuildContext context, int index){
-//            return searchFilter == ''
-//                ? SearchResultRow(
-//                    resultData: allResults[index],
-//                  )
-//                : searchFilter == 'events'
-//                ? SearchResultRow(
-//                    resultData: eventResults[index],
-//                  )
-//                : searchFilter == 'users'
-//                ? SearchResultRow(
-//                    resultData: userResults[index],
-//                  )
-//                : SearchResultRow(
-//                    resultData: communityResults[index],
-//                  );
-//          }
-//      );
     }
 
     return Scaffold(

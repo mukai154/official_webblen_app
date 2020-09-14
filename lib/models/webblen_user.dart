@@ -10,8 +10,6 @@ class WebblenUser {
   List eventHistory;
   List rewards;
   List savedEvents;
-  List friends;
-  List friendRequests;
   List achievements;
   bool isCommunityBuilder;
   bool isNewCommunityBuilder;
@@ -52,8 +50,6 @@ class WebblenUser {
     this.eventHistory,
     this.rewards,
     this.savedEvents,
-    this.friends,
-    this.friendRequests,
     this.achievements,
     this.notifyFlashEvents,
     this.notifyFriendRequests,
@@ -98,8 +94,6 @@ class WebblenUser {
           eventHistory: data['eventHistory'],
           rewards: data['rewards'],
           savedEvents: data['savedEvents'],
-          friends: data['friends'],
-          friendRequests: data['friendRequests'],
           achievements: data['acheivements'],
           notifyHotEvents: data['notifyHotEvents'],
           notifyFlashEvents: data['notifyFlashEvents'],
@@ -141,8 +135,6 @@ class WebblenUser {
         'eventHistory': this.eventHistory,
         'rewards': this.rewards,
         'savedEvents': this.savedEvents,
-        'friends': this.friends,
-        'friendRequests': this.friendRequests,
         'achievements': this.achievements,
         'notifyFlashEvents': this.notifyFlashEvents,
         'notifyHotEvents': this.notifyHotEvents,

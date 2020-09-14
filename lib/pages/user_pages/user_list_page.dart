@@ -71,25 +71,25 @@ class _UserSearchPageState extends State<UserSearchPage> {
               context: context,
               loadingDescription: 'Loading Users...',
             )
-          : ListView.builder(
-              controller: scrollController,
-              itemCount: users.length,
-              itemBuilder: (context, i) {
-                bool isFollowingUser = false;
-                if (users[i].friends != null && users[i].friends.contains(widget.currentUser.uid)) {
-                  isFollowingUser = true;
-                }
-                return Padding(
-                  padding: EdgeInsets.symmetric(
-                    vertical: 8.0,
-                  ),
-                  child: UserRow(
-                    user: users[i],
-                    transitionToUserDetails: () => transitionToUserDetails(users[i]),
-                    sendUserFriendRequest: null, //() => sendFriendRequest(searchResults[i]),
-                  ),
-                );
-              },
+          : Container(
+              color: Colors.white,
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: users.length,
+                itemBuilder: (context, i) {
+                  return Padding(
+                    padding: EdgeInsets.symmetric(
+                      vertical: 16.0,
+                      horizontal: 16.0,
+                    ),
+                    child: UserRow(
+                      size: 50,
+                      user: users[i],
+                      transitionToUserDetails: () => transitionToUserDetails(users[i]),
+                    ),
+                  );
+                },
+              ),
             ),
     );
   }

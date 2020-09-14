@@ -169,7 +169,6 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
                       itemBuilder: (context, index) {
                         return UserRow(
                           user: eventAttendees[index],
-                          sendUserFriendRequest: () => sendFriendRequest(eventAttendees[index]),
                           transitionToUserDetails: () => transitionToUserDetails(eventAttendees[index]),
                         );
                       },

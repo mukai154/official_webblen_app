@@ -86,7 +86,7 @@
 	<key>NSMotionUsageDescription</key>
 	<string>Webblen Would Like to Access Your Motion Activity to Let You Check Into Events</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>this will enable you to choose photos from your library to attach to posts, events, and your account.</string>
+	<string>this will enable you to choose photos from your library and save videos recorded from streams.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

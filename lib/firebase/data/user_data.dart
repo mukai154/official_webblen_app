@@ -7,6 +7,15 @@ class WebblenUserData {
   final CollectionReference eventRef = Firestore().collection("events");
   final CollectionReference notifRef = Firestore().collection("user_notifications");
 
+  Future<bool> checkIfUserExists(String uid) async {
+    DocumentSnapshot documentSnapshot = await userRef.document(uid).get();
+    if (documentSnapshot.exists) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   Stream<WebblenUser> streamCurrentUser(String uid) {
     return userRef.document(uid).snapshots().map((snapshot) => WebblenUser.fromMap(Map<String, dynamic>.from(snapshot.data['d'])));
   }
@@ -59,7 +68,7 @@ class WebblenUserData {
     DocumentSnapshot documentSnapshot = await stripeRef.document(uid).get();
     if (documentSnapshot.exists) {
       Map<String, dynamic> docData = documentSnapshot.data;
-      if (docData['stripeUID'] != null) {
+      if (docData['stripeUID'] != null && docData['verified'] == "verified") {
         canSellTickets = true;
       }
     }
@@ -117,6 +126,12 @@ class WebblenUserData {
       error = e.toString();
     });
     return error;
+  }
+
+  Future<Null> updateUserAppOpen(String uid, String zipcode, double lat, double lon) async {
+    int appOpenInMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    //GeoFirePoint geoFirePoint = GeoFirePoint(lat, lon);
+    userRef.document(uid).updateData({'g': null, 'l': null, 'appOpenInMilliseconds': appOpenInMilliseconds, 'lastSeenZipcode': zipcode});
   }
 
 //  Future<String> updateUserImg(File userImgFile, String uid) async {

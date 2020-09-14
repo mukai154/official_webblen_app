@@ -8,6 +8,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:random_string/random_string.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:webblen/firebase/data/chat_data.dart';
 import 'package:webblen/firebase/data/event_data.dart';
@@ -17,7 +18,9 @@ import 'package:webblen/models/event_chat_message.dart';
 import 'package:webblen/models/gift_donation.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/agora/agora_service.dart';
 import 'package:webblen/services/in_app_purchases/in_app_purchases.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
@@ -50,7 +53,6 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
   bool muted = false;
   bool isLoggedIntoAgoraRtm = true;
   bool isInAgoraChannel = true;
-  int audienceSize = 0;
   var tryingToEnd = false;
 
   final messageFieldController = TextEditingController();
@@ -134,7 +136,8 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
     );
     GiftDonationsDataService().sendGift(widget.event.id, widget.currentUser.uid, giftDonation).then((error) {
       if (error == null) {
-        return;
+        GiftDonationsDataService()
+            .updateEventGiftLog(widget.event.id, widget.currentUser.uid, widget.currentUser.username, widget.currentUser.profile_pic, giftDonation);
       } else if (error == "insufficient") {
         ShowAlertDialogService().showFailureDialog(context, "Error", "Insufficient Funds");
       } else {
@@ -306,11 +309,12 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
     await AgoraRtcEngine.enableVideo();
     await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await AgoraRtcEngine.setClientRole(ClientRole.Audience);
-    await AgoraRtcEngine.joinChannel(null, widget.event.id, null, 0);
   }
 
   /// Add agora event handlers
   initialize() async {
+    int agoraUID = int.parse(randomNumeric(10));
+    String agoraToken = await AgoraService().retrieveAgoraToken(widget.event, agoraUID);
     await initializeAgoraRtc();
     host = await WebblenUserData().getUserByID(widget.event.authorID);
     await AgoraRtcEngine.enableWebSdkInteroperability(true);
@@ -318,8 +322,10 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
     configuration.dimensions = Size(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
     configuration.frameRate = 30;
     await AgoraRtcEngine.setVideoEncoderConfiguration(configuration);
-    await AgoraRtcEngine.joinChannel(null, widget.event.id, widget.currentUser.uid, 0);
+    await AgoraRtcEngine.joinChannel(null, widget.event.id, null, 0);
     setAgoraRtcEventHandlers();
+    isLoading = false;
+    setState(() {});
   }
 
   /// Create agora sdk instance and initialize
@@ -537,17 +543,55 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
       child: Column(
         children: [
           Container(
-            height: 25,
+            //height: 50,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText(
-                  context: context,
-                  text: widget.event.title,
-                  textColor: Colors.white,
-                  textAlign: TextAlign.left,
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w700,
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 4.0),
+                          CachedNetworkImage(
+                            imageUrl: widget.event.imageURL,
+                            imageBuilder: (context, imageProvider) => Container(
+                              width: 32.0,
+                              height: 32.0,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(width: 8.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            widget.event.title,
+                            style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          host == null
+                              ? Container()
+                              : GestureDetector(
+                                  onTap: () => PageTransitionService(
+                                    context: context,
+                                    currentUser: widget.currentUser,
+                                    webblenUser: host,
+                                  ).transitionToUserPage(),
+                                  child: Text(
+                                    "Hosted by: @${host.username}",
+                                    style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -555,15 +599,22 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                       tryingToEnd = true;
                     });
                   },
-                  child: Icon(
-                    FontAwesomeIcons.times,
-                    color: Colors.white60,
-                    size: 24.0,
+                  child: Container(
+                    height: 35,
+                    width: 35,
+                    child: Center(
+                      child: Icon(
+                        FontAwesomeIcons.times,
+                        color: Colors.white60,
+                        size: 24.0,
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
+          SizedBox(height: 8.0),
           Container(
             height: 40,
             child: Row(
@@ -737,25 +788,24 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                         return StatefulBuilder(
                           builder: (context, setState) {
                             return Container(
-                              height: 402,
+                              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                              height: 400,
                               child: bottomSheetMode == BottomSheetMode.rewards
                                   ? Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         SizedBox(height: 16),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 16.0),
-                                          child: Text(
-                                            'Awards',
-                                            style: TextStyle(
-                                              fontSize: 32,
-                                              color: Colors.white,
-                                            ),
+                                        Text(
+                                          'Gifts',
+                                          style: TextStyle(
+                                            fontSize: 32,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w700,
                                           ),
                                         ),
                                         SizedBox(height: 32),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             _awardIcon(1, 0.10),
                                             _awardIcon(2, 0.50),
@@ -765,7 +815,7 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                         ),
                                         SizedBox(height: 16),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             _awardIcon(5, 50.0001),
                                             _awardIcon(6, 100.0001),
@@ -774,12 +824,68 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                           ],
                                         ),
                                         SizedBox(height: 32),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                                          child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Row(
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  height: 15,
+                                                  width: 15,
+                                                  child: Image.asset(
+                                                    'assets/images/webblen_coin.png',
+                                                  ),
+                                                ),
+                                                SizedBox(width: 4),
+                                                StreamBuilder(
+                                                  stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
+                                                  builder: (context, userSnapshot) {
+                                                    if (!userSnapshot.hasData)
+                                                      return Text(
+                                                        "Loading...",
+                                                      );
+                                                    var userData = userSnapshot.data;
+                                                    double availablePoints = userData['d']["eventPoints"] * 1.00;
+                                                    return Padding(
+                                                      padding: EdgeInsets.all(4.0),
+                                                      child: Row(
+                                                        children: <Widget>[
+                                                          Text(
+                                                            availablePoints.toStringAsFixed(2),
+                                                            style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                            GestureDetector(
+                                              child: Text(
+                                                'Get More Webblen',
+                                                style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
+                                              ),
+                                              onTap: () {
+                                                setState(() {
+                                                  bottomSheetMode = BottomSheetMode.refill;
+                                                });
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    )
+                                  : Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        SizedBox(height: 16),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: 100,
+                                              child: Row(
                                                 children: [
                                                   Container(
                                                     height: 15,
@@ -794,7 +900,7 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                                     builder: (context, userSnapshot) {
                                                       if (!userSnapshot.hasData)
                                                         return Text(
-                                                          "Loading...",
+                                                          "...",
                                                         );
                                                       var userData = userSnapshot.data;
                                                       double availablePoints = userData['d']["eventPoints"] * 1.00;
@@ -813,72 +919,9 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                                   ),
                                                 ],
                                               ),
-                                              GestureDetector(
-                                                child: Text(
-                                                  'Get More Webblen',
-                                                  style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
-                                                ),
-                                                onTap: () {
-                                                  setState(() {
-                                                    bottomSheetMode = BottomSheetMode.refill;
-                                                  });
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                  : Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(height: 16),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          mainAxisSize: MainAxisSize.max,
-                                          children: [
-                                            Container(
-                                              width: MediaQuery.of(context).size.width / 3,
-                                              child: Padding(
-                                                padding: const EdgeInsets.only(left: 16),
-                                                child: Row(
-                                                  children: [
-                                                    Container(
-                                                      height: 15,
-                                                      width: 15,
-                                                      child: Image.asset(
-                                                        'assets/images/webblen_coin.png',
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 4),
-                                                    StreamBuilder(
-                                                      stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-                                                      builder: (context, userSnapshot) {
-                                                        if (!userSnapshot.hasData)
-                                                          return Text(
-                                                            "...",
-                                                          );
-                                                        var userData = userSnapshot.data;
-                                                        double availablePoints = userData['d']["eventPoints"] * 1.00;
-                                                        return Padding(
-                                                          padding: EdgeInsets.all(4.0),
-                                                          child: Row(
-                                                            children: <Widget>[
-                                                              Text(
-                                                                availablePoints.toStringAsFixed(2),
-                                                                style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
                                             ),
                                             Container(
-                                              width: MediaQuery.of(context).size.width / 3,
+                                              width: 100,
                                               child: Text(
                                                 'Refill',
                                                 style: TextStyle(
@@ -889,45 +932,39 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                               ),
                                             ),
                                             Container(
-                                              width: MediaQuery.of(context).size.width / 3,
+                                              width: 100,
                                             ),
                                           ],
                                         ),
                                         SizedBox(height: 32),
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                                          child: GridView.count(
-                                            childAspectRatio: 3 / 2,
-                                            shrinkWrap: true,
-                                            crossAxisCount: 3,
-                                            crossAxisSpacing: 8,
-                                            mainAxisSpacing: 18,
-                                            children: [
-                                              _gridItem(1, 'webblen_1'),
-                                              _gridItem(2, 'webblen_5'),
-                                              _gridItem(3, 'webblen_25'),
-                                              _gridItem(4, 'webblen_50'),
-                                              _gridItem(5, 'webblen_100'),
-                                            ],
-                                          ),
+                                        GridView.count(
+                                          childAspectRatio: 3 / 2,
+                                          shrinkWrap: true,
+                                          crossAxisCount: 3,
+                                          crossAxisSpacing: 8,
+                                          mainAxisSpacing: 18,
+                                          children: [
+                                            _gridItem(1, 'webblen_1'),
+                                            _gridItem(2, 'webblen_5'),
+                                            _gridItem(3, 'webblen_25'),
+                                            _gridItem(4, 'webblen_50'),
+                                            _gridItem(5, 'webblen_100'),
+                                          ],
                                         ),
                                         SizedBox(height: 32),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 16),
-                                          child: GestureDetector(
-                                            child: Text(
-                                              'Back',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.white,
-                                              ),
+                                        GestureDetector(
+                                          child: Text(
+                                            'Back',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
                                             ),
-                                            onTap: () {
-                                              setState(() {
-                                                bottomSheetMode = BottomSheetMode.rewards;
-                                              });
-                                            },
                                           ),
+                                          onTap: () {
+                                            setState(() {
+                                              bottomSheetMode = BottomSheetMode.rewards;
+                                            });
+                                          },
                                         ),
                                       ],
                                     ),
@@ -954,17 +991,19 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                   if (!snapshot.hasData) return Container();
                   var eventData = snapshot.data;
                   List attendees = eventData['d']['attendees'];
-                  return attendees.contains(widget.currentUser.uid)
-                      ? AltCheckInFloatingAction(
-                          checkInAvailable: true,
-                          isVirtualEventCheckIn: true,
-                          checkInAction: () => checkoutOfEvent(),
-                        )
-                      : CheckInFloatingAction(
-                          checkInAvailable: true,
-                          isVirtualEventCheckIn: true,
-                          checkInAction: () => checkIntoEvent(),
-                        );
+                  return showWaitingRoom
+                      ? Container(height: 0)
+                      : attendees.contains(widget.currentUser.uid)
+                          ? AltCheckInFloatingAction(
+                              checkInAvailable: true,
+                              isVirtualEventCheckIn: true,
+                              checkInAction: () => checkoutOfEvent(),
+                            )
+                          : CheckInFloatingAction(
+                              checkInAvailable: true,
+                              isVirtualEventCheckIn: true,
+                              checkInAction: () => checkIntoEvent(),
+                            );
                 },
               ),
             ],

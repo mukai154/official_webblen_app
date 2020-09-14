@@ -26,4 +26,31 @@ class GiftDonationsDataService {
     }
     return error;
   }
+
+  Future<String> updateEventGiftLog(String eventID, String uid, String username, String userImgURL, GiftDonation giftDonation) async {
+    String error;
+    Map<dynamic, dynamic> donators = {};
+    double giftPool;
+    DocumentSnapshot snapshot = await giftDonationRef.document(eventID).get();
+    print(snapshot);
+    if (snapshot.exists && snapshot.data.isNotEmpty) {
+      donators = snapshot.data['donators'];
+      giftPool = snapshot.data['giftPool'] == null ? 0.0001 : snapshot.data['giftPool'];
+      if (donators[uid] == null) {
+        donators[uid] = {'uid': uid, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': giftDonation.giftAmount};
+      } else {
+        Map<String, dynamic> donator = donators[uid];
+        double prevGiftAmount = donator['totalGiftAmount'];
+        double newGiftAmount = prevGiftAmount + giftDonation.giftAmount;
+        donators[uid] = {'uid': uid, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': newGiftAmount};
+      }
+      giftPool += giftDonation.giftAmount;
+      await giftDonationRef.document(eventID).updateData({'donators': donators, 'giftPool': giftPool});
+    } else {
+      donators[uid] = {'uid': uid, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': giftDonation.giftAmount};
+      giftPool = giftDonation.giftAmount;
+      await giftDonationRef.document(eventID).setData({'donators': donators, 'giftPool': giftPool});
+    }
+    return error;
+  }
 }

@@ -11,7 +11,6 @@ import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/platform_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/firebase/services/remote_messaging.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/home_pages/home_dashboard_page.dart';
 import 'package:webblen/pages/home_pages/location_permissions_page.dart';
@@ -31,7 +30,7 @@ import 'package:webblen/widgets/widgets_data_streams/stream_user_account.dart';
 import 'package:webblen/widgets/widgets_data_streams/stream_user_notifications.dart';
 import 'package:webblen/widgets/widgets_home/check_in_floating_action.dart';
 
-import 'firebase_data/stripe_data.dart';
+import 'firebase/data/user_data.dart';
 import 'pages/user_pages/user_page.dart';
 
 class HomePage extends StatefulWidget {
@@ -73,9 +72,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     if (isConnectedToNetwork) {
       BaseAuth().getCurrentUserID().then((val) {
         uid = val;
-        UserDataService().checkIfUserExists(uid).then((exists) {
+        WebblenUserData().checkIfUserExists(uid).then((exists) {
           if (exists) {
-            UserDataService().getUserByID(uid).then((user) {
+            WebblenUserData().getUserByID(uid).then((user) {
               currentUser = user;
               checkPermissions();
             });
@@ -151,27 +150,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       currentLon = location.longitude;
       LocationService().getCityNameFromLatLon(currentLat, currentLon).then((res) {
         areaName = res;
-        print(areaName);
         isLoading = false;
         setState(() {});
+      });
+      LocationService().getZipFromLatLon(currentLat, currentLon).then((res) {
+        WebblenUserData().updateUserAppOpen(uid, res, currentLat, currentLon);
       });
       FirebaseMessagingService().updateFirebaseMessageToken(uid);
       FirebaseMessagingService().configFirebaseMessaging(
         context,
         currentUser,
       );
-      UserDataService().updateUserAppOpen(
-        uid,
-        currentLat,
-        currentLon,
-      );
-      StripeDataService().checkIfStripeSetup(uid).then((res) {
-        hasEarningsAccount = res;
-        EventDataService().areCheckInsAvailable(currentLat, currentLon).then((result) {
-          checkInAvailable = result;
-          getPlatformData(currentLat, currentLon);
-        });
-      });
+
       initDynamicLinks();
 //        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
 
@@ -275,9 +265,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         notifWidget: StreamUserNotifications(uid: uid, notifAction: null), //() => didPressNotificationsBell(),,
       ),
       NotificationPage(
-        currentUser: currentUser,
-        //key: newsPageKey,
-      ),
+          currentUser: currentUser,
+          viewWalletAction: () {
+            pageIndex = 2;
+            setState(() {});
+          }
+          //key: newsPageKey,
+          ),
       WalletPage(
         currentUser: currentUser,
         key: walletPageKey,
@@ -320,18 +314,28 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             iconData: FontAwesomeIcons.home,
             text: 'Home',
           ),
-          FABBottomAppBarItem(
-            customWidget: StreamUserNotifications(
-              uid: uid,
-              pageIsActive: pageIndex == 1 ? true : false,
-              notifAction: null,
-            ),
-            text: 'Notifications',
-          ),
-          FABBottomAppBarItem(
-            iconData: FontAwesomeIcons.wallet,
-            text: 'Wallet',
-          ),
+          isLoading
+              ? FABBottomAppBarItem(
+                  customWidget: Container(),
+                  text: '',
+                )
+              : FABBottomAppBarItem(
+                  customWidget: StreamUserNotifications(
+                    uid: uid,
+                    pageIsActive: pageIndex == 1 ? true : false,
+                    notifAction: null,
+                  ),
+                  text: 'Notifications',
+                ),
+          isLoading
+              ? FABBottomAppBarItem(
+                  customWidget: Container(),
+                  text: '',
+                )
+              : FABBottomAppBarItem(
+                  iconData: FontAwesomeIcons.wallet,
+                  text: 'Wallet',
+                ),
           isConnectedToNetwork
               ? FABBottomAppBarItem(
                   customWidget: StreamUserAccount(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -18,9 +17,7 @@ class NotificationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notifColor = notification.notificationType == "deposit"
-        ? FlatColors.darkMountainGreen
-        : FlatColors.darkGray;
+    final notifColor = notification.notificationType == "deposit" ? FlatColors.darkMountainGreen : FlatColors.darkGray;
 
     final notifIcon = notification.notificationType == "deposit"
         ? Icon(
@@ -40,7 +37,7 @@ class NotificationRow extends StatelessWidget {
                     size: 20.0,
                     color: notifColor,
                   )
-                : notification.notificationType == "newEvent"
+                : notification.notificationType == "event"
                     ? Icon(
                         FontAwesomeIcons.calendar,
                         size: 20.0,
@@ -81,8 +78,21 @@ class NotificationRow extends StatelessWidget {
                       maxWidth: MediaQuery.of(context).size.width * 0.82,
                     ),
                     child: Fonts().textW700(
-                      notification.notificationTitle,
+                      notification.notificationType == "user" ? "@${notification.notificationTitle}" : notification.notificationTitle,
                       16.0,
+                      notifColor,
+                      TextAlign.left,
+                    ),
+                  ),
+            notification.notificationType == "deposit"
+                ? Container()
+                : Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.82,
+                    ),
+                    child: Fonts().textW400(
+                      notification.notificationDescription,
+                      15.0,
                       notifColor,
                       TextAlign.left,
                     ),
@@ -91,8 +101,7 @@ class NotificationRow extends StatelessWidget {
               height: 2.0,
             ),
             Fonts().textW400(
-              TimeCalc().getPastTimeFromMilliseconds(
-                  notification.notificationExpDate - 1209600000),
+              TimeCalc().getPastTimeFromMilliseconds(notification.notificationExpDate - 1209600000),
               12.0,
               FlatColors.lightAmericanGray,
               TextAlign.right,

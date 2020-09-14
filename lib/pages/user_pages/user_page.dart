@@ -13,11 +13,9 @@ import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
-import 'package:webblen/widgets/widgets_common/common_alert.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_user/user_details_header.dart';
 
@@ -155,6 +153,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
       onRefresh: refreshData,
       child: ListView.builder(
         controller: hostedEventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
         key: UniqueKey(),
         shrinkWrap: true,
         padding: EdgeInsets.only(
@@ -224,6 +223,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
       onRefresh: refreshData,
       child: ListView.builder(
         controller: pastEventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
         key: UniqueKey(),
         shrinkWrap: true,
         padding: EdgeInsets.only(
@@ -399,32 +399,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
-                            isOwner
-                                ? GestureDetector(
-                                    onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSettingsPage(),
-                                    child: Icon(FontAwesomeIcons.cog, color: Colors.black, size: 20.0),
-                                  )
-                                : GestureDetector(
-                                    onTap: () => ShowAlertDialogService().showAlert(
-                                      context,
-                                      UserDetailsOptionsDialog(
-                                        addFriendAction: null, //() => sendFriendRequest(),
-                                        friendRequestStatus: friendRequestStatus,
-                                        confirmRequestAction: null, //() => confirmFriendRequest(),
-                                        denyRequestAction: null, //() => denyFriendRequest(),
-                                        blockUserAction: null,
-                                        hideFromUserAction: null,
-                                        removeFriendAction: null, //() => deleteFriendConfirmation(),
-                                        messageUserAction: null, //messageUser,
-                                      ),
-                                      true,
-                                    ),
-                                    child: Icon(
-                                      FontAwesomeIcons.ellipsisH,
-                                      size: 24.0,
-                                      color: Colors.black,
-                                    ),
-                                  ),
+                            GestureDetector(
+                              onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionTFeedbackPage(),
+                              child: Icon(FontAwesomeIcons.lightbulb, color: Colors.black, size: 20.0),
+                            ),
+                            SizedBox(width: 16.0),
+                            GestureDetector(
+                              onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSettingsPage(),
+                              child: Icon(FontAwesomeIcons.cog, color: Colors.black, size: 20.0),
+                            ),
                           ],
                         ),
                       ),
@@ -437,10 +420,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
               child: StreamBuilder(
                 stream: Firestore.instance.collection("webblen_user").document(user.uid).snapshots(),
                 builder: (context, userSnapshot) {
-                  if (!userSnapshot.hasData)
-                    return Text(
-                      "Loading...",
-                    );
+                  if (!userSnapshot.hasData) return Container(height: 200);
                   var userData = userSnapshot.data;
                   List following = userData['d']["following"];
                   List followers = userData['d']["followers"];
@@ -512,8 +492,8 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                               )
                             : hostedEventResults.isEmpty
                                 ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      SizedBox(height: 32.0),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[
@@ -521,17 +501,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                             constraints: BoxConstraints(
                                               maxWidth: MediaQuery.of(context).size.width - 16,
                                             ),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "@${user.username} Has Not Hosted Any Streams/Events",
-                                              textColor: Colors.black,
+                                            child: Text(
+                                              "@${user.username} Has Not Hosted Any Streams/Events",
                                               textAlign: TextAlign.center,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
                                             ),
                                           )
                                         ],
                                       ),
+                                      SizedBox(height: 8.0),
                                     ],
                                   )
                                 : listHostedEvents(),
@@ -547,8 +525,8 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                               )
                             : pastEventResults.isEmpty
                                 ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      SizedBox(height: 32.0),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[
@@ -556,17 +534,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                             constraints: BoxConstraints(
                                               maxWidth: MediaQuery.of(context).size.width - 16,
                                             ),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "@${user.username} Has Not Hosted Any Streams/Events",
-                                              textColor: Colors.black,
+                                            child: Text(
+                                              "@${user.username} Has Not Attended Any Streams/Events",
                                               textAlign: TextAlign.center,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
                                             ),
                                           )
                                         ],
                                       ),
+                                      SizedBox(height: 8.0),
                                     ],
                                   )
                                 : listPastEvents(),
@@ -717,6 +693,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
       onRefresh: refreshData,
       child: ListView.builder(
         controller: hostedEventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
         key: UniqueKey(),
         shrinkWrap: true,
         padding: EdgeInsets.only(
@@ -786,6 +763,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
       onRefresh: refreshData,
       child: ListView.builder(
         controller: pastEventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
         key: UniqueKey(),
         shrinkWrap: true,
         padding: EdgeInsets.only(
@@ -920,32 +898,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(
         "@${user.username}",
-        isOwner
-            ? Container()
-            : Padding(
-                padding: EdgeInsets.only(right: 8.0),
-                child: GestureDetector(
-                  onTap: () => ShowAlertDialogService().showAlert(
-                    context,
-                    UserDetailsOptionsDialog(
-                      addFriendAction: null, //() => sendFriendRequest(),
-                      friendRequestStatus: friendRequestStatus,
-                      confirmRequestAction: null, //() => confirmFriendRequest(),
-                      denyRequestAction: null, //() => denyFriendRequest(),
-                      blockUserAction: null,
-                      hideFromUserAction: null,
-                      removeFriendAction: null, //() => deleteFriendConfirmation(),
-                      messageUserAction: null, //messageUser,
-                    ),
-                    true,
-                  ),
-                  child: Icon(
-                    FontAwesomeIcons.ellipsisH,
-                    size: 24.0,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
+        Container(),
       ),
       body: MediaQuery(
         data: MediaQuery.of(context).copyWith(
@@ -1033,8 +986,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                 )
                               : hostedEventResults.isEmpty
                                   ? Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
-                                        SizedBox(height: 32.0),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
@@ -1042,17 +995,15 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                               constraints: BoxConstraints(
                                                 maxWidth: MediaQuery.of(context).size.width - 16,
                                               ),
-                                              child: CustomText(
-                                                context: context,
-                                                text: "@${user.username} Has Not Hosted Any Streams or Events",
-                                                textColor: Colors.black,
+                                              child: Text(
+                                                "@${user.username} Has Not Hosted Any Streams/Events",
                                                 textAlign: TextAlign.center,
-                                                fontSize: 14.0,
-                                                fontWeight: FontWeight.w500,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
                                               ),
                                             )
                                           ],
                                         ),
+                                        SizedBox(height: 8.0),
                                       ],
                                     )
                                   : listHostedEvents(),
@@ -1068,8 +1019,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                 )
                               : pastEventResults.isEmpty
                                   ? Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
-                                        SizedBox(height: 32.0),
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
@@ -1077,17 +1028,15 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                               constraints: BoxConstraints(
                                                 maxWidth: MediaQuery.of(context).size.width - 16,
                                               ),
-                                              child: CustomText(
-                                                context: context,
-                                                text: "@${user.username} Has Not Hosted Any Events",
-                                                textColor: Colors.black,
+                                              child: Text(
+                                                "@${user.username} Has Not Attended Any Streams/Events",
                                                 textAlign: TextAlign.center,
-                                                fontSize: 16.0,
-                                                fontWeight: FontWeight.w500,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
                                               ),
                                             )
                                           ],
                                         ),
+                                        SizedBox(height: 8.0),
                                       ],
                                     )
                                   : listPastEvents(),

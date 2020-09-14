@@ -61,9 +61,8 @@ class _EventBlockState extends State<EventBlock> {
   @override
   Widget build(BuildContext context) {
     int currentDateInMilliseconds = DateTime.now().millisecondsSinceEpoch;
-    int twoHoursPastEventDateInMilliseconds = widget.event.startDateTimeInMilliseconds + 7200000;
 
-    final double size = 120;
+    final double size = 125;
     return GestureDetector(
       onTap: widget.viewEventTickets == null ? widget.viewEventDetails : widget.viewEventTickets,
       child: Container(
@@ -75,14 +74,6 @@ class _EventBlockState extends State<EventBlock> {
           borderRadius: BorderRadius.all(
             Radius.circular(8.0),
           ),
-          //          boxShadow: [
-          //            BoxShadow(
-          //              color: Colors.black12,
-          //              spreadRadius: 1.5,
-          //              blurRadius: 1.0,
-          //              offset: Offset(0.0, 0.0),
-          //            ),
-          //          ],
         ),
         child: Row(
           children: <Widget>[
@@ -102,7 +93,7 @@ class _EventBlockState extends State<EventBlock> {
             Column(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0),
+                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
                   height: size,
                   width: MediaQuery.of(context).size.width - (125 + 32),
                   decoration: BoxDecoration(
@@ -118,10 +109,10 @@ class _EventBlockState extends State<EventBlock> {
                       CustomText(
                         context: context,
                         text: currentDateInMilliseconds > widget.event.startDateTimeInMilliseconds &&
-                                currentDateInMilliseconds < twoHoursPastEventDateInMilliseconds
-                            ? "Happening Now"
+                                currentDateInMilliseconds < widget.event.endDateTimeInMilliseconds
+                            ? widget.event.isDigitalEvent ? "LIVE" : "Happening Now"
                             : "${widget.event.startDate.substring(0, widget.event.startDate.length - 6)} • ${widget.event.startTime}",
-                        textColor: CustomColors.webblenRed,
+                        textColor: currentDateInMilliseconds > widget.event.endDateTimeInMilliseconds ? Colors.black45 : CustomColors.webblenRed,
                         textAlign: TextAlign.left,
                         fontSize: 14.0,
                         fontWeight: FontWeight.w700,
@@ -205,15 +196,15 @@ class _EventBlockState extends State<EventBlock> {
                                               size: 30,
                                             ),
                                           ),
-                                          SizedBox(width: 8.0),
-                                          GestureDetector(
-                                            onTap: () => saveUnsaveEvent(),
-                                            child: Icon(
-                                              eventIsSaved ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                                              size: 18.0,
-                                              color: eventIsSaved ? Colors.red : Colors.black45,
-                                            ),
-                                          ),
+//                                          SizedBox(width: 8.0),
+//                                          GestureDetector(
+//                                            onTap: () => saveUnsaveEvent(),
+//                                            child: Icon(
+//                                              eventIsSaved ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+//                                              size: 18.0,
+//                                              color: eventIsSaved ? Colors.red : Colors.black45,
+//                                            ),
+//                                          ),
                                         ],
                                       ),
                                     )

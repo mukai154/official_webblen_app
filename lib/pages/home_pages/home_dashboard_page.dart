@@ -2,9 +2,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
 import 'package:flutter_native_admob/native_admob_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:google_maps_webservice/places.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
@@ -15,6 +17,7 @@ import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
@@ -82,37 +85,45 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   //ADMOB
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
+  GoogleMapsPlaces _places = GoogleMapsPlaces(
+    apiKey: Strings.googleAPIKEY,
+    //baseUrl: Strings.proxyMapsURL,
+  );
 
   getLiveEvents() async {
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       print(eventTypeFilter);
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          //.where('d.type', isEqualTo: eventTypeFilter)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where('d.type', isEqualTo: eventTypeFilter)
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     }
     QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
@@ -128,32 +139,36 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       print(eventTypeFilter);
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     }
     QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
@@ -165,21 +180,21 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     setState(() {});
   }
 
-  getSavedEvents() async {
-    Query eventsQuery;
-    eventsQuery = eventsRef
-        .where('d.savedBy', arrayContains: widget.currentUser.uid)
-        .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-        .orderBy('d.startDateTimeInMilliseconds', descending: false)
-        .limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    if (querySnapshot.documents.isNotEmpty) {
-      lastSavedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-      savedEventResults = querySnapshot.documents;
-    }
-    //isLoading = false;
-    setState(() {});
-  }
+//  getSavedEvents() async {
+//    Query eventsQuery;
+//    eventsQuery = eventsRef
+//        .where('d.savedBy', arrayContains: widget.currentUser.uid)
+//        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+//        .orderBy('d.endDateTimeInMilliseconds', descending: false)
+//        .limit(resultsPerPage);
+//    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
+//    if (querySnapshot.documents.isNotEmpty) {
+//      lastSavedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
+//      savedEventResults = querySnapshot.documents;
+//    }
+//    //isLoading = false;
+//    setState(() {});
+//  }
 
 //  getFollowedEvents() async {
 //    Query eventsQuery = eventsRef
@@ -205,33 +220,36 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          //.where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
     }
@@ -255,34 +273,38 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     Query eventsQuery;
     if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.type', isEqualTo: eventTypeFilter)
           .where('d.category', isEqualTo: eventCategoryFilter)
-          .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.startDateTimeInMilliseconds', descending: false)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastVirtualEventDocSnap)
           .limit(resultsPerPage);
     }
@@ -305,8 +327,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     setState(() {});
     Query eventsQuery = eventsRef
         .where("d.savedBy", isEqualTo: widget.currentUser.uid)
-        .where("d.startDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+        .orderBy('d.endDateTimeInMilliseconds', descending: false)
         .startAfterDocument(lastSavedEventDocSnap)
         .limit(resultsPerPage);
 
@@ -342,13 +364,44 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
 //    setState(() {});
 //  }
 
+  setNewLocation() async {
+    Navigator.of(context).pop();
+    Prediction p = await PlacesAutocomplete.show(
+      context: context,
+      apiKey: Strings.googleAPIKEY,
+      onError: (res) {
+        print(res.errorMessage);
+      },
+      //proxyBaseUrl: Strings.proxyMapsURL,
+      mode: Mode.overlay,
+      language: "en",
+      components: [
+        Component(
+          Component.country,
+          "us",
+        ),
+      ],
+    );
+    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
+    double lat = detail.result.geometry.location.lat;
+    double lon = detail.result.geometry.location.lng;
+    CustomAlerts().showLoadingAlert(context, "Setting Location...");
+    Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
+    areaCodeFilter = locationData['zipcode'];
+    areaName = locationData['city'];
+    setState(() {});
+    refreshData();
+    Navigator.of(context).pop();
+    lat = detail.result.geometry.location.lat;
+    lon = detail.result.geometry.location.lng;
+  }
+
   Future<void> refreshData() async {
     liveEventResults = [];
     virtualEventResults = [];
-    savedEventResults = [];
     getLiveEvents();
     getVirtualEvents();
-    getSavedEvents();
+    //getSavedEvents();
   }
 
   Future<void> refreshFromPreferences() async {
@@ -387,7 +440,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           ),
           SizedBox(height: 4.0),
           GestureDetector(
-            onTap: null,
+            onTap: () => setNewLocation(),
             child: TextFieldContainer(
               height: 30.0,
               child: Column(
@@ -494,153 +547,180 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   }
 
   Widget listLiveEvents() {
-    return ListView.builder(
-      controller: liveEventsScrollController,
-      key: UniqueKey(),
-      shrinkWrap: true,
-      itemCount: liveEventResults.length,
-      itemBuilder: (context, index) {
-        WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(liveEventResults[index].data['d']));
-        double num = index / 15;
-        print(num == num.roundToDouble() && num != 0);
-        if (num == num.roundToDouble() && num != 0) {
-          return Padding(
-            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
-            child: Container(
-              child: Column(
-                children: [
-                  Container(
-                    height: 70,
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.only(bottom: 20.0),
-                    child: NativeAdmob(
-                      // Your ad unit id
-                      loading: Container(),
-                      adUnitID: 'ca-app-pub-3940256099942544/3986624511',
-                      numberAds: 3,
-                      controller: nativeAdController,
-                      type: NativeAdmobType.banner,
+    return LiquidPullToRefresh(
+      color: CustomColors.webblenRed,
+      onRefresh: refreshData,
+      child: ListView.builder(
+        controller: liveEventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: liveEventResults.length,
+        itemBuilder: (context, index) {
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(liveEventResults[index].data['d']));
+          double num = index / 15;
+          print(num == num.roundToDouble() && num != 0);
+          if (num == num.roundToDouble() && num != 0) {
+            return Padding(
+              padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
+              child: Container(
+                child: Column(
+                  children: [
+                    Container(
+                      height: 70,
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.only(bottom: 20.0),
+                      child: NativeAdmob(
+                        // Your ad unit id
+                        loading: Container(),
+                        adUnitID: 'ca-app-pub-3940256099942544/3986624511',
+                        numberAds: 3,
+                        controller: nativeAdController,
+                        type: NativeAdmobType.banner,
+                      ),
                     ),
-                  ),
-                  EventBlock(
-                    currentUID: widget.currentUser.uid,
-                    event: event,
-                    shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                    viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                    viewEventTickets: null,
-                    numOfTicsForEvent: null,
-                    eventImgSize: MediaQuery.of(context).size.width - 16,
-                    eventDescHeight: 120.0,
-                  ),
-                ],
+                    EventBlock(
+                      currentUID: widget.currentUser.uid,
+                      event: event,
+                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+                      viewEventDetails: () =>
+                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                      viewEventTickets: null,
+                      numOfTicsForEvent: null,
+                      eventImgSize: MediaQuery.of(context).size.width - 16,
+                      eventDescHeight: 120.0,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        } else {
-          return Padding(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
-            child: EventBlock(
-              currentUID: widget.currentUser.uid,
-              event: event,
-              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-              viewEventTickets: null,
-              numOfTicsForEvent: null,
-              eventImgSize: MediaQuery.of(context).size.width - 16,
-              eventDescHeight: 120.0,
-            ),
-          );
-        }
-      },
+            );
+          } else {
+            return Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
+              child: EventBlock(
+                currentUID: widget.currentUser.uid,
+                event: event,
+                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                viewEventTickets: null,
+                numOfTicsForEvent: null,
+                eventImgSize: MediaQuery.of(context).size.width - 16,
+                eventDescHeight: 120.0,
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
   Widget listVirtualEvents() {
-    return ListView.builder(
-      controller: virtualEventsScrollController,
-      key: UniqueKey(),
-      shrinkWrap: true,
-      itemCount: virtualEventResults.length,
-      itemBuilder: (context, index) {
-        WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(virtualEventResults[index].data['d']));
-        double num = index / 15;
-        print(num == num.roundToDouble() && num != 0);
-        if (num == num.roundToDouble() && num != 0) {
-          return Padding(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
-            child: Container(
-              child: Column(
-                children: [
-                  Container(
-                    height: 70,
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.only(bottom: 20.0),
-                    child: NativeAdmob(
-                      // Your ad unit id
-                      loading: Container(),
-                      adUnitID: 'ca-app-pub-3940256099942544/3986624511',
-                      numberAds: 3,
-                      controller: nativeAdController,
-                      type: NativeAdmobType.banner,
+    return LiquidPullToRefresh(
+      color: CustomColors.webblenRed,
+      onRefresh: refreshData,
+      child: ListView.builder(
+        controller: virtualEventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: virtualEventResults.length,
+        itemBuilder: (context, index) {
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(virtualEventResults[index].data['d']));
+          double num = index / 15;
+          print(num == num.roundToDouble() && num != 0);
+          if (num == num.roundToDouble() && num != 0) {
+            return Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
+              child: Container(
+                child: Column(
+                  children: [
+                    Container(
+                      height: 70,
+                      padding: EdgeInsets.all(10),
+                      margin: EdgeInsets.only(bottom: 20.0),
+                      child: NativeAdmob(
+                        // Your ad unit id
+                        loading: Container(),
+                        adUnitID: 'ca-app-pub-3940256099942544/3986624511',
+                        numberAds: 3,
+                        controller: nativeAdController,
+                        type: NativeAdmobType.banner,
+                      ),
                     ),
-                  ),
-                  EventBlock(
-                    currentUID: widget.currentUser.uid,
-                    event: event,
-                    shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                    viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                    viewEventTickets: null,
-                    numOfTicsForEvent: null,
-                    eventImgSize: MediaQuery.of(context).size.width - 16,
-                    eventDescHeight: 120.0,
-                  ),
-                ],
+                    EventBlock(
+                      currentUID: widget.currentUser.uid,
+                      event: event,
+                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+                      viewEventDetails: () =>
+                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                      viewEventTickets: null,
+                      numOfTicsForEvent: null,
+                      eventImgSize: MediaQuery.of(context).size.width - 16,
+                      eventDescHeight: 120.0,
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
-        } else {
-          return Padding(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
-            child: EventBlock(
-              currentUID: widget.currentUser.uid,
-              event: event,
-              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-              viewEventTickets: null,
-              numOfTicsForEvent: null,
-              eventImgSize: MediaQuery.of(context).size.width - 16,
-              eventDescHeight: 120.0,
-            ),
-          );
-        }
-      },
+            );
+          } else {
+            return Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
+              child: EventBlock(
+                currentUID: widget.currentUser.uid,
+                event: event,
+                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                viewEventTickets: null,
+                numOfTicsForEvent: null,
+                eventImgSize: MediaQuery.of(context).size.width - 16,
+                eventDescHeight: 120.0,
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
-  Widget listSavedEvents() {
-    return ListView.builder(
-      controller: savedEventsScrollController,
-      key: UniqueKey(),
-      shrinkWrap: true,
-      itemCount: savedEventResults.length,
-      itemBuilder: (context, index) {
-        WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(savedEventResults[index].data['d']));
-        return Padding(
-          padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: savedEventResults.length - 1 == index ? 16.0 : 0),
-          child: EventBlock(
-            currentUID: widget.currentUser.uid,
-            event: event,
-            shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-            viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-            viewEventTickets: null,
-            numOfTicsForEvent: null,
-            eventImgSize: MediaQuery.of(context).size.width - 16,
-            eventDescHeight: 120.0,
-          ),
-        );
-      },
-    );
-  }
+//  Widget listSavedEvents() {
+//    return LiquidPullToRefresh(
+//      onRefresh: refreshData,
+//      child: ListView.builder(
+//        controller: savedEventsScrollController,
+//        key: UniqueKey(),
+//        shrinkWrap: true,
+//        padding: EdgeInsets.only(
+//          top: 4.0,
+//          bottom: 4.0,
+//        ),
+//        itemCount: savedEventResults.length,
+//        itemBuilder: (context, index) {
+//          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(savedEventResults[index].data['d']));
+//          return Padding(
+//            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: savedEventResults.length - 1 == index ? 16.0 : 0),
+//            child: EventBlock(
+//              currentUID: widget.currentUser.uid,
+//              event: event,
+//              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+//              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+//              viewEventTickets: null,
+//              numOfTicsForEvent: null,
+//              eventImgSize: MediaQuery.of(context).size.width - 16,
+//              eventDescHeight: 120.0,
+//            ),
+//          );
+//        },
+//      ),
+//    );
+//  }
 
   showNewEventOrStreamDialog() {
     ShowAlertDialogService().showNewEventOrStreamDialog(
@@ -656,34 +736,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     );
   }
 
-//  Widget listMyEvents() {
-//    return LiquidPullToRefresh(
-//      color: CustomColors.webblenRed,
-//      onRefresh: refreshData,
-//      child: ListView.builder(
-//        controller: myEventsScrollController,
-//        key: UniqueKey(),
-//        shrinkWrap: true,
-//        itemCount: myEventResults.length,
-//        itemBuilder: (context, index) {
-//          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(myEventResults[index].data['d']));
-//          return Padding(
-//            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: myEventResults.length - 1 == index ? 16.0 : 0),
-//            child: EventBlock(
-//              event: event,
-//              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-//              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-//              viewEventTickets: null,
-//              numOfTicsForEvent: null,
-//              eventImgSize: MediaQuery.of(context).size.width - 16,
-//              eventDescHeight: 120.0,
-//            ),
-//          );
-//        },
-//      ),
-//    );
-//  }
-
   @override
   void initState() {
     super.initState();
@@ -695,12 +747,12 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     }
     setState(() {});
     _tabController = new TabController(
-      length: 3,
+      length: 2,
       vsync: this,
     );
     liveEventsScrollController = ScrollController();
     virtualEventsScrollController = ScrollController();
-    savedEventsScrollController = ScrollController();
+//    savedEventsScrollController = ScrollController();
     liveEventsScrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * liveEventsScrollController.position.maxScrollExtent;
       if (liveEventsScrollController.position.pixels > triggerFetchMoreSize) {
@@ -713,22 +765,17 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         getAdditionalVirtualEvents();
       }
     });
-    savedEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * savedEventsScrollController.position.maxScrollExtent;
-      if (savedEventsScrollController.position.pixels > triggerFetchMoreSize) {
-        getAdditionalSavedEvents();
-      }
-    });
-//    followingEventsScrollController.addListener(() {
-//      double triggerFetchMoreSize = 0.9 * followingEventsScrollController.position.maxScrollExtent;
-//      if (followingEventsScrollController.position.pixels > triggerFetchMoreSize) {
-//        getAdditionalMyEvents();
+//    savedEventsScrollController.addListener(() {
+//      double triggerFetchMoreSize = 0.9 * savedEventsScrollController.position.maxScrollExtent;
+//      if (savedEventsScrollController.position.pixels > triggerFetchMoreSize) {
+//        getAdditionalSavedEvents();
 //      }
 //    });
+    areaName = widget.areaName;
+    setState(() {});
     LocationService().getZipFromLatLon(widget.currentLat, widget.currentLon).then((res) {
       areaCodeFilter = res;
-      getSavedEvents();
-//      getMyEvents();
+      //getSavedEvents();
       getVirtualEvents();
       getLiveEvents();
     });
@@ -739,7 +786,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     super.dispose();
     liveEventsScrollController.dispose();
     virtualEventsScrollController.dispose();
-    savedEventsScrollController.dispose();
+    //savedEventsScrollController.dispose();
 //    followingEventsScrollController.dispose();
   }
 
@@ -767,36 +814,36 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                     children: [
                       MediaQuery(
                         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                        child: widget.areaName.length <= 6
+                        child: areaName.length <= 6
                             ? Fonts().textW700(
-                                widget.areaName,
+                                areaName,
                                 40,
                                 Colors.black,
                                 TextAlign.left,
                               )
-                            : widget.areaName.length <= 8
+                            : areaName.length <= 8
                                 ? Fonts().textW700(
-                                    widget.areaName,
+                                    areaName,
                                     35,
                                     Colors.black,
                                     TextAlign.left,
                                   )
-                                : widget.areaName.length <= 10
+                                : areaName.length <= 10
                                     ? Fonts().textW700(
-                                        widget.areaName,
+                                        areaName,
                                         30,
                                         Colors.black,
                                         TextAlign.left,
                                       )
-                                    : widget.areaName.length <= 12
+                                    : areaName.length <= 12
                                         ? Fonts().textW700(
-                                            widget.areaName,
+                                            areaName,
                                             25,
                                             Colors.black,
                                             TextAlign.left,
                                           )
                                         : Fonts().textW700(
-                                            widget.areaName,
+                                            areaName,
                                             20,
                                             Colors.black,
                                             TextAlign.left,
@@ -821,10 +868,14 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                           children: <Widget>[
                             GestureDetector(
                               onTap: () => showEventPreferenceDialog(),
-                              child: Icon(
-                                FontAwesomeIcons.slidersH,
-                                size: 20.0,
-                                color: Colors.black,
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                child: Icon(
+                                  FontAwesomeIcons.slidersH,
+                                  size: 20.0,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
                             GestureDetector(
@@ -832,18 +883,26 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                 context: context,
                                 currentUser: widget.currentUser,
                               ).transitionToSearchPage(),
-                              child: Icon(
-                                FontAwesomeIcons.search,
-                                size: 20.0,
-                                color: Colors.black,
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                child: Icon(
+                                  FontAwesomeIcons.search,
+                                  size: 20.0,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
                             GestureDetector(
                               onTap: () => showNewEventOrStreamDialog(),
-                              child: Icon(
-                                FontAwesomeIcons.plus,
-                                size: 20.0,
-                                color: Colors.black,
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                child: Icon(
+                                  FontAwesomeIcons.plus,
+                                  size: 20.0,
+                                  color: Colors.black,
+                                ),
                               ),
                             ),
                           ],
@@ -856,11 +915,13 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
             ),
           ),
           Container(
+            height: 50,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TabBar(
                   controller: _tabController,
+                  labelPadding: EdgeInsets.symmetric(horizontal: 60.0),
                   indicatorColor: CustomColors.webblenRed,
                   labelColor: CustomColors.darkGray,
                   isScrollable: true,
@@ -885,44 +946,44 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    Tab(
-                      child: CustomText(
-                        context: context,
-                        text: "Saved",
-                        textColor: Colors.black,
-                        textAlign: TextAlign.center,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+//                    Tab(
+//                      child: CustomText(
+//                        context: context,
+//                        text: "Saved",
+//                        textColor: Colors.black,
+//                        textAlign: TextAlign.center,
+//                        fontSize: 15.0,
+//                        fontWeight: FontWeight.w500,
+//                      ),
+//                    ),
                   ],
                 ),
               ],
             ),
           ),
           Expanded(
-            child: LiquidPullToRefresh(
-              onRefresh: refreshData,
-              child: Container(
-                width: MediaQuery.of(context).size.width,
-                child: DefaultTabController(
-                  length: 3,
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: <Widget>[
-                      //LIVE EVENTS
-                      Container(
-                        key: PageStorageKey('key0'),
-                        color: Colors.white,
-                        child: isLoading
-                            ? LoadingScreen(
-                                context: context,
-                                loadingDescription: 'Loading Live Events...',
-                              )
-                            : liveEventResults.isEmpty
-                                ? Column(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              child: DefaultTabController(
+                length: 2,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: <Widget>[
+                    //LIVE EVENTS
+                    Container(
+                      key: PageStorageKey('key0'),
+                      color: Colors.white,
+                      child: isLoading
+                          ? LoadingScreen(
+                              context: context,
+                              loadingDescription: 'Loading Live Events...',
+                            )
+                          : liveEventResults.isEmpty
+                              ? LiquidPullToRefresh(
+                                  onRefresh: refreshData,
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      SizedBox(height: 32.0),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[
@@ -930,13 +991,10 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                             constraints: BoxConstraints(
                                               maxWidth: MediaQuery.of(context).size.width - 16,
                                             ),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "We Could Not Find Any Live Events According to Your Preferences",
-                                              textColor: Colors.black,
+                                            child: Text(
+                                              "We Could Not Find Any Events \nAccording to Your Preferences",
                                               textAlign: TextAlign.center,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
                                             ),
                                           )
                                         ],
@@ -947,112 +1005,103 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                         children: <Widget>[
                                           GestureDetector(
                                             onTap: () => showEventPreferenceDialog(),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "Change My Preferences",
-                                              textColor: Colors.blueAccent,
+                                            child: Text(
+                                              "Change My Preferences",
                                               textAlign: TextAlign.center,
-                                              underline: false,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
                                             ),
                                           ),
                                         ],
                                       ),
+                                      SizedBox(height: 100.0),
                                     ],
-                                  )
-                                : listLiveEvents(),
-                      ),
-                      //VIRTUAL EVENTS
-                      Container(
-                        key: PageStorageKey('key1'),
-                        color: Colors.white,
-                        child: isLoading
-                            ? LoadingScreen(
-                                context: context,
-                                loadingDescription: 'Loading Virtual Events...',
-                              )
-                            : virtualEventResults.isEmpty
-                                ? Column(
-                                    children: <Widget>[
-                                      SizedBox(height: 32.0),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width - 16,
-                                            ),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "We Could Not Find Any Virtual Events According to Your Preferences",
-                                              textColor: Colors.black,
-                                              textAlign: TextAlign.center,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(height: 8.0),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          GestureDetector(
-                                            onTap: () => showEventPreferenceDialog(),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "Change My Preferences",
-                                              textColor: Colors.blueAccent,
-                                              textAlign: TextAlign.center,
-                                              underline: false,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
-                                            ),
+                                  ),
+                                )
+                              : listLiveEvents(),
+                    ),
+                    //VIRTUAL EVENTS
+                    Container(
+                      key: PageStorageKey('key1'),
+                      color: Colors.white,
+                      child: isLoading
+                          ? LoadingScreen(
+                              context: context,
+                              loadingDescription: 'Loading Virtual Events...',
+                            )
+                          : virtualEventResults.isEmpty
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Container(
+                                          constraints: BoxConstraints(
+                                            maxWidth: MediaQuery.of(context).size.width - 16,
                                           ),
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                : listVirtualEvents(),
-                      ),
-                      //SAVED EVENTS
-                      Container(
-                        key: PageStorageKey('key2'),
-                        color: Colors.white,
-                        child: isLoading
-                            ? LoadingScreen(
-                                context: context,
-                                loadingDescription: 'Loading Saved Events...',
-                              )
-                            : savedEventResults.isEmpty
-                                ? Column(
-                                    children: <Widget>[
-                                      SizedBox(height: 32.0),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width - 16,
-                                            ),
-                                            child: CustomText(
-                                              context: context,
-                                              text: "You Do Not Have Any Upcoming Events Saved",
-                                              textColor: Colors.black,
-                                              textAlign: TextAlign.center,
-                                              fontSize: 16.0,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ],
-                                  )
-                                : listSavedEvents(),
-                      ),
-                    ],
-                  ),
+                                          child: Text(
+                                            "We Could Not Find Any Streams \nAccording to Your Preferences",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                    SizedBox(height: 8.0),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        GestureDetector(
+                                          onTap: () => showEventPreferenceDialog(),
+                                          child: Text(
+                                            "Change My Preferences",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 100.0),
+                                  ],
+                                )
+                              : listVirtualEvents(),
+                    ),
+                    //SAVED EVENTS
+//                    Container(
+//                      key: PageStorageKey('key2'),
+//                      color: Colors.white,
+//                      child: isLoading
+//                          ? LoadingScreen(
+//                              context: context,
+//                              loadingDescription: 'Loading Saved Events...',
+//                            )
+//                          : savedEventResults.isEmpty
+//                              ? Column(
+//                                  mainAxisAlignment: MainAxisAlignment.center,
+//                                  children: <Widget>[
+//                                    Row(
+//                                      mainAxisAlignment: MainAxisAlignment.center,
+//                                      children: <Widget>[
+//                                        Container(
+//                                          constraints: BoxConstraints(
+//                                            maxWidth: MediaQuery.of(context).size.width - 16,
+//                                          ),
+//                                          child: CustomText(
+//                                            context: context,
+//                                            text: "You Do Not Have Any Upcoming Events Saved",
+//                                            textColor: Colors.black,
+//                                            textAlign: TextAlign.center,
+//                                            fontSize: 16.0,
+//                                            fontWeight: FontWeight.w500,
+//                                          ),
+//                                        )
+//                                      ],
+//                                    ),
+//                                  ],
+//                                )
+//                              : listSavedEvents(),
+//                    ),
+                  ],
                 ),
               ),
             ),

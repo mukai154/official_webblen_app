@@ -7,6 +7,7 @@ import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/ticket_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -37,6 +38,7 @@ class EventDetailsPage extends StatefulWidget {
 }
 
 class _EventDetailsPageState extends State<EventDetailsPage> {
+  WebblenUser host;
   bool isLoading = true;
   bool eventStarted = false;
   WebblenEvent event;
@@ -260,20 +262,22 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     super.initState();
     EventDataService().getEvent(widget.eventID).then((res) {
       event = res;
-      print(event);
       if (event.startDateTimeInMilliseconds < currentDateTimeInMilliseconds) {
         eventStarted = true;
       }
-      if (event.hasTickets) {
-        TicketDataService().getEventTicketDistro(widget.eventID).then((res) {
-          eventTicketDistro = res;
+      WebblenUserData().getUserByID(event.authorID).then((res) {
+        host = res;
+        if (event.hasTickets) {
+          TicketDataService().getEventTicketDistro(widget.eventID).then((res) {
+            eventTicketDistro = res;
+            isLoading = false;
+            setState(() {});
+          });
+        } else {
           isLoading = false;
           setState(() {});
-        });
-      } else {
-        isLoading = false;
-        setState(() {});
-      }
+        }
+      });
     });
   }
 
@@ -290,7 +294,30 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             ),
           ),
         ),
-        SizedBox(height: 8.0),
+        SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => PageTransitionService(
+            context: context,
+            currentUser: widget.currentUser,
+            webblenUser: host,
+          ).transitionToUserPage(),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              children: [
+                Text(
+                  "Hosted By ",
+                  style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  "@${host.username}",
+                  style: TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 4.0),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: CustomText(
@@ -298,7 +325,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             text: event.category,
             textColor: Colors.black,
             textAlign: TextAlign.left,
-            fontSize: 24.0,
+            fontSize: 20.0,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -324,7 +351,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             children: <Widget>[
               Fonts().textW700(
                 'Details',
-                24.0,
+                18.0,
                 Colors.black,
                 TextAlign.left,
               ),
@@ -706,7 +733,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    Fonts().textW700("Virtual Event", 16.0, Colors.black, TextAlign.left),
+                                    Fonts().textW700("Stream", 16.0, Colors.black, TextAlign.left),
                                     Fonts().textW300("on Webblen", 14.0, Colors.black, TextAlign.left),
                                   ],
                                 ),

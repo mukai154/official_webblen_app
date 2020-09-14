@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -8,97 +9,54 @@ import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
 
 class UserRow extends StatelessWidget {
   final WebblenUser user;
+  final double size;
   final VoidCallback transitionToUserDetails;
-  final VoidCallback sendUserFriendRequest;
-  final TextStyle headerTextStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 20.0,
-    color: FlatColors.lightAmericanGray,
-  );
-  final TextStyle subHeaderTextStyle = TextStyle(
-    fontWeight: FontWeight.w500,
-    fontSize: 14.0,
-    color: FlatColors.londonSquare,
-  );
-  final TextStyle bodyTextStyle = TextStyle(
-    fontSize: 15.0,
-    fontWeight: FontWeight.w500,
-    color: FlatColors.blackPearl,
-  );
+  final VoidCallback followUnfollowUser;
 
   UserRow({
     this.user,
+    this.size,
     this.transitionToUserDetails,
-    this.sendUserFriendRequest,
+    this.followUnfollowUser,
   });
 
   @override
   Widget build(BuildContext context) {
-    final userCard = Container(
-      color: Colors.white,
-      margin: EdgeInsets.only(
-        bottom: 1.0,
-      ),
-      padding: EdgeInsets.symmetric(
-        vertical: 8.0,
-        horizontal: 16.0,
-      ),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            flex: 1,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                UserDetailsProfilePic(
-                  userPicUrl: user.profile_pic,
-                  size: 70.0,
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: 8.0,
-                    ),
-                    MediaQuery(
-                      data: MediaQuery.of(context).copyWith(
-                        textScaleFactor: 1.0,
-                      ),
-                      child: user.username.length > 15
-                          ? Fonts().textW700(
-                              "@${user.username}",
-                              15.0,
-                              Colors.black,
-                              TextAlign.left,
-                            )
-                          : Fonts().textW700(
-                              "@${user.username}",
-                              18.0,
-                              Colors.black,
-                              TextAlign.left,
-                            ),
-                    ),
-                    //communityBuilderBadge,
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-
     return GestureDetector(
       onTap: transitionToUserDetails,
-      child: userCard,
+      child: Container(
+        child: Row(
+          children: <Widget>[
+            Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                SizedBox(height: 4.0),
+                CachedNetworkImage(
+                  imageUrl: user.profile_pic,
+                  imageBuilder: (context, imageProvider) => Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(width: 8.0),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  "@${user.username}",
+                  style: TextStyle(color: Colors.black, fontSize: size < 50 ? 14 : 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
     );
   }
 }
