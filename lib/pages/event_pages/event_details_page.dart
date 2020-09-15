@@ -3,8 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:random_string/random_string.dart';
 import 'package:share/share.dart';
+import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/ticket_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
@@ -17,12 +17,12 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/open_url.dart';
-import 'package:webblen/utils/time.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
-import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
+
+import 'create_event_page.dart';
 
 class EventDetailsPage extends StatefulWidget {
   final String eventID;
@@ -113,10 +113,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   void editEventAction() {
     Navigator.of(context).pop();
-    PageTransitionService(
-      context: context,
-      eventID: event.id,
-    ).transitionToCreateEventPage();
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => CreateEventPage(eventID: event.id, isStream: event.isDigitalEvent)));
   }
 
   void viewAttendeesAction() {
@@ -148,11 +145,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 //    });
   }
 
-  void addEventToCalendar() async {
-    ShowAlertDialogService().showLoadingDialog(context);
-    String timezone = await Time().getLocalTimezone();
+  void createEventReminder() async {
     CreateNotification().createTimedNotification(
-      randomBetween(0, 99),
+      event.title.length,
       event.startDateTimeInMilliseconds - 900000,
       event.title,
       "Event Starts in 15 Minutes!",
@@ -186,7 +181,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         null, //shareEventAction,
         shareLinkAction,
         event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == event.authorID ? editEventAction : null,
-        widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch ? deleteEventAction : null);
+        widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && !event.hasTickets
+            ? deleteEventAction
+            : null);
   }
 
   Widget ticketBuilder(TicketDistro ticketDistro) {
@@ -267,6 +264,9 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
       }
       WebblenUserData().getUserByID(event.authorID).then((res) {
         host = res;
+        if (event.authorID != widget.currentUser.uid) {
+          createEventReminder();
+        }
         if (event.hasTickets) {
           TicketDataService().getEventTicketDistro(widget.eventID).then((res) {
             eventTicketDistro = res;
@@ -294,50 +294,19 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             ),
           ),
         ),
-        SizedBox(height: 8),
-        GestureDetector(
-          onTap: () => PageTransitionService(
-            context: context,
-            currentUser: widget.currentUser,
-            webblenUser: host,
-          ).transitionToUserPage(),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              children: [
-                Text(
-                  "Hosted By ",
-                  style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-                Text(
-                  "@${host.username}",
-                  style: TextStyle(color: Colors.blue, fontSize: 14, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-          ),
-        ),
-        SizedBox(height: 4.0),
+        SizedBox(height: 8.0),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: CustomText(
-            context: context,
-            text: event.category,
-            textColor: Colors.black,
-            textAlign: TextAlign.left,
-            fontSize: 20.0,
-            fontWeight: FontWeight.w700,
+          child: Text(
+            event.title,
+            style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
           ),
         ),
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: CustomText(
-            context: context,
-            text: event.type,
-            textColor: Colors.black38,
-            textAlign: TextAlign.left,
-            fontSize: 14.0,
-            fontWeight: FontWeight.w500,
+          child: Text(
+            '${event.startDate} ${event.startTime} ${event.timezone}',
+            style: TextStyle(color: CustomColors.webblenRed, fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ),
         Padding(
@@ -355,162 +324,92 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                 Colors.black,
                 TextAlign.left,
               ),
-              Fonts().textW500(
+              Fonts().textW400(
                 event.desc,
+                14.0,
+                Colors.black,
+                TextAlign.left,
+              ),
+              SizedBox(height: 16.0),
+              Fonts().textW700(
+                'Address',
                 16.0,
                 Colors.black,
                 TextAlign.left,
               ),
-            ],
-          ),
-        ),
-        eventIsLive
-            ? Container()
-            : Padding(
-                padding: EdgeInsets.only(
-                  left: 16.0,
-                  top: 16.0,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Column(
-                      children: <Widget>[
-                        event.streetAddress == null
-                            ? Container()
-                            : Icon(
-                                FontAwesomeIcons.directions,
-                                size: 24.0,
-                                color: Colors.black,
-                              ),
-                      ],
-                    ),
-                    SizedBox(
-                      width: 8.0,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        SizedBox(
-                          height: 4.0,
-                        ),
-                        event.streetAddress == null
-                            ? Container()
-                            : Container(
-                                constraints: BoxConstraints(
-                                  maxWidth: MediaQuery.of(context).size.width * 0.8,
-                                ),
-                                child: CustomText(
-                                  context: context,
-                                  text: '${event.streetAddress.replaceAll(', USA', '').replaceAll(', United States', '')}',
-                                  textColor: Colors.black,
-                                  textAlign: TextAlign.left,
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                        event.venueName == null
-                            ? Container()
-                            : CustomText(
-                                context: context,
-                                text: '${event.venueName}',
-                                textColor: Colors.black54,
-                                textAlign: TextAlign.left,
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w400,
-                              ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-        eventIsLive || event.streetAddress == null
-            ? Container()
-            : Padding(
-                padding: EdgeInsets.only(
-                  left: 16.0,
-                  top: 4.0,
-                ),
-                child: InkWell(
-                  onTap: () => OpenUrl().openMaps(context, eventLat.toString(), eventLon.toString()),
-                  child: Fonts().textW500(
-                    'View in Maps',
-                    14.0,
-                    FlatColors.webblenDarkBlue,
-                    TextAlign.left,
-                  ),
-                ),
-              ),
-        Padding(
-          padding: EdgeInsets.only(
-            left: 18.0,
-            top: 24.0,
-          ),
-          child: Row(
-            children: <Widget>[
-              Column(
-                children: <Widget>[
-                  Icon(
-                    FontAwesomeIcons.calendar,
-                    size: 20.0,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
               SizedBox(
-                width: 8.0,
+                height: 2.0,
               ),
-              Column(
-                children: <Widget>[
-                  SizedBox(
-                    height: 4.0,
-                  ),
-                  Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.8,
+              event.streetAddress == null
+                  ? Container()
+                  : Text(
+                      '${event.streetAddress.replaceAll(', USA', '').replaceAll(', United States', '')}',
+                      style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w400),
                     ),
-                    child: CustomText(
-                      context: context,
-                      text: '${event.startDate} ${event.startTime} ${event.timezone}',
-                      textColor: Colors.black,
-                      textAlign: TextAlign.left,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w400,
+              event.venueName == null || event.venueName.isEmpty
+                  ? Container()
+                  : Text(
+                      '${event.venueName}',
+                      style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w400),
                     ),
-                  ),
-                ],
+              SizedBox(height: 4.0),
+              InkWell(
+                onTap: () => OpenUrl().openMaps(context, eventLat.toString(), eventLon.toString()),
+                child: Text(
+                  'View in Maps',
+                  style: TextStyle(color: CustomColors.webblenRed, fontSize: 14, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
           ),
         ),
-        eventIsLive || event.startDateTimeInMilliseconds == null //|| currentDateTime > event.endDateInMilliseconds
-            ? Container()
-            : Padding(
-                padding: EdgeInsets.only(
-                  left: 16.0,
-                  top: 2.0,
+        SizedBox(height: 16.0),
+        GestureDetector(
+          onTap: () => PageTransitionService(
+            context: context,
+            currentUser: widget.currentUser,
+            webblenUser: host,
+          ).transitionToUserPage(),
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Text(
+                  "Hosted By ",
+                  style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-                child: InkWell(
-                  onTap: () => addEventToCalendar(),
-                  child: Fonts().textW500(
-                    'Add to Calendar',
-                    14.0,
-                    FlatColors.webblenDarkBlue,
-                    TextAlign.left,
-                  ),
+                Text(
+                  "@${host.username}",
+                  style: TextStyle(color: CustomColors.webblenRed, fontSize: 14, fontWeight: FontWeight.bold),
                 ),
-              ),
+              ],
+            ),
+          ),
+        ),
+        SizedBox(height: 4.0),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            event.category,
+            style: TextStyle(color: Colors.black38, fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            event.type,
+            style: TextStyle(color: Colors.black38, fontSize: 14, fontWeight: FontWeight.w500),
+          ),
+        ),
         event.fbUsername.isNotEmpty || event.twitterUsername.isNotEmpty || event.website.isNotEmpty
             ? Padding(
                 padding: EdgeInsets.only(
                   left: 16.0,
                   top: 24.0,
                 ),
-                child: Fonts().textW700(
-                  'Additional Info',
-                  18.0,
-                  FlatColors.darkGray,
-                  TextAlign.left,
+                child: Text(
+                  "Additional Info",
+                  style: TextStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
                 ),
               )
             : Container(),
@@ -595,7 +494,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(
-        isLoading ? '' : event.title,
+        isLoading ? '' : event.isDigitalEvent ? "Stream" : "Event",
         IconButton(
           icon: Icon(
             FontAwesomeIcons.ellipsisH,
@@ -690,20 +589,30 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    CustomColorButton(
-                                      text: "Start Stream",
-                                      textSize: 14.0,
-                                      textColor: Colors.white,
-                                      backgroundColor: FlatColors.webblenRed,
-                                      height: 35.0,
-                                      width: MediaQuery.of(context).size.width * 0.4,
-                                      onPressed: () => PageTransitionService(
-                                        context: context,
-                                        currentUser: widget.currentUser,
-                                        event: event,
-                                        clientRole: ClientRole.Broadcaster,
-                                      ).transitionToDigitalEventHostPage(),
-                                    ),
+                                    currentDateTimeInMilliseconds > event.endDateTimeInMilliseconds
+                                        ? CustomColorButton(
+                                            text: "Stream Has Ended",
+                                            textSize: 14.0,
+                                            textColor: Colors.black,
+                                            backgroundColor: Colors.white,
+                                            height: 35.0,
+                                            width: MediaQuery.of(context).size.width * 0.4,
+                                            onPressed: null,
+                                          )
+                                        : CustomColorButton(
+                                            text: "Start Stream",
+                                            textSize: 14.0,
+                                            textColor: Colors.white,
+                                            backgroundColor: FlatColors.webblenRed,
+                                            height: 35.0,
+                                            width: MediaQuery.of(context).size.width * 0.4,
+                                            onPressed: () => PageTransitionService(
+                                              context: context,
+                                              currentUser: widget.currentUser,
+                                              event: event,
+                                              clientRole: ClientRole.Broadcaster,
+                                            ).transitionToDigitalEventHostPage(),
+                                          ),
                                   ],
                                 ),
                               ],
@@ -741,19 +650,29 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
-                                    CustomColorButton(
-                                      text: "Watch Now",
-                                      textSize: 14.0,
-                                      textColor: Colors.white,
-                                      backgroundColor: FlatColors.electronBlue,
-                                      height: 35.0,
-                                      width: MediaQuery.of(context).size.width * 0.4,
-                                      onPressed: () => PageTransitionService(
-                                        context: context,
-                                        currentUser: widget.currentUser,
-                                        event: event,
-                                      ).transitionToDigitalEventViewerPage(),
-                                    ),
+                                    currentDateTimeInMilliseconds > event.endDateTimeInMilliseconds
+                                        ? CustomColorButton(
+                                            text: "Stream Has Ended",
+                                            textSize: 14.0,
+                                            textColor: Colors.black,
+                                            backgroundColor: Colors.white,
+                                            height: 35.0,
+                                            width: MediaQuery.of(context).size.width * 0.4,
+                                            onPressed: null,
+                                          )
+                                        : CustomColorButton(
+                                            text: "Watch Now",
+                                            textSize: 14.0,
+                                            textColor: Colors.white,
+                                            backgroundColor: FlatColors.electronBlue,
+                                            height: 35.0,
+                                            width: MediaQuery.of(context).size.width * 0.4,
+                                            onPressed: () => PageTransitionService(
+                                              context: context,
+                                              currentUser: widget.currentUser,
+                                              event: event,
+                                            ).transitionToDigitalEventViewerPage(),
+                                          ),
                                   ],
                                 ),
                               ],

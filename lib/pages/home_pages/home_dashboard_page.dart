@@ -49,19 +49,21 @@ class HomeDashboardPage extends StatefulWidget {
 
 class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTickerProviderStateMixin {
   bool isLoading = true;
+
   //Scroller & Paging
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
   ScrollController liveEventsScrollController;
   ScrollController virtualEventsScrollController;
   ScrollController savedEventsScrollController;
-//  ScrollController followingEventsScrollController;
   int resultsPerPage = 10;
+
   //Filter
   String areaName = "My Current Location";
   String areaCodeFilter;
   String eventTypeFilter = "None";
   String eventCategoryFilter = "None";
+
   //Event Results
   int dateTimeInMilliseconds2hoursAgo = DateTime.now().millisecondsSinceEpoch - 7400000;
   CollectionReference eventsRef = Firestore.instance.collection("events");
@@ -72,22 +74,18 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   DocumentSnapshot lastLiveEventDocSnap;
   DocumentSnapshot lastVirtualEventDocSnap;
   DocumentSnapshot lastSavedEventDocSnap;
-//  DocumentSnapshot lastFollowingEventDocSnap;
   bool loadingAdditionalLiveEvents = false;
   bool moreLiveEventsAvailable = true;
   bool loadingAdditionalVirtualEvents = false;
   bool moreVirtualEventsAvailable = true;
   bool loadingAdditionalSavedEvents = false;
   bool moreSavedEventsAvailable = true;
-//  bool loadingAdditionalFollowingEvents = false;
-//  bool moreFollowingsAvailable = true;
 
   //ADMOB
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
   GoogleMapsPlaces _places = GoogleMapsPlaces(
     apiKey: Strings.googleAPIKEY,
-    //baseUrl: Strings.proxyMapsURL,
   );
 
   getLiveEvents() async {
@@ -100,7 +98,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
-      print(eventTypeFilter);
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.type', isEqualTo: eventTypeFilter)
@@ -145,7 +142,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .limit(resultsPerPage);
     } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
-      print(eventTypeFilter);
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: true)
@@ -176,39 +172,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       lastVirtualEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
       virtualEventResults = querySnapshot.documents;
     }
-    //isLoading = false;
     setState(() {});
   }
-
-//  getSavedEvents() async {
-//    Query eventsQuery;
-//    eventsQuery = eventsRef
-//        .where('d.savedBy', arrayContains: widget.currentUser.uid)
-//        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-//        .orderBy('d.endDateTimeInMilliseconds', descending: false)
-//        .limit(resultsPerPage);
-//    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-//    if (querySnapshot.documents.isNotEmpty) {
-//      lastSavedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-//      savedEventResults = querySnapshot.documents;
-//    }
-//    //isLoading = false;
-//    setState(() {});
-//  }
-
-//  getFollowedEvents() async {
-//    Query eventsQuery = eventsRef
-//        .where("d.startDateTimeInMilliseconds", isGreaterThan: DateTime.now().millisecondsSinceEpoch - 3)
-//        .orderBy('d.startDateTimeInMilliseconds', descending: true)
-//        .limit(resultsPerPage);
-//    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-//    if (querySnapshot.documents.isNotEmpty) {
-//      lastFollowingEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-//      followingEventsResults = querySnapshot.documents;
-//    }
-//    //isLoading = false;
-//    setState(() {});
-//  }
 
   getAdditionalLiveEvents() async {
     if (isLoading || !moreLiveEventsAvailable || loadingAdditionalLiveEvents) {
@@ -341,28 +306,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     loadingAdditionalSavedEvents = false;
     setState(() {});
   }
-
-//  getAdditionalMyEvents() async {
-//    if (isLoading || !moreFollowingEventsAvailable || loadingAdditionalFollowingEvents) {
-//      return;
-//    }
-//    loadingAdditionalFollowingEvents = true;
-//    setState(() {});
-//    Query eventsQuery = eventsRef
-//        .where("d.authorID", isEqualTo: widget.currentUser.uid)
-//        .orderBy('d.startDateTimeInMilliseconds', descending: true)
-//        .startAfterDocument(lastFollowingEventDocSnap)
-//        .limit(resultsPerPage);
-//
-//    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-//    lastMyEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-//    myEventResults.addAll(querySnapshot.documents);
-//    if (querySnapshot.documents.length == 0) {
-//      moreMyEventsAvailable = false;
-//    }
-//    loadingAdditionalMyEvents = false;
-//    setState(() {});
-//  }
 
   setNewLocation() async {
     Navigator.of(context).pop();
@@ -563,7 +506,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(liveEventResults[index].data['d']));
           double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
             return Padding(
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
@@ -635,7 +577,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(virtualEventResults[index].data['d']));
           double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
             return Padding(
               padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
@@ -690,38 +631,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     );
   }
 
-//  Widget listSavedEvents() {
-//    return LiquidPullToRefresh(
-//      onRefresh: refreshData,
-//      child: ListView.builder(
-//        controller: savedEventsScrollController,
-//        key: UniqueKey(),
-//        shrinkWrap: true,
-//        padding: EdgeInsets.only(
-//          top: 4.0,
-//          bottom: 4.0,
-//        ),
-//        itemCount: savedEventResults.length,
-//        itemBuilder: (context, index) {
-//          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(savedEventResults[index].data['d']));
-//          return Padding(
-//            padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: savedEventResults.length - 1 == index ? 16.0 : 0),
-//            child: EventBlock(
-//              currentUID: widget.currentUser.uid,
-//              event: event,
-//              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-//              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-//              viewEventTickets: null,
-//              numOfTicsForEvent: null,
-//              eventImgSize: MediaQuery.of(context).size.width - 16,
-//              eventDescHeight: 120.0,
-//            ),
-//          );
-//        },
-//      ),
-//    );
-//  }
-
   showNewEventOrStreamDialog() {
     ShowAlertDialogService().showNewEventOrStreamDialog(
       context,
@@ -739,7 +648,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   @override
   void initState() {
     super.initState();
-    //loadData();
     if (Platform.isIOS) {
       adMobUnitID = 'ca-app-pub-2136415475966451/5262349288';
     } else if (Platform.isAndroid) {
@@ -752,7 +660,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     );
     liveEventsScrollController = ScrollController();
     virtualEventsScrollController = ScrollController();
-//    savedEventsScrollController = ScrollController();
     liveEventsScrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * liveEventsScrollController.position.maxScrollExtent;
       if (liveEventsScrollController.position.pixels > triggerFetchMoreSize) {
@@ -765,12 +672,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         getAdditionalVirtualEvents();
       }
     });
-//    savedEventsScrollController.addListener(() {
-//      double triggerFetchMoreSize = 0.9 * savedEventsScrollController.position.maxScrollExtent;
-//      if (savedEventsScrollController.position.pixels > triggerFetchMoreSize) {
-//        getAdditionalSavedEvents();
-//      }
-//    });
     areaName = widget.areaName;
     setState(() {});
     LocationService().getZipFromLatLon(widget.currentLat, widget.currentLon).then((res) {
@@ -786,8 +687,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     super.dispose();
     liveEventsScrollController.dispose();
     virtualEventsScrollController.dispose();
-    //savedEventsScrollController.dispose();
-//    followingEventsScrollController.dispose();
   }
 
   @override

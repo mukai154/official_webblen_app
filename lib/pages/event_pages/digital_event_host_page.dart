@@ -17,7 +17,6 @@ import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/agora/agora_service.dart';
 import 'package:webblen/styles/fonts.dart';
-import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/check_in_count_box.dart';
 import 'package:webblen/widgets/events/live_now_box.dart';
 import 'package:webblen/widgets/events/viewer_count_box.dart';
@@ -256,17 +255,15 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
       child: Column(
         children: [
           Container(
-            height: 25,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CustomText(
-                  context: context,
-                  text: widget.event.title,
-                  textColor: Colors.white,
-                  textAlign: TextAlign.left,
-                  fontSize: 22.0,
-                  fontWeight: FontWeight.w700,
+                Container(
+                  width: MediaQuery.of(context).size.width * 0.85,
+                  child: Text(
+                    widget.event.title,
+                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {

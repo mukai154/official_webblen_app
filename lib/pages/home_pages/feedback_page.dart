@@ -1,5 +1,8 @@
+import 'dart:core';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -72,6 +75,11 @@ class _FeedbackPageState extends State<FeedbackPage> {
     );
   }
 
+  openEmailForSupport() {
+    final Uri emailURI = Uri(scheme: 'mailto', path: 'team@webblen.com', queryParameters: {'subject': 'App Support'});
+    launch(emailURI.toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -94,7 +102,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
       ),
       body: Container(
         color: Colors.white,
-        margin: EdgeInsets.symmetric(horizontal: 16.0),
+        padding: EdgeInsets.symmetric(horizontal: 16.0),
         child: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: ListView(
@@ -119,6 +127,16 @@ class _FeedbackPageState extends State<FeedbackPage> {
               ),
               SizedBox(height: 16.0),
               feedbackField(),
+              SizedBox(height: 32.0),
+              GestureDetector(
+                onTap: () => openEmailForSupport(),
+                child: Fonts().textW700(
+                  "Need Support?",
+                  14,
+                  Colors.blue,
+                  TextAlign.left,
+                ),
+              ),
             ],
           ),
         ),

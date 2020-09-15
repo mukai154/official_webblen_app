@@ -93,7 +93,7 @@ class _EventBlockState extends State<EventBlock> {
             Column(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 4),
+                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 0),
                   height: size,
                   width: MediaQuery.of(context).size.width - (125 + 32),
                   decoration: BoxDecoration(
@@ -162,10 +162,6 @@ class _EventBlockState extends State<EventBlock> {
                                 ),
                               ],
                             ),
-//                      Container(
-//                        height: 1.0,
-//                        color: Colors.black12,
-//                      ),
                       SizedBox(height: 6.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

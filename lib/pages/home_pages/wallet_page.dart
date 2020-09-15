@@ -193,7 +193,6 @@ class _WalletPageState extends State<WalletPage> {
         }
       } else {
         StripePaymentService().updateAccountVerificationStatus(currentUID).then((status) {
-          print(status);
           if (status == 'verified') {
             ShowAlertDialogService().showActionSuccessDialog(
                 context, "Your Account Has Been Approved!", "Please Provide Your Banking Information to Begin Receiving Payouts", () {});

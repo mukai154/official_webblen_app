@@ -23,6 +23,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
@@ -1720,15 +1721,27 @@ class _CreateEventPageState extends State<CreateEventPage> {
         Navigator.of(context).pop();
         widget.isStream
             ? ShowAlertDialogService().showActionSuccessDialog(context, "Stream Uploaded", "Your Stream Has Successfully Been Uploaded", () {
+                CreateNotification().createTimedNotification(
+                  newEvent.title.length,
+                  newEvent.startDateTimeInMilliseconds - 900000,
+                  "Your Stream: ${newEvent.title}",
+                  "Starts in 15 Minutes! Get Ready!",
+                  '',
+                );
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
               })
             : ShowAlertDialogService().showActionSuccessDialog(context, "Event Uploaded", "Your Event Has Successfully Been Uploaded", () {
+                CreateNotification().createTimedNotification(
+                  newEvent.title.length,
+                  newEvent.startDateTimeInMilliseconds - 900000,
+                  "Your Event: ${newEvent.title}",
+                  "Starts in 15 Minutes! Get Ready!",
+                  '',
+                );
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
               });
-
-        //newEvent.navigateToEvent(newEvent.id);
       } else {
         widget.isStream
             ? CustomAlerts().showErrorAlert(context, "Stream Submission Error", "There was an issue creating your stream. Please try again")
@@ -1753,7 +1766,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
       widget.isStream
           ? CustomAlerts().showErrorAlert(context, "Location Error", "Please Define the Audience Location of this Stream")
           : CustomAlerts().showErrorAlert(context, "Location Error", "Please Define the Location of this Event");
-    } else if (zipPostalCode.length != 5) {
+    } else if (nearbyZipcodes.isEmpty && zipPostalCode.length != 5) {
       print(zipPostalCode);
       widget.isStream
           ? CustomAlerts().showErrorAlert(context, "Location Error", "Please Define a Better Audience Location for this Stream")

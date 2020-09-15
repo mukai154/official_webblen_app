@@ -708,7 +708,7 @@ class EventOptionsDialog extends StatelessWidget {
           ),
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(
               child: Column(
@@ -724,6 +724,7 @@ class EventOptionsDialog extends StatelessWidget {
                       TextAlign.center,
                     ),
                   ),
+                  SizedBox(height: 8.0),
                 ],
               ),
             ),

@@ -17,7 +17,7 @@ class NotificationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final notifColor = notification.notificationType == "deposit" ? FlatColors.darkMountainGreen : FlatColors.darkGray;
+    final notifColor = notification.notificationType == "deposit" ? FlatColors.darkMountainGreen : Colors.black;
 
     final notifIcon = notification.notificationType == "deposit"
         ? Icon(
@@ -79,12 +79,12 @@ class NotificationRow extends StatelessWidget {
                     ),
                     child: Fonts().textW700(
                       notification.notificationType == "user" ? "@${notification.notificationTitle}" : notification.notificationTitle,
-                      16.0,
+                      14.0,
                       notifColor,
                       TextAlign.left,
                     ),
                   ),
-            notification.notificationType == "deposit"
+            notification.notificationType == "deposit" || notification.notificationType == "event"
                 ? Container()
                 : Container(
                     constraints: BoxConstraints(
@@ -92,7 +92,7 @@ class NotificationRow extends StatelessWidget {
                     ),
                     child: Fonts().textW400(
                       notification.notificationDescription,
-                      15.0,
+                      14.0,
                       notifColor,
                       TextAlign.left,
                     ),
