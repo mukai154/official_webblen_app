@@ -2,27 +2,50 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webblen/models/webblen_event.dart';
 
 class AgoraService {
-  Future<String> retrieveAgoraToken(WebblenEvent event, int agoraUID) async {
-    String token;
+  Future<String> acquireAgoraResourceID(String eventID) async {
+    String resourceID;
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'retrieveAgoraToken',
+      functionName: 'acquireAgoraResourceID',
     );
 
     final HttpsCallableResult result = await callable.call(
       <String, dynamic>{
-        'event': event.toMap(),
-        'agoraUID': agoraUID,
+        'eventID': eventID,
       },
     ).catchError((e) {
       print(e.message);
     });
     if (result != null) {
-      token = result.data['token'];
+      print(result.data);
+      resourceID = result.data;
     }
-    return token;
+    return resourceID;
   }
 
-  Future<String> startAgoraCloudRecording(WebblenEvent event, String uid, int streamerAgoraID, String token) async {
+  Future<String> startAgoraCloudRecording(String resourceID, String eventID, String uid, String streamerAgoraID) async {
+    String error;
+    print(streamerAgoraID);
+    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
+      functionName: 'startAgoraCloudRecording',
+    );
+
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{
+        'resourceID': resourceID,
+        'eventID': eventID,
+        'uid': uid,
+        'streamerAgoraID': streamerAgoraID,
+      },
+    ).catchError((e) {
+      print(e.message);
+    });
+    if (result != null) {
+      print(result.data['data'][0]);
+    }
+    return error;
+  }
+
+  Future<String> stopAgoraCloudRecording(WebblenEvent event, String uid, String streamerAgoraID) async {
     String error;
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
       functionName: 'startAgoraCloudRecording',
@@ -33,7 +56,6 @@ class AgoraService {
         'event': event.toMap(),
         'uid': uid,
         'streamerAgoraID': streamerAgoraID,
-        'token': token,
       },
     ).catchError((e) {
       print(e.message);

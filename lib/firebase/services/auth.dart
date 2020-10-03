@@ -6,16 +6,16 @@ class BaseAuth {
   static FirebaseAuth firebaseAuth = FirebaseAuth.instance;
 
   Future<String> signIn(String email, String password) async {
-    AuthResult result = await firebaseAuth.signInWithEmailAndPassword(
+    UserCredential result = await firebaseAuth.signInWithEmailAndPassword(
       email: email,
       password: password,
     );
-    FirebaseUser user = result.user;
+    User user = result.user;
     return user != null ? user.uid : null;
   }
 
   Future<String> createUser(String email, String password) async {
-    AuthResult result = await firebaseAuth.createUserWithEmailAndPassword(
+    UserCredential result = await firebaseAuth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
@@ -24,13 +24,13 @@ class BaseAuth {
   }
 
   Future<String> getCurrentUserID() async {
-    FirebaseUser user = await firebaseAuth.currentUser();
+    User user = firebaseAuth.currentUser;
     return user != null ? user.uid : null;
   }
 
   Future<String> signOut() async {
     await firebaseAuth.signOut();
-    FirebaseUser user = await firebaseAuth.currentUser();
+    User user = firebaseAuth.currentUser;
     return user != null ? user.uid : null;
   }
 }

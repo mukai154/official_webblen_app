@@ -4,11 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/models/webblen_transaction.dart';
 
 class TransactionDataService {
-  final CollectionReference transactionRef =
-      Firestore.instance.collection("transactions");
+  final CollectionReference transactionRef = FirebaseFirestore.instance.collection("transactions");
 
-  Future<String> submitTransaction(String uid, double transAmount,
-      String transType, String depositAccountName, String transDesc) async {
+  Future<String> submitTransaction(String uid, double transAmount, String transType, String depositAccountName, String transDesc) async {
     String error;
     WebblenTransaction newTransaction = WebblenTransaction(
       status: "pending",
@@ -20,7 +18,7 @@ class TransactionDataService {
       transactionUserUid: uid,
       isNew: true,
     );
-    await transactionRef.document().setData(newTransaction.toMap()).then((doc) {
+    await transactionRef.doc().set(newTransaction.toMap()).then((doc) {
       error = "";
     }).catchError((e) {
       error = e;
@@ -36,10 +34,9 @@ class TransactionDataService {
           isEqualTo: uid,
         )
         .getDocuments();
-    var transactionDocs = querySnapshot.documents;
+    var transactionDocs = querySnapshot.docs;
     transactionDocs.forEach((transDoc) {
-      WebblenTransaction webblenTransaction =
-          WebblenTransaction.fromMap(transDoc.data);
+      WebblenTransaction webblenTransaction = WebblenTransaction.fromMap(transDoc.data());
       userTransactions.add(webblenTransaction);
     });
     userTransactions.sort((t1, t2) {
@@ -59,12 +56,8 @@ class TransactionDataService {
           isEqualTo: true,
         )
         .getDocuments();
-    querySnapshot.documents.forEach((transDoc) {
-      transactionRef
-          .document(transDoc.documentID)
-          .updateData({'isNew': false})
-          .whenComplete(() {})
-          .catchError((e) {});
+    querySnapshot.docs.forEach((transDoc) {
+      transactionRef.doc(transDoc.id).updateData({'isNew': false}).whenComplete(() {}).catchError((e) {});
     });
   }
 }

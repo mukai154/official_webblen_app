@@ -325,7 +325,7 @@ class ShowAlertDialogService {
         });
   }
 
-  Future<bool> showFormDialog(BuildContext context, Widget form) {
+  Future<bool> showCustomWidgetDialog(BuildContext context, Widget form) {
     return showDialog<bool>(
         context: context,
         barrierDismissible: true,

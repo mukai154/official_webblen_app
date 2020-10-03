@@ -4,13 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 
 class StripeDataService {
-  final CollectionReference stripeRef = Firestore.instance.collection("stripe");
-  final CollectionReference userRef = Firestore.instance.collection("webblen_user");
+  final CollectionReference stripeRef = FirebaseFirestore.instance.collection("stripe");
+  final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
 
   Future<bool> checkIfStripeSetup(String uid) async {
     bool stripeIsSetup = false;
-    DocumentSnapshot documentSnapshot = await stripeRef.document(uid).get();
-    if (documentSnapshot.exists) {
+    DocumentSnapshot docSnapshot = await stripeRef.doc(uid).get();
+    if (docSnapshot.exists) {
       stripeIsSetup = true;
     }
     return stripeIsSetup;
@@ -18,9 +18,9 @@ class StripeDataService {
 
   Future<String> getStripeUID(String uid) async {
     String stripeUID;
-    DocumentSnapshot documentSnapshot = await stripeRef.document(uid).get();
-    if (documentSnapshot.exists) {
-      stripeUID = documentSnapshot.data['stripeUID'];
+    DocumentSnapshot docSnapshot = await stripeRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      stripeUID = docSnapshot.data()['stripeUID'];
     }
     return stripeUID;
   }
@@ -31,9 +31,9 @@ class StripeDataService {
     List currentlyDue = accountVerificationStatus['currently_due'];
     List pending = accountVerificationStatus['pending_verification'];
     if (currentlyDue.length > 1 || pending.isNotEmpty) {
-      await stripeRef.document(uid).updateData({"verified": "pending"});
+      await stripeRef.doc(uid).update({"verified": "pending"});
     } else {
-      await stripeRef.document(uid).updateData({"verified": "verified"});
+      await stripeRef.doc(uid).update({"verified": "verified"});
       status = "verified";
     }
     return status;

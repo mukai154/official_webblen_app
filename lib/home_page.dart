@@ -149,22 +149,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       currentLat = location.latitude;
       currentLon = location.longitude;
       LocationService().getCityNameFromLatLon(currentLat, currentLon).then((res) {
+        LocationService().getZipFromLatLon(currentLat, currentLon).then((res) {
+          WebblenUserData().updateUserAppOpen(uid, res, currentLat, currentLon);
+        });
         areaName = res;
         isLoading = false;
         setState(() {});
-      });
-      LocationService().getZipFromLatLon(currentLat, currentLon).then((res) {
-        WebblenUserData().updateUserAppOpen(uid, res, currentLat, currentLon);
       });
       FirebaseMessagingService().updateFirebaseMessageToken(uid);
       FirebaseMessagingService().configFirebaseMessaging(
         context,
         currentUser,
       );
-
       initDynamicLinks();
-//        GeoFencing().addAndCreateGeoFencesFromEvents(currentLat, currentLon, uid);
-
     } else {
       hasLocation = false;
       isLoading = false;
@@ -354,7 +351,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       body: PageStorage(
         bucket: pageStorageBucket,
         child: isLoading == true
-            ? Container()
+            ? Container(
+                child: Center(
+                  child: Text(
+                    'Retrieving Location...',
+                    style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400, fontSize: 18.0),
+                  ),
+                ),
+              )
             : !isConnectedToNetwork
                 ? NetworkStatusPage(reloadAction: () => reloadData())
                 : !hasLocation
@@ -362,7 +366,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         reloadAction: () => reloadData(),
                         enableLocationAction: () => LocationPermissions().openAppSettings(),
                       )
-                    : updateRequired ? UpdateRequiredPage() : pageViews[pageIndex],
+                    : updateRequired
+                        ? UpdateRequiredPage()
+                        : pageViews[pageIndex],
       ),
     );
   }

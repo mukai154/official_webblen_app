@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:video_compress/video_compress.dart';
 
 class WebblenImagePicker {
   final BuildContext context;
@@ -18,6 +19,22 @@ class WebblenImagePicker {
   });
 
   final ImagePicker imagePicker = ImagePicker();
+
+  Future<File> retrieveVideoFromLibrary() async {
+    imageCache.clear();
+    File vidFile;
+    final pickedFile = await imagePicker.getVideo(source: ImageSource.gallery);
+    File vid = File(pickedFile.path);
+    if (vid != null) {
+      MediaInfo media = await VideoCompress.compressVideo(
+        vid.path,
+        quality: VideoQuality.MediumQuality,
+        deleteOrigin: false,
+      );
+      vidFile = media.file;
+    }
+    return vidFile;
+  }
 
   Future<File> retrieveImageFromLibrary() async {
     imageCache.clear();

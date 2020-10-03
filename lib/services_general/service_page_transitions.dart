@@ -1,4 +1,3 @@
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/models/community.dart';
@@ -16,13 +15,14 @@ import 'package:webblen/pages/earnings_pages/set_up_direct_deposit_page.dart';
 import 'package:webblen/pages/earnings_pages/set_up_instant_deposit_page.dart';
 import 'package:webblen/pages/event_pages/create_event_page.dart';
 import 'package:webblen/pages/event_pages/digital_event_host_page.dart';
-import 'package:webblen/pages/event_pages/digital_event_page.dart';
 import 'package:webblen/pages/event_pages/digital_event_viewer_page.dart';
 import 'package:webblen/pages/event_pages/event_attendees_page.dart';
 import 'package:webblen/pages/event_pages/event_check_in_page.dart';
 import 'package:webblen/pages/event_pages/event_details_page.dart';
+import 'package:webblen/pages/event_pages/upload_stream_video_page.dart';
 import 'package:webblen/pages/home_pages/feedback_page.dart';
 import 'package:webblen/pages/home_pages/notifications_page.dart';
+import 'package:webblen/pages/home_pages/video_play_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
 import 'package:webblen/pages/ticket_pages/event_tickets_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
@@ -35,8 +35,8 @@ import 'package:webblen/pages/user_pages/shop_page.dart';
 import 'package:webblen/pages/user_pages/transaction_history_page.dart';
 import 'package:webblen/pages/user_pages/user_list_page.dart';
 import 'package:webblen/pages/user_pages/user_page.dart';
-import 'package:webblen/utils/ticket_scanner.dart';
-import 'package:webblen/utils/webblen_scanner.dart';
+//import 'package:webblen/utils/ticket_scanner.dart';
+//import 'package:webblen/utils/webblen_scanner.dart';
 
 class PageTransitionService {
   final BuildContext context;
@@ -66,9 +66,9 @@ class PageTransitionService {
   final double lon;
   final List<Map<String, dynamic>> ticketsToPurchase;
   final List eventFees;
-  final ClientRole clientRole;
   final bool isStream;
   final String pageTitle;
+  final String vidURL;
 
   PageTransitionService({
     this.isStream,
@@ -99,8 +99,8 @@ class PageTransitionService {
     this.communities,
     this.ticketsToPurchase,
     this.eventFees,
-    this.clientRole,
     this.pageTitle,
+    this.vidURL,
   });
 
   //ROOT PAGES
@@ -148,6 +148,24 @@ class PageTransitionService {
       );
 
   //EVENTS
+  void transitionToVideoPlayPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => VideoPlayPage(
+            vidURL: vidURL,
+          ),
+        ),
+      );
+  void transitionToUploadStreamVideoPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UploadStreamVideoPage(
+            event: event,
+            currentUser: currentUser,
+          ),
+        ),
+      );
+
   void transitionToCreateEventPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -184,17 +202,6 @@ class PageTransitionService {
           builder: (context) => DigitalEventViewerPage(
             currentUser: currentUser,
             event: event,
-          ),
-        ),
-      );
-
-  void transitionToDigitalEventPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DigitalEventPage(
-            currentUser: currentUser,
-            event: event,
-            role: clientRole,
           ),
         ),
       );
@@ -250,15 +257,15 @@ class PageTransitionService {
         ),
       );
 
-  void openTicketScanner() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => TicketScanner(
-            currentUser: currentUser,
-            event: event,
-          ),
-        ),
-      );
+//  void openTicketScanner() => Navigator.push(
+//        context,
+//        MaterialPageRoute(
+//          builder: (context) => TicketScanner(
+//            currentUser: currentUser,
+//            event: event,
+//          ),
+//        ),
+//      );
 
   void transitionToTicketInfoPage() => Navigator.push(
         context,
@@ -413,12 +420,12 @@ class PageTransitionService {
       );
 
   //WEBBLEN SCANNER
-  void openWebblenScanner() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => WebblenScanner(
-            currentUser: currentUser,
-          ),
-        ),
-      );
+//  void openWebblenScanner() => Navigator.push(
+//        context,
+//        MaterialPageRoute(
+//          builder: (context) => WebblenScanner(
+//            currentUser: currentUser,
+//          ),
+//        ),
+//      );
 }

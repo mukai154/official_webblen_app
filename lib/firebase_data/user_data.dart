@@ -1,28 +1,26 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:webblen/firebase_services/file_uploader.dart';
 import 'package:webblen/models/webblen_user.dart';
 
 class UserDataService {
   //Geoflutterfire geo = Geoflutterfire();
-  final CollectionReference userRef = Firestore.instance.collection("webblen_user");
-  final CollectionReference eventRef = Firestore.instance.collection("events");
-  final CollectionReference notifRef = Firestore.instance.collection("user_notifications");
+  final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
+  final CollectionReference eventRef = FirebaseFirestore.instance.collection("events");
+  final CollectionReference notifRef = FirebaseFirestore.instance.collection("user_notifications");
 
   final StorageReference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
 
   Future<bool> checkAdminStatus(String uid) async {
     bool isAdmin = false;
-    DocumentSnapshot comDoc = await userRef.document(uid).get();
+    DocumentSnapshot comDoc = await userRef.doc(uid).get();
     if (comDoc.exists) {
-      if (comDoc.data['isAdmin'] != null) {
-        isAdmin = comDoc.data['isAdmin'];
+      if (comDoc.data()['isAdmin'] != null) {
+        isAdmin = comDoc.data()['isAdmin'];
       }
     }
     return isAdmin;
@@ -30,36 +28,7 @@ class UserDataService {
 
   //***CREATE
   Stream<WebblenUser> streamCurrentUser(String uid) {
-    return userRef.document(uid).snapshots().map((snapshot) => WebblenUser.fromMap(Map<String, dynamic>.from(snapshot.data['d'])));
-  }
-
-  Future<bool> createNewUser(File userImage, WebblenUser user, String uid) async {
-    bool success = true;
-    StorageReference storageReference = FirebaseStorage.instance.ref();
-    String fileName = "$uid.jpg";
-    storageReference.child("profile_pics").child(fileName).putFile(userImage);
-    String downloadUrl = await FileUploader().upload(
-      userImage,
-      fileName,
-      'profile_pics',
-    );
-    user.profile_pic = downloadUrl.toString();
-    //GeoPoint geoPoint = GeoFirePoint(0, 0).geoPoint;
-    await Firestore.instance
-        .collection("webblen_user")
-        .document(uid)
-        .setData({
-          'appOpenInMilliseconds': DateTime.now().millisecondsSinceEpoch,
-          'd': user.toMap(),
-          'g': '',
-          'l': null,
-          'lastAPRechargeInMilliseconds': DateTime.now().millisecondsSinceEpoch
-        })
-        .whenComplete(() {})
-        .catchError((e) {
-          success = false;
-        });
-    return success;
+    return userRef.doc(uid).snapshots().map((snapshot) => WebblenUser.fromMap(Map<String, dynamic>.from(snapshot.data()['d'])));
   }
 
   //***READ
@@ -70,18 +39,18 @@ class UserDataService {
           'd.username',
           isEqualTo: username,
         )
-        .getDocuments();
-    if (querySnapshot.documents.isNotEmpty) {
-      userPicURL = querySnapshot.documents.first.data['d']['profile_pic'];
+        .get();
+    if (querySnapshot.docs.isNotEmpty) {
+      userPicURL = querySnapshot.docs.first.data()['d']['profile_pic'];
     }
     return userPicURL;
   }
 
   Future<String> findUserMesseageTokenByID(String uid) async {
     String token = "";
-    DocumentSnapshot documentSnapshot = await userRef.document(uid).get();
-    if (documentSnapshot.exists) {
-      token = documentSnapshot.data["messageToken"];
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      token = docSnapshot.data()["messageToken"];
     }
     return token;
   }
@@ -174,13 +143,13 @@ class UserDataService {
   }
 
   Future<Null> updateNotifTime(String uid) async {
-    userRef.document(uid).updateData({'lastNotificationTimeInMilliseconds': DateTime.now().millisecondsSinceEpoch});
+    userRef.doc(uid).update({'lastNotificationTimeInMilliseconds': DateTime.now().millisecondsSinceEpoch});
   }
 
   Future<int> getLastNotifTime(String uid) async {
     int lastNotifInMilliseconds;
-    await userRef.document(uid).get().then((userDoc) {
-      lastNotifInMilliseconds = userDoc.data['lastNotificationTimeInMilliseconds'];
+    await userRef.doc(uid).get().then((userDoc) {
+      lastNotifInMilliseconds = userDoc.data()['lastNotificationTimeInMilliseconds'];
     });
     return lastNotifInMilliseconds;
   }
@@ -212,7 +181,7 @@ class UserDataService {
   Future<Null> updateUserAppOpen(String uid, double lat, double lon) async {
     int appOpenInMilliseconds = DateTime.now().millisecondsSinceEpoch;
     //GeoFirePoint geoFirePoint = GeoFirePoint(lat, lon);
-    userRef.document(uid).updateData({
+    userRef.doc(uid).update({
       'g': null,
       'l': null,
       'appOpenInMilliseconds': appOpenInMilliseconds,
@@ -246,8 +215,8 @@ class UserDataService {
           'd.username',
           isEqualTo: username,
         )
-        .getDocuments();
-    if (query != null && query.documents.length > 0) {
+        .get();
+    if (query != null && query.docs.length > 0) {
       return true;
     } else {
       return false;
@@ -255,8 +224,8 @@ class UserDataService {
   }
 
   Future<bool> checkIfUserExists(String uid) async {
-    DocumentSnapshot documentSnapshot = await userRef.document(uid).get();
-    if (documentSnapshot.exists) {
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
       return true;
     } else {
       return false;
@@ -264,15 +233,15 @@ class UserDataService {
   }
 
   Future<Null> addUserDataField(String dataName, dynamic data) async {
-    QuerySnapshot querySnapshot = await userRef.getDocuments();
-    querySnapshot.documents.forEach((doc) {
-      userRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
+    QuerySnapshot querySnapshot = await userRef.get();
+    querySnapshot.docs.forEach((doc) {
+      userRef.doc(doc.id).update({"$dataName": data}).whenComplete(() {}).catchError((e) {});
     });
   }
 
   Future<String> setUserCloudMessageToken(String uid, String messageToken) async {
     String status = "";
-    userRef.document(uid).updateData({"d.messageToken": messageToken}).whenComplete(() {}).catchError((e) {
+    userRef.doc(uid).update({"d.messageToken": messageToken}).whenComplete(() {}).catchError((e) {
           status = e.details;
         });
     return status;
@@ -280,17 +249,17 @@ class UserDataService {
 
   Future<String> removeFriend(String currentUid, String uid) async {
     String requestStatus;
-    DocumentSnapshot ownUserSnapshot = await userRef.document(currentUid).get();
-    DocumentSnapshot otherUserSnapshot = await userRef.document(uid).get();
-    List ownUserFriendsList = ownUserSnapshot.data["d"]['friends'];
-    List otherUserFriendsList = otherUserSnapshot.data["d"]['friends'];
+    DocumentSnapshot ownUserSnapshot = await userRef.doc(currentUid).get();
+    DocumentSnapshot otherUserSnapshot = await userRef.doc(uid).get();
+    List ownUserFriendsList = ownUserSnapshot.data()["d"]['friends'];
+    List otherUserFriendsList = otherUserSnapshot.data()["d"]['friends'];
     ownUserFriendsList = ownUserFriendsList.toList(growable: true);
     otherUserFriendsList = otherUserFriendsList.toList(growable: true);
     ownUserFriendsList.remove(uid);
     otherUserFriendsList.remove(currentUid);
 
-    await userRef.document(uid).updateData({"d.friends": otherUserFriendsList}).whenComplete(() {
-      userRef.document(currentUid).updateData({"d.friends": ownUserFriendsList}).whenComplete(() {
+    await userRef.doc(uid).update({"d.friends": otherUserFriendsList}).whenComplete(() {
+      userRef.doc(currentUid).update({"d.friends": ownUserFriendsList}).whenComplete(() {
         requestStatus = "success";
       }).catchError((e) {
         requestStatus = e.details;
@@ -303,8 +272,8 @@ class UserDataService {
 
   Future<String> checkFriendStatus(String currentUid, String uid) async {
     String friendStatus;
-    DocumentSnapshot peerDocSnapshot = await userRef.document(uid).get();
-    List friendsList = peerDocSnapshot.data["d"]['friends'];
+    DocumentSnapshot peerDocSnapshot = await userRef.doc(uid).get();
+    List friendsList = peerDocSnapshot.data()["d"]['friends'];
     if (friendsList.contains(currentUid)) {
       friendStatus = "friends";
     } else {
@@ -321,9 +290,9 @@ class UserDataService {
             'notificationData',
             isEqualTo: currentUid,
           )
-          .getDocuments()
+          .get()
           .then((notifQuery) {
-        if (notifQuery.documents != null && notifQuery.documents.length > 0) {
+        if (notifQuery.docs != null && notifQuery.docs.length > 0) {
           friendStatus = 'pending';
         }
       });
@@ -332,13 +301,13 @@ class UserDataService {
   }
 
   Future<Null> updateNotificationPermission(String uid, String notif, bool status) async {
-    userRef.document(uid).updateData({notif: status}).whenComplete(() {}).catchError((e) {});
+    userRef.doc(uid).update({notif: status}).whenComplete(() {}).catchError((e) {});
   }
 
 //  Future<Null> updateUserField() async {
 //    userRef.getDocuments().then((res){
-//     res.documents.forEach((doc) async {
-//       await userRef.document(doc.documentID).updateData(({
+//     res.docs.forEach((doc) async {
+//       await userRef.doc(doc.docID).updateData(({
 //         'd.userLat': FieldValue.delete(),
 //         'd.userLon': FieldValue.delete()
 //       }));

@@ -160,7 +160,7 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
       appBar: WebblenAppBar().basicAppBar("Bank Account Details", context),
       body: Container(
         child: StreamBuilder(
-            stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+            stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
             builder: (context, userSnapshot) {
               if (!userSnapshot.hasData)
                 return Text(

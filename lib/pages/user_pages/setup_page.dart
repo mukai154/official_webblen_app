@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -133,7 +134,7 @@ class _SetupPageState extends State<SetupPage> {
 
   createNewUser(File userImage, WebblenUser user, String uid) async {
     ScaffoldState scaffold = homeScaffoldKey.currentState;
-    UserDataService()
+    WebblenUserData()
         .createNewUser(
       userImage,
       user,

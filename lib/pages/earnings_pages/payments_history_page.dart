@@ -13,8 +13,8 @@ class PaymentHistoryPage extends StatefulWidget {
 }
 
 class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
-  CollectionReference stripeRef = Firestore().collection("stripe");
-  CollectionReference stripeActivityRef = Firestore().collection("stripe_connect_activity");
+  CollectionReference stripeRef = FirebaseFirestore.instance.collection("stripe");
+  CollectionReference stripeActivityRef = FirebaseFirestore.instance.collection("stripe_connect_activity");
 
   String currentUID;
   List<DocumentSnapshot> paymentHistoryResults = [];
@@ -28,9 +28,9 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
 
   getPaymentHistory() async {
     Query paymentsHistoryQuery = stripeActivityRef.where("uid", isEqualTo: currentUID).orderBy("timePosted", descending: true).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await paymentsHistoryQuery.getDocuments();
-    lastDocumentSnapshot = querySnapshot.documents[querySnapshot.documents.length - 1];
-    paymentHistoryResults = querySnapshot.documents;
+    QuerySnapshot querySnapshot = await paymentsHistoryQuery.get();
+    lastDocumentSnapshot = querySnapshot.docs[querySnapshot.docs.length - 1];
+    paymentHistoryResults = querySnapshot.docs;
     isLoading = false;
     setState(() {});
   }
@@ -47,10 +47,10 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
         .startAfterDocument(lastDocumentSnapshot)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await paymentsHistoryQuery.getDocuments();
-    lastDocumentSnapshot = querySnapshot.documents[querySnapshot.documents.length - 1];
-    paymentHistoryResults.addAll(querySnapshot.documents);
-    if (querySnapshot.documents.length == 0) {
+    QuerySnapshot querySnapshot = await paymentsHistoryQuery.get();
+    lastDocumentSnapshot = querySnapshot.docs[querySnapshot.docs.length - 1];
+    paymentHistoryResults.addAll(querySnapshot.docs);
+    if (querySnapshot.docs.length == 0) {
       moreDataAvailable = false;
     }
     loadingAdditionalData = false;
@@ -98,7 +98,7 @@ class _PaymentHistoryPageState extends State<PaymentHistoryPage> {
               shrinkWrap: true,
               itemCount: paymentHistoryResults.length,
               itemBuilder: (_, int index) {
-                final Map<String, dynamic> docData = paymentHistoryResults[index].data;
+                final Map<String, dynamic> docData = paymentHistoryResults[index].data();
                 final dynamic message = docData['description'];
                 final dynamic timePosted = docData['timePosted'];
                 return Container(

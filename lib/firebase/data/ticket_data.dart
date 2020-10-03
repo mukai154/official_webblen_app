@@ -3,13 +3,13 @@ import 'package:webblen/models/event_ticket.dart';
 import 'package:webblen/models/ticket_distro.dart';
 
 class TicketDataService {
-  final CollectionReference ticketsRef = Firestore().collection("purchased_tickets");
-  final CollectionReference ticketDistroRef = Firestore().collection("ticket_distros");
+  final CollectionReference ticketsRef = FirebaseFirestore.instance.collection("purchased_tickets");
+  final CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("ticket_distros");
 
   //CREATE
   Future<String> uploadEventTickets(String eventID, TicketDistro ticketDistro) async {
     String error;
-    await ticketDistroRef.document(eventID).setData(ticketDistro.toMap()).catchError((e) {
+    await ticketDistroRef.doc(eventID).set(ticketDistro.toMap()).catchError((e) {
       error = e.details;
     });
     return error;
@@ -18,18 +18,18 @@ class TicketDataService {
   //READ
   Future<TicketDistro> getEventTicketDistro(String eventID) async {
     TicketDistro ticketDistro;
-    DocumentSnapshot snapshot = await ticketDistroRef.document(eventID).get();
+    DocumentSnapshot snapshot = await ticketDistroRef.doc(eventID).get();
     if (snapshot.exists) {
-      ticketDistro = TicketDistro.fromMap(snapshot.data);
+      ticketDistro = TicketDistro.fromMap(snapshot.data());
     }
     return ticketDistro;
   }
 
   Future<List<EventTicket>> getPurchasedTickets(String uid) async {
     List<EventTicket> eventTickets = [];
-    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).getDocuments();
-    snapshot.documents.forEach((doc) {
-      EventTicket ticket = EventTicket.fromMap(doc.data);
+    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).get();
+    snapshot.docs.forEach((doc) {
+      EventTicket ticket = EventTicket.fromMap(doc.data());
       eventTickets.add(ticket);
     });
     return eventTickets;
@@ -37,9 +37,9 @@ class TicketDataService {
 
   Future<List<EventTicket>> getPurchasedTicketsFromEvent(String uid, String eventID) async {
     List<EventTicket> eventTickets = [];
-    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).where("eventID", isEqualTo: eventID).getDocuments();
-    snapshot.documents.forEach((doc) {
-      EventTicket ticket = EventTicket.fromMap(doc.data);
+    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).where("eventID", isEqualTo: eventID).get();
+    snapshot.docs.forEach((doc) {
+      EventTicket ticket = EventTicket.fromMap(doc.data());
       eventTickets.add(ticket);
     });
     return eventTickets;
@@ -47,7 +47,7 @@ class TicketDataService {
 
   Future<String> updateScannedTickets(String eventKey, List validTickets, List usedTickets) async {
     String error = "";
-    await ticketDistroRef.document(eventKey).updateData({
+    await ticketDistroRef.doc(eventKey).update({
       "validTicketIDs": validTickets,
       "usedTicketIDs": usedTickets,
     }).catchError((e) {

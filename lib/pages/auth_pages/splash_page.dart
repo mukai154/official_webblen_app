@@ -42,13 +42,13 @@ class _SplashPageState extends State<SplashPage> {
         child: Container(
           color: Colors.white,
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 40.0),
+            padding: EdgeInsets.symmetric(vertical: 20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SizedBox(height: 32.0),
+                SizedBox(height: 20.0),
                 Container(
-                  height: 600.0,
+                  height: MediaQuery.of(context).size.height > 2000 ? MediaQuery.of(context).size.height * 0.8 : 500,
                   child: PageView(
                     physics: ClampingScrollPhysics(),
                     controller: _pageController,
@@ -59,7 +59,7 @@ class _SplashPageState extends State<SplashPage> {
                     },
                     children: <Widget>[
                       Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: <Widget>[
@@ -68,8 +68,8 @@ class _SplashPageState extends State<SplashPage> {
                                 image: AssetImage(
                                   'assets/images/onboarding0.png',
                                 ),
-                                height: MediaQuery.of(context).size.width * 0.8,
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.width * 0.70,
+                                width: MediaQuery.of(context).size.width * 0.70,
                               ),
                             ),
                             Text(
@@ -87,7 +87,7 @@ class _SplashPageState extends State<SplashPage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(40.0),
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -96,8 +96,8 @@ class _SplashPageState extends State<SplashPage> {
                                 image: AssetImage(
                                   'assets/images/onboarding2.png',
                                 ),
-                                height: MediaQuery.of(context).size.width * 0.8,
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.width * 0.70,
+                                width: MediaQuery.of(context).size.width * 0.70,
                               ),
                             ),
                             SizedBox(height: 30.0),
@@ -114,7 +114,7 @@ class _SplashPageState extends State<SplashPage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(40.0),
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -123,8 +123,8 @@ class _SplashPageState extends State<SplashPage> {
                                 image: AssetImage(
                                   'assets/images/onboarding1.png',
                                 ),
-                                height: MediaQuery.of(context).size.width * 0.8,
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.width * 0.70,
+                                width: MediaQuery.of(context).size.width * 0.70,
                               ),
                             ),
                             SizedBox(height: 30.0),
@@ -141,7 +141,7 @@ class _SplashPageState extends State<SplashPage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(40.0),
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -150,8 +150,8 @@ class _SplashPageState extends State<SplashPage> {
                                 image: AssetImage(
                                   'assets/images/onboarding3.png',
                                 ),
-                                height: MediaQuery.of(context).size.width * 0.8,
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.width * 0.7,
+                                width: MediaQuery.of(context).size.width * 0.7,
                               ),
                             ),
                             SizedBox(height: 30.0),
@@ -168,7 +168,7 @@ class _SplashPageState extends State<SplashPage> {
                         ),
                       ),
                       Padding(
-                        padding: EdgeInsets.all(40.0),
+                        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -177,8 +177,8 @@ class _SplashPageState extends State<SplashPage> {
                                 image: AssetImage(
                                   'assets/images/onboarding4.png',
                                 ),
-                                height: MediaQuery.of(context).size.width * 0.8,
-                                width: MediaQuery.of(context).size.width * 0.8,
+                                height: MediaQuery.of(context).size.width * 0.7,
+                                width: MediaQuery.of(context).size.width * 0.7,
                               ),
                             ),
                             SizedBox(height: 30.0),

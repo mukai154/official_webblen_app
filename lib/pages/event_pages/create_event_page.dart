@@ -167,7 +167,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
     Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
     Navigator.of(context).pop();
     zipPostalCode = locationData['zipcode'];
-    print(zipPostalCode);
     city = locationData['city'];
     province = locationData['administrativeLevels']['level1short'];
     lat = detail.result.geometry.location.lat;
@@ -731,7 +730,11 @@ class _CreateEventPageState extends State<CreateEventPage> {
             width: 150,
             child: CustomText(
               context: context,
-              text: formType == "ticket" ? "Ticket Name" : formType == "fee" ? "Fee Name" : "Discount Code Name",
+              text: formType == "ticket"
+                  ? "Ticket Name"
+                  : formType == "fee"
+                      ? "Fee Name"
+                      : "Discount Code Name",
               textColor: Colors.black,
               textAlign: TextAlign.left,
               fontSize: 14.0,
@@ -1350,7 +1353,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
 
   changeFormStatus(String form) {
     if (form == "ticketForm") {
-      print('ticketForm');
       if (showTicketForm) {
         showTicketForm = false;
       } else {
@@ -1665,10 +1667,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
   createEvent() async {
     CustomAlerts().showLoadingAlert(context, widget.isStream ? "Setting Up Stream..." : "Uploading Event...");
     String fullStartDateTime = startDate + " " + startTime;
-    print(fullStartDateTime);
     String fullEndDateTime = endDate + " " + endTime;
     DateTime startDateTime = dateTimeFormatter.parse(fullStartDateTime);
-    print(startDateTime.millisecondsSinceEpoch);
     DateTime endDateTime = dateTimeFormatter.parse(fullEndDateTime);
 
     WebblenEvent newEvent = WebblenEvent(
@@ -1715,7 +1715,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
       paidOut: false,
     );
     WebblenUser currentUser = await WebblenUserData().getUserByID(currentUID);
-    print(currentUser.uid);
     EventDataService().uploadEvent(newEvent, zipPostalCode, eventImgFile, ticketDistro).then((res) {
       if (res != null) {
         Navigator.of(context).pop();
@@ -1767,7 +1766,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
           ? CustomAlerts().showErrorAlert(context, "Location Error", "Please Define the Audience Location of this Stream")
           : CustomAlerts().showErrorAlert(context, "Location Error", "Please Define the Location of this Event");
     } else if (nearbyZipcodes.isEmpty && zipPostalCode.length != 5) {
-      print(zipPostalCode);
       widget.isStream
           ? CustomAlerts().showErrorAlert(context, "Location Error", "Please Define a Better Audience Location for this Stream")
           : CustomAlerts().showErrorAlert(context, "Location Error", "Please Define a Better Location for this Event");
@@ -1857,7 +1855,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
             : timeFormatter.format(selectedDateTime.add(Duration(
                 hours: selectedDateTime.hour <= 19
                     ? 4
-                    : selectedDateTime.hour == 20 ? 3 : selectedDateTime.hour == 21 ? 2 : selectedDateTime.hour == 22 ? 1 : 0)));
+                    : selectedDateTime.hour == 20
+                        ? 3
+                        : selectedDateTime.hour == 21
+                            ? 2
+                            : selectedDateTime.hour == 22
+                                ? 1
+                                : 0)));
         isLoading = false;
         setState(() {});
       }
@@ -1869,10 +1873,20 @@ class _CreateEventPageState extends State<CreateEventPage> {
     return Scaffold(
       appBar: WebblenAppBar().newEventAppBar(
           context,
-          widget.eventID != null ? widget.isStream ? 'Editing Stream' : 'Editing Event' : widget.isStream ? 'New Stream' : 'New Event',
           widget.eventID != null
-              ? widget.isStream ? 'Cancel Editing Stream?' : 'Cancel Editing Event?'
-              : widget.isStream ? 'Cancel Adding New Stream?' : 'Cancel Adding New Event?', () {
+              ? widget.isStream
+                  ? 'Editing Stream'
+                  : 'Editing Event'
+              : widget.isStream
+                  ? 'New Stream'
+                  : 'New Event',
+          widget.eventID != null
+              ? widget.isStream
+                  ? 'Cancel Editing Stream?'
+                  : 'Cancel Editing Event?'
+              : widget.isStream
+                  ? 'Cancel Adding New Stream?'
+                  : 'Cancel Adding New Event?', () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
       },
@@ -1999,8 +2013,12 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                       padding: EdgeInsets.symmetric(horizontal: 2.0),
                                       child: CustomColorButton(
                                         text: widget.eventID == null
-                                            ? widget.isStream ? "Create Stream" : "Create Event"
-                                            : widget.isStream ? "Update Stream" : "Update Event",
+                                            ? widget.isStream
+                                                ? "Create Stream"
+                                                : "Create Event"
+                                            : widget.isStream
+                                                ? "Update Stream"
+                                                : "Update Event",
                                         textColor: Colors.black,
                                         backgroundColor: Colors.white,
                                         height: 35.0,

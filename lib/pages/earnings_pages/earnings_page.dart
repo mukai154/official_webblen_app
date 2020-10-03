@@ -50,7 +50,7 @@ class _EarningsPageState extends State<EarningsPage> {
           if (val.toString().contains("individual.id_number")) {
             socialSecurityNeeded = true;
           }
-          if (val.toString().contains("verification.document")) {
+          if (val.toString().contains("verification.doc")) {
             photoNeeded = true;
           }
         });
@@ -123,7 +123,7 @@ class _EarningsPageState extends State<EarningsPage> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-        stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+        stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
         builder: (context, userSnapshot) {
           if (!userSnapshot.hasData)
             return Scaffold(
@@ -246,15 +246,15 @@ class _EarningsPageState extends State<EarningsPage> {
                                     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                                       if (!snapshot.hasData) return Container();
 
-                                      final int activityCount = snapshot.data.documents.length;
+                                      final int activityCount = snapshot.data.docs.length;
                                       print(activityCount);
                                       return ListView.builder(
                                         shrinkWrap: true,
                                         itemCount: activityCount,
                                         itemBuilder: (_, int index) {
-                                          final DocumentSnapshot document = snapshot.data.documents[index];
-                                          final dynamic message = document['description'];
-                                          final dynamic timePosted = document['timePosted'];
+                                          final DocumentSnapshot doc = snapshot.data.docs[index];
+                                          final dynamic message = doc.data()['description'];
+                                          final dynamic timePosted = doc.data()['timePosted'];
                                           return Container(
                                             margin: EdgeInsets.symmetric(vertical: 4.0),
                                             child: ListTile(
@@ -324,8 +324,11 @@ class _EarningsPageState extends State<EarningsPage> {
                                     backgroundColor: userData['cardInfo'] == null ? FlatColors.textFieldGray : FlatColors.darkMountainGreen,
                                     height: 45.0,
                                     width: MediaQuery.of(context).size.width * 0.9,
-                                    onPressed:
-                                        userData['cardInfo'] == null ? null : availableBalance < 9.99 ? () => minRequiredAlert() : () => performInstantPayout(),
+                                    onPressed: userData['cardInfo'] == null
+                                        ? null
+                                        : availableBalance < 9.99
+                                            ? () => minRequiredAlert()
+                                            : () => performInstantPayout(),
                                   ),
                   ],
                 ),

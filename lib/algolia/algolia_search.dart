@@ -2,15 +2,15 @@ import 'package:algolia/algolia.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AlgoliaSearch {
-  DocumentReference algoliaDocRef = Firestore().collection("app_release_info").document("algolia");
+  final DocumentReference algoliaDocRef = FirebaseFirestore.instance.collection("app_release_info").doc("algolia");
 
   Future<Algolia> initializeAlgolia() async {
     Algolia algolia;
     String appID;
     String apiKey;
     DocumentSnapshot snapshot = await algoliaDocRef.get();
-    appID = snapshot.data['appID'];
-    apiKey = snapshot.data['apiKey'];
+    appID = snapshot.data()['appID'];
+    apiKey = snapshot.data()['apiKey'];
     algolia = Algolia.init(applicationId: appID, apiKey: apiKey);
     return algolia;
   }
@@ -22,12 +22,14 @@ class AlgoliaSearch {
       AlgoliaQuery query = algolia.instance.index('users').search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
-        Map<String, dynamic> dataMap = {};
-        dataMap['resultType'] = 'user';
-        dataMap['resultHeader'] = "@" + snapshot.data['d']['username'];
-        dataMap['imageData'] = snapshot.data['d']['profile_pic'];
-        dataMap['key'] = snapshot.data['d']['uid'];
-        results.add(dataMap);
+        if (snapshot.data['d'] != null) {
+          Map<String, dynamic> dataMap = {};
+          dataMap['resultType'] = 'user';
+          dataMap['resultHeader'] = "@" + snapshot.data['d']['username'];
+          dataMap['imageData'] = snapshot.data['d']['profile_pic'];
+          dataMap['key'] = snapshot.data['d']['uid'];
+          results.add(dataMap);
+        }
       });
     }
     return results;
@@ -40,12 +42,14 @@ class AlgoliaSearch {
       AlgoliaQuery query = algolia.instance.index('events').search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
-        Map<String, dynamic> dataMap = {};
-        dataMap['resultType'] = 'event';
-        dataMap['resultHeader'] = snapshot.data['title'];
-        dataMap['imageData'] = snapshot.data['imageURL'];
-        dataMap['key'] = snapshot.data['id'];
-        results.add(dataMap);
+        if (snapshot.data != null) {
+          Map<String, dynamic> dataMap = {};
+          dataMap['resultType'] = 'event';
+          dataMap['resultHeader'] = snapshot.data['title'];
+          dataMap['imageData'] = snapshot.data['imageURL'];
+          dataMap['key'] = snapshot.data['id'];
+          results.add(dataMap);
+        }
       });
     }
     return results;

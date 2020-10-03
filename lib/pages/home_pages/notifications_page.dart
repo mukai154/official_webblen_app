@@ -27,7 +27,7 @@ class _NotificationPageState extends State<NotificationPage> {
   Widget buildNotificationsView() {
     return Container(
       child: StreamBuilder(
-        stream: Firestore.instance
+        stream: FirebaseFirestore.instance
             .collection('user_notifications')
             .where(
               'uid',
@@ -41,8 +41,8 @@ class _NotificationPageState extends State<NotificationPage> {
               context: context,
               loadingDescription: "Loading...",
             );
-          notifDocs = notifSnapshot.data.documents.toList();
-          notifDocs.sort((notifDocA, notifDocB) => notifDocB.data['notificationExpDate'].compareTo(notifDocA.data['notificationExpDate']));
+          notifDocs = notifSnapshot.data.docs.toList();
+          notifDocs.sort((notifDocA, notifDocB) => notifDocB.data()['notificationExpDate'].compareTo(notifDocA.data()['notificationExpDate']));
           return notifDocs.isEmpty
               ? buildEmptyListView("No Messages Found")
               : ListView(
@@ -51,7 +51,7 @@ class _NotificationPageState extends State<NotificationPage> {
                     bottom: 4.0,
                   ),
                   children: notifDocs.map((DocumentSnapshot notifDoc) {
-                    WebblenNotification notif = WebblenNotification.fromMap(notifDoc.data);
+                    WebblenNotification notif = WebblenNotification.fromMap(notifDoc.data());
                     if (notif.notificationSeen == false) {
                       WebblenNotificationDataService().updateNotificationStatus(notif.notificationKey);
                     }

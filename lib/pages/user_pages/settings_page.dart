@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:contact_picker/contact_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -35,7 +34,6 @@ class _SettingsPageState extends State<SettingsPage> {
   File newUserImage;
   String stripeConnectURL;
   bool stripeAccountIsSetup = false;
-  final ContactPicker _contactPicker = new ContactPicker();
 
   Widget optionRow(Icon icon, String optionName, Color optionColor, VoidCallback onTap) {
     return GestureDetector(
@@ -160,13 +158,13 @@ class _SettingsPageState extends State<SettingsPage> {
                 : Form(
                     key: settingsFormKey,
                     child: StreamBuilder(
-                      stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-                      builder: (context, userSnapshot) {
+                      stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+                      builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                         if (!userSnapshot.hasData)
                           return Text(
                             "Loading...",
                           );
-                        var userData = userSnapshot.data;
+                        var userData = userSnapshot.data.data();
                         return Column(
                           children: <Widget>[
                             Row(
@@ -334,7 +332,7 @@ class _SettingsPageState extends State<SettingsPage> {
 //                    },
 //                  ),
                             StreamBuilder(
-                              stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+                              stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
                               builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                                 if (!snapshot.hasData) return Container();
                                 var stripeAccountExists = snapshot.data.exists;

@@ -6,10 +6,10 @@ import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 
 class StripePaymentService {
-  CollectionReference stripeRef = Firestore().collection("stripe");
-  CollectionReference stripeActivityRef = Firestore().collection("stripe_connect_activity");
-  CollectionReference ticketDistroRef = Firestore().collection("ticket_distros");
-  CollectionReference purchasedTicketsRef = Firestore().collection("purchased_tickets");
+  CollectionReference stripeRef = FirebaseFirestore.instance.collection("stripe");
+  CollectionReference stripeActivityRef = FirebaseFirestore.instance.collection("stripe_connect_activity");
+  CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("ticket_distros");
+  CollectionReference purchasedTicketsRef = FirebaseFirestore.instance.collection("purchased_tickets");
 
   Future<String> purchaseTickets(
     String eventTitle,
@@ -86,9 +86,9 @@ class StripePaymentService {
 
   Future<String> completeTicketPurchase(String uid, List ticketsToPurchase, WebblenEvent event) async {
     String error = "";
-    DocumentSnapshot snapshot = await ticketDistroRef.document(event.id).get();
+    DocumentSnapshot snapshot = await ticketDistroRef.doc(event.id).get();
     print(snapshot);
-    TicketDistro ticketDistro = TicketDistro.fromMap(snapshot.data);
+    TicketDistro ticketDistro = TicketDistro.fromMap(snapshot.data());
     List validTicketIDs = ticketDistro.validTicketIDs.toList(growable: true);
     ticketsToPurchase.forEach((purchasedTicket) async {
       String ticketName = purchasedTicket['ticketName'];
@@ -114,11 +114,11 @@ class StripePaymentService {
           endTime: event.endTime,
           timezone: event.timezone,
         );
-        await purchasedTicketsRef.document(ticketID).setData(newTicket.toMap()).catchError((e) {
+        await purchasedTicketsRef.doc(ticketID).set(newTicket.toMap()).catchError((e) {
           error = e;
         });
       }
-      await ticketDistroRef.document(event.id).updateData({
+      await ticketDistroRef.doc(event.id).update({
         "tickets": ticketDistro.tickets,
         "validTicketIDs": validTicketIDs,
       }).catchError((e) {
@@ -139,9 +139,9 @@ class StripePaymentService {
 
   Future<String> getStripeUID(String uid) async {
     String stripeUID;
-    DocumentSnapshot snapshot = await stripeRef.document(uid).get();
+    DocumentSnapshot snapshot = await stripeRef.doc(uid).get();
     if (snapshot.exists) {
-      Map<String, dynamic> data = snapshot.data;
+      Map<String, dynamic> data = snapshot.data();
       stripeUID = data['stripeUID'];
     }
     return stripeUID;
@@ -169,9 +169,9 @@ class StripePaymentService {
     List currentlyDue = accountVerificationStatus['currently_due'];
     List pending = accountVerificationStatus['pending_verification'];
     if (currentlyDue.length > 1 || pending.isNotEmpty) {
-      await stripeRef.document(uid).updateData({"verified": "pending"});
+      await stripeRef.doc(uid).update({"verified": "pending"});
     } else {
-      await stripeRef.document(uid).updateData({"verified": "verified"});
+      await stripeRef.doc(uid).update({"verified": "verified"});
       status = "verified";
     }
     return status;

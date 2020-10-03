@@ -66,15 +66,21 @@
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>MinimumOSVersion</key>
+	<string>11.0</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Webblen Would Like Access to Your Media to Save and Access Audio/Video You've Recorded</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Webblen Would Like Access to Your Calendar to Add Events</string>
 	<key>NSCameraUsageDescription</key>
 	<string>this will enable you to take take photos and stream video for your account and events.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Webblen Would Like to Access Your Contacts to Share Streams and Events</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Webblen Would Like to Access Your Location to Let You Know About Events Happening Around You</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -87,6 +93,8 @@
 	<string>Webblen Would Like to Access Your Motion Activity to Let You Check Into Events</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>this will enable you to choose photos from your library and save videos recorded from streams.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Webblen Would Like to Use Speech Recognition for Voice to Text</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
@@ -113,5 +121,7 @@
 	<false/>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
+	<key>kTCCServiceMediaLibrary</key>
+	<string>Webblen Would Like Access to Your Music to Connect with Live Streams</string>
 </dict>
 </plist>

@@ -23,7 +23,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   String feedback;
   GlobalKey feedbackForm = GlobalKey<FormState>();
   TextEditingController textEditingController = TextEditingController();
-  CollectionReference feedbackRef = Firestore().collection("feedback");
+  CollectionReference feedbackRef = FirebaseFirestore.instance.collection("feedback");
 
   submitFeedback() async {
     ShowAlertDialogService().showLoadingDialog(context);
@@ -31,7 +31,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     formState.save();
     if (feedback != null && feedback.isNotEmpty) {
       String error;
-      await feedbackRef.document().setData({
+      await feedbackRef.doc().set({
         "uid": widget.currentUser.uid,
         "datePostedInMilliseconds": DateTime.now().millisecondsSinceEpoch,
         "feedback": feedback,

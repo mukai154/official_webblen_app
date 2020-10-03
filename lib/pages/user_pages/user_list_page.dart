@@ -22,7 +22,7 @@ class UserSearchPage extends StatefulWidget {
 }
 
 class _UserSearchPageState extends State<UserSearchPage> {
-  CollectionReference userRef = Firestore.instance.collection("webblen_user");
+  CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
   List<DocumentSnapshot> userDocResults = [];
   ScrollController scrollController = ScrollController();
   int prevIndex = 0;
@@ -31,9 +31,11 @@ class _UserSearchPageState extends State<UserSearchPage> {
 
   getUsers() async {
     widget.userIDs.forEach((uid) async {
-      DocumentSnapshot snapshot = await userRef.document(uid).get();
-      WebblenUser user = WebblenUser.fromMap(snapshot.data['d']);
-      users.add(user);
+      DocumentSnapshot snapshot = await userRef.doc(uid).get();
+      if (snapshot.exists) {
+        WebblenUser user = WebblenUser.fromMap(snapshot.data()['d']);
+        users.add(user);
+      }
       if (widget.userIDs.last == uid) {
         isLoading = false;
         setState(() {});

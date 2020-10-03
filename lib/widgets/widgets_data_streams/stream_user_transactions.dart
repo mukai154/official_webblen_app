@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import 'package:webblen/models/webblen_transaction.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -17,7 +16,7 @@ class StreamUserTransactions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: Firestore.instance
+      stream: FirebaseFirestore.instance
           .collection("transactions")
           .where(
             'transactionUserUid',
@@ -26,7 +25,7 @@ class StreamUserTransactions extends StatelessWidget {
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> tSnapshot) {
         if (!tSnapshot.hasData) return Container();
-        if (tSnapshot.data.documents.isEmpty)
+        if (tSnapshot.data.docs.isEmpty)
           return Column(
             children: <Widget>[
               SizedBox(
@@ -42,8 +41,8 @@ class StreamUserTransactions extends StatelessWidget {
           );
         return ListView(
           shrinkWrap: true,
-          children: tSnapshot.data.documents.map((DocumentSnapshot tDoc) {
-            WebblenTransaction tData = WebblenTransaction.fromMap(tDoc.data);
+          children: tSnapshot.data.docs.map((DocumentSnapshot tDoc) {
+            WebblenTransaction tData = WebblenTransaction.fromMap(tDoc.data());
             return TransactionRow(transaction: tData);
           }).toList(),
         );
@@ -64,7 +63,7 @@ class StreamUserTransactionsIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: Firestore.instance
+      stream: FirebaseFirestore.instance
           .collection("transactions")
           .where(
             'transactionUserUid',
@@ -76,7 +75,7 @@ class StreamUserTransactionsIcon extends StatelessWidget {
           )
           .snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> tSnapshot) {
-        if (!tSnapshot.hasData || tSnapshot.data.documents.isEmpty)
+        if (!tSnapshot.hasData || tSnapshot.data.docs.isEmpty)
           return TransactionReceiptIcon(
             hasNewTransactions: false,
             onTapAction: onTapAction,

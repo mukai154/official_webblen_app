@@ -7,7 +7,7 @@ import 'package:webblen/services_general/services_show_alert.dart';
 
 class LocationService {
   Map<String, double> currentLocation;
-  Location currentUserLocation = new Location();
+  Location currentUserLocation = Location();
 
   Future<LocationData> getCurrentLocation(BuildContext context) async {
     LocationData locationData;

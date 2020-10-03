@@ -12,17 +12,17 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
 
 class EventDataService {
-  final CollectionReference eventsRef = Firestore().collection("events");
-  final CollectionReference activeStreamRef = Firestore().collection("active_streams");
-  final CollectionReference ticketsRef = Firestore().collection("purchased_tickets");
-  final CollectionReference ticketDistroRef = Firestore().collection("ticket_distros");
+  final CollectionReference eventsRef = FirebaseFirestore.instance.collection("events");
+  final CollectionReference activeStreamRef = FirebaseFirestore.instance.collection("active_streams");
+  final CollectionReference ticketsRef = FirebaseFirestore.instance.collection("purchased_tickets");
+  final CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("ticket_distros");
+  final CollectionReference recordedStreamRef = FirebaseFirestore.instance.collection("recorded_streams");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
 
   //CREATE
   Future<WebblenEvent> uploadEvent(WebblenEvent newEvent, String zipPostalCode, File eventImageFile, TicketDistro ticketDistro) async {
     print("uploading event...");
     print(zipPostalCode);
-    String error;
     List nearbyZipcodes = [];
     String newEventID = newEvent.id == null ? randomAlphaNumeric(12) : newEvent.id;
     newEvent.id = newEventID;
@@ -41,7 +41,7 @@ class EventDataService {
       }
       newEvent.nearbyZipcodes = nearbyZipcodes;
     }
-    await eventsRef.document(newEventID).setData({'d': newEvent.toMap(), 'g': null, 'l': null});
+    await eventsRef.doc(newEventID).set({'d': newEvent.toMap(), 'g': null, 'l': null});
     if (ticketDistro.tickets.isNotEmpty) {
       await uploadEventTickets(newEventID, ticketDistro);
     }
@@ -50,7 +50,27 @@ class EventDataService {
 
   Future<String> uploadEventTickets(String eventID, TicketDistro ticketDistro) async {
     String error;
-    await ticketDistroRef.document(eventID).setData(ticketDistro.toMap()).catchError((e) {
+    await ticketDistroRef.doc(eventID).set(ticketDistro.toMap()).catchError((e) {
+      error = e.details;
+    });
+    return error;
+  }
+
+  Future<String> setReviewStatus(String eventID, String title, String uid, List nearbyZipcodes, String imageURL, String downloadURL) async {
+    String error;
+    await recordedStreamRef.doc(eventID + DateTime.now().millisecondsSinceEpoch.toString()).set({
+      "eventID": eventID,
+      "authorID": uid,
+      "title": title,
+      "approved": false,
+      "expiration": DateTime.now().millisecondsSinceEpoch + 259200000,
+      "nearbyZipcodes": nearbyZipcodes,
+      "imageURL": imageURL,
+      "downloadURL": downloadURL,
+      "postedTimeInMilliseconds": DateTime.now().millisecondsSinceEpoch,
+      "showAllUsers": false,
+      "seenBy": [],
+    }).catchError((e) {
       error = e.details;
     });
     return error;
@@ -66,9 +86,9 @@ class EventDataService {
   //READ
   Future<List<WebblenEvent>> getEvents({String cityFilter, String stateFilter, String categoryFilter, String typeFilter}) async {
     List<WebblenEvent> events = [];
-    QuerySnapshot querySnapshot = await eventsRef.getDocuments();
-    querySnapshot.documents.forEach((snapshot) {
-      WebblenEvent event = WebblenEvent.fromMap(snapshot.data['d']);
+    QuerySnapshot querySnapshot = await eventsRef.get();
+    querySnapshot.docs.forEach((snapshot) {
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()['d']);
       events.add(event);
     });
     events.sort((eventA, eventB) => eventA.startDateTimeInMilliseconds.compareTo(eventB.startDateTimeInMilliseconds));
@@ -77,9 +97,9 @@ class EventDataService {
 
   Future<WebblenEvent> getEvent(String eventID) async {
     WebblenEvent event;
-    await eventsRef.document(eventID).get().then((res) {
+    await eventsRef.doc(eventID).get().then((res) {
       if (res.exists) {
-        event = WebblenEvent.fromMap(res.data['d']);
+        event = WebblenEvent.fromMap(res.data()['d']);
       }
     }).catchError((e) {
       print(e.details);
@@ -110,9 +130,9 @@ class EventDataService {
 
   Future<List<WebblenEvent>> getTrendingEvents() async {
     List<WebblenEvent> events = [];
-    QuerySnapshot querySnapshot = await eventsRef.orderBy('d.clicks').limit(3).getDocuments();
-    querySnapshot.documents.forEach((snapshot) {
-      WebblenEvent event = WebblenEvent.fromMap(snapshot.data['d']);
+    QuerySnapshot querySnapshot = await eventsRef.orderBy('d.clicks').limit(3).get();
+    querySnapshot.docs.forEach((snapshot) {
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()['d']);
       events.add(event);
     });
     events.sort((eventA, eventB) => eventA.startDateTimeInMilliseconds.compareTo(eventB.startDateTimeInMilliseconds));
@@ -121,18 +141,18 @@ class EventDataService {
 
   Future<TicketDistro> getEventTicketDistro(String eventID) async {
     TicketDistro ticketDistro;
-    DocumentSnapshot snapshot = await ticketDistroRef.document(eventID).get();
+    DocumentSnapshot snapshot = await ticketDistroRef.doc(eventID).get();
     if (snapshot.exists) {
-      ticketDistro = TicketDistro.fromMap(snapshot.data);
+      ticketDistro = TicketDistro.fromMap(snapshot.data());
     }
     return ticketDistro;
   }
 
   Future<List<EventTicket>> getPurchasedTickets(String uid) async {
     List<EventTicket> eventTickets = [];
-    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).getDocuments();
-    snapshot.documents.forEach((doc) {
-      EventTicket ticket = EventTicket.fromMap(doc.data);
+    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).get();
+    snapshot.docs.forEach((doc) {
+      EventTicket ticket = EventTicket.fromMap(doc.data());
       eventTickets.add(ticket);
     });
     return eventTickets;
@@ -140,9 +160,9 @@ class EventDataService {
 
   Future<List<EventTicket>> getPurchasedTicketsFromEvent(String uid, String eventID) async {
     List<EventTicket> eventTickets = [];
-    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).where("eventID", isEqualTo: eventID).getDocuments();
-    snapshot.documents.forEach((doc) {
-      EventTicket ticket = EventTicket.fromMap(doc.data);
+    QuerySnapshot snapshot = await ticketsRef.where("purchaserUID", isEqualTo: uid).where("eventID", isEqualTo: eventID).get();
+    snapshot.docs.forEach((doc) {
+      EventTicket ticket = EventTicket.fromMap(doc.data());
       eventTickets.add(ticket);
     });
     return eventTickets;
@@ -161,8 +181,8 @@ class EventDataService {
 //    var eventGeoRef = geo.collection(collectionRef: query.reference());
 //    GeoFirePoint geoPoint = geo.point(latitude: lat, longitude: lon);
 //    List events;
-//    await eventGeoRef.within(center: geoPoint, radius: 50, field: 'l', strictMode: false).first.then((documents) {
-//      print(documents.length);
+//    await eventGeoRef.within(center: geoPoint, radius: 50, field: 'l', strictMode: false).first.then((docs) {
+//      print(docs.length);
 //    }).catchError((e) {
 //      print(e);
 //    });
@@ -178,12 +198,12 @@ class EventDataService {
         .where("d.nearbyZipcodes", arrayContains: '58102')
         .where("d.isDigitalEvent", isEqualTo: false)
         .where("d.endDateTimeInMilliseconds", isGreaterThan: milli)
-        .getDocuments()
+        .get()
         .catchError((e) {
       print(e);
     });
-    snapshot.documents.forEach((doc) {
-      WebblenEvent event = WebblenEvent.fromMap(doc.data['d']);
+    snapshot.docs.forEach((doc) {
+      WebblenEvent event = WebblenEvent.fromMap(doc.data()['d']);
       if (event.startDateTimeInMilliseconds < milli) {
         double distanceFromPoint = geoPoint.distance(lat: event.lat, lng: event.lon);
         if (distanceFromPoint < 5.0) {
@@ -297,7 +317,7 @@ class EventDataService {
 
   Future<String> createActiveLiveStream(String id, String uid, String username, String userImgURL, List nearbyZipcodes, int timeInMilliseconds) async {
     String error;
-    await activeStreamRef.document(id).setData({
+    await activeStreamRef.doc(id).set({
       "id": id,
       "uid": uid,
       "username": username,
@@ -312,7 +332,7 @@ class EventDataService {
 
   Future<String> endActiveStream(String id) async {
     String error;
-    await activeStreamRef.document(id).delete();
+    await activeStreamRef.doc(id).delete();
     return error;
   }
 
@@ -320,7 +340,7 @@ class EventDataService {
     final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
       functionName: 'notifyFollowersStreamIsLive',
     );
-    final HttpsCallableResult result = await callable.call(
+    await callable.call(
       <String, dynamic>{
         'eventID': eventID,
         'uid': uid,
@@ -331,7 +351,7 @@ class EventDataService {
   //UPDATE
 
   Future updateEvent(WebblenEvent data, String id) async {
-    await eventsRef.document(id).updateData(data.toMap());
+    await eventsRef.doc(id).update(data.toMap());
     return;
   }
 
@@ -346,7 +366,7 @@ class EventDataService {
     } else {
       savedByIDs.add(uid);
     }
-    await eventsRef.document(event.id).updateData({"d.savedBy": savedByIDs}).catchError((e) {
+    await eventsRef.doc(event.id).update({"d.savedBy": savedByIDs}).catchError((e) {
       error = e.toString();
     });
     return error;
@@ -355,11 +375,11 @@ class EventDataService {
   //***DELETE
   Future<String> deleteEvent(String eventID) async {
     String error = "";
-    await eventsRef.document(eventID).get().then((doc) async {
+    await eventsRef.doc(eventID).get().then((doc) async {
       if (doc.exists) {
-        await eventsRef.document(eventID).delete();
+        await eventsRef.doc(eventID).delete();
       } else {
-        //await pastEventsRef.document(eventID).delete();
+        //await pastEventsRef.doc(eventID).delete();
       }
     });
     return error;
@@ -369,7 +389,7 @@ class EventDataService {
 //    String error = "";
 //    CollectionReference oldEventsRef = Firestore().collection("past_events");
 //    QuerySnapshot querySnapshot = await oldEventsRef.getDocuments();
-//    querySnapshot.documents.forEach((doc) async {
+//    querySnapshot.docs.forEach((doc) async {
 //      int eventStartDateTimeInMilliseconds = doc.data['d']['startDateInMilliseconds'];
 //      DateTime eventDateTime = DateTime.fromMillisecondsSinceEpoch(eventStartDateTimeInMilliseconds);
 //      DateFormat formatter = DateFormat('MMM dd, yyyy');
@@ -423,7 +443,7 @@ class EventDataService {
 //        title: doc.data['d']['title'],
 //        type: 'Other',
 //      );
-//      await eventsRef.document(event.id).setData({
+//      await eventsRef.doc(event.id).set({
 //        'd': event.toMap(),
 //        'g': doc.data['g'],
 //        'l': doc.data['l'],
@@ -433,16 +453,16 @@ class EventDataService {
 
 //  Future<Null> addEventDataField(String dataName, dynamic data) async {
 //    QuerySnapshot querySnapshot = await pastEventsRef.getDocuments();
-//    print(querySnapshot.documents.length);
-//    querySnapshot.documents.forEach((doc) {
-//      pastEventsRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
+//    print(querySnapshot.docs.length);
+//    querySnapshot.docs.forEach((doc) {
+//      pastEventsRef.doc(doc.docID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
 //    });
 //  }
 //
 //  Future<Null> addRecEventDataField(String dataName, dynamic data) async {
 //    QuerySnapshot querySnapshot = await recurringEventRef.getDocuments();
-//    querySnapshot.documents.forEach((doc) {
-//      recurringEventRef.document(doc.documentID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
+//    querySnapshot.docs.forEach((doc) {
+//      recurringEventRef.doc(doc.docID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
 //    });
 //  }
 }

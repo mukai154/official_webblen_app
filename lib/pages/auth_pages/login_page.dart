@@ -53,8 +53,17 @@ class _LoginPageState extends State<LoginPage> {
       this.verificationId = verId;
     };
 
+    final PhoneVerificationCompleted verificationCompleted = (PhoneAuthCredential credential) async {
+      // ANDROID ONLY!
+
+      // Sign the user in (or link) with the auto-generated credential
+      if (Platform.isAndroid) {
+        await FirebaseAuth.instance.signInWithCredential(credential);
+      }
+    };
     final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
-      this.verificationId = verId;
+      print(verificationId);
+      verificationId = verId;
       ShowAlertDialogService().showFormWidget(
         context,
         'Enter SMS Code',
@@ -64,37 +73,42 @@ class _LoginPageState extends State<LoginPage> {
           },
         ),
         () {
-          FirebaseAuth.instance.currentUser().then((user) {
-            if (user != null) {
-              Navigator.of(context).pop();
-              PageTransitionService(context: context).transitionToRootPage();
-            } else {
-              Navigator.of(context).pop();
-              signInWithPhone();
-            }
-          });
+          if (FirebaseAuth.instance.currentUser != null) {
+            Navigator.of(context).pop();
+            PageTransitionService(context: context).transitionToRootPage();
+          } else {
+            Navigator.of(context).pop();
+            signInWithPhone();
+          }
         },
       );
     };
 
-    final PhoneVerificationFailed veriFailed = (AuthException exception) {
+    final PhoneVerificationFailed veriFailed = (FirebaseAuthException exception) {
       print(exception.message);
       isLoading = false;
       ShowAlertDialogService().showFailureDialog(context, "Verification Failed", "There was an issue verifying your phone number. Please try again");
       setState(() {});
     };
 
-    await FirebaseAuth.instance.verifyPhoneNumber(
-        phoneNumber: this.phoneNo,
-        codeAutoRetrievalTimeout: autoRetrieve,
-        codeSent: smsCodeSent,
-        timeout: const Duration(seconds: 5),
-        verificationCompleted: null,
-        verificationFailed: veriFailed);
+    try {
+      await FirebaseAuth.instance.verifyPhoneNumber(
+          phoneNumber: phoneNo,
+          codeAutoRetrievalTimeout: autoRetrieve,
+          codeSent: smsCodeSent,
+          timeout: const Duration(seconds: 5),
+          verificationCompleted: verificationCompleted,
+          verificationFailed: veriFailed);
+    } catch (e) {
+      print(e);
+      isLoading = false;
+      ShowAlertDialogService().showFailureDialog(context, "Verification Failed", "There was an issue verifying your phone number. Please try again");
+      setState(() {});
+    }
   }
 
   signInWithPhone() async {
-    final AuthCredential credential = PhoneAuthProvider.getCredential(
+    final AuthCredential credential = PhoneAuthProvider.credential(
       verificationId: verificationId,
       smsCode: smsCode,
     );
@@ -160,6 +174,7 @@ class _LoginPageState extends State<LoginPage> {
           });
         }
       } else {
+        print(phoneNo);
         verifyPhone();
       }
     } else {
@@ -188,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     GoogleSignInAuthentication googleAuth = await googleAccount.authentication;
 
-    AuthCredential credential = GoogleAuthProvider.getCredential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+    AuthCredential credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
     FirebaseAuth.instance.signInWithCredential(credential).then((user) {
       if (user != null) {
         PageTransitionService(context: context).transitionToRootPage();
@@ -213,7 +228,7 @@ class _LoginPageState extends State<LoginPage> {
     final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
     switch (result.status) {
       case FacebookLoginStatus.loggedIn:
-        final AuthCredential credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
+        final AuthCredential credential = FacebookAuthProvider.credential(result.accessToken.token);
         FirebaseAuth.instance.signInWithCredential(credential).then((user) {
           if (user != null) {
             PageTransitionService(context: context).transitionToRootPage();
@@ -227,7 +242,7 @@ class _LoginPageState extends State<LoginPage> {
         break;
       case FacebookLoginStatus.cancelledByUser:
         scaffold.showSnackBar(SnackBar(
-          content: Text("Cancelled Facebook Login"),
+          content: Text("Cancelled Facebook Sign In"),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
         ));
@@ -239,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
         scaffold.showSnackBar(SnackBar(
           content: MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-            child: Text("There was an Issue Logging Into Facebook"),
+            child: Text("There was an Issue Signing Into Facebook"),
           ),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
@@ -262,8 +277,8 @@ class _LoginPageState extends State<LoginPage> {
     switch (result.status) {
       case AuthorizationStatus.authorized:
         final AppleIdCredential appleIdCredential = result.credential;
-        OAuthProvider oAuthProvider = OAuthProvider(providerId: "apple.com");
-        final AuthCredential credential = oAuthProvider.getCredential(
+        OAuthProvider oAuthProvider = OAuthProvider("apple.com");
+        final AuthCredential credential = oAuthProvider.credential(
           idToken: String.fromCharCodes(appleIdCredential.identityToken),
           accessToken: String.fromCharCodes(appleIdCredential.authorizationCode),
         );
@@ -280,7 +295,7 @@ class _LoginPageState extends State<LoginPage> {
         break;
       case AuthorizationStatus.cancelled:
         scaffold.showSnackBar(SnackBar(
-          content: Text("Cancelled Apple Login"),
+          content: Text("Cancelled Apple Sign In"),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
         ));
@@ -293,7 +308,7 @@ class _LoginPageState extends State<LoginPage> {
         scaffold.showSnackBar(SnackBar(
           content: MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-            child: Text("There was an Issue Logging Into Apple"),
+            child: Text("There was an Issue Signing Into Apple"),
           ),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 3),
@@ -422,35 +437,55 @@ class _LoginPageState extends State<LoginPage> {
     final googleButton = GoogleBtn(action: loginWithGoogle);
 
     //**EMAIL/PHONE BUTTON
-    final signInWithEmailButton = CustomColorIconButton(
-      icon: Icon(FontAwesomeIcons.envelope, color: Colors.black, size: 18.0),
-      text: "Sign in With Email",
-      textColor: Colors.black,
-      backgroundColor: Colors.white,
-      height: 45.0,
-      width: MediaQuery.of(context).size.width * 0.85,
-      onPressed: () => setSignInWithEmailStatus(),
+    final signInWithEmailButton = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6.0),
+      child: Material(
+        elevation: 2.0,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4.0),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(4.0),
+          onTap: () => setSignInWithEmailStatus(),
+          child: Container(
+            height: 45.0,
+            width: 45.0,
+            child: Center(
+              child: Icon(FontAwesomeIcons.envelope, color: Colors.black, size: 24.0),
+            ),
+          ),
+        ),
+      ),
     );
 
-    final signInWithPhoneButton = CustomColorIconButton(
-      icon: Icon(FontAwesomeIcons.mobileAlt, color: Colors.black, size: 18.0),
-      text: "Sign in With Phone",
-      textColor: Colors.black,
-      backgroundColor: Colors.white,
-      height: 45.0,
-      width: MediaQuery.of(context).size.width * 0.85,
-      onPressed: () => setSignInWithEmailStatus(),
+    final signInWithPhoneButton = Padding(
+      padding: EdgeInsets.symmetric(horizontal: 6.0),
+      child: Material(
+        elevation: 2.0,
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4.0),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(4.0),
+          onTap: () => setSignInWithEmailStatus(),
+          child: Container(
+            height: 45.0,
+            width: 45.0,
+            child: Center(
+              child: Icon(FontAwesomeIcons.mobileAlt, color: Colors.black, size: 24.0),
+            ),
+          ),
+        ),
+      ),
     );
 
     final orTextLabel = Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 10),
       child: MediaQuery(
         data: MediaQuery.of(context).copyWith(
           textScaleFactor: 1.0,
         ),
         child: CustomText(
           context: context,
-          text: 'or',
+          text: 'or Sign in with',
           textColor: CustomColors.londonSquare,
           textAlign: TextAlign.left,
           fontSize: 12.0,
@@ -535,10 +570,15 @@ class _LoginPageState extends State<LoginPage> {
                       logo,
                       signInWithEmail ? authForm : phoneAuthForm,
                       orTextLabel,
-                      facebookButton,
-                      Platform.isIOS ? appleButton : Container(),
-                      googleButton,
-                      signInWithEmail ? signInWithPhoneButton : signInWithEmailButton,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          facebookButton,
+                          Platform.isIOS ? appleButton : Container(),
+                          googleButton,
+                          signInWithEmail ? signInWithPhoneButton : signInWithEmailButton,
+                        ],
+                      ),
                       SizedBox(height: 16.0),
                       serviceAgreement,
                     ],

@@ -189,7 +189,7 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
         child: isLoading
             ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed)
             : StreamBuilder(
-                stream: Firestore.instance.collection("stripe").document(widget.currentUser.uid).snapshots(),
+                stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
                 builder: (context, userSnapshot) {
                   if (!userSnapshot.hasData)
                     return Text(

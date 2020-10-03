@@ -51,7 +51,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   String friendRequestStatus = "";
 
   //Event Results
-  CollectionReference eventsRef = Firestore.instance.collection("events");
+  CollectionReference eventsRef = FirebaseFirestore.instance.collection("events");
   List<DocumentSnapshot> hostedEventResults = [];
   List<DocumentSnapshot> pastEventResults = [];
   List followingList = [];
@@ -62,7 +62,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   bool moreHostedEventsAvailable = true;
   bool loadingAdditionalPastEvents = false;
   bool morePastEventsAvailable = true;
-
+  int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
   //ADMOB
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
@@ -81,11 +81,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
 
   getHostedEvents() async {
     Query eventsQuery;
-    eventsQuery = eventsRef.where('d.authorID', isEqualTo: user.uid).orderBy('d.startDateTimeInMilliseconds', descending: true).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    if (querySnapshot.documents.isNotEmpty) {
-      lastHostedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-      hostedEventResults = querySnapshot.documents;
+    eventsQuery = eventsRef
+        .where('d.authorID', isEqualTo: user.uid)
+        .where("d.startDateTimeInMilliseconds", isGreaterThan: currentDateTimeInMilliseconds)
+        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .limit(resultsPerPage);
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    if (querySnapshot.docs.isNotEmpty) {
+      lastHostedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      hostedEventResults = querySnapshot.docs;
     }
     isLoading = false;
     setState(() {});
@@ -94,10 +98,10 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   getPastEvents() async {
     Query eventsQuery;
     eventsQuery = eventsRef.where('d.attendees', arrayContains: user.uid).orderBy('d.startDateTimeInMilliseconds', descending: true).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    if (querySnapshot.documents.isNotEmpty) {
-      lastPastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-      pastEventResults = querySnapshot.documents;
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    if (querySnapshot.docs.isNotEmpty) {
+      lastPastEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      pastEventResults = querySnapshot.docs;
     }
     //isLoading = false;
     setState(() {});
@@ -111,14 +115,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
     setState(() {});
     Query eventsQuery = eventsRef
         .where("d.authorID", isEqualTo: user.uid)
-        .orderBy('d.startDateTimeInMilliseconds', descending: true)
+        .where("d.startDateTimeInMilliseconds", isGreaterThan: currentDateTimeInMilliseconds)
+        .orderBy('d.startDateTimeInMilliseconds', descending: false)
         .startAfterDocument(lastHostedEventDocSnap)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastHostedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-    hostedEventResults.addAll(querySnapshot.documents);
-    if (querySnapshot.documents.length == 0) {
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    lastHostedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    hostedEventResults.addAll(querySnapshot.docs);
+    if (querySnapshot.docs.length == 0) {
       moreHostedEventsAvailable = false;
     }
     loadingAdditionalHostedEvents = false;
@@ -137,10 +142,10 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
         .startAfterDocument(lastPastEventDocSnap)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastPastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-    pastEventResults.addAll(querySnapshot.documents);
-    if (querySnapshot.documents.length == 0) {
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    lastPastEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    pastEventResults.addAll(querySnapshot.docs);
+    if (querySnapshot.docs.length == 0) {
       morePastEventsAvailable = false;
     }
     loadingAdditionalPastEvents = false;
@@ -162,7 +167,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
         ),
         itemCount: hostedEventResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(hostedEventResults[index].data['d']));
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(hostedEventResults[index].data()['d']));
           double num = index / 15;
           print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
@@ -232,7 +237,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
         ),
         itemCount: pastEventResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(pastEventResults[index].data['d']));
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(pastEventResults[index].data()['d']));
           double num = index / 15;
           print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
@@ -418,10 +423,10 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
             ),
             Container(
               child: StreamBuilder(
-                stream: Firestore.instance.collection("webblen_user").document(user.uid).snapshots(),
-                builder: (context, userSnapshot) {
+                stream: FirebaseFirestore.instance.collection("webblen_user").doc(user.uid).snapshots(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                   if (!userSnapshot.hasData) return Container(height: 200);
-                  var userData = userSnapshot.data;
+                  var userData = userSnapshot.data.data();
                   List following = userData['d']["following"];
                   List followers = userData['d']["followers"];
                   return Container(
@@ -445,7 +450,11 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                         currentUser: widget.currentUser,
                         pageTitle: "Following",
                       ).transitionToUserListPage(),
-                      isFollowing: followingList == null ? null : followingList.contains(user.uid) ? true : false,
+                      isFollowing: followingList == null
+                          ? null
+                          : followingList.contains(user.uid)
+                              ? true
+                              : false,
                     ),
                   );
                 },
@@ -593,7 +602,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   String friendRequestStatus = "";
 
   //Event Results
-  CollectionReference eventsRef = Firestore.instance.collection("events");
+  CollectionReference eventsRef = FirebaseFirestore.instance.collection("events");
   List<DocumentSnapshot> hostedEventResults = [];
   List<DocumentSnapshot> pastEventResults = [];
   DocumentSnapshot lastHostedEventDocSnap;
@@ -622,10 +631,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   getHostedEvents() async {
     Query eventsQuery;
     eventsQuery = eventsRef.where('d.authorID', isEqualTo: user.uid).orderBy('d.startDateTimeInMilliseconds', descending: true).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    if (querySnapshot.documents.isNotEmpty) {
-      lastHostedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-      hostedEventResults = querySnapshot.documents;
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    if (querySnapshot.docs.isNotEmpty) {
+      lastHostedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      hostedEventResults = querySnapshot.docs;
     }
     isLoading = false;
     setState(() {});
@@ -634,10 +643,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   getPastEvents() async {
     Query eventsQuery;
     eventsQuery = eventsRef.where('d.attendees', arrayContains: user.uid).orderBy('d.startDateTimeInMilliseconds', descending: true).limit(resultsPerPage);
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    if (querySnapshot.documents.isNotEmpty) {
-      lastPastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-      pastEventResults = querySnapshot.documents;
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    if (querySnapshot.docs.isNotEmpty) {
+      lastPastEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      pastEventResults = querySnapshot.docs;
     }
     //isLoading = false;
     setState(() {});
@@ -655,10 +664,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         .startAfterDocument(lastHostedEventDocSnap)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastHostedEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-    hostedEventResults.addAll(querySnapshot.documents);
-    if (querySnapshot.documents.length == 0) {
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    lastHostedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    hostedEventResults.addAll(querySnapshot.docs);
+    if (querySnapshot.docs.length == 0) {
       moreHostedEventsAvailable = false;
     }
     loadingAdditionalHostedEvents = false;
@@ -677,10 +686,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         .startAfterDocument(lastPastEventDocSnap)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await eventsQuery.getDocuments().catchError((e) => print(e));
-    lastPastEventDocSnap = querySnapshot.documents[querySnapshot.documents.length - 1];
-    pastEventResults.addAll(querySnapshot.documents);
-    if (querySnapshot.documents.length == 0) {
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    lastPastEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    pastEventResults.addAll(querySnapshot.docs);
+    if (querySnapshot.docs.length == 0) {
       morePastEventsAvailable = false;
     }
     loadingAdditionalPastEvents = false;
@@ -702,7 +711,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         ),
         itemCount: hostedEventResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(hostedEventResults[index].data['d']));
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(hostedEventResults[index].data()['d']));
           double num = index / 15;
           print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
@@ -772,7 +781,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         ),
         itemCount: pastEventResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(pastEventResults[index].data['d']));
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(pastEventResults[index].data()['d']));
           double num = index / 15;
           print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
@@ -910,13 +919,13 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               StreamBuilder(
-                stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-                builder: (context, userSnapshot) {
+                stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                   if (!userSnapshot.hasData)
                     return Text(
                       "Loading...",
                     );
-                  var userData = userSnapshot.data;
+                  var userData = userSnapshot.data.data();
                   List following = userData['d']["following"];
                   List followers = userData['d']["followers"];
                   return Container(

@@ -3,15 +3,13 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/models/webblen_reward.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:webblen/models/webblen_reward.dart';
 
 class RewardDataService {
-  final CollectionReference rewardRef =
-      Firestore.instance.collection("rewards");
-  final CollectionReference userRef =
-      Firestore.instance.collection("webblen_user");
+  final CollectionReference rewardRef = FirebaseFirestore.instance.collection("rewards");
+  final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
   final StorageReference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
 
@@ -27,11 +25,7 @@ class RewardDataService {
       reward.rewardImagePath = downloadUrl;
     }
     reward.rewardKey = rewardKey;
-    await Firestore.instance
-        .collection("rewards")
-        .document(rewardKey)
-        .setData(reward.toMap())
-        .whenComplete(() {
+    await FirebaseFirestore.instance.collection("rewards").doc(rewardKey).set(reward.toMap()).whenComplete(() {
       result = "success";
     }).catchError((e) {
       result = e.toString();
@@ -42,8 +36,7 @@ class RewardDataService {
   Future<String> uploadRewardImage(File rewardImage, String fileName) async {
     StorageReference ref = storageReference.child("rewards").child(fileName);
     StorageUploadTask uploadTask = ref.putFile(rewardImage);
-    String downloadUrl =
-        await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
     return downloadUrl;
   }
 
@@ -55,8 +48,8 @@ class RewardDataService {
           'rewardCategory',
           isEqualTo: tier,
         )
-        .getDocuments();
-    List eventsSnapshot = querySnapshot.documents;
+        .get();
+    List eventsSnapshot = querySnapshot.docs;
     eventsSnapshot.forEach((rewardDoc) {
       WebblenReward reward = WebblenReward.fromMap(rewardDoc.data);
       tierRewards.add(reward);
@@ -72,8 +65,8 @@ class RewardDataService {
           'rewardCategory',
           isEqualTo: 'charity',
         )
-        .getDocuments();
-    List eventsSnapshot = querySnapshot.documents;
+        .get();
+    List eventsSnapshot = querySnapshot.docs;
     eventsSnapshot.forEach((rewardDoc) {
       WebblenReward reward = WebblenReward.fromMap(rewardDoc.data);
       charityRewards.add(reward);
@@ -84,15 +77,12 @@ class RewardDataService {
 
   Future<String> updateAmountOfRewardAvailable(String rewardID) async {
     String status = "";
-    DocumentSnapshot documentSnapshot =
-        await rewardRef.document(rewardID).get();
-    int amountAvailable = documentSnapshot.data["amountAvailable"];
+    DocumentSnapshot docSnapshot = await rewardRef.doc(rewardID).get();
+    int amountAvailable = docSnapshot.data()["amountAvailable"];
     if (amountAvailable > 0) {
       amountAvailable -= 1;
     }
-    rewardRef
-        .document(rewardID)
-        .updateData({"amountAvailable": amountAvailable}).whenComplete(() {
+    rewardRef.doc(rewardID).update({"amountAvailable": amountAvailable}).whenComplete(() {
       status = amountAvailable.toString();
     }).catchError((e) {
       status = "error";
@@ -100,12 +90,11 @@ class RewardDataService {
     return status;
   }
 
-  Future<String> purchaseReward(
-      String uid, String rewardID, double cost) async {
+  Future<String> purchaseReward(String uid, String rewardID, double cost) async {
     String error = "";
-    DocumentSnapshot userSnapshot = await userRef.document(uid).get();
-    double userPoints = userSnapshot.data['d']["eventPoints"] * 1.00;
-    List userRewards = userSnapshot.data['d']["rewards"].toList();
+    DocumentSnapshot userSnapshot = await userRef.doc(uid).get();
+    double userPoints = userSnapshot.data()['d']["eventPoints"] * 1.00;
+    List userRewards = userSnapshot.data()['d']["rewards"].toList();
     if (userPoints < cost) {
       error = "Insufficient Funds";
     } else if (userRewards.contains(rewardID)) {
@@ -113,11 +102,7 @@ class RewardDataService {
     } else {
       userRewards.add(rewardID);
       userPoints = userPoints - cost;
-      userRef
-          .document(uid)
-          .updateData({"d.eventPoints": userPoints, "d.rewards": userRewards})
-          .whenComplete(() {})
-          .catchError((e) {
+      userRef.doc(uid).update({"d.eventPoints": userPoints, "d.rewards": userRewards}).whenComplete(() {}).catchError((e) {
             error = e.details;
           });
     }
@@ -126,14 +111,10 @@ class RewardDataService {
 
   Future<String> removeUserReward(String uid, String rewardID) async {
     String error = "";
-    DocumentSnapshot userSnapshot = await userRef.document(uid).get();
-    List userRewards = userSnapshot.data['d']["rewards"].toList();
+    DocumentSnapshot userSnapshot = await userRef.doc(uid).get();
+    List userRewards = userSnapshot.data()['d']["rewards"].toList();
     userRewards.remove(rewardID);
-    userRef
-        .document(uid)
-        .updateData({"d.rewards": userRewards})
-        .whenComplete(() {})
-        .catchError((e) {
+    userRef.doc(uid).update({"d.rewards": userRewards}).whenComplete(() {}).catchError((e) {
           error = e.details;
         });
 
@@ -142,24 +123,21 @@ class RewardDataService {
 
   Future<WebblenReward> findRewardByID(String rewardID) async {
     WebblenReward reward;
-    DocumentSnapshot documentSnapshot =
-        await rewardRef.document(rewardID).get();
-    if (documentSnapshot.exists) {
-      reward = WebblenReward.fromMap(documentSnapshot.data);
+    DocumentSnapshot docSnapshot = await rewardRef.doc(rewardID).get();
+    if (docSnapshot.exists) {
+      reward = WebblenReward.fromMap(docSnapshot.data());
     }
     return reward;
   }
 
   Future<Null> deleteRewardByID(String rewardID) async {
-    DocumentSnapshot documentSnapshot =
-        await rewardRef.document(rewardID).get();
-    if (documentSnapshot.exists) {
-      rewardRef.document(rewardID).delete();
+    DocumentSnapshot docSnapshot = await rewardRef.doc(rewardID).get();
+    if (docSnapshot.exists) {
+      rewardRef.doc(rewardID).delete();
     }
   }
 
-  Future<List<WebblenReward>> deleteExpiredRewards(
-      List<WebblenReward> rewardsList) async {
+  Future<List<WebblenReward>> deleteExpiredRewards(List<WebblenReward> rewardsList) async {
     DateFormat formatter = new DateFormat("MM/dd/yyyy");
     DateTime today = DateTime.now();
     List<WebblenReward> validRewards = rewardsList.toList(
@@ -168,19 +146,16 @@ class RewardDataService {
     rewardsList.forEach((reward) {
       DateTime rewardExpirationDate = formatter.parse(reward.expirationDate);
       if (today.isAfter(rewardExpirationDate)) {
-        rewardRef.document(reward.rewardKey).delete();
+        rewardRef.doc(reward.rewardKey).delete();
         validRewards.remove(reward);
       }
     });
     return validRewards;
   }
 
-  filterRewards(List<WebblenReward> rewardsList, double filterCost,
-      String filterCategory) {
+  filterRewards(List<WebblenReward> rewardsList, double filterCost, String filterCategory) {
     List<WebblenReward> filteredRewards;
-    filteredRewards = rewardsList
-        .where((reward) => reward.rewardCategory == filterCategory)
-        .toList();
+    filteredRewards = rewardsList.where((reward) => reward.rewardCategory == filterCategory).toList();
     return filteredRewards;
   }
 }

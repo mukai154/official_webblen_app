@@ -27,8 +27,8 @@ class StreamUserAccount extends StatelessWidget {
             baseColor: CustomColors.iosOffWhite,
             highlightColor: Colors.white)
         : StreamBuilder(
-            stream: Firestore.instance.collection("webblen_user").document(uid).snapshots(),
-            builder: (context, userSnapshot) {
+            stream: FirebaseFirestore.instance.collection("webblen_user").doc(uid).snapshots(),
+            builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
               if (!userSnapshot.hasData)
                 return Shimmer.fromColors(
                     child: Container(
@@ -38,7 +38,7 @@ class StreamUserAccount extends StatelessWidget {
                     ),
                     baseColor: CustomColors.iosOffWhite,
                     highlightColor: Colors.white);
-              var userData = userSnapshot.data;
+              var userData = userSnapshot.data.data();
               return userData['d']['profile_pic'] != null
                   ? Container(
                       height: 35,

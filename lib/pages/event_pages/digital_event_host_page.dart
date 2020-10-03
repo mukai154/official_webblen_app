@@ -1,6 +1,8 @@
 import 'dart:async';
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:agora_rtc_engine/rtc_local_view.dart' as RtcLocalView;
+import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,25 +10,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:random_string/random_string.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:webblen/firebase/data/chat_data.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/models/event_chat_message.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/agora/agora_service.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/events/check_in_count_box.dart';
 import 'package:webblen/widgets/events/live_now_box.dart';
 import 'package:webblen/widgets/events/viewer_count_box.dart';
 
 class DigitalEventHostPage extends StatefulWidget {
-  /// non-modifiable channel name of the page
   final WebblenUser currentUser;
   final WebblenEvent event;
 
-  /// Creates a call page with given channel name.
   const DigitalEventHostPage({Key key, this.currentUser, this.event}) : super(key: key);
 
   @override
@@ -35,15 +34,27 @@ class DigitalEventHostPage extends StatefulWidget {
 
 class _DigitalEventHostPageState extends State<DigitalEventHostPage> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   String agoraAppID = 'f10ecda2344b4c039df6d33953a3f598';
+  RtcEngine agoraRtcEngine;
   static final _users = <int>[];
   bool muted = false;
-  bool isLoggedIntoAgoraRtm = true;
   bool isInAgoraChannel = true;
-  int audienceSize = 0;
   bool isRecording = false;
   var tryingToEnd = false;
-  String agoraToken;
   bool isLoading = true;
+  bool micEnabled = false;
+  bool cameraEnabled = false;
+//  bool recording = false;
+//  bool finishedRecording = false;
+//  bool uploadingFiles = false;
+//  String uploadStatus;
+//  FlutterAudioRecorder audioRecorder;
+//  var audioRecording;
+//  File vidFile;
+//  File audFile;
+//  String vidFilePath;
+//  String audFilePath;
+//  LocalFileSystem localFileSystem = LocalFileSystem();
+//  Directory tempDirectory;
 
   final messageFieldController = TextEditingController();
   ScrollController chatViewController = ScrollController();
@@ -53,35 +64,196 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
   AnimationController giftAnimationController;
   Animation giftAnimation;
 
+//  ///**** RECORDING, VIDEO UPLOAD, AUDIO UPLOAD
+//
+//  requestRecordingStart() {
+//    if (finishedRecording) {
+//      ShowAlertDialogService().showDetailedConfirmationDialog(
+//        context,
+//        "Re-Record Stream?",
+//        "Previous Recording Will Be Discarded",
+//        "Record",
+//        () {
+//          Navigator.of(context).pop();
+//          startScreenAndAudioRecord();
+//        },
+//        () => Navigator.of(context).pop(),
+//      );
+//    } else {
+//      ShowAlertDialogService().showDetailedConfirmationDialog(
+//        context,
+//        "Record Stream?",
+//        "Recorded Streams Are Publicly Availble for 3 Days",
+//        "Record",
+//        () {
+//          Navigator.of(context).pop();
+//          startScreenAndAudioRecord();
+//        },
+//        () => Navigator.of(context).pop(),
+//      );
+//    }
+//  }
+//
+//  startScreenAndAudioRecord() async {
+//    tempDirectory = await getTemporaryDirectory();
+//
+//    ///RECORD SCREEN
+//    await FlutterScreenRecording.startRecordScreen("${widget.event.id} + ${DateTime.now().millisecondsSinceEpoch.toString()}");
+//
+//    ///RECORD AUDIO
+//    audFilePath = tempDirectory.path + "/${DateTime.now().millisecondsSinceEpoch.toString()}audio_rec.wav";
+//    audioRecorder = FlutterAudioRecorder(audFilePath, audioFormat: AudioFormat.WAV);
+//    await audioRecorder.initialized.catchError((e) => print(e));
+//    await audioRecorder.start().catchError((e) => print(e));
+//    audioRecording = await audioRecorder.current(channel: 1);
+//    if (audioRecorder.recording.status == RecordingStatus.Recording) {
+//      recording = true;
+//      setState(() {});
+//    } else {
+//      ShowAlertDialogService().showFailureDialog(context, "Recording Error", "There's An Issue Recording Your Audio. Please Enable Audio Recording");
+//    }
+//  }
+//
+//  stopScreenAndAudioRecord() async {
+//    vidFilePath = await FlutterScreenRecording.stopRecordScreen;
+//    var audResult = await audioRecorder.stop();
+//    audFilePath = audResult.path;
+//    recording = false;
+//    finishedRecording = true;
+//    setState(() {});
+//  }
+//
+//  uploadRecordings() async {
+//    uploadingFiles = true;
+//    setState(() {});
+//    uploadStatus = "Compressing Video...";
+//    setState(() {});
+//    MediaInfo compressedVid = await VideoCompress.compressVideo(
+////      vidFilePath,
+////      quality: VideoQuality.MediumQuality,
+////      deleteOrigin: false,
+////    );
+//    vidFile = localFileSystem.file(compressedVid.path);
+//    audFile = localFileSystem.file(audFilePath);
+//    await uploadFile("stream_video", vidFile, "${widget.event.id}.mp4");
+//    uploadStatus = "Preparing Audio";
+//    setState(() {});
+//    await uploadFile("stream_audio", audFile, "${widget.event.id}.wav");
+//    await EventDataService().setReviewStatus(widget.event.id, widget.currentUser.uid, widget.event.nearbyZipcodes);
+//    uploadStatus = "Upload Complete!";
+//    uploadingFiles = false;
+//    tryingToEnd = true;
+//    setState(() {});
+//  }
+//
+//  Future<String> uploadFile(String bucketName, File file, String fileName) async {
+//    String downloadUrl;
+//    StorageReference storageReference = FirebaseStorage.instance.ref();
+//    StorageReference ref = storageReference.child(bucketName).child(widget.currentUser.uid).child(fileName);
+//    StorageUploadTask uploadTask = ref.putFile(
+//      file,
+//      StorageMetadata(
+//        contentType: bucketName == "stream_video" ? 'video/mp4' : 'audio/wav',
+//      ),
+//    );
+//    uploadTask.events.forEach((event) {
+//      int percentComplete = ((event.snapshot.bytesTransferred / event.snapshot.totalByteCount) * 100).round();
+//      if (bucketName == "stream_video") {
+//        if (percentComplete == 100) {
+//          uploadStatus = "Finalizing Video...";
+//        } else {
+//          uploadStatus = "Uploading Video $percentComplete%";
+//        }
+//        setState(() {});
+//      } else {
+//        if (percentComplete == 100) {
+//          uploadStatus = "Finalizing Audio...";
+//        } else {
+//          uploadStatus = "Uploading Audio $percentComplete%";
+//        }
+//        setState(() {});
+//      }
+//    });
+//    await uploadTask.onComplete.catchError((e) => print(e));
+//    downloadUrl = await ref.getDownloadURL() as String;
+//    return downloadUrl;
+//  }
+//
+//  uploadFilesAndClose() async {
+//    uploadingFiles = true;
+//    setState(() {});
+//    print('uploading files...');
+//    MediaInfo mediaInfo = await VideoCompress.compressVideo(
+//      vidFilePath,
+//      quality: VideoQuality.MediumQuality,
+//      deleteOrigin: false, // It's false by default
+//    );
+//    vidFilePath = mediaInfo.path;
+//    vidFile = localFileSystem.file(vidFilePath);
+//    audFile = localFileSystem.file(audFilePath);
+//    print(vidFile);
+//    print(audFile);
+//    print("uploading video...");
+//    String vidURL = await FileUploader().uploadStreamVideo(vidFile, widget.currentUser.uid, "${widget.event.id}.mp4");
+//    print(vidURL);
+//    print("uploading audio...");
+//    String audURL = await FileUploader().uploadStreamAudio(audFile, widget.currentUser.uid, "${widget.event.id}.wav");
+//    print(audURL);
+//    print("Upload Complete");
+//    uploadingFiles = false;
+//    tryingToEnd = true;
+//    setState(() {});
+//  }
+
   initialize() async {
-    int agoraUID = int.parse(randomNumeric(10));
-    agoraToken = await AgoraService().retrieveAgoraToken(widget.event, agoraUID);
-    print(agoraToken);
     await initializeAgoraRtc();
-    await AgoraRtcEngine.enableWebSdkInteroperability(true);
     VideoEncoderConfiguration configuration = VideoEncoderConfiguration();
-    configuration.dimensions = Size(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
-    configuration.frameRate = 30;
-    await AgoraRtcEngine.setVideoEncoderConfiguration(configuration);
-    await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    await AgoraRtcEngine.setClientRole(ClientRole.Broadcaster);
-    await AgoraRtcEngine.joinChannel(null, widget.event.id, null, agoraUID).catchError((e) {
+    configuration.dimensions = VideoDimensions(MediaQuery.of(context).size.height.round(), MediaQuery.of(context).size.width.round());
+    configuration.frameRate = VideoFrameRate.Fps30;
+    await agoraRtcEngine.setVideoEncoderConfiguration(configuration);
+    await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+    await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
+    await agoraRtcEngine.joinChannel(null, widget.event.id, null, 0).catchError((e) {
       print(e);
     });
+    checkPermissions();
+    setAgoraRtcEventHandlers();
     isLoading = false;
     setState(() {});
-    setAgoraRtcEventHandlers();
+  }
+
+  checkPermissions() async {
+    var cameraStatus = await Permission.camera.status;
+    var micStatus = await Permission.microphone.status;
+    if (cameraStatus.isUndetermined || cameraStatus.isDenied || cameraStatus.isPermanentlyDenied) {
+      await Permission.camera.request();
+    }
+    if (micStatus.isUndetermined || micStatus.isDenied || micStatus.isPermanentlyDenied) {
+      await Permission.microphone.request();
+    }
+    if (cameraStatus.isGranted) {
+      cameraEnabled = true;
+      setState(() {});
+    }
+    if (micStatus.isGranted) {
+      micEnabled = true;
+      setState(() {});
+    }
   }
 
   /// Create agora sdk instance and initialize
   initializeAgoraRtc() async {
-    await AgoraRtcEngine.create(agoraAppID);
-    await AgoraRtcEngine.enableVideo();
-    await AgoraRtcEngine.enableLocalAudio(true);
+    agoraRtcEngine = await RtcEngine.create(agoraAppID);
+    await agoraRtcEngine.enableVideo();
+    await agoraRtcEngine.enableLocalAudio(true);
   }
 
   setAgoraRtcEventHandlers() {
-    AgoraRtcEngine.onJoinChannelSuccess = (String channel, int uid, int elapsed) async {
+    agoraRtcEngine.setEventHandler(RtcEngineEventHandler(error: (code) {
+      setState(() {
+        print('Error: $code');
+      });
+    }, joinChannelSuccess: (channel, uid, elapsed) async {
       EventDataService().createActiveLiveStream(
         widget.event.id,
         widget.currentUser.uid,
@@ -91,39 +263,38 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
         DateTime.now().millisecondsSinceEpoch,
       );
       EventDataService().notifyFollowersStreamIsLive(widget.event.id, widget.currentUser.uid);
-      await Wakelock.enable();
-    };
 
-    AgoraRtcEngine.onLeaveChannel = () {
+      await Wakelock.enable();
+    }, leaveChannel: (stats) {
       setState(() {
         _users.clear();
       });
-    };
-
-    AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
+    }, userJoined: (uid, elapsed) {
       setState(() {
         _users.add(uid);
       });
-    };
-
-    AgoraRtcEngine.onUserOffline = (int uid, int reason) {
+    }, userOffline: (uid, elapsed) {
       setState(() {
         _users.remove(uid);
       });
-    };
+    }, firstRemoteVideoFrame: (uid, width, height, elapsed) {
+      setState(() {
+        print('video started');
+      });
+    }));
   }
 
   /// Helper function to get list of native views
   List<Widget> _getRenderViews() {
-    final list = [
-      AgoraRenderWidget(0, local: true, preview: true),
-    ];
+    final List<StatefulWidget> list = [];
+    list.add(RtcLocalView.SurfaceView());
+    _users.forEach((int uid) => list.add(RtcRemoteView.SurfaceView(uid: uid)));
     return list;
   }
 
   /// Video view wrapper
   Widget _videoView(view) {
-    return Expanded(child: ClipRRect(child: view));
+    return Expanded(child: Container(child: view));
   }
 
   /// Video view row wrapper
@@ -162,11 +333,11 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
     setState(() {
       muted = !muted;
     });
-    AgoraRtcEngine.muteLocalAudioStream(muted);
+    agoraRtcEngine.muteLocalAudioStream(muted);
   }
 
   void switchCamera() {
-    AgoraRtcEngine.switchCamera();
+    agoraRtcEngine.switchCamera();
   }
 
   Future<bool> _willPopCallback() async {
@@ -253,6 +424,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
             child: Row(
@@ -267,9 +439,8 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                 ),
                 GestureDetector(
                   onTap: () {
-                    setState(() {
-                      tryingToEnd = true;
-                    });
+                    tryingToEnd = true;
+                    setState(() {});
                   },
                   child: Icon(
                     FontAwesomeIcons.times,
@@ -287,20 +458,20 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                 LiveNowBox(),
                 SizedBox(width: 8.0),
                 StreamBuilder(
-                  stream: Firestore.instance.collection("event_chats").document(widget.event.id).snapshots(),
-                  builder: (context, snapshot) {
+                  stream: FirebaseFirestore.instance.collection("event_chats").doc(widget.event.id).snapshots(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                     if (!snapshot.hasData) return Container();
-                    var streamData = snapshot.data;
+                    var streamData = snapshot.data.data();
                     List activeMembers = streamData['activeMembers'] == null ? [widget.currentUser.uid] : streamData['activeMembers'];
                     return ViewerCountBox(viewCount: activeMembers.length);
                   },
                 ),
                 SizedBox(width: 8.0),
                 StreamBuilder(
-                  stream: Firestore.instance.collection("events").document(widget.event.id).snapshots(),
-                  builder: (context, snapshot) {
+                  stream: FirebaseFirestore.instance.collection("events").doc(widget.event.id).snapshots(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                     if (!snapshot.hasData) return Container();
-                    var eventData = snapshot.data;
+                    var eventData = snapshot.data.data();
                     List attendees = eventData['d']['attendees'];
                     return CheckInCountBox(checkInCount: attendees.length);
                   },
@@ -308,13 +479,72 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
               ],
             ),
           ),
+          SizedBox(height: 8.0),
+          cameraEnabled
+              ? Container()
+              : GestureDetector(
+                  onTap: () {
+                    openAppSettings();
+                  },
+                  child: Container(
+                    child: Text(
+                      "Please Enable Your Camera",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+          SizedBox(height: 8.0),
+          micEnabled
+              ? Container()
+              : GestureDetector(
+                  onTap: () {
+                    openAppSettings();
+                  },
+                  child: Container(
+                    child: Text(
+                      "Please Enable Your Microphone",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ),
+//          Row(
+//            children: [
+//              GestureDetector(
+//                onTap: recording ? () => stopScreenAndAudioRecord() : () => requestRecordingStart(),
+//                child: Container(
+//                  height: 24,
+//                  width: 30,
+//                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+//                  decoration: BoxDecoration(
+//                    color: finishedRecording
+//                        ? CustomColors.darkMountainGreen
+//                        : recording
+//                            ? CustomColors.webblenRed
+//                            : Colors.black38,
+//                    borderRadius: BorderRadius.all(Radius.circular(8)),
+//                  ),
+//                  child: Icon(
+//                    finishedRecording
+//                        ? FontAwesomeIcons.solidFileVideo
+//                        : recording
+//                            ? FontAwesomeIcons.solidDotCircle
+//                            : FontAwesomeIcons.video,
+//                    color: Colors.white,
+//                    size: 11.0,
+//                  ),
+//                ),
+//              ),
+//            ],
+//          ),
         ],
       ),
     );
   }
 
   Widget _bottomBar() {
-    if (!isLoggedIntoAgoraRtm || !isInAgoraChannel) {
+    if (!isInAgoraChannel) {
       return Container();
     }
     return Container(
@@ -383,7 +613,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                             padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                             height: 400,
                             child: StreamBuilder(
-                              stream: Firestore.instance.collection("gift_donations").document(widget.event.id).snapshots(),
+                              stream: FirebaseFirestore.instance.collection("gift_donations").doc(widget.event.id).snapshots(),
                               builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                                 if (!snapshot.hasData || !snapshot.data.exists)
                                   return Container(
@@ -418,7 +648,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                                       ],
                                     ),
                                   );
-                                Map<String, dynamic> donatorsMap = snapshot.data['donators'] == null ? {} : snapshot.data['donators'];
+                                Map<String, dynamic> donatorsMap = snapshot.data.data()['donators'] == null ? {} : snapshot.data.data()['donators'];
                                 List donators = donatorsMap.values.toList(growable: true);
                                 print(donators.length);
                                 if (donators.length > 1) {
@@ -551,7 +781,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                                               child: Row(
                                                 children: <Widget>[
                                                   Text(
-                                                    snapshot.data['giftPool'].toStringAsFixed(2),
+                                                    snapshot.data.data()['giftPool'].toStringAsFixed(2),
                                                     style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
                                                   ),
                                                 ],
@@ -620,6 +850,56 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
     );
   }
 
+//  Widget upload() {
+//    return Container(
+//      color: Colors.black.withOpacity(0.5),
+//      child: Stack(
+//        children: <Widget>[
+//          Align(
+//            alignment: Alignment.center,
+//            child: Padding(
+//              padding: const EdgeInsets.all(30.0),
+//              child: Text(
+//                uploadStatus,
+//                textAlign: TextAlign.center,
+//                style: TextStyle(color: Colors.white, fontSize: 20),
+//              ),
+//            ),
+//          ),
+//          Container(
+//            alignment: Alignment.bottomCenter,
+//            child: Row(
+//              mainAxisAlignment: MainAxisAlignment.spaceAround,
+//              children: <Widget>[
+//                Expanded(
+//                  child: Padding(
+//                    padding: const EdgeInsets.only(left: 4.0, right: 8.0, top: 8.0, bottom: 8.0),
+//                    child: RaisedButton(
+//                      child: Padding(
+//                        padding: const EdgeInsets.symmetric(vertical: 15),
+//                        child: Text(
+//                          'Cancel',
+//                          style: TextStyle(color: Colors.white),
+//                        ),
+//                      ),
+//                      elevation: 2.0,
+//                      color: Colors.grey,
+//                      onPressed: () {
+//                        setState(() {
+//                          uploadingFiles = false;
+//                        });
+//                      },
+//                    ),
+//                  ),
+//                )
+//              ],
+//            ),
+//          )
+//        ],
+//      ),
+//    );
+//  }
+
   Widget endLive() {
     return Container(
       color: Colors.black.withOpacity(0.5),
@@ -656,8 +936,8 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                       color: Colors.red,
                       onPressed: () async {
                         await Wakelock.disable();
-                        AgoraRtcEngine.leaveChannel();
-                        AgoraRtcEngine.destroy();
+                        agoraRtcEngine.leaveChannel();
+                        agoraRtcEngine.destroy();
                         EventDataService().endActiveStream(widget.event.id);
                         Navigator.pop(context);
                       },
@@ -694,7 +974,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
   }
 
   scrollToChatMessage() async {
-    if (chatViewController.position.pixels == chatViewController.position.maxScrollExtent) {
+    if (chatViewController.hasClients && chatViewController.position.pixels == chatViewController.position.maxScrollExtent) {
       await Future.delayed(Duration(milliseconds: 500));
       if (chatViewController.hasClients) {
         chatViewController.jumpTo(chatViewController.position.maxScrollExtent);
@@ -729,8 +1009,8 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
     // clear users
     _users.clear();
     // destroy sdk
-    AgoraRtcEngine.leaveChannel();
-    AgoraRtcEngine.destroy();
+    agoraRtcEngine.leaveChannel();
+    agoraRtcEngine.destroy();
     super.dispose();
   }
 
@@ -747,22 +1027,22 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: StreamBuilder(
-              stream: Firestore.instance
+              stream: FirebaseFirestore.instance
                   .collection("event_chats")
-                  .document(widget.event.id)
+                  .doc(widget.event.id)
                   .collection("messages")
                   .where('timePostedInMilliseconds', isGreaterThan: startChatAfterTimeInMilliseconds)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data.documents.isEmpty) return Container();
+                if (!snapshot.hasData || snapshot.data.docs.isEmpty) return Container();
                 return ListView.builder(
                   controller: chatViewController,
-                  itemCount: snapshot.data.documents.length,
+                  itemCount: snapshot.data.docs.length,
                   itemBuilder: (BuildContext context, int index) {
                     scrollToChatMessage();
-                    String username = '@' + snapshot.data.documents[index].data['username'];
-                    String message = snapshot.data.documents[index].data['message'];
-                    String userImgURL = snapshot.data.documents[index].data['userImgURL'];
+                    String username = '@' + snapshot.data.docs[index].data()['username'];
+                    String message = snapshot.data.docs[index].data()['message'];
+                    String userImgURL = snapshot.data.docs[index].data()['userImgURL'];
                     return username == '@system'
                         ? Container(
                             margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -849,20 +1129,20 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
             child: StreamBuilder(
               stream: Firestore.instance
                   .collection("gift_donations")
-                  .document(widget.event.id)
+                  .doc(widget.event.id)
                   .collection("gift_donations")
                   .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
                   .orderBy("timePostedInMilliseconds", descending: false)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data.documents.isEmpty) return Container();
+                if (!snapshot.hasData || snapshot.data.docs.isEmpty) return Container();
                 return ListView.builder(
                   //controller: chatViewController,
-                  itemCount: 1, //snapshot.data.documents.length,
+                  itemCount: 1, //snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    String senderUsername = snapshot.data.documents.last.data['senderUsername'];
-                    int giftID = snapshot.data.documents.last.data['giftID'];
-                    String giftAmount = snapshot.data.documents.last.data['giftAmount'].toStringAsFixed(2);
+                    String senderUsername = snapshot.data.docs.last.data()['senderUsername'];
+                    int giftID = snapshot.data.docs.last.data()['giftID'];
+                    String giftAmount = snapshot.data.docs.last.data()['giftAmount'].toStringAsFixed(2);
                     giftAnimationController.forward();
                     return FadeTransition(
                       opacity: giftAnimation,
@@ -886,7 +1166,9 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                                                     ? 'assets/images/wolf_icon.png'
                                                     : giftID == 6
                                                         ? 'assets/images/eagle_icon.png'
-                                                        : giftID == 7 ? 'assets/images/heart_fire_icon.png' : 'assets/images/webblen_coin.png',
+                                                        : giftID == 7
+                                                            ? 'assets/images/heart_fire_icon.png'
+                                                            : 'assets/images/webblen_coin.png',
                               ),
                             ),
                             Fonts().textW700(
@@ -922,7 +1204,8 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                   if (tryingToEnd == false && !isLoading) giftsAndDonationsStream(),
                   if (tryingToEnd == false && !isLoading) messageList(),
                   if (tryingToEnd == false && !isLoading) _bottomBar(), // send message
-                  if (tryingToEnd == true && !isLoading) endLive(), // view message
+                  if (tryingToEnd == true && !isLoading) endLive(), //
+                  //if (uploadingFiles && !isLoading) upload(), // view message
                 ],
               ),
             ),

@@ -1,6 +1,7 @@
 import 'dart:async';
 
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:agora_rtc_engine/rtc_engine.dart';
+import 'package:agora_rtc_engine/rtc_remote_view.dart' as RtcRemoteView;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:random_string/random_string.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:webblen/firebase/data/chat_data.dart';
 import 'package:webblen/firebase/data/event_data.dart';
@@ -18,7 +18,6 @@ import 'package:webblen/models/event_chat_message.dart';
 import 'package:webblen/models/gift_donation.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/agora/agora_service.dart';
 import 'package:webblen/services/in_app_purchases/in_app_purchases.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -48,6 +47,7 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
   AppLifecycleState _lastLifecycleState;
   //STREAMING
   String agoraAppID = 'f10ecda2344b4c039df6d33953a3f598';
+  RtcEngine agoraRtcEngine;
   bool detaching = false;
   static final _users = <int>[];
   bool muted = false;
@@ -303,26 +303,16 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
     _getPurchaseHistory();
   }
 
-  /// Create agora sdk instance and initialize
-  Future<void> _initAgoraRtcEngine() async {
-    await AgoraRtcEngine.create(agoraAppID);
-    await AgoraRtcEngine.enableVideo();
-    await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    await AgoraRtcEngine.setClientRole(ClientRole.Audience);
-  }
-
-  /// Add agora event handlers
   initialize() async {
-    int agoraUID = int.parse(randomNumeric(10));
-    String agoraToken = await AgoraService().retrieveAgoraToken(widget.event, agoraUID);
+//    int agoraUID = int.parse(randomNumeric(10));
+//    String agoraToken = await AgoraService().retrieveAgoraToken(widget.event, agoraUID);
     await initializeAgoraRtc();
     host = await WebblenUserData().getUserByID(widget.event.authorID);
-    await AgoraRtcEngine.enableWebSdkInteroperability(true);
     VideoEncoderConfiguration configuration = VideoEncoderConfiguration();
-    configuration.dimensions = Size(MediaQuery.of(context).size.height, MediaQuery.of(context).size.width);
-    configuration.frameRate = 30;
-    await AgoraRtcEngine.setVideoEncoderConfiguration(configuration);
-    await AgoraRtcEngine.joinChannel(null, widget.event.id, null, 0);
+    configuration.dimensions = VideoDimensions(MediaQuery.of(context).size.height.round(), MediaQuery.of(context).size.width.round());
+    configuration.frameRate = VideoFrameRate.Fps30;
+    await agoraRtcEngine.setVideoEncoderConfiguration(configuration);
+    await agoraRtcEngine.joinChannel(null, widget.event.id, null, 0);
     setAgoraRtcEventHandlers();
     isLoading = false;
     setState(() {});
@@ -330,42 +320,38 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
 
   /// Create agora sdk instance and initialize
   initializeAgoraRtc() async {
-    await AgoraRtcEngine.create(agoraAppID);
-    await AgoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
-    await AgoraRtcEngine.setClientRole(ClientRole.Audience);
-    await AgoraRtcEngine.enableVideo();
+    agoraRtcEngine = await RtcEngine.create(agoraAppID);
+    await agoraRtcEngine.enableVideo();
+    await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
+    await agoraRtcEngine.setClientRole(ClientRole.Audience);
   }
 
   setAgoraRtcEventHandlers() {
-    AgoraRtcEngine.onJoinChannelSuccess = (String channel, int uid, int elapsed) async {
+    agoraRtcEngine.setEventHandler(RtcEngineEventHandler(error: (code) {
+      setState(() {
+        print('Error: $code');
+      });
+    }, joinChannelSuccess: (channel, uid, elapsed) async {
       await Wakelock.enable();
-    };
-
-    AgoraRtcEngine.onLeaveChannel = () {
+    }, leaveChannel: (stats) {
       setState(() {
         _users.clear();
       });
-    };
-
-    AgoraRtcEngine.onUserJoined = (int uid, int elapsed) {
+    }, userJoined: (uid, elapsed) {
       setState(() {
         showWaitingRoom = false;
         _users.add(uid);
       });
-    };
-
-    AgoraRtcEngine.onUserOffline = (int uid, int reason) {
+    }, userOffline: (uid, elapsed) {
       setState(() {
         showWaitingRoom = true;
         _users.remove(uid);
       });
-    };
-
-    AgoraRtcEngine.onFirstRemoteVideoFrame = (int uid, int width, int height, int elapsed) {
+    }, firstRemoteVideoFrame: (uid, width, height, elapsed) {
       setState(() {
         showWaitingRoom = false;
       });
-    };
+    }));
   }
 
   Future<bool> _willPopCallback() async {
@@ -377,8 +363,8 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
 
   /// Helper function to get list of native views
   List<Widget> _getRenderViews() {
-    final List<AgoraRenderWidget> list = [];
-    _users.forEach((int uid) => list.add(AgoraRenderWidget(uid)));
+    final List<StatefulWidget> list = [];
+    _users.forEach((int uid) => list.add(RtcRemoteView.SurfaceView(uid: uid)));
     return list;
   }
 
@@ -450,7 +436,9 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                   ? 'assets/images/wolf_icon.png'
                                   : giftID == 6
                                       ? 'assets/images/eagle_icon.png'
-                                      : giftID == 7 ? 'assets/images/heart_fire_icon.png' : 'assets/images/webblen_coin.png',
+                                      : giftID == 7
+                                          ? 'assets/images/heart_fire_icon.png'
+                                          : 'assets/images/webblen_coin.png',
             ),
           ),
           SizedBox(height: 4),
@@ -459,7 +447,17 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                 ? 'Love'
                 : giftID == 2
                     ? 'More Love'
-                    : giftID == 3 ? 'Confetti' : giftID == 4 ? 'Party' : giftID == 5 ? 'Wolf' : giftID == 6 ? 'Eagle' : giftID == 7 ? 'Much Love' : 'Webblen',
+                    : giftID == 3
+                        ? 'Confetti'
+                        : giftID == 4
+                            ? 'Party'
+                            : giftID == 5
+                                ? 'Wolf'
+                                : giftID == 6
+                                    ? 'Eagle'
+                                    : giftID == 7
+                                        ? 'Much Love'
+                                        : 'Webblen',
             style: TextStyle(
               fontSize: 14,
               color: Colors.white,
@@ -472,7 +470,19 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
               Text(
                 giftID == 1
                     ? '0.10'
-                    : giftID == 2 ? '0.50' : giftID == 3 ? '5' : giftID == 4 ? '25' : giftID == 5 ? '50' : giftID == 6 ? '100' : giftID == 7 ? '500' : '1',
+                    : giftID == 2
+                        ? '0.50'
+                        : giftID == 3
+                            ? '5'
+                            : giftID == 4
+                                ? '25'
+                                : giftID == 5
+                                    ? '50'
+                                    : giftID == 6
+                                        ? '100'
+                                        : giftID == 7
+                                            ? '500'
+                                            : '1',
                 style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
               ),
               SizedBox(width: 4),
@@ -513,7 +523,15 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                 ),
                 SizedBox(width: 2),
                 Text(
-                  itemNum == 1 ? '1' : itemNum == 2 ? '5' : itemNum == 3 ? '25' : itemNum == 4 ? '50' : '100',
+                  itemNum == 1
+                      ? '1'
+                      : itemNum == 2
+                          ? '5'
+                          : itemNum == 3
+                              ? '25'
+                              : itemNum == 4
+                                  ? '50'
+                                  : '100',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.white,
@@ -524,7 +542,15 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
             ),
             SizedBox(height: 4),
             Text(
-              itemNum == 1 ? '\$0.99' : itemNum == 2 ? '\$4.99' : itemNum == 3 ? '\$24.99' : itemNum == 4 ? '\$49.99' : '\$99.99',
+              itemNum == 1
+                  ? '\$0.99'
+                  : itemNum == 2
+                      ? '\$4.99'
+                      : itemNum == 3
+                          ? '\$24.99'
+                          : itemNum == 4
+                              ? '\$49.99'
+                              : '\$99.99',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey,
@@ -600,8 +626,8 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                     });
                   },
                   child: Container(
-                    height: 35,
-                    width: 35,
+                    height: 40,
+                    width: 40,
                     child: Center(
                       child: Icon(
                         FontAwesomeIcons.times,
@@ -622,20 +648,20 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                 showWaitingRoom ? OffAirBox() : LiveNowBox(),
                 SizedBox(width: 8.0),
                 StreamBuilder(
-                  stream: Firestore.instance.collection("event_chats").document(widget.event.id).snapshots(),
-                  builder: (context, snapshot) {
+                  stream: FirebaseFirestore.instance.collection("event_chats").doc(widget.event.id).snapshots(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                     if (!snapshot.hasData) return Container();
-                    var streamData = snapshot.data;
+                    var streamData = snapshot.data.data();
                     List activeMembers = streamData['activeMembers'] == null ? [widget.currentUser.uid] : streamData['activeMembers'];
                     return ViewerCountBox(viewCount: activeMembers.length);
                   },
                 ),
                 SizedBox(width: 8.0),
                 StreamBuilder(
-                  stream: Firestore.instance.collection("events").document(widget.event.id).snapshots(),
-                  builder: (context, snapshot) {
+                  stream: FirebaseFirestore.instance.collection("events").doc(widget.event.id).snapshots(),
+                  builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                     if (!snapshot.hasData) return Container();
-                    var eventData = snapshot.data;
+                    var eventData = snapshot.data.data();
                     List attendees = eventData['d']['attendees'];
                     return CheckInCountBox(checkInCount: attendees.length);
                   },
@@ -684,8 +710,8 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                       color: Colors.red,
                       onPressed: () async {
                         await Wakelock.disable();
-                        AgoraRtcEngine.leaveChannel();
-                        AgoraRtcEngine.destroy();
+                        agoraRtcEngine.leaveChannel();
+                        agoraRtcEngine.destroy();
                         ChatDataService().leaveChatStream(widget.event.id, widget.currentUser.uid, false, widget.currentUser.username);
                         Navigator.pop(context);
                       },
@@ -838,13 +864,13 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                                 ),
                                                 SizedBox(width: 4),
                                                 StreamBuilder(
-                                                  stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-                                                  builder: (context, userSnapshot) {
+                                                  stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+                                                  builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                                                     if (!userSnapshot.hasData)
                                                       return Text(
                                                         "Loading...",
                                                       );
-                                                    var userData = userSnapshot.data;
+                                                    var userData = userSnapshot.data.data();
                                                     double availablePoints = userData['d']["eventPoints"] * 1.00;
                                                     return Padding(
                                                       padding: EdgeInsets.all(4.0),
@@ -896,13 +922,13 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                                   ),
                                                   SizedBox(width: 4),
                                                   StreamBuilder(
-                                                    stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-                                                    builder: (context, userSnapshot) {
+                                                    stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+                                                    builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                                                       if (!userSnapshot.hasData)
                                                         return Text(
                                                           "...",
                                                         );
-                                                      var userData = userSnapshot.data;
+                                                      var userData = userSnapshot.data.data();
                                                       double availablePoints = userData['d']["eventPoints"] * 1.00;
                                                       return Padding(
                                                         padding: EdgeInsets.all(4.0),
@@ -986,10 +1012,10 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                 ),
               ),
               StreamBuilder(
-                stream: Firestore.instance.collection("events").document(widget.event.id).snapshots(),
-                builder: (context, snapshot) {
+                stream: FirebaseFirestore.instance.collection("events").doc(widget.event.id).snapshots(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                   if (!snapshot.hasData) return Container();
-                  var eventData = snapshot.data;
+                  var eventData = snapshot.data.data();
                   List attendees = eventData['d']['attendees'];
                   return showWaitingRoom
                       ? Container(height: 0)
@@ -1056,8 +1082,8 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
     WidgetsBinding.instance.removeObserver(this);
     giftAnimationController.dispose();
     // destroy sdk
-    AgoraRtcEngine.leaveChannel();
-    AgoraRtcEngine.destroy();
+    agoraRtcEngine.leaveChannel();
+    agoraRtcEngine.destroy();
     chatViewController.dispose();
     messageFieldController.dispose();
     if (_conectionSubscription != null) {
@@ -1096,22 +1122,22 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
           child: Container(
             width: MediaQuery.of(context).size.width * 0.8,
             child: StreamBuilder(
-              stream: Firestore.instance
+              stream: FirebaseFirestore.instance
                   .collection("event_chats")
-                  .document(widget.event.id)
+                  .doc(widget.event.id)
                   .collection("messages")
                   .where('timePostedInMilliseconds', isGreaterThan: startChatAfterTimeInMilliseconds)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data.documents.isEmpty) return Container();
+                if (!snapshot.hasData || snapshot.data.docs.isEmpty) return Container();
                 return ListView.builder(
                   controller: chatViewController,
-                  itemCount: snapshot.data.documents.length,
+                  itemCount: snapshot.data.docs.length,
                   itemBuilder: (BuildContext context, int index) {
                     scrollToChatMessage();
-                    String username = '@' + snapshot.data.documents[index].data['username'];
-                    String message = snapshot.data.documents[index].data['message'];
-                    String userImgURL = snapshot.data.documents[index].data['userImgURL'];
+                    String username = '@' + snapshot.data.docs[index].data()['username'];
+                    String message = snapshot.data.docs[index].data()['message'];
+                    String userImgURL = snapshot.data.docs[index].data()['userImgURL'];
                     return username == '@system'
                         ? Container(
                             margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -1193,22 +1219,22 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
           heightFactor: 0.3,
           child: Container(
             child: StreamBuilder(
-              stream: Firestore.instance
+              stream: FirebaseFirestore.instance
                   .collection("gift_donations")
-                  .document(widget.event.id)
+                  .doc(widget.event.id)
                   .collection("gift_donations")
                   .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
                   .orderBy("timePostedInMilliseconds", descending: false)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data.documents.isEmpty) return Container();
+                if (!snapshot.hasData || snapshot.data.docs.isEmpty) return Container();
                 return ListView.builder(
                   //controller: chatViewController,
-                  itemCount: 1, //snapshot.data.documents.length,
+                  itemCount: 1, //snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    String senderUsername = snapshot.data.documents.last.data['senderUsername'];
-                    int giftID = snapshot.data.documents.last.data['giftID'];
-                    String giftAmount = snapshot.data.documents.last.data['giftAmount'].toStringAsFixed(2);
+                    String senderUsername = snapshot.data.docs.last.data()['senderUsername'];
+                    int giftID = snapshot.data.docs.last.data()['giftID'];
+                    String giftAmount = snapshot.data.docs.last.data()['giftAmount'].toStringAsFixed(2);
                     giftAnimationController.forward();
                     return FadeTransition(
                       opacity: giftAnimation,
@@ -1231,7 +1257,9 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
                                                     ? 'assets/images/wolf_icon.png'
                                                     : giftID == 6
                                                         ? 'assets/images/eagle_icon.png'
-                                                        : giftID == 7 ? 'assets/images/heart_fire_icon.png' : 'assets/images/webblen_coin.png',
+                                                        : giftID == 7
+                                                            ? 'assets/images/heart_fire_icon.png'
+                                                            : 'assets/images/webblen_coin.png',
                               ),
                             ),
                             Fonts().textW700(

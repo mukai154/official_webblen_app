@@ -42,7 +42,7 @@ class WalletPage extends StatefulWidget {
 }
 
 class _WalletPageState extends State<WalletPage> {
-  CollectionReference userRef = Firestore().collection("users");
+  CollectionReference userRef = FirebaseFirestore.instance.collection("users");
   WebblenUser currentUser;
   List<WebblenReward> walletRewards = [];
   GlobalKey<FormState> paymentFormKey = new GlobalKey<FormState>();
@@ -174,7 +174,7 @@ class _WalletPageState extends State<WalletPage> {
           if (val.toString().contains("individual.id_number")) {
             socialSecurityNeeded = true;
           }
-          if (val.toString().contains("verification.document")) {
+          if (val.toString().contains("verification.doc")) {
             photoNeeded = true;
           }
         });
@@ -512,13 +512,13 @@ class _WalletPageState extends State<WalletPage> {
         shrinkWrap: true,
         children: [
           StreamBuilder(
-              stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-              builder: (context, userSnapshot) {
+              stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+              builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                 if (!userSnapshot.hasData)
                   return Text(
                     "Loading...",
                   );
-                var userData = userSnapshot.data;
+                var userData = userSnapshot.data.data();
                 double webblenBalance = userData['d']['eventPoints'] * 1.00;
                 double ap = userData['d']['ap'] * 1.00;
                 int apLvl = userData['d']['apLvl'];

@@ -1,4 +1,3 @@
-import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -49,6 +48,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   double eventLon = 0.0;
   TicketDistro eventTicketDistro;
   List<Map<String, dynamic>> tickets;
+  bool canUploadVideo = false;
 
   Widget eventCaption() {
     return Padding(
@@ -266,6 +266,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
         host = res;
         if (event.authorID != widget.currentUser.uid) {
           createEventReminder();
+          WebblenUserData().canUploadVideoAndIsAdmin(widget.currentUser.uid).then((res) {
+            canUploadVideo = res;
+            setState(() {});
+          });
+        } else {
+          WebblenUserData().canUploadVideo(widget.currentUser.uid).then((res) {
+            canUploadVideo = res;
+          });
         }
         if (event.hasTickets) {
           TicketDataService().getEventTicketDistro(widget.eventID).then((res) {
@@ -422,70 +430,107 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              event.fbUsername != null && event.fbUsername.isNotEmpty
-                  ? GestureDetector(
-                      onTap: () => OpenUrl().launchInWebViewOrVC(
-                        context,
-                        event.fbUsername,
-                      ),
-                      child: IconBubble(
-                        icon: Icon(
-                          FontAwesomeIcons.facebookF,
-                          size: 20.0,
-                          color: Colors.white,
+              event.instaUsername != null && event.instaUsername.isNotEmpty
+                  ? Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () => OpenUrl().launchInWebViewOrVC(
+                          context,
+                          "https://www.instagram.com/${event.instaUsername.replaceAll("@", "").trim()}",
                         ),
-                        color: FlatColors.darkGray,
-                        size: 35.0,
+                        child: IconBubble(
+                          icon: Icon(
+                            FontAwesomeIcons.instagram,
+                            size: 25.0,
+                            color: Colors.white,
+                          ),
+                          color: CustomColors.webblenPink,
+                          size: 40.0,
+                        ),
                       ),
                     )
                   : Container(),
               event.fbUsername != null && event.fbUsername.isNotEmpty
-                  ? SizedBox(
-                      width: 16.0,
+                  ? Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () => OpenUrl().launchInWebViewOrVC(
+                          context,
+                          "https://www.facebook.com/${event.fbUsername.replaceAll("@", "").trim()}",
+                        ),
+                        child: IconBubble(
+                          icon: Icon(
+                            FontAwesomeIcons.instagram,
+                            size: 25.0,
+                            color: Colors.white,
+                          ),
+                          color: CustomColors.facebookBlue,
+                          size: 40.0,
+                        ),
+                      ),
                     )
                   : Container(),
               event.twitterUsername != null && event.twitterUsername.isNotEmpty
-                  ? GestureDetector(
-                      onTap: () => OpenUrl().launchInWebViewOrVC(
-                        context,
-                        event.twitterUsername,
-                      ),
-                      child: IconBubble(
-                        icon: Icon(
-                          FontAwesomeIcons.twitter,
-                          size: 18.0,
-                          color: Colors.white,
+                  ? Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: GestureDetector(
+                        onTap: () => OpenUrl().launchInWebViewOrVC(
+                          context,
+                          "https://www.twitter.com/${event.twitterUsername.replaceAll("@", "").trim()}",
                         ),
-                        color: FlatColors.darkGray,
-                        size: 35.0,
+                        child: IconBubble(
+                          icon: Icon(
+                            FontAwesomeIcons.twitter,
+                            size: 20.0,
+                            color: Colors.white,
+                          ),
+                          color: CustomColors.twitterBlue,
+                          size: 40.0,
+                        ),
                       ),
-                    )
-                  : Container(),
-              event.twitterUsername != null && event.twitterUsername.isNotEmpty
-                  ? SizedBox(
-                      width: 16.0,
                     )
                   : Container(),
               event.website != null && event.website.isNotEmpty
                   ? GestureDetector(
                       onTap: () => OpenUrl().launchInWebViewOrVC(
                         context,
-                        event.website,
+                        event.website.contains("https://") || event.website.contains("http://") ? event.website : "https://${event.website}",
                       ),
                       child: IconBubble(
                         icon: Icon(
                           FontAwesomeIcons.link,
-                          size: 18.0,
+                          size: 20.0,
                           color: Colors.white,
                         ),
-                        color: FlatColors.darkGray,
-                        size: 35.0,
+                        color: CustomColors.darkMountainGreen,
+                        size: 40.0,
                       ),
                     )
                   : Container(),
             ],
           ),
         ),
+        canUploadVideo
+            ? Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0),
+                child: GestureDetector(
+                  onTap: () => PageTransitionService(
+                    context: context,
+                    currentUser: widget.currentUser,
+                    event: event,
+                  ).transitionToUserPage(),
+                  child: CustomColorButton(
+                    onPressed: () => PageTransitionService(context: context, event: event, currentUser: widget.currentUser).transitionToUploadStreamVideoPage(),
+                    text: "UPLOAD STREAM/VIDEO",
+                    textColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    textSize: 14.0,
+                    height: 35,
+                    width: MediaQuery.of(context).size.width - 32,
+                  ),
+                ),
+              )
+            : Container(),
       ],
     );
   }
@@ -494,7 +539,11 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: WebblenAppBar().actionAppBar(
-        isLoading ? '' : event.isDigitalEvent ? "Stream" : "Event",
+        isLoading
+            ? ''
+            : event.isDigitalEvent
+                ? "Stream"
+                : "Event",
         IconButton(
           icon: Icon(
             FontAwesomeIcons.ellipsisH,
@@ -610,7 +659,6 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                                               context: context,
                                               currentUser: widget.currentUser,
                                               event: event,
-                                              clientRole: ClientRole.Broadcaster,
                                             ).transitionToDigitalEventHostPage(),
                                           ),
                                   ],

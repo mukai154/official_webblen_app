@@ -176,13 +176,13 @@ class _ShopPageState extends State<ShopPage> {
             horizontal: 4.0,
           ),
           child: StreamBuilder(
-            stream: Firestore.instance.collection("webblen_user").document(widget.currentUser.uid).snapshots(),
-            builder: (context, userSnapshot) {
+            stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+            builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
               if (!userSnapshot.hasData)
                 return Text(
                   "Loading...",
                 );
-              var userData = userSnapshot.data;
+              var userData = userSnapshot.data.data();
               double availablePoints = userData['d']["eventPoints"] * 1.00;
               return Padding(
                 padding: EdgeInsets.all(4.0),
