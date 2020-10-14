@@ -229,7 +229,7 @@ PODS:
   - BoringSSL-GRPC/Implementation (0.0.7):
     - BoringSSL-GRPC/Interface (= 0.0.7)
   - BoringSSL-GRPC/Interface (0.0.7)
-  - cloud_firestore (0.14.0-2):
+  - cloud_firestore (0.14.1-2):
     - Firebase/CoreOnly (~> 6.26.0)
     - Firebase/Firestore (~> 6.26.0)
     - firebase_core
@@ -272,7 +272,7 @@ PODS:
   - Firebase/Storage (6.26.0):
     - Firebase/CoreOnly
     - FirebaseStorage (~> 3.6.1)
-  - firebase_auth (0.18.1):
+  - firebase_auth (0.18.1-1):
     - Firebase/Auth (~> 6.26.0)
     - Firebase/CoreOnly (~> 6.26.0)
     - firebase_core
@@ -285,7 +285,7 @@ PODS:
     - Firebase/DynamicLinks (~> 6.26.0)
     - firebase_core
     - Flutter
-  - firebase_messaging (7.0.1):
+  - firebase_messaging (7.0.2):
     - Firebase/CoreOnly (~> 6.26.0)
     - Firebase/Messaging (~> 6.26.0)
     - firebase_core
@@ -478,6 +478,7 @@ PODS:
   - Mantle (2.1.4):
     - Mantle/extobjc (= 2.1.4)
   - Mantle/extobjc (2.1.4)
+  - MTBBarcodeScanner (5.0.11)
   - nanopb (1.30905.0):
     - nanopb/decode (= 1.30905.0)
     - nanopb/encode (= 1.30905.0)
@@ -490,6 +491,9 @@ PODS:
   - PromisesObjC (1.2.10)
   - Protobuf (3.13.0)
   - PureLayout (3.1.6)
+  - qr_code_scanner (0.0.2):
+    - Flutter
+    - MTBBarcodeScanner
   - Reachability (3.2)
   - SDWebImage/Core (5.9.2)
   - SDWebImageWebPCoder (0.6.1):
@@ -500,7 +504,7 @@ PODS:
   - sqflite (0.0.1):
     - Flutter
     - FMDB (~> 2.7.2)
-  - TOCropViewController (2.5.4)
+  - TOCropViewController (2.5.5)
   - uni_links (0.0.1):
     - Flutter
   - url_launcher (0.0.1):
@@ -540,6 +544,7 @@ DEPENDENCIES:
   - location_permissions (from `.symlinks/plugins/location_permissions/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - qr_code_scanner (from `.symlinks/plugins/qr_code_scanner/ios`)
   - share (from `.symlinks/plugins/share/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
@@ -584,6 +589,7 @@ SPEC REPOS:
     - leveldb-library
     - libwebp
     - Mantle
+    - MTBBarcodeScanner
     - nanopb
     - PromisesObjC
     - Protobuf
@@ -648,6 +654,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  qr_code_scanner:
+    :path: ".symlinks/plugins/qr_code_scanner/ios"
   share:
     :path: ".symlinks/plugins/share/ios"
   sqflite:
@@ -670,16 +678,16 @@ SPEC CHECKSUMS:
   AppAuth: bce82c76043657c99d91e7882e8a9e1a93650cd4
   apple_sign_in: 7716c7ddfa195aeab7dec0dc374ef4ff45d1adb4
   BoringSSL-GRPC: 8edf627ee524575e2f8d19d56f068b448eea3879
-  cloud_firestore: b054ccc068b5907645c32b669d38e82db2a11fc7
+  cloud_firestore: d800bcc818ca2307beaeb697a94aa76341bc661d
   cloud_functions: cc36e7b5ec30848fbf6ff5f240188d51104ce9dd
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   FBSDKCoreKit: 1d5acf7c9d7a2f92bb1a242dc60cae5b7adb91df
   FBSDKLoginKit: f1ea8026a58b52d30c9f2e6a58ca7d813619fb83
   Firebase: 7cf5f9c67f03cb3b606d1d6535286e1080e57eb6
-  firebase_auth: 148f122f852361f9548e63e3dc1e84c888c751d1
+  firebase_auth: 7263cdea1ab32345b00be89bed437e6f427363b7
   firebase_core: 3134fe79d257d430f163b558caf52a10a87efe8a
   firebase_dynamic_links: 8335f3c9553c15ff0e73b851a406453052225905
-  firebase_messaging: d11c68e6ea2ea84091e09827b38dcdd22d6cc1b2
+  firebase_messaging: 2844c37f9ce87c0904b38fe435223161b1a71528
   firebase_storage: 419f66c641d8bbd8306abeb7d08bd6ece87d8b5a
   FirebaseAnalyticsInterop: 3f86269c38ae41f47afeb43ebf32a001f58fcdae
   FirebaseAuth: 7047aec89c0b17ecd924a550c853f0c27ac6015e
@@ -723,24 +731,26 @@ SPEC CHECKSUMS:
   location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   location_permissions: 7e0f9aa0f60deb8ff93ddf0e2a164c7e8197bc94
   Mantle: bf2e1b464f82465b9074e9de970739a2615e093a
+  MTBBarcodeScanner: f453b33c4b7dfe545d8c6484ed744d55671788cb
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   permission_handler: eac8e15b4a1a3fba55b761d19f3f4e6b005d15b6
   PromisesObjC: b14b1c6b68e306650688599de8a45e49fae81151
   Protobuf: 3dac39b34a08151c6d949560efe3f86134a3f748
   PureLayout: bd3c4ec3a3819ad387c99ebb72c6b129c3ed4d2d
+  qr_code_scanner: 16107718bdad7d708cdf6a5eacdca24b56cdf471
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   SDWebImage: 0b42b8719ab0c5257177d5894306e8a336b21cbb
   SDWebImageWebPCoder: d0dac55073088d24b2ac1b191a71a8f8d0adac21
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
-  TOCropViewController: 2a1ae1242600b1f2d996fd91a5268b2309a33b5c
+  TOCropViewController: da59f531f8ac8a94ef6d6c0fc34009350f9e8bfe
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher: 6fef411d543ceb26efce54b05a0a40bfd74cbbef
   video_compress: fce97e4fb1dfd88175aa07d2ffc8a2f297f87fbe
   video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
   wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
 
-PODFILE CHECKSUM: 8111381daaee28e9ac2603e93ff590a8ad93e10a
+PODFILE CHECKSUM: 283de8f5242cb849ee863883ed0bf47a7785505b
 
 COCOAPODS: 1.9.3

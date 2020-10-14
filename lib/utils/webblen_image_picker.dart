@@ -28,7 +28,7 @@ class WebblenImagePicker {
     if (vid != null) {
       MediaInfo media = await VideoCompress.compressVideo(
         vid.path,
-        quality: VideoQuality.MediumQuality,
+        quality: VideoQuality.HighestQuality,
         deleteOrigin: false,
       );
       vidFile = media.file;

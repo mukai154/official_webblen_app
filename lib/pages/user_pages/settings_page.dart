@@ -332,7 +332,7 @@ class _SettingsPageState extends State<SettingsPage> {
 //                    },
 //                  ),
                             StreamBuilder(
-                              stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
+                              stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
                               builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
                                 if (!snapshot.hasData) return Container();
                                 var stripeAccountExists = snapshot.data.exists;

@@ -127,6 +127,14 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     ).transitionToUserListPage();
   }
 
+  void scanForTicketsAction() {
+    Navigator.of(context).pop();
+    PageTransitionService(
+      context: context,
+      event: event,
+    ).transitionToTicketScanPage();
+  }
+
 //  void shareEventAction() {
 //    Navigator.of(context).pop();
 //    PageTransitionService(
@@ -176,14 +184,16 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
 
   showEventOptions() {
     ShowAlertDialogService().showEventOptionsDialog(
-        context,
-        event.startDateTimeInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
-        null, //shareEventAction,
-        shareLinkAction,
-        event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == event.authorID ? editEventAction : null,
-        widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && !event.hasTickets
-            ? deleteEventAction
-            : null);
+      context,
+      event.startDateTimeInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
+      null, //shareEventAction,
+      shareLinkAction,
+      event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == event.authorID ? editEventAction : null,
+      widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && !event.hasTickets
+          ? deleteEventAction
+          : null,
+      widget.currentUser.uid == event.authorID && event.hasTickets ? scanForTicketsAction : null,
+    );
   }
 
   Widget ticketBuilder(TicketDistro ticketDistro) {
@@ -460,7 +470,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
                         ),
                         child: IconBubble(
                           icon: Icon(
-                            FontAwesomeIcons.instagram,
+                            FontAwesomeIcons.facebookF,
                             size: 25.0,
                             color: Colors.white,
                           ),

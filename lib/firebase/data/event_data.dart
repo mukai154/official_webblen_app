@@ -21,8 +21,6 @@ class EventDataService {
 
   //CREATE
   Future<WebblenEvent> uploadEvent(WebblenEvent newEvent, String zipPostalCode, File eventImageFile, TicketDistro ticketDistro) async {
-    print("uploading event...");
-    print(zipPostalCode);
     List nearbyZipcodes = [];
     String newEventID = newEvent.id == null ? randomAlphaNumeric(12) : newEvent.id;
     newEvent.id = newEventID;
@@ -52,6 +50,17 @@ class EventDataService {
     String error;
     await ticketDistroRef.doc(eventID).set(ticketDistro.toMap()).catchError((e) {
       error = e.details;
+    });
+    return error;
+  }
+
+  Future<String> updateScannedTickets(String eventKey, List validTickets, List usedTickets) async {
+    String error = "";
+    await ticketDistroRef.doc(eventKey).update({
+      "validTicketIDs": validTickets,
+      "usedTicketIDs": usedTickets,
+    }).catchError((e) {
+      error = e;
     });
     return error;
   }
@@ -101,9 +110,7 @@ class EventDataService {
       if (res.exists) {
         event = WebblenEvent.fromMap(res.data()['d']);
       }
-    }).catchError((e) {
-      print(e.details);
-    });
+    }).catchError((e) {});
     return event;
   }
 
@@ -199,9 +206,7 @@ class EventDataService {
         .where("d.isDigitalEvent", isEqualTo: false)
         .where("d.endDateTimeInMilliseconds", isGreaterThan: milli)
         .get()
-        .catchError((e) {
-      print(e);
-    });
+        .catchError((e) {});
     snapshot.docs.forEach((doc) {
       WebblenEvent event = WebblenEvent.fromMap(doc.data()['d']);
       if (event.startDateTimeInMilliseconds < milli) {

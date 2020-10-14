@@ -63,6 +63,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   bool loadingAdditionalPastEvents = false;
   bool morePastEventsAvailable = true;
   int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
+  int dateTimeInMilliseconds2hoursAgo = DateTime.now().millisecondsSinceEpoch - 7400000;
   //ADMOB
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
@@ -83,8 +84,8 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
     Query eventsQuery;
     eventsQuery = eventsRef
         .where('d.authorID', isEqualTo: user.uid)
-        .where("d.startDateTimeInMilliseconds", isGreaterThan: currentDateTimeInMilliseconds)
-        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+        .orderBy('d.endDateTimeInMilliseconds', descending: false)
         .limit(resultsPerPage);
     QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
     if (querySnapshot.docs.isNotEmpty) {
@@ -115,8 +116,8 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
     setState(() {});
     Query eventsQuery = eventsRef
         .where("d.authorID", isEqualTo: user.uid)
-        .where("d.startDateTimeInMilliseconds", isGreaterThan: currentDateTimeInMilliseconds)
-        .orderBy('d.startDateTimeInMilliseconds', descending: false)
+        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+        .orderBy('d.endDateTimeInMilliseconds', descending: false)
         .startAfterDocument(lastHostedEventDocSnap)
         .limit(resultsPerPage);
 
@@ -587,6 +588,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   WebblenUser user;
   bool isOwner = false;
   bool isLoading = true;
+  int dateTimeInMilliseconds2hoursAgo = DateTime.now().millisecondsSinceEpoch - 7400000;
   //Scroller & Paging
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
@@ -630,7 +632,11 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
 
   getHostedEvents() async {
     Query eventsQuery;
-    eventsQuery = eventsRef.where('d.authorID', isEqualTo: user.uid).orderBy('d.startDateTimeInMilliseconds', descending: true).limit(resultsPerPage);
+    eventsQuery = eventsRef
+        .where('d.authorID', isEqualTo: user.uid)
+        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+        .orderBy('d.endDateTimeInMilliseconds', descending: false)
+        .limit(resultsPerPage);
     QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
     if (querySnapshot.docs.isNotEmpty) {
       lastHostedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
@@ -660,7 +666,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     setState(() {});
     Query eventsQuery = eventsRef
         .where("d.authorID", isEqualTo: user.uid)
-        .orderBy('d.startDateTimeInMilliseconds', descending: true)
+        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+        .orderBy('d.endDateTimeInMilliseconds', descending: false)
         .startAfterDocument(lastHostedEventDocSnap)
         .limit(resultsPerPage);
 

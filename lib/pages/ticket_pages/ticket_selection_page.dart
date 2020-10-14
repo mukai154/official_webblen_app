@@ -50,17 +50,12 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
     int qtyAmount = int.parse(selectedValue);
     ticketsToPurchase[index]['qty'] = qtyAmount;
     ticketsToPurchase.forEach((ticket) {
-      print(ticket);
       double ticketPrice = double.parse(ticket['ticketPrice'].toString().substring(1));
       double ticketCharge = ticketPrice * ticket['qty'];
       chargeAmount += ticketCharge;
     });
     setState(() {});
   }
-
-  purchaseTickets() {}
-
-  saveCardInfo() {}
 
   Widget ticketListBuilder() {
     return ListView.builder(
@@ -140,7 +135,6 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
       eventHost = res;
       EventDataService().getEventTicketDistro(widget.event.id).then((res) {
         ticketDistro = res;
-        print(ticketDistro);
         ticketDistro.tickets.forEach((ticket) {
           Map<String, dynamic> tData = Map<String, dynamic>.from(ticket);
           tData['qty'] = 0;

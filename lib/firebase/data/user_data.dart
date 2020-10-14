@@ -25,7 +25,7 @@ class WebblenUserData {
   Future<bool> canUploadVideoAndIsAdmin(String uid) async {
     bool canUploadVideoAndIsAdmin = false;
     DocumentSnapshot snapshot = await userRef.doc(uid).get();
-    if (snapshot.data()['canUploadVideo'] != null && snapshot.data()['canUploadVideo'] && snapshot.data()['isAdmin']) {
+    if (snapshot.data()['canUploadVideo'] != null && snapshot.data()['canUploadVideo'] && snapshot.data()['isAdmin'] != null && snapshot.data()['isAdmin']) {
       canUploadVideoAndIsAdmin = true;
     }
     return canUploadVideoAndIsAdmin;
@@ -171,6 +171,21 @@ class WebblenUserData {
     //GeoFirePoint geoFirePoint = GeoFirePoint(lat, lon);
     userRef.doc(uid).update({'g': null, 'l': null, 'appOpenInMilliseconds': appOpenInMilliseconds, 'lastSeenZipcode': zipcode});
   }
+
+  Future<Null> setGoogleTokens(String uid, String idToken, String accessToken) async {
+    return userRef.doc(uid).update({'googleIDToken': idToken, 'googleAccessToken': accessToken});
+  }
+
+  // Future<Null> updateUserField() async {
+  //   userRef.get().then((res) {
+  //     res.docs.forEach((doc) async {
+  //       await userRef.doc(doc.id).update(({
+  //             'd.webblen': 1.001,
+  //             'd.impactPoints': 1.001,
+  //           }));
+  //     });
+  //   });
+  // }
 
 //  Future<String> updateUserImg(File userImgFile, String uid) async {
 //    String error = "";

@@ -213,9 +213,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
     await agoraRtcEngine.setVideoEncoderConfiguration(configuration);
     await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
-    await agoraRtcEngine.joinChannel(null, widget.event.id, null, 0).catchError((e) {
-      print(e);
-    });
+    await agoraRtcEngine.joinChannel(null, widget.event.id, null, 0);
     checkPermissions();
     setAgoraRtcEventHandlers();
     isLoading = false;

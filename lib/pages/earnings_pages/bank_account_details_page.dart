@@ -160,13 +160,13 @@ class _BankAccountDetailsPageState extends State<BankAccountDetailsPage> {
       appBar: WebblenAppBar().basicAppBar("Bank Account Details", context),
       body: Container(
         child: StreamBuilder(
-            stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
-            builder: (context, userSnapshot) {
+            stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
+            builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
               if (!userSnapshot.hasData)
                 return Text(
                   "Loading...",
                 );
-              Map<String, dynamic> userData = userSnapshot.data.data;
+              Map<String, dynamic> userData = userSnapshot.data.data();
               BankingInfo bankingInfo = userData['bankInfo'] == null ? null : BankingInfo.fromMap(Map<String, dynamic>.from(userData['bankInfo']));
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -264,8 +264,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .where('d.type', isEqualTo: eventTypeFilter)
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy('d.endDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastLiveEventDocSnap)
           .limit(resultsPerPage);
@@ -1020,7 +1020,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                     Tab(
                       child: CustomText(
                         context: context,
-                        text: "Stream",
+                        text: "Streams",
                         textColor: Colors.black,
                         textAlign: TextAlign.center,
                         fontSize: 15.0,

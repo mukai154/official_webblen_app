@@ -93,7 +93,7 @@ class _EventBlockState extends State<EventBlock> {
             Column(
               children: [
                 Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 0),
+                  padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
                   height: size,
                   width: MediaQuery.of(context).size.width - (125 + 32),
                   decoration: BoxDecoration(
@@ -110,7 +110,9 @@ class _EventBlockState extends State<EventBlock> {
                         context: context,
                         text: currentDateInMilliseconds > widget.event.startDateTimeInMilliseconds &&
                                 currentDateInMilliseconds < widget.event.endDateTimeInMilliseconds
-                            ? widget.event.isDigitalEvent ? "LIVE" : "Happening Now"
+                            ? widget.event.isDigitalEvent
+                                ? "LIVE"
+                                : "Happening Now"
                             : "${widget.event.startDate.substring(0, widget.event.startDate.length - 6)} • ${widget.event.startTime}",
                         textColor: currentDateInMilliseconds > widget.event.endDateTimeInMilliseconds ? Colors.black45 : CustomColors.webblenRed,
                         textAlign: TextAlign.left,
@@ -118,14 +120,10 @@ class _EventBlockState extends State<EventBlock> {
                         fontWeight: FontWeight.w700,
                       ),
                       Container(
-                        child: CustomText(
-                          context: context,
-                          text: widget.event.title,
+                        child: Text(
+                          widget.event.title,
+                          style: TextStyle(color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.bold),
                           maxLines: 2,
-                          textColor: Colors.black,
-                          textAlign: TextAlign.left,
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       SizedBox(height: 2.0),
@@ -138,31 +136,24 @@ class _EventBlockState extends State<EventBlock> {
                                   color: Colors.black38,
                                 ),
                                 SizedBox(width: 8.0),
-                                CustomText(
-                                  context: context,
-                                  text: "Livestream",
-                                  textColor: Colors.black45,
-                                  textAlign: TextAlign.left,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w500,
+                                Text(
+                                  "Livestream",
+                                  style: TextStyle(color: Colors.black45, fontSize: 14.0, fontWeight: FontWeight.w500),
                                 ),
                               ],
                             )
-                          : Row(
-                              children: <Widget>[
-                                CustomText(
-                                  context: context,
-                                  text: widget.event.city == null || widget.event.province == null
-                                      ? "Location Unvailable"
-                                      : "${widget.event.city}, ${widget.event.province}",
-                                  textColor: Colors.black45,
-                                  textAlign: TextAlign.left,
-                                  fontSize: 14.0,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ],
+                          : Container(
+                              child: Text(
+                                widget.event.city == null || widget.event.province == null
+                                    ? "Location Unavailable"
+                                    : widget.event.city.contains(widget.event.province)
+                                        ? widget.event.city
+                                        : "${widget.event.city}, ${widget.event.province}",
+                                style: TextStyle(color: Colors.black45, fontSize: 12.0, fontWeight: FontWeight.w500),
+                                maxLines: 2,
+                              ),
                             ),
-                      SizedBox(height: 6.0),
+                      SizedBox(height: 4.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
@@ -171,7 +162,7 @@ class _EventBlockState extends State<EventBlock> {
                             text: widget.event.type,
                             textColor: Colors.black45,
                             textAlign: TextAlign.left,
-                            fontSize: 14.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.w500,
                           ),
                           widget.numOfTicsForEvent == null

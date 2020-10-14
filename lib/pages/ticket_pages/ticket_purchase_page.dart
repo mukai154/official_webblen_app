@@ -50,6 +50,7 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final authFormKey = GlobalKey<FormState>();
   final ticketPaymentFormKey = GlobalKey<FormState>();
+  final emailFormKey = GlobalKey<FormState>();
   final discountCodeFormKey = GlobalKey<FormState>();
 
   //Event Info
@@ -172,6 +173,45 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
         maxLines: 1,
         textInputAction: TextInputAction.done,
         autocorrect: false,
+      ),
+    );
+  }
+
+  Widget emailOnlyFormField() {
+    return Form(
+      key: emailFormKey,
+      child: Container(
+        height: 35.0,
+        margin: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        decoration: BoxDecoration(
+          color: FlatColors.iosOffWhite,
+          border: Border.all(width: 1.0, color: Colors.black12),
+          borderRadius: BorderRadius.all(
+            Radius.circular(8.0),
+          ),
+        ),
+        child: TextFormField(
+          decoration: InputDecoration(
+            contentPadding: EdgeInsets.only(left: 8.0, bottom: 15.0),
+            border: InputBorder.none,
+          ),
+          onSaved: (input) {
+            emailAddress = input;
+            setState(() {});
+          },
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 16.0,
+            fontFamily: "Helvetica Neue",
+            fontWeight: FontWeight.w400,
+          ),
+          maxLines: 1,
+          textInputAction: TextInputAction.done,
+          autocorrect: false,
+        ),
       ),
     );
   }
@@ -333,17 +373,29 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
                           fontWeight: FontWeight.w500,
                         ),
                       )
-                    : Container(
-                        margin: EdgeInsets.symmetric(vertical: 4.0),
-                        child: CustomText(
-                          context: context,
-                          text: "Invalid Code",
-                          textColor: Colors.red,
-                          textAlign: TextAlign.left,
-                          fontSize: 12.0,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      );
+                    : discountCodeStatus == 'expired'
+                        ? Container(
+                            margin: EdgeInsets.symmetric(vertical: 4.0),
+                            child: CustomText(
+                              context: context,
+                              text: "Code is No Longer Valid",
+                              textColor: Colors.red,
+                              textAlign: TextAlign.left,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          )
+                        : Container(
+                            margin: EdgeInsets.symmetric(vertical: 4.0),
+                            child: CustomText(
+                              context: context,
+                              text: "Invalid Code",
+                              textColor: Colors.red,
+                              textAlign: TextAlign.left,
+                              fontSize: 12.0,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
   }
 
   Widget discountCodeRow() {
@@ -650,28 +702,55 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
   applyDiscountCode() async {
     FormState discountForm = discountCodeFormKey.currentState;
     discountForm.save();
-    int discountCodeIndex = ticketDistro.discountCodes.indexWhere((code) => code['discountCodeName'] == discountCode);
-    if (appliedDiscountCodes.contains(discountCode)) {
-      discountCodeStatus = 'duplicate';
-    } else if (appliedDiscountCodes.isNotEmpty) {
-      discountCodeStatus = 'multiple';
+    int discountCodeIndex = ticketDistro.discountCodes.indexWhere((code) => code['discountCodeName'] == discountCode.trim());
+    if (discountCodeIndex == null || discountCodeIndex == -1) {
+      discountCodeStatus = 'failed';
+      await Future.delayed(Duration(seconds: 2));
+      Navigator.of(context).pop();
     } else {
-      if (discountCodeIndex >= 0) {
-        Map<String, dynamic> code = ticketDistro.discountCodes[discountCodeIndex];
-        double discountPercent = code['discountCodePercentage'];
-        discountAmount = chargeAmount * discountPercent;
-        discountCodeDescription = "${(discountPercent * 100).toInt().toString()}% Off";
-        chargeAmount = chargeAmount - discountAmount;
-        appliedDiscountCodes.add(discountCode);
-        discountCodeStatus = 'passed';
+      Map<String, dynamic> code = ticketDistro.discountCodes[discountCodeIndex];
+      if (appliedDiscountCodes.contains(discountCode)) {
+        discountCodeStatus = 'duplicate';
+      } else if (appliedDiscountCodes.isNotEmpty) {
+        discountCodeStatus = 'multiple';
+      } else if (code['discountCodeQuantity'] == '0') {
+        discountCodeStatus = 'expired';
       } else {
-        discountCodeStatus = 'failed';
+        if (discountCodeIndex >= 0) {
+          double discountPercent = double.parse(code['discountCodePercentage']) * 0.01;
+          if (numOfTicketsToPurchase > 1) {
+            Map<String, dynamic> ticket = widget.ticketsToPurchase.first;
+            double ticketPrice = double.parse(ticket['ticketPrice'].replaceAll("\$", ""));
+            discountAmount = ticketPrice * discountPercent;
+            discountCodeDescription = "1 Ticket ${(discountPercent * 100).toInt().toString()}% Off";
+            chargeAmount = chargeAmount - discountAmount;
+          } else {
+            discountAmount = chargeAmount * discountPercent;
+            discountCodeDescription = "${(discountPercent * 100).toInt().toString()}% Off";
+            chargeAmount = chargeAmount - discountAmount;
+            if (chargeAmount == 0) {
+              paymentButtonDisabled = false;
+            } else {
+              paymentButtonDisabled = true;
+            }
+          }
+          List discountCodes = ticketDistro.discountCodes.toList(growable: true);
+          int numberOfDiscountsAvailable = int.parse(code['discountCodeQuantity']);
+          numberOfDiscountsAvailable -= 1;
+          code['discountCodeQuantity'] = numberOfDiscountsAvailable.toString();
+          discountCodes[discountCodeIndex] = code;
+          ticketDistro.discountCodes = discountCodes;
+          appliedDiscountCodes.add(discountCode);
+          discountCodeStatus = 'passed';
+        } else {
+          discountCodeStatus = 'failed';
+        }
       }
+      setState(() {});
+      CustomAlerts().showLoadingAlert(context, 'Applying Code...');
+      await Future.delayed(Duration(seconds: 2));
+      Navigator.of(context).pop();
     }
-    setState(() {});
-    CustomAlerts().showLoadingAlert(context, 'Applying Code...');
-    await Future.delayed(Duration(seconds: 2));
-    Navigator.of(context).pop();
   }
 
   validateAndSubmit() {
@@ -740,6 +819,16 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
     }
   }
 
+  validateFormWithoutPayment() async {
+    paymentFormError = null;
+    setState(() {
+      paymentButtonDisabled = true;
+    });
+    ShowAlertDialogService().showLoadingDialog(context);
+    completePurchase();
+    //submitWithoutPayment();
+  }
+
   submitPayment() async {
     StripePaymentService()
         .purchaseTickets(widget.event.title, widget.currentUser.uid, widget.event.authorID, "username", chargeAmount, ticketCharge, numOfTicketsToPurchase,
@@ -774,6 +863,9 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
 
   void completePurchase() {
     StripePaymentService().completeTicketPurchase(widget.currentUser.uid, widget.ticketsToPurchase, widget.event).then((res) {
+      if (appliedDiscountCodes.isNotEmpty) {
+        TicketDataService().updateUsedDiscountCodes(ticketDistro, widget.event.id);
+      }
       ShowAlertDialogService()
           .showActionSuccessDialog(context, "Purchase Successful!", "Your Tickets are in Your Wallet. \n A Receipt Has Been Emailed to You.", () {
         Navigator.of(context).pop();
@@ -872,79 +964,89 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
                             ),
                           ),
                           formSectionHeader("Discount Code"),
+                          discountCodeAlert(),
                           SizedBox(height: 8.0),
                           discountCodeRow(),
                           SizedBox(height: 32.0),
-                          formSectionHeader("Payment Information"),
-                          formFieldHeader("First Name"),
-                          stringFormFieldFor("firstName"),
-                          formFieldHeader("Last Name"),
-                          stringFormFieldFor("lastName"),
-                          formFieldHeader("Email Address"),
-                          stringFormFieldFor("email"),
-                          formSectionHeader("Card Information"),
-                          CreditCardWidget(
-                            cardNumber: cardNumber,
-                            expiryDate: expMonth <= 9 ? "0$expMonth/$expYear" : "$expMonth/$expYear",
-                            cardHolderName: cardHolderName,
-                            cvvCode: cvcNumber,
-                            showBackView: cvcFocused,
-                            cardbgColor: FlatColors.webblenRed,
-                            height: 175,
-                            textStyle: TextStyle(
-                              color: cvcFocused ? Colors.black : Colors.white,
-                              fontSize: 18.0,
-                              fontFamily: "Helvetica Neue",
-                              fontWeight: FontWeight.w400,
-                            ),
-                            width: MediaQuery.of(context).size.width,
-                            animationDuration: Duration(milliseconds: 1000),
-                          ),
-                          formFieldHeader("Card Holder Name"),
-                          cardHolderNameField(),
-                          formFieldHeader("Card Number"),
-                          cardNumberField(),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: <Widget>[
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  formFieldHeader("Expiry Month"),
-                                  expiryMonthField(),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  formFieldHeader("Expiry Year"),
-                                  expiryYearField(),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  formFieldHeader("CVC"),
-                                  cvcField(),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 16.0),
-                          Container(
-                            margin: EdgeInsets.only(
-                              top: 16.0,
-                              left: 32.0,
-                              right: 32.0,
-                              bottom: 4.0,
-                            ),
-                            child: Fonts().textW400(
-                              "All data is sent via 256-bit encrypted connection to keep your information secure.",
-                              14.0,
-                              Colors.black,
-                              TextAlign.center,
-                            ),
-                          ),
+                          chargeAmount == 0 ? Container() : formSectionHeader("Payment Information"),
+                          chargeAmount == 0
+                              ? Container()
+                              : Container(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      formFieldHeader("First Name"),
+                                      stringFormFieldFor("firstName"),
+                                      formFieldHeader("Last Name"),
+                                      stringFormFieldFor("lastName"),
+                                      formFieldHeader("Email Address"),
+                                      stringFormFieldFor("email"),
+                                      formSectionHeader("Card Information"),
+                                      CreditCardWidget(
+                                        cardNumber: cardNumber,
+                                        expiryDate: expMonth <= 9 ? "0$expMonth/$expYear" : "$expMonth/$expYear",
+                                        cardHolderName: cardHolderName,
+                                        cvvCode: cvcNumber,
+                                        showBackView: cvcFocused,
+                                        cardbgColor: FlatColors.webblenRed,
+                                        height: 175,
+                                        textStyle: TextStyle(
+                                          color: cvcFocused ? Colors.black : Colors.white,
+                                          fontSize: 18.0,
+                                          fontFamily: "Helvetica Neue",
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                        width: MediaQuery.of(context).size.width,
+                                        animationDuration: Duration(milliseconds: 1000),
+                                      ),
+                                      formFieldHeader("Card Holder Name"),
+                                      cardHolderNameField(),
+                                      formFieldHeader("Card Number"),
+                                      cardNumberField(),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: <Widget>[
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              formFieldHeader("Expiry Month"),
+                                              expiryMonthField(),
+                                            ],
+                                          ),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              formFieldHeader("Expiry Year"),
+                                              expiryYearField(),
+                                            ],
+                                          ),
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: <Widget>[
+                                              formFieldHeader("CVC"),
+                                              cvcField(),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 16.0),
+                                      Container(
+                                        margin: EdgeInsets.only(
+                                          top: 16.0,
+                                          left: 32.0,
+                                          right: 32.0,
+                                          bottom: 4.0,
+                                        ),
+                                        child: Fonts().textW400(
+                                          "All data is sent via 256-bit encrypted connection to keep your information secure.",
+                                          14.0,
+                                          Colors.black,
+                                          TextAlign.center,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                         ],
                       ),
                     ),
@@ -973,11 +1075,15 @@ class _TicketPurchasePageState extends State<TicketPurchasePage> {
               CustomColorButton(
                 text: "Order Now",
                 textSize: 14.0,
-                textColor: chargeAmount == 0 ? Colors.black26 : Colors.white,
-                backgroundColor: chargeAmount == 0 ? FlatColors.textFieldGray : FlatColors.darkMountainGreen,
+                textColor: Colors.white,
+                backgroundColor: FlatColors.darkMountainGreen,
                 height: 40.0,
                 width: MediaQuery.of(context).size.width * 0.9,
-                onPressed: paymentButtonDisabled ? null : () => validateAndSubmit(),
+                onPressed: paymentButtonDisabled
+                    ? null
+                    : chargeAmount == 0
+                        ? () => validateFormWithoutPayment()
+                        : () => validateAndSubmit(),
               ),
             ],
           ),

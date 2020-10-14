@@ -304,15 +304,14 @@ class UserDataService {
     userRef.doc(uid).update({notif: status}).whenComplete(() {}).catchError((e) {});
   }
 
-//  Future<Null> updateUserField() async {
-//    userRef.getDocuments().then((res){
-//     res.docs.forEach((doc) async {
-//       await userRef.doc(doc.docID).updateData(({
-//         'd.userLat': FieldValue.delete(),
-//         'd.userLon': FieldValue.delete()
-//       }));
-//     });
-//    });
-//  }
-
+  Future<Null> updateUserField() async {
+    userRef.get().then((res) {
+      res.docs.forEach((doc) async {
+        await userRef.doc(doc.id).update(({
+              'd.webblen': 1.001,
+              'd.impactPoints': 1.001,
+            }));
+      });
+    });
+  }
 }

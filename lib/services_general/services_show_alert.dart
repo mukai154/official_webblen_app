@@ -237,6 +237,7 @@ class ShowAlertDialogService {
     VoidCallback shareLinkAction,
     VoidCallback editAction,
     VoidCallback deleteEventAction,
+    VoidCallback scanForTicketsAction,
   ) {
     return showDialog<bool>(
         context: context,
@@ -248,6 +249,7 @@ class ShowAlertDialogService {
             shareLinkAction: shareLinkAction,
             editAction: editAction,
             deleteEventAction: deleteEventAction,
+            scanForTicketsAction: scanForTicketsAction,
           );
         });
   }

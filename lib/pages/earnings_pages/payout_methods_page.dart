@@ -77,10 +77,10 @@ class _PayoutMethodsPageState extends State<PayoutMethodsPage> {
     return Scaffold(
       appBar: WebblenAppBar().basicAppBar("Payout Methods", context),
       body: StreamBuilder(
-          stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
-          builder: (context, userSnapshot) {
+          stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
+          builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
             if (!userSnapshot.hasData) return Text("Loading...");
-            var userData = userSnapshot.data.data;
+            var userData = userSnapshot.data.data();
             Map<String, dynamic> bankInfo = userData['bankInfo'] == null ? null : Map<String, dynamic>.from(userData['bankInfo']);
             Map<String, dynamic> cardInfo = userData['cardInfo'] == null ? null : Map<String, dynamic>.from(userData['cardInfo']);
             return Container(

@@ -5,6 +5,7 @@ import 'package:webblen/models/webblen_chat_message.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/pages/auth_pages/connect_youtube_live_page.dart';
 import 'package:webblen/pages/earnings_pages/bank_account_details_page.dart';
 import 'package:webblen/pages/earnings_pages/debit_card_details_page.dart';
 import 'package:webblen/pages/earnings_pages/earnings_info_page.dart';
@@ -27,6 +28,7 @@ import 'package:webblen/pages/home_pages/wallet_page.dart';
 import 'package:webblen/pages/ticket_pages/event_tickets_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
+import 'package:webblen/pages/ticket_pages/ticket_scan_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
 import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
@@ -225,6 +227,15 @@ class PageTransitionService {
         ),
       );
 
+  void transitionToConnectToYoutubePage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ConnectYoutubeLivePage(
+            currentUser: currentUser,
+          ),
+        ),
+      );
+
   void transitionToTicketSelectionPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -257,15 +268,15 @@ class PageTransitionService {
         ),
       );
 
-//  void openTicketScanner() => Navigator.push(
-//        context,
-//        MaterialPageRoute(
-//          builder: (context) => TicketScanner(
-//            currentUser: currentUser,
-//            event: event,
-//          ),
-//        ),
-//      );
+  void transitionToTicketScanPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => TicketScanPage(
+            currentUser: currentUser,
+            event: event,
+          ),
+        ),
+      );
 
   void transitionToTicketInfoPage() => Navigator.push(
         context,

@@ -55,4 +55,14 @@ class TicketDataService {
     });
     return error;
   }
+
+  Future<String> updateUsedDiscountCodes(TicketDistro ticketDistro, String eventID) async {
+    String error = "";
+    await ticketDistroRef.doc(eventID).update({
+      "discountCodes": ticketDistro.discountCodes,
+    }).catchError((e) {
+      error = e;
+    });
+    return error;
+  }
 }

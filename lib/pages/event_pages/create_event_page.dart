@@ -22,6 +22,7 @@ import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/create_notification.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
@@ -129,6 +130,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   String twitterUsername;
   String instaUsername;
   String websiteURL;
+  String youtubeStreamLink;
 
   //Other
   void dismissKeyboard() {
@@ -1523,6 +1525,37 @@ class _CreateEventPageState extends State<CreateEventPage> {
     );
   }
 
+  Widget youtubeStreamLinkStatus() {
+    return Row(
+      children: [
+        Column(
+          children: [
+            Row(
+              children: [
+                Icon(FontAwesomeIcons.youtubeSquare, color: Colors.red, size: 16.0),
+                Text(
+                  "Stream to Youtube",
+                  style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+        Column(
+          children: [
+            GestureDetector(
+              onTap: () => PageTransitionService(context: context, currentUser: currentUser).transitionToConnectToYoutubePage(),
+              child: Text(
+                youtubeStreamLink == null ? "Connect" : "Disconnect",
+                style: TextStyle(color: youtubeStreamLink == null ? Colors.blue : Colors.red, fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget fbSocialHeader() {
     return Row(
       children: <Widget>[
@@ -1987,6 +2020,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                 SizedBox(height: 16.0),
                                 widget.isStream ? fieldHeader("Stream Type", true) : fieldHeader("Event Type", true),
                                 eventTypeDropDown(),
+                                SizedBox(height: 32.0),
+                                fieldHeader("Additional Streams (Optional)", false),
+                                youtubeStreamLinkStatus(),
                                 SizedBox(height: 32.0),
                                 fieldHeader("Social Links (Optional)", false),
                                 SizedBox(height: 8.0),

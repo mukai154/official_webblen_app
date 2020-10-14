@@ -189,13 +189,13 @@ class _DebitCardDetailsPageState extends State<DebitCardDetailsPage> {
         child: isLoading
             ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed)
             : StreamBuilder(
-                stream: Firestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
-                builder: (context, userSnapshot) {
+                stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
+                builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
                   if (!userSnapshot.hasData)
                     return Text(
                       "Loading...",
                     );
-                  Map<String, dynamic> userData = userSnapshot.data.data;
+                  Map<String, dynamic> userData = userSnapshot.data.data();
                   DebitCardInfo cardInfo = userData['cardInfo'] == null ? null : DebitCardInfo.fromMap(Map<String, dynamic>.from(userData['cardInfo']));
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,

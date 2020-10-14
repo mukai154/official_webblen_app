@@ -686,6 +686,7 @@ class EventOptionsDialog extends StatelessWidget {
   final VoidCallback shareLinkAction;
   final VoidCallback editAction;
   final VoidCallback deleteEventAction;
+  final VoidCallback scanForTicketsAction;
 
   EventOptionsDialog({
     this.viewAttendeesAction,
@@ -693,13 +694,22 @@ class EventOptionsDialog extends StatelessWidget {
     this.shareLinkAction,
     this.editAction,
     this.deleteEventAction,
+    this.scanForTicketsAction,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomAlertDialog(
       content: Container(
-        height: editAction == null ? deleteEventAction == null ? viewAttendeesAction == null ? shareEventAction == null ? 150 : 180 : 220 : 280 : 310,
+        height: editAction == null
+            ? deleteEventAction == null
+                ? viewAttendeesAction == null
+                    ? shareEventAction == null
+                        ? 160
+                        : 190
+                    : 220
+                : 290
+            : 320,
         decoration: BoxDecoration(
           shape: BoxShape.rectangle,
           color: const Color(0xFFFFFF),
@@ -775,6 +785,21 @@ class EventOptionsDialog extends StatelessWidget {
                           height: 45.0,
                           width: 200.0,
                           onPressed: shareLinkAction,
+                        )
+                      : Container(),
+                  scanForTicketsAction != null
+                      ? CustomColorIconButton(
+                          icon: Icon(
+                            FontAwesomeIcons.qrcode,
+                            color: Colors.black,
+                            size: 16.0,
+                          ),
+                          text: "Scan for Tickets",
+                          textColor: Colors.black,
+                          backgroundColor: Colors.white,
+                          height: 45.0,
+                          width: 200.0,
+                          onPressed: scanForTicketsAction,
                         )
                       : Container(),
                   editAction != null

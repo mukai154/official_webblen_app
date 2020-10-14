@@ -470,7 +470,9 @@ class _WalletPageState extends State<WalletPage> {
         });
       } else {
         isLoadingRewards = false;
-        setState(() {});
+        if (this.mounted) {
+          setState(() {});
+        }
       }
     });
   }

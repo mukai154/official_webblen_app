@@ -7,7 +7,7 @@ class PlatformDataService {
 
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "9.1.1";
+    String currentVersion = "9.1.15";
     DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
     String releasedVersion = docSnapshot.data()["versionNumber"];
     bool versionIsRequired = docSnapshot.data()["versionIsRequired"];
@@ -42,6 +42,13 @@ class PlatformDataService {
     String appID;
     DocumentSnapshot snapshot = await appReleaseRef.doc('agora').get();
     appID = snapshot.data()['appID'];
+    return appID;
+  }
+
+  Future<String> getGoogleApiKey() async {
+    String appID;
+    DocumentSnapshot snapshot = await appReleaseRef.doc('google').get();
+    appID = snapshot.data()['apiKey'];
     return appID;
   }
 }

@@ -1,10 +1,10 @@
 name: webblen
-description: Official Webblen Application
-
-version: 8.0.0
+description: Official Webblen App
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -54,9 +54,10 @@ dependencies:
 
   #QR READ/RENDER
   qr_flutter: ^3.1.0
-#  qr_code_scanner:
-#    git:
-#      url: https://github.com/kamilpowalowski/qr_code_scanner.git
+  qr_code_scanner: ^0.0.13
+  #  qr_code_scanner:
+  #    git:
+  #      url: https://github.com/kamilpowalowski/qr_code_scanner.git
 
   #Phone Util Dependencies
   flutter_local_notifications: ^0.8.4
@@ -88,6 +89,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
 flutter:
   uses-material-design: true
   assets:

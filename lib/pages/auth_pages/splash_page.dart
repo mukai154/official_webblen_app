@@ -46,7 +46,7 @@ class _SplashPageState extends State<SplashPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
-                SizedBox(height: 20.0),
+                SizedBox(height: 100.0),
                 Container(
                   height: MediaQuery.of(context).size.height > 2000 ? MediaQuery.of(context).size.height * 0.8 : 500,
                   child: PageView(

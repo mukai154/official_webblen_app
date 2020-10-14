@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/firebase/data/event_data.dart';
-import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -51,7 +51,7 @@ class _SearchPageState extends State<SearchPage> {
     if (searchVal == '' || searchVal == null) {
       clearSearch();
     } else {
-      eventResults = await AlgoliaSearch().queryEvents(searchVal);
+      //eventResults = await AlgoliaSearch().queryEvents(searchVal);
       userResults = await AlgoliaSearch().queryUsers(searchVal);
       allResults = [
         eventResults,
@@ -64,7 +64,7 @@ class _SearchPageState extends State<SearchPage> {
 
   void transitionToUserDetails(String uid) {
     ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService().getUserByID(uid).then((user) {
+    WebblenUserData().getUserByID(uid).then((user) {
       Navigator.of(context).pop();
       PageTransitionService(context: context, currentUser: widget.currentUser, webblenUser: user).transitionToUserPage();
     });
@@ -94,7 +94,6 @@ class _SearchPageState extends State<SearchPage> {
   @override
   void initState() {
     super.initState();
-    //WebblenUserData().transitionFriendsToFollowers();
   }
 
   @override
