@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 
 class UserOptionsService {
@@ -19,7 +19,7 @@ class UserOptionsService {
     String friendRequestStatus;
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    await UserDataService().getUsername(uid).then((currentUsername) {
+    await WebblenUserData().getUsername(uid).then((currentUsername) {
       if (currentUsername != null) {
 //        WebblenNotificationDataService()
 //            .sendFriendRequest(
@@ -65,7 +65,7 @@ class UserOptionsService {
     String friendRequestStatus;
     Navigator.of(context).pop();
     ShowAlertDialogService().showLoadingDialog(context);
-    await UserDataService().getUsername(uid).then((currentUsername) {
+    await WebblenUserData().getUsername(uid).then((currentUsername) {
       if (currentUsername != null) {
 //        WebblenNotificationDataService()
 //            .sendFriendRequest(
@@ -102,7 +102,7 @@ class UserOptionsService {
   }
 
   void signUserOut(BuildContext context) async {
-    await FacebookLogin().logOut();
+    await FacebookAuth.instance.logOut();
     await GoogleSignIn().signOut();
     BaseAuth().signOut().then((uid) {
       Navigator.of(context).pushNamedAndRemoveUntil(

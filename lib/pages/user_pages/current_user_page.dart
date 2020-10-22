@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
 import 'package:flutter_native_admob/native_admob_controller.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
@@ -12,31 +13,29 @@ import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 import 'package:webblen/widgets/widgets_user/user_details_header.dart';
 
-class UserPage extends StatefulWidget {
+class CurrentUserPage extends StatefulWidget {
   final WebblenUser currentUser;
   final WebblenUser webblenUser;
   final backButtonIsDisabled;
 
-  UserPage({
+  CurrentUserPage({
     this.currentUser,
     this.webblenUser,
     this.backButtonIsDisabled,
   });
 
   @override
-  _UserPageState createState() => _UserPageState();
+  _CurrentUserPageState createState() => _CurrentUserPageState();
 }
 
-class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin {
+class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProviderStateMixin {
   WebblenUser user;
-  bool isOwner = false;
   bool isLoading = true;
-
   //Scroller & Paging
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
@@ -401,8 +400,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   Future<void> refreshData() async {
     hostedEventResults = [];
     pastEventResults = [];
+    attendedEventResults = [];
     getHostedEvents();
     getPastEvents();
+    getAttendedEvents();
   }
 
   @override
@@ -410,7 +411,6 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     super.initState();
     if (widget.webblenUser == null || widget.webblenUser.uid == widget.currentUser.uid) {
       setState(() {
-        isOwner = true;
         user = widget.currentUser;
       });
     } else {
@@ -423,7 +423,6 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
       userFollowersList = res;
       setState(() {});
     });
-
     if (Platform.isIOS) {
       adMobUnitID = 'ca-app-pub-2136415475966451/5262349288';
     } else if (Platform.isAndroid) {
@@ -473,33 +472,85 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     SystemChrome.setSystemUIOverlayStyle(
       SystemUiOverlayStyle.dark,
     );
-    return Scaffold(
-      appBar: WebblenAppBar().actionAppBar(
-        "@${user.username}",
-        Container(),
+    return MediaQuery(
+      data: MediaQuery.of(context).copyWith(
+        textScaleFactor: 1.0,
       ),
-      body: MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaleFactor: 1.0,
-        ),
-        child: Container(
-          color: Colors.white,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              StreamBuilder(
-                stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+      child: Container(
+        color: Colors.white,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              height: 70,
+              margin: EdgeInsets.only(
+                left: 16,
+                top: 30,
+                right: 8,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      CustomText(
+                        context: context,
+                        text: "My Account",
+                        textColor: Colors.black,
+                        textAlign: TextAlign.center,
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ],
+                  ),
+                  Column(
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: 20,
+                          right: 8,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionTFeedbackPage(),
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                child: Icon(FontAwesomeIcons.lightbulb, color: Colors.black, size: 20.0),
+                              ),
+                            ),
+                            SizedBox(width: 16.0),
+                            GestureDetector(
+                              onTap: () => PageTransitionService(context: context, currentUser: widget.currentUser).transitionToSettingsPage(),
+                              child: Container(
+                                height: 30,
+                                width: 30,
+                                child: Icon(FontAwesomeIcons.cog, color: Colors.black, size: 20.0),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              child: StreamBuilder(
+                stream: FirebaseFirestore.instance.collection("webblen_user").doc(user.uid).snapshots(),
                 builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
-                  if (!userSnapshot.hasData)
-                    return Text(
-                      "Loading...",
-                    );
+                  if (!userSnapshot.hasData) return Container(height: 200);
                   var userData = userSnapshot.data.data();
                   List following = userData['d']["following"];
                   List followers = userData['d']["followers"];
                   return Container(
                     child: UserDetailsHeader(
-                      isOwner: isOwner,
+                      isOwner: true,
                       username: user.username,
                       userPicUrl: user.profile_pic,
                       uid: user.uid,
@@ -518,162 +569,166 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                         currentUser: widget.currentUser,
                         pageTitle: "Following",
                       ).transitionToUserListPage(),
-                      isFollowing: following.contains(user.uid) ? true : false,
+                      isFollowing: followingList == null
+                          ? null
+                          : followingList.contains(user.uid)
+                              ? true
+                              : false,
                     ),
                   );
                 },
               ),
-              Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TabBar(
-                      controller: _tabController,
-                      labelPadding: EdgeInsets.symmetric(horizontal: 20.0),
-                      indicatorColor: CustomColors.webblenRed,
-                      labelColor: CustomColors.darkGray,
-                      isScrollable: true,
-                      tabs: [
-                        Tab(
-                          child: Text(
-                            "Upcoming",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
-                          ),
+            ),
+            Container(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TabBar(
+                    controller: _tabController,
+                    labelPadding: EdgeInsets.symmetric(horizontal: 20.0),
+                    indicatorColor: CustomColors.webblenRed,
+                    labelColor: CustomColors.darkGray,
+                    isScrollable: true,
+                    tabs: [
+                      Tab(
+                        child: Text(
+                          "Upcoming",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
                         ),
-                        Tab(
-                          child: Text(
-                            "Past",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
-                          ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Past",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
                         ),
-                        Tab(
-                          child: Text(
-                            "Check-Ins",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
-                          ),
+                      ),
+                      Tab(
+                        child: Text(
+                          "Check-Ins",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              Expanded(
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  child: DefaultTabController(
-                    length: 3,
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: <Widget>[
-                        //Hosted EVENTS
-                        Container(
-                          key: PageStorageKey('key0'),
-                          color: Colors.white,
-                          child: isLoading
-                              ? LoadingScreen(
-                                  context: context,
-                                  loadingDescription: 'Loading Hosted Events...',
-                                )
-                              : hostedEventResults.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width - 16,
-                                              ),
-                                              child: Text(
-                                                "@${user.username} Has Not Hosted Any Streams/Events",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(height: 8.0),
-                                      ],
-                                    )
-                                  : listHostedEvents(),
-                        ),
-                        //Past Events
-                        Container(
-                          key: PageStorageKey('key1'),
-                          color: Colors.white,
-                          child: isLoading
-                              ? LoadingScreen(
-                                  context: context,
-                                  loadingDescription: 'Loading Past Events...',
-                                )
-                              : pastEventResults.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width - 16,
-                                              ),
-                                              child: Text(
-                                                "@${user.username} Has Not Attended Any Streams/Events",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(height: 8.0),
-                                      ],
-                                    )
-                                  : listPastEvents(),
-                        ),
-                        //Attended Events
-                        Container(
-                          key: PageStorageKey('key2'),
-                          color: Colors.white,
-                          child: isLoading
-                              ? LoadingScreen(
-                                  context: context,
-                                  loadingDescription: 'Loading Attended Events...',
-                                )
-                              : attendedEventResults.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: <Widget>[
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width - 16,
-                                              ),
-                                              child: Text(
-                                                "@${user.username} Has Not Attended Any Streams/Events",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(height: 8.0),
-                                      ],
-                                    )
-                                  : listAttendedEvents(),
-                        ),
-                      ],
-                    ),
+            ),
+            Expanded(
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                child: DefaultTabController(
+                  length: 3,
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: <Widget>[
+                      //Hosted EVENTS
+                      Container(
+                        key: PageStorageKey('key0'),
+                        color: Colors.white,
+                        child: isLoading
+                            ? LoadingScreen(
+                                context: context,
+                                loadingDescription: 'Loading Hosted Events...',
+                              )
+                            : hostedEventResults.isEmpty
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                            ),
+                                            child: Text(
+                                              "@${user.username} Has No Upcoming Streams/Events",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 8.0),
+                                    ],
+                                  )
+                                : listHostedEvents(),
+                      ),
+                      //Past Events
+                      Container(
+                        key: PageStorageKey('key1'),
+                        color: Colors.white,
+                        child: isLoading
+                            ? LoadingScreen(
+                                context: context,
+                                loadingDescription: 'Loading Past Events...',
+                              )
+                            : pastEventResults.isEmpty
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                            ),
+                                            child: Text(
+                                              "@${user.username} Has Not Hosted Any Streams/Events Recently",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 8.0),
+                                    ],
+                                  )
+                                : listPastEvents(),
+                      ),
+                      //Attended EVENTS
+                      Container(
+                        key: PageStorageKey('key2'),
+                        color: Colors.white,
+                        child: isLoading
+                            ? LoadingScreen(
+                                context: context,
+                                loadingDescription: 'Loading Attended Events...',
+                              )
+                            : attendedEventResults.isEmpty
+                                ? Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                            ),
+                                            child: Text(
+                                              "@${user.username} Has Not Attended Any Streams/Events",
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                      SizedBox(height: 8.0),
+                                    ],
+                                  )
+                                : listAttendedEvents(),
+                      ),
+                    ],
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

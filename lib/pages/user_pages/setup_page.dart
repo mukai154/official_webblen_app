@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -46,26 +45,9 @@ class _SetupPageState extends State<SetupPage> {
       following: [],
       lastCheckInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       achievements: [],
-      notifyFlashEvents: true,
-      notifyFriendRequests: true,
-      notifyHotEvents: true,
-      notifySuggestedEvents: true,
-      notifyWalletDeposits: true,
-      notifyNewMessages: true,
       lastNotifInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       messageNotificationCount: 0,
-      friendRequestNotificationCount: 0,
-      achievementNotificationCount: 0,
-      eventNotificationCount: 0,
-      walletNotificationCount: 0,
-      isCommunityBuilder: false,
-      isNewCommunityBuilder: false,
-      communityBuilderNotificationCount: 0,
       notificationCount: 0,
-      isOnWaitList: false,
-      messageToken: '',
-      isNew: true,
-      canMakeAds: false,
       ap: 0.20,
       apLvl: 1,
       lastPayoutTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
@@ -113,7 +95,7 @@ class _SetupPageState extends State<SetupPage> {
       );
     } else {
       username = username.toLowerCase().trim();
-      usernameExists = await UserDataService().checkIfUsernameExists(username);
+      usernameExists = await WebblenUserData().checkIfUsernameExists(username);
       if (usernameExists) {
         Navigator.of(context).pop();
         scaffold.showSnackBar(
@@ -202,7 +184,6 @@ class _SetupPageState extends State<SetupPage> {
             color: Colors.black,
             fontSize: 30.0,
             fontWeight: FontWeight.w700,
-            fontFamily: "Nunito",
           ),
           autofocus: false,
           onSaved: (value) => username = value,

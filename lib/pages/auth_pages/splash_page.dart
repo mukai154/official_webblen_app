@@ -121,7 +121,7 @@ class _SplashPageState extends State<SplashPage> {
                             Center(
                               child: Image(
                                 image: AssetImage(
-                                  'assets/images/onboarding1.png',
+                                  'assets/images/phone_card.png',
                                 ),
                                 height: MediaQuery.of(context).size.width * 0.70,
                                 width: MediaQuery.of(context).size.width * 0.70,

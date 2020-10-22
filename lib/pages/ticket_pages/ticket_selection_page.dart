@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:webblen/firebase/data/event_data.dart';
-import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -131,7 +131,7 @@ class _TicketSelectionPageState extends State<TicketSelectionPage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    UserDataService().getUserByID(widget.event.authorID).then((res) {
+    WebblenUserData().getUserByID(widget.event.authorID).then((res) {
       eventHost = res;
       EventDataService().getEventTicketDistro(widget.event.id).then((res) {
         ticketDistro = res;

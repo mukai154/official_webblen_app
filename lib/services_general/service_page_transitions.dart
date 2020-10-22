@@ -30,6 +30,7 @@ import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_scan_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
+import 'package:webblen/pages/user_pages/current_user_page.dart';
 import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';

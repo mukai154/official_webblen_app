@@ -5,7 +5,7 @@ import 'package:apple_sign_in/apple_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -30,7 +30,6 @@ class _LoginPageState extends State<LoginPage> {
   final loginScaffoldKey = GlobalKey<ScaffoldState>();
   final authFormKey = GlobalKey<FormState>();
 
-  static final FacebookLogin facebookSignIn = FacebookLogin();
   GoogleSignIn googleSignIn = GoogleSignIn(
     scopes: <String>[
       'email',
@@ -225,9 +224,9 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
     ScaffoldState scaffold = loginScaffoldKey.currentState;
-    final FacebookLoginResult result = await facebookSignIn.logIn(['email', 'publish_video']);
+    final LoginResult result = await FacebookAuth.instance.login(permissions: ['email', 'publish_video']);
     switch (result.status) {
-      case FacebookLoginStatus.loggedIn:
+      case FacebookAuthLoginResponse.ok:
         final AuthCredential credential = FacebookAuthProvider.credential(result.accessToken.token);
         FirebaseAuth.instance.signInWithCredential(credential).then((user) {
           if (user != null) {
@@ -240,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
           }
         });
         break;
-      case FacebookLoginStatus.cancelledByUser:
+      case FacebookAuthLoginResponse.cancelled:
         scaffold.showSnackBar(SnackBar(
           content: Text("Cancelled Facebook Sign In"),
           backgroundColor: Colors.red,
@@ -250,7 +249,7 @@ class _LoginPageState extends State<LoginPage> {
           isLoading = false;
         });
         break;
-      case FacebookLoginStatus.error:
+      case FacebookAuthLoginResponse.error:
         scaffold.showSnackBar(SnackBar(
           content: MediaQuery(
             data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),

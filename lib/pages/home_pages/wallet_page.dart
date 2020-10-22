@@ -8,10 +8,9 @@ import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/event_data.dart';
+import 'package:webblen/firebase/data/reward_data.dart';
+import 'package:webblen/firebase/data/transaction_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
-import 'package:webblen/firebase_data/reward_data.dart';
-import 'package:webblen/firebase_data/transaction_data.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/event_ticket.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_reward.dart';
@@ -162,7 +161,7 @@ class _WalletPageState extends State<WalletPage> {
       List eventuallyDue = res['eventually_due'];
       List pending = res['pending_verification'];
       if (pending.isNotEmpty) {
-        ShowAlertDialogService().showInfoDialog(context, "Account Is Under Review", "Verifcation Can Take Up to 24 Hours. Please Check Again Later");
+        ShowAlertDialogService().showInfoDialog(context, "Account Is Under Review", "Verification Can Take Up to 24 Hours. Please Check Again Later");
       } else if (eventuallyDue.length > 1) {
         bool needsToFillForm = false;
         bool photoNeeded = false;
@@ -197,7 +196,7 @@ class _WalletPageState extends State<WalletPage> {
             ShowAlertDialogService().showActionSuccessDialog(
                 context, "Your Account Has Been Approved!", "Please Provide Your Banking Information to Begin Receiving Payouts", () {});
           } else {
-            ShowAlertDialogService().showInfoDialog(context, "Account Is Under Review", "Verifcation Can Take Up to 24 Hours. Please Check Again Later");
+            ShowAlertDialogService().showInfoDialog(context, "Account Is Under Review", "Verification Can Take Up to 24 Hours. Please Check Again Later");
           }
         });
       }
@@ -451,7 +450,7 @@ class _WalletPageState extends State<WalletPage> {
     isLoadingRewards = true;
     walletRewards = [];
     setState(() {});
-    UserDataService().getUserByID(currentUser.uid).then((result) {
+    WebblenUserData().getUserByID(currentUser.uid).then((result) {
       currentUser = result;
       if (currentUser.rewards.length > 0) {
         currentUser.rewards.forEach((reward) {

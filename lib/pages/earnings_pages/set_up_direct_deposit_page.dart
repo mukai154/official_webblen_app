@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:webblen/firebase_data/stripe_data.dart';
+import 'package:webblen/firebase/data/stripe_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';

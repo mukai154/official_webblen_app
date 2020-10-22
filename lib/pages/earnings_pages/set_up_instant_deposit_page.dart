@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_credit_card/flutter_credit_card.dart';
 import 'package:stripe_sdk/stripe_sdk.dart';
 import 'package:stripe_sdk/stripe_sdk_ui.dart';
-import 'package:webblen/firebase_data/stripe_data.dart';
+import 'package:webblen/firebase/data/stripe_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';

@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:webblen/firebase_data/stripe_data.dart';
+import 'package:webblen/firebase/data/stripe_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';

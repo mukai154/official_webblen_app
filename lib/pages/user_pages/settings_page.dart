@@ -5,7 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/stripe/stripe_payment.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
@@ -79,10 +79,9 @@ class _SettingsPageState extends State<SettingsPage> {
       userImage,
       fileName,
     );
-    UserDataService()
+    WebblenUserData()
         .updateUserProfilePic(
       widget.currentUser.uid,
-      widget.currentUser.username,
       downloadUrl,
     )
         .then((e) {
@@ -254,7 +253,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                                   Switch(
                                     value: userData['notifyDeposits'] == null ? true : userData['notifyDeposits'],
-                                    onChanged: (val) => UserDataService().updateNotificationPermission(
+                                    onChanged: (val) => WebblenUserData().updateNotificationPermission(
                                       widget.currentUser.uid,
                                       "notifyDeposits",
                                       val,
@@ -279,7 +278,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                   ),
                                   Switch(
                                     value: userData['notifyNewFollowers'] == null ? true : userData['notifyNewFollowers'],
-                                    onChanged: (val) => UserDataService().updateNotificationPermission(
+                                    onChanged: (val) => WebblenUserData().updateNotificationPermission(
                                       widget.currentUser.uid,
                                       "notifyNewFollowers",
                                       val,
@@ -303,8 +302,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                     TextAlign.left,
                                   ),
                                   Switch(
-                                    value: widget.currentUser.notifyNewMessages,
-                                    onChanged: (val) => UserDataService().updateNotificationPermission(
+                                    value: true, //widget.currentUser.notifyNewMessages,
+                                    onChanged: (val) => WebblenUserData().updateNotificationPermission(
                                       widget.currentUser.uid,
                                       "notifyNearbyEvents",
                                       val,

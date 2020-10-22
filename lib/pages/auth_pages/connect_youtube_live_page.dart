@@ -3,6 +3,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:webblen/firebase/data/platform_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/api/youtube_api.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 //import 'package:http/http.dart' as dart;
@@ -52,6 +53,9 @@ class _ConnectYoutubeLivePageState extends State<ConnectYoutubeLivePage> {
     googleIDToken = googleAuth.idToken;
     googleAccessToken = googleAuth.accessToken;
     WebblenUserData().setGoogleTokens(widget.currentUser.uid, googleIDToken, googleAccessToken);
+    DateTime d1 = DateTime.now().add(Duration(hours: 1));
+    DateTime d2 = d1.add(Duration(hours: 1));
+    await YoutubeAPI().createVideoBroadcast("Test", d1, d2, googleApiKey, googleAccessToken);
     isLoading = false;
     setState(() {});
   }

@@ -96,6 +96,16 @@ class WebblenUserData {
     return userImgURL;
   }
 
+  Future<String> getUsername(String uid) async {
+    String userImgURL;
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> docData = docSnapshot.data();
+      userImgURL = docData['d']['username'];
+    }
+    return userImgURL;
+  }
+
   Future<String> getStripeUID(String uid) async {
     String stripeUID;
     DocumentSnapshot docSnapshot = await stripeRef.doc(uid).get();
@@ -174,6 +184,26 @@ class WebblenUserData {
 
   Future<Null> setGoogleTokens(String uid, String idToken, String accessToken) async {
     return userRef.doc(uid).update({'googleIDToken': idToken, 'googleAccessToken': accessToken});
+  }
+
+  Future<String> setUserCloudMessageToken(String uid, String messageToken) async {
+    String status = "";
+    userRef.doc(uid).update({"d.messageToken": messageToken}).whenComplete(() {}).catchError((e) {
+          status = e.details;
+        });
+    return status;
+  }
+
+  Future<String> updateUserProfilePic(String uid, String downloadUrl) async {
+    String error;
+    userRef.doc(uid).update({"d.profile_pic": downloadUrl}).whenComplete(() {}).catchError((e) {
+          error = e.details;
+        });
+    return error;
+  }
+
+  Future<Null> updateNotificationPermission(String uid, String notif, bool status) async {
+    userRef.doc(uid).update({notif: status}).whenComplete(() {}).catchError((e) {});
   }
 
   // Future<Null> updateUserField() async {

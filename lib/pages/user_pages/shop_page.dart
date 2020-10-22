@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:webblen/firebase_data/reward_data.dart';
+import 'package:webblen/firebase/data/reward_data.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/services_show_alert.dart';

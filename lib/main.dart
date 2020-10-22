@@ -5,7 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/pages/auth_pages/login_page.dart';
-import 'package:webblen/pages/user_pages/setup_page.dart';
+import 'package:webblen/pages/onboarding/onboarding_page.dart';
 import 'package:webblen/root_page.dart';
 import 'package:webblen/styles/flat_colors.dart';
 
@@ -47,7 +47,7 @@ class WebblenApp extends StatelessWidget {
                   '/home': (BuildContext context) => HomePage(),
                   '/root': (BuildContext context) => RootPage(),
                   '/login': (BuildContext context) => LoginPage(),
-                  '/setup': (BuildContext context) => SetupPage(),
+                  '/setup': (BuildContext context) => OnboardingPage(),
                 },
               ),
             );

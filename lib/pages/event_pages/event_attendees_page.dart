@@ -2,10 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:webblen/firebase/data/event_data.dart';
-import 'package:webblen/firebase_data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
@@ -49,48 +47,6 @@ class _EventAttendeesPageState extends State<EventAttendeesPage> {
       currentUser: widget.currentUser,
       viewingMembersOrAttendees: true,
     ).transitionToUserListPage();
-  }
-
-  void sendFriendRequest(WebblenUser peerUser) async {
-    ShowAlertDialogService().showLoadingDialog(context);
-    UserDataService()
-        .checkFriendStatus(
-      widget.currentUser.uid,
-      peerUser.uid,
-    )
-        .then((friendStatus) {
-      if (friendStatus == "pending") {
-        Navigator.of(context).pop();
-        ShowAlertDialogService().showFailureDialog(
-          context,
-          "Request Pending",
-          "You already have a pending friend request",
-        );
-      } else {
-//        WebblenNotificationDataService()
-//            .sendFriendRequest(
-//          widget.currentUser.uid,
-//          widget.currentUser.username,
-//          peerUser.uid,
-//        )
-//            .then((requestStatus) {
-//          Navigator.of(context).pop();
-//          if (requestStatus == "success") {
-//            ShowAlertDialogService().showSuccessDialog(
-//              context,
-//              "Friend Request Sent!",
-//              "@" + peerUser.username + " Will Need to Confirm Your Request",
-//            );
-//          } else {
-//            ShowAlertDialogService().showFailureDialog(
-//              context,
-//              "Request Failed",
-//              requestStatus,
-//            );
-//          }
-//        });
-      }
-    });
   }
 
   loadAttendees() async {

@@ -2,8 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shimmer/shimmer.dart';
-
-import 'package:webblen/firebase_data/user_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/styles/flat_colors.dart';
 
 class UserDetailsProfilePic extends StatelessWidget {
@@ -72,7 +71,7 @@ class _UserProfilePicFromUIDState extends State<UserProfilePicFromUID> {
   @override
   void initState() {
     super.initState();
-    UserDataService().getUserProfilePicURL(widget.uid).then((url) {
+    WebblenUserData().getUserImgByID(widget.uid).then((url) {
       if (url != null) {
         userImageURL = url;
         if (this.mounted) {
@@ -101,18 +100,16 @@ class UserProfilePicFromUsername extends StatefulWidget {
   });
 
   @override
-  _UserProfilePicFromUsernameState createState() =>
-      _UserProfilePicFromUsernameState();
+  _UserProfilePicFromUsernameState createState() => _UserProfilePicFromUsernameState();
 }
 
-class _UserProfilePicFromUsernameState
-    extends State<UserProfilePicFromUsername> {
+class _UserProfilePicFromUsernameState extends State<UserProfilePicFromUsername> {
   String userImageURL = "";
 
   @override
   void initState() {
     super.initState();
-    UserDataService().findProfilePicUrlByUsername(widget.username).then((url) {
+    WebblenUserData().getUserImgByID(widget.username).then((url) {
       if (url != null) {
         userImageURL = url;
         if (this.mounted) {

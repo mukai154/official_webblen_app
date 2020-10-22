@@ -31,7 +31,7 @@ import 'package:webblen/widgets/widgets_data_streams/stream_user_notifications.d
 import 'package:webblen/widgets/widgets_home/check_in_floating_action.dart';
 
 import 'firebase/data/user_data.dart';
-import 'pages/user_pages/user_page.dart';
+import 'pages/user_pages/current_user_page.dart';
 
 class HomePage extends StatefulWidget {
   @override
