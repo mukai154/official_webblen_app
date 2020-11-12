@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/models/webblen_reward.dart';
+import 'package:webblen/styles/flat_colors.dart';
 
 class WalletRewardRow extends StatelessWidget {
   final WebblenReward reward;
@@ -38,7 +37,7 @@ class WalletRewardRow extends StatelessWidget {
       borderRadius: BorderRadius.circular(30.0),
       child: FadeInImage.assetNetwork(
         placeholder: "assets/gifs/loading.gif",
-        image: reward.rewardImagePath,
+        image: reward.imageURL,
         width: 60.0,
       ),
     );
@@ -71,14 +70,14 @@ class WalletRewardRow extends StatelessWidget {
             height: 4.0,
           ),
           Text(
-            reward.rewardProviderName,
+            reward.title,
             style: headerTextStyle,
           ),
           Container(
             height: 8.0,
           ),
           Text(
-            reward.rewardDescription,
+            reward.description,
             style: bodyTextStyle,
             maxLines: 3,
           ),

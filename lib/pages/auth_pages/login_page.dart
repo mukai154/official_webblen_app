@@ -224,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
       isLoading = true;
     });
     ScaffoldState scaffold = loginScaffoldKey.currentState;
-    final LoginResult result = await FacebookAuth.instance.login(permissions: ['email', 'publish_video']);
+    final LoginResult result = await FacebookAuth.instance.login(permissions: ['email']);
     switch (result.status) {
       case FacebookAuthLoginResponse.ok:
         final AuthCredential credential = FacebookAuthProvider.credential(result.accessToken.token);

@@ -8,6 +8,7 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/stripe/stripe_payment.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/open_url.dart';
@@ -72,7 +73,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<Null> updateUserPic(File userImage, String uid) async {
     ShowAlertDialogService().showLoadingDialog(context);
-    StorageReference storageReference = FirebaseStorage.instance.ref();
+    Reference storageReference = FirebaseStorage.instance.ref();
     String fileName = "$uid.jpg";
     storageReference.child("profile_pics").child(fileName).putFile(userImage);
     String downloadUrl = await uploadUserImage(
@@ -96,10 +97,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<String> uploadUserImage(File userImage, String fileName) async {
     setState(() {});
-    StorageReference storageReference = FirebaseStorage.instance.ref();
-    StorageReference ref = storageReference.child("profile_pics").child(fileName);
-    StorageUploadTask uploadTask = ref.putFile(userImage);
-    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+    Reference ref = FirebaseStorage.instance.ref().child("profile_pics").child(fileName);
+    UploadTask uploadTask = ref.putFile(userImage);
+    String downloadUrl = await (await uploadTask).ref.getDownloadURL();
     return downloadUrl;
   }
 
@@ -349,9 +349,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                               Icon(FontAwesomeIcons.briefcase, color: CustomColors.blackPearl, size: 18.0),
                                               'Create Earnings Account',
                                               CustomColors.blackPearl,
-                                              () {
-                                                OpenUrl().launchInWebViewOrVC(context, stripeConnectURL);
-                                              },
+                                              () => OpenUrl().launchInWebViewOrVC(context, stripeConnectURL),
                                             ),
                                           ],
                                         ),
@@ -366,12 +364,22 @@ class _SettingsPageState extends State<SettingsPage> {
                             ),
                             SizedBox(height: 8.0),
                             optionRow(
+                              Icon(FontAwesomeIcons.heart, color: CustomColors.blackPearl, size: 18.0),
+                              'My Interests',
+                              CustomColors.blackPearl,
+                              () => PageTransitionService(context: context).transitionToInterestsPage(),
+                            ),
+                            SizedBox(height: 8.0),
+                            Container(
+                              color: Colors.black12,
+                              height: 0.5,
+                            ),
+                            SizedBox(height: 8.0),
+                            optionRow(
                               Icon(FontAwesomeIcons.questionCircle, color: CustomColors.blackPearl, size: 18.0),
                               'Help/FAQ',
                               CustomColors.blackPearl,
-                              () {
-                                OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq');
-                              },
+                              () => OpenUrl().launchInWebViewOrVC(context, 'https://www.webblen.io/faq'),
                             ),
                             SizedBox(height: 8.0),
                             Container(

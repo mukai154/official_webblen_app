@@ -1,7 +1,7 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
 
 class WebblenAppBar {
@@ -94,12 +94,18 @@ class WebblenAppBar {
           color: Colors.black,
           size: 16.0,
         ),
-        onPressed: () {
-          ShowAlertDialogService().showCancelDialog(
-            context,
-            cancelHeader,
-            cancelAction,
+        onPressed: () async {
+          OkCancelResult res = await showOkCancelAlertDialog(
+            context: context,
+            message: cancelHeader,
+            isDestructiveAction: true,
+            okLabel: "Cancel",
+            cancelLabel: "Go Back",
           );
+          print(res);
+          if (res == OkCancelResult.ok) {
+            cancelAction();
+          }
         },
       ),
       actions: <Widget>[actionWidget],

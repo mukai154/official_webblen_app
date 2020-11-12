@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,10 +8,12 @@ import 'package:flutter_calendar_carousel/classes/event.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/constants/strings.dart';
 import 'package:webblen/constants/timezones.dart';
@@ -29,6 +32,7 @@ import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
+import 'package:webblen/widgets/common/containers/tag_container.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
@@ -52,6 +56,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
   bool isTypingMultiLine = false;
   ScrollController scrollController = ScrollController();
   TextEditingController controller = TextEditingController();
+  TextEditingController tagTextController = TextEditingController();
   GlobalKey formKey = GlobalKey<FormState>();
   //Event Details
   WebblenEvent newEvent;
@@ -124,8 +129,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
   //Additional Info & Social Links
   String privacy = 'public';
   List<String> privacyOptions = ['public', 'private'];
-  String eventType = 'Select Type';
-  String eventCategory = 'Select Category';
   String fbUsername;
   String twitterUsername;
   String instaUsername;
@@ -1463,62 +1466,52 @@ class _CreateEventPageState extends State<CreateEventPage> {
     );
   }
 
-  Widget eventCategoryDropDown() {
+  Widget eventTagsDropdown() {
     return Row(
       children: <Widget>[
         TextFieldContainer(
-          height: 45,
+          height: 50,
           width: 300,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: 12,
+          child: TypeAheadField(
+            hideOnEmpty: true,
+            hideOnLoading: true,
+            direction: AxisDirection.up,
+            textFieldConfiguration: TextFieldConfiguration(
+              controller: tagTextController,
+              cursorColor: Colors.black,
+              decoration: InputDecoration(
+                hintText: "Search for Tags",
+                border: InputBorder.none,
+              ),
+              autofocus: false,
             ),
-            child: DropdownButton(
-                isExpanded: true,
-                underline: Container(),
-                value: eventCategory,
-                items: Strings.eventCategories.map((String val) {
-                  return DropdownMenuItem<String>(
-                    value: val,
-                    child: Text(val),
+            suggestionsCallback: (searchTerm) async {
+              return await AlgoliaSearch().queryTags(searchTerm);
+            },
+            itemBuilder: (context, tag) {
+              return ListTile(
+                title: Text(
+                  tag,
+                  style: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w700),
+                ),
+              );
+            },
+            onSuggestionSelected: (tag) {
+              if (!tags.contains(tag)) {
+                if (tags.length < 3) {
+                  tags.add(tag);
+                  setState(() {});
+                } else {
+                  showOkAlertDialog(
+                    context: context,
+                    message: "Tag Limit Reached",
+                    okLabel: "Ok",
+                    barrierDismissible: true,
                   );
-                }).toList(),
-                onChanged: (val) {
-                  setState(() {
-                    eventCategory = val;
-                  });
-                }),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget eventTypeDropDown() {
-    return Row(
-      children: <Widget>[
-        TextFieldContainer(
-          height: 45,
-          width: 300,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: 12,
-            ),
-            child: DropdownButton(
-                isExpanded: true,
-                underline: Container(),
-                value: eventType,
-                items: Strings.eventTypes.map((String val) {
-                  return DropdownMenuItem<String>(
-                    value: val,
-                    child: Text(val),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  setState(() {
-                    eventType = val;
-                  });
-                }),
+                }
+              }
+              tagTextController.clear();
+            },
           ),
         ),
       ],
@@ -1723,8 +1716,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
       lon: lon,
       sharedComs: sharedComs,
       tags: tags,
-      type: eventType,
-      category: eventCategory,
       clicks: eventClicks,
       website: websiteURL,
       fbUsername: fbUsername,
@@ -1748,7 +1739,9 @@ class _CreateEventPageState extends State<CreateEventPage> {
       paidOut: false,
     );
     WebblenUser currentUser = await WebblenUserData().getUserByID(currentUID);
-    EventDataService().uploadEvent(newEvent, zipPostalCode, eventImgFile, ticketDistro).then((res) {
+    EventDataService()
+        .uploadEvent(newEvent, zipPostalCode, eventImgFile, ticketDistro, widget.eventID == null ? false : true, currentUser.followers)
+        .then((res) {
       if (res != null) {
         Navigator.of(context).pop();
         widget.isStream
@@ -1806,14 +1799,10 @@ class _CreateEventPageState extends State<CreateEventPage> {
       widget.isStream
           ? CustomAlerts().showErrorAlert(context, "Stream Description Missing", "Please Set the Description for this Stream")
           : CustomAlerts().showErrorAlert(context, "Event Description Missing", "Please Set the Description for this Event");
-    } else if (eventCategory == 'Select Event Category') {
+    } else if (tags.isEmpty) {
       widget.isStream
-          ? CustomAlerts().showErrorAlert(context, "Stream Category Missing", "Please Set the Category for this Stream")
-          : CustomAlerts().showErrorAlert(context, "Event Category Missing", "Please Set the Category for this Event");
-    } else if (eventType == "Select Event Type") {
-      widget.isStream
-          ? CustomAlerts().showErrorAlert(context, "Stream Type Missing", "Please Select What Type of Stream This Is.")
-          : CustomAlerts().showErrorAlert(context, "Event Type Missing", "Please Select What Type of Event This Is.");
+          ? CustomAlerts().showErrorAlert(context, "Tags Missing", "Please Set at least 1 Tags for this Stream")
+          : CustomAlerts().showErrorAlert(context, "Tags Missing", "Please Set at least 1 Tags for this Event");
     } else {
       createEvent();
     }
@@ -1853,8 +1842,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
             lon = res.lon;
             sharedComs = res.sharedComs;
             tags = res.tags;
-            eventType = res.type;
-            eventCategory = res.category;
             eventClicks = res.clicks;
             websiteURL = res.website;
             fbUsername = res.fbUsername;
@@ -2015,14 +2002,33 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                 widget.isStream ? fieldHeader("Stream Privacy", true) : fieldHeader("Event Privacy", true),
                                 eventPrivacyDropdown(),
                                 SizedBox(height: 16.0),
-                                widget.isStream ? fieldHeader("Stream Category", true) : fieldHeader("Event Category", true),
-                                eventCategoryDropDown(),
+                                fieldHeader("Tags", true),
+                                eventTagsDropdown(),
+                                Container(
+                                  height: 40,
+                                  margin: EdgeInsets.symmetric(horizontal: 16.0),
+                                  child: ListView.builder(
+                                      scrollDirection: Axis.horizontal,
+                                      physics: NeverScrollableScrollPhysics(),
+                                      itemCount: tags.length,
+                                      itemBuilder: (BuildContext context, int index) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            tags.removeAt(index);
+                                            setState(() {});
+                                          },
+                                          child: Padding(
+                                            padding: EdgeInsets.only(right: 8.0, top: 16.0),
+                                            child: TagContainer(
+                                              tag: tags[index],
+                                              width: 100,
+                                            ),
+                                          ),
+                                        );
+                                      }),
+                                ),
                                 SizedBox(height: 16.0),
                                 widget.isStream ? fieldHeader("Stream Type", true) : fieldHeader("Event Type", true),
-                                eventTypeDropDown(),
-                                SizedBox(height: 32.0),
-                                fieldHeader("Additional Streams (Optional)", false),
-                                youtubeStreamLinkStatus(),
                                 SizedBox(height: 32.0),
                                 fieldHeader("Social Links (Optional)", false),
                                 SizedBox(height: 8.0),

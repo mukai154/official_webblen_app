@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/styles/flat_colors.dart';
 
@@ -41,10 +40,7 @@ class RewardRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final rewardPic = ClipRRect(
       borderRadius: BorderRadius.circular(30.0),
-      child: FadeInImage.assetNetwork(
-          placeholder: "assets/gifs/loading.gif",
-          image: reward.rewardImagePath,
-          width: 60.0),
+      child: FadeInImage.assetNetwork(placeholder: "assets/gifs/loading.gif", image: reward.imageURL, width: 60.0),
     );
 
     final rewardPicContainer = Container(
@@ -65,7 +61,7 @@ class RewardRow extends StatelessWidget {
           ),
           Container(width: 8.0),
           Text(
-            reward.rewardCost.toString(),
+            reward.cost.toString(),
             style: pointStatStyle,
           ),
         ],
@@ -97,12 +93,12 @@ class RewardRow extends StatelessWidget {
             height: 8.0,
           ),
           Text(
-            reward.rewardProviderName,
+            reward.title,
             style: headerTextStyle,
           ),
           SizedBox(height: 8.0),
           Text(
-            reward.rewardDescription,
+            reward.description,
             style: subHeaderTextStyle,
           ),
           Row(

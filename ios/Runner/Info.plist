@@ -27,7 +27,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-			    <string>fb1366128250170949</string>
+				<string>fb1366128250170949</string>
 				<string>com.googleusercontent.apps.618036466482-k34kcq6fv7d87sgs6iggv10eh7uag8mf</string>
 			</array>
 		</dict>
@@ -52,10 +52,12 @@
 	<string>ca-app-pub-2136415475966451~5144610810</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
+		<string>instagram</string>
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
 		<string>fbauth2</string>
 		<string>fbshareextension</string>
+		<string>twitter</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
@@ -84,6 +86,8 @@
 	<string>Webblen Would Like to Access Your Microphone for Streaming Video</string>
 	<key>NSMotionUsageDescription</key>
 	<string>Webblen Would Like to Access Your Motion Activity to Let You Check Into Events</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Webblen Would Like Access to Your Media to Save and Access Images You've Taken</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>this will enable you to choose photos from your library and save videos recorded from streams.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

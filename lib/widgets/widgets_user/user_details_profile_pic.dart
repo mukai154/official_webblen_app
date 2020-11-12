@@ -24,6 +24,7 @@ class UserDetailsProfilePic extends StatelessWidget {
         child: CachedNetworkImage(
           fit: BoxFit.cover,
           imageUrl: userPicUrl,
+          filterQuality: FilterQuality.medium,
           placeholder: (context, url) => Container(
             height: size,
             width: size,

@@ -1,78 +1,123 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:intl/intl.dart';
+import 'package:random_string/random_string.dart';
 import 'package:webblen/models/webblen_reward.dart';
+import 'package:webblen/services/location/location_service.dart';
 
 class RewardDataService {
   final CollectionReference rewardRef = FirebaseFirestore.instance.collection("rewards");
   final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
-  final StorageReference storageReference = FirebaseStorage.instance.ref();
+  final Reference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
 
-  Future<String> uploadReward(File rewardImage, WebblenReward reward) async {
-    String result;
-    final String rewardKey = "${Random().nextInt(999999999)}";
-    if (rewardImage != null) {
-      String fileName = "$rewardKey.jpg";
-      String downloadUrl = await uploadRewardImage(
-        rewardImage,
-        fileName,
-      );
-      reward.rewardImagePath = downloadUrl;
+  Future<WebblenReward> uploadReward(WebblenReward reward, String zipPostalCode, File imgFile) async {
+    List nearbyZipcodes = [];
+    String id = reward.id == null ? randomAlphaNumeric(12) : reward.id;
+    reward.id = id;
+    // reward.webAppLink = 'https://app.webblen.io/#/reward?id=${reward.id}';
+    if (imgFile != null) {
+      String fileName = "${reward.id}.jpg";
+      String imgURL = await uploadRewardImage(imgFile, fileName);
+      reward.imageURL = imgURL;
     }
-    reward.rewardKey = rewardKey;
-    await FirebaseFirestore.instance.collection("rewards").doc(rewardKey).set(reward.toMap()).whenComplete(() {
-      result = "success";
-    }).catchError((e) {
-      result = e.toString();
-    });
-    return result;
+    if (zipPostalCode != null) {
+      List listOfAreaCodes = await LocationService().findNearestZipcodes(zipPostalCode);
+      if (listOfAreaCodes != null) {
+        nearbyZipcodes = listOfAreaCodes;
+      } else {
+        nearbyZipcodes.add(zipPostalCode);
+      }
+      reward.nearbyZipcodes = nearbyZipcodes;
+    }
+    await rewardRef.doc(id).set(reward.toMap());
+    return reward;
   }
 
-  Future<String> uploadRewardImage(File rewardImage, String fileName) async {
-    StorageReference ref = storageReference.child("rewards").child(fileName);
-    StorageUploadTask uploadTask = ref.putFile(rewardImage);
-    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+  Future<String> uploadRewardImage(File imgFile, String fileName) async {
+    Reference ref = storageReference.child("rewards").child(fileName);
+    UploadTask uploadTask = ref.putFile(imgFile);
+    String downloadUrl = await (await uploadTask).ref.getDownloadURL();
     return downloadUrl;
   }
 
-  Future<List<WebblenReward>> findTierRewards(String tier) async {
-    List<WebblenReward> tierRewards = [];
+  Future<List<WebblenReward>> findLocalRewards(String zipcode) async {
+    List<WebblenReward> rewards = [];
 
     QuerySnapshot querySnapshot = await rewardRef
         .where(
-          'rewardCategory',
-          isEqualTo: tier,
+          'nearbyZipcodes',
+          arrayContains: zipcode,
         )
         .get();
     List eventsSnapshot = querySnapshot.docs;
     eventsSnapshot.forEach((rewardDoc) {
       WebblenReward reward = WebblenReward.fromMap(rewardDoc.data);
-      tierRewards.add(reward);
+      rewards.add(reward);
     });
-    return tierRewards;
+    return rewards;
   }
 
-  Future<List<WebblenReward>> findCharityRewards() async {
-    List<WebblenReward> charityRewards = [];
+  Future<List<WebblenReward>> findWebblenMerchRewards() async {
+    List<WebblenReward> rewards = [];
+    QuerySnapshot snapshot = await rewardRef.where('type', isEqualTo: 'webblenClothes').get().catchError((e) {
+      print(e);
+    });
+    snapshot.docs.forEach((doc) {
+      WebblenReward reward = WebblenReward.fromMap(doc.data());
+      rewards.add(reward);
+    });
+    return rewards;
+  }
+
+  Future<List<WebblenReward>> findGlobalRewards() async {
+    List<WebblenReward> rewards = [];
 
     QuerySnapshot querySnapshot = await rewardRef
         .where(
-          'rewardCategory',
-          isEqualTo: 'charity',
+          'isGlobalReward',
+          isEqualTo: true,
         )
         .get();
     List eventsSnapshot = querySnapshot.docs;
     eventsSnapshot.forEach((rewardDoc) {
       WebblenReward reward = WebblenReward.fromMap(rewardDoc.data);
-      charityRewards.add(reward);
+      rewards.add(reward);
+    });
+    return rewards;
+  }
+
+  Future<List<WebblenReward>> findCashRewards() async {
+    List<WebblenReward> rewards = [];
+
+    QuerySnapshot querySnapshot = await rewardRef.where('type', isEqualTo: 'cash').get();
+    querySnapshot.docs.forEach((doc) {
+      WebblenReward reward = WebblenReward.fromMap(doc.data());
+      rewards.add(reward);
     });
 
-    return charityRewards;
+    return rewards;
+  }
+
+  Future<List<WebblenReward>> findDonationRewards() async {
+    List<WebblenReward> rewards = [];
+
+    QuerySnapshot querySnapshot = await rewardRef
+        .where(
+          'type',
+          isEqualTo: 'donation',
+        )
+        .get();
+    List eventsSnapshot = querySnapshot.docs;
+    eventsSnapshot.forEach((rewardDoc) {
+      WebblenReward reward = WebblenReward.fromMap(rewardDoc.data);
+      rewards.add(reward);
+    });
+
+    return rewards;
   }
 
   Future<String> updateAmountOfRewardAvailable(String rewardID) async {
@@ -146,16 +191,16 @@ class RewardDataService {
     rewardsList.forEach((reward) {
       DateTime rewardExpirationDate = formatter.parse(reward.expirationDate);
       if (today.isAfter(rewardExpirationDate)) {
-        rewardRef.doc(reward.rewardKey).delete();
+        rewardRef.doc(reward.id).delete();
         validRewards.remove(reward);
       }
     });
     return validRewards;
   }
 
-  filterRewards(List<WebblenReward> rewardsList, double filterCost, String filterCategory) {
+  filterRewards(List<WebblenReward> rewardsList, double filterCost, String filterType) {
     List<WebblenReward> filteredRewards;
-    filteredRewards = rewardsList.where((reward) => reward.rewardCategory == filterCategory).toList();
+    filteredRewards = rewardsList.where((reward) => reward.type == filterType).toList();
     return filteredRewards;
   }
 }

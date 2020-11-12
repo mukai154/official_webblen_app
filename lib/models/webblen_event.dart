@@ -17,8 +17,6 @@ class WebblenEvent {
   double lon;
   List sharedComs;
   List tags;
-  String type;
-  String category;
   int clicks;
   String website;
   String fbUsername;
@@ -62,8 +60,6 @@ class WebblenEvent {
     this.lon,
     this.sharedComs,
     this.tags,
-    this.type,
-    this.category,
     this.clicks,
     this.website,
     this.fbUsername,
@@ -109,8 +105,6 @@ class WebblenEvent {
           lon: data['lon'],
           sharedComs: data['sharedComs'],
           tags: data['tags'],
-          type: data['type'],
-          category: data['category'],
           clicks: data['clicks'],
           website: data['website'],
           fbUsername: data['fbUsername'],
@@ -155,8 +149,6 @@ class WebblenEvent {
         'lon': this.lon,
         'sharedComs': this.sharedComs,
         'tags': this.tags,
-        'type': this.type,
-        'category': this.category,
         'clicks': this.clicks,
         'website': this.website,
         'fbUsername': this.fbUsername,

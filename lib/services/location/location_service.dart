@@ -54,7 +54,7 @@ class LocationService {
     });
     if (result != null) {
       List areaCodes = result.data['data'];
-      if (areaCodes.isNotEmpty) {
+      if (areaCodes != null && areaCodes.isNotEmpty) {
         zips = areaCodes;
       }
     }
@@ -93,9 +93,15 @@ class LocationService {
   Future<String> getZipFromLatLon(double lat, double lon) async {
     String zip;
     Coordinates coordinates = Coordinates(lat, lon);
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
-    var address = addresses.first;
-    zip = address.postalCode;
+    if (coordinates != null) {
+      var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates).catchError((e) {
+        //print(e);
+      });
+      if (addresses != null) {
+        var address = addresses.first;
+        zip = address.postalCode;
+      }
+    }
     return zip;
   }
 

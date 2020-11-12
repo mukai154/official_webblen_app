@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
+import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -12,7 +13,6 @@ import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/events/event_check_in_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_event/event_no_check_in_found.dart';
 
 class EventCheckInPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -144,9 +144,33 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
                 child: events.isEmpty
                     ? ListView(
                         children: <Widget>[
-                          EventNoCheckInFound(
-                            createEventAction: () => showNewEventOrStreamDialog(),
-                          )
+                          SizedBox(height: 200),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Image.asset(
+                              'assets/images/sad_face.png',
+                              height: 200,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.medium,
+                            ),
+                          ),
+                          Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 8.0,
+                              ),
+                              child: Text(
+                                "It Looks Like You're at an Event Right Now",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+                              )),
+                          GestureDetector(
+                            onTap: () => showNewEventOrStreamDialog(),
+                            child: Text(
+                              "Create Event",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                            ),
+                          ),
                         ],
                       )
                     : ListView.builder(

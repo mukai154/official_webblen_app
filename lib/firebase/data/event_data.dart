@@ -11,17 +11,21 @@ import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
 
+import 'post_data.dart';
+
 class EventDataService {
   final CollectionReference eventsRef = FirebaseFirestore.instance.collection("events");
   final CollectionReference activeStreamRef = FirebaseFirestore.instance.collection("active_streams");
   final CollectionReference ticketsRef = FirebaseFirestore.instance.collection("purchased_tickets");
   final CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("ticket_distros");
   final CollectionReference recordedStreamRef = FirebaseFirestore.instance.collection("recorded_streams");
-  final StorageReference storageReference = FirebaseStorage.instance.ref();
+  final Reference storageReference = FirebaseStorage.instance.ref();
 
   //CREATE
-  Future<WebblenEvent> uploadEvent(WebblenEvent newEvent, String zipPostalCode, File eventImageFile, TicketDistro ticketDistro) async {
+  Future<WebblenEvent> uploadEvent(
+      WebblenEvent newEvent, String zipPostalCode, File eventImageFile, TicketDistro ticketDistro, bool didEditEvent, List followers) async {
     List nearbyZipcodes = [];
+
     String newEventID = newEvent.id == null ? randomAlphaNumeric(12) : newEvent.id;
     newEvent.id = newEventID;
     newEvent.webAppLink = 'https://app.webblen.io/#/event?id=${newEvent.id}';
@@ -40,9 +44,11 @@ class EventDataService {
       newEvent.nearbyZipcodes = nearbyZipcodes;
     }
     await eventsRef.doc(newEventID).set({'d': newEvent.toMap(), 'g': null, 'l': null});
+    PostDataService().createPostFromEvent(newEvent, didEditEvent, followers);
     if (ticketDistro.tickets.isNotEmpty) {
       await uploadEventTickets(newEventID, ticketDistro);
     }
+
     return newEvent;
   }
 
@@ -86,9 +92,9 @@ class EventDataService {
   }
 
   Future<String> uploadEventImage(File eventImage, String fileName) async {
-    StorageReference ref = storageReference.child("events").child(fileName);
-    StorageUploadTask uploadTask = ref.putFile(eventImage);
-    String downloadUrl = await (await uploadTask.onComplete).ref.getDownloadURL() as String;
+    Reference ref = storageReference.child("events").child(fileName);
+    UploadTask uploadTask = ref.putFile(eventImage);
+    String downloadUrl = await (await uploadTask).ref.getDownloadURL();
     return downloadUrl;
   }
 

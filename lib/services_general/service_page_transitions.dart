@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/home_page.dart';
 import 'package:webblen/models/community.dart';
 import 'package:webblen/models/webblen_chat_message.dart';
 import 'package:webblen/models/webblen_event.dart';
@@ -25,19 +24,30 @@ import 'package:webblen/pages/home_pages/feedback_page.dart';
 import 'package:webblen/pages/home_pages/notifications_page.dart';
 import 'package:webblen/pages/home_pages/video_play_page.dart';
 import 'package:webblen/pages/home_pages/wallet_page.dart';
+import 'package:webblen/pages/onboarding/attendee_viewer_path_page.dart';
+import 'package:webblen/pages/onboarding/event_host_path_page.dart';
+import 'package:webblen/pages/onboarding/streamer_path_page.dart';
+import 'package:webblen/pages/post_pages/create_post_page.dart';
+import 'package:webblen/pages/post_pages/post_view_page.dart';
+import 'package:webblen/pages/shop_pages/create_shop_item_page.dart';
+import 'package:webblen/pages/shop_pages/shop_item_details_page.dart';
+import 'package:webblen/pages/shop_pages/shop_page.dart';
 import 'package:webblen/pages/ticket_pages/event_tickets_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_scan_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
 import 'package:webblen/pages/user_pages/current_user_page.dart';
+import 'package:webblen/pages/user_pages/follow_suggestions_page.dart';
+import 'package:webblen/pages/user_pages/interests_page.dart';
+import 'package:webblen/pages/user_pages/new_webblen_balance_page.dart';
 import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
-import 'package:webblen/pages/user_pages/shop_page.dart';
 import 'package:webblen/pages/user_pages/transaction_history_page.dart';
 import 'package:webblen/pages/user_pages/user_list_page.dart';
 import 'package:webblen/pages/user_pages/user_page.dart';
+
 //import 'package:webblen/utils/ticket_scanner.dart';
 //import 'package:webblen/utils/webblen_scanner.dart';
 
@@ -72,8 +82,10 @@ class PageTransitionService {
   final bool isStream;
   final String pageTitle;
   final String vidURL;
+  final String postID;
 
   PageTransitionService({
+    this.postID,
     this.isStream,
     this.context,
     this.action,
@@ -112,20 +124,44 @@ class PageTransitionService {
         (Route<dynamic> route) => false,
       );
 
+  void transitionToOnboardingCompletePage() => Navigator.of(context).pushNamedAndRemoveUntil(
+        '/onboarding_complete',
+        (Route<dynamic> route) => false,
+      );
   void transitionToLoginPage() => Navigator.of(context).pushNamedAndRemoveUntil(
         '/login',
         (Route<dynamic> route) => false,
       );
 
-  void transitionToSim() => Navigator.push(
+  void returnToRootPage() => Navigator.of(context).popUntil(
+        (route) => route.isFirst,
+      );
+
+  //ONBOARDING
+  void transitionToOnboardingPathSelectPage() => Navigator.of(context).pushNamedAndRemoveUntil(
+        '/onboarding',
+        (Route<dynamic> route) => false,
+      );
+
+  void transitionToEventHostPath() => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => HomePage(),
+          builder: (context) => EventHostPathPage(),
         ),
       );
 
-  void returnToRootPage() => Navigator.of(context).popUntil(
-        (route) => route.isFirst,
+  void transitionToStreamerPath() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => StreamerPathPage(),
+        ),
+      );
+
+  void transitionToAttendeeViewerPath() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => AttendeeViewerPathPage(),
+        ),
       );
 
   //SEARCH
@@ -146,6 +182,25 @@ class PageTransitionService {
             currentUser: currentUser,
             userIDs: userIDs,
             pageTitle: pageTitle,
+          ),
+        ),
+      );
+
+  //POSTS
+  void transitionToCreatePostPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CreatePostPage(
+            postID: postID,
+          ),
+        ),
+      );
+
+  void transitionToPostViewPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PostViewPage(
+            postID: postID,
           ),
         ),
       );
@@ -296,6 +351,25 @@ class PageTransitionService {
         ),
       );
 
+  ///TODO: REWARD ID
+  void transitionToCreateShopItemPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CreateShopItemPage(
+            rewardID: null,
+          ),
+        ),
+      );
+
+  void transitionToShopItemPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ShopItemDetailsPage(
+            reward: reward,
+          ),
+        ),
+      );
+
   void transitionToShopPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -400,6 +474,27 @@ class PageTransitionService {
             currentUser: currentUser,
             webblenUser: webblenUser,
           ),
+        ),
+      );
+
+  void transitionToInterestsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => InterestsPage(),
+        ),
+      );
+
+  void transitionToFollowSugestionsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => FollowSuggestionsPage(),
+        ),
+      );
+
+  void transitionToNewWebblenBalancePage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => NewWebblenBalancePage(),
         ),
       );
 

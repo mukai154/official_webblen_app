@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:video_compress/video_compress.dart';
 import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -21,6 +22,8 @@ class UploadStreamVideoPage extends StatefulWidget {
 }
 
 class _UploadStreamVideoPageState extends State<UploadStreamVideoPage> {
+  Subscription compressProgressSub;
+  VideoCompress videoCompress = VideoCompress();
   File vidFile;
   String uid;
   String username;
@@ -34,20 +37,23 @@ class _UploadStreamVideoPageState extends State<UploadStreamVideoPage> {
   //Form Validations
   Future<Null> uploadFile() async {
     String downloadUrl;
-    StorageReference storageReference = FirebaseStorage.instance.ref();
-    StorageReference ref =
-        storageReference.child("stream_video").child(widget.currentUser.uid).child("${widget.event.id}${DateTime.now().millisecondsSinceEpoch}.mp4");
+
+    Reference ref = FirebaseStorage.instance
+        .ref()
+        .child("stream_video")
+        .child(widget.currentUser.uid)
+        .child("${widget.event.id}${DateTime.now().millisecondsSinceEpoch}.mp4");
     if (vidFile == null) {
       ShowAlertDialogService().showFailureDialog(context, "Video Missing", "Please Select a Video to Upload");
     } else {
-      StorageUploadTask uploadTask = ref.putFile(
+      UploadTask uploadTask = ref.putFile(
         vidFile,
-        StorageMetadata(
+        SettableMetadata(
           contentType: 'video/mp4',
         ),
       );
-      uploadTask.events.forEach((event) {
-        int percentComplete = ((event.snapshot.bytesTransferred / event.snapshot.totalByteCount) * 100).round();
+      uploadTask.snapshotEvents.forEach((event) {
+        int percentComplete = ((event.bytesTransferred / event.totalBytes) * 100).round();
         if (percentComplete == 100) {
           uploadStatus = "Finalizing Video...";
         } else {
@@ -55,8 +61,8 @@ class _UploadStreamVideoPageState extends State<UploadStreamVideoPage> {
         }
         setState(() {});
       });
-      await uploadTask.onComplete.catchError((e) => print(e));
-      downloadUrl = await ref.getDownloadURL() as String;
+      await uploadTask.catchError((e) => print(e));
+      downloadUrl = await ref.getDownloadURL();
       uploadStatus = "Upload Success";
       setState(() {});
       EventDataService()
@@ -68,19 +74,39 @@ class _UploadStreamVideoPageState extends State<UploadStreamVideoPage> {
     setState(() {
       vidFile = null;
     });
-    vidFile = await WebblenImagePicker(
+    File file = await WebblenImagePicker(
       context: context,
       ratioX: 1.0,
       ratioY: 1.0,
     ).retrieveVideoFromLibrary();
-    if (vidFile != null) {
+    if (file != null) {
+      MediaInfo media = await VideoCompress.compressVideo(
+        file.path,
+        quality: VideoQuality.HighestQuality,
+        deleteOrigin: false,
+      );
+      vidFile = media.file;
       setState(() {});
     }
   }
 
   @override
+  void initState() {
+    super.initState();
+    compressProgressSub = VideoCompress.compressProgress$.subscribe((progress) {
+      if (progress != 100.0) {
+        setState(() {
+          uploadStatus = "Compressing Video: ${progress.toStringAsFixed(0)}%";
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
     super.dispose();
+    compressProgressSub.unsubscribe();
+    VideoCompress.deleteAllCache();
   }
 
   @override

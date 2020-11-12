@@ -5,7 +5,7 @@ class TimeCalc {
   DateFormat dateFormatter = DateFormat("MM/dd/yyyy");
   DateFormat timeFormatter = DateFormat("h:mm a");
   DateFormat dateTimeFormatter = DateFormat("MM/dd/yyyy h:mm a");
-  DateFormat formatter = DateFormat('MMM dd, yyyy | h:mm a');
+  DateFormat formatter = DateFormat('MMM dd, yyyy');
 
   String getStringFromDate(DateTime data) {
     String dateTime = formatter.format(data);

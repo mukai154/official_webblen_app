@@ -54,4 +54,42 @@ class AlgoliaSearch {
     }
     return results;
   }
+
+  Future<List<String>> queryTags(String searchTerm) async {
+    Algolia algolia = await initializeAlgolia();
+    List<String> results = [];
+    if (searchTerm != null && searchTerm.isNotEmpty) {
+      AlgoliaQuery query = algolia.instance.index('tags').search(searchTerm);
+      AlgoliaQuerySnapshot snapshot = await query.getObjects();
+      snapshot.hits.forEach((snapshot) {
+        // print(searchTerm);
+        // print(snapshot.data);
+        if (snapshot.data != null) {
+          String res = snapshot.data['tag'];
+          results.add(res);
+        }
+      });
+    }
+    return results;
+  }
+
+  Future<Map<dynamic, dynamic>> getTagsAndCategories() async {
+    Map<dynamic, dynamic> allTags = {};
+    Algolia algolia = await initializeAlgolia();
+    AlgoliaQuerySnapshot q = await algolia.instance.index('tags').getObjects();
+    q.hits.forEach((snapshot) {
+      Map<String, dynamic> data = snapshot.data;
+      if (allTags[data['category']] == null) {
+        allTags[data['category']] = [data['tag']];
+      } else {
+        allTags[data['category']].add(data['tag']);
+      }
+    });
+    allTags.forEach((key, value) {
+      List tags = value.toList(growable: true);
+      tags.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+      allTags[key] = tags;
+    });
+    return allTags;
+  }
 }

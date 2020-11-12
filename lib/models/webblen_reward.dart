@@ -1,72 +1,59 @@
 class WebblenReward {
-  String rewardKey;
-  String rewardProviderName;
-  String rewardDescription;
-  String rewardImagePath;
-  double rewardLat;
-  double rewardLon;
-  double rewardCost;
+  String id;
+  String type;
+  String providerID;
+  String title;
+  String description;
+  String imageURL;
+  bool isGlobalReward;
+  List nearbyZipcodes;
+  double cost;
   int amountAvailable;
+  String url;
   String expirationDate;
-  String rewardType;
-  String rewardUrl;
-  String rewardPromoCode;
-  String rewardBarcodeNumber;
-  String rewardCategory;
-  bool exclusiveReward;
 
   WebblenReward({
-    this.rewardKey,
-    this.rewardProviderName,
-    this.rewardDescription,
-    this.rewardImagePath,
-    this.rewardLat,
-    this.rewardLon,
-    this.rewardCost,
+    this.id,
+    this.type,
+    this.providerID,
+    this.title,
+    this.description,
+    this.imageURL,
+    this.isGlobalReward,
+    this.nearbyZipcodes,
+    this.cost,
     this.amountAvailable,
+    this.url,
     this.expirationDate,
-    this.rewardType,
-    this.rewardUrl,
-    this.rewardPromoCode,
-    this.rewardBarcodeNumber,
-    this.rewardCategory,
-    this.exclusiveReward,
   });
 
   WebblenReward.fromMap(Map<String, dynamic> data)
       : this(
-          rewardKey: data['rewardKey'],
-          rewardProviderName: data['rewardProviderName'],
-          rewardDescription: data['rewardDescription'],
-          rewardImagePath: data['rewardImagePath'],
-          rewardLat: data['rewardLat'],
-          rewardLon: data['rewardLon'],
-          rewardCost: data['rewardCost'],
+          id: data['id'],
+          type: data['type'],
+          providerID: data['providerID'],
+          title: data['title'],
+          description: data['description'],
+          imageURL: data['imageURL'],
+          isGlobalReward: data['isGlobalReward'],
+          nearbyZipcodes: data['nearbyZipcodes'],
+          cost: data['cost'],
           amountAvailable: data['amountAvailable'],
-          expirationDate: data['expirationDate'],
-          rewardType: data['rewardType'],
-          rewardUrl: data['rewardUrl'],
-          rewardPromoCode: data['rewardPromoCode'],
-          rewardBarcodeNumber: data['rewardBarcodeNumber'],
-          rewardCategory: data['rewardCategory'],
-          exclusiveReward: data['exclusiveReward'],
+          url: data['url'],
         );
 
   Map<String, dynamic> toMap() => {
-        'rewardKey': this.rewardKey,
-        'rewardProviderName': this.rewardProviderName,
-        'rewardDescription': this.rewardDescription,
-        'rewardImagePath': this.rewardImagePath,
-        'rewardLat': this.rewardLat,
-        'rewardLon': this.rewardLon,
-        'rewardCost': this.rewardCost,
+        'id': this.id,
+        'type': this.type,
+        'providerID': this.providerID,
+        'title': this.title,
+        'description': this.description,
+        'imageURL': this.imageURL,
+        'isGlobalReward': this.isGlobalReward,
+        'nearbyZipcodes': this.nearbyZipcodes,
+        'cost': this.cost,
         'amountAvailable': this.amountAvailable,
+        'url': this.url,
         'expirationDate': this.expirationDate,
-        'rewardType': this.rewardType,
-        'rewardUrl': this.rewardUrl,
-        'rewardPromoCode': this.rewardPromoCode,
-        'rewardBarcodeNumber': this.rewardBarcodeNumber,
-        'rewardCategory': this.rewardCategory,
-        'exclusiveReward': this.exclusiveReward,
       };
 }

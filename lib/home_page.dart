@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:location/location.dart';
 import 'package:location_permissions/location_permissions.dart';
-import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/platform_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/firebase/services/remote_messaging.dart';
@@ -74,9 +73,18 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         uid = val;
         WebblenUserData().checkIfUserExists(uid).then((exists) {
           if (exists) {
-            WebblenUserData().getUserByID(uid).then((user) {
-              currentUser = user;
-              checkPermissions();
+            WebblenUserData().checkIfUserOnboarded(uid).then((res) {
+              if (res) {
+                WebblenUserData().getUserByID(uid).then((user) {
+                  currentUser = user;
+                  checkPermissions();
+                });
+              } else {
+                Navigator.of(context).pushNamedAndRemoveUntil(
+                  '/onboarding',
+                  (Route<dynamic> route) => false,
+                );
+              }
             });
           } else {
             Navigator.of(context).pushNamedAndRemoveUntil(
@@ -92,37 +100,54 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
-  void initDynamicLinks() async {
-    final PendingDynamicLinkData data = await FirebaseDynamicLinks.instance.getInitialLink();
+  Future<Null> handleDynamicLinks() async {
+    print('handling dynamic links..');
+    final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.getInitialLink();
+    print(linkData);
+    handleLink(linkData);
+    FirebaseDynamicLinks.instance.onLink(
+      onSuccess: (PendingDynamicLinkData dynamicLink) async {
+        print(linkData);
+        handleLink(dynamicLink);
+      },
+      onError: (OnLinkErrorException e) async {
+        print('Link Failed: ${e.message}');
+      },
+    );
+    return;
+  }
+
+  void handleLink(PendingDynamicLinkData data) {
+    String id;
     final Uri deepLink = data?.link;
-
     if (deepLink != null) {
-      ShowAlertDialogService().showLoadingDialog(context);
-      String eventID = deepLink.path;
-      EventDataService().getEvent(eventID).then((res) {
-        Navigator.of(context).pop();
-        PageTransitionService(context: context, currentUser: currentUser, eventIsLive: false).transitionToEventPage();
-      });
-    }
-
-    FirebaseDynamicLinks.instance.onLink(onSuccess: (PendingDynamicLinkData dynamicLink) async {
-      final Uri deepLink = dynamicLink?.link;
-      if (deepLink != null) {
-        ShowAlertDialogService().showLoadingDialog(context);
-        String eventID = deepLink.path;
-        EventDataService().getEvent(eventID).then((res) {
-          Navigator.of(context).pop();
-          PageTransitionService(context: context, currentUser: currentUser, eventIsLive: false).transitionToEventPage();
+      print('_handleDeepLink | deeplink: $deepLink');
+      id = deepLink.queryParameters['id'];
+      if (id != null) {
+        WebblenUserData().checkIfUserExists(uid).then((exists) {
+          if (exists) {
+            WebblenUserData().getUserByID(uid).then((user) {
+              currentUser = user;
+              if (deepLink.pathSegments.contains('post')) {
+                PageTransitionService(context: context, postID: id).transitionToPostViewPage();
+              } else if (deepLink.pathSegments.contains('event')) {
+                PageTransitionService(context: context, eventID: id, currentUser: currentUser).transitionToEventPage();
+              } else if (deepLink.pathSegments.contains('user')) {
+                WebblenUserData().getUserByID(id).then((res) {
+                  PageTransitionService(context: context, currentUser: currentUser, webblenUser: res).transitionToUserPage();
+                });
+              }
+            });
+          } else {
+            //SHOW PREVIEW PAGES
+          }
         });
       }
-    }, onError: (OnLinkErrorException e) async {
-      PageTransitionService(context: context).returnToRootPage();
-    });
+    }
   }
 
   checkPermissions() async {
     DevicePermissions().checkLocationPermissions().then((locationPermissions) async {
-      print(locationPermissions);
       if (locationPermissions == 'PermissionStatus.unknown') {
         String permissions = await DevicePermissions().requestPermssion();
         if (permissions == 'PermissionStatus.denied') {
@@ -137,7 +162,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         isLoading = false;
         setState(() {});
       } else {
-        loadLocation();
+        if (this.mounted) {
+          loadLocation();
+        }
       }
     });
   }
@@ -155,13 +182,16 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         areaName = res;
         isLoading = false;
         setState(() {});
+        WebblenUserData().displayDepositAnimation(currentUser.uid).then((bool) {
+          if (bool == true) {
+            PageTransitionService(context: context).transitionToNewWebblenBalancePage();
+          }
+        });
       });
       FirebaseMessagingService().updateFirebaseMessageToken(uid);
       FirebaseMessagingService().configFirebaseMessaging(
         context,
-        currentUser,
       );
-      initDynamicLinks();
     } else {
       hasLocation = false;
       isLoading = false;
@@ -241,7 +271,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
-    initialize();
+    handleDynamicLinks().then((val) {
+      initialize();
+    });
   }
 
   @override

@@ -2,15 +2,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/firebase/data/user_data.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/utils/create_notification.dart';
 
 class FirebaseMessagingService {
-  final FirebaseMessaging firebaseMessaging = new FirebaseMessaging();
-  final CollectionReference notificationRef = Firestore.instance.collection("user_notifications");
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
+  final CollectionReference notificationRef = FirebaseFirestore.instance.collection("user_notifications");
 
 //** FIREBASE MESSAGING  */
-  configFirebaseMessaging(BuildContext context, WebblenUser currentUser) {
+  configFirebaseMessaging(BuildContext context) {
     String messageTitle;
     String messageBody;
     String messageType;

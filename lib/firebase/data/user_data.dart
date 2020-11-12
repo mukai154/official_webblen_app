@@ -5,13 +5,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:webblen/firebase/services/file_upload.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/location/location_service.dart';
 
 class WebblenUserData {
   final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
   final CollectionReference stripeRef = FirebaseFirestore.instance.collection("stripe");
   final CollectionReference eventRef = FirebaseFirestore.instance.collection("events");
   final CollectionReference notifRef = FirebaseFirestore.instance.collection("user_notifications");
-  final StorageReference storageReference = FirebaseStorage.instance.ref();
+  final Reference storageReference = FirebaseStorage.instance.ref();
 
   Future<bool> canUploadVideo(String uid) async {
     bool canUploadVideo = false;
@@ -33,7 +34,7 @@ class WebblenUserData {
 
   Future<bool> createNewUser(File userImage, WebblenUser user, String uid) async {
     bool success = true;
-    StorageReference storageReference = FirebaseStorage.instance.ref();
+    Reference storageReference = FirebaseStorage.instance.ref();
     String fileName = "$uid.jpg";
     storageReference.child("profile_pics").child(fileName).putFile(userImage);
     String downloadUrl = await FileUploader().uploadProfilePic(
@@ -68,12 +69,32 @@ class WebblenUserData {
     }
   }
 
+  Future<bool> checkIfUserOnboarded(String uid) async {
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    Map<dynamic, dynamic> data = docSnapshot.data() == null ? {} : docSnapshot.data();
+    if (data['onboarded'] == null || data['onboarded'] == false) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
   Stream<WebblenUser> streamCurrentUser(String uid) {
     return userRef.doc(uid).snapshots().map((snapshot) => WebblenUser.fromMap(Map<String, dynamic>.from(snapshot.data()['d'])));
   }
 
   Stream<Map<String, dynamic>> streamStripeAccount(String uid) {
     return stripeRef.doc(uid).snapshots().map((snapshot) => snapshot.data());
+  }
+
+  Future<bool> isAdmin(String uid) async {
+    bool isAdmin = false;
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> docData = docSnapshot.data();
+      isAdmin = docData['isAdmin'] == null ? false : docData['isAdmin'];
+    }
+    return isAdmin;
   }
 
   Future<WebblenUser> getUserByID(String uid) async {
@@ -104,6 +125,26 @@ class WebblenUserData {
       userImgURL = docData['d']['username'];
     }
     return userImgURL;
+  }
+
+  Future<double> getWebblenWalletTotal(String uid) async {
+    double webblen = 0.001;
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> docData = docSnapshot.data();
+      webblen = docData['d']['eventPoints'];
+    }
+    return webblen;
+  }
+
+  Future<List> getInterests(String uid) async {
+    List interests = [];
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> docData = docSnapshot.data();
+      interests = docData['tags'] == null ? [] : docData['tags'];
+    }
+    return interests;
   }
 
   Future<String> getStripeUID(String uid) async {
@@ -146,6 +187,36 @@ class WebblenUserData {
     return usernameExists;
   }
 
+  Future<bool> displayDepositAnimation(String uid) async {
+    bool displayAnimation = false;
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    if (snapshot.exists) {
+      Map<String, dynamic> docData = snapshot.data();
+      if (docData['canDisplayDepositAnimation'] == null || docData['canDisplayDepositAnimation'] == true) {
+        displayAnimation = true;
+      }
+    }
+    return displayAnimation;
+  }
+
+  Future<double> depositAnimationValue(String uid) async {
+    double val = 0.01;
+    QuerySnapshot query =
+        await notifRef.where('uid', isEqualTo: uid).where('notificationType', isEqualTo: 'deposit').where('notificationSeen', isEqualTo: false).get();
+    query.docs.forEach((doc) {
+      String notifData = doc.data()['notificationData'];
+      if (notifData.isNotEmpty) {
+        try {
+          val += double.parse(notifData);
+        } catch (e) {
+          print('invalid val');
+        }
+      }
+    });
+    await userRef.doc(uid).update({"canDisplayDepositAnimation": false}).catchError((e) {});
+    return val;
+  }
+
   Future<List> getFollowingList(String uid) async {
     List followingList;
     DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
@@ -157,10 +228,66 @@ class WebblenUserData {
     return followingList;
   }
 
+  Future<List<WebblenUser>> getFollowerSuggestions(String uid, String zipcode, List tags) async {
+    List<String> tagFilter = List<String>.from(tags);
+    List<WebblenUser> users = [];
+    QuerySnapshot snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("tags", arrayContainsAny: tagFilter).get().catchError((e) {
+      //print(e);
+    });
+    if (snapshot.docs.length == null || snapshot.docs.length < 10) {
+      snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).orderBy("appOpenInMilliseconds", descending: true).get().catchError((e) {
+        // print(e);
+      });
+    }
+    snapshot.docs.forEach((doc) {
+      if (doc.data()['d']['followers'] == null || !doc.data()['d']['followers'].contains(uid)) {
+        WebblenUser user = WebblenUser.fromMap(doc.data()['d']);
+        if (user.uid != uid) {
+          users.add(user);
+        }
+      }
+    });
+    return users;
+  }
+
+  Future<Null> updateOnboardStatus(String uid, List tags) async {
+    await userRef.doc(uid).update({"tags": tags});
+    await userRef.doc(uid).update({"canDisplayDepositAnimation": false});
+    await userRef.doc(uid).update({"onboarded": true});
+  }
+
+  Future<String> updateInterests(String uid, List tags) async {
+    String error;
+    await userRef.doc(uid).update({"tags": tags}).catchError((e) {
+      error = e.details;
+    });
+    return error;
+  }
+
   Future<String> updateFollowing(String currentUID, String userUID, List currentUserFollowingList, List userFollowerList) async {
     String error;
     await userRef.doc(currentUID).update({"d.following": currentUserFollowingList});
     await userRef.doc(userUID).update({"d.followers": userFollowerList});
+    return error;
+  }
+
+  Future<String> updateFollowingByID(String currentUID, String userUID) async {
+    String error;
+    DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
+    List following = currentUserSnapshot.data()['d']['following'] == null ? [] : currentUserSnapshot.data()['d']['following'].toList(growable: true);
+    DocumentSnapshot userSnapshot = await userRef.doc(userUID).get();
+    List followers = userSnapshot.data()['d']['followers'] == null ? [] : currentUserSnapshot.data()['d']['followers'].toList(growable: true);
+
+    if (following.contains(userUID)) {
+      following.remove(userUID);
+      followers.remove(currentUID);
+    } else {
+      following.add(userUID);
+      followers.add(currentUID);
+    }
+    await userRef.doc(currentUID).update({"d.following": following});
+    await userRef.doc(userUID).update({"d.followers": followers});
+
     return error;
   }
 
@@ -179,7 +306,18 @@ class WebblenUserData {
   Future<Null> updateUserAppOpen(String uid, String zipcode, double lat, double lon) async {
     int appOpenInMilliseconds = DateTime.now().millisecondsSinceEpoch;
     //GeoFirePoint geoFirePoint = GeoFirePoint(lat, lon);
-    userRef.doc(uid).update({'g': null, 'l': null, 'appOpenInMilliseconds': appOpenInMilliseconds, 'lastSeenZipcode': zipcode});
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    List nearbyZipcodes = snapshot.data()['nearbyZipcodes'] == null ? [] : snapshot.data()['nearbyZipcodes'];
+    if (!nearbyZipcodes.contains(zipcode)) {
+      nearbyZipcodes = await LocationService().findNearestZipcodes(zipcode);
+    }
+    userRef.doc(uid).update({
+      'g': null,
+      'l': null,
+      'appOpenInMilliseconds': appOpenInMilliseconds,
+      'lastSeenZipcode': zipcode,
+      'nearbyZipcodes': nearbyZipcodes,
+    });
   }
 
   Future<Null> setGoogleTokens(String uid, String idToken, String accessToken) async {
@@ -204,6 +342,18 @@ class WebblenUserData {
 
   Future<Null> updateNotificationPermission(String uid, String notif, bool status) async {
     userRef.doc(uid).update({notif: status}).whenComplete(() {}).catchError((e) {});
+  }
+
+  Future<Null> setFBAccessToken(String uid, String fbAccessToken) async {
+    userRef.doc(uid).update({"fbAccessToken": fbAccessToken}).whenComplete(() {}).catchError((e) {});
+  }
+
+  Future<Null> setAssociatedEmailAddress(String uid, String emailAddress) async {
+    userRef.doc(uid).update({"emailAddress": emailAddress}).whenComplete(() {}).catchError((e) {});
+  }
+
+  Future<Null> setGoogleAccessTokenAndID(String uid, String googleAccessToken, String googleIDToken) async {
+    userRef.doc(uid).update({"googleAccessToken": googleAccessToken, "googleIDToken": googleIDToken}).whenComplete(() {}).catchError((e) {});
   }
 
   // Future<Null> updateUserField() async {

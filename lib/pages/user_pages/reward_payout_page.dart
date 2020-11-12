@@ -31,9 +31,9 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
 
   String showFormDepositLabel() {
     String formDepositType = "";
-    if (widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal') {
+    if (widget.redeemingReward.type == 'giftCard' || widget.redeemingReward.type == 'paypal') {
       formDepositType = "Email:";
-    } else if (widget.redeemingReward.rewardType == 'venmo') {
+    } else if (widget.redeemingReward.type == 'venmo') {
       formDepositType = "Venmo Username:";
     } else {
       formDepositType = "CashApp Username:";
@@ -43,9 +43,9 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
 
   String showFormDepositNameHint() {
     String formDepositNameHint = "";
-    if (widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal') {
+    if (widget.redeemingReward.type == 'giftCard' || widget.redeemingReward.type == 'paypal') {
       formDepositNameHint = "email address";
-    } else if (widget.redeemingReward.rewardType == 'venmo') {
+    } else if (widget.redeemingReward.type == 'venmo') {
       formDepositNameHint = "venmo username";
     } else {
       formDepositNameHint = "cashapp username";
@@ -78,16 +78,16 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
           .submitTransaction(
         widget.currentUser.uid,
         null,
-        widget.redeemingReward.rewardType,
+        widget.redeemingReward.type,
         formDepositNameInput,
-        widget.redeemingReward.rewardDescription,
+        widget.redeemingReward.description,
       )
           .then((error) {
         if (error.isEmpty) {
           RewardDataService()
               .removeUserReward(
             widget.currentUser.uid,
-            widget.redeemingReward.rewardKey,
+            widget.redeemingReward.id,
           )
               .then((error) {
             if (error.isEmpty) {
@@ -132,15 +132,14 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
                   style: TextStyle(
                     color: FlatColors.darkGray,
                   ),
-                  keyboardType: widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal'
-                      ? TextInputType.emailAddress
-                      : TextInputType.text,
+                  keyboardType:
+                      widget.redeemingReward.type == 'giftCard' || widget.redeemingReward.type == 'paypal' ? TextInputType.emailAddress : TextInputType.text,
                   autofocus: false,
                   validator: (value) => value.isEmpty ? 'Required' : null,
                   onSaved: (value) => formDepositNameInput = value,
                   decoration: InputDecoration(
                     border: InputBorder.none,
-                    icon: widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal'
+                    icon: widget.redeemingReward.type == 'giftCard' || widget.redeemingReward.type == 'paypal'
                         ? Icon(
                             FontAwesomeIcons.envelope,
                             color: FlatColors.darkGray,
@@ -168,9 +167,8 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
                   style: TextStyle(
                     color: FlatColors.darkGray,
                   ),
-                  keyboardType: widget.redeemingReward.rewardType == 'giftCard' || widget.redeemingReward.rewardType == 'paypal'
-                      ? TextInputType.emailAddress
-                      : TextInputType.text,
+                  keyboardType:
+                      widget.redeemingReward.type == 'giftCard' || widget.redeemingReward.type == 'paypal' ? TextInputType.emailAddress : TextInputType.text,
                   autofocus: false,
                   validator: (value) => value.isEmpty ? 'Required' : null,
                   onSaved: (value) => formDepositNameInputConfirmation = value,
@@ -237,7 +235,7 @@ class _RewardPayoutPageState extends State<RewardPayoutPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     Fonts().textW500(
-                      widget.redeemingReward.rewardProviderName,
+                      widget.redeemingReward.title,
                       18.0,
                       FlatColors.darkGray,
                       TextAlign.center,

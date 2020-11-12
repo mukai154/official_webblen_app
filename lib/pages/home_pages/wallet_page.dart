@@ -24,7 +24,6 @@ import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
-import 'package:webblen/widgets/widgets_reward/reward_card.dart';
 import 'package:webblen/widgets/widgets_reward/reward_purchase.dart';
 
 class WalletPage extends StatefulWidget {
@@ -292,10 +291,10 @@ class _WalletPageState extends State<WalletPage> {
         barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
           return RewardWalletDialog(
-            rewardTitle: reward.rewardProviderName,
-            rewardDescription: reward.rewardDescription,
-            rewardImageURL: reward.rewardImagePath,
-            rewardCost: reward.rewardCost.toStringAsFixed(2),
+            rewardTitle: reward.title,
+            rewardDescription: reward.description,
+            rewardImageURL: reward.imageURL,
+            rewardCost: reward.cost.toStringAsFixed(2),
             redeemAction: () => redeemRewardDialog(reward),
             dismissAction: () => dismissPurchaseDialog(context),
           );
@@ -312,10 +311,10 @@ class _WalletPageState extends State<WalletPage> {
         barrierDismissible: false, // user must tap button!
         builder: (BuildContext context) {
           return RewardRedemptionDialog(
-            rewardTitle: reward.rewardProviderName,
-            rewardDescription: reward.rewardDescription,
-            rewardImageURL: reward.rewardImagePath,
-            rewardCost: reward.rewardCost.toStringAsFixed(2),
+            rewardTitle: reward.title,
+            rewardDescription: reward.description,
+            rewardImageURL: reward.imageURL,
+            rewardCost: reward.cost.toStringAsFixed(2),
             confirmAction: () => redeemReward(reward),
             cancelAction: () => dismissPurchaseDialog(context),
           );
@@ -345,7 +344,7 @@ class _WalletPageState extends State<WalletPage> {
     setState(() {
       redeemingReward = reward;
     });
-    if (reward.rewardUrl.isEmpty) {
+    if (reward.url.isEmpty) {
       walletRewards.remove(reward);
       setState(() {});
       PageTransitionService(
@@ -353,8 +352,8 @@ class _WalletPageState extends State<WalletPage> {
         reward: redeemingReward,
         currentUser: widget.currentUser,
       ).transitionToRewardPayoutPage();
-    } else if (await canLaunch(reward.rewardUrl)) {
-      await launch(reward.rewardUrl);
+    } else if (await canLaunch(reward.url)) {
+      await launch(reward.url);
     } else {
       redeemFailedDialog(
         "Could Not Open Url",
@@ -372,9 +371,9 @@ class _WalletPageState extends State<WalletPage> {
           .submitTransaction(
         widget.currentUser.uid,
         null,
-        redeemingReward.rewardType,
+        redeemingReward.type,
         formDepositName,
-        redeemingReward.rewardDescription,
+        redeemingReward.description,
       )
           .then((error) {
         if (error.isEmpty) {
@@ -399,30 +398,30 @@ class _WalletPageState extends State<WalletPage> {
 
   Widget buildWalletRewards() {
     if (walletRewards.isNotEmpty) {
-      return rewardsList(walletRewards);
+      //return rewardsList(walletRewards);
     } else {
       return noRewardsList();
     }
   }
 
-  Widget rewardsList(List<WebblenReward> walletRewards) {
-    return Container(
-      height: 115,
-      child: GridView.count(
-        crossAxisCount: 1,
-        scrollDirection: Axis.horizontal,
-        children: new List<Widget>.generate(walletRewards.length, (index) {
-          return GridTile(
-            child: RewardCard(
-              walletRewards[index],
-              () => redeemRewardDialog(walletRewards[index]),
-              true,
-            ),
-          );
-        }),
-      ),
-    );
-  }
+  // Widget rewardsList(List<WebblenReward> walletRewards) {
+  //   return Container(
+  //     height: 115,
+  //     child: GridView.count(
+  //       crossAxisCount: 1,
+  //       scrollDirection: Axis.horizontal,
+  //       children: new List<Widget>.generate(walletRewards.length, (index) {
+  //         return GridTile(
+  //           child: RewardCard(
+  //             walletRewards[index],
+  //             () => redeemRewardDialog(walletRewards[index]),
+  //             true,
+  //           ),
+  //         );
+  //       }),
+  //     ),
+  //   );
+  // }
 
   Widget noRewardsList() {
     return Container(

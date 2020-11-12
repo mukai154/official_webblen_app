@@ -1,19 +1,26 @@
 import 'dart:io';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
 import 'package:flutter_native_admob/native_admob_controller.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
+import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/constants/strings.dart';
+import 'package:webblen/firebase/data/post_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
@@ -21,16 +28,17 @@ import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/time.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
-import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
+import 'package:webblen/widgets/posts/post_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
 
 import 'video_play_page.dart';
 
 class HomeDashboardPage extends StatefulWidget {
   final WebblenUser currentUser;
+  final List tags;
   final bool updateRequired;
   final String areaName;
   final Key key;
@@ -40,6 +48,7 @@ class HomeDashboardPage extends StatefulWidget {
 
   HomeDashboardPage({
     this.currentUser,
+    this.tags,
     this.updateRequired,
     this.areaName,
     this.currentLat,
@@ -55,40 +64,52 @@ class HomeDashboardPage extends StatefulWidget {
 class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTickerProviderStateMixin {
   List<VideoPlayerController> videoControllers = [];
   bool isLoading = true;
+  TextEditingController tagTextController = TextEditingController();
 
   //Scroller & Paging
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
   ScrollController recordedStreamsScrollController;
-  ScrollController liveEventsScrollController;
-  ScrollController virtualEventsScrollController;
-  ScrollController savedEventsScrollController;
+  ScrollController postsScrollController;
+  ScrollController eventsScrollController;
+  ScrollController followingScrollController;
+  ScrollController recommendedScrollController;
   int resultsPerPage = 15;
 
   //Filter
-  String areaName = "My Current Location";
-  String areaCodeFilter;
-  String eventTypeFilter = "None";
-  String eventCategoryFilter = "None";
+  String areaName = "";
+  String areaCodeFilter = "";
+  String tagFilter = "";
+  List<String> sortByList = ["Latest", "Most Popular"];
+  String sortBy = "Latest";
 
   //Event Results
   int dateTimeInMilliseconds2hoursAgo = DateTime.now().millisecondsSinceEpoch - 7400000;
+  int dateTimeInMilliseconds1MonthAgo = DateTime.now().millisecondsSinceEpoch - 2628000000;
+  CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
   CollectionReference eventsRef = FirebaseFirestore.instance.collection("events");
   CollectionReference recordedStreamsRef = FirebaseFirestore.instance.collection("recorded_streams");
   List<DocumentSnapshot> recordedStreamResults = [];
-  List<DocumentSnapshot> liveEventResults = [];
-  List<DocumentSnapshot> virtualEventResults = [];
-  List<DocumentSnapshot> savedEventResults = [];
-  List<DocumentSnapshot> followingEventsResults = [];
-  DocumentSnapshot lastLiveEventDocSnap;
-  DocumentSnapshot lastVirtualEventDocSnap;
-  DocumentSnapshot lastSavedEventDocSnap;
-  bool loadingAdditionalLiveEvents = false;
-  bool moreLiveEventsAvailable = true;
-  bool loadingAdditionalVirtualEvents = false;
-  bool moreVirtualEventsAvailable = true;
-  bool loadingAdditionalSavedEvents = false;
-  bool moreSavedEventsAvailable = true;
+  List<DocumentSnapshot> postResults = [];
+  List<DocumentSnapshot> eventResults = [];
+  List<DocumentSnapshot> followingResults = [];
+  List<DocumentSnapshot> recommendedResults = [];
+  DocumentSnapshot lastPostDocSnap;
+  DocumentSnapshot lastEventDocSnap;
+  DocumentSnapshot lastFollowingDocSnap;
+  DocumentSnapshot lastRecommendedDocSnap;
+
+  bool loadingAdditionalPosts = false;
+  bool morePostsAvailable = true;
+
+  bool loadingAdditionalEvents = false;
+  bool moreEventsAvailable = true;
+
+  bool loadingAdditionalFollowing = false;
+  bool moreFollowingAvailable = true;
+
+  bool loadingAdditionalRecommended = false;
+  bool moreRecommendedAvailable = true;
 
   //ADMOB
   String adMobUnitID;
@@ -104,24 +125,6 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         pageBuilder: (_, __, ___) => VideoPlayPage(currentUser: widget.currentUser, vidURL: vidURL, eventID: eventID, authorID: authorID),
       ),
     );
-
-    // PageTransitionService(context: context, vidURL: vidURL).transitionToVideoPlayPage();
-//    Widget widget = Container(
-//      height: MediaQuery.of(context).size.height - 32,
-//      width: MediaQuery.of(context).size.width - 32,
-//      child: AspectRatio(
-//        aspectRatio: controller.value.aspectRatio,
-//        child: Stack(
-//          alignment: Alignment.bottomCenter,
-//          children: <Widget>[
-//            VideoPlayer(controller),
-//            _ControlsOverlay(controller: controller),
-//            VideoProgressIndicator(controller, allowScrubbing: true),
-//          ],
-//        ),
-//      ),
-//    );
-//    ShowAlertDialogService().showCustomWidgetDialog(context, widget);
   }
 
   getRecordedStreams() async {
@@ -129,7 +132,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         .where('showAllUsers', isEqualTo: true)
         .where('expiration', isGreaterThanOrEqualTo: DateTime.now().millisecondsSinceEpoch)
         .get()
-        .catchError((e) => print(e));
+        .catchError((e) {});
     if (querySnapshot.docs.isNotEmpty) {
       recordedStreamResults.addAll(querySnapshot.docs);
     }
@@ -138,7 +141,9 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         .where('nearbyZipcodes', arrayContains: areaCodeFilter)
         .where('expiration', isGreaterThanOrEqualTo: DateTime.now().millisecondsSinceEpoch)
         .get()
-        .catchError((e) => print(e));
+        .catchError((e) {
+      print(e);
+    });
     if (querySnapshot.docs.isNotEmpty) {
       recordedStreamResults.addAll(querySnapshot.docs);
     }
@@ -148,239 +153,283 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     }
   }
 
-  getLiveEvents() async {
-    Query eventsQuery;
-    if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.category', isEqualTo: eventCategoryFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
+  getPosts() async {
+    Query query;
+    if (areaCodeFilter.isEmpty) {
+      query = postsRef
+          .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
+          .orderBy('postDateTimeInMilliseconds', descending: true)
           .limit(resultsPerPage);
     } else {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.category', isEqualTo: eventCategoryFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
+      query = postsRef
+          .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
+          .orderBy('postDateTimeInMilliseconds', descending: true)
           .limit(resultsPerPage);
     }
-    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    QuerySnapshot querySnapshot = await query.get().catchError((e) {
+      print(e);
+    });
     if (querySnapshot.docs.isNotEmpty) {
-      lastLiveEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
-      liveEventResults = querySnapshot.docs;
+      lastPostDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      postResults = querySnapshot.docs;
+      if (tagFilter.isNotEmpty) {
+        postResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
+      }
+      if (sortBy == "Latest") {
+        postResults.sort((docA, docB) => docB.data()['postDateTimeInMilliseconds'].compareTo(docA.data()['postDateTimeInMilliseconds']));
+      } else {
+        postResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
+      }
     }
     isLoading = false;
     setState(() {});
   }
 
-  getVirtualEvents() async {
+  getEvents() async {
     Query eventsQuery;
-    if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
+    if (areaCodeFilter.isEmpty) {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
           .where('d.privacy', isEqualTo: "public")
           .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.category', isEqualTo: eventCategoryFilter)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.category', isEqualTo: eventCategoryFilter)
           .where('d.privacy', isEqualTo: "public")
           .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
           .limit(resultsPerPage);
     }
-    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) {
+      print(e);
+    });
     if (querySnapshot.docs.isNotEmpty) {
-      lastVirtualEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
-      virtualEventResults = querySnapshot.docs;
+      lastEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      eventResults = querySnapshot.docs;
+      if (tagFilter.isNotEmpty) {
+        eventResults.removeWhere((doc) => !doc.data()['d']['tags'].contains(tagFilter));
+      }
+      if (sortBy == "Most Popular") {
+        eventResults.sort((docA, docB) => docB.data()['d']['clicks'].compareTo(docA.data()['d']['clicks']));
+      }
     }
+    isLoading = false;
     setState(() {});
   }
 
-  getAdditionalLiveEvents() async {
-    if (isLoading || !moreLiveEventsAvailable || loadingAdditionalLiveEvents) {
+  getFollowingPosts() async {
+    Query query = postsRef
+        .where('followers', arrayContains: widget.currentUser.uid)
+        .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
+        .orderBy('postDateTimeInMilliseconds', descending: true);
+    QuerySnapshot querySnapshot = await query.get().catchError((e) {
+      print(e);
+    });
+    if (querySnapshot.docs.isNotEmpty) {
+      lastFollowingDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      followingResults = querySnapshot.docs;
+      if (tagFilter.isNotEmpty) {
+        followingResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
+      }
+      if (sortBy == "Most Popular") {
+        followingResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
+      }
+    }
+    isLoading = false;
+    setState(() {});
+  }
+
+  getRecommendedPosts() async {
+    // Query query;
+    // if (tagFilter == "None" && !sortByPopularity) {
+    //   query = postsRef
+    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.tags)
+    //       .orderBy('postDateTimeInMilliseconds', descending: true)
+    //       .limit(resultsPerPage);
+    // } else if (tagFilter != "None" && !sortByPopularity) {
+    //   query = postsRef
+    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.tags)
+    //       .where('tags', arrayContains: tagFilter)
+    //       .orderBy('postDateTimeInMilliseconds', descending: true)
+    //       .limit(resultsPerPage);
+    // } else if (tagFilter == "None" && sortByPopularity) {
+    //   query = postsRef.where('tags', arrayContainsAny: widget.tags).orderBy('commentCount', descending: true).limit(resultsPerPage);
+    // } else {
+    //   query = postsRef
+    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.tags)
+    //       .where('tags', arrayContains: tagFilter)
+    //       .orderBy('commentCount', descending: true)
+    //       .limit(resultsPerPage);
+    // }
+    // QuerySnapshot querySnapshot = await query.get().catchError((e) {
+    //   print(e);
+    // });
+    // if (querySnapshot.docs.isNotEmpty) {
+    //   lastRecommendedDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    //   recommendedResults = querySnapshot.docs;
+    // }
+    // isLoading = false;
+    // setState(() {});
+  }
+
+  getAdditionalEvents() async {
+    if (isLoading || !moreEventsAvailable || loadingAdditionalEvents) {
       return;
     }
-    loadingAdditionalLiveEvents = true;
+    loadingAdditionalEvents = true;
     setState(() {});
     Query eventsQuery;
-    if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
+    if (areaCodeFilter.isEmpty) {
       eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.privacy', isEqualTo: "public")
           .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastLiveEventDocSnap)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
-          .where('d.privacy', isEqualTo: "public")
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastLiveEventDocSnap)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.category', isEqualTo: eventCategoryFilter)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastLiveEventDocSnap)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
+          .startAfterDocument(lastEventDocSnap)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: false)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.category', isEqualTo: eventCategoryFilter)
           .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastLiveEventDocSnap)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
+          .startAfterDocument(lastEventDocSnap)
           .limit(resultsPerPage);
     }
 
-    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
-    lastLiveEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
-    liveEventResults.addAll(querySnapshot.docs);
-    if (querySnapshot.docs.length == 0) {
-      moreLiveEventsAvailable = false;
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) {});
+    lastEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    eventResults.addAll(querySnapshot.docs);
+    if (tagFilter.isNotEmpty) {
+      eventResults.removeWhere((doc) => !doc.data()['d']['tags'].contains(tagFilter));
     }
-    loadingAdditionalLiveEvents = false;
+    // if (sortBy == "Latest") {
+    //   eventResults.sort((docA, docB) => docB.data()['d']['endDateTimeInMilliseconds'].compareTo(docA.data()['d']['endDateTimeInMilliseconds']));
+    // } else {
+    //   eventResults.sort((docA, docB) => docB.data()['d']['clicks'].compareTo(docA.data()['d']['clicks']));
+    // }
+    if (querySnapshot.docs.length == 0) {
+      moreEventsAvailable = false;
+    }
+    loadingAdditionalEvents = false;
     setState(() {});
   }
 
-  getAdditionalVirtualEvents() async {
-    if (isLoading || !moreVirtualEventsAvailable || loadingAdditionalVirtualEvents) {
+  getAdditionalPosts() async {
+    if (isLoading || !morePostsAvailable || loadingAdditionalPosts) {
       return;
     }
-    loadingAdditionalVirtualEvents = true;
+    loadingAdditionalPosts = true;
     setState(() {});
-    Query eventsQuery;
-    if (eventCategoryFilter == "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastVirtualEventDocSnap)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter == "None" && eventTypeFilter != "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastVirtualEventDocSnap)
-          .limit(resultsPerPage);
-    } else if (eventCategoryFilter != "None" && eventTypeFilter == "None") {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.category', isEqualTo: eventCategoryFilter)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastVirtualEventDocSnap)
+    Query query;
+    if (areaCodeFilter.isEmpty) {
+      query = postsRef
+          .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
+          .orderBy('postDateTimeInMilliseconds', descending: true)
+          .startAfterDocument(lastPostDocSnap)
           .limit(resultsPerPage);
     } else {
-      eventsQuery = eventsRef
-          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
-          .where('d.isDigitalEvent', isEqualTo: true)
-          .where('d.type', isEqualTo: eventTypeFilter)
-          .where('d.category', isEqualTo: eventCategoryFilter)
-          .where('d.privacy', isEqualTo: "public")
-          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-          .orderBy('d.endDateTimeInMilliseconds', descending: false)
-          .startAfterDocument(lastVirtualEventDocSnap)
+      query = postsRef
+          .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
+          .orderBy('postDateTimeInMilliseconds', descending: true)
+          .startAfterDocument(lastPostDocSnap)
           .limit(resultsPerPage);
     }
-
-    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
-    lastVirtualEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
-    virtualEventResults.addAll(querySnapshot.docs);
-    if (querySnapshot.docs.length == 0) {
-      moreVirtualEventsAvailable = false;
+    QuerySnapshot querySnapshot = await query.get().catchError((e) {});
+    lastPostDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    postResults.addAll(querySnapshot.docs);
+    if (tagFilter.isNotEmpty) {
+      postResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
     }
-    loadingAdditionalVirtualEvents = false;
+    if (sortBy == "Most Popular") {
+      postResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
+    }
+    if (querySnapshot.docs.length == 0) {
+      morePostsAvailable = false;
+    }
+    loadingAdditionalPosts = false;
     setState(() {});
   }
 
-  getAdditionalSavedEvents() async {
-    if (isLoading || !moreSavedEventsAvailable || loadingAdditionalSavedEvents) {
+  getAdditionalFollowing() async {
+    if (isLoading || !moreFollowingAvailable || loadingAdditionalFollowing) {
       return;
     }
-    loadingAdditionalSavedEvents = true;
+    loadingAdditionalFollowing = true;
     setState(() {});
-    Query eventsQuery = eventsRef
-        .where("d.savedBy", isEqualTo: widget.currentUser.uid)
-        .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
-        .orderBy('d.endDateTimeInMilliseconds', descending: false)
-        .startAfterDocument(lastSavedEventDocSnap)
+    Query query = postsRef
+        .where('followers', arrayContains: widget.currentUser.uid)
+        .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
+        .orderBy('postDateTimeInMilliseconds', descending: true)
+        .startAfterDocument(lastFollowingDocSnap)
         .limit(resultsPerPage);
 
-    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) => print(e));
-    lastSavedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
-    savedEventResults.addAll(querySnapshot.docs);
-    if (querySnapshot.docs.length == 0) {
-      moreSavedEventsAvailable = false;
+    QuerySnapshot querySnapshot = await query.get().catchError((e) {});
+    lastFollowingDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    followingResults.addAll(querySnapshot.docs);
+    if (tagFilter.isNotEmpty) {
+      followingResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
     }
-    loadingAdditionalSavedEvents = false;
+    if (sortBy == "Most Popular") {
+      followingResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
+    }
+    if (querySnapshot.docs.length == 0) {
+      moreFollowingAvailable = false;
+    }
+    loadingAdditionalFollowing = false;
     setState(() {});
+  }
+
+  getAdditionalRecommended() async {
+    // if (isLoading || !moreRecommendedAvailable || loadingAdditionalRecommended) {
+    //   return;
+    // }
+    // loadingAdditionalRecommended = true;
+    // setState(() {});
+    // Query query;
+    // if (tagFilter == "None" && !sortByPopularity) {
+    //   query = postsRef
+    //       .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.currentUser.tags)
+    //       .orderBy('postDateTimeInMilliseconds', descending: true)
+    //       .startAfterDocument(lastRecommendedDocSnap)
+    //       .limit(resultsPerPage);
+    // } else if (tagFilter != "None" && !sortByPopularity) {
+    //   query = postsRef
+    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.currentUser.tags)
+    //       .where('tags', arrayContains: tagFilter)
+    //       .orderBy('postDateTimeInMilliseconds', descending: true)
+    //       .startAfterDocument(lastRecommendedDocSnap)
+    //       .limit(resultsPerPage);
+    // } else if (tagFilter == "None" && sortByPopularity) {
+    //   query = postsRef
+    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.currentUser.tags)
+    //       .startAfterDocument(lastRecommendedDocSnap)
+    //       .orderBy('commentCount', descending: true)
+    //       .limit(resultsPerPage);
+    // } else {
+    //   query = postsRef
+    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
+    //       .where('tags', arrayContainsAny: widget.currentUser.tags)
+    //       .where('tags', arrayContains: tagFilter)
+    //       .orderBy('commentCount', descending: true)
+    //       .startAfterDocument(lastRecommendedDocSnap)
+    //       .limit(resultsPerPage);
+    // }
+    // QuerySnapshot querySnapshot = await query.get().catchError((e) {});
+    // lastRecommendedDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    // recommendedResults.addAll(querySnapshot.docs);
+    // if (querySnapshot.docs.length == 0) {
+    //   moreRecommendedAvailable = false;
+    // }
+    // loadingAdditionalRecommended = false;
+    // setState(() {});
   }
 
   setNewLocation() async {
@@ -389,7 +438,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       context: context,
       apiKey: Strings.googleAPIKEY,
       onError: (res) {
-        print(res.errorMessage);
+        //print(res.errorMessage);
       },
       //proxyBaseUrl: Strings.proxyMapsURL,
       mode: Mode.overlay,
@@ -416,156 +465,199 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   }
 
   Future<void> refreshData() async {
-    liveEventResults = [];
-    virtualEventResults = [];
+    postResults = [];
+    eventResults = [];
+    followingResults = [];
+    // recommendedResults = [];
     recordedStreamResults = [];
     getRecordedStreams();
-    getLiveEvents();
-    getVirtualEvents();
-    //getSavedEvents();
+    getEvents();
+    getFollowingPosts();
+    // getRecommendedPosts();
+    getPosts();
   }
 
   Future<void> refreshFromPreferences() async {
-    Navigator.of(context).pop();
     isLoading = true;
     setState(() {});
-    liveEventResults = [];
-    virtualEventResults = [];
-    getRecordedStreams();
-    getLiveEvents();
-    getVirtualEvents();
+    refreshData();
   }
 
-  showEventPreferenceDialog() {
-    Widget widget = Container(
-      height: 325.0,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          CustomText(
-            context: context,
-            text: "Event Preferences",
-            textColor: Colors.black,
-            textAlign: TextAlign.center,
-            fontSize: 24.0,
-            fontWeight: FontWeight.w700,
-          ),
-          SizedBox(height: 16.0),
-          CustomText(
-            context: context,
-            text: "Location:",
-            textColor: Colors.black,
-            textAlign: TextAlign.left,
-            fontSize: 16.0,
-            fontWeight: FontWeight.w700,
-          ),
-          SizedBox(height: 4.0),
-          GestureDetector(
-            onTap: () => setNewLocation(),
-            child: TextFieldContainer(
-              height: 30.0,
+  showPreferenceDialog() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 64.0),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomText(
+                        context: context,
+                        text: "Preferences",
+                        textColor: Colors.black,
+                        textAlign: TextAlign.left,
+                        fontSize: 24.0,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: Icon(
+                          FontAwesomeIcons.times,
+                          color: Colors.black38,
+                          size: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
                   CustomText(
                     context: context,
-                    text: "$areaName",
+                    text: "Sort By:",
                     textColor: Colors.black,
                     textAlign: TextAlign.left,
-                    fontSize: 12.0,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  SizedBox(height: 4.0),
+                  TextFieldContainer(
+                    height: 32,
+                    child: DropdownButton(
+                        isExpanded: true,
+                        underline: Container(),
+                        value: sortBy,
+                        items: sortByList.map((String val) {
+                          return DropdownMenuItem<String>(
+                            value: val,
+                            child: Text(val),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          setState(() {
+                            sortBy = val;
+                          });
+                          refreshFromPreferences();
+                        }),
+                  ),
+                  SizedBox(height: 32.0),
+                  CustomText(
+                    context: context,
+                    text: "Location:",
+                    textColor: Colors.black,
+                    textAlign: TextAlign.left,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  SizedBox(height: 4.0),
+                  GestureDetector(
+                    onTap: () => setNewLocation(),
+                    child: TextFieldContainer(
+                      height: 32.0,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          CustomText(
+                            context: context,
+                            text: areaName.isEmpty ? "Everywhere" : "$areaName",
+                            textColor: Colors.black,
+                            textAlign: TextAlign.left,
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.0),
+                  GestureDetector(
+                    onTap: () {
+                      areaName = "";
+                      areaCodeFilter = "";
+                      setState(() {});
+                      refreshFromPreferences();
+                    },
+                    child: Text(
+                      'Clear Location Filter',
+                      style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  SizedBox(height: 32.0),
+                  CustomText(
+                    context: context,
+                    text: "Tag: $tagFilter",
+                    textColor: Colors.black,
+                    textAlign: TextAlign.left,
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w700,
+                  ),
+                  SizedBox(height: 4.0),
+                  TextFieldContainer(
+                    height: 35,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        top: 8,
+                      ),
+                      child: TypeAheadField(
+                        hideOnEmpty: true,
+                        hideOnLoading: true,
+                        direction: AxisDirection.down,
+                        textFieldConfiguration: TextFieldConfiguration(
+                          controller: tagTextController,
+                          cursorColor: Colors.black,
+                          decoration: InputDecoration(
+                            hintText: "Search for Tag",
+                            border: InputBorder.none,
+                          ),
+                          autofocus: false,
+                        ),
+                        suggestionsCallback: (searchTerm) async {
+                          return await AlgoliaSearch().queryTags(searchTerm);
+                        },
+                        itemBuilder: (context, tag) {
+                          return ListTile(
+                            title: Text(
+                              tag,
+                              style: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w700),
+                            ),
+                          );
+                        },
+                        onSuggestionSelected: (val) {
+                          tagFilter = val;
+                          tagTextController.clear();
+                          refreshFromPreferences();
+                          setState(() {});
+                        },
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 12.0),
+                  GestureDetector(
+                    onTap: () {
+                      tagFilter = "";
+                      setState(() {});
+                      refreshFromPreferences();
+                    },
+                    child: Text(
+                      'Clear Tag Filter',
+                      style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.bold),
+                    ),
                   ),
                 ],
               ),
-            ),
-          ),
-          SizedBox(height: 16.0),
-          CustomText(
-            context: context,
-            text: "Category:",
-            textColor: Colors.black,
-            textAlign: TextAlign.left,
-            fontSize: 16.0,
-            fontWeight: FontWeight.w700,
-          ),
-          SizedBox(height: 4.0),
-          TextFieldContainer(
-            height: 35,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 6,
-              ),
-              child: DropdownButton(
-                  style: TextStyle(fontSize: 12.0, color: Colors.black),
-                  isExpanded: true,
-                  underline: Container(),
-                  value: eventCategoryFilter,
-                  items: Strings.eventCategoryFilters.map((String val) {
-                    return DropdownMenuItem<String>(
-                      value: val,
-                      child: Text(val),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      eventCategoryFilter = val;
-                    });
-                    Navigator.of(context).pop();
-                    showEventPreferenceDialog();
-                  }),
-            ),
-          ),
-          SizedBox(height: 16.0),
-          CustomText(
-            context: context,
-            text: "Type:",
-            textColor: Colors.black,
-            textAlign: TextAlign.left,
-            fontSize: 16.0,
-            fontWeight: FontWeight.w700,
-          ),
-          SizedBox(height: 4.0),
-          TextFieldContainer(
-            height: 35,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: 6,
-              ),
-              child: DropdownButton(
-                  style: TextStyle(fontSize: 12.0, color: Colors.black),
-                  isExpanded: true,
-                  underline: Container(),
-                  value: eventTypeFilter,
-                  items: Strings.eventTypeFilters.map((String val) {
-                    return DropdownMenuItem<String>(
-                      value: val,
-                      child: Text(val),
-                    );
-                  }).toList(),
-                  onChanged: (val) {
-                    setState(() {
-                      eventTypeFilter = val;
-                    });
-                    Navigator.of(context).pop();
-                    showEventPreferenceDialog();
-                  }),
-            ),
-          ),
-          SizedBox(height: 16.0),
-          CustomColorButton(
-            text: "Apply",
-            textColor: Colors.white,
-            backgroundColor: CustomColors.darkMountainGreen,
-            height: 45.0,
-            width: 200.0,
-            onPressed: () => refreshFromPreferences(),
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
-    ShowAlertDialogService().showCustomWidgetDialog(context, widget);
   }
 
   Widget listRecordedStreams() {
@@ -655,12 +747,12 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     );
   }
 
-  Widget listLiveEvents() {
+  Widget listPosts(String postType) {
     return LiquidPullToRefresh(
       color: CustomColors.webblenRed,
       onRefresh: refreshData,
       child: ListView.builder(
-        controller: liveEventsScrollController,
+        controller: null,
         physics: AlwaysScrollableScrollPhysics(),
         key: UniqueKey(),
         shrinkWrap: true,
@@ -668,84 +760,25 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           top: 4.0,
           bottom: 4.0,
         ),
-        itemCount: liveEventResults.length,
+        itemCount: postType == "following"
+            ? followingResults.length
+            : postType == "recommended"
+                ? recommendedResults.length
+                : postResults.length,
         itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(liveEventResults[index].data()['d']));
+          WebblenPost post = WebblenPost.fromMap(Map<String, dynamic>.from(postType == "following"
+              ? followingResults[index].data()
+              : postType == "recommended"
+                  ? recommendedResults[index].data()
+                  : postResults[index].data()));
           double num = index / 15;
           if (num == num.roundToDouble() && num != 0) {
             return Padding(
-              padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
-              child: Container(
-                child: Column(
-                  children: [
-                    Container(
-                      height: 70,
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(bottom: 20.0),
-                      child: NativeAdmob(
-                        // Your ad unit id
-                        loading: Container(),
-                        adUnitID: adMobUnitID, //'ca-app-pub-3940256099942544/3986624511',
-                        numberAds: 1,
-                        controller: nativeAdController,
-                        type: NativeAdmobType.banner,
-                      ),
-                    ),
-                    EventBlock(
-                      currentUID: widget.currentUser.uid,
-                      event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                      viewEventDetails: () =>
-                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          } else {
-            return Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
-              child: EventBlock(
-                currentUID: widget.currentUser.uid,
-                event: event,
-                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                viewEventTickets: null,
-                numOfTicsForEvent: null,
-                eventImgSize: MediaQuery.of(context).size.width - 16,
-                eventDescHeight: 120.0,
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  Widget listVirtualEvents() {
-    return LiquidPullToRefresh(
-      color: CustomColors.webblenRed,
-      onRefresh: refreshData,
-      child: ListView.builder(
-        controller: virtualEventsScrollController,
-        physics: AlwaysScrollableScrollPhysics(),
-        key: UniqueKey(),
-        shrinkWrap: true,
-        padding: EdgeInsets.only(
-          top: 4.0,
-          bottom: 4.0,
-        ),
-        itemCount: virtualEventResults.length,
-        itemBuilder: (context, index) {
-          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(virtualEventResults[index].data()['d']));
-          double num = index / 15;
-          if (num == num.roundToDouble() && num != 0) {
-            return Padding(
-              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
+              padding: postType == "following"
+                  ? EdgeInsets.only(bottom: followingResults.length - 1 == index ? 16.0 : 0)
+                  : postType == "recommended"
+                      ? EdgeInsets.only(bottom: recommendedResults.length - 1 == index ? 16.0 : 0)
+                      : EdgeInsets.only(bottom: postResults.length - 1 == index ? 16.0 : 0),
               child: Container(
                 child: Column(
                   children: [
@@ -763,17 +796,23 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                         type: NativeAdmobType.banner,
                       ),
                     ),
-                    EventBlock(
-                      currentUID: widget.currentUser.uid,
-                      event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                      viewEventDetails: () =>
-                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
-                    ),
+                    post.imageURL == null
+                        ? PostTextBlock(
+                            currentUID: widget.currentUser.uid,
+                            post: post,
+                            viewUser: () => transitionToUserPage(post.authorID),
+                            //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                            viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
+                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                          )
+                        : PostImgBlock(
+                            currentUID: widget.currentUser.uid,
+                            post: post,
+                            viewUser: () => transitionToUserPage(post.authorID),
+                            //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                            viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
+                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                          ),
                   ],
                 ),
               ),
@@ -781,40 +820,62 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           } else {
             return index == 0
                 ? Padding(
-                    padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: liveEventResults.length - 1 == index ? 16.0 : 0),
+                    padding: postType == "following"
+                        ? EdgeInsets.only(bottom: followingResults.length - 1 == index ? 16.0 : 0)
+                        : postType == "recommended"
+                            ? EdgeInsets.only(bottom: recommendedResults.length - 1 == index ? 16.0 : 0)
+                            : EdgeInsets.only(bottom: postResults.length - 1 == index ? 16.0 : 0),
                     child: Container(
                       child: Column(
                         children: [
-                          listRecordedStreams(),
+                          recordedStreamResults.isNotEmpty ? listRecordedStreams() : Container(),
                           SizedBox(height: 8.0),
-                          EventBlock(
-                            currentUID: widget.currentUser.uid,
-                            event: event,
-                            shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                            viewEventDetails: () =>
-                                PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                            viewEventTickets: null,
-                            numOfTicsForEvent: null,
-                            eventImgSize: MediaQuery.of(context).size.width - 16,
-                            eventDescHeight: 120.0,
-                          ),
+                          post.imageURL == null
+                              ? PostTextBlock(
+                                  currentUID: widget.currentUser.uid,
+                                  post: post,
+                                  viewUser: () => transitionToUserPage(post.authorID),
+                                  //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                                  viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
+                                  postOptions: () => postOptionsDialog(post.id, post.authorID),
+                                )
+                              : PostImgBlock(
+                                  currentUID: widget.currentUser.uid,
+                                  post: post,
+                                  viewUser: () => transitionToUserPage(post.authorID),
+                                  //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                                  viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
+                                  postOptions: () => postOptionsDialog(post.id, post.authorID),
+                                ),
                         ],
                       ),
                     ),
                   )
                 : Padding(
-                    padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: virtualEventResults.length - 1 == index ? 16.0 : 0),
-                    child: EventBlock(
-                      currentUID: widget.currentUser.uid,
-                      event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                      viewEventDetails: () =>
-                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
-                    ),
+                    padding: postType == "following"
+                        ? EdgeInsets.only(bottom: followingResults.length - 1 == index ? 16.0 : 0)
+                        : postType == "recommended"
+                            ? EdgeInsets.only(bottom: recommendedResults.length - 1 == index ? 16.0 : 0)
+                            : EdgeInsets.only(bottom: postResults.length - 1 == index ? 16.0 : 0),
+                    child: post.imageURL == null
+                        ? PostTextBlock(
+                            currentUID: widget.currentUser.uid,
+                            post: post,
+                            viewUser: () => transitionToUserPage(post.authorID),
+                            //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                            viewPost: () =>
+                                PageTransitionService(context: context, currentUser: widget.currentUser, postID: post.id).transitionToPostViewPage(),
+                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                          )
+                        : PostImgBlock(
+                            currentUID: widget.currentUser.uid,
+                            post: post,
+                            viewUser: () => transitionToUserPage(post.authorID),
+                            //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                            viewPost: () =>
+                                PageTransitionService(context: context, currentUser: widget.currentUser, postID: post.id).transitionToPostViewPage(),
+                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                          ),
                   );
           }
         },
@@ -822,18 +883,106 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     );
   }
 
-  showNewEventOrStreamDialog() {
-    ShowAlertDialogService().showNewEventOrStreamDialog(
-      context,
-      () {
-        Navigator.of(context).pop();
-        PageTransitionService(context: context, isStream: false).transitionToCreateEventPage();
-      },
-      () {
-        Navigator.of(context).pop();
-        PageTransitionService(context: context, isStream: true).transitionToCreateEventPage();
-      },
+  Widget listEvents() {
+    return LiquidPullToRefresh(
+      color: CustomColors.webblenRed,
+      onRefresh: refreshData,
+      child: ListView.builder(
+        controller: eventsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: eventResults.length,
+        itemBuilder: (context, index) {
+          WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(eventResults[index].data()['d']));
+          return Padding(
+            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
+            child: EventBlock(
+              currentUID: widget.currentUser.uid,
+              event: event,
+              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
+              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+              viewEventTickets: null,
+              numOfTicsForEvent: null,
+              eventImgSize: MediaQuery.of(context).size.width - 16,
+              eventDescHeight: 120.0,
+            ),
+          );
+        },
+      ),
     );
+  }
+
+  showNewContentDialog() async {
+    String action = await showModalActionSheet(context: context, message: "What Do You Have for $areaName?", actions: [
+      SheetAction(label: "Create Post", key: 'post'),
+      SheetAction(label: "Create Stream", key: 'stream'),
+      SheetAction(label: "Create Event", key: 'event'),
+    ]);
+    if (action == 'post') {
+      PageTransitionService(context: context).transitionToCreatePostPage();
+    } else if (action == 'stream') {
+      PageTransitionService(context: context, isStream: true).transitionToCreateEventPage();
+    } else if (action == 'event') {
+      PageTransitionService(context: context, isStream: false).transitionToCreateEventPage();
+    }
+  }
+
+  postOptionsDialog(String postID, String postAuthorID) async {
+    if (postAuthorID == widget.currentUser.uid) {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Edit Post", key: 'editPost'),
+          SheetAction(label: "Share", key: 'sharePost'),
+          SheetAction(label: "Delete Post", key: 'deletePost', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'editPost') {
+        PageTransitionService(context: context, postID: postID).transitionToCreatePostPage();
+      } else if (action == 'sharePost') {
+        PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      } else if (action == 'deletePost') {
+        OkCancelResult res = await showOkCancelAlertDialog(
+          context: context,
+          message: "Delete This Post?",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+          isDestructiveAction: true,
+        );
+        if (res == OkCancelResult.ok) {
+          PostDataService().deletePost(postID);
+        }
+      }
+    } else {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Share", key: 'share'),
+          SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'share') {
+        PageTransitionService(context: context).transitionToCreatePostPage();
+      } else if (action == 'report') {
+        PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      }
+    }
+  }
+
+  transitionToUserPage(String uid) async {
+    ShowAlertDialogService().showLoadingDialog(context);
+    WebblenUser user = await WebblenUserData().getUserByID(uid);
+    Navigator.of(context).pop();
+    PageTransitionService(
+      context: context,
+      currentUser: widget.currentUser,
+      webblenUser: user,
+    ).transitionToUserPage();
   }
 
   @override
@@ -846,39 +995,58 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     }
     setState(() {});
     _tabController = new TabController(
-      length: 2,
+      length: 3,
       vsync: this,
     );
-    liveEventsScrollController = ScrollController();
-    virtualEventsScrollController = ScrollController();
-    liveEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * liveEventsScrollController.position.maxScrollExtent;
-      if (liveEventsScrollController.position.pixels > triggerFetchMoreSize) {
-        getAdditionalLiveEvents();
+
+    postsScrollController = ScrollController();
+    eventsScrollController = ScrollController();
+    followingScrollController = ScrollController();
+    // recommendedScrollController = ScrollController();
+
+    postsScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * postsScrollController.position.maxScrollExtent;
+      if (postsScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalPosts();
       }
     });
-    virtualEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * virtualEventsScrollController.position.maxScrollExtent;
-      if (virtualEventsScrollController.position.pixels > triggerFetchMoreSize) {
-        getAdditionalVirtualEvents();
+    eventsScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * eventsScrollController.position.maxScrollExtent;
+      if (eventsScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalEvents();
       }
     });
+    followingScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * followingScrollController.position.maxScrollExtent;
+      if (followingScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalFollowing();
+      }
+    });
+    // recommendedScrollController.addListener(() {
+    //   double triggerFetchMoreSize = 0.9 * recommendedScrollController.position.maxScrollExtent;
+    //   if (recommendedScrollController.position.pixels > triggerFetchMoreSize) {
+    //     getAdditionalRecommended();
+    //   }
+    // });
     areaName = widget.areaName;
     setState(() {});
     LocationService().getZipFromLatLon(widget.currentLat, widget.currentLon).then((res) {
       areaCodeFilter = res;
-      //getSavedEvents();
       getRecordedStreams();
-      getVirtualEvents();
-      getLiveEvents();
+      getPosts();
+      getEvents();
+      getFollowingPosts();
+      //getRecommendedPosts();
     });
   }
 
   @override
   void dispose() {
     super.dispose();
-    liveEventsScrollController.dispose();
-    virtualEventsScrollController.dispose();
+    eventsScrollController.dispose();
+    postsScrollController.dispose();
+    followingScrollController.dispose();
+    // recommendedScrollController.dispose();
   }
 
   @override
@@ -893,7 +1061,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
             margin: EdgeInsets.only(
               left: 16,
               top: 30,
-              right: 8,
+              right: 16,
             ),
             child: Row(
               children: [
@@ -905,40 +1073,47 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                     children: [
                       MediaQuery(
                         data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
-                        child: areaName.length <= 6
+                        child: areaName.isEmpty
                             ? Fonts().textW700(
-                                areaName,
-                                40,
+                                "Everywhere",
+                                25,
                                 Colors.black,
                                 TextAlign.left,
                               )
-                            : areaName.length <= 8
+                            : areaName.length <= 6
                                 ? Fonts().textW700(
                                     areaName,
-                                    35,
+                                    40,
                                     Colors.black,
                                     TextAlign.left,
                                   )
-                                : areaName.length <= 10
+                                : areaName.length <= 8
                                     ? Fonts().textW700(
                                         areaName,
-                                        30,
+                                        35,
                                         Colors.black,
                                         TextAlign.left,
                                       )
-                                    : areaName.length <= 12
+                                    : areaName.length <= 10
                                         ? Fonts().textW700(
                                             areaName,
-                                            25,
+                                            30,
                                             Colors.black,
                                             TextAlign.left,
                                           )
-                                        : Fonts().textW700(
-                                            areaName,
-                                            20,
-                                            Colors.black,
-                                            TextAlign.left,
-                                          ),
+                                        : areaName.length <= 12
+                                            ? Fonts().textW700(
+                                                areaName,
+                                                25,
+                                                Colors.black,
+                                                TextAlign.left,
+                                              )
+                                            : Fonts().textW700(
+                                                areaName,
+                                                20,
+                                                Colors.black,
+                                                TextAlign.left,
+                                              ),
                       ),
                     ],
                   ),
@@ -958,7 +1133,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: <Widget>[
                             GestureDetector(
-                              onTap: () => showEventPreferenceDialog(),
+                              onTap: () => showPreferenceDialog(),
                               child: Container(
                                 height: 30,
                                 width: 30,
@@ -985,7 +1160,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => showNewEventOrStreamDialog(),
+                              onTap: () => showNewContentDialog(),
                               child: Container(
                                 height: 30,
                                 width: 30,
@@ -1006,47 +1181,85 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
             ),
           ),
           Container(
-            height: 50,
+            height: 30,
+            padding: EdgeInsets.only(bottom: 4),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 TabBar(
                   controller: _tabController,
-                  labelPadding: EdgeInsets.symmetric(horizontal: 60.0),
-                  indicatorColor: CustomColors.webblenRed,
-                  labelColor: CustomColors.darkGray,
                   isScrollable: true,
+                  labelPadding: EdgeInsets.symmetric(horizontal: 10),
+                  indicatorColor: CustomColors.webblenRed,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.black54,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicator: BoxDecoration(borderRadius: BorderRadius.circular(10), color: CustomColors.webblenRed),
                   tabs: [
                     Tab(
-                      child: CustomText(
-                        context: context,
-                        text: "Streams",
-                        textColor: Colors.black,
-                        textAlign: TextAlign.center,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Posts",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
                     ),
                     Tab(
-                      child: CustomText(
-                        context: context,
-                        text: "Events",
-                        textColor: Colors.black,
-                        textAlign: TextAlign.center,
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.w500,
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Events",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
                       ),
                     ),
-//                    Tab(
-//                      child: CustomText(
-//                        context: context,
-//                        text: "Saved",
-//                        textColor: Colors.black,
-//                        textAlign: TextAlign.center,
-//                        fontSize: 15.0,
-//                        fontWeight: FontWeight.w500,
-//                      ),
-//                    ),
+                    Tab(
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Following",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Tab(
+                    //   child: Container(
+                    //     height: 30,
+                    //     width: 110,
+                    //     decoration: BoxDecoration(
+                    //       borderRadius: BorderRadius.circular(10),
+                    //     ),
+                    //     child: Align(
+                    //       alignment: Alignment.center,
+                    //       child: Text(
+                    //         "Recommended",
+                    //         style: TextStyle(fontWeight: FontWeight.bold),
+                    //       ),
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ],
@@ -1056,70 +1269,124 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
             child: Container(
               width: MediaQuery.of(context).size.width,
               child: DefaultTabController(
-                length: 2,
+                length: 4,
                 child: TabBarView(
                   controller: _tabController,
                   children: <Widget>[
                     //LIVE EVENTS
                     Container(
-                        key: PageStorageKey('key0'),
-                        color: Colors.white,
-                        child: isLoading
-                            ? LoadingScreen(
-                                context: context,
-                                loadingDescription: 'Loading Streams...',
-                              )
-                            : virtualEventResults.isEmpty && recordedStreamResults.isEmpty
-                                ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width - 16,
-                                            ),
-                                            child: Text(
-                                              "We Could Not Find Any Streams \nAccording to Your Preferences",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(height: 8.0),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          GestureDetector(
-                                            onTap: () => showEventPreferenceDialog(),
-                                            child: Text(
-                                              "Change My Preferences",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
-                                            ),
+                      key: PageStorageKey('key0'),
+                      color: Colors.white,
+                      child: isLoading
+                          ? LoadingScreen(
+                              context: context,
+                              loadingDescription: 'Loading Posts...',
+                            )
+                          : postResults.isEmpty && recordedStreamResults.isEmpty
+                              ? LiquidPullToRefresh(
+                                  color: CustomColors.webblenRed,
+                                  onRefresh: refreshData,
+                                  child: Center(
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                          child: Image.asset(
+                                            'assets/images/balloon_person.png',
+                                            height: 200,
+                                            fit: BoxFit.contain,
+                                            filterQuality: FilterQuality.medium,
                                           ),
-                                        ],
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                              ),
+                                              child: Text(
+                                                "Looks Like Nobody Has Started\nSetting the Culture of This Area...",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            GestureDetector(
+                                              onTap: () => showNewContentDialog(),
+                                              child: Text(
+                                                "Be the First and Get 10.00 WBLN",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 100.0),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : recordedStreamResults.isNotEmpty && postResults.isEmpty
+                                  ? LiquidPullToRefresh(
+                                      color: CustomColors.webblenRed,
+                                      onRefresh: refreshData,
+                                      child: Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                              child: Image.asset(
+                                                'assets/images/balloon_person.png',
+                                                height: 200,
+                                                fit: BoxFit.contain,
+                                                filterQuality: FilterQuality.medium,
+                                              ),
+                                            ),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width - 16,
+                                                  ),
+                                                  child: Text(
+                                                    "Looks Like Nobody Has Started\nSetting the Culture of This Area...",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            SizedBox(height: 8.0),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                GestureDetector(
+                                                  onTap: () => showNewContentDialog(),
+                                                  child: Text(
+                                                    "Be the First and Get 10.00 WBLN",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 100.0),
+                                          ],
+                                        ),
                                       ),
-                                      SizedBox(height: 100.0),
-                                    ],
-                                  )
-                                : recordedStreamResults.isNotEmpty && virtualEventResults.isEmpty
-                                    ? Column(
-                                        children: [
-                                          SizedBox(height: 8.0),
-                                          listRecordedStreams(),
-                                          SizedBox(height: 8.0),
-                                          Text(
-                                            "We Could Not Find Any Streams \nAccording to Your Preferences",
-                                            textAlign: TextAlign.center,
-                                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                          ),
-                                        ],
-                                      )
-                                    : listVirtualEvents()),
-                    //VIRTUAL EVENTS
+                                    )
+                                  : listPosts(""),
+                    ),
+                    //EVENTS
                     Container(
                       key: PageStorageKey('key1'),
                       color: Colors.white,
@@ -1128,82 +1395,174 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                               context: context,
                               loadingDescription: 'Loading Events...',
                             )
-                          : liveEventResults.isEmpty
+                          : eventResults.isEmpty
                               ? LiquidPullToRefresh(
+                                  color: CustomColors.webblenRed,
                                   onRefresh: refreshData,
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: <Widget>[
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Container(
-                                            constraints: BoxConstraints(
-                                              maxWidth: MediaQuery.of(context).size.width - 16,
+                                  child: Center(
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: <Widget>[
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                              ),
+                                              child: Text(
+                                                "We Could Not Find Any Events \nAccording to Your Preferences",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            GestureDetector(
+                                              onTap: () => showPreferenceDialog(),
+                                              child: Text(
+                                                "Change My Preferences",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                              ),
                                             ),
-                                            child: Text(
-                                              "We Could Not Find Any Events \nAccording to Your Preferences",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      SizedBox(height: 8.0),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          GestureDetector(
-                                            onTap: () => showEventPreferenceDialog(),
-                                            child: Text(
-                                              "Change My Preferences",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 100.0),
-                                    ],
+                                          ],
+                                        ),
+                                        SizedBox(height: 100.0),
+                                      ],
+                                    ),
                                   ),
                                 )
-                              : listLiveEvents(),
+                              : listEvents(),
                     ),
-                    //SAVED EVENTS
-//                    Container(
-//                      key: PageStorageKey('key2'),
-//                      color: Colors.white,
-//                      child: isLoading
-//                          ? LoadingScreen(
-//                              context: context,
-//                              loadingDescription: 'Loading Saved Events...',
-//                            )
-//                          : savedEventResults.isEmpty
-//                              ? Column(
-//                                  mainAxisAlignment: MainAxisAlignment.center,
-//                                  children: <Widget>[
-//                                    Row(
-//                                      mainAxisAlignment: MainAxisAlignment.center,
-//                                      children: <Widget>[
-//                                        Container(
-//                                          constraints: BoxConstraints(
-//                                            maxWidth: MediaQuery.of(context).size.width - 16,
-//                                          ),
-//                                          child: CustomText(
-//                                            context: context,
-//                                            text: "You Do Not Have Any Upcoming Events Saved",
-//                                            textColor: Colors.black,
-//                                            textAlign: TextAlign.center,
-//                                            fontSize: 16.0,
-//                                            fontWeight: FontWeight.w500,
-//                                          ),
-//                                        )
-//                                      ],
-//                                    ),
-//                                  ],
-//                                )
-//                              : listSavedEvents(),
-//                    ),
+                    //Following
+                    Container(
+                      key: PageStorageKey('key2'),
+                      color: Colors.white,
+                      child: isLoading
+                          ? LoadingScreen(
+                              context: context,
+                              loadingDescription: 'Loading Posts...',
+                            )
+                          : followingResults.isEmpty
+                              ? LiquidPullToRefresh(
+                                  color: CustomColors.webblenRed,
+                                  onRefresh: refreshData,
+                                  child: Center(
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                          child: Image.asset(
+                                            'assets/images/add_users.png',
+                                            height: 200,
+                                            fit: BoxFit.contain,
+                                            filterQuality: FilterQuality.medium,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                              ),
+                                              child: Text(
+                                                "No One Your Following Has Posted Anything Recently",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            GestureDetector(
+                                              onTap: () => PageTransitionService(context: context).transitionToFollowSugestionsPage(),
+                                              child: Text(
+                                                "View Follow Suggestions",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 100.0),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : listPosts('following'),
+                    ),
+                    //RECOMMENDED
+                    // Container(
+                    //   key: PageStorageKey('key3'),
+                    //   color: Colors.white,
+                    //   child: isLoading
+                    //       ? LoadingScreen(
+                    //           context: context,
+                    //           loadingDescription: 'Loading Posts...',
+                    //         )
+                    //       : recommendedResults.isEmpty
+                    //           ? LiquidPullToRefresh(
+                    //               color: CustomColors.webblenRed,
+                    //               onRefresh: refreshData,
+                    //               child: Center(
+                    //                 child: ListView(
+                    //                   shrinkWrap: true,
+                    //                   children: <Widget>[
+                    //                     Padding(
+                    //                       padding: EdgeInsets.symmetric(horizontal: 16.0),
+                    //                       child: Image.asset(
+                    //                         'assets/images/analytics.png',
+                    //                         height: 200,
+                    //                         fit: BoxFit.contain,
+                    //                         filterQuality: FilterQuality.medium,
+                    //                       ),
+                    //                     ),
+                    //                     Row(
+                    //                       mainAxisAlignment: MainAxisAlignment.center,
+                    //                       children: <Widget>[
+                    //                         Container(
+                    //                           constraints: BoxConstraints(
+                    //                             maxWidth: MediaQuery.of(context).size.width - 16,
+                    //                           ),
+                    //                           child: Text(
+                    //                             "We Couldn't Find Any People or Events\n that Would Interest You\n\n Check Back Here Later!",
+                    //                             textAlign: TextAlign.center,
+                    //                             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                    //                           ),
+                    //                         )
+                    //                       ],
+                    //                     ),
+                    //                     SizedBox(height: 8.0),
+                    //                     Row(
+                    //                       mainAxisAlignment: MainAxisAlignment.center,
+                    //                       children: <Widget>[
+                    //                         GestureDetector(
+                    //                           onTap: () => PageTransitionService(context: context).transitionToInterestsPage(),
+                    //                           child: Text(
+                    //                             "Update Interests",
+                    //                             textAlign: TextAlign.center,
+                    //                             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                    //                           ),
+                    //                         ),
+                    //                       ],
+                    //                     ),
+                    //                     SizedBox(height: 100.0),
+                    //                   ],
+                    //                 ),
+                    //               ),
+                    //             )
+                    //           : listPosts('recommended'),
+                    // ),
                   ],
                 ),
               ),

@@ -17,7 +17,7 @@ class EventChatMessage {
       : this(
           senderUID: data['senderUID'],
           userImgURL: data['userImgURL'],
-          username: data['usernmae'],
+          username: data['username'],
           message: data['message'],
           timePostedInMilliseconds: data['timePostedInMilliseconds'],
         );

@@ -8,6 +8,7 @@ import 'package:flutter_native_admob/native_admob_controller.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
+import 'package:webblen/firebase/data/post_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
@@ -20,12 +21,10 @@ import 'package:webblen/widgets/widgets_user/user_details_header.dart';
 class UserPage extends StatefulWidget {
   final WebblenUser currentUser;
   final WebblenUser webblenUser;
-  final backButtonIsDisabled;
 
   UserPage({
     this.currentUser,
     this.webblenUser,
-    this.backButtonIsDisabled,
   });
 
   @override
@@ -71,6 +70,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     if (followingList.contains(user.uid)) {
       followingList.remove(user.uid);
       userFollowersList.remove(widget.currentUser.uid);
+      PostDataService().removeUserFromFollowingPosts(widget.currentUser.uid, user.uid);
     } else {
       followingList.add(user.uid);
       userFollowersList.add(widget.currentUser.uid);

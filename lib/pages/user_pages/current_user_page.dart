@@ -13,6 +13,7 @@ import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
@@ -66,16 +67,18 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
 
-  followUnfollowAction() async {
-    if (followingList.contains(user.uid)) {
-      followingList.remove(user.uid);
-      userFollowersList.remove(widget.currentUser.uid);
-    } else {
-      followingList.add(user.uid);
-      userFollowersList.add(widget.currentUser.uid);
-    }
-    setState(() {});
-    WebblenUserData().updateFollowing(widget.currentUser.uid, user.uid, followingList, userFollowersList);
+  showNewEventOrStreamDialog() {
+    ShowAlertDialogService().showNewEventOrStreamDialog(
+      context,
+      () {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, isStream: false).transitionToCreateEventPage();
+      },
+      () {
+        Navigator.of(context).pop();
+        PageTransitionService(context: context, isStream: true).transitionToCreateEventPage();
+      },
+    );
   }
 
   getHostedEvents() async {
@@ -556,7 +559,7 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                       uid: user.uid,
                       followersLength: followers.length,
                       followingLength: following.length,
-                      followUnfollowAction: () => followUnfollowAction(),
+                      followUnfollowAction: null,
                       viewFollowersAction: () => PageTransitionService(
                         context: context,
                         userIDs: followers,
@@ -637,6 +640,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                 ? Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                        child: Image.asset(
+                                          'assets/images/beach_sun.png',
+                                          height: 200,
+                                          fit: BoxFit.contain,
+                                          filterQuality: FilterQuality.medium,
+                                        ),
+                                      ),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[
@@ -653,6 +665,14 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                         ],
                                       ),
                                       SizedBox(height: 8.0),
+                                      GestureDetector(
+                                        onTap: () => showNewEventOrStreamDialog(),
+                                        child: Text(
+                                          "Change Event or Stream",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                        ),
+                                      ),
                                     ],
                                   )
                                 : listHostedEvents(),
@@ -670,6 +690,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                 ? Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                        child: Image.asset(
+                                          'assets/images/beach_sun.png',
+                                          height: 200,
+                                          fit: BoxFit.contain,
+                                          filterQuality: FilterQuality.medium,
+                                        ),
+                                      ),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[
@@ -703,6 +732,15 @@ class _CurrentUserPageState extends State<CurrentUserPage> with SingleTickerProv
                                 ? Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                        child: Image.asset(
+                                          'assets/images/beach_sun.png',
+                                          height: 200,
+                                          fit: BoxFit.contain,
+                                          filterQuality: FilterQuality.medium,
+                                        ),
+                                      ),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: <Widget>[

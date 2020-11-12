@@ -5,9 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:webblen/home_page.dart';
 import 'package:webblen/pages/auth_pages/login_page.dart';
-import 'package:webblen/pages/onboarding/onboarding_page.dart';
+import 'package:webblen/pages/onboarding/onboarding_path_select_page.dart';
 import 'package:webblen/root_page.dart';
 import 'package:webblen/styles/flat_colors.dart';
+
+import 'pages/onboarding/onboarding_complete_page.dart';
+import 'pages/user_pages/setup_page.dart';
 
 void main() {
   runApp(WebblenApp());
@@ -44,10 +47,12 @@ class WebblenApp extends StatelessWidget {
                 ),
                 home: RootPage(),
                 routes: <String, WidgetBuilder>{
-                  '/home': (BuildContext context) => HomePage(),
                   '/root': (BuildContext context) => RootPage(),
                   '/login': (BuildContext context) => LoginPage(),
-                  '/setup': (BuildContext context) => OnboardingPage(),
+                  '/setup': (BuildContext context) => SetupPage(),
+                  '/onboarding': (BuildContext context) => OnboardingPathSelectPage(),
+                  '/home': (BuildContext context) => HomePage(),
+                  '/onboarding_complete': (BuildContext context) => OnboardingCompletePage(),
                 },
               ),
             );

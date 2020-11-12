@@ -405,20 +405,20 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
           ),
         ),
         SizedBox(height: 4.0),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            event.category,
-            style: TextStyle(color: Colors.black38, fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            event.type,
-            style: TextStyle(color: Colors.black38, fontSize: 14, fontWeight: FontWeight.w500),
-          ),
-        ),
+        // Padding(
+        //   padding: EdgeInsets.symmetric(horizontal: 16.0),
+        //   child: Text(
+        //     event.category,
+        //     style: TextStyle(color: Colors.black38, fontSize: 14, fontWeight: FontWeight.w500),
+        //   ),
+        // ),
+        // Padding(
+        //   padding: EdgeInsets.symmetric(horizontal: 16.0),
+        //   child: Text(
+        //     event.type,
+        //     style: TextStyle(color: Colors.black38, fontSize: 14, fontWeight: FontWeight.w500),
+        //   ),
+        // ),
         event.fbUsername.isNotEmpty || event.twitterUsername.isNotEmpty || event.website.isNotEmpty
             ? Padding(
                 padding: EdgeInsets.only(

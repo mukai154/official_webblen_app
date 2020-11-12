@@ -1,6 +1,6 @@
 name: webblen
 description: Official Webblen App
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 version: 1.0.0+1
 
 environment:
@@ -11,12 +11,12 @@ dependencies:
     sdk: flutter
 
   #Firestore Dependencies
-  cloud_firestore: ^0.14.0+2
-  firebase_storage: ^4.0.0
-  firebase_auth: ^0.18.1
-  firebase_messaging: ^7.0.0
-  firebase_dynamic_links: ^0.6.0
-  cloud_functions: ^0.6.0
+  cloud_firestore: ^0.14.3
+  firebase_storage: ^5.0.1
+  firebase_auth: ^0.18.3
+  firebase_messaging: ^7.0.3
+  firebase_dynamic_links: ^0.6.2
+  cloud_functions: ^0.7.0+1
   flutter_native_admob: ^2.1.0+3
 
   #Analytics
@@ -29,10 +29,13 @@ dependencies:
   stripe_sdk: ^2.4.2
   flutter_appauth: ^0.6.0
 
+
   #Social Dependencies
   google_sign_in: ^4.0.11
   flutter_facebook_auth: ^0.3.2
   apple_sign_in: ^0.1.0
+  social_share_plugin:
+    git: 'https://github.com/gunantosteven/social_share_plugin.git'
 
 
   #Location Dependencies
@@ -52,8 +55,8 @@ dependencies:
 
   #Video Dependencies
   agora_rtc_engine: ^3.0.1-dev.7
-  video_compress: ^2.0.0
   flick_video_player: ^0.1.1
+  video_compress: "2.0.0"
 
   #QR READ/RENDER
   qr_flutter: ^3.1.0
@@ -86,6 +89,9 @@ dependencies:
   permission_handler: ^5.0.1+1
   introduction_screen: ^1.0.9
   adaptive_dialog: ^0.9.0
+  flutter_typeahead: ^1.8.8
+  carousel_pro: ^1.0.0
+  flutter_tags: "^0.4.9"
 
 dev_dependencies:
   flutter_test:

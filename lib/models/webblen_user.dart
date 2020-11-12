@@ -20,6 +20,7 @@ class WebblenUser {
   int eventsToLvlUp;
   List following;
   List followers;
+  List tags;
 
   // bool isCommunityBuilder;
   // bool isNewCommunityBuilder;

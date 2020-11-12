@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
@@ -7,7 +8,6 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
-import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 
@@ -127,7 +127,7 @@ class _SetupPageState extends State<SetupPage> {
       if (success) {
         PageTransitionService(
           context: context,
-        ).transitionToRootPage();
+        ).transitionToOnboardingPathSelectPage();
       } else {
         Navigator.of(context).pop();
         scaffold.showSnackBar(
@@ -146,7 +146,6 @@ class _SetupPageState extends State<SetupPage> {
   }
 
   void setUserProfilePic(bool getImageFromCamera) async {
-    Navigator.of(context).pop();
     setState(() {
       userImage = null;
     });
@@ -175,6 +174,7 @@ class _SetupPageState extends State<SetupPage> {
         height: 30.0,
         width: MediaQuery.of(context).size.width - 16,
         child: TextFormField(
+          cursorColor: Colors.black,
           textCapitalization: TextCapitalization.none,
           initialValue: username,
           autocorrect: false,
@@ -216,17 +216,28 @@ class _SetupPageState extends State<SetupPage> {
       elevation: 0.0,
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => ShowAlertDialogService().showImageSelectDialog(
-          context,
-          () => setUserProfilePic(true),
-          () => setUserProfilePic(false),
-        ),
+        onTap: () async {
+          String res = await showModalActionSheet(
+            context: context,
+            // title: "Add Image",
+            message: "Select an Image for Your Profile",
+            actions: [
+              SheetAction(label: "Camera", key: 'camera', icon: Icons.camera_alt),
+              SheetAction(label: "Gallery", key: 'gallery', icon: Icons.image),
+            ],
+          );
+          if (res == "camera") {
+            setUserProfilePic(true);
+          } else if (res == "gallery") {
+            setUserProfilePic(false);
+          }
+        },
         borderRadius: BorderRadius.circular(80.0),
         child: userImage == null
             ? Icon(
                 Icons.camera_alt,
                 size: 40.0,
-                color: FlatColors.darkGray,
+                color: Colors.black54,
               )
             : Container(
                 decoration: BoxDecoration(
@@ -267,18 +278,14 @@ class _SetupPageState extends State<SetupPage> {
                 children: <Widget>[
                   Column(
                     children: <Widget>[
-                      Fonts().textW600(
+                      Text(
                         "Welcome to Webblen!",
-                        24.0,
-                        Colors.black,
-                        TextAlign.center,
+                        style: TextStyle(fontSize: 28, color: Colors.black, fontWeight: FontWeight.w700),
                       ),
                       SizedBox(height: 8.0),
-                      Fonts().textW400(
+                      Text(
                         "Let's Get You Started",
-                        16.0,
-                        Colors.black,
-                        TextAlign.center,
+                        style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.w400),
                       ),
                     ],
                   ),
