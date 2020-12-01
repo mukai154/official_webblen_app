@@ -8,13 +8,14 @@ class EarningsInfoPage extends StatelessWidget {
     return Scaffold(
       appBar: WebblenAppBar().basicAppBar('How Earnings Work', context),
       body: Container(
+        color: Colors.white,
         margin: EdgeInsets.symmetric(horizontal: 16.0),
         child: ListView(
           children: <Widget>[
             SizedBox(
               height: 16.0,
             ),
-            Fonts().textW600(
+            Fonts().textW700(
               'Account Balance',
               24,
               Colors.black,
@@ -59,7 +60,7 @@ class EarningsInfoPage extends StatelessWidget {
             SizedBox(
               height: 32.0,
             ),
-            Fonts().textW600(
+            Fonts().textW700(
               'Payout Schedule',
               24,
               Colors.black87,
@@ -84,7 +85,7 @@ class EarningsInfoPage extends StatelessWidget {
             SizedBox(
               height: 16.0,
             ),
-            Fonts().textW600(
+            Fonts().textW700(
               'Instant Deposits',
               18,
               Colors.black87,
@@ -94,7 +95,7 @@ class EarningsInfoPage extends StatelessWidget {
               height: 4.0,
             ),
             Fonts().textW400(
-              "You have the ability to cashout your earnings daily for a fee of up to 1.5% the total deposit. This allows you to receive your earnings from ticket sales, gifts, and donations on demand from Webblen rather than waiting for a direct deposit.",
+              "You have the ability to cash-out your earnings daily for a fee of up to 1.5% the total deposit. This allows you to receive your earnings from ticket sales, gifts, and donations on demand from Webblen rather than waiting for a direct deposit.",
               14,
               Colors.black87,
               TextAlign.left,

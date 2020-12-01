@@ -17,7 +17,7 @@ class AnimatedNumText extends AnimatedWidget {
   @override
   build(BuildContext context) {
     return AnimatedDefaultTextStyle(
-      child: Text("+${animation.value.toStringAsFixed(2)} WBBLN"),
+      child: Text("+${animation.value.toStringAsFixed(2)} WBLN"),
       style: animationComplete
           ? TextStyle(
               color: CustomColors.darkMountainGreen,
@@ -46,6 +46,7 @@ class OnboardingCompletePage extends StatefulWidget {
 }
 
 class _OnboardingCompletePageState extends State<OnboardingCompletePage> with TickerProviderStateMixin {
+  String uid;
   Timer timer;
   AnimationController animationController;
   bool animationComplete = false;
@@ -60,8 +61,11 @@ class _OnboardingCompletePageState extends State<OnboardingCompletePage> with Ti
   @override
   initState() {
     super.initState();
-    BaseAuth().getCurrentUserID().then((userID) {
-      WebblenUserData().depositWebblen(5.001, userID);
+    BaseAuth().getCurrentUserID().then((res) {
+      uid = res;
+      WebblenUserData().depositWebblen(5.001, uid);
+      WebblenUserData().completeOnboarding(uid);
+      setState(() {});
     });
     animationController = AnimationController(
       vsync: this,
@@ -156,7 +160,10 @@ class _OnboardingCompletePageState extends State<OnboardingCompletePage> with Ti
                       backgroundColor: Colors.white,
                       height: 45.0,
                       width: 200.0,
-                      onPressed: () => PageTransitionService(context: context).transitionToRootPage(),
+                      onPressed: () {
+                        WebblenUserData().disableDepositAnimation(uid);
+                        PageTransitionService(context: context).transitionToRootPage();
+                      },
                     ),
                   ],
                 ),

@@ -22,13 +22,10 @@ class UpdateRequiredPage extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
           SizedBox(height: 4.0),
-          CustomText(
-            context: context,
-            text: 'Please Update Your Current Version of Webblen to Continue',
-            textColor: Colors.black,
+          Text(
+            'Please Update Your Current Version of Webblen to Continue',
             textAlign: TextAlign.center,
-            fontSize: 18.0,
-            fontWeight: FontWeight.w500,
+            style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
           ),
           SizedBox(height: 16.0),
           CustomColorButton(

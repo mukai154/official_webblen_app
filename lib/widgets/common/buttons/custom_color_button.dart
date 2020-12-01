@@ -8,6 +8,7 @@ class CustomColorButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color backgroundColor;
   final Color textColor;
+  final double elevation;
 
   CustomColorButton({
     this.text,
@@ -17,12 +18,13 @@ class CustomColorButton extends StatelessWidget {
     this.onPressed,
     this.backgroundColor,
     this.textColor,
+    this.elevation,
   });
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 2.0,
+      elevation: elevation == null ? 2.0 : elevation,
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14.0),
       child: InkWell(
@@ -69,6 +71,7 @@ class CustomColorIconButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color backgroundColor;
   final Color textColor;
+  final double elevation;
 
   CustomColorIconButton({
     this.icon,
@@ -78,6 +81,7 @@ class CustomColorIconButton extends StatelessWidget {
     this.onPressed,
     this.backgroundColor,
     this.textColor,
+    this.elevation,
   });
 
   @override
@@ -88,7 +92,7 @@ class CustomColorIconButton extends StatelessWidget {
         horizontal: 16.0,
       ),
       child: Material(
-        elevation: 2.0,
+        elevation: elevation == null ? 2.0 : elevation,
         color: backgroundColor,
         borderRadius: BorderRadius.circular(14.0),
         child: InkWell(

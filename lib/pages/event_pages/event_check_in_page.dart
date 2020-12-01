@@ -125,9 +125,9 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
         IconButton(
           onPressed: () => showNewEventOrStreamDialog(),
           icon: Icon(
-            FontAwesomeIcons.plusSquare,
-            size: 24.0,
-            color: FlatColors.darkGray,
+            FontAwesomeIcons.plus,
+            size: 20.0,
+            color: Colors.black,
           ),
         ),
       ),
@@ -159,7 +159,7 @@ class _EventCheckInPageState extends State<EventCheckInPage> {
                                 vertical: 8.0,
                               ),
                               child: Text(
-                                "It Looks Like You're at an Event Right Now",
+                                "It Looks Like You're Not at an Event Right Now",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
                               )),

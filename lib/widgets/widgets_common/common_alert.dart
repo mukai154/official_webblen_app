@@ -8,7 +8,7 @@ import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/widgets_common/common_button.dart';
 import 'package:webblen/widgets/widgets_common/common_custom_alert.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class FailureDialog extends StatelessWidget {
   final String header;

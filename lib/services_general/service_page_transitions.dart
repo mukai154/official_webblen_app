@@ -27,6 +27,7 @@ import 'package:webblen/pages/home_pages/wallet_page.dart';
 import 'package:webblen/pages/onboarding/attendee_viewer_path_page.dart';
 import 'package:webblen/pages/onboarding/event_host_path_page.dart';
 import 'package:webblen/pages/onboarding/streamer_path_page.dart';
+import 'package:webblen/pages/onboarding/suggest_followers_page.dart';
 import 'package:webblen/pages/post_pages/create_post_page.dart';
 import 'package:webblen/pages/post_pages/post_view_page.dart';
 import 'package:webblen/pages/shop_pages/create_shop_item_page.dart';
@@ -37,17 +38,18 @@ import 'package:webblen/pages/ticket_pages/ticket_info_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_purchase_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_scan_page.dart';
 import 'package:webblen/pages/ticket_pages/ticket_selection_page.dart';
+import 'package:webblen/pages/ticket_pages/user_tickets_page.dart';
 import 'package:webblen/pages/user_pages/current_user_page.dart';
 import 'package:webblen/pages/user_pages/follow_suggestions_page.dart';
 import 'package:webblen/pages/user_pages/interests_page.dart';
 import 'package:webblen/pages/user_pages/new_webblen_balance_page.dart';
-import 'package:webblen/pages/user_pages/reward_payout_page.dart';
 import 'package:webblen/pages/user_pages/search_page.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/pages/user_pages/transaction_history_page.dart';
 import 'package:webblen/pages/user_pages/user_list_page.dart';
 import 'package:webblen/pages/user_pages/user_page.dart';
-
+import 'package:webblen/pages/wallet_pages/how_webblen_works_page.dart';
+import 'package:webblen/pages/wallet_pages/redeemed_rewards_page.dart';
 //import 'package:webblen/utils/ticket_scanner.dart';
 //import 'package:webblen/utils/webblen_scanner.dart';
 
@@ -83,6 +85,7 @@ class PageTransitionService {
   final String pageTitle;
   final String vidURL;
   final String postID;
+  final bool rewardExtraWebblen;
 
   PageTransitionService({
     this.postID,
@@ -116,6 +119,7 @@ class PageTransitionService {
     this.eventFees,
     this.pageTitle,
     this.vidURL,
+    this.rewardExtraWebblen,
   });
 
   //ROOT PAGES
@@ -192,6 +196,7 @@ class PageTransitionService {
         MaterialPageRoute(
           builder: (context) => CreatePostPage(
             postID: postID,
+            rewardExtraWebblen: rewardExtraWebblen,
           ),
         ),
       );
@@ -230,6 +235,7 @@ class PageTransitionService {
           builder: (context) => CreateEventPage(
             eventID: eventID,
             isStream: isStream,
+            rewardExtraWebblen: rewardExtraWebblen,
           ),
         ),
       );
@@ -341,11 +347,27 @@ class PageTransitionService {
         ),
       );
 
+  void transitionToUserTicketsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => UserTicketsPage(),
+        ),
+      );
+
   //WEBBLEN ECON
   void transitionToWalletPage() => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => WalletPage(
+            currentUser: currentUser,
+          ),
+        ),
+      );
+
+  void transitionToRedeemedRewardsPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RedeemedRewardsPage(
             currentUser: currentUser,
           ),
         ),
@@ -366,6 +388,7 @@ class PageTransitionService {
         MaterialPageRoute(
           builder: (context) => ShopItemDetailsPage(
             reward: reward,
+            currentUser: currentUser,
           ),
         ),
       );
@@ -374,16 +397,6 @@ class PageTransitionService {
         context,
         MaterialPageRoute(
           builder: (context) => ShopPage(
-            currentUser: currentUser,
-          ),
-        ),
-      );
-
-  void transitionToRewardPayoutPage() => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => RewardPayoutPage(
-            redeemingReward: reward,
             currentUser: currentUser,
           ),
         ),
@@ -484,6 +497,13 @@ class PageTransitionService {
         ),
       );
 
+  void transitionToSuggestFollowersPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SuggestFollowersPage(),
+        ),
+      );
+
   void transitionToFollowSugestionsPage() => Navigator.push(
         context,
         MaterialPageRoute(
@@ -517,7 +537,7 @@ class PageTransitionService {
         ),
       );
 
-  void transitionTFeedbackPage() => Navigator.push(
+  void transitionToFeedbackPage() => Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => FeedbackPage(
@@ -526,6 +546,12 @@ class PageTransitionService {
         ),
       );
 
+  void transitionToHowWebblenWorksPage() => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HowWebblenWorksPage(),
+        ),
+      );
   //WEBBLEN SCANNER
 //  void openWebblenScanner() => Navigator.push(
 //        context,

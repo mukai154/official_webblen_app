@@ -52,12 +52,17 @@
 	<string>ca-app-pub-2136415475966451~5144610810</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
-		<string>instagram</string>
 		<string>fbapi</string>
 		<string>fb-messenger-share-api</string>
 		<string>fbauth2</string>
 		<string>fbshareextension</string>
 		<string>twitter</string>
+		<string>instagram</string>
+		<string>instagram-stories</string>
+		<string>facebook-stories</string>
+		<string>facebook</string>
+		<string>whatsapp</string>
+		<string>tg</string>
 	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>

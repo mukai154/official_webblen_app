@@ -43,8 +43,8 @@ android {
         targetSdkVersion 29
         multiDexEnabled true
         manifestPlaceholders = [appAuthRedirectScheme: 'com.webblen.events.webblen']
-        versionCode 87
-        versionName '9.1.15'
+        versionCode 88
+        versionName '9.2.0'
         ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
     }
 

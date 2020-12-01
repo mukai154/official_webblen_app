@@ -12,7 +12,7 @@ import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class FollowSuggestionsPage extends StatefulWidget {
   @override
@@ -60,7 +60,7 @@ class _FollowSuggestionsPageState extends State<FollowSuggestionsPage> {
       double lon = location.longitude;
       LocationService().getZipFromLatLon(lat, lon).then((res) {
         res = zipcode;
-        WebblenUserData().getFollowerSuggestions(uid, zipcode, tags).then((res) {
+        WebblenUserData().getFollowerSuggestions(uid, zipcode).then((res) {
           suggestedUsers = res;
           isLoading = false;
           setState(() {});
@@ -83,6 +83,7 @@ class _FollowSuggestionsPageState extends State<FollowSuggestionsPage> {
         currentUser = res;
         WebblenUserData().getInterests(uid).then((res) {
           tags = res;
+
           setState(() {});
           loadData();
         });
@@ -117,7 +118,7 @@ class _FollowSuggestionsPageState extends State<FollowSuggestionsPage> {
                                 onTap: () => transitionToUserPage(suggestedUsers[index].uid),
                                 child: Row(
                                   children: [
-                                    UserDetailsProfilePic(
+                                    UserProfilePic(
                                       size: 60,
                                       userPicUrl: suggestedUsers[index].profile_pic,
                                     ),
@@ -136,12 +137,21 @@ class _FollowSuggestionsPageState extends State<FollowSuggestionsPage> {
                               ),
                               newFollows.contains(suggestedUsers[index].uid)
                                   ? CustomColorButton(
-                                      text: "Unfollow",
-                                      textColor: CustomColors.lightAmericanGray,
-                                      backgroundColor: Colors.white,
+                                      text: "following",
+                                      textColor: Colors.black,
+                                      backgroundColor: CustomColors.iosOffWhite,
+                                      elevation: 0.0,
                                       height: 30.0,
                                       width: 100,
-                                      onPressed: () => followUnfollowAction(suggestedUsers[index].uid),
+                                      onPressed: () {
+                                        if (newFollows.contains(suggestedUsers[index].uid)) {
+                                          newFollows.remove(suggestedUsers[index].uid);
+                                        } else {
+                                          newFollows.add(suggestedUsers[index].uid);
+                                        }
+                                        setState(() {});
+                                        WebblenUserData().unFollowUser(uid, suggestedUsers[index].uid);
+                                      },
                                     )
                                   : IconButton(
                                       icon: Icon(
@@ -149,7 +159,15 @@ class _FollowSuggestionsPageState extends State<FollowSuggestionsPage> {
                                         size: 18.0,
                                         color: Colors.black,
                                       ),
-                                      onPressed: () => followUnfollowAction(suggestedUsers[index].uid),
+                                      onPressed: () {
+                                        if (newFollows.contains(suggestedUsers[index].uid)) {
+                                          newFollows.remove(suggestedUsers[index].uid);
+                                        } else {
+                                          newFollows.add(suggestedUsers[index].uid);
+                                        }
+                                        setState(() {});
+                                        WebblenUserData().followUser(uid, suggestedUsers[index].uid);
+                                      },
                                     ),
                             ],
                           ),

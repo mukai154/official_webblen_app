@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:location/location.dart';
+import 'package:webblen/constants/strings.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 
 class LocationService {
@@ -84,7 +85,7 @@ class LocationService {
   Future<String> getAddressFromLatLon(double lat, double lon) async {
     String foundAddress;
     Coordinates coordinates = Coordinates(lat, lon);
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var addresses = await Geocoder.google(Strings.googleAPIKEY).findAddressesFromCoordinates(coordinates);
     var address = addresses.first;
     foundAddress = address.addressLine;
     return foundAddress;
@@ -94,7 +95,7 @@ class LocationService {
     String zip;
     Coordinates coordinates = Coordinates(lat, lon);
     if (coordinates != null) {
-      var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates).catchError((e) {
+      var addresses = await Geocoder.google(Strings.googleAPIKEY).findAddressesFromCoordinates(coordinates).catchError((e) {
         //print(e);
       });
       if (addresses != null) {
@@ -108,7 +109,7 @@ class LocationService {
   Future<String> getCityNameFromLatLon(double lat, double lon) async {
     String cityName;
     Coordinates coordinates = Coordinates(lat, lon);
-    var addresses = await Geocoder.local.findAddressesFromCoordinates(coordinates);
+    var addresses = await Geocoder.google(Strings.googleAPIKEY).findAddressesFromCoordinates(coordinates);
     var address = addresses.first;
     cityName = address.locality;
     return cityName;

@@ -1,22 +1,26 @@
 import 'dart:io';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
 import 'package:flutter_native_admob/native_admob_controller.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/post_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/events/event_block.dart';
+import 'package:webblen/widgets/posts/post_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_user/user_details_header.dart';
+import 'package:webblen/widgets/widgets_user/user_header.dart';
 
 class UserPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -39,6 +43,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   //Scroller & Paging
   final PageStorageBucket bucket = PageStorageBucket();
   TabController _tabController;
+  ScrollController postsScrollController;
   ScrollController hostedEventsScrollController;
   ScrollController pastEventsScrollController;
   ScrollController attendedEventsScrollController;
@@ -46,14 +51,19 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
 
   //Event Results
   CollectionReference eventsRef = FirebaseFirestore.instance.collection("events");
+  CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
+  List<DocumentSnapshot> postResults = [];
   List<DocumentSnapshot> hostedEventResults = [];
   List<DocumentSnapshot> pastEventResults = [];
   List<DocumentSnapshot> attendedEventResults = [];
-  List followingList = [];
+  List currentUserFollowingList = [];
   List userFollowersList = [];
+  DocumentSnapshot lastPostDocSnap;
   DocumentSnapshot lastHostedEventDocSnap;
   DocumentSnapshot lastPastEventDocSnap;
   DocumentSnapshot lastAttendedEventDocSnap;
+  bool loadingAdditionalPosts = false;
+  bool morePostsAvailable = true;
   bool loadingAdditionalHostedEvents = false;
   bool moreHostedEventsAvailable = true;
   bool loadingAdditionalPastEvents = false;
@@ -66,17 +76,133 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   String adMobUnitID;
   final nativeAdController = NativeAdmobController();
 
-  followUnfollowAction() async {
-    if (followingList.contains(user.uid)) {
-      followingList.remove(user.uid);
-      userFollowersList.remove(widget.currentUser.uid);
-      PostDataService().removeUserFromFollowingPosts(widget.currentUser.uid, user.uid);
+  postOptionsDialog(WebblenPost post) async {
+    if (post.authorID == widget.currentUser.uid) {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Edit Post", key: 'editPost'),
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'sharePost'),
+          SheetAction(label: "Delete Post", key: 'deletePost', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'editPost') {
+        PageTransitionService(context: context, postID: post.id).transitionToCreatePostPage();
+      } else if (action == 'copyLink') {
+        ShareService().shareContent(post: post, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'sharePost') {
+        ShareService().shareContent(post: post, copyLink: false);
+      } else if (action == 'deletePost') {
+        OkCancelResult res = await showOkCancelAlertDialog(
+          context: context,
+          message: "Delete This Post?",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+          isDestructiveAction: true,
+        );
+        if (res == OkCancelResult.ok) {
+          PostDataService().deletePost(post.id);
+        }
+      }
     } else {
-      followingList.add(user.uid);
-      userFollowersList.add(widget.currentUser.uid);
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'share'),
+          SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'copyLink') {
+        ShareService().shareContent(post: post, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'share') {
+        ShareService().shareContent(post: post, copyLink: false);
+      } else if (action == 'report') {
+        //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      }
     }
+  }
+
+  eventOptionsDialog(WebblenEvent event) async {
+    if (event.authorID == widget.currentUser.uid) {
+      List<SheetAction<String>> actions = event.endDateTimeInMilliseconds > currentDateTimeInMilliseconds
+          ? event.hasTickets
+              ? [
+                  SheetAction(label: "Edit Event", key: 'editEvent'),
+                  SheetAction(label: "Copy Ticket Link", key: 'ticketLink'),
+                  SheetAction(label: "Copy Link", key: 'copyLink'),
+                  SheetAction(label: "Share", key: 'shareEvent'),
+                  SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+                ]
+              : [
+                  SheetAction(label: "Edit Event", key: 'editEvent'),
+                  SheetAction(label: "Copy Link", key: 'copyLink'),
+                  SheetAction(label: "Share", key: 'shareEvent'),
+                  SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+                ]
+          : [
+              SheetAction(label: "Copy Link", key: 'copyLink'),
+              SheetAction(label: "Share", key: 'shareEvent'),
+              SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+            ];
+      String action = await showModalActionSheet(
+        context: context,
+        actions: actions,
+      );
+      if (action == 'editEvent') {
+        PageTransitionService(context: context, eventID: event.id, isStream: event.isDigitalEvent).transitionToCreateEventPage();
+      } else if (action == 'ticketLink') {
+        ShareService().copyTicketLink(event: event);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'copyLink') {
+        ShareService().shareContent(event: event, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'shareEvent') {
+        ShareService().shareContent(event: event, copyLink: false);
+      } else if (action == 'deleteEvent') {
+        OkCancelResult res = await showOkCancelAlertDialog(
+          context: context,
+          message: "Delete This Event?",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+          isDestructiveAction: true,
+        );
+        if (res == OkCancelResult.ok) {
+          EventDataService().deleteEvent(event.id);
+        }
+      }
+    } else {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'share'),
+          SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'copyLink') {
+        ShareService().shareContent(event: event, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'share') {
+        ShareService().shareContent(event: event, copyLink: false);
+      } else if (action == 'report') {
+        //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      }
+    }
+  }
+
+  getPosts() async {
+    Query query = postsRef.where('authorID', isEqualTo: user.uid).orderBy('postDateTimeInMilliseconds', descending: true).limit(resultsPerPage);
+    QuerySnapshot querySnapshot = await query.get().catchError((e) => print(e));
+    if (querySnapshot.docs.isNotEmpty) {
+      lastPostDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      postResults = querySnapshot.docs;
+    }
+    isLoading = false;
     setState(() {});
-    WebblenUserData().updateFollowing(widget.currentUser.uid, user.uid, followingList, userFollowersList);
   }
 
   getHostedEvents() async {
@@ -117,6 +243,28 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
       lastAttendedEventDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
       attendedEventResults = querySnapshot.docs;
     }
+    setState(() {});
+  }
+
+  getAdditionalPosts() async {
+    if (isLoading || !morePostsAvailable || loadingAdditionalPosts) {
+      return;
+    }
+    loadingAdditionalPosts = true;
+    setState(() {});
+    Query query = postsRef
+        .where("authorID", isEqualTo: user.uid)
+        .orderBy('postDateTimeInMilliseconds', descending: true)
+        .startAfterDocument(lastPostDocSnap)
+        .limit(resultsPerPage);
+
+    QuerySnapshot querySnapshot = await query.get().catchError((e) => print(e));
+    lastPostDocSnap = querySnapshot.docs.last;
+    postResults.addAll(querySnapshot.docs);
+    if (querySnapshot.docs.length == 0) {
+      morePostsAvailable = false;
+    }
+    loadingAdditionalPosts = false;
     setState(() {});
   }
 
@@ -188,6 +336,53 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     setState(() {});
   }
 
+  Widget listPosts() {
+    return LiquidPullToRefresh(
+      color: CustomColors.webblenRed,
+      onRefresh: refreshData,
+      child: ListView.builder(
+        controller: postsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: postResults.length,
+        itemBuilder: (context, index) {
+          WebblenPost post = WebblenPost.fromMap(Map<String, dynamic>.from(postResults[index].data()));
+          return Padding(
+            padding: EdgeInsets.only(bottom: postResults.length - 1 == index ? 16.0 : 0),
+            child: Container(
+              child: Column(
+                children: [
+                  SizedBox(height: 8.0),
+                  post.imageURL == null
+                      ? PostTextBlock(
+                          currentUID: widget.currentUser.uid,
+                          post: post,
+                          viewUser: null, //() => transitionToUserPage(post.authorID),
+                          viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
+                          postOptions: () => postOptionsDialog(post),
+                        )
+                      : PostImgBlock(
+                          currentUID: widget.currentUser.uid,
+                          post: post,
+                          viewUser: null, //() => transitionToUserPage(post.authorID),
+                          //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
+                          viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
+                          postOptions: () => postOptionsDialog(post),
+                        ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget listHostedEvents() {
     return LiquidPullToRefresh(
       color: CustomColors.webblenRed,
@@ -205,7 +400,6 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(hostedEventResults[index].data()['d']));
           double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
             return Padding(
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: hostedEventResults.length - 1 == index ? 16.0 : 0),
@@ -227,13 +421,9 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                     ),
                     EventBlock(
                       event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
                       viewEventDetails: () =>
                           PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
+                      eventOptions: () => eventOptionsDialog(event),
                     ),
                   ],
                 ),
@@ -244,12 +434,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: hostedEventResults.length - 1 == index ? 16.0 : 0),
               child: EventBlock(
                 event: event,
-                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
                 viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                viewEventTickets: null,
-                numOfTicsForEvent: null,
-                eventImgSize: MediaQuery.of(context).size.width - 16,
-                eventDescHeight: 120.0,
+                eventOptions: () => eventOptionsDialog(event),
               ),
             );
           }
@@ -275,7 +461,6 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(pastEventResults[index].data()['d']));
           double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
             return Padding(
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: pastEventResults.length - 1 == index ? 16.0 : 0),
@@ -297,13 +482,9 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                     ),
                     EventBlock(
                       event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
                       viewEventDetails: () =>
                           PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
+                      eventOptions: () => eventOptionsDialog(event),
                     ),
                   ],
                 ),
@@ -314,12 +495,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: pastEventResults.length - 1 == index ? 16.0 : 0),
               child: EventBlock(
                 event: event,
-                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
                 viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                viewEventTickets: null,
-                numOfTicsForEvent: null,
-                eventImgSize: MediaQuery.of(context).size.width - 16,
-                eventDescHeight: 120.0,
+                eventOptions: () => eventOptionsDialog(event),
               ),
             );
           }
@@ -345,7 +522,6 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(attendedEventResults[index].data()['d']));
           double num = index / 15;
-          print(num == num.roundToDouble() && num != 0);
           if (num == num.roundToDouble() && num != 0) {
             return Padding(
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: attendedEventResults.length - 1 == index ? 16.0 : 0),
@@ -366,15 +542,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                       ),
                     ),
                     EventBlock(
-                      event: event,
-                      shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-                      viewEventDetails: () =>
-                          PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                      viewEventTickets: null,
-                      numOfTicsForEvent: null,
-                      eventImgSize: MediaQuery.of(context).size.width - 16,
-                      eventDescHeight: 120.0,
-                    ),
+                        event: event,
+                        viewEventDetails: () =>
+                            PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                        eventOptions: () => eventOptionsDialog(event)),
                   ],
                 ),
               ),
@@ -384,12 +555,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
               padding: EdgeInsets.only(top: 16.0, left: 8.0, right: 8.0, bottom: attendedEventResults.length - 1 == index ? 16.0 : 0),
               child: EventBlock(
                 event: event,
-                shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
                 viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-                viewEventTickets: null,
-                numOfTicsForEvent: null,
-                eventImgSize: MediaQuery.of(context).size.width - 16,
-                eventDescHeight: 120.0,
+                eventOptions: () => eventOptionsDialog(event),
               ),
             );
           }
@@ -399,8 +566,10 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   }
 
   Future<void> refreshData() async {
+    postResults = [];
     hostedEventResults = [];
     pastEventResults = [];
+    getPosts();
     getHostedEvents();
     getPastEvents();
   }
@@ -418,8 +587,8 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
         user = widget.webblenUser;
       });
     }
-    followingList = widget.currentUser.following.toList(growable: true);
-    WebblenUserData().getFollowingList(widget.currentUser.uid).then((res) {
+    currentUserFollowingList = widget.currentUser.following.toList(growable: true);
+    WebblenUserData().getFollowers(user.uid).then((res) {
       userFollowersList = res;
       setState(() {});
     });
@@ -431,30 +600,38 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
     }
     setState(() {});
     _tabController = new TabController(
-      length: 3,
+      length: 4,
       vsync: this,
     );
+    postsScrollController = ScrollController();
     hostedEventsScrollController = ScrollController();
     pastEventsScrollController = ScrollController();
     attendedEventsScrollController = ScrollController();
+    postsScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.2 * postsScrollController.position.maxScrollExtent;
+      if (postsScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalPosts();
+      }
+    });
     hostedEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * hostedEventsScrollController.position.maxScrollExtent;
+      double triggerFetchMoreSize = 0.2 * hostedEventsScrollController.position.maxScrollExtent;
       if (hostedEventsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalHostedEvents();
       }
     });
     pastEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * pastEventsScrollController.position.maxScrollExtent;
+      double triggerFetchMoreSize = 0.2 * pastEventsScrollController.position.maxScrollExtent;
       if (pastEventsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalPastEvents();
       }
     });
     attendedEventsScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.9 * attendedEventsScrollController.position.maxScrollExtent;
+      double triggerFetchMoreSize = 0.2 * attendedEventsScrollController.position.maxScrollExtent;
       if (attendedEventsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalAttendedEvents();
       }
     });
+    getPosts();
     getHostedEvents();
     getPastEvents();
     getAttendedEvents();
@@ -463,6 +640,7 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
   @override
   void dispose() {
     super.dispose();
+    postsScrollController.dispose();
     hostedEventsScrollController.dispose();
     pastEventsScrollController.dispose();
     attendedEventsScrollController.dispose();
@@ -488,12 +666,9 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               StreamBuilder(
-                stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+                stream: FirebaseFirestore.instance.collection("webblen_user").doc(user.uid).snapshots(),
                 builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
-                  if (!userSnapshot.hasData)
-                    return Text(
-                      "Loading...",
-                    );
+                  if (!userSnapshot.hasData) return Container();
                   var userData = userSnapshot.data.data();
                   List following = userData['d']["following"];
                   List followers = userData['d']["followers"];
@@ -505,7 +680,9 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                       uid: user.uid,
                       followersLength: followers.length,
                       followingLength: following.length,
-                      followUnfollowAction: () => followUnfollowAction(),
+                      followUnfollowAction: followers.contains(widget.currentUser.uid)
+                          ? () => WebblenUserData().unFollowUser(widget.currentUser.uid, user.uid)
+                          : () => WebblenUserData().followUser(widget.currentUser.uid, user.uid),
                       viewFollowersAction: () => PageTransitionService(
                         context: context,
                         userIDs: followers,
@@ -518,44 +695,87 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                         currentUser: widget.currentUser,
                         pageTitle: "Following",
                       ).transitionToUserListPage(),
-                      isFollowing: following.contains(user.uid) ? true : false,
+                      isFollowing: followers.contains(widget.currentUser.uid) ? true : false,
                     ),
                   );
                 },
               ),
               Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    TabBar(
-                      controller: _tabController,
-                      labelPadding: EdgeInsets.symmetric(horizontal: 20.0),
-                      indicatorColor: CustomColors.webblenRed,
-                      labelColor: CustomColors.darkGray,
-                      isScrollable: true,
-                      tabs: [
-                        Tab(
+                height: 30,
+                margin: EdgeInsets.only(bottom: 8),
+                child: TabBar(
+                  controller: _tabController,
+                  isScrollable: true,
+                  labelPadding: EdgeInsets.symmetric(horizontal: 10),
+                  indicatorColor: CustomColors.webblenRed,
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.black54,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicator: BoxDecoration(borderRadius: BorderRadius.circular(10), color: CustomColors.webblenRed),
+                  tabs: [
+                    Tab(
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
                           child: Text(
-                            "Upcoming",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
+                            "Posts",
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                        Tab(
+                      ),
+                    ),
+                    Tab(
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
                           child: Text(
-                            "Past",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
+                            "Events",
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                        Tab(
+                      ),
+                    ),
+                    Tab(
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            "Past Events",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Tab(
+                      child: Container(
+                        height: 30,
+                        width: 110,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
                           child: Text(
                             "Check-Ins",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.black, fontSize: 14.0, fontWeight: FontWeight.w500),
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
-                      ],
+                      ),
                     ),
                   ],
                 ),
@@ -564,13 +784,61 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                 child: Container(
                   width: MediaQuery.of(context).size.width,
                   child: DefaultTabController(
-                    length: 3,
+                    length: 4,
                     child: TabBarView(
                       controller: _tabController,
                       children: <Widget>[
-                        //Hosted EVENTS
+                        //Posts
                         Container(
                           key: PageStorageKey('key0'),
+                          color: Colors.white,
+                          child: isLoading
+                              ? LoadingScreen(
+                                  context: context,
+                                  loadingDescription: 'Loading Posts...',
+                                )
+                              : postResults.isEmpty
+                                  ? LiquidPullToRefresh(
+                                      onRefresh: refreshData,
+                                      color: CustomColors.webblenRed,
+                                      child: Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                              child: Image.asset(
+                                                'assets/images/beach_sun.png',
+                                                height: 200,
+                                                fit: BoxFit.contain,
+                                                filterQuality: FilterQuality.medium,
+                                              ),
+                                            ),
+                                            SizedBox(height: 8.0),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width - 16,
+                                                  ),
+                                                  child: Text(
+                                                    "@${user.username} Has Not Posted Anything",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  : listPosts(),
+                        ),
+                        //Hosted EVENTS
+                        Container(
+                          key: PageStorageKey('key1'),
                           color: Colors.white,
                           child: isLoading
                               ? LoadingScreen(
@@ -578,32 +846,47 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                   loadingDescription: 'Loading Hosted Events...',
                                 )
                               : hostedEventResults.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                  ? LiquidPullToRefresh(
+                                      onRefresh: refreshData,
+                                      color: CustomColors.webblenRed,
+                                      child: Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
                                           children: <Widget>[
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                              child: Image.asset(
+                                                'assets/images/beach_sun.png',
+                                                height: 200,
+                                                fit: BoxFit.contain,
+                                                filterQuality: FilterQuality.medium,
                                               ),
-                                              child: Text(
-                                                "@${user.username} Has Not Hosted Any Streams/Events",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                              ),
-                                            )
+                                            ),
+                                            SizedBox(height: 8.0),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width - 16,
+                                                  ),
+                                                  child: Text(
+                                                    "@${user.username} Has No Any Streams/Events",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                        SizedBox(height: 8.0),
-                                      ],
+                                      ),
                                     )
                                   : listHostedEvents(),
                         ),
                         //Past Events
                         Container(
-                          key: PageStorageKey('key1'),
+                          key: PageStorageKey('key2'),
                           color: Colors.white,
                           child: isLoading
                               ? LoadingScreen(
@@ -611,32 +894,47 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                   loadingDescription: 'Loading Past Events...',
                                 )
                               : pastEventResults.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                  ? LiquidPullToRefresh(
+                                      onRefresh: refreshData,
+                                      color: CustomColors.webblenRed,
+                                      child: Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
                                           children: <Widget>[
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                              child: Image.asset(
+                                                'assets/images/beach_sun.png',
+                                                height: 200,
+                                                fit: BoxFit.contain,
+                                                filterQuality: FilterQuality.medium,
                                               ),
-                                              child: Text(
-                                                "@${user.username} Has Not Attended Any Streams/Events",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                              ),
-                                            )
+                                            ),
+                                            SizedBox(height: 8.0),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width - 16,
+                                                  ),
+                                                  child: Text(
+                                                    "@${user.username} Has No Past Streams/Events",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                        SizedBox(height: 8.0),
-                                      ],
+                                      ),
                                     )
                                   : listPastEvents(),
                         ),
                         //Attended Events
                         Container(
-                          key: PageStorageKey('key2'),
+                          key: PageStorageKey('key3'),
                           color: Colors.white,
                           child: isLoading
                               ? LoadingScreen(
@@ -644,26 +942,41 @@ class _UserPageState extends State<UserPage> with SingleTickerProviderStateMixin
                                   loadingDescription: 'Loading Attended Events...',
                                 )
                               : attendedEventResults.isEmpty
-                                  ? Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: <Widget>[
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                  ? LiquidPullToRefresh(
+                                      onRefresh: refreshData,
+                                      color: CustomColors.webblenRed,
+                                      child: Center(
+                                        child: ListView(
+                                          shrinkWrap: true,
                                           children: <Widget>[
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                              child: Image.asset(
+                                                'assets/images/beach_sun.png',
+                                                height: 200,
+                                                fit: BoxFit.contain,
+                                                filterQuality: FilterQuality.medium,
                                               ),
-                                              child: Text(
-                                                "@${user.username} Has Not Attended Any Streams/Events",
-                                                textAlign: TextAlign.center,
-                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
-                                              ),
-                                            )
+                                            ),
+                                            SizedBox(height: 8.0),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth: MediaQuery.of(context).size.width - 16,
+                                                  ),
+                                                  child: Text(
+                                                    "@${user.username} Has Not Attended Any Streams/Events",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                                  ),
+                                                )
+                                              ],
+                                            ),
                                           ],
                                         ),
-                                        SizedBox(height: 8.0),
-                                      ],
+                                      ),
                                     )
                                   : listAttendedEvents(),
                         ),

@@ -2,32 +2,29 @@ import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:social_share_plugin/social_share_plugin.dart';
 import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/constants/strings.dart';
 import 'package:webblen/firebase/data/post_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
-import 'package:webblen/firebase/services/dynamic_links.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
-import 'package:webblen/widgets/common/containers/round_container.dart';
 import 'package:webblen/widgets/common/containers/tag_container.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
@@ -35,7 +32,8 @@ import 'package:webblen/widgets/common/text/custom_text.dart';
 
 class CreatePostPage extends StatefulWidget {
   final String postID;
-  CreatePostPage({this.postID});
+  final bool rewardExtraWebblen;
+  CreatePostPage({this.postID, this.rewardExtraWebblen});
 
   @override
   _CreatePostPageState createState() => _CreatePostPageState();
@@ -78,37 +76,6 @@ class _CreatePostPageState extends State<CreatePostPage> {
   //Additional Info & Social Links
   String postCategory = 'Select Category';
 
-  copyNewPostLink() async {
-    ShowAlertDialogService().showLoadingInfoDialog(context, "Generating Link...");
-    String url = await DynamicLinks().createDynamicLink(
-      linkType: "post",
-      id: post.id,
-      title: "Checkout My New Post on Webblen",
-      description: post.body.length > 50 ? post.body.substring(0, 49) + "..." : post.body,
-      imageURL: post.imageURL == null
-          ? "https://firebasestorage.googleapis.com/v0/b/webblen-events.appspot.com/o/profile_pics%2FEtKiw3gK37QsOg6tPBnSJ8MhCm23.png?alt=media&token=6076da1d-ef93-4d3c-9937-a67dda7094ad"
-          : post.imageURL,
-    );
-    Clipboard.setData(ClipboardData(text: url));
-    Navigator.of(context).pop();
-    ShowAlertDialogService().showSuccessDialog(context, "Link Copied!", "Feel Free to Share it");
-  }
-
-  shareToInstagram() async {
-    PermissionStatus status = await Permission.photos.status;
-    if (status.isUndetermined) {
-      status = await Permission.photos.request();
-    }
-    if (status.isGranted) {
-      ShowAlertDialogService().showLoadingInfoDialog(context, "Exporting to Instagram...");
-      Directory dir = await getApplicationDocumentsDirectory();
-      String path = dir.path;
-      File file = await imgFile.copy('$path/webblen${DateTime.now().millisecondsSinceEpoch.toString()}.png');
-      Navigator.of(context).pop();
-      SocialSharePlugin.shareToFeedInstagram(path: file.path);
-    }
-  }
-
   //Other
   void dismissKeyboard() {
     FocusScope.of(context).unfocus();
@@ -138,19 +105,21 @@ class _CreatePostPageState extends State<CreatePostPage> {
         ),
       ],
     );
-    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
-    postAddress = detail.result.formattedAddress;
-    lat = detail.result.geometry.location.lat;
-    lon = detail.result.geometry.location.lng;
-    CustomAlerts().showLoadingAlert(context, "Setting Location...");
-    Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
-    Navigator.of(context).pop();
-    zipPostalCode = locationData['zipcode'];
-    city = locationData['city'];
-    province = locationData['administrativeLevels']['level1short'];
-    lat = detail.result.geometry.location.lat;
-    lon = detail.result.geometry.location.lng;
-    setState(() {});
+    if (p != null) {
+      PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
+      postAddress = detail.result.formattedAddress;
+      lat = detail.result.geometry.location.lat;
+      lon = detail.result.geometry.location.lng;
+      CustomAlerts().showLoadingAlert(context, "Setting Location...");
+      Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
+      Navigator.of(context).pop();
+      zipPostalCode = locationData['zipcode'];
+      city = locationData['city'];
+      province = locationData['administrativeLevels']['level1short'];
+      lat = detail.result.geometry.location.lat;
+      lon = detail.result.geometry.location.lng;
+      setState(() {});
+    }
   }
 
   Widget addImageButton() {
@@ -361,6 +330,151 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
+  confirmPostSubmission() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              height: 280,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 8),
+                  Text(
+                    'Submit Post?',
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Available Balance:",
+                        style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: [
+                          StreamBuilder(
+                            stream: FirebaseFirestore.instance.collection("webblen_user").doc(currentUser.uid).snapshots(),
+                            builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+                              if (!userSnapshot.hasData)
+                                return Text(
+                                  "Loading...",
+                                );
+                              var userData = userSnapshot.data.data();
+                              double availablePoints = userData['d']["eventPoints"] * 1.00;
+                              return Text(
+                                "${availablePoints.toStringAsFixed(2)} WBLN",
+                                textAlign: TextAlign.right,
+                                style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w500),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Post Cost:",
+                        style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "-0.50 WBLN",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: 14, color: Colors.red, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  Divider(
+                    color: Colors.black26,
+                    indent: 8.0,
+                    endIndent: 8.0,
+                    thickness: 1.0,
+                    height: 4,
+                  ),
+                  SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        height: 15,
+                        width: 15,
+                        child: Image.asset(
+                          'assets/images/webblen_coin.png',
+                        ),
+                      ),
+                      SizedBox(width: 4.0),
+                      StreamBuilder(
+                        stream: FirebaseFirestore.instance.collection("webblen_user").doc(currentUser.uid).snapshots(),
+                        builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+                          if (!userSnapshot.hasData)
+                            return Text(
+                              "Loading...",
+                            );
+                          var userData = userSnapshot.data.data();
+                          double newAvailableBalance = (userData['d']["eventPoints"] * 1.00) - 0.5;
+                          return Text(
+                            "${newAvailableBalance.toStringAsFixed(2)} WBLN",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 32.0),
+                  CustomColorButton(
+                    text: "Submit Post",
+                    textColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    height: 40.0,
+                    width: MediaQuery.of(context).size.width - 34,
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      ShowAlertDialogService().showLoadingDialog(context);
+                      WebblenUserData().updateWebblenBalance(currentUser.uid, -0.5).then((e) {
+                        Navigator.of(context).pop();
+                        if (e.isEmpty) {
+                          submitPost();
+                        } else {
+                          showOkAlertDialog(
+                            context: context,
+                            message: e,
+                            okLabel: "Ok",
+                            barrierDismissible: true,
+                          );
+                        }
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   //CREATE EVENT
   submitPost() async {
     CustomAlerts().showLoadingAlert(context, "Uploading Post...");
@@ -387,6 +501,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
         post = res;
         setState(() {});
         Navigator.of(context).pop();
+        if (widget.rewardExtraWebblen != null && widget.rewardExtraWebblen) {
+          WebblenUserData().depositWebblen(10.001, currentUID);
+        }
         showModalBottomSheet(
           context: context,
           isDismissible: false,
@@ -396,93 +513,73 @@ class _CreatePostPageState extends State<CreatePostPage> {
               builder: (context, setState) {
                 return Container(
                   padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  height: 400,
+                  height: 280,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 16),
-                      Text(
-                        'Post Successful!',
-                        style: TextStyle(
-                          fontSize: 32,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Post Successful!',
+                            style: TextStyle(
+                              fontSize: 32,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => PageTransitionService(context: context).returnToRootPage(),
+                            icon: Icon(
+                              FontAwesomeIcons.times,
+                              color: Colors.black,
+                              size: 16,
+                            ),
+                          )
+                        ],
                       ),
-                      SizedBox(height: 8),
+                      SizedBox(height: 4),
                       Text(
                         "Share It with the Rest of the World?",
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           color: Colors.black,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () => copyNewPostLink(),
-                            child: Container(
-                              child: Column(
-                                children: [
-                                  RoundContainer(
-                                    size: 32,
-                                    color: CustomColors.darkMountainGreen,
-                                    child: Icon(
-                                      FontAwesomeIcons.link,
-                                      color: Colors.white,
-                                      size: 16.0,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    'Copy Link',
-                                    style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          imgFile == null
-                              ? Container()
-                              : GestureDetector(
-                                  onTap: () => shareToInstagram(),
-                                  child: Container(
-                                    child: Column(
-                                      children: [
-                                        RoundContainer(
-                                          size: 32,
-                                          color: CustomColors.webblenPink,
-                                          child: Icon(
-                                            FontAwesomeIcons.instagram,
-                                            color: Colors.white,
-                                            size: 16.0,
-                                          ),
-                                        ),
-                                        SizedBox(height: 4),
-                                        Text(
-                                          'Facebook',
-                                          style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                        ],
+                      SizedBox(height: 24),
+                      GestureDetector(
+                        child: Text(
+                          'Copy Link',
+                          style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.w700),
+                        ),
+                        onTap: () {
+                          ShareService().shareContent(post: post, imgPath: imgFile == null ? null : imgFile.path, copyLink: true);
+                          HapticFeedback.mediumImpact();
+                          showOkAlertDialog(
+                            context: context,
+                            message: "Link Copied!",
+                            okLabel: "Ok",
+                            barrierDismissible: true,
+                          );
+                        },
                       ),
-                      SizedBox(height: 32),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            child: Text(
-                              'Done',
-                              style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.w700),
-                            ),
-                            onTap: () => PageTransitionService(context: context).returnToRootPage(),
-                          ),
-                        ],
+                      SizedBox(height: 16),
+                      GestureDetector(
+                        child: Text(
+                          'Share',
+                          style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.w700),
+                        ),
+                        onTap: () => ShareService().shareContent(post: post, imgPath: imgFile == null ? null : imgFile.path, copyLink: false),
+                      ),
+                      SizedBox(height: 24),
+                      GestureDetector(
+                        child: Text(
+                          'Done',
+                          style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.w700),
+                        ),
+                        onTap: () => PageTransitionService(context: context).returnToRootPage(),
                       ),
                     ],
                   ),
@@ -520,7 +617,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         okLabel: "Ok",
         barrierDismissible: true,
       );
-    } else if (nearbyZipcodes.isEmpty && zipPostalCode.length != 5) {
+    } else if (nearbyZipcodes.isEmpty && zipPostalCode == null || nearbyZipcodes.isEmpty && zipPostalCode.length != 5) {
       showOkAlertDialog(
         context: context,
         message: "Please Define a Better Location for this Post",
@@ -528,7 +625,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
         barrierDismissible: true,
       );
     } else {
-      submitPost();
+      if (widget.postID != null) {
+        submitPost();
+      } else {
+        confirmPostSubmission();
+      }
     }
   }
 
@@ -542,13 +643,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
         });
         WebblenUserData().getUserByID(currentUID).then((res) {
           currentUser = res;
-          print(currentUser.followers);
           setState(() {});
         });
       }
       if (widget.postID != null) {
         PostDataService().getPost(widget.postID).then((res) {
-          print(res.tags);
           if (res != null) {
             body = res.body;
             imgURL = res.imageURL == null ? null : res.imageURL;
@@ -574,158 +673,161 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: WebblenAppBar().newEventAppBar(
-          context, widget.postID != null ? 'Editing Post' : 'New Post', widget.postID != null ? 'Cancel Editing Post?' : 'Cancel Adding New Post?', () {
-        Navigator.of(context).pop();
-      },
-          isTypingMultiLine
-              ? GestureDetector(
-                  onTap: () => dismissKeyboard(),
-                  child: Container(
-                    margin: EdgeInsets.only(right: 16.0, top: 16.0),
-                    child: CustomText(
-                      context: context,
-                      text: "Dismiss",
-                      textColor: Colors.blueAccent,
-                      textAlign: TextAlign.left,
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ))
-              : Container()),
-      body: Container(
-        child: Form(
-          key: formKey,
-          child: ListView(
-            controller: scrollController,
-            shrinkWrap: true,
-            children: <Widget>[
-              isLoading
-                  ? Container(
-                      constraints: BoxConstraints(
-                        minHeight: MediaQuery.of(context).size.height,
+    return GestureDetector(
+      onTap: () => dismissKeyboard(),
+      child: Scaffold(
+        appBar: WebblenAppBar().newEventAppBar(
+            context, widget.postID != null ? 'Editing Post' : 'New Post', widget.postID != null ? 'Cancel Editing Post?' : 'Cancel Adding New Post?', () {
+          Navigator.of(context).pop();
+        },
+            isTypingMultiLine
+                ? GestureDetector(
+                    onTap: () => dismissKeyboard(),
+                    child: Container(
+                      margin: EdgeInsets.only(right: 16.0, top: 16.0),
+                      child: CustomText(
+                        context: context,
+                        text: "Dismiss",
+                        textColor: Colors.blueAccent,
+                        textAlign: TextAlign.left,
+                        fontSize: 18.0,
+                        fontWeight: FontWeight.w700,
                       ),
-                      child: Column(
-                        children: <Widget>[
-                          CustomLinearProgress(progressBarColor: CustomColors.webblenRed),
-                        ],
-                      ),
-                    )
-                  : Container(
-                      child: Column(
-                        children: <Widget>[
-                          addImageButton(),
-                          Container(
-                            height: 40,
-                            width: MediaQuery.of(context).size.width,
-                            margin: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                scrollDirection: Axis.horizontal,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemCount: tags.length,
-                                itemBuilder: (BuildContext context, int index) {
-                                  return GestureDetector(
-                                    onTap: () {
-                                      tags.removeAt(index);
-                                      setState(() {});
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.only(right: 8.0, top: 16.0),
-                                      child: TagContainer(
-                                        tag: tags[index],
-                                        width: 100,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                          ),
-                          SizedBox(height: 16.0),
-                          Container(
-                            margin: EdgeInsets.symmetric(horizontal: 16.0),
-                            child: Column(
-                              children: [
-                                TextFieldContainer(
-                                  height: 50,
-                                  child: TypeAheadField(
-                                    hideOnEmpty: true,
-                                    hideOnLoading: true,
-                                    direction: AxisDirection.up,
-                                    textFieldConfiguration: TextFieldConfiguration(
-                                      controller: tagTextController,
-                                      cursorColor: Colors.black,
-                                      decoration: InputDecoration(
-                                        hintText: "Search for Tags",
-                                        border: InputBorder.none,
-                                      ),
-                                      autofocus: false,
-                                    ),
-                                    suggestionsCallback: (searchTerm) async {
-                                      return await AlgoliaSearch().queryTags(searchTerm);
-                                    },
-                                    itemBuilder: (context, tag) {
-                                      return ListTile(
-                                        title: Text(
-                                          tag,
-                                          style: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w700),
+                    ))
+                : Container()),
+        body: Container(
+          child: Form(
+            key: formKey,
+            child: ListView(
+              controller: scrollController,
+              shrinkWrap: true,
+              children: <Widget>[
+                isLoading
+                    ? Container(
+                        constraints: BoxConstraints(
+                          minHeight: MediaQuery.of(context).size.height,
+                        ),
+                        child: Column(
+                          children: <Widget>[
+                            CustomLinearProgress(progressBarColor: CustomColors.webblenRed),
+                          ],
+                        ),
+                      )
+                    : Container(
+                        child: Column(
+                          children: <Widget>[
+                            addImageButton(),
+                            Container(
+                              height: 40,
+                              width: MediaQuery.of(context).size.width,
+                              margin: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: tags.length,
+                                  itemBuilder: (BuildContext context, int index) {
+                                    return GestureDetector(
+                                      onTap: () {
+                                        tags.removeAt(index);
+                                        setState(() {});
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.only(right: 8.0, top: 16.0),
+                                        child: TagContainer(
+                                          tag: tags[index],
+                                          width: 100,
                                         ),
-                                      );
-                                    },
-                                    onSuggestionSelected: (tag) {
-                                      if (!tags.contains(tag)) {
-                                        if (tags.length < 3) {
-                                          tags.add(tag);
-                                          setState(() {});
-                                        } else {
-                                          showOkAlertDialog(
-                                            context: context,
-                                            message: "Tag Limit Reached",
-                                            okLabel: "Ok",
-                                            barrierDismissible: true,
-                                          );
-                                        }
-                                      }
-                                      tagTextController.clear();
-                                    },
-                                  ),
-                                ),
-                                //EVENT LOCATION
-                                SizedBox(height: 16.0),
-                                fieldHeader("Audience Location", true),
-                                postLocationField(),
-                                SizedBox(height: 16.0),
-                                //POST BODY
-                                fieldHeader("Message", true),
-                                postBodyField(),
-
-                                // widget.isStream ? fieldHeader("Stream Category", true) : fieldHeader("Event Category", true),
-                                // postCategory(),
-                                SizedBox(height: 32.0),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 2.0),
-                                      child: CustomColorButton(
-                                        text: widget.postID == null ? "Create Post" : "Update Post",
-                                        textColor: Colors.black,
-                                        backgroundColor: Colors.white,
-                                        height: 35.0,
-                                        width: 150,
-                                        onPressed: () => validateAndSubmitPost(),
                                       ),
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: 64.0),
-                              ],
+                                    );
+                                  }),
                             ),
-                          ),
-                        ],
+                            SizedBox(height: 16.0),
+                            Container(
+                              margin: EdgeInsets.symmetric(horizontal: 16.0),
+                              child: Column(
+                                children: [
+                                  TextFieldContainer(
+                                    height: 50,
+                                    child: TypeAheadField(
+                                      hideOnEmpty: true,
+                                      hideOnLoading: true,
+                                      direction: AxisDirection.up,
+                                      textFieldConfiguration: TextFieldConfiguration(
+                                        controller: tagTextController,
+                                        cursorColor: Colors.black,
+                                        decoration: InputDecoration(
+                                          hintText: "Search for Tags",
+                                          border: InputBorder.none,
+                                        ),
+                                        autofocus: false,
+                                      ),
+                                      suggestionsCallback: (searchTerm) async {
+                                        return await AlgoliaSearch().queryTags(searchTerm);
+                                      },
+                                      itemBuilder: (context, tag) {
+                                        return ListTile(
+                                          title: Text(
+                                            tag,
+                                            style: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.w700),
+                                          ),
+                                        );
+                                      },
+                                      onSuggestionSelected: (tag) {
+                                        if (!tags.contains(tag)) {
+                                          if (tags.length < 3) {
+                                            tags.add(tag);
+                                            setState(() {});
+                                          } else {
+                                            showOkAlertDialog(
+                                              context: context,
+                                              message: "Tag Limit Reached",
+                                              okLabel: "Ok",
+                                              barrierDismissible: true,
+                                            );
+                                          }
+                                        }
+                                        tagTextController.clear();
+                                      },
+                                    ),
+                                  ),
+                                  //EVENT LOCATION
+                                  SizedBox(height: 16.0),
+                                  fieldHeader("Audience Location", true),
+                                  postLocationField(),
+                                  SizedBox(height: 16.0),
+                                  //POST BODY
+                                  fieldHeader("Message", true),
+                                  postBodyField(),
+
+                                  // widget.isStream ? fieldHeader("Stream Category", true) : fieldHeader("Event Category", true),
+                                  // postCategory(),
+                                  SizedBox(height: 32.0),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 2.0),
+                                        child: CustomColorButton(
+                                          text: widget.postID == null ? "Create Post" : "Update Post",
+                                          textColor: Colors.black,
+                                          backgroundColor: Colors.white,
+                                          height: 35.0,
+                                          width: 150,
+                                          onPressed: () => validateAndSubmitPost(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 64.0),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -1,365 +1,527 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:google_maps_webservice/places.dart';
 import 'package:webblen/constants/custom_colors.dart';
+import 'package:webblen/constants/strings.dart';
+import 'package:webblen/firebase/data/reward_data.dart';
+import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_reward.dart';
-import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
+import 'package:webblen/widgets/common/containers/text_field_container.dart';
+import 'package:webblen/widgets/common/text/custom_text.dart';
 
 class ShopItemDetailsPage extends StatefulWidget {
+  final WebblenUser currentUser;
   final WebblenReward reward;
-  ShopItemDetailsPage({this.reward});
+  ShopItemDetailsPage({this.currentUser, this.reward});
 
   @override
   _ShopItemDetailsPageState createState() => _ShopItemDetailsPageState();
 }
 
 class _ShopItemDetailsPageState extends State<ShopItemDetailsPage> {
-  int quantity = 1;
+  bool isLoading;
+  String email;
+  String address1;
+  String address2;
+  String cashRewardUsername;
+  String cashRewardUsernameConfirmation;
+  double purchaseTotal;
+  String selectedSize = 'M';
+  List<String> availableSizes = ['XS', 'S', 'M', 'L', 'XL'];
+  final GlobalKey<FormState> merchFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> cashFormKey = GlobalKey<FormState>();
 
-  List<bool> selectedColor = [true, false, false, false];
+  GoogleMapsPlaces _places = GoogleMapsPlaces(
+    apiKey: Strings.googleAPIKEY,
+    //baseUrl: Strings.proxyMapsURL,
+  );
 
-  Widget buildCard() {
-    return Card(
-      elevation: 10,
-      margin: EdgeInsets.fromLTRB(40, 20, 40, 20),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Color(0xffdddddd),
+  openGoogleAutoComplete() async {
+    Prediction p = await PlacesAutocomplete.show(
+      context: context,
+      apiKey: Strings.googleAPIKEY,
+      onError: (res) {
+        print(res.errorMessage);
+      },
+      //proxyBaseUrl: Strings.proxyMapsURL,
+      mode: Mode.overlay,
+      language: "en",
+      components: [
+        Component(
+          Component.country,
+          "us",
         ),
-//        width: MediaQuery.of(context).size.width -50,
-//        height: MediaQuery.of(context).size.height / 3,
-        child: Column(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                child: CachedNetworkImage(
-                  imageUrl: widget.reward.imageURL,
-                  fit: BoxFit.fill,
-                  width: MediaQuery.of(context).size.width - 80,
-                ),
-              ),
-              flex: 6,
-            ),
-            Expanded(
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          child: Text(widget.reward.cost.toStringAsFixed(2),
-                              overflow: TextOverflow.ellipsis, maxLines: 1, style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white)),
-                          padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                          margin: EdgeInsets.only(top: 5),
-                          decoration: BoxDecoration(color: Color(0xff36004f), borderRadius: BorderRadius.circular(15)),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(top: 5),
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.star,
-                                color: Colors.pink,
-                              ),
-                              Icon(
-                                Icons.star,
-                                color: Colors.pink,
-                              ),
-                              Icon(
-                                Icons.star,
-                                color: Colors.pink,
-                              ),
-                              Icon(
-                                Icons.star_half,
-                                color: Colors.pink,
-                              ),
-                              Icon(
-                                Icons.star_border,
-                                color: Colors.pink,
-                              )
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              flex: 1,
-            )
-          ],
-        ),
-      ),
+      ],
     );
+    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
+    address1 = detail.result.formattedAddress;
+    setState(() {});
   }
 
-  Widget buildChoice() {
-    // TODO: change color to a drop down menu
+  purchaseReward() {
+    if (widget.reward.type == "webblenClothes") {
+      submitMerchForm();
+    } else {
+      submitCashForm();
+    }
+  }
+
+  submitMerchForm() {
+    merchFormKey.currentState.save();
+    if (email == null || !Strings().isEmailValid(email)) {
+      showAlertDialog(
+        context: context,
+        message: "Email Invalid",
+        barrierDismissible: true,
+        actions: [
+          AlertDialogAction(label: "Ok", isDefaultAction: true),
+        ],
+      );
+    } else if (address1 == null || address1.isEmpty) {
+      showAlertDialog(
+        context: context,
+        message: "Address Required",
+        barrierDismissible: true,
+        actions: [
+          AlertDialogAction(label: "Ok", isDefaultAction: true),
+        ],
+      );
+    } else {
+      RewardDataService().purchaseReward(widget.currentUser.uid, widget.reward.cost).then((e) {
+        if (e == null) {
+          RewardDataService()
+              .purchaseMerchReward(
+            widget.currentUser.uid,
+            widget.reward.type,
+            widget.reward.title,
+            widget.reward.id,
+            selectedSize,
+            email,
+            address1,
+            address2,
+          )
+              .then((e) async {
+            if (e == null) {
+              String res = await showAlertDialog(
+                context: context,
+                message: "Purchase Successful!",
+                barrierDismissible: false,
+                actions: [
+                  AlertDialogAction(label: "Ok", key: "ok", isDefaultAction: true),
+                ],
+              );
+              if (res == "ok") {
+                Navigator.of(context).pop();
+              }
+            } else {
+              WebblenUserData().depositWebblen(widget.reward.cost, widget.currentUser.uid);
+              showAlertDialog(
+                context: context,
+                message: "There Was an Issue Completing Your Order. Please Try Again.",
+                barrierDismissible: true,
+                actions: [
+                  AlertDialogAction(label: "Ok", isDefaultAction: true),
+                ],
+              );
+            }
+          });
+        } else {
+          showAlertDialog(
+            context: context,
+            message: "Insufficient Funds",
+            barrierDismissible: true,
+            actions: [
+              AlertDialogAction(label: "Ok", isDefaultAction: true),
+            ],
+          );
+        }
+      });
+    }
+  }
+
+  submitCashForm() {
+    merchFormKey.currentState.save();
+    if (!widget.reward.title.contains("PayPal") && email == null || !Strings().isEmailValid(email)) {
+      showAlertDialog(
+        context: context,
+        message: "Email Invalid",
+        barrierDismissible: true,
+        actions: [
+          AlertDialogAction(label: "Ok", isDefaultAction: true),
+        ],
+      );
+    } else if (cashRewardUsername == null || cashRewardUsername.isEmpty) {
+      showAlertDialog(
+        context: context,
+        message: "Username Required",
+        barrierDismissible: true,
+        actions: [
+          AlertDialogAction(label: "Ok", isDefaultAction: true),
+        ],
+      );
+    } else if (cashRewardUsername != cashRewardUsernameConfirmation) {
+      showAlertDialog(
+        context: context,
+        message: "Usernames Do Not Match",
+        barrierDismissible: true,
+        actions: [
+          AlertDialogAction(label: "Ok", isDefaultAction: true),
+        ],
+      );
+    } else {
+      RewardDataService().purchaseReward(widget.currentUser.uid, widget.reward.cost).then((e) {
+        if (e == null) {
+          RewardDataService()
+              .purchaseCashReward(
+            widget.currentUser.uid,
+            widget.reward.type,
+            widget.reward.title,
+            widget.reward.id,
+            cashRewardUsername,
+            email,
+          )
+              .then((e) async {
+            if (e == null) {
+              String res = await showAlertDialog(
+                context: context,
+                message: "Purchase Successful!",
+                barrierDismissible: false,
+                actions: [
+                  AlertDialogAction(label: "Ok", key: "ok", isDefaultAction: true),
+                ],
+              );
+              if (res == "ok") {
+                Navigator.of(context).pop();
+              }
+            } else {
+              WebblenUserData().depositWebblen(widget.reward.cost, widget.currentUser.uid);
+              showAlertDialog(
+                context: context,
+                message: "There Was an Issue Completing Your Order. Please Try Again.",
+                barrierDismissible: true,
+                actions: [
+                  AlertDialogAction(label: "Ok", isDefaultAction: true),
+                ],
+              );
+            }
+          });
+        } else {
+          showAlertDialog(
+            context: context,
+            message: "Insufficient Funds",
+            barrierDismissible: true,
+            actions: [
+              AlertDialogAction(label: "Ok", isDefaultAction: true),
+            ],
+          );
+        }
+      });
+    }
+  }
+
+  Widget fieldHeader(String header, bool isRequired) {
+    return isRequired
+        ? Row(
+            children: [
+              Text(
+                header,
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 16.0, color: Colors.black, fontWeight: FontWeight.w500),
+              ),
+              Text(
+                "*",
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 16.0, color: Colors.red, fontWeight: FontWeight.w500),
+              )
+            ],
+          )
+        : Row(
+            children: [
+              Text(
+                header,
+                textAlign: TextAlign.left,
+                style: TextStyle(fontSize: 16.0, color: Colors.black, fontWeight: FontWeight.w500),
+              )
+            ],
+          );
+  }
+
+  Widget sizeDropdown() {
     return Row(
       children: <Widget>[
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              buildColor(Colors.brown, 0),
-              buildColor(Color(0xffba5d5d), 1),
-              buildColor(Color(0xffb78484), 2),
-              buildColor(Color(0xff912121), 3),
-            ],
-          ),
-        ),
-        Expanded(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              IconButton(
-                  icon: Icon(
-                    Icons.add_circle_outline,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      quantity++;
-                    });
-                  }),
-              Text(
-                quantity.toString(),
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              IconButton(
-                  icon: Icon(
-                    Icons.remove_circle_outline,
-                    color: Colors.grey,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      quantity = --quantity == 0 ? 1 : quantity;
-                    });
-                  }),
-            ],
+        TextFieldContainer(
+          height: 45,
+          width: 50,
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: 12,
+            ),
+            child: DropdownButton(
+                isExpanded: true,
+                underline: Container(),
+                value: selectedSize,
+                items: availableSizes.map((String val) {
+                  return DropdownMenuItem<String>(
+                    value: val,
+                    child: Text(val),
+                  );
+                }).toList(),
+                onChanged: (val) {
+                  setState(() {
+                    selectedSize = val;
+                  });
+                }),
           ),
         ),
       ],
     );
   }
 
-  Widget buildColor(Color color, int i) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          for (int j = 0; j < selectedColor.length; j++) {
-            selectedColor[j] = false;
-            if (j == i) selectedColor[j] = true;
-          }
-        });
-      },
-      child: Container(
-        margin: EdgeInsets.only(left: 8),
-        child: selectedColor[i]
-            ? Icon(
-                Icons.check,
-                size: 15,
-                color: Colors.white,
-              )
-            : null,
-        decoration: ShapeDecoration(color: color, shape: CircleBorder()),
-        height: 20,
-        width: 20,
-      ),
-    );
-  }
-
-  Widget buildAddToRow() {
-    return Container(
-      margin: EdgeInsets.only(left: 10),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              child: FlatButton(
-                  onPressed: null,
-                  child: Text(
-                    "ADD TO CART",
-                    style: TextStyle(color: Colors.white),
-                  )),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                gradient: LinearGradient(
-                  colors: [Colors.pink, Colors.pinkAccent, Colors.purpleAccent],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+  Widget locationField() {
+    return GestureDetector(
+      onTap: () => openGoogleAutoComplete(),
+      child: TextFieldContainer(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Container(
+              height: 40.0,
+              padding: EdgeInsets.only(top: 10.0),
+              child: CustomText(
+                context: context,
+                text: address1 == null || address1.isEmpty ? "Search for Address" : address1,
+                textColor: address1 == null || address1.isEmpty ? Colors.black54 : Colors.black,
+                textAlign: TextAlign.left,
+                fontSize: 16.0,
+                fontWeight: FontWeight.w400,
               ),
             ),
-            flex: 3,
-          ),
-          Expanded(
-              child: Container(
-//            margin: EdgeInsets.only(left: 30, right: 20),
-            decoration: ShapeDecoration(shape: CircleBorder(), color: Color(0xffdddddd)),
-            child: Icon(
-              Icons.favorite_border,
-              color: Colors.black,
-            ),
-            padding: EdgeInsets.all(10),
-          ))
-        ],
-      ),
-    );
-  }
-
-//  @override
-//  Widget build(BuildContext context) {
-//    return Scaffold(
-//      appBar: AppBar(
-//        elevation: 0.0,
-//        title: Text("Back to Shopping"),
-//      ),
-//      body: ListView(
-//        children: <Widget>[
-//          buildProduct(),
-//          buildChoicesRow(),
-//          buildBuyRow(),
-//          Divider(),
-//          buildDescription(),
-//          Divider(),
-//        ],
-//      ),
-//    );
-//  }
-
-  // TODO: Change text UI
-  Widget buildProduct() {
-    return Container(
-      height: 200.0,
-      child: GridTile(
-        child: Container(
-          color: Colors.white,
-          child: CachedNetworkImage(
-            imageUrl: widget.reward.imageURL,
-            fit: BoxFit.fitHeight,
-            width: MediaQuery.of(context).size.width - 80,
-          ),
-        ),
-        footer: Container(
-          color: Colors.white,
-          child: ListTile(
-            leading: Text(widget.reward.title, overflow: TextOverflow.ellipsis, maxLines: 1, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.0)),
-            title: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Text(widget.reward.cost.toStringAsFixed(2),
-                      overflow: TextOverflow.ellipsis, maxLines: 1, style: TextStyle(fontWeight: FontWeight.w800, color: Colors.red)),
-                ),
-              ],
-            ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  Widget buildChoicesRow() {
-    return Container(
-      color: Color(0xffe5e3e3),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              child: buildChoiceButton("Size"),
-              margin: EdgeInsets.all(5),
-            ),
-            flex: 3,
-          ),
-          Expanded(
-              child: Container(
-                child: buildChoiceButton("Color"),
-                margin: EdgeInsets.all(5),
-              ),
-              flex: 3),
-          Expanded(
-            child: Container(
-              child: buildChoiceButton("Quantity"),
-              margin: EdgeInsets.all(5),
-            ),
-            flex: 4,
-          ),
+  Widget emailField() {
+    return TextFieldContainer(
+      child: TextFormField(
+        initialValue: email,
+        cursorColor: Colors.black,
+        validator: (value) => value.isEmpty ? 'Field Cannot be Empty' : null,
+        onChanged: (value) {
+          setState(() {
+            email = value.trim();
+          });
+        },
+        onSaved: (value) => email = value.trim(),
+        decoration: InputDecoration(
+          hintText: "example@email.com",
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Widget address2Field() {
+    return TextFieldContainer(
+      child: TextFormField(
+        initialValue: address2,
+        cursorColor: Colors.black,
+        validator: (value) => value.isEmpty ? 'Field Cannot be Empty' : null,
+        onChanged: (value) {
+          setState(() {
+            address2 = value.trim();
+          });
+        },
+        onSaved: (value) => address2 = value.trim(),
+        decoration: InputDecoration(
+          hintText: "Optional",
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Widget cashRewardUsernameField() {
+    return TextFieldContainer(
+      child: TextFormField(
+        initialValue: cashRewardUsername,
+        cursorColor: Colors.black,
+        validator: (value) => value.isEmpty ? 'Field Cannot be Empty' : null,
+        onChanged: (value) {
+          setState(() {
+            cashRewardUsername = value.trim();
+          });
+        },
+        onSaved: (value) => cashRewardUsername = value.trim(),
+        decoration: InputDecoration(
+          hintText: widget.reward.title.contains("Cash App")
+              ? "\$username"
+              : widget.reward.title.contains("Venmo")
+                  ? "@username"
+                  : "example@email.com",
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Widget confirmCashRewardUsernameField() {
+    return TextFieldContainer(
+      child: TextFormField(
+        initialValue: cashRewardUsernameConfirmation,
+        cursorColor: Colors.black,
+        validator: (value) => value.isEmpty ? 'Field Cannot be Empty' : null,
+        onChanged: (value) {
+          setState(() {
+            cashRewardUsernameConfirmation = value.trim();
+          });
+        },
+        onSaved: (value) => cashRewardUsernameConfirmation = value.trim(),
+        decoration: InputDecoration(
+          hintText: widget.reward.title.contains("Cash App")
+              ? "\$username"
+              : widget.reward.title.contains("Venmo")
+                  ? "@username"
+                  : "example@email.com",
+          border: InputBorder.none,
+        ),
+      ),
+    );
+  }
+
+  Widget merchRewardForm() {
+    return Form(
+      key: merchFormKey,
+      child: Column(
+        children: [
+          fieldHeader("Size", true),
+          SizedBox(height: 4),
+          sizeDropdown(),
+          SizedBox(height: 24),
+          fieldHeader("Email Address", true),
+          SizedBox(height: 4),
+          emailField(),
+          SizedBox(height: 24),
+          fieldHeader("Street Address", true),
+          SizedBox(height: 4),
+          locationField(),
+          SizedBox(height: 24),
+          fieldHeader("Apt, Suite, No.", false),
+          SizedBox(height: 4),
+          address2Field(),
+          SizedBox(height: 32),
         ],
       ),
     );
   }
 
-  Widget buildChoiceButton(String text) {
-    return MaterialButton(
-      color: Colors.white,
-      textColor: Colors.grey,
-      elevation: 0.2,
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              text,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
-            flex: 2,
+  Widget cashRewardForm() {
+    return Form(
+      key: cashFormKey,
+      child: Column(
+        children: [
+          widget.reward.title.contains("PayPal") ? Container() : fieldHeader("Email Address", true),
+          widget.reward.title.contains("PayPal") ? Container() : SizedBox(height: 4),
+          widget.reward.title.contains("PayPal") ? Container() : emailField(),
+          widget.reward.title.contains("PayPal") ? Container() : SizedBox(height: 24),
+          fieldHeader(
+            widget.reward.title.contains("Cash App")
+                ? "Cash App Tag"
+                : widget.reward.title.contains("Venmo")
+                    ? "Venmo Username"
+                    : "PayPal Email",
+            true,
           ),
-          Expanded(child: Icon(Icons.arrow_drop_down))
+          SizedBox(height: 4),
+          cashRewardUsernameField(),
+          SizedBox(height: 24),
+          fieldHeader(
+            widget.reward.title.contains("Cash App")
+                ? "Confirm Cash App Tag"
+                : widget.reward.title.contains("Venmo")
+                    ? "Confirm Venmo Username"
+                    : "Confirm PayPal Email",
+            true,
+          ),
+          SizedBox(height: 4),
+          confirmCashRewardUsernameField(),
+          SizedBox(height: 32),
         ],
       ),
-      onPressed: () {
-        showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text(text),
-                content: Text("Choose the $text"),
-                actions: <Widget>[
-                  MaterialButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(context);
-                    },
-                    child: Text("close"),
-                  )
-                ],
-              );
-            });
-      },
-    );
-  }
-
-  Widget buildBuyRow() {
-    return Container(
-      margin: EdgeInsets.only(left: 10),
-      child: Row(
-        children: <Widget>[
-          Expanded(child: MaterialButton(onPressed: () {}, color: Colors.pink, textColor: Colors.white, elevation: 0.2, child: Text("Buy now"))),
-          IconButton(icon: Icon(Icons.add_shopping_cart), color: Colors.pink, onPressed: () {}),
-          IconButton(icon: Icon(Icons.favorite_border), color: Colors.pink, onPressed: () {})
-        ],
-      ),
-    );
-  }
-
-  Widget buildDescription() {
-    return ListTile(
-      title: Text("Details"),
-      subtitle: Text("A very valuable item that will surly stun anyone who look at it, Give it a try. The sure thing is that you won't regret it."),
     );
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // ** APP BAR
+    final appBar = AppBar(
+      elevation: 0.5,
+      brightness: Brightness.light,
+      backgroundColor: Color(0xFFF9F9F9),
+      title: Text(
+        "Details",
+        textAlign: TextAlign.center,
+        style: TextStyle(color: Colors.black, fontSize: 18.0, fontWeight: FontWeight.bold),
+      ),
+      //Text('Shop', style: Fonts.dashboardTitleStyle),
+      leading: BackButton(
+        color: Colors.black,
+      ),
+      actions: <Widget>[
+        Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: 4.0,
+          ),
+          child: StreamBuilder(
+            stream: FirebaseFirestore.instance.collection("webblen_user").doc(widget.currentUser.uid).snapshots(),
+            builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+              if (!userSnapshot.hasData)
+                return Text(
+                  "Loading...",
+                );
+              var userData = userSnapshot.data.data();
+              double availablePoints = userData['d']["eventPoints"] * 1.00;
+              return Padding(
+                padding: EdgeInsets.all(4.0),
+                child: Row(
+                  children: <Widget>[
+                    Image.asset(
+                      'assets/images/webblen_coin.png',
+                      height: 24.0,
+                      width: 24.0,
+                      fit: BoxFit.contain,
+                    ),
+                    SizedBox(width: 4.0),
+                    Text(
+                      availablePoints.toStringAsFixed(2),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+
     return Scaffold(
-      appBar: WebblenAppBar().basicAppBar("Details", context),
+      appBar: appBar,
       body: Container(
+        color: Colors.white,
         child: ListView(
           children: [
             Container(
@@ -405,6 +567,8 @@ class _ShopItemDetailsPageState extends State<ShopItemDetailsPage> {
                       ),
                     ],
                   ),
+                  SizedBox(height: 32),
+                  widget.reward.type == "webblenClothes" ? merchRewardForm() : cashRewardForm(),
                 ],
               ),
             ),
@@ -470,7 +634,7 @@ class _ShopItemDetailsPageState extends State<ShopItemDetailsPage> {
                     backgroundColor: CustomColors.darkMountainGreen,
                     height: 35.0,
                     width: MediaQuery.of(context).size.width * 0.4,
-                    onPressed: null,
+                    onPressed: () => purchaseReward(),
                   ),
                 ],
               ),

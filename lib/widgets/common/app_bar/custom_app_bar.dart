@@ -27,6 +27,26 @@ class WebblenAppBar {
     );
   }
 
+  Widget basicActionBarWithoutBackButton(String appBarTitle, BuildContext context, Widget trailingWidget) {
+    return AppBar(
+      elevation: 0.0,
+      brightness: Brightness.light,
+      backgroundColor: Colors.white,
+      title: MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaleFactor: 1.0,
+        ),
+        child: Fonts().textW700(
+          appBarTitle,
+          20.0,
+          Colors.black,
+          TextAlign.center,
+        ),
+      ),
+      actions: <Widget>[trailingWidget],
+    );
+  }
+
   Widget streamBroadcasterAppbar(Widget leadingWidget, Widget trailingWidget) {
     return AppBar(
       elevation: 0.0,

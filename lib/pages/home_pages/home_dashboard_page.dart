@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
 import 'package:flutter_native_admob/native_admob_controller.dart';
@@ -12,17 +13,18 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
-import 'package:share/share.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/constants/strings.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/post_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
@@ -71,6 +73,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   TabController _tabController;
   ScrollController recordedStreamsScrollController;
   ScrollController postsScrollController;
+  ScrollController streamsScrollController;
   ScrollController eventsScrollController;
   ScrollController followingScrollController;
   ScrollController recommendedScrollController;
@@ -91,16 +94,21 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   CollectionReference recordedStreamsRef = FirebaseFirestore.instance.collection("recorded_streams");
   List<DocumentSnapshot> recordedStreamResults = [];
   List<DocumentSnapshot> postResults = [];
+  List<DocumentSnapshot> streamResults = [];
   List<DocumentSnapshot> eventResults = [];
   List<DocumentSnapshot> followingResults = [];
   List<DocumentSnapshot> recommendedResults = [];
   DocumentSnapshot lastPostDocSnap;
+  DocumentSnapshot lastStreamDocSnap;
   DocumentSnapshot lastEventDocSnap;
   DocumentSnapshot lastFollowingDocSnap;
   DocumentSnapshot lastRecommendedDocSnap;
 
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
+
+  bool loadingAdditionalStreams = false;
+  bool moreStreamsAvailable = true;
 
   bool loadingAdditionalEvents = false;
   bool moreEventsAvailable = true;
@@ -186,16 +194,52 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     setState(() {});
   }
 
+  getStreams() async {
+    Query query;
+    if (areaCodeFilter.isEmpty) {
+      query = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: true)
+          .where('d.privacy', isEqualTo: "public")
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
+          .limit(resultsPerPage);
+    } else {
+      query = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: true)
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.privacy', isEqualTo: "public")
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
+          .limit(resultsPerPage);
+    }
+    QuerySnapshot querySnapshot = await query.get().catchError((e) {
+      print(e);
+    });
+    if (querySnapshot.docs.isNotEmpty) {
+      lastStreamDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+      streamResults = querySnapshot.docs;
+      if (tagFilter.isNotEmpty) {
+        streamResults.removeWhere((doc) => !doc.data()['d']['tags'].contains(tagFilter));
+      }
+      if (sortBy == "Most Popular") {
+        streamResults.sort((docA, docB) => docB.data()['d']['clicks'].compareTo(docA.data()['d']['clicks']));
+      }
+    }
+    setState(() {});
+  }
+
   getEvents() async {
     Query eventsQuery;
     if (areaCodeFilter.isEmpty) {
       eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.privacy', isEqualTo: "public")
           .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy("d.endDateTimeInMilliseconds", descending: false)
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.privacy', isEqualTo: "public")
           .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
@@ -237,8 +281,10 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         followingResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
       }
     }
-    isLoading = false;
-    setState(() {});
+    if (this.mounted) {
+      isLoading = false;
+      setState(() {});
+    }
   }
 
   getRecommendedPosts() async {
@@ -277,6 +323,47 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     // setState(() {});
   }
 
+  getAdditionalStreams() async {
+    if (isLoading || !moreStreamsAvailable || loadingAdditionalStreams) {
+      return;
+    }
+    loadingAdditionalStreams = true;
+    setState(() {});
+    Query eventsQuery;
+    if (areaCodeFilter.isEmpty) {
+      eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where('d.privacy', isEqualTo: "public")
+          .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
+          .startAfterDocument(lastStreamDocSnap)
+          .limit(resultsPerPage);
+    } else {
+      eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: false)
+          .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
+          .where('d.privacy', isEqualTo: "public")
+          .orderBy("d.endDateTimeInMilliseconds", descending: false)
+          .startAfterDocument(lastStreamDocSnap)
+          .limit(resultsPerPage);
+    }
+
+    QuerySnapshot querySnapshot = await eventsQuery.get().catchError((e) {});
+    lastStreamDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    streamResults.addAll(querySnapshot.docs);
+    if (tagFilter.isNotEmpty) {
+      streamResults.removeWhere((doc) => !doc.data()['d']['tags'].contains(tagFilter));
+    }
+    if (sortBy == "Most Popular") {
+      streamResults.sort((docA, docB) => docB.data()['d']['clicks'].compareTo(docA.data()['d']['clicks']));
+    }
+    if (querySnapshot.docs.length == 0) {
+      moreStreamsAvailable = false;
+    }
+    loadingAdditionalStreams = false;
+    setState(() {});
+  }
+
   getAdditionalEvents() async {
     if (isLoading || !moreEventsAvailable || loadingAdditionalEvents) {
       return;
@@ -286,6 +373,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     Query eventsQuery;
     if (areaCodeFilter.isEmpty) {
       eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.privacy', isEqualTo: "public")
           .where("d.endDateTimeInMilliseconds", isGreaterThan: dateTimeInMilliseconds2hoursAgo)
           .orderBy("d.endDateTimeInMilliseconds", descending: false)
@@ -293,6 +381,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           .limit(resultsPerPage);
     } else {
       eventsQuery = eventsRef
+          .where('d.isDigitalEvent', isEqualTo: false)
           .where('d.nearbyZipcodes', arrayContains: areaCodeFilter)
           .where('d.privacy', isEqualTo: "public")
           .orderBy("d.endDateTimeInMilliseconds", descending: false)
@@ -306,11 +395,9 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     if (tagFilter.isNotEmpty) {
       eventResults.removeWhere((doc) => !doc.data()['d']['tags'].contains(tagFilter));
     }
-    // if (sortBy == "Latest") {
-    //   eventResults.sort((docA, docB) => docB.data()['d']['endDateTimeInMilliseconds'].compareTo(docA.data()['d']['endDateTimeInMilliseconds']));
-    // } else {
-    //   eventResults.sort((docA, docB) => docB.data()['d']['clicks'].compareTo(docA.data()['d']['clicks']));
-    // }
+    if (sortBy == "Most Popular") {
+      eventResults.sort((docA, docB) => docB.data()['d']['clicks'].compareTo(docA.data()['d']['clicks']));
+    }
     if (querySnapshot.docs.length == 0) {
       moreEventsAvailable = false;
     }
@@ -465,6 +552,8 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   }
 
   Future<void> refreshData() async {
+    isLoading = true;
+    setState(() {});
     postResults = [];
     eventResults = [];
     followingResults = [];
@@ -803,7 +892,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                             viewUser: () => transitionToUserPage(post.authorID),
                             //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
                             viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
-                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                            postOptions: () => postOptionsDialog(post),
                           )
                         : PostImgBlock(
                             currentUID: widget.currentUser.uid,
@@ -811,7 +900,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                             viewUser: () => transitionToUserPage(post.authorID),
                             //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
                             viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
-                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                            postOptions: () => postOptionsDialog(post),
                           ),
                   ],
                 ),
@@ -837,7 +926,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                   viewUser: () => transitionToUserPage(post.authorID),
                                   //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
                                   viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
-                                  postOptions: () => postOptionsDialog(post.id, post.authorID),
+                                  postOptions: () => postOptionsDialog(post),
                                 )
                               : PostImgBlock(
                                   currentUID: widget.currentUser.uid,
@@ -845,7 +934,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                   viewUser: () => transitionToUserPage(post.authorID),
                                   //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
                                   viewPost: () => PageTransitionService(context: context, postID: post.id).transitionToPostViewPage(),
-                                  postOptions: () => postOptionsDialog(post.id, post.authorID),
+                                  postOptions: () => postOptionsDialog(post),
                                 ),
                         ],
                       ),
@@ -865,7 +954,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                             //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
                             viewPost: () =>
                                 PageTransitionService(context: context, currentUser: widget.currentUser, postID: post.id).transitionToPostViewPage(),
-                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                            postOptions: () => postOptionsDialog(post),
                           )
                         : PostImgBlock(
                             currentUID: widget.currentUser.uid,
@@ -874,10 +963,43 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                             //shareEvent: () => Share.share("https://app.webblen.io/#/post?id=${post.id}"),
                             viewPost: () =>
                                 PageTransitionService(context: context, currentUser: widget.currentUser, postID: post.id).transitionToPostViewPage(),
-                            postOptions: () => postOptionsDialog(post.id, post.authorID),
+                            postOptions: () => postOptionsDialog(post),
                           ),
                   );
           }
+        },
+      ),
+    );
+  }
+
+  Widget listStreams() {
+    return LiquidPullToRefresh(
+      color: CustomColors.webblenRed,
+      onRefresh: refreshData,
+      child: ListView.builder(
+        controller: streamsScrollController,
+        physics: AlwaysScrollableScrollPhysics(),
+        key: UniqueKey(),
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: streamResults.length,
+        itemBuilder: (context, index) {
+          WebblenEvent stream = WebblenEvent.fromMap(Map<String, dynamic>.from(streamResults[index].data()['d']));
+          if (stream != null) {
+            return Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: streamResults.length - 1 == index ? 16.0 : 0),
+              child: EventBlock(
+                currentUID: widget.currentUser.uid,
+                event: stream,
+                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: stream.id).transitionToEventPage(),
+                eventOptions: () => eventOptionsDialog(stream),
+              ),
+            );
+          }
+          return SizedBox(height: 0, width: 0);
         },
       ),
     );
@@ -899,53 +1021,56 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         itemCount: eventResults.length,
         itemBuilder: (context, index) {
           WebblenEvent event = WebblenEvent.fromMap(Map<String, dynamic>.from(eventResults[index].data()['d']));
-          return Padding(
-            padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
-            child: EventBlock(
-              currentUID: widget.currentUser.uid,
-              event: event,
-              shareEvent: () => Share.share("https://app.webblen.io/#/event?id=${event.id}"),
-              viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
-              viewEventTickets: null,
-              numOfTicsForEvent: null,
-              eventImgSize: MediaQuery.of(context).size.width - 16,
-              eventDescHeight: 120.0,
-            ),
-          );
+          if (event != null) {
+            return Padding(
+              padding: EdgeInsets.only(left: 8.0, right: 8.0, bottom: eventResults.length - 1 == index ? 16.0 : 0),
+              child: EventBlock(
+                currentUID: widget.currentUser.uid,
+                event: event,
+                viewEventDetails: () => PageTransitionService(context: context, currentUser: widget.currentUser, eventID: event.id).transitionToEventPage(),
+                eventOptions: () => eventOptionsDialog(event),
+              ),
+            );
+          }
+          return SizedBox(height: 0, width: 0);
         },
       ),
     );
   }
 
-  showNewContentDialog() async {
+  showNewContentDialog(bool rewardExtraWebblen) async {
     String action = await showModalActionSheet(context: context, message: "What Do You Have for $areaName?", actions: [
       SheetAction(label: "Create Post", key: 'post'),
       SheetAction(label: "Create Stream", key: 'stream'),
       SheetAction(label: "Create Event", key: 'event'),
     ]);
     if (action == 'post') {
-      PageTransitionService(context: context).transitionToCreatePostPage();
+      PageTransitionService(context: context, rewardExtraWebblen: rewardExtraWebblen).transitionToCreatePostPage();
     } else if (action == 'stream') {
-      PageTransitionService(context: context, isStream: true).transitionToCreateEventPage();
+      PageTransitionService(context: context, isStream: true, rewardExtraWebblen: rewardExtraWebblen).transitionToCreateEventPage();
     } else if (action == 'event') {
-      PageTransitionService(context: context, isStream: false).transitionToCreateEventPage();
+      PageTransitionService(context: context, isStream: false, rewardExtraWebblen: rewardExtraWebblen).transitionToCreateEventPage();
     }
   }
 
-  postOptionsDialog(String postID, String postAuthorID) async {
-    if (postAuthorID == widget.currentUser.uid) {
+  postOptionsDialog(WebblenPost post) async {
+    if (post.authorID == widget.currentUser.uid) {
       String action = await showModalActionSheet(
         context: context,
         actions: [
           SheetAction(label: "Edit Post", key: 'editPost'),
+          SheetAction(label: "Copy Link", key: 'copyLink'),
           SheetAction(label: "Share", key: 'sharePost'),
           SheetAction(label: "Delete Post", key: 'deletePost', isDestructiveAction: true),
         ],
       );
       if (action == 'editPost') {
-        PageTransitionService(context: context, postID: postID).transitionToCreatePostPage();
+        PageTransitionService(context: context, postID: post.id).transitionToCreatePostPage();
+      } else if (action == 'copyLink') {
+        ShareService().shareContent(post: post, copyLink: true);
+        HapticFeedback.mediumImpact();
       } else if (action == 'sharePost') {
-        PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+        ShareService().shareContent(post: post, copyLink: false);
       } else if (action == 'deletePost') {
         OkCancelResult res = await showOkCancelAlertDialog(
           context: context,
@@ -955,21 +1080,97 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           isDestructiveAction: true,
         );
         if (res == OkCancelResult.ok) {
-          PostDataService().deletePost(postID);
+          PostDataService().deletePost(post.id).then((err) {
+            refreshData();
+          });
         }
       }
     } else {
       String action = await showModalActionSheet(
         context: context,
         actions: [
+          SheetAction(label: "Copy Link", key: 'copyLink'),
           SheetAction(label: "Share", key: 'share'),
           SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
         ],
       );
-      if (action == 'share') {
-        PageTransitionService(context: context).transitionToCreatePostPage();
+      if (action == 'copyLink') {
+        ShareService().shareContent(post: post, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'share') {
+        ShareService().shareContent(post: post, copyLink: false);
       } else if (action == 'report') {
-        PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+        //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      }
+    }
+  }
+
+  eventOptionsDialog(WebblenEvent event) async {
+    if (event.authorID == widget.currentUser.uid) {
+      List<SheetAction<String>> actions = event.endDateTimeInMilliseconds > DateTime.now().microsecondsSinceEpoch
+          ? event.hasTickets
+              ? [
+                  SheetAction(label: "Edit Event", key: 'editEvent'),
+                  SheetAction(label: "Copy Ticket Link", key: 'ticketLink'),
+                  SheetAction(label: "Copy Link", key: 'copyLink'),
+                  SheetAction(label: "Share", key: 'shareEvent'),
+                  SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+                ]
+              : [
+                  SheetAction(label: "Edit Event", key: 'editEvent'),
+                  SheetAction(label: "Copy Link", key: 'copyLink'),
+                  SheetAction(label: "Share", key: 'shareEvent'),
+                  SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+                ]
+          : [
+              SheetAction(label: "Copy Link", key: 'copyLink'),
+              SheetAction(label: "Share", key: 'shareEvent'),
+              SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+            ];
+      String action = await showModalActionSheet(
+        context: context,
+        actions: actions,
+      );
+      if (action == 'editEvent') {
+        PageTransitionService(context: context, eventID: event.id, isStream: event.isDigitalEvent).transitionToCreateEventPage();
+      } else if (action == 'ticketLink') {
+        ShareService().copyTicketLink(event: event);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'copyLink') {
+        ShareService().shareContent(event: event, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'shareEvent') {
+        ShareService().shareContent(event: event, copyLink: false);
+      } else if (action == 'deleteEvent') {
+        OkCancelResult res = await showOkCancelAlertDialog(
+          context: context,
+          message: "Delete This Event?",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+          isDestructiveAction: true,
+        );
+        if (res == OkCancelResult.ok) {
+          EventDataService().deleteEvent(event.id).then((err) {
+            refreshData();
+          });
+        }
+      }
+    } else {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'share'),
+          SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'copyLink') {
+        ShareService().shareContent(event: event, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'share') {
+        ShareService().shareContent(event: event, copyLink: false);
+      } else if (action == 'report') {
+        //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
       }
     }
   }
@@ -995,19 +1196,25 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     }
     setState(() {});
     _tabController = new TabController(
-      length: 3,
+      length: 4,
       vsync: this,
     );
 
     postsScrollController = ScrollController();
+    streamsScrollController = ScrollController();
     eventsScrollController = ScrollController();
     followingScrollController = ScrollController();
-    // recommendedScrollController = ScrollController();
 
     postsScrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * postsScrollController.position.maxScrollExtent;
       if (postsScrollController.position.pixels > triggerFetchMoreSize) {
         getAdditionalPosts();
+      }
+    });
+    streamsScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * streamsScrollController.position.maxScrollExtent;
+      if (streamsScrollController.position.pixels > triggerFetchMoreSize) {
+        getAdditionalStreams();
       }
     });
     eventsScrollController.addListener(() {
@@ -1034,6 +1241,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
       areaCodeFilter = res;
       getRecordedStreams();
       getPosts();
+      getStreams();
       getEvents();
       getFollowingPosts();
       //getRecommendedPosts();
@@ -1045,6 +1253,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
     super.dispose();
     eventsScrollController.dispose();
     postsScrollController.dispose();
+    streamsScrollController.dispose();
     followingScrollController.dispose();
     // recommendedScrollController.dispose();
   }
@@ -1160,7 +1369,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                               ),
                             ),
                             GestureDetector(
-                              onTap: () => showNewContentDialog(),
+                              onTap: () => showNewContentDialog(false),
                               child: Container(
                                 height: 30,
                                 width: 30,
@@ -1183,84 +1392,79 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
           Container(
             height: 30,
             padding: EdgeInsets.only(bottom: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TabBar(
-                  controller: _tabController,
-                  isScrollable: true,
-                  labelPadding: EdgeInsets.symmetric(horizontal: 10),
-                  indicatorColor: CustomColors.webblenRed,
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.black54,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  indicator: BoxDecoration(borderRadius: BorderRadius.circular(10), color: CustomColors.webblenRed),
-                  tabs: [
-                    Tab(
-                      child: Container(
-                        height: 30,
-                        width: 110,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Posts",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
+            child: TabBar(
+              controller: _tabController,
+              isScrollable: true,
+              labelPadding: EdgeInsets.symmetric(horizontal: 10),
+              indicatorColor: CustomColors.webblenRed,
+              labelColor: Colors.white,
+              unselectedLabelColor: Colors.black54,
+              indicatorSize: TabBarIndicatorSize.label,
+              indicator: BoxDecoration(borderRadius: BorderRadius.circular(10), color: CustomColors.webblenRed),
+              tabs: [
+                Tab(
+                  child: Container(
+                    height: 30,
+                    width: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Posts",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Tab(
-                      child: Container(
-                        height: 30,
-                        width: 110,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Events",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                  ),
+                ),
+                Tab(
+                  child: Container(
+                    height: 30,
+                    width: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Streams",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    Tab(
-                      child: Container(
-                        height: 30,
-                        width: 110,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Align(
-                          alignment: Alignment.center,
-                          child: Text(
-                            "Following",
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
+                  ),
+                ),
+                Tab(
+                  child: Container(
+                    height: 30,
+                    width: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Events",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
                     ),
-                    // Tab(
-                    //   child: Container(
-                    //     height: 30,
-                    //     width: 110,
-                    //     decoration: BoxDecoration(
-                    //       borderRadius: BorderRadius.circular(10),
-                    //     ),
-                    //     child: Align(
-                    //       alignment: Alignment.center,
-                    //       child: Text(
-                    //         "Recommended",
-                    //         style: TextStyle(fontWeight: FontWeight.bold),
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
-                  ],
+                  ),
+                ),
+                Tab(
+                  child: Container(
+                    height: 30,
+                    width: 110,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Following",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -1273,7 +1477,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                 child: TabBarView(
                   controller: _tabController,
                   children: <Widget>[
-                    //LIVE EVENTS
+                    ///POSTS
                     Container(
                       key: PageStorageKey('key0'),
                       color: Colors.white,
@@ -1319,7 +1523,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
                                             GestureDetector(
-                                              onTap: () => showNewContentDialog(),
+                                              onTap: () => showNewContentDialog(true),
                                               child: Text(
                                                 "Be the First and Get 10.00 WBLN",
                                                 textAlign: TextAlign.center,
@@ -1370,7 +1574,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               children: <Widget>[
                                                 GestureDetector(
-                                                  onTap: () => showNewContentDialog(),
+                                                  onTap: () => showNewContentDialog(true),
                                                   child: Text(
                                                     "Be the First and Get 10.00 WBLN",
                                                     textAlign: TextAlign.center,
@@ -1386,9 +1590,73 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                                     )
                                   : listPosts(""),
                     ),
-                    //EVENTS
+
+                    ///STREAMS
                     Container(
                       key: PageStorageKey('key1'),
+                      color: Colors.white,
+                      child: isLoading
+                          ? LoadingScreen(
+                              context: context,
+                              loadingDescription: 'Loading Streams...',
+                            )
+                          : streamResults.isEmpty
+                              ? LiquidPullToRefresh(
+                                  color: CustomColors.webblenRed,
+                                  onRefresh: refreshData,
+                                  child: Center(
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: <Widget>[
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                          child: Image.asset(
+                                            'assets/images/video_phone.png',
+                                            height: 200,
+                                            fit: BoxFit.contain,
+                                            filterQuality: FilterQuality.medium,
+                                          ),
+                                        ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth: MediaQuery.of(context).size.width - 16,
+                                              ),
+                                              child: Text(
+                                                "We Could Not Find Any Events \nAccording to Your Preferences",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w400),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        SizedBox(height: 8.0),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: <Widget>[
+                                            GestureDetector(
+                                              onTap: () => showPreferenceDialog(),
+                                              child: Text(
+                                                "Change Preferences",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w700, color: CustomColors.electronBlue),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(height: 100.0),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : listStreams(),
+                    ),
+
+                    ///EVENTS
+                    Container(
+                      key: PageStorageKey('key2'),
                       color: Colors.white,
                       child: isLoading
                           ? LoadingScreen(
@@ -1441,7 +1709,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
                     ),
                     //Following
                     Container(
-                      key: PageStorageKey('key2'),
+                      key: PageStorageKey('key3'),
                       color: Colors.white,
                       child: isLoading
                           ? LoadingScreen(

@@ -1,13 +1,13 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 
 class DynamicLinks {
-  Future<String> createDynamicLink({String linkType, String id, String title, String description, String imageURL}) async {
+  Future<String> createDynamicLink({String contentType, String id, String title, String description, String imageURL}) async {
     Uri uri;
-    if (linkType == 'post') {
+    if (contentType == 'post') {
       uri = Uri.parse('https://app.webblen.io/#/post?id=$id');
-    } else if (linkType == 'event') {
+    } else if (contentType == 'event') {
       uri = Uri.parse('https://app.webblen.io/#/event?id=$id');
-    } else if (linkType == 'user') {
+    } else if (contentType == 'user') {
       uri = Uri.parse('https://app.webblen.io/#/user?id=$id');
     }
 
@@ -25,7 +25,7 @@ class DynamicLinks {
       ),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: title,
-        imageUrl: Uri.dataFromString(imageURL),
+        imageUrl: Uri.parse(imageURL),
         description: description,
       ),
 //      googleAnalyticsParameters: GoogleAnalyticsParameters(
@@ -39,29 +39,7 @@ class DynamicLinks {
 //      ),
     );
 
-    final Uri dynamicLink = await parameters.buildUrl();
-    return dynamicLink.toString();
-  }
-
-  Future<Map<String, dynamic>> handleDynamicLinks() async {
-    Map<String, dynamic> data = {};
-    final PendingDynamicLinkData linkData = await FirebaseDynamicLinks.instance.getInitialLink();
-    handleLink(linkData);
-    FirebaseDynamicLinks.instance.onLink(
-      onSuccess: (PendingDynamicLinkData dynamicLink) async {
-        handleLink(dynamicLink);
-      },
-      onError: (OnLinkErrorException e) async {
-        print('Link Failed: ${e.message}');
-      },
-    );
-    return data;
-  }
-
-  void handleLink(PendingDynamicLinkData data) {
-    final Uri deepLink = data?.link;
-    if (deepLink != null) {
-      print('_handleDeepLink | deeplink: $deepLink');
-    }
+    final ShortDynamicLink shortDynamicLink = await parameters.buildShortLink();
+    return shortDynamicLink.shortUrl.toString();
   }
 }

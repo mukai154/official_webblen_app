@@ -156,7 +156,6 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
   void _getItems() async {
     List<IAPItem> items = await FlutterInappPurchase.instance.getProducts(_productLists);
     for (var item in items) {
-      print('${item.toString()}');
       this._items.add(item);
     }
   }
@@ -177,7 +176,6 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
   Future _getPurchases() async {
     List<PurchasedItem> items = await FlutterInappPurchase.instance.getAvailablePurchases();
     for (var item in items) {
-      print('${item.toString()}');
       this._purchases.add(item);
     }
 
@@ -254,7 +252,6 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
       platformVersion = 'Failed to get platform version.';
     }
     var result = await FlutterInappPurchase.instance.initConnection;
-    print('result: $result');
     if (!mounted) return;
 
     setState(() {
@@ -1094,13 +1091,7 @@ class _DigitalEventViewerPageState extends State<DigitalEventViewerPage> with Wi
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      if (!detaching) {
-        ChatDataService().leaveChatStream(widget.event.id, widget.currentUser.uid, false, widget.currentUser.username);
-      }
-      detaching = true;
-      setState(() {});
-    } else if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed) {
       if (detaching) {
         ChatDataService().joinChatStream(widget.event.id, widget.currentUser.uid, false, widget.currentUser.username);
       }

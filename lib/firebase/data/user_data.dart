@@ -9,6 +9,7 @@ import 'package:webblen/services/location/location_service.dart';
 
 class WebblenUserData {
   final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
+  final CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
   final CollectionReference stripeRef = FirebaseFirestore.instance.collection("stripe");
   final CollectionReference eventRef = FirebaseFirestore.instance.collection("events");
   final CollectionReference notifRef = FirebaseFirestore.instance.collection("user_notifications");
@@ -137,6 +138,24 @@ class WebblenUserData {
     return webblen;
   }
 
+  Future<String> updateWebblenBalance(String uid, double val) async {
+    String error = "";
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> docData = docSnapshot.data();
+      double webblen = docData['d']['eventPoints'];
+      if (webblen + (val) < 0) {
+        error = "insufficient funds";
+      } else {
+        webblen = webblen + val;
+        await userRef.doc(uid).update({"d.eventPoints": webblen}).catchError((e) {
+          error = e.details;
+        });
+      }
+    }
+    return error;
+  }
+
   Future<List> getInterests(String uid) async {
     List interests = [];
     DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
@@ -199,6 +218,12 @@ class WebblenUserData {
     return displayAnimation;
   }
 
+  Future<bool> disableDepositAnimation(String uid) async {
+    bool displayAnimation = false;
+    await userRef.doc(uid).update({"canDisplayDepositAnimation": false}).catchError((e) {});
+    return displayAnimation;
+  }
+
   Future<double> depositAnimationValue(String uid) async {
     double val = 0.01;
     QuerySnapshot query =
@@ -209,7 +234,7 @@ class WebblenUserData {
         try {
           val += double.parse(notifData);
         } catch (e) {
-          print('invalid val');
+          //print('invalid val');
         }
       }
     });
@@ -217,28 +242,33 @@ class WebblenUserData {
     return val;
   }
 
-  Future<List> getFollowingList(String uid) async {
-    List followingList;
+  Future<List> getFollowers(String uid) async {
+    List followers;
     DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
     if (docSnapshot.exists) {
       Map<String, dynamic> docData = docSnapshot.data();
       WebblenUser user = WebblenUser.fromMap(Map<String, dynamic>.from(docData['d']));
-      followingList = user.following;
+      followers = user.followers;
     }
-    return followingList;
+    return followers;
   }
 
-  Future<List<WebblenUser>> getFollowerSuggestions(String uid, String zipcode, List tags) async {
-    List<String> tagFilter = List<String>.from(tags);
+  Future<List> getFollowing(String uid) async {
+    List following;
+    DocumentSnapshot docSnapshot = await userRef.doc(uid).get();
+    if (docSnapshot.exists) {
+      Map<String, dynamic> docData = docSnapshot.data();
+      WebblenUser user = WebblenUser.fromMap(Map<String, dynamic>.from(docData['d']));
+      following = user.following;
+    }
+    return following;
+  }
+
+  Future<List<WebblenUser>> getFollowerSuggestions(String uid, String zipcode) async {
     List<WebblenUser> users = [];
-    QuerySnapshot snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("tags", arrayContainsAny: tagFilter).get().catchError((e) {
+    QuerySnapshot snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("recommend", isEqualTo: true).get().catchError((e) {
       //print(e);
     });
-    if (snapshot.docs.length == null || snapshot.docs.length < 10) {
-      snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).orderBy("appOpenInMilliseconds", descending: true).get().catchError((e) {
-        // print(e);
-      });
-    }
     snapshot.docs.forEach((doc) {
       if (doc.data()['d']['followers'] == null || !doc.data()['d']['followers'].contains(uid)) {
         WebblenUser user = WebblenUser.fromMap(doc.data()['d']);
@@ -247,11 +277,31 @@ class WebblenUserData {
         }
       }
     });
+    if (users.length < 10) {
+      QuerySnapshot query = await userRef
+          // .where("appOpenInMilliseconds", isGreaterThanOrEqualTo: val)
+          .orderBy("appOpenInMilliseconds", descending: true)
+          .limit(50)
+          .get()
+          .catchError((e) {
+        //print(e);
+      });
+      query.docs.forEach((doc) {
+        if (doc.data()['d']['followers'] == null || !doc.data()['d']['followers'].contains(uid)) {
+          WebblenUser user = WebblenUser.fromMap(doc.data()['d']);
+          if (user.uid != uid) {
+            List existing = users.where((x) => x.uid == doc.id).toList();
+            if (existing.isEmpty) {
+              users.add(user);
+            }
+          }
+        }
+      });
+    }
     return users;
   }
 
-  Future<Null> updateOnboardStatus(String uid, List tags) async {
-    await userRef.doc(uid).update({"tags": tags});
+  Future<Null> completeOnboarding(String uid) async {
     await userRef.doc(uid).update({"canDisplayDepositAnimation": false});
     await userRef.doc(uid).update({"onboarded": true});
   }
@@ -264,10 +314,65 @@ class WebblenUserData {
     return error;
   }
 
-  Future<String> updateFollowing(String currentUID, String userUID, List currentUserFollowingList, List userFollowerList) async {
+  Future<String> followUser(String currentUID, String targetUserID) async {
     String error;
-    await userRef.doc(currentUID).update({"d.following": currentUserFollowingList});
-    await userRef.doc(userUID).update({"d.followers": userFollowerList});
+    DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
+    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
+    Map<String, dynamic> currentUserData = currentUserSnapshot.data();
+    Map<String, dynamic> targetUserData = targetUserSnapshot.data();
+    List currentUserFollowing = currentUserData['d']['following'];
+    List targetUserFollowers = targetUserData['d']['followers'];
+    if (!currentUserFollowing.contains(targetUserID)) {
+      currentUserFollowing.add(targetUserID);
+      await userRef.doc(currentUID).update({'d.following': currentUserFollowing}).catchError((e) {
+        print(e);
+      });
+    }
+    if (!targetUserFollowers.contains(currentUID)) {
+      targetUserFollowers.add(currentUID);
+      await userRef.doc(targetUserID).update({'d.followers': targetUserFollowers}).catchError((e) {
+        print(e);
+      });
+    }
+    QuerySnapshot postQuery = await postsRef.where('authorID', isEqualTo: targetUserID).get();
+    postQuery.docs.forEach((doc) {
+      List followers = doc.data()['followers'].toList(growable: true);
+      if (!followers.contains(currentUID)) {
+        followers.add(currentUID);
+        postsRef.doc(doc.id).update({'followers': followers}).catchError((e) {
+          print(e);
+        });
+      }
+    });
+    return error;
+  }
+
+  Future<String> unFollowUser(String currentUID, String targetUserID) async {
+    String error;
+    DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
+    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
+    Map<String, dynamic> currentUserData = currentUserSnapshot.data();
+    Map<String, dynamic> targetUserData = targetUserSnapshot.data();
+    List currentUserFollowing = currentUserData['d']['following'].toList(growable: true);
+    List targetUserFollowers = targetUserData['d']['followers'].toList(growable: true);
+    if (currentUserFollowing.contains(targetUserID)) {
+      currentUserFollowing.remove(targetUserID);
+      await userRef.doc(currentUID).update({'d.following': currentUserFollowing});
+    }
+    if (targetUserFollowers.contains(currentUID)) {
+      targetUserFollowers.remove(currentUID);
+      await userRef.doc(targetUserID).update({'d.followers': targetUserFollowers});
+    }
+    QuerySnapshot postQuery = await postsRef.where('authorID', isEqualTo: targetUserID).get();
+    postQuery.docs.forEach((doc) {
+      List followers = doc.data()['followers'].toList(growable: true);
+      if (followers.contains(currentUID)) {
+        followers.remove(currentUID);
+        postsRef.doc(doc.id).update({'followers': followers}).catchError((e) {
+          print(e);
+        });
+      }
+    });
     return error;
   }
 
@@ -354,6 +459,16 @@ class WebblenUserData {
 
   Future<Null> setGoogleAccessTokenAndID(String uid, String googleAccessToken, String googleIDToken) async {
     userRef.doc(uid).update({"googleAccessToken": googleAccessToken, "googleIDToken": googleIDToken}).whenComplete(() {}).catchError((e) {});
+  }
+
+  flipFollowersFollowing(String uid) async {
+    String error;
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    Map<String, dynamic> userData = snapshot.data();
+    List following = userData['d']['following'].toList(growable: true);
+    List followers = userData['d']['followers'].toList(growable: true);
+    await userRef.doc(uid).update({'d.following': followers.toSet().toList(), 'd.followers': following.toSet().toList()});
+    return error;
   }
 
   // Future<Null> updateUserField() async {

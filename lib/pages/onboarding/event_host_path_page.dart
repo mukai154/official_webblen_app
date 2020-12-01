@@ -12,7 +12,7 @@ import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
-import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/pages/onboarding/suggest_followers_page.dart';
 import 'package:webblen/utils/open_url.dart';
 import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
@@ -28,7 +28,8 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
   bool isLoading = true;
   final introKey = GlobalKey<IntroductionScreenState>();
   bool showSkipButton = true;
-  bool freezeSwipe = false;
+  bool showNextButton = true;
+  int pageNum = 0;
   String uid;
   Map<dynamic, dynamic> allTags = {};
   String selectedCategory;
@@ -56,8 +57,13 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
   }
 
   onboardCompleteTransition() {
-    WebblenUserData().updateOnboardStatus(uid, selectedTags);
-    PageTransitionService(context: context).transitionToOnboardingCompletePage();
+    WebblenUserData().updateInterests(uid, selectedTags);
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SuggestFollowersPage(
+                  onboarding: true,
+                )));
   }
 
   //Social Auth
@@ -195,7 +201,7 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
               height: 45.0,
               onPressed: () {
                 IntroductionScreenState screenState = introKey.currentState;
-                screenState.skipToEnd();
+                screenState.animateScroll(3);
               },
             ),
           ],
@@ -248,7 +254,7 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
                     child: GestureDetector(
                       onTap: () {
                         IntroductionScreenState screenState = introKey.currentState;
-                        screenState.skipToEnd();
+                        screenState.animateScroll(3);
                       },
                       child: Text(
                         "I'll Do This Later",
@@ -426,7 +432,7 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
               endIndent: 16,
               color: Colors.black45,
             ),
-            selectedCategory == null
+            selectedCategory == null || selectedCategory == 'select category'
                 ? Container()
                 : GridView.count(
                     shrinkWrap: true,
@@ -492,6 +498,7 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
         }
       });
       tagCategories.sort((a, b) => a.compareTo(b));
+      tagCategories.insert(0, "select category");
       selectedCategory = tagCategories.first;
       isLoading = false;
       setState(() {});
@@ -512,18 +519,26 @@ class _EventHostPathPageState extends State<EventHostPathPage> {
     );
     return IntroductionScreen(
       key: introKey,
-      onChange: (pageNum) {
-        if (pageNum == 0) {
-          showSkipButton = true;
+      freeze: true,
+      onChange: (val) {
+        pageNum = val;
+        if (pageNum == 0 || pageNum == 3 || pageNum == 2) {
+          showNextButton = true;
         } else {
-          showSkipButton = false;
+          showNextButton = false;
         }
         setState(() {});
       },
       onDone: () => onboardCompleteTransition(),
-      onSkip: () => Navigator.of(context).pop(),
+      onSkip: () {
+        if (pageNum == 0) {
+          Navigator.of(context).pop();
+        } else {
+          introKey.currentState.animateScroll(pageNum - 1);
+        }
+      },
       showSkipButton: showSkipButton,
-      showNextButton: true,
+      showNextButton: showNextButton,
       skipFlex: 0,
       nextFlex: 0,
       skip: Text('Back', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),

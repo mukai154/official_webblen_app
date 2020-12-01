@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_calendar_carousel/classes/event.dart';
@@ -25,6 +26,7 @@ import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/pages/user_pages/settings_page.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/create_notification.dart';
@@ -37,12 +39,11 @@ import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 
-import 'event_details_page.dart';
-
 class CreateEventPage extends StatefulWidget {
   final String eventID;
   final bool isStream;
-  CreateEventPage({this.eventID, this.isStream});
+  final bool rewardExtraWebblen;
+  CreateEventPage({this.eventID, this.isStream, this.rewardExtraWebblen});
 
   @override
   _CreateEventPageState createState() => _CreateEventPageState();
@@ -164,18 +165,20 @@ class _CreateEventPageState extends State<CreateEventPage> {
         ),
       ],
     );
-    PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
-    eventAddress = detail.result.formattedAddress;
-    lat = detail.result.geometry.location.lat;
-    lon = detail.result.geometry.location.lng;
-    CustomAlerts().showLoadingAlert(context, "Setting Location...");
-    Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
-    Navigator.of(context).pop();
-    zipPostalCode = locationData['zipcode'];
-    city = locationData['city'];
-    province = locationData['administrativeLevels']['level1short'];
-    lat = detail.result.geometry.location.lat;
-    lon = detail.result.geometry.location.lng;
+    if (p != null) {
+      PlacesDetailsResponse detail = await _places.getDetailsByPlaceId(p.placeId);
+      eventAddress = detail.result.formattedAddress;
+      lat = detail.result.geometry.location.lat;
+      lon = detail.result.geometry.location.lng;
+      CustomAlerts().showLoadingAlert(context, "Setting Location...");
+      Map<dynamic, dynamic> locationData = await LocationService().reverseGeocodeLatLon(lat, lon);
+      Navigator.of(context).pop();
+      zipPostalCode = locationData['zipcode'];
+      city = locationData['city'];
+      province = locationData['administrativeLevels']['level1short'];
+      lat = detail.result.geometry.location.lat;
+      lon = detail.result.geometry.location.lng;
+    }
     setState(() {});
   }
 
@@ -1690,6 +1693,151 @@ class _CreateEventPageState extends State<CreateEventPage> {
   }
 
   //CREATE EVENT
+  confirmSubmission() {
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              height: 280,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 8),
+                  Text(
+                    widget.isStream ? 'Schedule Stream?' : 'Schedule Event?',
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Available Balance:",
+                        style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: [
+                          StreamBuilder(
+                            stream: FirebaseFirestore.instance.collection("webblen_user").doc(currentUser.uid).snapshots(),
+                            builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+                              if (!userSnapshot.hasData)
+                                return Text(
+                                  "Loading...",
+                                );
+                              var userData = userSnapshot.data.data();
+                              double availablePoints = userData['d']["eventPoints"] * 1.00;
+                              return Text(
+                                "${availablePoints.toStringAsFixed(2)} WBLN",
+                                textAlign: TextAlign.right,
+                                style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.w500),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 4.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Event Cost:",
+                        style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                      Row(
+                        children: [
+                          Text(
+                            "-0.50 WBLN",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: 14, color: Colors.red, fontWeight: FontWeight.w500),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16.0),
+                  Divider(
+                    color: Colors.black26,
+                    indent: 8.0,
+                    endIndent: 8.0,
+                    thickness: 1.0,
+                    height: 4,
+                  ),
+                  SizedBox(height: 16.0),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        height: 15,
+                        width: 15,
+                        child: Image.asset(
+                          'assets/images/webblen_coin.png',
+                        ),
+                      ),
+                      SizedBox(width: 4.0),
+                      StreamBuilder(
+                        stream: FirebaseFirestore.instance.collection("webblen_user").doc(currentUser.uid).snapshots(),
+                        builder: (context, AsyncSnapshot<DocumentSnapshot> userSnapshot) {
+                          if (!userSnapshot.hasData)
+                            return Text(
+                              "Loading...",
+                            );
+                          var userData = userSnapshot.data.data();
+                          double newAvailableBalance = (userData['d']["eventPoints"] * 1.00) - 0.5;
+                          return Text(
+                            "${newAvailableBalance.toStringAsFixed(2)} WBLN",
+                            textAlign: TextAlign.right,
+                            style: TextStyle(fontSize: 14, color: Colors.black, fontWeight: FontWeight.bold),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 32.0),
+                  CustomColorButton(
+                    text: "Confirm",
+                    textColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    height: 40.0,
+                    width: MediaQuery.of(context).size.width - 34,
+                    onPressed: () {
+                      // Navigator.of(context).pop();
+                      // ShowAlertDialogService().showLoadingDialog(context);
+                      WebblenUserData().updateWebblenBalance(currentUser.uid, -0.5).then((e) {
+                        //Navigator.of(context).pop();
+                        if (e.isEmpty) {
+                          submitEvent();
+                        } else {
+                          showOkAlertDialog(
+                            context: context,
+                            message: e,
+                            okLabel: "Ok",
+                            barrierDismissible: true,
+                          );
+                        }
+                      });
+                    },
+                  ),
+                  SizedBox(height: 16.0),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   createEvent() async {
     CustomAlerts().showLoadingAlert(context, widget.isStream ? "Setting Up Stream..." : "Uploading Event...");
     String fullStartDateTime = startDate + " " + startTime;
@@ -1744,29 +1892,100 @@ class _CreateEventPageState extends State<CreateEventPage> {
         .then((res) {
       if (res != null) {
         Navigator.of(context).pop();
-        widget.isStream
-            ? ShowAlertDialogService().showActionSuccessDialog(context, "Stream Uploaded", "Your Stream Has Successfully Been Uploaded", () {
-                CreateNotification().createTimedNotification(
-                  newEvent.title.length,
-                  newEvent.startDateTimeInMilliseconds - 900000,
-                  "Your Stream: ${newEvent.title}",
-                  "Starts in 15 Minutes! Get Ready!",
-                  '',
+        CreateNotification().createTimedNotification(
+          newEvent.title.length,
+          newEvent.startDateTimeInMilliseconds - 900000,
+          widget.isStream ? "Your Stream: ${newEvent.title}" : "Your Event: ${newEvent.title}",
+          "Starts in 15 Minutes! Get Ready!",
+          '',
+        );
+        if (widget.rewardExtraWebblen != null && widget.rewardExtraWebblen) {
+          WebblenUserData().depositWebblen(10.001, currentUID);
+        }
+        showModalBottomSheet(
+          context: context,
+          isDismissible: false,
+          backgroundColor: Colors.white,
+          builder: (context) {
+            return StatefulBuilder(
+              builder: (context, setState) {
+                return Container(
+                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  height: 280,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            widget.isStream ? 'Stream Scheduled!' : 'Event Scheduled!',
+                            style: TextStyle(
+                              fontSize: 32,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => PageTransitionService(context: context).returnToRootPage(),
+                            icon: Icon(
+                              FontAwesomeIcons.times,
+                              color: Colors.black,
+                              size: 16,
+                            ),
+                          )
+                        ],
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Share It with the Rest of the World?",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      SizedBox(height: 24),
+                      GestureDetector(
+                        child: Text(
+                          res.hasTickets ? 'Copy Ticket Link' : 'Copy Link',
+                          style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.w700),
+                        ),
+                        onTap: () {
+                          ShareService().shareContent(event: res, imgPath: res.imageURL == null ? null : eventImgFile.path, copyLink: true);
+                          HapticFeedback.mediumImpact();
+                          showOkAlertDialog(
+                            context: context,
+                            message: "Link Copied!",
+                            okLabel: "Ok",
+                            barrierDismissible: true,
+                          );
+                        },
+                      ),
+                      SizedBox(height: 16),
+                      GestureDetector(
+                        child: Text(
+                          'Share',
+                          style: TextStyle(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.w700),
+                        ),
+                        onTap: () => ShareService().shareContent(event: res, imgPath: res.imageURL == null ? null : eventImgFile.path, copyLink: false),
+                      ),
+                      SizedBox(height: 24),
+                      GestureDetector(
+                        child: Text(
+                          'Done',
+                          style: TextStyle(fontSize: 18, color: Colors.black, fontWeight: FontWeight.w700),
+                        ),
+                        onTap: () => PageTransitionService(context: context).returnToRootPage(),
+                      ),
+                    ],
+                  ),
                 );
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
-              })
-            : ShowAlertDialogService().showActionSuccessDialog(context, "Event Uploaded", "Your Event Has Successfully Been Uploaded", () {
-                CreateNotification().createTimedNotification(
-                  newEvent.title.length,
-                  newEvent.startDateTimeInMilliseconds - 900000,
-                  "Your Event: ${newEvent.title}",
-                  "Starts in 15 Minutes! Get Ready!",
-                  '',
-                );
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => EventDetailsPage(eventID: res.id, currentUser: currentUser)));
-              });
+              },
+            );
+          },
+        );
       } else {
         widget.isStream
             ? CustomAlerts().showErrorAlert(context, "Stream Submission Error", "There was an issue creating your stream. Please try again")
@@ -1811,6 +2030,8 @@ class _CreateEventPageState extends State<CreateEventPage> {
   @override
   void initState() {
     super.initState();
+    // EventDataService().addEventDataField();
+
     BaseAuth().getCurrentUserID().then((res) {
       if (res != null) {
         setState(() {
@@ -1907,8 +2128,7 @@ class _CreateEventPageState extends State<CreateEventPage> {
               : widget.isStream
                   ? 'Cancel Adding New Stream?'
                   : 'Cancel Adding New Event?', () {
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
+        PageTransitionService(context: context).returnToRootPage();
       },
           isTypingMultiLine
               ? GestureDetector(
@@ -2027,8 +2247,6 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                         );
                                       }),
                                 ),
-                                SizedBox(height: 16.0),
-                                widget.isStream ? fieldHeader("Stream Type", true) : fieldHeader("Event Type", true),
                                 SizedBox(height: 32.0),
                                 fieldHeader("Social Links (Optional)", false),
                                 SizedBox(height: 8.0),
@@ -2065,7 +2283,13 @@ class _CreateEventPageState extends State<CreateEventPage> {
                                         backgroundColor: Colors.white,
                                         height: 35.0,
                                         width: 150,
-                                        onPressed: () => submitEvent(),
+                                        onPressed: () {
+                                          if (widget.eventID == null) {
+                                            confirmSubmission();
+                                          } else {
+                                            submitEvent();
+                                          }
+                                        },
                                       ),
                                     ),
                                   ],

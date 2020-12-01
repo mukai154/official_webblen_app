@@ -249,7 +249,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
   setAgoraRtcEventHandlers() {
     agoraRtcEngine.setEventHandler(RtcEngineEventHandler(error: (code) {
       setState(() {
-        print('Error: $code');
+        //print('Error: $code');
       });
     }, joinChannelSuccess: (channel, uid, elapsed) async {
       EventDataService().createActiveLiveStream(
@@ -277,7 +277,7 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
       });
     }, firstRemoteVideoFrame: (uid, width, height, elapsed) {
       setState(() {
-        print('video started');
+        // print('video started');
       });
     }));
   }
@@ -648,7 +648,6 @@ class _DigitalEventHostPageState extends State<DigitalEventHostPage> with Widget
                                   );
                                 Map<String, dynamic> donatorsMap = snapshot.data.data()['donators'] == null ? {} : snapshot.data.data()['donators'];
                                 List donators = donatorsMap.values.toList(growable: true);
-                                print(donators.length);
                                 if (donators.length > 1) {
                                   donators.sort((a, b) => b['totalGiftAmount'].compareTo(a['totalGiftAmount']));
                                 }

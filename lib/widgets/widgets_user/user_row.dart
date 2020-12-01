@@ -5,7 +5,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class UserRow extends StatelessWidget {
   final WebblenUser user;
@@ -87,7 +87,7 @@ class UserRowMin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userPic = UserDetailsProfilePic(
+    final userPic = UserProfilePic(
       userPicUrl: user.profile_pic,
       size: 75.0,
     );
@@ -145,7 +145,7 @@ class UserRowInvite extends StatelessWidget {
             size: 60.0,
             color: FlatColors.darkMountainGreen,
           )
-        : UserDetailsProfilePic(
+        : UserProfilePic(
             userPicUrl: user.profile_pic,
             size: 60.0,
           );

@@ -54,11 +54,11 @@ class PostDataService {
       imageURL: event.imageURL,
       body: didEditEvent
           ? event.isDigitalEvent
-              ? " edited an upcoming stream: "
-              : " edited an upcoming event: "
+              ? " edited an upcoming stream: ${event.title}"
+              : " edited an upcoming event: ${event.title}"
           : event.isDigitalEvent
-              ? " scheduled an upcoming stream: "
-              : " scheduled an upcoming event: ",
+              ? " scheduled an upcoming stream: ${event.title}"
+              : " scheduled an upcoming event: ${event.title}",
       nearbyZipcodes: event.nearbyZipcodes,
       commentCount: 0,
       postDateTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,

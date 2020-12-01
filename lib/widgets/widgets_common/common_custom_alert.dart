@@ -693,7 +693,6 @@ Future<T> customShowDialog<T>({
       child: child ?? Builder(builder: builder),
       theme: Theme.of(
         context,
-        shadowThemeOnly: true,
       ),
       barrierDismissible: barrierDismissible,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,

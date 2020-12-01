@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/truncate_text.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class SearchResultRow extends StatelessWidget {
   final Map<String, dynamic> resultData;
@@ -37,7 +36,7 @@ class SearchResultRow extends StatelessWidget {
                     children: <Widget>[
                       resultData['imageData'] == null || resultData['imageData'] == ''
                           ? Container()
-                          : UserDetailsProfilePic(
+                          : UserProfilePic(
                               userPicUrl: resultData['imageData'],
                               size: 50.0,
                             ),
@@ -62,16 +61,16 @@ class SearchResultRow extends StatelessWidget {
                             ),
                           ],
                         ),
-                        Row(
-                          children: <Widget>[
-                            Fonts().textW300(
-                              resultData['resultType'],
-                              14.0,
-                              Colors.black,
-                              TextAlign.left,
-                            ),
-                          ],
-                        ),
+                        // Row(
+                        //   children: <Widget>[
+                        //     Fonts().textW300(
+                        //       resultData['resultType'],
+                        //       14.0,
+                        //       Colors.black,
+                        //       TextAlign.left,
+                        //     ),
+                        //   ],
+                        // ),
                       ],
                     ),
                   ),

@@ -10,8 +10,9 @@
 	</array>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>https://webblenevents.page.link</string>
+		<string>https://webblen.page.link</string>
 		<string>https://webblen.io</string>
+		<string>https://app.webblen.io</string>
 	</array>
 </dict>
 </plist>

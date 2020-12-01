@@ -7,7 +7,7 @@ import 'package:webblen/firebase/data/comment_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/utils/time_calc.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class CommentBlock extends StatefulWidget {
   final String currentUID;
@@ -117,7 +117,7 @@ class _CommentBlockState extends State<CommentBlock> {
                           baseColor: CustomColors.iosOffWhite,
                           highlightColor: Colors.white,
                         )
-                      : UserDetailsProfilePic(
+                      : UserProfilePic(
                           userPicUrl: authorProfilePicURL,
                           size: widget.comment.isReply ? 20 : 35,
                         ),
@@ -133,6 +133,7 @@ class _CommentBlockState extends State<CommentBlock> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       GestureDetector(
+                        onLongPress: widget.commentOptions,
                         onDoubleTap: widget.commentOptions,
                         child: Container(
                           width: widget.comment.isReply ? MediaQuery.of(context).size.width - 120 : MediaQuery.of(context).size.width - 74,

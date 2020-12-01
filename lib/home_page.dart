@@ -180,8 +180,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
           WebblenUserData().updateUserAppOpen(uid, res, currentLat, currentLon);
         });
         areaName = res;
-        isLoading = false;
-        setState(() {});
+        if (this.mounted) {
+          isLoading = false;
+          setState(() {});
+        }
         WebblenUserData().displayDepositAnimation(currentUser.uid).then((bool) {
           if (bool == true) {
             PageTransitionService(context: context).transitionToNewWebblenBalancePage();
@@ -199,12 +201,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     }
   }
 
-  Future<Null> getPlatformData(double lat, double lon) async {
+  Future<Null> getPlatformData() async {
     PlatformDataService().isUpdateAvailable().then((updateIsAvailable) {
       if (updateIsAvailable) {
         updateRequired = updateIsAvailable;
       }
-      isLoading = false;
       setState(() {});
     });
   }
@@ -271,6 +272,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   @override
   void initState() {
     super.initState();
+    getPlatformData();
     handleDynamicLinks().then((val) {
       initialize();
     });
@@ -307,7 +309,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       ),
       CurrentUserPage(
         currentUser: currentUser,
-        backButtonIsDisabled: true,
       ),
     ];
 
@@ -386,7 +387,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ? Container(
                 child: Center(
                   child: Text(
-                    'Retrieving Location...',
+                    '',
                     style: TextStyle(color: Colors.black, fontWeight: FontWeight.w400, fontSize: 18.0),
                   ),
                 ),

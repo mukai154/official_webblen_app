@@ -43,7 +43,6 @@ class _OnboardingPathSelectPageState extends State<OnboardingPathSelectPage> {
   validateAndSubmitEmailAddress() async {
     FormState formState = formKey.currentState;
     formState.save();
-    print(emailAddress);
     if (!Strings().isEmailValid(emailAddress)) {
       showAlertDialog(
         context: context,

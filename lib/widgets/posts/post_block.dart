@@ -6,13 +6,15 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/utils/time_calc.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class PostImgBlock extends StatefulWidget {
   final String currentUID;
   final WebblenPost post;
   final VoidCallback viewPost;
   final VoidCallback viewUser;
+  final VoidCallback viewParent;
+  final bool showParentAction;
   final VoidCallback postOptions;
 
   PostImgBlock({
@@ -20,6 +22,8 @@ class PostImgBlock extends StatefulWidget {
     this.post,
     this.viewPost,
     this.viewUser,
+    this.viewParent,
+    this.showParentAction,
     this.postOptions,
   });
 
@@ -77,7 +81,7 @@ class _PostImgBlockState extends State<PostImgBlock> {
                                 baseColor: CustomColors.iosOffWhite,
                                 highlightColor: Colors.white,
                               )
-                            : UserDetailsProfilePic(userPicUrl: authorProfilePicURL, size: 35),
+                            : UserProfilePic(userPicUrl: authorProfilePicURL, size: 35),
                         SizedBox(
                           width: 10.0,
                         ),
@@ -107,12 +111,23 @@ class _PostImgBlockState extends State<PostImgBlock> {
                       ],
                     ),
                   ),
-                  widget.postOptions == null
-                      ? Container()
-                      : IconButton(
-                          icon: Icon(Icons.more_vert),
-                          onPressed: widget.postOptions,
+                  widget.showParentAction != null && widget.showParentAction
+                      ? Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            onTap: widget.viewParent,
+                            child: Text(
+                              'View Event',
+                              style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         )
+                      : widget.postOptions == null
+                          ? Container()
+                          : IconButton(
+                              icon: Icon(Icons.more_horiz),
+                              onPressed: widget.postOptions,
+                            ),
                 ],
               ),
             ),
@@ -121,6 +136,7 @@ class _PostImgBlockState extends State<PostImgBlock> {
               height: deviceSize.width,
               width: deviceSize.width,
               fadeInCurve: Curves.easeIn,
+              filterQuality: FilterQuality.high,
             ),
             Padding(
               padding: EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0, bottom: 8.0),
@@ -194,6 +210,8 @@ class PostTextBlock extends StatefulWidget {
   final WebblenPost post;
   final VoidCallback viewPost;
   final VoidCallback viewUser;
+  final VoidCallback viewParent;
+  final bool showParentAction;
   final VoidCallback postOptions;
 
   PostTextBlock({
@@ -201,6 +219,8 @@ class PostTextBlock extends StatefulWidget {
     this.post,
     this.viewPost,
     this.viewUser,
+    this.viewParent,
+    this.showParentAction,
     this.postOptions,
   });
 
@@ -220,7 +240,9 @@ class _PostTextBlockState extends State<PostTextBlock> {
       authorProfilePicURL = res.profile_pic;
       authorUsername = res.username;
       isLoading = false;
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
   }
 
@@ -255,7 +277,7 @@ class _PostTextBlockState extends State<PostTextBlock> {
                                 baseColor: CustomColors.iosOffWhite,
                                 highlightColor: Colors.white,
                               )
-                            : UserDetailsProfilePic(userPicUrl: authorProfilePicURL, size: 35),
+                            : UserProfilePic(userPicUrl: authorProfilePicURL, size: 35),
                         SizedBox(
                           width: 10.0,
                         ),
@@ -285,12 +307,23 @@ class _PostTextBlockState extends State<PostTextBlock> {
                       ],
                     ),
                   ),
-                  widget.postOptions == null
-                      ? Container()
-                      : IconButton(
-                          icon: Icon(Icons.more_vert),
-                          onPressed: widget.postOptions,
+                  widget.showParentAction != null && widget.showParentAction
+                      ? Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: InkWell(
+                            onTap: widget.viewParent,
+                            child: Text(
+                              'View Event',
+                              style: TextStyle(color: Colors.black, fontSize: 14, fontWeight: FontWeight.bold),
+                            ),
+                          ),
                         )
+                      : widget.postOptions == null
+                          ? Container()
+                          : IconButton(
+                              icon: Icon(Icons.more_horiz),
+                              onPressed: widget.postOptions,
+                            ),
                 ],
               ),
             ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:webblen/firebase/data/transaction_data.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
-import 'package:webblen/widgets/widgets_data_streams/stream_user_transactions.dart';
 
 class TransactionHistoryPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -32,9 +31,7 @@ class _TransactionHistoryPageState extends State<TransactionHistoryPage> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        child: StreamUserTransactions(
-          uid: widget.currentUser.uid,
-        ),
+        child: Container(),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class StreamUserAccount extends StatelessWidget {
   final String uid;
@@ -51,7 +51,7 @@ class StreamUserAccount extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(16.5)),
                       ),
                       child: Center(
-                        child: UserDetailsProfilePic(
+                        child: UserProfilePic(
                           userPicUrl: userData['d']["profile_pic"],
                           size: 32.0,
                         ),
@@ -68,7 +68,7 @@ class StreamUserAccount extends StatelessWidget {
                         borderRadius: BorderRadius.all(Radius.circular(16.5)),
                       ),
                       child: Center(
-                        child: UserDetailsProfilePic(
+                        child: UserProfilePic(
                           userPicUrl: '',
                           size: 32.0,
                         ),

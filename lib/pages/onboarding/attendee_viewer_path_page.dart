@@ -11,7 +11,7 @@ import 'package:webblen/algolia/algolia_search.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
-import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/pages/onboarding/suggest_followers_page.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 
 class AttendeeViewerPathPage extends StatefulWidget {
@@ -51,8 +51,13 @@ class _AttendeeViewerPathPageState extends State<AttendeeViewerPathPage> {
   }
 
   onboardCompleteTransition() {
-    WebblenUserData().updateOnboardStatus(uid, selectedTags);
-    PageTransitionService(context: context).transitionToOnboardingCompletePage();
+    WebblenUserData().updateInterests(uid, selectedTags);
+    Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SuggestFollowersPage(
+                  onboarding: true,
+                )));
   }
 
   //Social Auth
@@ -207,7 +212,7 @@ class _AttendeeViewerPathPageState extends State<AttendeeViewerPathPage> {
               endIndent: 16,
               color: Colors.black45,
             ),
-            selectedCategory == null
+            selectedCategory == null || selectedCategory == "Select Category"
                 ? Container()
                 : GridView.count(
                     shrinkWrap: true,
@@ -272,6 +277,7 @@ class _AttendeeViewerPathPageState extends State<AttendeeViewerPathPage> {
         }
       });
       tagCategories.sort((a, b) => a.compareTo(b));
+      tagCategories.insert(0, 'Select Category');
       selectedCategory = tagCategories.first;
       isLoading = false;
       setState(() {});

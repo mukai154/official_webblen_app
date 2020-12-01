@@ -7,18 +7,22 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:share/share.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/comment_data.dart';
+import 'package:webblen/firebase/data/event_data.dart';
 import 'package:webblen/firebase/data/post_data.dart';
 import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/share/share_service.dart';
+import 'package:webblen/services_general/service_page_transitions.dart';
+import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/widgets/comments/comment_block.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/posts/post_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class PostViewPage extends StatefulWidget {
   final String postID;
@@ -45,7 +49,55 @@ class _PostViewPageState extends State<PostViewPage> {
     return Container();
   }
 
-  void showPostOptions() {}
+  void showPostOptions() async {
+    if (post.authorID == currentUser.uid) {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Edit Post", key: 'editPost'),
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'sharePost'),
+          SheetAction(label: "Delete Post", key: 'deletePost', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'editPost') {
+        PageTransitionService(context: context, postID: post.id).transitionToCreatePostPage();
+      } else if (action == 'copyLink') {
+        ShareService().shareContent(post: post, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'sharePost') {
+        ShareService().shareContent(post: post, copyLink: false);
+      } else if (action == 'deletePost') {
+        OkCancelResult res = await showOkCancelAlertDialog(
+          context: context,
+          message: "Delete This Post?",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+          isDestructiveAction: true,
+        );
+        if (res == OkCancelResult.ok) {
+          PostDataService().deletePost(post.id);
+        }
+      }
+    } else {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'share'),
+          SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'copyLink') {
+        ShareService().shareContent(post: post, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'share') {
+        ShareService().shareContent(post: post, copyLink: false);
+      } else if (action == 'report') {
+        //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      }
+    }
+  }
 
   Widget postComments() {
     return Container(
@@ -177,7 +229,7 @@ class _PostViewPageState extends State<PostViewPage> {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            UserDetailsProfilePic(
+            UserProfilePic(
               userPicUrl: currentUser.profile_pic,
               size: 45,
             ),
@@ -282,6 +334,32 @@ class _PostViewPageState extends State<PostViewPage> {
     );
   }
 
+  viewParent() {
+    EventDataService().getEvent(post.parentID).then((res) {
+      if (res != null) {
+        PageTransitionService(context: context, eventID: post.parentID, currentUser: currentUser).transitionToEventPage();
+      } else {
+        showOkAlertDialog(
+          context: context,
+          message: "This Event No Longer Exists",
+          okLabel: "Ok",
+          barrierDismissible: true,
+        );
+      }
+    });
+  }
+
+  transitionToUserPage(String uid) async {
+    ShowAlertDialogService().showLoadingDialog(context);
+    WebblenUser user = await WebblenUserData().getUserByID(uid);
+    Navigator.of(context).pop();
+    PageTransitionService(
+      context: context,
+      currentUser: currentUser,
+      webblenUser: user,
+    ).transitionToUserPage();
+  }
+
   Future<void> loadPost() async {
     PostDataService().getPost(widget.postID).then((res) {
       if (res != null) {
@@ -343,14 +421,20 @@ class _PostViewPageState extends State<PostViewPage> {
                             children: [
                               post.imageURL != null
                                   ? PostImgBlock(
+                                      viewUser: () => transitionToUserPage(post.authorID),
                                       postOptions: null,
                                       post: post,
                                       viewPost: null,
+                                      viewParent: post.parentID == null ? null : () => viewParent(),
+                                      showParentAction: post.parentID == null ? false : true,
                                     )
                                   : PostTextBlock(
+                                      viewUser: () => transitionToUserPage(post.authorID),
                                       postOptions: null,
                                       post: post,
                                       viewPost: null,
+                                      viewParent: post.parentID == null ? null : () => viewParent(),
+                                      showParentAction: post.parentID == null ? false : true,
                                     ),
                               postTags(),
                               postComments(),

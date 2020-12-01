@@ -9,9 +9,8 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
+import 'package:webblen/widgets/rewards/reward_block.dart';
 import 'package:webblen/widgets/widgets_common/common_progress.dart';
-import 'package:webblen/widgets/widgets_reward/reward_block.dart';
-import 'package:webblen/widgets/widgets_reward/reward_purchase.dart';
 
 class ShopPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -34,44 +33,8 @@ class _ShopPageState extends State<ShopPage> {
   List<WebblenReward> cashRewards = [];
   List<WebblenReward> charityRewards = [];
 
-  Future<bool> showRewardPurchaseDialog(BuildContext context, WebblenReward reward) {
-    return showDialog<bool>(
-        context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (BuildContext context) {
-          return RewardInfoDialog(
-            rewardTitle: reward.title,
-            rewardDescription: reward.description,
-            rewardImageURL: reward.imageURL,
-            rewardCost: reward.cost.toStringAsFixed(2),
-            purchaseAction: () {
-              reward.type == "charity" ? showCharityDialog(context) : purchaseRewardDialog(reward);
-            },
-            dismissAction: () => dismissPurchaseDialog(context),
-          );
-        });
-  }
-
   void dismissPurchaseDialog(BuildContext context) {
     Navigator.pop(context);
-  }
-
-  Future<bool> purchaseRewardDialog(WebblenReward reward) {
-    Navigator.pop(context);
-    return showDialog<bool>(
-        context: context,
-        barrierDismissible: false, // user must tap button!
-        builder: (BuildContext context) {
-          return RewardConfirmPurchaseDialog(
-            rewardTitle: reward.title,
-            rewardDescription: reward.description,
-            rewardImageURL: reward.imageURL,
-            rewardCost: reward.cost.toStringAsFixed(2),
-            confirmAction: () => purchaseReward(reward),
-            cancelAction: () => dismissPurchaseDialog(context),
-            purchaseIsLoading: purchaseIsLoading,
-          );
-        });
   }
 
   showCharityDialog(BuildContext context) {}
@@ -100,30 +63,30 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-  void purchaseReward(WebblenReward reward) async {
-    setState(() {
-      purchaseIsLoading = true;
-    });
-    RewardDataService()
-        .purchaseReward(
-      widget.currentUser.uid,
-      reward.id,
-      reward.cost,
-    )
-        .then((e) {
-      if (e.isNotEmpty) {
-        purchaseFailedDialog(
-          "Purchase Failed",
-          e,
-        );
-      } else {
-        purchaseSuccessDialog(
-          "Reward Purchased!",
-          "Your Reward is Now in Your Wallet",
-        );
-      }
-    });
-  }
+  // void purchaseReward(WebblenReward reward) async {
+  //   setState(() {
+  //     purchaseIsLoading = true;
+  //   });
+  //   RewardDataService()
+  //       .purchaseReward(
+  //     widget.currentUser.uid,
+  //     reward.id,
+  //     reward.cost,
+  //   )
+  //       .then((e) {
+  //     if (e.isNotEmpty) {
+  //       purchaseFailedDialog(
+  //         "Purchase Failed",
+  //         e,
+  //       );
+  //     } else {
+  //       purchaseSuccessDialog(
+  //         "Reward Purchased!",
+  //         "Your Reward is Now in Your Wallet",
+  //       );
+  //     }
+  //   });
+  // }
 
   Widget rewardsGrid(List<WebblenReward> rewards) {
     return ListView.builder(
@@ -135,7 +98,7 @@ class _ShopPageState extends State<ShopPage> {
           padding: EdgeInsets.symmetric(horizontal: 8),
           child: RewardBlock(
             reward: rewards[index],
-            action: () => PageTransitionService(context: context, reward: rewards[index]).transitionToShopItemPage(),
+            action: () => PageTransitionService(context: context, reward: rewards[index], currentUser: widget.currentUser).transitionToShopItemPage(),
           ),
         );
       },
@@ -231,9 +194,10 @@ class _ShopPageState extends State<ShopPage> {
                     height: 200.0,
                     width: 350.0,
                     child: Carousel(
+                      boxFit: BoxFit.contain,
                       images: [
-                        NetworkImage('https://cdn-images-1.medium.com/max/2000/1*GqdzzfB_BHorv7V2NV7Jgg.jpeg'),
-                        NetworkImage('https://cdn-images-1.medium.com/max/2000/1*wnIEgP1gNMrK5gZU7QS0-A.jpeg'),
+                        NetworkImage(
+                            'https://firebasestorage.googleapis.com/v0/b/webblen-events.appspot.com/o/app_images%2Fcash%20in%20.PNG?alt=media&token=9989465e-35db-4782-9e08-0fe75351569a'),
                       ],
                       dotSize: 4.0,
                       dotSpacing: 15.0,

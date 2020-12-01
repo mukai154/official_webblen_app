@@ -16,7 +16,7 @@ import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
 import 'package:webblen/widgets/common/state/progress_indicator.dart';
 import 'package:webblen/widgets/widgets_icons/icon_bubble.dart';
-import 'package:webblen/widgets/widgets_user/user_details_profile_pic.dart';
+import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
 
 class SettingsPage extends StatefulWidget {
   final WebblenUser currentUser;
@@ -183,7 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                           () => changeUserProfilePic(false),
                                         ),
                                         child: newUserImage == null
-                                            ? UserDetailsProfilePic(
+                                            ? UserProfilePic(
                                                 userPicUrl: userData['d']['profile_pic'],
                                                 size: 100.0,
                                               )
@@ -313,23 +313,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                 ],
                               ),
                             ),
-
-//                  optionRow(
-//                    Icon(
-//                      FontAwesomeIcons.comments,
-//                      color: FlatColors.blackPearl,
-//                      size: 18.0,
-//                    ),
-//                    'Invite Friends',
-//                    FlatColors.blackPearl,
-//                    () async {
-//                      Contact contact = await _contactPicker.selectContact();
-//                      SendInviteMessage().sendSMS(
-//                        'test message',
-//                        [contact.phoneNumber.number],
-//                      );
-//                    },
-//                  ),
                             StreamBuilder(
                               stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
                               builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {

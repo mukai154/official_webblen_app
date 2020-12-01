@@ -462,13 +462,28 @@ class EventDataService {
 //    });
 //  }
 
-//  Future<Null> addEventDataField(String dataName, dynamic data) async {
-//    QuerySnapshot querySnapshot = await pastEventsRef.getDocuments();
-//    print(querySnapshot.docs.length);
-//    querySnapshot.docs.forEach((doc) {
-//      pastEventsRef.doc(doc.docID).updateData({"$dataName": data}).whenComplete(() {}).catchError((e) {});
-//    });
-//  }
+  Future<Null> addEventDataField() async {
+    QuerySnapshot querySnapshot = await eventsRef.getDocuments();
+    querySnapshot.docs.forEach((doc) {
+      Map<String, dynamic> data = doc.data();
+      String authorID = data['d']['authorID'] == null ? "EtKiw3gK37QsOg6tPBnSJ8MhCm23" : data['d']['authorID'];
+      List savedBy = data['d']['savedBy'] == null ? [] : data['d']['savedBy'];
+      bool paidOut = data['d']['paidOut'] == null ? false : data['d']['paidOut'];
+      bool isDigitalEvent = data['d']['isDigitalEvent'] == null ? false : data['d']['isDigitalEvent'];
+      if (data['d']['authorID'] == null) {
+        eventsRef
+            .doc(doc.id)
+            .update({
+              "d.authorID": authorID,
+              "d.savedBy": savedBy,
+              "d.paidOut": paidOut,
+              "d.isDigitalEvent": isDigitalEvent,
+            })
+            .whenComplete(() {})
+            .catchError((e) {});
+      }
+    });
+  }
 //
 //  Future<Null> addRecEventDataField(String dataName, dynamic data) async {
 //    QuerySnapshot querySnapshot = await recurringEventRef.getDocuments();

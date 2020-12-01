@@ -1,5 +1,7 @@
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:share/share.dart';
@@ -10,6 +12,7 @@ import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/ticket_distro.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
 import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/flat_colors.dart';
@@ -182,18 +185,72 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
     });
   }
 
-  showEventOptions() {
-    ShowAlertDialogService().showEventOptionsDialog(
-      context,
-      event.startDateTimeInMilliseconds < DateTime.now().millisecondsSinceEpoch ? viewAttendeesAction : null,
-      null, //shareEventAction,
-      shareLinkAction,
-      event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && widget.currentUser.uid == event.authorID ? editEventAction : null,
-      widget.currentUser.uid == event.authorID && event.startDateTimeInMilliseconds > DateTime.now().millisecondsSinceEpoch && !event.hasTickets
-          ? deleteEventAction
-          : null,
-      widget.currentUser.uid == event.authorID && event.hasTickets ? scanForTicketsAction : null,
-    );
+  eventOptionsDialog() async {
+    if (event.authorID == widget.currentUser.uid) {
+      List<SheetAction<String>> actions = event.endDateTimeInMilliseconds > currentDateTimeInMilliseconds
+          ? event.hasTickets
+              ? [
+                  SheetAction(label: "Edit Event", key: 'editEvent'),
+                  SheetAction(label: "Copy Ticket Link", key: 'ticketLink'),
+                  SheetAction(label: "Copy Link", key: 'copyLink'),
+                  SheetAction(label: "Share", key: 'shareEvent'),
+                  SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+                ]
+              : [
+                  SheetAction(label: "Edit Event", key: 'editEvent'),
+                  SheetAction(label: "Copy Link", key: 'copyLink'),
+                  SheetAction(label: "Share", key: 'shareEvent'),
+                  SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+                ]
+          : [
+              SheetAction(label: "Copy Link", key: 'copyLink'),
+              SheetAction(label: "Share", key: 'shareEvent'),
+              SheetAction(label: "Delete Event", key: 'deleteEvent', isDestructiveAction: true),
+            ];
+      String action = await showModalActionSheet(
+        context: context,
+        actions: actions,
+      );
+      if (action == 'editEvent') {
+        PageTransitionService(context: context, eventID: event.id, isStream: event.isDigitalEvent).transitionToCreateEventPage();
+      } else if (action == 'ticketLink') {
+        ShareService().copyTicketLink(event: event);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'copyLink') {
+        ShareService().shareContent(event: event, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'shareEvent') {
+        ShareService().shareContent(event: event, copyLink: false);
+      } else if (action == 'deleteEvent') {
+        OkCancelResult res = await showOkCancelAlertDialog(
+          context: context,
+          message: "Delete This Event?",
+          okLabel: "Delete",
+          cancelLabel: "Cancel",
+          isDestructiveAction: true,
+        );
+        if (res == OkCancelResult.ok) {
+          EventDataService().deleteEvent(event.id);
+        }
+      }
+    } else {
+      String action = await showModalActionSheet(
+        context: context,
+        actions: [
+          SheetAction(label: "Copy Link", key: 'copyLink'),
+          SheetAction(label: "Share", key: 'share'),
+          SheetAction(label: "Report", key: 'report', isDestructiveAction: true),
+        ],
+      );
+      if (action == 'copyLink') {
+        ShareService().shareContent(event: event, copyLink: true);
+        HapticFeedback.mediumImpact();
+      } else if (action == 'share') {
+        ShareService().shareContent(event: event, copyLink: false);
+      } else if (action == 'report') {
+        //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
+      }
+    }
   }
 
   Widget ticketBuilder(TicketDistro ticketDistro) {
@@ -560,7 +617,7 @@ class _EventDetailsPageState extends State<EventDetailsPage> {
             size: 18.0,
             color: Colors.black,
           ),
-          onPressed: () => showEventOptions(),
+          onPressed: () => eventOptionsDialog(),
         ),
       ),
       body: isLoading ? CustomLinearProgress(progressBarColor: FlatColors.webblenRed) : eventView(),

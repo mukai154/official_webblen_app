@@ -3,13 +3,13 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:intl/intl.dart';
 import 'package:random_string/random_string.dart';
 import 'package:webblen/models/webblen_reward.dart';
 import 'package:webblen/services/location/location_service.dart';
 
 class RewardDataService {
   final CollectionReference rewardRef = FirebaseFirestore.instance.collection("rewards");
+  final CollectionReference purchasedRewardsRef = FirebaseFirestore.instance.collection("purchased_rewards");
   final CollectionReference userRef = FirebaseFirestore.instance.collection("webblen_user");
   final Reference storageReference = FirebaseStorage.instance.ref();
   final double degreeMinMax = 0.145;
@@ -120,49 +120,55 @@ class RewardDataService {
     return rewards;
   }
 
-  Future<String> updateAmountOfRewardAvailable(String rewardID) async {
-    String status = "";
-    DocumentSnapshot docSnapshot = await rewardRef.doc(rewardID).get();
-    int amountAvailable = docSnapshot.data()["amountAvailable"];
-    if (amountAvailable > 0) {
-      amountAvailable -= 1;
-    }
-    rewardRef.doc(rewardID).update({"amountAvailable": amountAvailable}).whenComplete(() {
-      status = amountAvailable.toString();
-    }).catchError((e) {
-      status = "error";
-    });
-    return status;
-  }
-
-  Future<String> purchaseReward(String uid, String rewardID, double cost) async {
-    String error = "";
+  Future<String> purchaseReward(String uid, double cost) async {
+    String error;
     DocumentSnapshot userSnapshot = await userRef.doc(uid).get();
     double userPoints = userSnapshot.data()['d']["eventPoints"] * 1.00;
-    List userRewards = userSnapshot.data()['d']["rewards"].toList();
     if (userPoints < cost) {
       error = "Insufficient Funds";
-    } else if (userRewards.contains(rewardID)) {
-      error = "Reward Already Purchased";
     } else {
-      userRewards.add(rewardID);
       userPoints = userPoints - cost;
-      userRef.doc(uid).update({"d.eventPoints": userPoints, "d.rewards": userRewards}).whenComplete(() {}).catchError((e) {
-            error = e.details;
-          });
+      userRef.doc(uid).update({"d.eventPoints": userPoints}).catchError((e) {
+        error = e.details;
+      });
     }
     return error;
   }
 
-  Future<String> removeUserReward(String uid, String rewardID) async {
-    String error = "";
-    DocumentSnapshot userSnapshot = await userRef.doc(uid).get();
-    List userRewards = userSnapshot.data()['d']["rewards"].toList();
-    userRewards.remove(rewardID);
-    userRef.doc(uid).update({"d.rewards": userRewards}).whenComplete(() {}).catchError((e) {
-          error = e.details;
-        });
+  Future<String> purchaseMerchReward(
+      String uid, String rewardType, String rewardTitle, String rewardID, String size, String email, String address1, String address2) async {
+    String error;
+    purchasedRewardsRef.doc(uid).set({
+      "uid": uid,
+      "rewardType": rewardType,
+      "rewardTitle": rewardTitle,
+      "rewardID": rewardID,
+      "size": size,
+      "email": email,
+      "address1": address1,
+      "address2": address2,
+      "status": "pending",
+      "purchaseTimeInMilliseconds": DateTime.now().millisecondsSinceEpoch,
+    }).catchError((e) {
+      error = e.details;
+    });
+    return error;
+  }
 
+  Future<String> purchaseCashReward(String uid, String rewardType, String rewardTitle, String rewardID, String cashUsername, email) async {
+    String error = "";
+    purchasedRewardsRef.doc(uid).set({
+      "uid": uid,
+      "email": email,
+      "rewardType": rewardType,
+      "rewardTitle": rewardTitle,
+      "rewardID": rewardID,
+      "cashUsername": cashUsername,
+      "status": "pending",
+      "purchaseTimeInMilliseconds": DateTime.now().millisecondsSinceEpoch,
+    }).catchError((e) {
+      error = e.details;
+    });
     return error;
   }
 
@@ -180,27 +186,5 @@ class RewardDataService {
     if (docSnapshot.exists) {
       rewardRef.doc(rewardID).delete();
     }
-  }
-
-  Future<List<WebblenReward>> deleteExpiredRewards(List<WebblenReward> rewardsList) async {
-    DateFormat formatter = new DateFormat("MM/dd/yyyy");
-    DateTime today = DateTime.now();
-    List<WebblenReward> validRewards = rewardsList.toList(
-      growable: true,
-    );
-    rewardsList.forEach((reward) {
-      DateTime rewardExpirationDate = formatter.parse(reward.expirationDate);
-      if (today.isAfter(rewardExpirationDate)) {
-        rewardRef.doc(reward.id).delete();
-        validRewards.remove(reward);
-      }
-    });
-    return validRewards;
-  }
-
-  filterRewards(List<WebblenReward> rewardsList, double filterCost, String filterType) {
-    List<WebblenReward> filteredRewards;
-    filteredRewards = rewardsList.where((reward) => reward.type == filterType).toList();
-    return filteredRewards;
   }
 }
