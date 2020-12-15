@@ -7,7 +7,7 @@ class PlatformDataService {
 
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "9.2.0";
+    String currentVersion = "9.2.1";
     DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
     String releasedVersion = docSnapshot.data()["versionNumber"];
     bool versionIsRequired = docSnapshot.data()["versionIsRequired"];

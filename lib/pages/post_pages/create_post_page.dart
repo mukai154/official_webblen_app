@@ -20,7 +20,6 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services_general/service_page_transitions.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
 import 'package:webblen/widgets/common/app_bar/custom_app_bar.dart';
@@ -449,9 +448,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     width: MediaQuery.of(context).size.width - 34,
                     onPressed: () {
                       Navigator.of(context).pop();
-                      ShowAlertDialogService().showLoadingDialog(context);
                       WebblenUserData().updateWebblenBalance(currentUser.uid, -0.5).then((e) {
-                        Navigator.of(context).pop();
                         if (e.isEmpty) {
                           submitPost();
                         } else {
@@ -498,12 +495,12 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
     PostDataService().uploadPost(newPost, zipPostalCode, imgFile).then((res) {
       if (res != null) {
+        if (widget.rewardExtraWebblen != null && widget.rewardExtraWebblen) {
+          WebblenUserData().depositWebblen(10.001, currentUser.uid);
+        }
         post = res;
         setState(() {});
         Navigator.of(context).pop();
-        if (widget.rewardExtraWebblen != null && widget.rewardExtraWebblen) {
-          WebblenUserData().depositWebblen(10.001, currentUID);
-        }
         showModalBottomSheet(
           context: context,
           isDismissible: false,

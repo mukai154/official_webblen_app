@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webblen/firebase/services/notifications.dart';
 import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/models/webblen_post.dart';
 
@@ -6,7 +7,7 @@ class CommentDataService {
   final CollectionReference commentsRef = FirebaseFirestore.instance.collection("comments");
   final CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
   //CREATE
-  Future<String> sendComment(String parentID, WebblenComment comment) async {
+  Future<String> sendComment(String parentID, String postAuthorID, WebblenComment comment) async {
     String error;
     await commentsRef.doc(parentID).collection("comments").doc(comment.timePostedInMilliseconds.toString()).set(comment.toMap()).catchError((e) {
       error = e.details;
@@ -17,10 +18,13 @@ class CommentDataService {
     await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
       error = e.details;
     });
+    if (error == null && postAuthorID != comment.senderUID) {
+      WebblenNotificationDataService().sendPostCommentNotification(comment.postID, postAuthorID, comment.senderUID, comment.message);
+    }
     return error;
   }
 
-  Future<String> replyToComment(String parentID, String originalCommentID, WebblenComment comment) async {
+  Future<String> replyToComment(String parentID, String originaCommenterUID, String originalCommentID, WebblenComment comment) async {
     String error;
     DocumentSnapshot snapshot = await commentsRef.doc(parentID).collection("comments").doc(originalCommentID).get();
     WebblenComment originalComment = WebblenComment.fromMap(snapshot.data());
@@ -31,6 +35,10 @@ class CommentDataService {
     await commentsRef.doc(parentID).collection("comments").doc(originalCommentID).update(originalComment.toMap()).catchError((e) {
       error = e.details;
     });
+    if (error == null && originaCommenterUID != comment.senderUID) {
+      WebblenNotificationDataService()
+          .sendPostCommentReplyNotification(comment.postID, originaCommenterUID, originalCommentID, comment.senderUID, comment.message);
+    }
     return error;
   }
 

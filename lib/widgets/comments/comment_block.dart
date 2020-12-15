@@ -1,10 +1,7 @@
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:shimmer/shimmer.dart';
-import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/firebase/data/comment_data.dart';
-import 'package:webblen/firebase/data/user_data.dart';
 import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/utils/time_calc.dart';
 import 'package:webblen/widgets/widgets_user/user_profile_pic.dart';
@@ -31,7 +28,6 @@ class CommentBlock extends StatefulWidget {
 }
 
 class _CommentBlockState extends State<CommentBlock> {
-  bool isLoading = true;
   bool showReplies = false;
   String authorProfilePicURL;
   String authorUsername;
@@ -82,17 +78,6 @@ class _CommentBlockState extends State<CommentBlock> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    WebblenUserData().getUserByID(widget.comment.senderUID).then((res) {
-      authorProfilePicURL = res.profile_pic;
-      authorUsername = res.username;
-      isLoading = false;
-      setState(() {});
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.0),
@@ -105,117 +90,103 @@ class _CommentBlockState extends State<CommentBlock> {
               onTap: widget.viewUser,
               child: Row(
                 children: <Widget>[
-                  isLoading
-                      ? Shimmer.fromColors(
-                          child: Container(
-                            height: 35,
-                            width: 35,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          baseColor: CustomColors.iosOffWhite,
-                          highlightColor: Colors.white,
-                        )
-                      : UserProfilePic(
-                          userPicUrl: authorProfilePicURL,
-                          size: widget.comment.isReply ? 20 : 35,
-                        ),
+                  UserProfilePicFromUID(
+                    uid: widget.comment.senderUID,
+                    size: widget.comment.isReply ? 20 : 35,
+                  ),
                   SizedBox(
                     width: 10.0,
                   ),
                 ],
               ),
             ),
-            isLoading
-                ? Container()
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      GestureDetector(
-                        onLongPress: widget.commentOptions,
-                        onDoubleTap: widget.commentOptions,
-                        child: Container(
-                          width: widget.comment.isReply ? MediaQuery.of(context).size.width - 120 : MediaQuery.of(context).size.width - 74,
-                          child: RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 14.0,
-                                color: Colors.black,
-                              ),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: '$authorUsername ',
-                                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: widget.comment.message,
-                                  style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400),
-                                ),
-                              ],
-                            ),
-                          ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GestureDetector(
+                  onLongPress: widget.commentOptions,
+                  onDoubleTap: widget.commentOptions,
+                  child: Container(
+                    width: widget.comment.isReply ? MediaQuery.of(context).size.width - 120 : MediaQuery.of(context).size.width - 74,
+                    child: RichText(
+                      text: TextSpan(
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          color: Colors.black,
                         ),
-                      ),
-                      SizedBox(height: 2),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          Text(
-                            TimeCalc().getPastTimeFromMilliseconds(widget.comment.timePostedInMilliseconds),
-                            style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.w500),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: '${widget.comment.username} ',
+                            style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(width: 8.0),
-                          widget.replyAction == null
-                              ? Container()
-                              : GestureDetector(
-                                  onTap: widget.replyAction,
-                                  child: Text(
-                                    "Reply",
-                                    style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                          widget.comment.senderUID == widget.currentUID && widget.comment.isReply
-                              ? GestureDetector(
-                                  onTap: () => showReplyOptions(widget.comment),
-                                  child: Text(
-                                    "Delete",
-                                    style: TextStyle(color: Colors.red[300], fontSize: 12.0, fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                              : Container(),
+                          TextSpan(
+                            text: widget.comment.message,
+                            style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400),
+                          ),
                         ],
                       ),
-                      SizedBox(height: 8),
-                      widget.comment.replies.length > 0
-                          ? showReplies
-                              ? Padding(
-                                  padding: EdgeInsets.only(bottom: 16),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      showReplies = false;
-                                      setState(() {});
-                                    },
-                                    child: Text(
-                                      "Hide ${widget.comment.replies.length} replies",
-                                      style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                )
-                              : GestureDetector(
-                                  onTap: () {
-                                    showReplies = true;
-                                    setState(() {});
-                                  },
-                                  child: Text(
-                                    "- Show ${widget.comment.replies.length} replies",
-                                    style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.bold),
-                                  ),
-                                )
-                          : Container(),
-                      widget.comment.replies.length > 0 && showReplies ? listReplies() : Container(),
-                    ],
+                    ),
                   ),
+                ),
+                SizedBox(height: 2),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(
+                      TimeCalc().getPastTimeFromMilliseconds(widget.comment.timePostedInMilliseconds),
+                      style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.w500),
+                    ),
+                    SizedBox(width: 8.0),
+                    widget.replyAction == null
+                        ? Container()
+                        : GestureDetector(
+                            onTap: widget.replyAction,
+                            child: Text(
+                              "Reply",
+                              style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                    widget.comment.senderUID == widget.currentUID && widget.comment.isReply
+                        ? GestureDetector(
+                            onTap: () => showReplyOptions(widget.comment),
+                            child: Text(
+                              "Delete",
+                              style: TextStyle(color: Colors.red[300], fontSize: 12.0, fontWeight: FontWeight.bold),
+                            ),
+                          )
+                        : Container(),
+                  ],
+                ),
+                SizedBox(height: 8),
+                widget.comment.replies.length > 0
+                    ? showReplies
+                        ? Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: GestureDetector(
+                              onTap: () {
+                                showReplies = false;
+                                setState(() {});
+                              },
+                              child: Text(
+                                "Hide ${widget.comment.replies.length} replies",
+                                style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          )
+                        : GestureDetector(
+                            onTap: () {
+                              showReplies = true;
+                              setState(() {});
+                            },
+                            child: Text(
+                              "- Show ${widget.comment.replies.length} replies",
+                              style: TextStyle(color: Colors.black54, fontSize: 12.0, fontWeight: FontWeight.bold),
+                            ),
+                          )
+                    : Container(),
+                widget.comment.replies.length > 0 && showReplies ? listReplies() : Container(),
+              ],
+            ),
           ],
         ),
       ),

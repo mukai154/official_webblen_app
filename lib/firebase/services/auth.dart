@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:webblen/firebase/data/user_data.dart';
@@ -32,10 +33,14 @@ class BaseAuth {
     return user != null ? user.uid : null;
   }
 
-  Future<String> signOut() async {
+  void signUserOut(BuildContext context) async {
     await firebaseAuth.signOut();
-    User user = firebaseAuth.currentUser;
-    return user != null ? user.uid : null;
+    await FacebookAuth.instance.logOut();
+    await GoogleSignIn().signOut();
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      '/login',
+      (Route<dynamic> route) => false,
+    );
   }
 
   Future<String> linkFacebookAccount(LoginResult result) async {

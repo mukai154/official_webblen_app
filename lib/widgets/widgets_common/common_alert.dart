@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
-import 'package:webblen/services_general/services_user_options.dart';
+import 'package:webblen/firebase/services/auth.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
@@ -161,7 +161,7 @@ class LogoutDialog extends StatelessWidget {
                     backgroundColor: Colors.red,
                     height: 45.0,
                     width: 200.0,
-                    onPressed: () => UserOptionsService().signUserOut(context),
+                    onPressed: () => BaseAuth().signUserOut(context),
                   ),
                   CustomColorButton(
                     text: "Cancel",

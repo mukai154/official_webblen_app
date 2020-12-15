@@ -186,7 +186,7 @@ class _PostImgBlockState extends State<PostImgBlock> {
                       style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
                     ),
                     TextSpan(
-                      text: widget.post.body,
+                      text: widget.post.body.trim(),
                       style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400),
                     ),
                   ],
@@ -200,6 +200,113 @@ class _PostImgBlockState extends State<PostImgBlock> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ShareablePostImgBlock extends StatelessWidget {
+  final String username;
+  final String profilePicURL;
+  final WebblenPost post;
+  final bool removeWebblenLogo;
+
+  ShareablePostImgBlock({
+    this.username,
+    this.profilePicURL,
+    this.post,
+    this.removeWebblenLogo,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    UserProfilePic(userPicUrl: profilePicURL, size: 35),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    post.tags.isEmpty
+                        ? Text(
+                            "@$username",
+                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "@$username",
+                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                post.tags.toString().replaceAll("[", "").replaceAll("]", ""),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black45,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ],
+                ),
+                removeWebblenLogo
+                    ? Container()
+                    : Image.asset(
+                        'assets/images/webblen_coin.png',
+                        height: 30,
+                        width: 30,
+                        fit: BoxFit.contain,
+                      ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: CachedNetworkImage(
+                imageUrl: post.imageURL,
+                height: MediaQuery.of(context).size.width - 32,
+                width: MediaQuery.of(context).size.width - 32,
+                fadeInCurve: Curves.easeIn,
+                filterQuality: FilterQuality.high,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, 16),
+            child: RichText(
+              text: TextSpan(
+                style: TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.black,
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: '$username ',
+                    style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.bold),
+                  ),
+                  TextSpan(
+                    text: post.body.trim(),
+                    style: TextStyle(fontSize: 14.0, fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -375,6 +482,86 @@ class _PostTextBlockState extends State<PostTextBlock> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ShareablePostTextBlock extends StatelessWidget {
+  final String username;
+  final String profilePicURL;
+  final WebblenPost post;
+  final bool removeWebblenLogo;
+
+  ShareablePostTextBlock({
+    this.username,
+    this.profilePicURL,
+    this.post,
+    this.removeWebblenLogo,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 4.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    UserProfilePic(userPicUrl: profilePicURL, size: 35),
+                    SizedBox(
+                      width: 10.0,
+                    ),
+                    post.tags.isEmpty
+                        ? Text(
+                            "@$username",
+                            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                          )
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "@$username",
+                                style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                post.tags.toString().replaceAll("[", "").replaceAll("]", ""),
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Colors.black45,
+                                ),
+                              ),
+                            ],
+                          ),
+                  ],
+                ),
+                removeWebblenLogo
+                    ? Container()
+                    : Image.asset(
+                        'assets/images/webblen_coin.png',
+                        height: 30,
+                        width: 30,
+                        fit: BoxFit.contain,
+                      ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              post.body,
+              style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w500),
+            ),
+          ),
+          SizedBox(height: 16.0),
+        ],
       ),
     );
   }

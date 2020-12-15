@@ -103,6 +103,11 @@ class _NotificationPageState extends State<NotificationPage> {
         currentUser: widget.currentUser,
         eventID: notif.notificationData,
       ).transitionToEventPage();
+    } else if (notifType == "post") {
+      PageTransitionService(
+        context: context,
+        postID: notif.notificationData,
+      ).transitionToPostViewPage();
     }
   }
 

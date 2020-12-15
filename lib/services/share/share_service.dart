@@ -11,6 +11,10 @@ class ShareService {
     Clipboard.setData(ClipboardData(text: event.webAppLink));
   }
 
+  shareSavedImgContent({String imgPath, String url}) {
+    Share.shareFiles([imgPath], subject: "", text: "\n$url");
+  }
+
   shareContent({WebblenUser user, WebblenPost post, WebblenEvent event, String imgPath, bool copyLink}) async {
     String id;
     String contentType;

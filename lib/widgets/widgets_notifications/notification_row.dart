@@ -4,7 +4,6 @@ import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/styles/flat_colors.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/time_calc.dart';
-import 'package:webblen/widgets/widgets_common/common_button.dart';
 
 class NotificationRow extends StatelessWidget {
   final WebblenNotification notification;
@@ -25,29 +24,23 @@ class NotificationRow extends StatelessWidget {
             size: 16.0,
             color: notifColor,
           )
-        : notification.notificationType == "newPost"
+        : notification.notificationType == "post"
             ? Icon(
-                FontAwesomeIcons.newspaper,
+                FontAwesomeIcons.comment,
                 size: 20.0,
                 color: notifColor,
               )
-            : notification.notificationType == "newPostComment"
+            : notification.notificationType == "event"
                 ? Icon(
-                    FontAwesomeIcons.comment,
+                    FontAwesomeIcons.calendar,
                     size: 20.0,
                     color: notifColor,
                   )
-                : notification.notificationType == "event"
-                    ? Icon(
-                        FontAwesomeIcons.calendar,
-                        size: 20.0,
-                        color: notifColor,
-                      )
-                    : Icon(
-                        FontAwesomeIcons.bell,
-                        size: 20.0,
-                        color: notifColor,
-                      );
+                : Icon(
+                    FontAwesomeIcons.bell,
+                    size: 20.0,
+                    color: notifColor,
+                  );
 
     final cardContent = Row(
       children: <Widget>[
@@ -123,104 +116,6 @@ class NotificationRow extends StatelessWidget {
           horizontal: 16.0,
         ),
         child: cardContent,
-      ),
-    );
-  }
-}
-
-class InviteRequestNotificationRow extends StatelessWidget {
-  final WebblenNotification notification;
-  final VoidCallback notifAction;
-  final VoidCallback confirmRequest;
-  final VoidCallback denyRequest;
-
-  InviteRequestNotificationRow({
-    this.notification,
-    this.notifAction,
-    this.confirmRequest,
-    this.denyRequest,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final requestIcon = notification.notificationType == 'friendRequest'
-        ? Icon(
-            FontAwesomeIcons.solidHeart,
-            size: 16.0,
-            color: FlatColors.webblenRed,
-          )
-        : Icon(
-            FontAwesomeIcons.users,
-            size: 25.0,
-            color: FlatColors.darkMountainGreen,
-          );
-
-    final requestContent = Container(
-      child: Column(
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              requestIcon,
-            ],
-          ),
-          SizedBox(
-            height: 4.0,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Container(
-                width: 300,
-                child: Fonts().textW500(
-                  notification.notificationDescription,
-                  18.0,
-                  FlatColors.darkGray,
-                  TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 4.0,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              CustomColorButton(
-                text: "Accept",
-                textColor: Colors.white,
-                backgroundColor: FlatColors.darkMountainGreen,
-                height: 40.0,
-                width: MediaQuery.of(context).size.width * 0.35,
-                onPressed: confirmRequest,
-              ),
-              CustomColorButton(
-                text: "Ignore",
-                textColor: FlatColors.darkGray,
-                backgroundColor: Colors.white,
-                height: 40.0,
-                width: MediaQuery.of(context).size.width * 0.35,
-                onPressed: denyRequest,
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-
-    return GestureDetector(
-      onTap: notifAction,
-      child: Container(
-        color: Colors.white,
-        margin: EdgeInsets.only(
-          bottom: 4.0,
-        ),
-        padding: EdgeInsets.symmetric(
-          vertical: 16.0,
-          horizontal: 8.0,
-        ),
-        child: requestContent,
       ),
     );
   }

@@ -206,7 +206,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       if (updateIsAvailable) {
         updateRequired = updateIsAvailable;
       }
-      setState(() {});
+      if (this.mounted) {
+        setState(() {});
+      }
     });
   }
 

@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
 import 'package:flutter_native_admob/flutter_native_admob.dart';
@@ -12,6 +14,7 @@ import 'package:flutter_native_admob/native_admob_controller.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_maps_webservice/places.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webblen/algolia/algolia_search.dart';
@@ -30,6 +33,7 @@ import 'package:webblen/services_general/services_show_alert.dart';
 import 'package:webblen/styles/fonts.dart';
 import 'package:webblen/utils/time.dart';
 import 'package:webblen/widgets/common/alerts/custom_alerts.dart';
+import 'package:webblen/widgets/common/buttons/custom_color_button.dart';
 import 'package:webblen/widgets/common/containers/text_field_container.dart';
 import 'package:webblen/widgets/common/text/custom_text.dart';
 import 'package:webblen/widgets/events/event_block.dart';
@@ -67,6 +71,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   List<VideoPlayerController> videoControllers = [];
   bool isLoading = true;
   TextEditingController tagTextController = TextEditingController();
+  GlobalKey globalKey = new GlobalKey();
 
   //Scroller & Paging
   final PageStorageBucket bucket = PageStorageBucket();
@@ -125,6 +130,93 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
   GoogleMapsPlaces _places = GoogleMapsPlaces(
     apiKey: Strings.googleAPIKEY,
   );
+
+  captureAndSharePostImage() async {
+    ShowAlertDialogService().showLoadingInfoDialog(context, "Saving Image...");
+    RenderRepaintBoundary boundary = globalKey.currentContext.findRenderObject();
+    ui.Image img = await boundary.toImage(pixelRatio: 10.0);
+    ByteData imgData = await img.toByteData(format: ui.ImageByteFormat.png);
+    var res;
+    if (Platform.isIOS) {
+      res = await ImageGallerySaver.saveImage(imgData.buffer.asUint8List(), isReturnImagePathOfIOS: true);
+    } else {
+      res = await ImageGallerySaver.saveImage(imgData.buffer.asUint8List());
+    }
+    print(res);
+    if (res['isSuccess']) {
+      String filePath = res['filePath'].toString().replaceAll("file:///", "");
+      ShareService().shareSavedImgContent(imgPath: filePath, url: "");
+    }
+    Navigator.of(context).pop();
+    HapticFeedback.mediumImpact();
+  }
+
+  void sharePostAction(WebblenPost post) async {
+    WebblenUser user = await WebblenUserData().getUserByID(post.authorID);
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: true,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              // height: 280,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(height: 8),
+                  Text(
+                    'Share Post?',
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: Colors.black,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  post.imageURL == null
+                      ? RepaintBoundary(
+                          key: globalKey,
+                          child: ShareablePostTextBlock(
+                            username: user.username,
+                            profilePicURL: user.profile_pic,
+                            post: post,
+                            removeWebblenLogo: false,
+                          ),
+                        )
+                      : RepaintBoundary(
+                          key: globalKey,
+                          child: ShareablePostImgBlock(
+                            username: user.username,
+                            profilePicURL: user.profile_pic,
+                            post: post,
+                            removeWebblenLogo: false,
+                          ),
+                        ),
+                  SizedBox(height: 16.0),
+                  SizedBox(height: 16.0),
+                  CustomColorButton(
+                    text: "Share",
+                    textColor: Colors.black,
+                    backgroundColor: Colors.white,
+                    height: 40.0,
+                    width: MediaQuery.of(context).size.width - 34,
+                    onPressed: () => captureAndSharePostImage(),
+                  ),
+                  SizedBox(height: 16.0),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   openVideo(String vidURL, String eventID, String authorID) {
     Navigator.of(context).push(
@@ -1070,7 +1162,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         ShareService().shareContent(post: post, copyLink: true);
         HapticFeedback.mediumImpact();
       } else if (action == 'sharePost') {
-        ShareService().shareContent(post: post, copyLink: false);
+        sharePostAction(post);
       } else if (action == 'deletePost') {
         OkCancelResult res = await showOkCancelAlertDialog(
           context: context,
@@ -1098,7 +1190,7 @@ class _HomeDashboardPageState extends State<HomeDashboardPage> with SingleTicker
         ShareService().shareContent(post: post, copyLink: true);
         HapticFeedback.mediumImpact();
       } else if (action == 'share') {
-        ShareService().shareContent(post: post, copyLink: false);
+        sharePostAction(post);
       } else if (action == 'report') {
         //PageTransitionService(context: context, isStream: true).transitionToCreatePostPage();
       }
