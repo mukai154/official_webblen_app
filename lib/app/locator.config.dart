@@ -11,6 +11,7 @@ import 'package:stacked_themes/stacked_themes.dart';
 
 import '../services/auth/auth_service.dart';
 import '../services/services_module.dart';
+import '../services/firestore/user_data_service.dart';
 
 /// adds generated dependencies
 /// to the provided [GetIt] instance
@@ -25,7 +26,9 @@ GetIt $initGetIt(
   gh.lazySingleton<AuthService>(() => servicesModule.authService);
   gh.lazySingleton<DialogService>(() => servicesModule.dialogService);
   gh.lazySingleton<NavigationService>(() => servicesModule.navigationService);
+  gh.lazySingleton<SnackbarService>(() => servicesModule.snackBarService);
   gh.lazySingleton<ThemeService>(() => servicesModule.themeService);
+  gh.lazySingleton<UserDataService>(() => servicesModule.userDataService);
   return get;
 }
 
@@ -36,4 +39,8 @@ class _$ServicesModule extends ServicesModule {
   DialogService get dialogService => DialogService();
   @override
   NavigationService get navigationService => NavigationService();
+  @override
+  SnackbarService get snackBarService => SnackbarService();
+  @override
+  UserDataService get userDataService => UserDataService();
 }

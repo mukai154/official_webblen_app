@@ -10,16 +10,26 @@ void main() async {
   // Register all the models and services before the app starts
   await ThemeManager.initialise();
   setupLocator();
+  setupSnackBarUi();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(WebblenApp());
+}
+
+void setupSnackBarUi() {
+  final service = locator<SnackbarService>();
+  service.registerSnackbarConfig(SnackbarConfig(
+    backgroundColor: Colors.red,
+    textColor: Colors.white,
+    mainButtonTextColor: Colors.black,
+  ));
 }
 
 class WebblenApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
-      defaultThemeMode: ThemeMode.light,
+      //defaultThemeMode: ThemeService.getInstance().selectedThemeMode,
       lightTheme: regularTheme,
       darkTheme: darkTheme,
       builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(

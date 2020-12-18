@@ -3,6 +3,7 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 
 import 'auth/auth_service.dart';
+import 'firestore/user_data_service.dart';
 
 ///RUN "flutter pub run build_runner build" in Project Terminal to Generate Service Modules
 
@@ -15,5 +16,9 @@ abstract class ServicesModule {
   @lazySingleton
   DialogService get dialogService;
   @lazySingleton
+  SnackbarService get snackBarService;
+  @lazySingleton
   AuthService get authService;
+  @lazySingleton
+  UserDataService get userDataService;
 }
