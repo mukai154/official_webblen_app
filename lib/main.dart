@@ -29,7 +29,6 @@ class WebblenApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ThemeBuilder(
-      //defaultThemeMode: ThemeService.getInstance().selectedThemeMode,
       lightTheme: regularTheme,
       darkTheme: darkTheme,
       builder: (context, regularTheme, darkTheme, themeMode) => MaterialApp(

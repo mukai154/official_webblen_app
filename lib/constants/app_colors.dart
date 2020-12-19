@@ -5,6 +5,10 @@ import 'package:webblen/constants/custom_colors.dart';
 
 ThemeService _themeService = locator<ThemeService>();
 
+bool isDarkMode() {
+  return _themeService.isDarkMode;
+}
+
 Color appBackgroundColor() {
   return _themeService.isDarkMode ? CustomColors.webblenDarkGray : Colors.white;
 }
