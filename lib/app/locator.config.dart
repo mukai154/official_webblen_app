@@ -13,6 +13,7 @@ import '../services/auth/auth_service.dart';
 import '../ui/views/home/tabs/check_in/check_in_view_model.dart';
 import '../ui/views/home/tabs/home/home_view_model.dart';
 import '../ui/views/home/tabs/messages/messages_view_model.dart';
+import '../ui/views/home/tabs/home/tabs/news_posts/news_posts_view_model.dart';
 import '../ui/views/home/tabs/profile/profile_view_model.dart';
 import '../services/services_module.dart';
 import '../services/stripe/stripe_payment_service.dart';
@@ -41,6 +42,7 @@ GetIt $initGetIt(
   gh.singleton<CheckInViewModel>(CheckInViewModel());
   gh.singleton<HomeViewModel>(HomeViewModel());
   gh.singleton<MessagesViewModel>(MessagesViewModel());
+  gh.singleton<NewsPostsViewModel>(NewsPostsViewModel());
   gh.singleton<ProfileViewModel>(ProfileViewModel());
   gh.singleton<WalletViewModel>(WalletViewModel());
   return get;

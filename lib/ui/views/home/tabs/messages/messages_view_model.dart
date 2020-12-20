@@ -29,7 +29,7 @@ class MessagesViewModel extends BaseViewModel {
     setBusy(true);
     uid = val;
     messagesScrollController.addListener(() {
-      double triggerFetchMoreSize = 0.85 * messagesScrollController.position.maxScrollExtent;
+      double triggerFetchMoreSize = 0.9 * messagesScrollController.position.maxScrollExtent;
       if (messagesScrollController.position.pixels > triggerFetchMoreSize) {
         loadAdditionalMessages();
       }
