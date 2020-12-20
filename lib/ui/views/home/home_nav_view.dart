@@ -16,7 +16,7 @@ class HomeNavView extends StatelessWidget {
   Widget getViewForIndex(int index, WebblenUser user) {
     switch (index) {
       case 0:
-        return HomeView();
+        return HomeView(user: user);
       case 1:
         return MessagesView(user: user);
       case 2:
