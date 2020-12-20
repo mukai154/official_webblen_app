@@ -9,10 +9,10 @@ import 'package:webblen/app/theme_config.dart';
 void main() async {
   // Register all the models and services before the app starts
   await ThemeManager.initialise();
-  setupLocator();
-  setupSnackBarUi();
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  setupLocator();
+  setupSnackBarUi();
   runApp(WebblenApp());
 }
 
