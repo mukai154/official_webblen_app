@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/views/home/tabs/check_in/check_in_view.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view.dart';
 import 'package:webblen/ui/views/home/tabs/messages/messages_view.dart';
@@ -12,20 +13,29 @@ import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar_item
 import 'home_nav_view_model.dart';
 
 class HomeNavView extends StatelessWidget {
-  final List<Widget> screens = [
-    HomeView(),
-    MessagesView(),
-    CheckInView(),
-    WalletView(),
-    ProfileView(),
-  ];
+  Widget getViewForIndex(int index, WebblenUser user) {
+    switch (index) {
+      case 0:
+        return HomeView();
+      case 1:
+        return MessagesView(user: user);
+      case 2:
+        return CheckInView();
+      case 3:
+        return WalletView();
+      case 4:
+        return ProfileView(user: user);
+      default:
+        return HomeView();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeNavViewModel>.reactive(
       viewModelBuilder: () => HomeNavViewModel(),
       builder: (context, model, child) => Scaffold(
-        body: screens[model.navBarIndex],
+        body: model.isBusy ? Container() : getViewForIndex(model.navBarIndex, model.user),
         bottomNavigationBar: CustomNavBar(
           navBarItems: [
             CustomNavBarItem(

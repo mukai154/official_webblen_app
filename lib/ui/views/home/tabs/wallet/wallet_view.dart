@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view_model.dart';
 
@@ -39,7 +40,9 @@ class WalletView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<WalletViewModel>.reactive(
-      viewModelBuilder: () => WalletViewModel(),
+      disposeViewModel: false,
+      initialiseSpecialViewModelsOnce: true,
+      viewModelBuilder: () => locator<WalletViewModel>(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,
         color: appBackgroundColor(),
