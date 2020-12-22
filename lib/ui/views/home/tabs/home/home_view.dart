@@ -13,7 +13,8 @@ import 'home_view_model.dart';
 
 class HomeView extends StatefulWidget {
   final WebblenUser user;
-  HomeView({this.user});
+  final String cityName;
+  HomeView({this.user, this.cityName});
 
   @override
   _HomeViewState createState() => _HomeViewState();
@@ -30,7 +31,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            "Home",
+            widget.cityName,
             style: TextStyle(
               color: appFontColor(),
               fontWeight: FontWeight.bold,

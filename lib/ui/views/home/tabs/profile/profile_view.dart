@@ -7,6 +7,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/user_widgets/follow_stats_row.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/views/home/tabs/profile/profile_view_model.dart';
+import 'package:webblen/ui/views/home/tabs/profile/tabs/news_posts/news_posts_view.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 
 class ProfileView extends StatefulWidget {
@@ -82,6 +83,18 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
     );
   }
 
+  Widget body(ProfileViewModel model) {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        ProfileNewsPostsView(refreshData: model.refreshPosts, postResults: model.postResults),
+        Container(),
+        Container(),
+        Container(),
+      ],
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -95,6 +108,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    _tabController.dispose();
   }
 
   @override
@@ -102,7 +116,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
     return ViewModelBuilder<ProfileViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
-      // onModelReady: (model) => model.initialize(),
+      onModelReady: (model) => model.initialize(_tabController, widget.user),
       viewModelBuilder: () => locator<ProfileViewModel>(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,
@@ -117,11 +131,13 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                     key: PageStorageKey('profile-tab-bar'),
                     length: 4,
                     child: NestedScrollView(
-                      headerSliverBuilder: (context, value) {
+                      controller: model.scrollController,
+                      headerSliverBuilder: (context, innerBoxIsScrolled) {
                         return [
                           SliverAppBar(
                             pinned: true,
                             floating: true,
+                            forceElevated: innerBoxIsScrolled,
                             expandedHeight: 200,
                             backgroundColor: appBackgroundColor(),
                             flexibleSpace: FlexibleSpaceBar(
@@ -140,15 +156,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                           ),
                         ];
                       },
-                      body: TabBarView(
-                        controller: _tabController,
-                        children: [
-                          Container(),
-                          Container(),
-                          Container(),
-                          Container(),
-                        ],
-                      ),
+                      body: body(model),
                     ),
                   ),
                 ),

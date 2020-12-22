@@ -111,7 +111,9 @@ class NewsPostsViewModel extends BaseViewModel {
         duration: Duration(seconds: 5),
       );
     });
-    lastPostDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    if (querySnapshot.docs.isNotEmpty) {
+      lastPostDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+    }
     postResults.addAll(querySnapshot.docs);
     // if (tagFilter.isNotEmpty) {
     //   postResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
