@@ -5,6 +5,8 @@ import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/app/theme_config.dart';
+import 'package:webblen/ui/bottom_sheets/setup_bottom_sheet_ui.dart';
+
 
 void main() async {
   // Register all the models and services before the app starts
@@ -12,6 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   setupLocator();
+  setupBottomSheetUI();
   setupSnackBarUi();
   runApp(WebblenApp());
 }

@@ -91,7 +91,7 @@ class MessagesViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  ///NAVIGATION
+///NAVIGATION
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);
 // }

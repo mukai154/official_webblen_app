@@ -38,28 +38,28 @@ class MessagesView extends StatelessWidget {
       child: model.isBusy
           ? Center(child: CustomCircleProgressIndicator(color: appActiveColor(), size: 30))
           : LiquidPullToRefresh(
-              color: appActiveColor(),
-              onRefresh: model.refreshData,
-              child: ListView.builder(
-                key: PageStorageKey('messages'),
-                addAutomaticKeepAlives: true,
-                controller: controller,
-                shrinkWrap: true,
-                padding: EdgeInsets.only(
-                  top: 4.0,
-                  bottom: 4.0,
-                ),
-                itemCount: model.messageResults.length,
-                itemBuilder: (context, index) {
-                  return NotificationRow(
-                    onTap: null,
-                    header: model.messageResults[index]['notificationTitle'],
-                    subHeader: model.messageResults[index]['notificationDescription'],
-                    notifType: model.messageResults[index]['notificationType'],
-                  );
-                },
-              ),
-            ),
+        color: appActiveColor(),
+        onRefresh: model.refreshData,
+        child: ListView.builder(
+          key: PageStorageKey('messages'),
+          addAutomaticKeepAlives: true,
+          controller: controller,
+          shrinkWrap: true,
+          padding: EdgeInsets.only(
+            top: 4.0,
+            bottom: 4.0,
+          ),
+          itemCount: model.messageResults.length,
+          itemBuilder: (context, index) {
+            return NotificationRow(
+              onTap: null,
+              header: model.messageResults[index]['notificationTitle'],
+              subHeader: model.messageResults[index]['notificationDescription'],
+              notifType: model.messageResults[index]['notificationType'],
+            );
+          },
+        ),
+      ),
     );
   }
 

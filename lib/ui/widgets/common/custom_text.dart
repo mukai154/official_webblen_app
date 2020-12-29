@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stacked_themes/stacked_themes.dart';
+import 'package:webblen/constants/app_colors.dart';
 
 Widget customText({
   @required BuildContext context,
@@ -14,9 +14,7 @@ Widget customText({
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color == null
-          ? getThemeManager(context).isDarkMode
-              ? Colors.white70
-              : Colors.black
+          ? appFontColor()
           : color,
     ),
   );

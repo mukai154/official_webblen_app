@@ -3,17 +3,20 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
-import 'package:webblen/ui/views/home/tabs/home/tabs/news_posts/news_posts_view.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
+import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
+import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
 
 import 'home_view_model.dart';
 
 class HomeView extends StatefulWidget {
   final WebblenUser user;
-  HomeView({this.user});
+  final String initialCityName;
+  final String initialAreaCode;
+  HomeView({this.user, this.initialCityName, this.initialAreaCode});
 
   @override
   _HomeViewState createState() => _HomeViewState();
@@ -29,17 +32,39 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            "Home",
-            style: TextStyle(
-              color: appFontColor(),
-              fontWeight: FontWeight.bold,
-              fontSize: 30.0,
+          Container(
+            width: 200,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                " ${model.cityName}",
+                style: TextStyle(
+                  color: appFontColor(),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 35,
+                ),
+              ),
             ),
           ),
-          IconButton(
-            onPressed: () => model.navigateToCreateCauseView(),
-            icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
+          Row(
+            children: [
+              IconButton(
+                iconSize: 20,
+                onPressed: () => model.openSearch(),
+                icon: Icon(FontAwesomeIcons.search, color: appIconColor()),
+              ),
+              IconButton(
+                iconSize: 20,
+                onPressed: () => model.openFilter(),
+                icon: Icon(FontAwesomeIcons.slidersH, color: appIconColor()),
+              ),
+              IconButton(
+                iconSize: 20,
+                onPressed: () => model.navigateToCreateCauseView(),
+                icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
+              ),
+            ],
           ),
         ],
       ),
@@ -52,17 +77,20 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     );
   }
 
-  Widget body() {
-    return Expanded(
-      child: TabBarView(
-        controller: _tabController,
-        children: [
-          NewsPostsView(user: widget.user, areaCode: "58104"),
-          Container(),
-          Container(),
-          Container(),
-        ],
-      ),
+  Widget body(HomeViewModel model) {
+    return TabBarView(
+      controller: _tabController,
+      children: [
+        ListPosts(
+          refreshData: model.refreshPosts,
+          postResults: model.postResults,
+          pageStorageKey: PageStorageKey('home-posts'),
+          scrollController: model.scrollController,
+        ),
+        Container(),
+        Container(),
+        Container(),
+      ],
     );
   }
 
@@ -80,19 +108,37 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     return ViewModelBuilder<HomeViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
+      onModelReady: (model) => model.initialize(
+        tabController: _tabController,
+        currentUser: widget.user,
+        initialCityName: widget.initialCityName,
+        initialAreaCode: widget.initialAreaCode,
+      ),
       viewModelBuilder: () => locator<HomeViewModel>(),
       builder: (context, model, child) => Container(
-        height: MediaQuery.of(context).size.height,
-        color: model.themeService.isDarkMode ? CustomColors.webblenDarkGray : Colors.white,
+        height: screenHeight(context),
+        color: appBackgroundColor(),
         child: SafeArea(
           child: Container(
             child: Column(
               children: [
                 head(model),
-                SizedBox(height: 8),
+                SizedBox(height: 4),
                 tabBar(),
                 SizedBox(height: 4),
-                body(),
+                Expanded(
+                  child: model.isBusy
+                      ? Center(
+                    child: CustomCircleProgressIndicator(
+                      color: appActiveColor(),
+                      size: 32,
+                    ),
+                  )
+                      : DefaultTabController(
+                    length: 4,
+                    child: body(model),
+                  ),
+                ),
               ],
             ),
           ),

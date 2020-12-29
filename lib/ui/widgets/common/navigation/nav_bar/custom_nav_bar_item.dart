@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/constants/custom_colors.dart';
 
 class CustomNavBarItem extends StatelessWidget {
   final VoidCallback onTap;
@@ -11,8 +10,6 @@ class CustomNavBarItem extends StatelessWidget {
   CustomNavBarItem({this.onTap, this.isActive, this.iconData, this.label});
   @override
   Widget build(BuildContext context) {
-    Color activeColor = CustomColors.webblenRed;
-    Color inactiveColor = Colors.black;
 
     return GestureDetector(
       onTap: onTap,

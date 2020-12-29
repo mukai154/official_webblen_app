@@ -10,7 +10,6 @@ class WalletViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
-  ThemeService themeService = locator<ThemeService>();
 
   ///NAVIGATION
 // replaceWithPage() {
