@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/constants/custom_colors.dart';
+import 'package:webblen/constants/app_colors.dart';
 
 class TextFieldContainer extends StatelessWidget {
   final Widget child;
@@ -14,8 +14,8 @@ class TextFieldContainer extends StatelessWidget {
       width: width != null ? width : null,
       padding: EdgeInsets.only(left: 8.0),
       decoration: BoxDecoration(
-        color: CustomColors.iosOffWhite,
-        border: Border.all(width: 1.0, color: Colors.black12),
+        color: appTextFieldContainerColor(),
+        border: Border.all(width: 1.0, color: appBorderColorAlt()),
         borderRadius: BorderRadius.all(
           Radius.circular(8.0),
         ),

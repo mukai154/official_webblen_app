@@ -5,6 +5,7 @@ import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/app/theme_config.dart';
+import 'package:webblen/ui/bottom_sheets/setup_bottom_sheet_ui.dart';
 
 void main() async {
   // Register all the models and services before the app starts
@@ -12,17 +13,20 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   setupLocator();
+  setupBottomSheetUI();
   setupSnackBarUi();
   runApp(WebblenApp());
 }
 
 void setupSnackBarUi() {
   final service = locator<SnackbarService>();
-  service.registerSnackbarConfig(SnackbarConfig(
-    backgroundColor: Colors.red,
-    textColor: Colors.white,
-    mainButtonTextColor: Colors.black,
-  ));
+  service.registerSnackbarConfig(
+    SnackbarConfig(
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      mainButtonTextColor: Colors.black,
+    ),
+  );
 }
 
 class WebblenApp extends StatelessWidget {

@@ -18,8 +18,6 @@
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
 	<string>$(MARKETING_VERSION)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -48,6 +46,8 @@
 	<string>1366128250170949</string>
 	<key>FacebookDisplayName</key>
 	<string>Webblen</string>
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<false/>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-2136415475966451~5144610810</string>
 	<key>LSApplicationQueriesSchemes</key>

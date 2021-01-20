@@ -39,6 +39,9 @@ class SettingsViewModel extends BaseViewModel {
     );
     if (action == "logout") {
       await _authService.signOut();
+      if (_themeService.selectedThemeMode != ThemeManagerMode.light) {
+        _themeService.setThemeMode(ThemeManagerMode.light);
+      }
       _navigationService.pushNamedAndRemoveUntil(Routes.RootViewRoute);
     }
   }

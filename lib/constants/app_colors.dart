@@ -13,6 +13,14 @@ Color appBackgroundColor() {
   return _themeService.isDarkMode ? CustomColors.webblenDarkGray : Colors.white;
 }
 
+Color appButtonColor() {
+  return _themeService.isDarkMode ? CustomColors.webblenDarkGray : Colors.white;
+}
+
+Color appButtonColorAlt() {
+  return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
+}
+
 Color appIconColor() {
   return _themeService.isDarkMode ? Colors.white : Colors.black;
 }
@@ -51,6 +59,10 @@ Color appInActiveColorAlt() {
 
 Color appShadowColor() {
   return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
+}
+
+Color appTextFieldContainerColor() {
+  return _themeService.isDarkMode ? Colors.white38 : CustomColors.iosOffWhite;
 }
 
 Color appTextButtonColor() {
