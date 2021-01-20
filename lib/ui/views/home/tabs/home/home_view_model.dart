@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
@@ -23,9 +22,6 @@ class HomeViewModel extends BaseViewModel {
 
   ///CURRENT USER
   WebblenUser user;
-
-  ///FIRESTORE REFS
-  CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
 
   ///FILTERS
   String cityName;
@@ -118,7 +114,7 @@ class HomeViewModel extends BaseViewModel {
     loadingAdditionalPosts = true;
     notifyListeners();
     List<DocumentSnapshot> newResults = await _postDataService.loadAdditionalPosts(
-      prevResults: postResults,
+      lastDocSnap: postResults[postResults.length - 1],
       areaCode: areaCode,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
@@ -127,7 +123,7 @@ class HomeViewModel extends BaseViewModel {
     if (newResults.length == 0) {
       morePostsAvailable = false;
     } else {
-      postResults = newResults;
+      postResults.addAll(newResults);
     }
     loadingAdditionalPosts = false;
     notifyListeners();

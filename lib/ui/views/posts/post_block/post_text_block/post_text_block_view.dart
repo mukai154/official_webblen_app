@@ -16,7 +16,7 @@ class PostTextBlockView extends StatelessWidget {
 
   Widget head(PostTextBlockViewModel model) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.0, 16.0, 8.0, 4.0),
+      padding: EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[

@@ -10,6 +10,7 @@ import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/utils/network_status.dart';
 
 class HomeNavViewModel extends StreamViewModel<WebblenUser> {
+  ///SERVICES
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
@@ -18,12 +19,15 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   SnackbarService _snackbarService = locator<SnackbarService>();
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
 
+  ///INITIAL DATA
   InitErrorStatus initErrorStatus = InitErrorStatus.network;
-  WebblenUser user;
   String initialCityName;
   String initialAreaCode;
 
-  //Tab Bar State
+  ///CURRENT USER
+  WebblenUser user;
+
+  ///TAB BAR STATE
   int _navBarIndex = 0;
   int get navBarIndex => _navBarIndex;
 
@@ -57,7 +61,6 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
             );
           } else {
             initErrorStatus = InitErrorStatus.none;
-            setBusy(false);
             notifyListeners();
           }
         });
@@ -74,8 +77,10 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     String error;
     try {
       LocationData location = await _locationService.getCurrentLocation();
-      initialCityName = await _locationService.getCityNameFromLatLon(location.latitude, location.longitude);
-      initialAreaCode = await _locationService.getZipFromLatLon(location.latitude, location.longitude);
+      initialCityName = await _locationService.getCityNameFromLatLon(
+          location.latitude, location.longitude);
+      initialAreaCode = await _locationService.getZipFromLatLon(
+          location.latitude, location.longitude);
       notifyListeners();
     } catch (e) {
       error = "Location Error";
@@ -88,6 +93,7 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     if (data != null) {
       user = data;
       notifyListeners();
+      setBusy(false);
     }
   }
 
@@ -107,7 +113,7 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     }
   }
 
-///NAVIGATION
+  ///NAVIGATION
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);
 // }

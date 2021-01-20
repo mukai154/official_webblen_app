@@ -121,7 +121,7 @@ class HomeFilterBottomSheet extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 GestureDetector(
-                  onTap: null,
+                  onTap: () => model.clearLocationFilter(),
                   child: Text(
                     "Remove Location Filter",
                     style: TextStyle(
@@ -182,7 +182,7 @@ class HomeFilterBottomSheet extends StatelessWidget {
                 ),
                 SizedBox(height: 8),
                 GestureDetector(
-                  onTap: null,
+                  onTap: () => model.clearTagFilter(),
                   child: Text(
                     "Clear Tag Filter",
                     style: TextStyle(

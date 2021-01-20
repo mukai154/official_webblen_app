@@ -7,22 +7,28 @@ import 'package:webblen/services/firestore/platform_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 
 class HomeFilterBottomSheetModel extends BaseViewModel {
+  ///SERVICES
   PlatformDataService _platformDataService = locator<PlatformDataService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   GooglePlacesService googlePlacesService = locator<GooglePlacesService>();
   AlgoliaSearchService algoliaSearchService = locator<AlgoliaSearchService>();
 
+  ///HELPERS
   TextEditingController locationTextController = TextEditingController();
   TextEditingController tagTextController = TextEditingController();
 
+  ///FILTERS
   String sortBy;
   List<String> sortByList = ["Latest", "Most Popular"];
   String tagFilter;
   Map<String, dynamic> placeSearchResults = {};
   String cityName;
   String areaCode;
+
+  ///API KEYS
   String googleAPIKey;
 
+  ///INITIALIZE
   initialize(String currentSortBy, String currentCity, String currentAreaCode, String currentTagFilter) async {
     sortBy = currentSortBy;
     cityName = currentCity;
@@ -35,11 +41,37 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
     notifyListeners();
   }
 
-  setPlacesSearchResults(Map<String, dynamic> res) {
-    placeSearchResults = res;
+  ///SET FILTERS
+  setSortByFilter(String val) {
+    sortBy = val;
     notifyListeners();
   }
 
+  setPlacesSearchResults(Map<String, dynamic> val) {
+    placeSearchResults = val;
+    notifyListeners();
+  }
+
+  setTagFilter(String val) async {
+    tagFilter = val;
+    tagTextController.text = val;
+    notifyListeners();
+  }
+
+  ///CLEAR FILTERS
+  clearLocationFilter() {
+    cityName = "Everywhere";
+    areaCode = "";
+    locationTextController.text = cityName;
+    notifyListeners();
+  }
+
+  clearTagFilter() {
+    tagFilter = "";
+    notifyListeners();
+  }
+
+  ///GET LOCATION DETAILS
   getPlaceDetails(String place) async {
     String placeID = placeSearchResults[place];
     googlePlacesService.getDetailsFromPlaceID(key: googleAPIKey, placeID: placeID);
@@ -58,12 +90,7 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
     }
   }
 
-  setTagFilter(String val) async {
-    tagFilter = val;
-    tagTextController.text = val;
-    notifyListeners();
-  }
-
+  ///RETURN PREFERENCES
   Map<String, dynamic> returnPreferences() {
     return {
       "sortBy": sortBy,

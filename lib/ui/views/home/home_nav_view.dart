@@ -34,7 +34,11 @@ class HomeNavView extends StatelessWidget {
       case 4:
         return ProfileView(user: model.user);
       default:
-        return HomeView();
+        return HomeView(
+          user: model.user,
+          initialCityName: model.initialCityName,
+          initialAreaCode: model.initialAreaCode,
+        );
     }
   }
 
@@ -45,21 +49,24 @@ class HomeNavView extends StatelessWidget {
       viewModelBuilder: () => HomeNavViewModel(),
       builder: (context, model, child) => Scaffold(
         body: model.isBusy
-            ? Center(
-          child: CustomCircleProgressIndicator(
-            color: appActiveColor(),
-            size: 32,
-          ),
-        )
+            ? Container(
+                color: appBackgroundColor(),
+                child: Center(
+                  child: CustomCircleProgressIndicator(
+                    color: appActiveColor(),
+                    size: 32,
+                  ),
+                ),
+              )
             : model.initErrorStatus == InitErrorStatus.network
-            ? NetworkErrorView(
-          tryAgainAction: () => model.initialize(),
-        )
-            : model.initErrorStatus == InitErrorStatus.location
-            ? LocationErrorView(
-          tryAgainAction: () => model.initialize(),
-        )
-            : getViewForIndex(model.navBarIndex, model),
+                ? NetworkErrorView(
+                    tryAgainAction: () => model.initialize(),
+                  )
+                : model.initErrorStatus == InitErrorStatus.location
+                    ? LocationErrorView(
+                        tryAgainAction: () => model.initialize(),
+                      )
+                    : getViewForIndex(model.navBarIndex, model),
         bottomNavigationBar: CustomNavBar(
           navBarItems: [
             CustomNavBarItem(

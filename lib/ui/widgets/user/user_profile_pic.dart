@@ -27,13 +27,14 @@ class UserProfilePic extends StatelessWidget {
                 height: size,
                 width: size,
                 child: Shimmer.fromColors(
-                    baseColor: appShimmerBaseColor(),
-                    highlightColor: appShimmerHighlightColor(),
-                    child: Container(
-                      height: size,
-                      width: size,
-                      color: Colors.white,
-                    )),
+                  baseColor: appShimmerBaseColor(),
+                  highlightColor: appShimmerHighlightColor(),
+                  child: Container(
+                    height: size,
+                    width: size,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
           )
@@ -65,7 +66,7 @@ class UserProfilePic extends StatelessWidget {
                 ) =>
                     Icon(
                   FontAwesomeIcons.user,
-                  color: Colors.black12,
+                  color: appFontColor(),
                 ),
                 useOldImageOnUrlChange: false,
               ),

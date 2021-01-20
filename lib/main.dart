@@ -7,7 +7,6 @@ import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/app/theme_config.dart';
 import 'package:webblen/ui/bottom_sheets/setup_bottom_sheet_ui.dart';
 
-
 void main() async {
   // Register all the models and services before the app starts
   await ThemeManager.initialise();
@@ -21,11 +20,13 @@ void main() async {
 
 void setupSnackBarUi() {
   final service = locator<SnackbarService>();
-  service.registerSnackbarConfig(SnackbarConfig(
-    backgroundColor: Colors.red,
-    textColor: Colors.white,
-    mainButtonTextColor: Colors.black,
-  ));
+  service.registerSnackbarConfig(
+    SnackbarConfig(
+      backgroundColor: Colors.red,
+      textColor: Colors.white,
+      mainButtonTextColor: Colors.black,
+    ),
+  );
 }
 
 class WebblenApp extends StatelessWidget {
