@@ -2,8 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/models/webblen_event.dart';
-import 'package:webblen/ui/views/events/event_block/event_block_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
+
+import 'event_block_view_model.dart';
 
 class EventBlockView extends StatelessWidget {
   final WebblenEvent event;
@@ -27,14 +28,12 @@ class EventBlockView extends StatelessWidget {
                   children: [
                     SizedBox(height: 16),
                     CustomText(
-                      text: event.startDate
-                          .substring(4, event.startDate.length - 6),
+                      text: event.startDate.substring(4, event.startDate.length - 6),
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
                     CustomText(
-                      text: event.startDate
-                          .substring(0, event.startDate.length - 9),
+                      text: event.startDate.substring(0, event.startDate.length - 9),
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
@@ -72,8 +71,7 @@ class EventBlockView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                icon:
-                                    Icon(Icons.more_horiz, color: Colors.white),
+                                icon: Icon(Icons.more_horiz, color: Colors.white),
                                 onPressed: null,
                               )
                             ],
@@ -118,8 +116,7 @@ class EventBlockView extends StatelessWidget {
                                           padding: EdgeInsets.all(4),
                                           decoration: BoxDecoration(
                                             color: Colors.red,
-                                            borderRadius: BorderRadius.all(
-                                                Radius.circular(8)),
+                                            borderRadius: BorderRadius.all(Radius.circular(8)),
                                           ),
                                           child: Center(
                                             child: CustomText(

@@ -9,6 +9,7 @@ import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
+import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_view.dart';
 
 import 'home_view_model.dart';
 
@@ -49,11 +50,8 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
           ),
           Row(
             children: [
-              IconButton(
-                iconSize: 20,
-                onPressed: () => model.openSearch(),
-                icon: Icon(FontAwesomeIcons.search, color: appIconColor()),
-              ),
+              NotificationBellView(uid: widget.user.uid),
+              horizontalSpaceSmall,
               IconButton(
                 iconSize: 20,
                 onPressed: () => model.openFilter(),
@@ -129,15 +127,15 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                 Expanded(
                   child: model.isBusy
                       ? Center(
-                    child: CustomCircleProgressIndicator(
-                      color: appActiveColor(),
-                      size: 32,
-                    ),
-                  )
+                          child: CustomCircleProgressIndicator(
+                            color: appActiveColor(),
+                            size: 32,
+                          ),
+                        )
                       : DefaultTabController(
-                    length: 4,
-                    child: body(model),
-                  ),
+                          length: 4,
+                          child: body(model),
+                        ),
                 ),
               ],
             ),

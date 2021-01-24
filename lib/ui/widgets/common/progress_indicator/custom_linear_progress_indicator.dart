@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 
-class CustomLinearProgress extends StatelessWidget {
+class CustomLinearProgressIndicator extends StatelessWidget {
+  final Color color;
+
+  const CustomLinearProgressIndicator({this.color});
+
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: ThemeData(
-        accentColor: appActiveColor(),
-      ),
-      child: Container(
-        height: 2.0,
+    return Center(
+      heightFactor: 1,
+      widthFactor: 1,
+      child: SizedBox(
+        height: 1,
+        width: screenWidth(context),
         child: LinearProgressIndicator(
-          backgroundColor: Colors.transparent,
+          valueColor: AlwaysStoppedAnimation<Color>(
+            color == null ? Colors.black38 : color,
+          ),
         ),
       ),
     );

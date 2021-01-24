@@ -25,6 +25,10 @@ Color appIconColor() {
   return _themeService.isDarkMode ? Colors.white : Colors.black;
 }
 
+Color appIconColorAlt() {
+  return _themeService.isDarkMode ? Colors.white38 : Colors.black45;
+}
+
 Color appFontColor() {
   return _themeService.isDarkMode ? CustomColors.iosOffWhite : Colors.black;
 }

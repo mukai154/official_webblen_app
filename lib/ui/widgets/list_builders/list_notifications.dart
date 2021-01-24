@@ -1,18 +1,19 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_stream.dart';
+import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/streams/stream_block/stream_block_view.dart';
+import 'package:webblen/ui/widgets/notifications/notification_block/notification_block_view.dart';
 
-class ListStreams extends StatelessWidget {
-  final List dataResults;
+class ListNotifications extends StatelessWidget {
+  final List data;
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
   final ScrollController scrollController;
-  ListStreams({@required this.refreshData, @required this.dataResults, @required this.pageStorageKey, @required this.scrollController});
+  ListNotifications({@required this.refreshData, @required this.data, @required this.pageStorageKey, @required this.scrollController});
 
-  Widget listData() {
+  Widget listCauses() {
     return RefreshIndicator(
       onRefresh: refreshData,
       backgroundColor: appBackgroundColor(),
@@ -26,24 +27,19 @@ class ListStreams extends StatelessWidget {
           top: 4.0,
           bottom: 4.0,
         ),
-        itemCount: dataResults.length,
+        itemCount: data.length,
         itemBuilder: (context, index) {
-          WebblenStream stream;
-          bool displayBottomBorder = true;
+          WebblenNotification notification;
 
           ///GET CAUSE OBJECT
-          if (dataResults[index] is DocumentSnapshot) {
-            stream = WebblenStream.fromMap(dataResults[index].data());
+          if (data[index] is DocumentSnapshot) {
+            notification = WebblenNotification.fromMap(data[index].data());
           } else {
-            stream = dataResults[index];
+            notification = data[index];
           }
 
-          ///DISPLAY BOTTOM BORDER
-          if (dataResults.last == dataResults[index]) {
-            displayBottomBorder = false;
-          }
-          return StreamBlockView(
-            stream: stream,
+          return NotificationBlockView(
+            notification: notification,
           );
         },
       ),
@@ -55,7 +51,7 @@ class ListStreams extends StatelessWidget {
     return Container(
       height: screenHeight(context),
       color: appBackgroundColor(),
-      child: listData(),
+      child: listCauses(),
     );
   }
 }

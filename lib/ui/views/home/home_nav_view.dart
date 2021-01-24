@@ -6,8 +6,8 @@ import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/ui/views/home/init_error_views/location_error/location_error_view.dart';
 import 'package:webblen/ui/views/home/init_error_views/network_error/network_error_view.dart';
 import 'package:webblen/ui/views/home/tabs/check_in/check_in_view.dart';
+import 'package:webblen/ui/views/home/tabs/explore/explore_view.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view.dart';
-import 'package:webblen/ui/views/home/tabs/messages/messages_view.dart';
 import 'package:webblen/ui/views/home/tabs/profile/profile_view.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view.dart';
 import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar.dart';
@@ -26,7 +26,7 @@ class HomeNavView extends StatelessWidget {
           initialAreaCode: model.initialAreaCode,
         );
       case 1:
-        return MessagesView(user: model.user);
+        return ExploreView(user: model.user);
       case 2:
         return CheckInView();
       case 3:
@@ -76,7 +76,7 @@ class HomeNavView extends StatelessWidget {
             ),
             CustomNavBarItem(
               onTap: () => model.setNavBarIndex(1),
-              iconData: FontAwesomeIcons.envelope,
+              iconData: FontAwesomeIcons.search,
               isActive: model.navBarIndex == 1 ? true : false,
             ),
             CustomNavBarItem(

@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_stream.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/streams/stream_block/stream_block_view.dart';
+import 'package:webblen/ui/widgets/user/user_block/user_block_view.dart';
 
-class ListStreams extends StatelessWidget {
-  final List dataResults;
+class ListUsers extends StatelessWidget {
+  final List userResults;
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
   final ScrollController scrollController;
-  ListStreams({@required this.refreshData, @required this.dataResults, @required this.pageStorageKey, @required this.scrollController});
+  ListUsers({@required this.refreshData, @required this.userResults, @required this.pageStorageKey, @required this.scrollController});
 
-  Widget listData() {
+  Widget listUsers() {
     return RefreshIndicator(
       onRefresh: refreshData,
       backgroundColor: appBackgroundColor(),
@@ -26,24 +26,27 @@ class ListStreams extends StatelessWidget {
           top: 4.0,
           bottom: 4.0,
         ),
-        itemCount: dataResults.length,
+        itemCount: userResults.length,
         itemBuilder: (context, index) {
-          WebblenStream stream;
+          WebblenUser user;
           bool displayBottomBorder = true;
 
-          ///GET CAUSE OBJECT
-          if (dataResults[index] is DocumentSnapshot) {
-            stream = WebblenStream.fromMap(dataResults[index].data());
+          ///GET USER OBJECT
+          if (userResults[index] is Map) {
+            user = WebblenUser.fromMap(userResults[index]);
+          } else if (userResults[index] is DocumentSnapshot) {
+            user = WebblenUser.fromMap(userResults[index].data());
           } else {
-            stream = dataResults[index];
+            user = userResults[index];
           }
 
           ///DISPLAY BOTTOM BORDER
-          if (dataResults.last == dataResults[index]) {
+          if (userResults.last == userResults[index]) {
             displayBottomBorder = false;
           }
-          return StreamBlockView(
-            stream: stream,
+          return UserBlockView(
+            user: user,
+            displayBottomBorder: displayBottomBorder,
           );
         },
       ),
@@ -55,7 +58,7 @@ class ListStreams extends StatelessWidget {
     return Container(
       height: screenHeight(context),
       color: appBackgroundColor(),
-      child: listData(),
+      child: listUsers(),
     );
   }
 }
