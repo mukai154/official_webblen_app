@@ -116,7 +116,9 @@ class EventDataService {
       if (res.exists) {
         event = WebblenEvent.fromMap(res.data()['d']);
       }
-    }).catchError((e) {});
+    }).catchError((e) {
+      print(e.message);
+    });
     return event;
   }
 

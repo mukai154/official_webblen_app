@@ -31,6 +31,7 @@ class _UserTicketsPageState extends State<UserTicketsPage> {
         WebblenEvent event = await EventDataService().getEvent(ticket.eventID);
         if (event != null) {
           events.add(event);
+          setState(() {});
         }
       }
       if (ticsPerEvent[ticket.eventID] == null) {
@@ -48,7 +49,7 @@ class _UserTicketsPageState extends State<UserTicketsPage> {
   Widget ticketList() {
     return ListView.builder(
       shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
+      physics: AlwaysScrollableScrollPhysics(),
       itemCount: events.length,
       itemBuilder: (context, index) {
         return Padding(

@@ -79,7 +79,7 @@ class _TicketScanPageState extends State<TicketScanPage> {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
       controller.pauseCamera();
-      scanTicket(scanData);
+      //scanTicket(scanData);
     });
   }
 
