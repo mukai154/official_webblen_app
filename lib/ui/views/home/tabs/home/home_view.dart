@@ -8,6 +8,7 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
+import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
 import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_view.dart';
 
@@ -50,7 +51,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
           ),
           Row(
             children: [
-              NotificationBellView(uid: widget.user.uid),
+              NotificationBellView(uid: widget.user.id),
               horizontalSpaceSmall,
               IconButton(
                 iconSize: 20,
@@ -79,15 +80,63 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     return TabBarView(
       controller: _tabController,
       children: [
-        ListPosts(
-          refreshData: model.refreshPosts,
-          postResults: model.postResults,
-          pageStorageKey: PageStorageKey('home-posts'),
-          scrollController: model.scrollController,
+        model.postResults.isEmpty && !model.loadingPosts
+            ? ZeroStateView(
+                imageAssetName: "umbrella_chair",
+                imageSize: 200,
+                header: "No Posts in ${model.cityName} Found",
+                subHeader: model.postPromo != null
+                    ? "Create a Post for ${model.cityName} Now and Earn ${model.postPromo.toStringAsFixed(2)} WBLN!"
+                    : "Create a Post for ${model.cityName} Now!",
+                mainActionButtonTitle: model.postPromo != null ? "Earn ${model.postPromo.toStringAsFixed(2)} WBLN" : "Create Post",
+                mainAction: () {},
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: () async {},
+              )
+            : ListPosts(
+                refreshData: model.refreshPosts,
+                postResults: model.postResults,
+                pageStorageKey: PageStorageKey('home-posts'),
+                scrollController: model.scrollController,
+              ),
+        ZeroStateView(
+          imageAssetName: "video_phone",
+          imageSize: 200,
+          header: "No Streams in ${model.cityName} Found",
+          subHeader: model.postPromo != null
+              ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo.toStringAsFixed(2)} WBLN!"
+              : "Schedule a Stream for ${model.cityName} Now!",
+          mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo.toStringAsFixed(2)} WBLN" : "Create Stream",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
         ),
-        Container(),
-        Container(),
-        Container(),
+        ZeroStateView(
+          imageAssetName: "calendar",
+          imageSize: 200,
+          header: "No Events in ${model.cityName} Found",
+          subHeader: model.eventPromo != null
+              ? "Schedule an Event for ${model.cityName} Now and Earn ${model.eventPromo.toStringAsFixed(2)} WBLN!"
+              : "Schedule an Event for ${model.cityName} Now!",
+          mainActionButtonTitle: model.eventPromo != null ? "Earn ${model.eventPromo.toStringAsFixed(2)} WBLN" : "Create Event",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+        ZeroStateView(
+          imageAssetName: "mobile_people_group",
+          imageSize: 200,
+          header: "You are Not Following Anyone",
+          subHeader: "Find People and Groups to Follow and Get Invovled With",
+          mainActionButtonTitle: "Explore People & Groups",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
       ],
     );
   }

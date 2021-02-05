@@ -1,6 +1,16 @@
 enum BottomSheetType {
-  floating,
+  destructiveConfirmation,
   homeFilter,
   imagePicker,
-  search,
+  postPublished,
+  postAuthorOptions,
+  postOptions,
+  streamPublished,
+  streamCreatorOptions,
+  streamOptions,
+  eventPublished,
+  eventCreatorOptions,
+  eventOptions,
+  currentUserOptions,
+  userOptions,
 }

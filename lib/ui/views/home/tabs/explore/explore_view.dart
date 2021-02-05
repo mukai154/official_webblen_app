@@ -7,6 +7,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
+import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_streams.dart';
 import 'package:webblen/ui/widgets/list_builders/list_users.dart';
 import 'package:webblen/ui/widgets/search/search_field.dart';
@@ -68,7 +69,13 @@ class _ExploreViewState extends State<ExploreView> with SingleTickerProviderStat
                 pageStorageKey: PageStorageKey('explore-streams'),
                 scrollController: model.streamScrollController,
               )
-            : Container(), //noResultsFound(),
+            : ZeroStateView(
+                imageAssetName: "alien",
+                imageSize: 250,
+                header: "No Results Found",
+                subHeader: "Please Try Again Later",
+                refreshData: () async {},
+              ),
         model.eventResults.isNotEmpty
             ? ListStreams(
                 refreshData: model.refreshEvents,
@@ -76,7 +83,13 @@ class _ExploreViewState extends State<ExploreView> with SingleTickerProviderStat
                 pageStorageKey: PageStorageKey('explore-events'),
                 scrollController: model.eventScrollController,
               )
-            : Container(), //noResultsFound(),
+            : ZeroStateView(
+                imageAssetName: "alien",
+                imageSize: 250,
+                header: "No Results Found",
+                subHeader: "Please Try Again Later",
+                refreshData: () async {},
+              ),
         model.userResults.isNotEmpty
             ? ListUsers(
                 refreshData: model.refreshUsers,
@@ -84,7 +97,13 @@ class _ExploreViewState extends State<ExploreView> with SingleTickerProviderStat
                 pageStorageKey: PageStorageKey('explore-users'),
                 scrollController: model.userScrollController,
               )
-            : Container(), //noResultsFound(),
+            : ZeroStateView(
+                imageAssetName: "alien",
+                imageSize: 250,
+                header: "No Results Found",
+                subHeader: "Please Try Again Later",
+                refreshData: () async {},
+              ),
       ],
     );
   }

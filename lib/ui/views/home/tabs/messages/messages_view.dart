@@ -69,7 +69,7 @@ class MessagesView extends StatelessWidget {
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
       fireOnModelReadyOnce: true,
-      onModelReady: (model) => model.initialize(user.uid),
+      onModelReady: (model) => model.initialize(user.id),
       viewModelBuilder: () => locator<MessagesViewModel>(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,

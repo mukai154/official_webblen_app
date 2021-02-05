@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/models/webblen_user.dart';
 
 class UserDataService {
-  CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_user');
+  CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_users');
 
   Future checkIfUserExists(String id) async {
     bool exists = false;
@@ -16,7 +16,7 @@ class UserDataService {
   }
 
   Future createWebblenUser(WebblenUser user) async {
-    await userRef.doc(user.uid).set(user.toMap()).catchError((e) {
+    await userRef.doc(user.id).set(user.toMap()).catchError((e) {
       return e.message;
     });
   }
@@ -27,14 +27,13 @@ class UserDataService {
       return e.message;
     });
     if (snapshot.exists) {
-      Map<String, dynamic> snapshotData = snapshot.data();
-      user = WebblenUser.fromMap(snapshotData['d']);
+      user = WebblenUser.fromMap(snapshot.data());
     }
     return user;
   }
 
   Future updateWebblenUser(WebblenUser user) async {
-    await userRef.doc(user.uid).update(user.toMap()).catchError((e) {
+    await userRef.doc(user.id).update(user.toMap()).catchError((e) {
       return e.message;
     });
   }

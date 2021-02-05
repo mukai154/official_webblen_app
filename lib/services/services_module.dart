@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
+import 'package:webblen/services/firestore/comment_data_service.dart';
 import 'package:webblen/services/firestore/notification_data_service.dart';
 import 'package:webblen/services/firestore/platform_data_service.dart';
 import 'package:webblen/services/firestore/post_data_service.dart';
@@ -36,6 +37,8 @@ abstract class ServicesModule {
   UserDataService get userDataService;
   @lazySingleton
   PostDataService get postDataService;
+  @lazySingleton
+  CommentDataService get commentDataService;
   @lazySingleton
   StripePaymentService get stripePaymentService;
   @lazySingleton

@@ -9,7 +9,7 @@ class NetworkStatus {
         isConnected = true;
       }
     } on SocketException catch (_) {
-      print('not connected');
+      //print('not connected');
     }
     return isConnected;
   }

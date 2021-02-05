@@ -2,11 +2,60 @@ import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/models/webblen_post.dart';
 
 class PostDataService {
   CollectionReference postsRef = FirebaseFirestore.instance.collection('posts');
   int dateTimeInMilliseconds1MonthAgo = DateTime.now().millisecondsSinceEpoch - 2628000000;
   SnackbarService _snackbarService = locator<SnackbarService>();
+
+  Future checkIfPostExists(String id) async {
+    bool exists = false;
+    DocumentSnapshot snapshot = await postsRef.doc(id).get().catchError((e) {
+      return e.message;
+    });
+    if (snapshot.exists) {
+      exists = true;
+    }
+    return exists;
+  }
+
+  // Future createPost({
+  //   String id,
+  //   String causeID,
+  //   String authorID,
+  //   String body,
+  //   int dateCreatedInMilliseconds,
+  //   int commentCount,
+  // }) async {
+  //   GoForumPost post = GoForumPost(
+  //     id: id,
+  //     causeID: causeID,
+  //     authorID: authorID,
+  //     body: body,
+  //     dateCreatedInMilliseconds: dateCreatedInMilliseconds,
+  //     commentCount: commentCount,
+  //   );
+  //   await postRef.doc(post.id).set(post.toMap()).catchError((e) {
+  //     return e.message;
+  //   });
+  // }
+
+  Future getPostByID(String id) async {
+    WebblenPost post;
+    DocumentSnapshot snapshot = await postsRef.doc(id).get().catchError((e) {
+      print(e.message);
+      return _snackbarService.showSnackbar(
+        title: 'Post Error',
+        message: e.message,
+        duration: Duration(seconds: 5),
+      );
+    });
+    if (snapshot.exists) {
+      post = WebblenPost.fromMap(snapshot.data());
+    }
+    return post;
+  }
 
   ///READ & QUERIES
   Future<List<DocumentSnapshot>> loadPosts({

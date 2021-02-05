@@ -18,7 +18,7 @@ Color appButtonColor() {
 }
 
 Color appButtonColorAlt() {
-  return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
+  return _themeService.isDarkMode ? CustomColors.steelGray : CustomColors.iosOffWhite;
 }
 
 Color appIconColor() {
@@ -47,6 +47,10 @@ Color appBorderColor() {
 
 Color appBorderColorAlt() {
   return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
+}
+
+Color appDestructiveColor() {
+  return Colors.redAccent;
 }
 
 Color appActiveColor() {

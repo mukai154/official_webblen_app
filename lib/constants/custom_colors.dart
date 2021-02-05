@@ -7,6 +7,7 @@ class CustomColors {
   static const cashAppGreen = Color.fromRGBO(40, 193, 1, 1.0);
   static const iosOffWhite = Color(0xFFF9F9F9);
   static const textFieldGray = Color.fromARGB(255, 241, 241, 241);
+  static const steelGray = Color.fromRGBO(61, 61, 61, 1.0);
 
   ///WEBBLEN APP COLOR SWATCH
   static const webblenRed = Color.fromRGBO(253, 36, 61, 1.0);

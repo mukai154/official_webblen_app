@@ -6,6 +6,7 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/views/home/tabs/profile/profile_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
+import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
 import 'package:webblen/ui/widgets/user/follow_stats_row.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
@@ -51,7 +52,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
         children: [
           SizedBox(height: 16),
           UserProfilePic(
-            userPicUrl: widget.user.profile_pic,
+            userPicUrl: widget.user.profilePicURL,
             size: 60,
             isBusy: false,
           ),
@@ -87,10 +88,85 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
     return TabBarView(
       controller: _tabController,
       children: [
-        ListPosts(refreshData: model.refreshPosts, postResults: model.postResults, pageStorageKey: PageStorageKey('profile-posts')),
-        Container(),
-        Container(),
-        Container(),
+        //posts
+        model.postResults.isEmpty && !model.isBusy
+            ? ZeroStateView(
+                imageAssetName: "umbrella_chair",
+                imageSize: 200,
+                header: "You Have No Posts",
+                subHeader: "Create a New Post to Share with the Community",
+                mainActionButtonTitle: "Create Post",
+                mainAction: () {},
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: model.refreshPosts,
+              )
+            : ListPosts(refreshData: model.refreshPosts, postResults: model.postResults, pageStorageKey: PageStorageKey('profile-posts')),
+
+        //scheduled streams
+        ZeroStateView(
+          imageAssetName: "video_phone",
+          imageSize: 200,
+          header: "You Have Not Scheduled Any Streams",
+          subHeader: "Find Your Audience and Create a Stream",
+          mainActionButtonTitle: "Create Stream",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+        ZeroStateView(
+          imageAssetName: "calendar",
+          imageSize: 200,
+          header: "You Have Not Scheduled Any Events",
+          subHeader: "Create an Event for the Community",
+          mainActionButtonTitle: "Create Event",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+          scrollController: null,
+        ),
+        ZeroStateView(
+          imageAssetName: null,
+          header: "You Have No Recent Activity",
+          subHeader: "Get Involved in Your Community to Change That!",
+          mainActionButtonTitle: null,
+          mainAction: null,
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+        ZeroStateView(
+          imageAssetName: null,
+          header: "No Posts Found",
+          subHeader: "Posts You Save Will Show Up Here",
+          mainActionButtonTitle: null,
+          mainAction: null,
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+        ZeroStateView(
+          imageAssetName: null,
+          header: "No Streams Found",
+          subHeader: "Streams You Save Will Show Up Here",
+          mainActionButtonTitle: null,
+          mainAction: null,
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+        ZeroStateView(
+          imageAssetName: null,
+          header: "No Events Found",
+          subHeader: "Events You Save Will Show Up Here",
+          mainActionButtonTitle: null,
+          mainAction: null,
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
       ],
     );
   }
@@ -99,7 +175,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 4,
+      length: 7,
       vsync: this,
     );
   }
@@ -129,12 +205,14 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 Expanded(
                   child: DefaultTabController(
                     key: PageStorageKey('profile-tab-bar'),
-                    length: 4,
+                    length: 7,
                     child: NestedScrollView(
+                      key: PageStorageKey('profile-nested-scroll-key'),
                       controller: model.scrollController,
                       headerSliverBuilder: (context, innerBoxIsScrolled) {
                         return [
                           SliverAppBar(
+                            key: PageStorageKey('profile-app-bar-key'),
                             pinned: true,
                             floating: true,
                             forceElevated: innerBoxIsScrolled,

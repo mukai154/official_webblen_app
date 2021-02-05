@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:stacked_services/stacked_services.dart';
+import 'package:webblen/app/locator.dart';
 
 class PlatformDataService {
+  SnackbarService _snackbarService = locator<SnackbarService>();
   CollectionReference appReleaseRef = FirebaseFirestore.instance.collection("app_release_info");
+  CollectionReference webblenCurrencyRef = FirebaseFirestore.instance.collection("webblen_currency");
 
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
@@ -15,6 +19,51 @@ class PlatformDataService {
       updateAvailable = true;
     }
     return updateAvailable;
+  }
+
+  Future<double> getPostPromo() async {
+    double promo;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
+    try {
+      promo = snapshot.data()['postPromo'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return promo;
+  }
+
+  Future<double> getStreamPromo() async {
+    double promo;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
+    try {
+      promo = snapshot.data()['streamPromo'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return promo;
+  }
+
+  Future<double> getEventPromo() async {
+    double promo;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
+    try {
+      promo = snapshot.data()['eventPromo'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return promo;
   }
 
   Future<double> getEventTicketFee() async {

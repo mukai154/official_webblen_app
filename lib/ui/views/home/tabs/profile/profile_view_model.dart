@@ -32,8 +32,14 @@ class ProfileViewModel extends BaseViewModel {
   WebblenUser user;
 
   initialize(TabController tabController, WebblenUser currentUser) async {
+    //set busy status
+    setBusy(true);
+
+    //get current user
     user = currentUser;
     notifyListeners();
+
+    //load additional data on scroll
     scrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * scrollController.position.maxScrollExtent;
       if (scrollController.position.pixels > triggerFetchMoreSize) {
@@ -43,6 +49,8 @@ class ProfileViewModel extends BaseViewModel {
       }
     });
     notifyListeners();
+
+    //load profile data
     await loadData();
     setBusy(false);
   }
@@ -60,7 +68,7 @@ class ProfileViewModel extends BaseViewModel {
   loadPosts() async {
     Query query;
     // if (areaCodeFilter.isEmpty) {
-    query = postsRef.where('authorID', isEqualTo: user.uid).orderBy('postDateTimeInMilliseconds', descending: true).limit(resultsLimit);
+    query = postsRef.where('authorID', isEqualTo: user.id).orderBy('postDateTimeInMilliseconds', descending: true).limit(resultsLimit);
     // } else {
     //   query = postsRef
     //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
@@ -101,7 +109,7 @@ class ProfileViewModel extends BaseViewModel {
     Query query;
     // if (areaCodeFilter.isEmpty) {
     query = postsRef
-        .where('authorID', isEqualTo: user.uid)
+        .where('authorID', isEqualTo: user.id)
         .orderBy('postDateTimeInMilliseconds', descending: true)
         .startAfterDocument(lastPostDocSnap)
         .limit(resultsLimit);

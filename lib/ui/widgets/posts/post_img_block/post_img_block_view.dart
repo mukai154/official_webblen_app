@@ -6,7 +6,7 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
-import 'package:webblen/ui/views/posts/post_block/post_img_block/post_img_block_view_model.dart';
+import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_view_model.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostImgBlockView extends StatelessWidget {
@@ -68,7 +68,10 @@ class PostImgBlockView extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.more_horiz),
-            onPressed: () {},
+            onPressed: () => model.showOptions(
+              post: post,
+              refreshAction: null,
+            ),
           ),
         ],
       ),
@@ -162,7 +165,7 @@ class PostImgBlockView extends StatelessWidget {
       viewModelBuilder: () => PostImgBlockViewModel(),
       onModelReady: (model) => model.initialize(post.authorID),
       builder: (context, model, child) => GestureDetector(
-        onTap: null,
+        onTap: () => model.navigateToPostView(post.id),
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

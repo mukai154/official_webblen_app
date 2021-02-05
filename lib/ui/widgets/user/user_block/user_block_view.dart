@@ -39,7 +39,7 @@ class UserBlockView extends StatelessWidget {
 
   Widget body(UserBlockViewModel model) {
     return GestureDetector(
-      onTap: () => model.navigateToUserView(user.uid),
+      onTap: () => model.navigateToUserView(user.id),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         decoration: BoxDecoration(
@@ -49,7 +49,7 @@ class UserBlockView extends StatelessWidget {
         ),
         child: Row(
           children: <Widget>[
-            UserProfilePic(userPicUrl: user.profile_pic, size: 35, isBusy: false),
+            UserProfilePic(userPicUrl: user.profilePicURL, size: 35, isBusy: false),
             SizedBox(
               width: 10.0,
             ),
@@ -80,7 +80,7 @@ class UserBlockView extends StatelessWidget {
       onModelReady: (model) => model.initialize(user.followers),
       viewModelBuilder: () => UserBlockViewModel(),
       builder: (context, model, child) => GestureDetector(
-        onTap: () => model.navigateToUserView(user.uid),
+        onTap: () => model.navigateToUserView(user.id),
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

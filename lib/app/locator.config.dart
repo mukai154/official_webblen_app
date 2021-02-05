@@ -12,12 +12,12 @@ import 'package:stacked_themes/stacked_themes.dart';
 import '../services/algolia/algolia_search_service.dart';
 import '../services/auth/auth_service.dart';
 import '../ui/views/home/tabs/check_in/check_in_view_model.dart';
+import '../services/firestore/comment_data_service.dart';
 import '../ui/views/home/tabs/explore/explore_view_model.dart';
 import '../services/location/google_places_service.dart';
 import '../ui/views/home/tabs/home/home_view_model.dart';
 import '../services/location/location_service.dart';
 import '../ui/views/home/tabs/messages/messages_view_model.dart';
-import '../ui/views/home/tabs/home/tabs/news_posts/news_posts_view_model.dart';
 import '../services/firestore/notification_data_service.dart';
 import '../services/firestore/platform_data_service.dart';
 import '../services/firestore/post_data_service.dart';
@@ -41,6 +41,7 @@ GetIt $initGetIt(
       () => servicesModule.algoliaSearchService);
   gh.lazySingleton<AuthService>(() => servicesModule.authService);
   gh.lazySingleton<BottomSheetService>(() => servicesModule.bottomSheetService);
+  gh.lazySingleton<CommentDataService>(() => servicesModule.commentDataService);
   gh.lazySingleton<DialogService>(() => servicesModule.dialogService);
   gh.lazySingleton<GooglePlacesService>(
       () => servicesModule.googlePlacesService);
@@ -62,7 +63,6 @@ GetIt $initGetIt(
   gh.singleton<ExploreViewModel>(ExploreViewModel());
   gh.singleton<HomeViewModel>(HomeViewModel());
   gh.singleton<MessagesViewModel>(MessagesViewModel());
-  gh.singleton<NewsPostsViewModel>(NewsPostsViewModel());
   gh.singleton<ProfileViewModel>(ProfileViewModel());
   gh.singleton<WalletViewModel>(WalletViewModel());
   return get;
@@ -75,6 +75,8 @@ class _$ServicesModule extends ServicesModule {
   AuthService get authService => AuthService();
   @override
   BottomSheetService get bottomSheetService => BottomSheetService();
+  @override
+  CommentDataService get commentDataService => CommentDataService();
   @override
   DialogService get dialogService => DialogService();
   @override

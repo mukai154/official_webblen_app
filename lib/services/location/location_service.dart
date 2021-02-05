@@ -49,7 +49,7 @@ class LocationService {
         'zipcode': zipcode,
       },
     ).catchError((e) {
-      print(e);
+      //print(e);
     });
     if (result != null) {
       List areaCodes = result.data['data'];
@@ -71,7 +71,7 @@ class LocationService {
         'lon': lon,
       },
     ).catchError((e) {
-      print(e);
+      //print(e);
     });
     if (result != null) {
       data = result.data['data'][0];

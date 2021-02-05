@@ -4,7 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
-import 'package:webblen/ui/views/posts/post_block/post_text_block/post_text_block_view_model.dart';
+import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view_model.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostTextBlockView extends StatelessWidget {
@@ -164,7 +164,7 @@ class PostTextBlockView extends StatelessWidget {
       viewModelBuilder: () => PostTextBlockViewModel(),
       onModelReady: (model) => model.initialize(post.authorID),
       builder: (context, model, child) => GestureDetector(
-        onTap: null,
+        onTap: () => model.navigateToPostView(post.id),
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

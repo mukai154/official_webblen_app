@@ -6,7 +6,7 @@ import 'package:webblen/models/webblen_notification.dart';
 
 class NotificationDataService {
   SnackbarService _snackbarService = locator<SnackbarService>();
-  CollectionReference notifsRef = FirebaseFirestore.instance.collection("notifications");
+  CollectionReference notifsRef = FirebaseFirestore.instance.collection("webblen_notifications");
 
   Future<int> getNumberOfUnreadNotifications(String uid) async {
     int num = 0;

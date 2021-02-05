@@ -149,14 +149,14 @@ class WebblenExplorePageTabBar extends StatelessWidget {
           Tab(
             child: Container(
               height: 30,
-              width: 100,
+              width: 115,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(60),
               ),
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  "Users",
+                  "People/Groups",
                   style: TextStyle(fontWeight: fontWeight),
                 ),
               ),
@@ -246,7 +246,55 @@ class WebblenProfileTabBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  "Check-Ins",
+                  "Activity",
+                  style: TextStyle(fontWeight: fontWeight),
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: Container(
+              height: 30,
+              width: 110,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Saved Posts",
+                  style: TextStyle(fontWeight: fontWeight),
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: Container(
+              height: 30,
+              width: 110,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Saved Streams",
+                  style: TextStyle(fontWeight: fontWeight),
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: Container(
+              height: 30,
+              width: 110,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Saved Events",
                   style: TextStyle(fontWeight: fontWeight),
                 ),
               ),

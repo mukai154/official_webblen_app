@@ -3,9 +3,10 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/ui/bottom_sheets/home_filter/home_filter_bottom_sheet_model.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
+
+import 'home_filter_bottom_sheet_model.dart';
 
 class HomeFilterBottomSheet extends StatelessWidget {
   final SheetRequest request;

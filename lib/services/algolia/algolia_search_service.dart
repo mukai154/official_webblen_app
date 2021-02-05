@@ -25,7 +25,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('users').setHitsPerPage(resultsLimit).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_users').setHitsPerPage(resultsLimit).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -46,7 +46,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('users').setHitsPerPage(resultsLimit).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_users').setHitsPerPage(resultsLimit).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -62,7 +62,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('users').setHitsPerPage(resultsLimit).setPage(pageNum).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_users').setHitsPerPage(resultsLimit).setPage(pageNum).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -78,7 +78,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('events').setHitsPerPage(resultsLimit).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_events').setHitsPerPage(resultsLimit).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -99,7 +99,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<WebblenEvent> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('events').setHitsPerPage(resultsLimit).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_events').setHitsPerPage(resultsLimit).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -115,7 +115,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<WebblenEvent> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('events').setHitsPerPage(resultsLimit).setPage(pageNum).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_events').setHitsPerPage(resultsLimit).setPage(pageNum).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -131,7 +131,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('streams').setHitsPerPage(resultsLimit).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_streams').setHitsPerPage(resultsLimit).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -152,7 +152,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<WebblenStream> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('streams').setHitsPerPage(resultsLimit).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_streams').setHitsPerPage(resultsLimit).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
@@ -168,7 +168,7 @@ class AlgoliaSearchService {
     Algolia algolia = await initializeAlgolia();
     List<WebblenStream> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
-      AlgoliaQuery query = algolia.instance.index('streams').setHitsPerPage(resultsLimit).setPage(pageNum).search(searchTerm);
+      AlgoliaQuery query = algolia.instance.index('webblen_streams').setHitsPerPage(resultsLimit).setPage(pageNum).search(searchTerm);
       AlgoliaQuerySnapshot eventsSnapshot = await query.getObjects();
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {

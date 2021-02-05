@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route_annotations.dart';
 import 'package:webblen/ui/views/auth/auth_view.dart';
 import 'package:webblen/ui/views/home/home_nav_view.dart';
 import 'package:webblen/ui/views/notifications/notifications_view.dart';
+import 'package:webblen/ui/views/posts/post_view.dart';
 import 'package:webblen/ui/views/root/root_view.dart';
 import 'package:webblen/ui/views/search/all_search_results/all_search_results_view.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
@@ -14,14 +15,17 @@ import 'package:webblen/ui/views/settings/settings_view.dart';
     // initial route is named "/"
     MaterialRoute(page: RootView, initial: true, name: "RootViewRoute"),
 
-    // //AUTHENTICATION
+    //AUTHENTICATION
     MaterialRoute(page: AuthView, name: "AuthViewRoute"),
 
-    // //ONBOARDING
+    //ONBOARDING
     // MaterialRoute(page: OnboardingView, name: "OnboardingViewRoute"),
 
     // //HOME
     MaterialRoute(page: HomeNavView, name: "HomeNavViewRoute"),
+
+    //POST
+    MaterialRoute(page: PostView, name: "PostViewRoute"),
 
     //SEARCH
     MaterialRoute(page: SearchView, name: "SearchViewRoute"),
@@ -30,7 +34,7 @@ import 'package:webblen/ui/views/settings/settings_view.dart';
     //NOTIFICATIONS
     MaterialRoute(page: NotificationsView, name: "NotificationsViewRoute"),
 
-    // //SETTINGS
+    //SETTINGS
     MaterialRoute(page: SettingsView, name: "SettingsViewRoute"),
   ],
 )
