@@ -43,9 +43,9 @@ class PostAuthorBottomSheet extends StatelessWidget {
             verticalSpaceSmall,
             CustomButton(
               onPressed: () => completer(SheetResponse(responseData: "share")),
-              text: "Share (disabled)",
+              text: "Share",
               textSize: 16,
-              textColor: appInActiveColorAlt(),
+              textColor: appFontColor(),
               height: 45,
               width: screenWidth(context),
               backgroundColor: appBackgroundColor(),
@@ -54,7 +54,7 @@ class PostAuthorBottomSheet extends StatelessWidget {
             ),
             verticalSpaceSmall,
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "report")),
+              onPressed: () => completer(SheetResponse(responseData: "delete")),
               text: "Delete",
               textSize: 16,
               textColor: appDestructiveColor(),

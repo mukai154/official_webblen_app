@@ -5,7 +5,8 @@ import 'package:webblen/ui/bottom_sheets/confirmation_bottom_sheet/destructive_c
 import 'package:webblen/ui/bottom_sheets/home_filter_bottom_sheet/home_filter_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_author_bottom_sheet/post_author_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_bottom_sheet/post_bottom_sheet.dart';
-import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_publish_successful_bottom_sheet/publish_successful_bottom_sheet.dart';
+import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_publish_successful_bottom_sheet/post_publish_successful_bottom_sheet.dart';
+import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/current_user_options_bottom_sheet/current_user_options_bottom_sheet.dart';
 
 import 'image_picker_bottom_sheet/image_picker_bottom_sheet.dart';
 
@@ -26,8 +27,8 @@ void setupBottomSheetUI() {
     BottomSheetType.postPublished: (context, sheetRequest, completer) => PostSuccessfulBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.postAuthorOptions: (context, sheetRequest, completer) => PostAuthorBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.postOptions: (context, sheetRequest, completer) => PostBottomSheet(request: sheetRequest, completer: completer),
-    // BottomSheetType.currentUserOptions: (context, sheetRequest, completer) => CurrentUserBottomSheet(request: sheetRequest, completer: completer),
-    // BottomSheetType.userOptions: (context, sheetRequest, completer) => UserBottomSheet(request: sheetRequest, completer: completer),
+    BottomSheetType.currentUserOptions: (context, sheetRequest, completer) => CurrentUserOptionsBottomSheet(request: sheetRequest, completer: completer),
+    // BottomSheetType.userOptions: (context, sheetRequest, completer) => UserOptionsBottomSheet(request: sheetRequest, completer: completer),
   };
   bottomSheetService.setCustomSheetBuilders(builders);
 }

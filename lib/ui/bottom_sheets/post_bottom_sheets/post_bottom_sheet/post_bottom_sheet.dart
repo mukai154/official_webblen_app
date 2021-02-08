@@ -30,9 +30,9 @@ class PostBottomSheet extends StatelessWidget {
           children: [
             CustomButton(
               onPressed: () => completer(SheetResponse(responseData: "share")),
-              text: "Share (disabled)",
+              text: "Share",
               textSize: 16,
-              textColor: appInActiveColorAlt(),
+              textColor: appFontColor(),
               height: 45,
               width: screenWidth(context),
               backgroundColor: appBackgroundColor(),
@@ -42,7 +42,7 @@ class PostBottomSheet extends StatelessWidget {
             verticalSpaceSmall,
             CustomButton(
               onPressed: () => completer(SheetResponse(responseData: "report")),
-              text: "Report (disabled)",
+              text: "Report",
               textSize: 16,
               textColor: appDestructiveColor(),
               height: 45,

@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
 
   #ANALYTICS
-  firebase_analytics: ^6.0.2
+  firebase_analytics: 
   facebook_app_events: ^0.7.1
 
   #SOCIAL DEPENDENCIES
@@ -34,16 +34,17 @@ dependencies:
   async: ^2.4.2
 
   #FIRESTORE DATABASE
-  firebase_core: ^0.5.0+1
-  cloud_firestore: ^0.14.3+1
-  firebase_auth: ^0.18.3+1
-  firebase_storage: ^5.1.0
-  firebase_messaging: ^7.0.3
-  cloud_functions: ^0.7.0+1
+  firebase_core:
+  cloud_firestore:
+  firebase_auth:
+  firebase_storage:
+  firebase_messaging:
+  cloud_functions:
+  firebase_dynamic_links:
 
   #PHONE UTILITIES
   url_launcher: ^5.4.1
-  share: ^0.6.1+1
+  share: ^0.6.5+4
   permission_handler: ^5.0.1+1
   app_settings: 4.0.4
 

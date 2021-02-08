@@ -6,6 +6,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/user_data_service.dart';
@@ -16,6 +17,7 @@ class ProfileViewModel extends BaseViewModel {
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
   UserDataService _userDataService = locator<UserDataService>();
+  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
 
@@ -65,6 +67,7 @@ class ProfileViewModel extends BaseViewModel {
     await loadPosts();
   }
 
+  ///Load Data
   loadPosts() async {
     Query query;
     // if (areaCodeFilter.isEmpty) {
@@ -146,12 +149,31 @@ class ProfileViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  ///SHOW OPTIONS
+  showOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.currentUserOptions,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "edit profile") {
+        //edit profile
+      } else if (res == "saved") {
+        //saved
+      } else if (res == "settings") {
+        navigateToSettingsPage();
+      }
+      notifyListeners();
+    }
+  }
+
   ///NAVIGATION
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);
 // }
 //
   navigateToSettingsPage() {
-    _navigationService.navigateTo(Routes.SettingsViewRoute, arguments: {'data': 'example'});
+    _navigationService.navigateTo(Routes.SettingsViewRoute);
   }
 }

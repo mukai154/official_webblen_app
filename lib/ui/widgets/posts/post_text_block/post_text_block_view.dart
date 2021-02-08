@@ -66,7 +66,10 @@ class PostTextBlockView extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.more_horiz),
-            onPressed: () {},
+            onPressed: () => model.showOptions(
+              post: post,
+              refreshAction: null,
+            ),
           ),
         ],
       ),

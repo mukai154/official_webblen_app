@@ -39,7 +39,7 @@ class HomeViewModel extends BaseViewModel {
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
 
-  int resultsLimit = 15;
+  int resultsLimit = 10;
 
   ///PROMOS
   double postPromo;

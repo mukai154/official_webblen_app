@@ -80,6 +80,7 @@ class CustomIconButton extends StatelessWidget {
   final Color backgroundColor;
   final Color textColor;
   final double elevation;
+  final bool centerContent;
 
   CustomIconButton({
     this.icon,
@@ -90,6 +91,7 @@ class CustomIconButton extends StatelessWidget {
     this.backgroundColor,
     this.textColor,
     this.elevation,
+    this.centerContent,
   });
 
   @override
@@ -102,20 +104,21 @@ class CustomIconButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(14.0),
         onTap: onPressed,
         child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16),
           height: height,
           width: width,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: centerContent ? MainAxisAlignment.center : MainAxisAlignment.start,
             children: <Widget>[
               icon,
               text != null
                   ? SizedBox(
-                      width: 8.0,
+                      width: 10.0,
                     )
                   : Container(),
               text != null
                   ? Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: EdgeInsets.only(top: 1),
                       child: MediaQuery(
                         data: MediaQuery.of(context).copyWith(
                           textScaleFactor: 1.0,
@@ -124,8 +127,8 @@ class CustomIconButton extends StatelessWidget {
                           text,
                           style: TextStyle(
                             color: textColor,
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w700,
+                            fontSize: 14.0,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),

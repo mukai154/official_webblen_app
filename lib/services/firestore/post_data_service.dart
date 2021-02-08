@@ -20,6 +20,34 @@ class PostDataService {
     return exists;
   }
 
+  reportPost({@required String postID, @required String reporterID}) async {
+    DocumentSnapshot snapshot = await postsRef.doc(postID).get().catchError((e) {
+      return _snackbarService.showSnackbar(
+        title: 'Post Error',
+        message: e.message,
+        duration: Duration(seconds: 5),
+      );
+    });
+    if (snapshot.exists) {
+      List reportedBy = snapshot.data()['reportedBy'] == null ? [] : snapshot.data()['reportedBy'].toList(growable: true);
+      if (reportedBy.contains(reporterID)) {
+        return _snackbarService.showSnackbar(
+          title: 'Report Error',
+          message: "You've already reported this post. This post is currently pending review.",
+          duration: Duration(seconds: 5),
+        );
+      } else {
+        reportedBy.add(reporterID);
+        postsRef.doc(postID).update({"reportedBy": reportedBy});
+        return _snackbarService.showSnackbar(
+          title: 'Post Reported',
+          message: "This post is now pending review.",
+          duration: Duration(seconds: 5),
+        );
+      }
+    }
+  }
+
   // Future createPost({
   //   String id,
   //   String causeID,

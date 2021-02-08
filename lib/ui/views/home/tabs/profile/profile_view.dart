@@ -38,8 +38,8 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
             ),
           ),
           IconButton(
-            onPressed: () => model.navigateToSettingsPage(),
-            icon: Icon(FontAwesomeIcons.cog, color: appIconColor(), size: 20),
+            onPressed: () => model.showOptions(),
+            icon: Icon(FontAwesomeIcons.ellipsisH, color: appIconColor(), size: 20),
           ),
         ],
       ),
@@ -137,36 +137,36 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
           secondaryAction: null,
           refreshData: () async {},
         ),
-        ZeroStateView(
-          imageAssetName: null,
-          header: "No Posts Found",
-          subHeader: "Posts You Save Will Show Up Here",
-          mainActionButtonTitle: null,
-          mainAction: null,
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
-        ZeroStateView(
-          imageAssetName: null,
-          header: "No Streams Found",
-          subHeader: "Streams You Save Will Show Up Here",
-          mainActionButtonTitle: null,
-          mainAction: null,
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
-        ZeroStateView(
-          imageAssetName: null,
-          header: "No Events Found",
-          subHeader: "Events You Save Will Show Up Here",
-          mainActionButtonTitle: null,
-          mainAction: null,
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
+        // ZeroStateView(
+        //   imageAssetName: null,
+        //   header: "No Posts Found",
+        //   subHeader: "Posts You Save Will Show Up Here",
+        //   mainActionButtonTitle: null,
+        //   mainAction: null,
+        //   secondaryActionButtonTitle: null,
+        //   secondaryAction: null,
+        //   refreshData: () async {},
+        // ),
+        // ZeroStateView(
+        //   imageAssetName: null,
+        //   header: "No Streams Found",
+        //   subHeader: "Streams You Save Will Show Up Here",
+        //   mainActionButtonTitle: null,
+        //   mainAction: null,
+        //   secondaryActionButtonTitle: null,
+        //   secondaryAction: null,
+        //   refreshData: () async {},
+        // ),
+        // ZeroStateView(
+        //   imageAssetName: null,
+        //   header: "No Events Found",
+        //   subHeader: "Events You Save Will Show Up Here",
+        //   mainActionButtonTitle: null,
+        //   mainAction: null,
+        //   secondaryActionButtonTitle: null,
+        //   secondaryAction: null,
+        //   refreshData: () async {},
+        // ),
       ],
     );
   }
@@ -175,7 +175,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 7,
+      length: 4,
       vsync: this,
     );
   }
@@ -205,7 +205,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 Expanded(
                   child: DefaultTabController(
                     key: PageStorageKey('profile-tab-bar'),
-                    length: 7,
+                    length: 4,
                     child: NestedScrollView(
                       key: PageStorageKey('profile-nested-scroll-key'),
                       controller: model.scrollController,

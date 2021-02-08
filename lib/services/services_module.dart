@@ -2,12 +2,14 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/comment_data_service.dart';
 import 'package:webblen/services/firestore/notification_data_service.dart';
 import 'package:webblen/services/firestore/platform_data_service.dart';
 import 'package:webblen/services/firestore/post_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services/stripe/stripe_payment_service.dart';
 
 import 'auth/auth_service.dart';
@@ -47,4 +49,8 @@ abstract class ServicesModule {
   GooglePlacesService get googlePlacesService;
   @lazySingleton
   AlgoliaSearchService get algoliaSearchService;
+  @lazySingleton
+  DynamicLinkService get dynamicLinkService;
+  @lazySingleton
+  ShareService get shareService;
 }

@@ -13,6 +13,7 @@ import '../services/algolia/algolia_search_service.dart';
 import '../services/auth/auth_service.dart';
 import '../ui/views/home/tabs/check_in/check_in_view_model.dart';
 import '../services/firestore/comment_data_service.dart';
+import '../services/dynamic_links/dynamic_link_service.dart';
 import '../ui/views/home/tabs/explore/explore_view_model.dart';
 import '../services/location/google_places_service.dart';
 import '../ui/views/home/tabs/home/home_view_model.dart';
@@ -23,6 +24,7 @@ import '../services/firestore/platform_data_service.dart';
 import '../services/firestore/post_data_service.dart';
 import '../ui/views/home/tabs/profile/profile_view_model.dart';
 import '../services/services_module.dart';
+import '../services/share/share_service.dart';
 import '../services/stripe/stripe_payment_service.dart';
 import '../services/firestore/user_data_service.dart';
 import '../ui/views/home/tabs/wallet/wallet_view_model.dart';
@@ -43,6 +45,7 @@ GetIt $initGetIt(
   gh.lazySingleton<BottomSheetService>(() => servicesModule.bottomSheetService);
   gh.lazySingleton<CommentDataService>(() => servicesModule.commentDataService);
   gh.lazySingleton<DialogService>(() => servicesModule.dialogService);
+  gh.lazySingleton<DynamicLinkService>(() => servicesModule.dynamicLinkService);
   gh.lazySingleton<GooglePlacesService>(
       () => servicesModule.googlePlacesService);
   gh.lazySingleton<LocationService>(() => servicesModule.locationService);
@@ -52,6 +55,7 @@ GetIt $initGetIt(
   gh.lazySingleton<PlatformDataService>(
       () => servicesModule.platformDataService);
   gh.lazySingleton<PostDataService>(() => servicesModule.postDataService);
+  gh.lazySingleton<ShareService>(() => servicesModule.shareService);
   gh.lazySingleton<SnackbarService>(() => servicesModule.snackBarService);
   gh.lazySingleton<StripePaymentService>(
       () => servicesModule.stripePaymentService);
@@ -80,6 +84,8 @@ class _$ServicesModule extends ServicesModule {
   @override
   DialogService get dialogService => DialogService();
   @override
+  DynamicLinkService get dynamicLinkService => DynamicLinkService();
+  @override
   GooglePlacesService get googlePlacesService => GooglePlacesService();
   @override
   LocationService get locationService => LocationService();
@@ -92,6 +98,8 @@ class _$ServicesModule extends ServicesModule {
   PlatformDataService get platformDataService => PlatformDataService();
   @override
   PostDataService get postDataService => PostDataService();
+  @override
+  ShareService get shareService => ShareService();
   @override
   SnackbarService get snackBarService => SnackbarService();
   @override

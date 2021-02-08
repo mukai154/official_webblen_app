@@ -5,6 +5,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/utils/network_status.dart';
@@ -18,6 +19,7 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   LocationService _locationService = locator<LocationService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
 
   ///INITIAL DATA
   InitErrorStatus initErrorStatus = InitErrorStatus.network;
@@ -39,6 +41,8 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   initialize() async {
     setBusy(true);
     isConnectedToNetwork().then((connected) {
+
+      //check network status
       if (!connected) {
         initErrorStatus = InitErrorStatus.network;
         setBusy(false);
@@ -49,7 +53,9 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
           duration: Duration(seconds: 5),
         );
       } else {
-        getLocationDetails().then((e) {
+
+        //get location data
+        getLocationDetails().then((e) async {
           if (e != null) {
             initErrorStatus = InitErrorStatus.location;
             setBusy(false);
@@ -60,7 +66,10 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
               duration: Duration(seconds: 5),
             );
           } else {
+
+            //if there are no errors, check for dynamic links
             initErrorStatus = InitErrorStatus.none;
+            await _dynamicLinkService.handleDynamicLinks();
             notifyListeners();
           }
         });
@@ -77,10 +86,8 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     String error;
     try {
       LocationData location = await _locationService.getCurrentLocation();
-      initialCityName = await _locationService.getCityNameFromLatLon(
-          location.latitude, location.longitude);
-      initialAreaCode = await _locationService.getZipFromLatLon(
-          location.latitude, location.longitude);
+      initialCityName = await _locationService.getCityNameFromLatLon(location.latitude, location.longitude);
+      initialAreaCode = await _locationService.getZipFromLatLon(location.latitude, location.longitude);
       notifyListeners();
     } catch (e) {
       error = "Location Error";
