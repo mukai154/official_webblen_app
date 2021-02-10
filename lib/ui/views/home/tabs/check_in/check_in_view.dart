@@ -8,6 +8,9 @@ import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'check_in_view_model.dart';
 
 class CheckInView extends StatelessWidget {
+  final VoidCallback addContentAction;
+  CheckInView({this.addContentAction});
+
   Widget head(CheckInViewModel model) {
     return Container(
       height: 50,
@@ -28,7 +31,7 @@ class CheckInView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: null, //() => model.navigateToCreateCauseView(),
+                  onPressed: addContentAction,
                   icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
                 ),
               ],

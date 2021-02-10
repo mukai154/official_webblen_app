@@ -3,8 +3,10 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view_model.dart';
+import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostTextBlockView extends StatelessWidget {
@@ -159,6 +161,32 @@ class PostTextBlockView extends StatelessWidget {
     );
   }
 
+  Widget postTags(PostTextBlockViewModel model) {
+    return post.tags.isEmpty
+        ? Container()
+        : Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            height: 30,
+            child: ListView.builder(
+              addAutomaticKeepAlives: true,
+              physics: NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              padding: EdgeInsets.only(
+                top: 4.0,
+                bottom: 4.0,
+              ),
+              itemCount: post.tags.length,
+              itemBuilder: (context, index) {
+                return TagButton(
+                  onTap: null,
+                  tag: post.tags[index],
+                );
+              },
+            ),
+          );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<PostTextBlockViewModel>.reactive(
@@ -177,7 +205,8 @@ class PostTextBlockView extends StatelessWidget {
               head(model),
               postBody(),
               commentCountAndPostTime(),
-              SizedBox(height: 8.0),
+              verticalSpaceSmall,
+              postTags(model),
               Divider(
                 thickness: 4.0,
                 color: appPostBorderColor(),

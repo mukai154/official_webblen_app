@@ -48,26 +48,53 @@ class PostDataService {
     }
   }
 
-  // Future createPost({
-  //   String id,
-  //   String causeID,
-  //   String authorID,
-  //   String body,
-  //   int dateCreatedInMilliseconds,
-  //   int commentCount,
-  // }) async {
-  //   GoForumPost post = GoForumPost(
-  //     id: id,
-  //     causeID: causeID,
-  //     authorID: authorID,
-  //     body: body,
-  //     dateCreatedInMilliseconds: dateCreatedInMilliseconds,
-  //     commentCount: commentCount,
-  //   );
-  //   await postRef.doc(post.id).set(post.toMap()).catchError((e) {
-  //     return e.message;
-  //   });
-  // }
+  Future createPost({
+    @required String id,
+    @required String parentID,
+    @required String authorID,
+    @required String webAppLink,
+    @required String imageURL,
+    @required List nearbyZipcodes,
+    @required bool paidOut,
+    @required List participantIDs,
+    @required String city,
+    @required String province,
+    @required int postDateTimeInMilliseconds,
+    @required List savedBy,
+    @required List sharedComs,
+    @required List tags,
+    @required List followers,
+    @required bool reported,
+    @required int commentCount,
+    @required String postType,
+    @required String body,
+  }) async {
+    WebblenPost post = WebblenPost(
+      id: id,
+      parentID: parentID,
+      authorID: authorID,
+      webAppLink: webAppLink,
+      imageURL: imageURL,
+      nearbyZipcodes: nearbyZipcodes,
+      paidOut: paidOut,
+      participantIDs: participantIDs,
+      city: city,
+      province: province,
+      postDateTimeInMilliseconds: postDateTimeInMilliseconds,
+      savedBy: savedBy,
+      sharedComs: sharedComs,
+      tags: tags,
+      followers: followers,
+      reported: reported,
+      commentCount: commentCount,
+      postType: postType,
+      body: body,
+    );
+
+    await postsRef.doc(post.id).set(post.toMap()).catchError((e) {
+      return e.message;
+    });
+  }
 
   Future getPostByID(String id) async {
     WebblenPost post;

@@ -18,7 +18,6 @@ import '../ui/views/home/tabs/explore/explore_view_model.dart';
 import '../services/location/google_places_service.dart';
 import '../ui/views/home/tabs/home/home_view_model.dart';
 import '../services/location/location_service.dart';
-import '../ui/views/home/tabs/messages/messages_view_model.dart';
 import '../services/firestore/notification_data_service.dart';
 import '../services/firestore/platform_data_service.dart';
 import '../services/firestore/post_data_service.dart';
@@ -66,7 +65,6 @@ GetIt $initGetIt(
   gh.singleton<CheckInViewModel>(CheckInViewModel());
   gh.singleton<ExploreViewModel>(ExploreViewModel());
   gh.singleton<HomeViewModel>(HomeViewModel());
-  gh.singleton<MessagesViewModel>(MessagesViewModel());
   gh.singleton<ProfileViewModel>(ProfileViewModel());
   gh.singleton<WalletViewModel>(WalletViewModel());
   return get;

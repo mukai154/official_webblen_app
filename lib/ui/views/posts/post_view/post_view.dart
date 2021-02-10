@@ -6,7 +6,7 @@ import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
-import 'package:webblen/ui/views/posts/post_view_model.dart';
+import 'package:webblen/ui/views/posts/post_view/post_view_model.dart';
 import 'package:webblen/ui/widgets/comments/comment_text_field_view.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';

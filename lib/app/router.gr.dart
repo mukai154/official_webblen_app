@@ -12,7 +12,8 @@ import 'package:flutter/material.dart';
 import '../ui/views/auth/auth_view.dart';
 import '../ui/views/home/home_nav_view.dart';
 import '../ui/views/notifications/notifications_view.dart';
-import '../ui/views/posts/post_view.dart';
+import '../ui/views/posts/create_post_view/create_post_view.dart';
+import '../ui/views/posts/post_view/post_view.dart';
 import '../ui/views/root/root_view.dart';
 import '../ui/views/search/all_search_results/all_search_results_view.dart';
 import '../ui/views/search/search_view.dart';
@@ -23,6 +24,7 @@ class Routes {
   static const String AuthViewRoute = '/auth-view';
   static const String HomeNavViewRoute = '/home-nav-view';
   static const String PostViewRoute = '/post-view';
+  static const String CreatePostViewRoute = '/create-post-view';
   static const String SearchViewRoute = '/search-view';
   static const String AllSearchResultsViewRoute = '/all-search-results-view';
   static const String NotificationsViewRoute = '/notifications-view';
@@ -32,6 +34,7 @@ class Routes {
     AuthViewRoute,
     HomeNavViewRoute,
     PostViewRoute,
+    CreatePostViewRoute,
     SearchViewRoute,
     AllSearchResultsViewRoute,
     NotificationsViewRoute,
@@ -47,6 +50,7 @@ class WebblenRouter extends RouterBase {
     RouteDef(Routes.AuthViewRoute, page: AuthView),
     RouteDef(Routes.HomeNavViewRoute, page: HomeNavView),
     RouteDef(Routes.PostViewRoute, page: PostView),
+    RouteDef(Routes.CreatePostViewRoute, page: CreatePostView),
     RouteDef(Routes.SearchViewRoute, page: SearchView),
     RouteDef(Routes.AllSearchResultsViewRoute, page: AllSearchResultsView),
     RouteDef(Routes.NotificationsViewRoute, page: NotificationsView),
@@ -76,6 +80,12 @@ class WebblenRouter extends RouterBase {
     PostView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => PostView(),
+        settings: data,
+      );
+    },
+    CreatePostView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => CreatePostView(),
         settings: data,
       );
     },

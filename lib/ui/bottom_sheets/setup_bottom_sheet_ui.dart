@@ -1,6 +1,7 @@
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
+import 'package:webblen/ui/bottom_sheets/add_content_bottom_sheet/add_content_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/confirmation_bottom_sheet/destructive_confirmation_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/home_filter_bottom_sheet/home_filter_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_author_bottom_sheet/post_author_bottom_sheet.dart';
@@ -14,6 +15,7 @@ void setupBottomSheetUI() {
   final bottomSheetService = locator<BottomSheetService>();
 
   final builders = {
+    BottomSheetType.addContent: (context, sheetRequest, completer) => AddContentBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.destructiveConfirmation: (context, sheetRequest, completer) =>
         DestructiveConfirmationBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.homeFilter: (context, sheetRequest, completer) => HomeFilterBottomSheet(request: sheetRequest, completer: completer),

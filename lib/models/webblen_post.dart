@@ -6,6 +6,8 @@ class WebblenPost {
   String imageURL;
   String body;
   List nearbyZipcodes;
+  String city;
+  String province;
   int commentCount;
   int postDateTimeInMilliseconds;
   bool reported;
@@ -25,6 +27,8 @@ class WebblenPost {
     this.imageURL,
     this.body,
     this.nearbyZipcodes,
+    this.city,
+    this.province,
     this.commentCount,
     this.postDateTimeInMilliseconds,
     this.reported,
@@ -46,6 +50,8 @@ class WebblenPost {
           imageURL: data['imageURL'],
           body: data['body'],
           nearbyZipcodes: data['nearbyZipcodes'],
+          city: data['city'],
+          province: data['province'],
           commentCount: data['commentCount'],
           postDateTimeInMilliseconds: data['postDateTimeInMilliseconds'],
           reported: false,
@@ -66,6 +72,8 @@ class WebblenPost {
         'imageURL': this.imageURL,
         'body': this.body,
         'nearbyZipcodes': this.nearbyZipcodes,
+        'city': this.city,
+        'province': this.province,
         'commentCount': this.commentCount,
         'postDateTimeInMilliseconds': this.postDateTimeInMilliseconds,
         'reported': this.reported,

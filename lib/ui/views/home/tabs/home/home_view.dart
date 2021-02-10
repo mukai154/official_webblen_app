@@ -18,7 +18,8 @@ class HomeView extends StatefulWidget {
   final WebblenUser user;
   final String initialCityName;
   final String initialAreaCode;
-  HomeView({this.user, this.initialCityName, this.initialAreaCode});
+  final VoidCallback addContentAction;
+  HomeView({this.user, this.initialCityName, this.initialAreaCode, this.addContentAction});
 
   @override
   _HomeViewState createState() => _HomeViewState();
@@ -60,7 +61,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
               ),
               IconButton(
                 iconSize: 20,
-                onPressed: () => model.navigateToCreateCauseView(),
+                onPressed: widget.addContentAction,
                 icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
               ),
             ],

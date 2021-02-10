@@ -7,6 +7,7 @@ import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_view_model.dart';
+import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostImgBlockView extends StatelessWidget {
@@ -34,7 +35,7 @@ class PostImgBlockView extends StatelessWidget {
                 SizedBox(
                   width: 10.0,
                 ),
-                post.tags.isEmpty
+                post.city == null
                     ? Text(
                         "@${model.authorUsername}",
                         style: TextStyle(
@@ -54,12 +55,22 @@ class PostImgBlockView extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            post.tags.toString().replaceAll("[", "").replaceAll("]", ""),
-                            style: TextStyle(
-                              color: appFontColorAlt(),
-                              fontSize: 14,
-                            ),
+                          SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.mapMarkerAlt,
+                                size: 10,
+                                color: appFontColorAlt(),
+                              ),
+                              Text(
+                                ' ${post.city}, ${post.province}',
+                                style: TextStyle(
+                                  color: appFontColorAlt(),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -157,6 +168,30 @@ class PostImgBlockView extends StatelessWidget {
     );
   }
 
+  Widget postTags(PostImgBlockViewModel model) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      height: 30,
+      child: ListView.builder(
+        addAutomaticKeepAlives: true,
+        physics: NeverScrollableScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: post.tags.length,
+        itemBuilder: (context, index) {
+          return TagButton(
+            onTap: null,
+            tag: post.tags[index],
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<PostImgBlockViewModel>.reactive(
@@ -176,7 +211,8 @@ class PostImgBlockView extends StatelessWidget {
               postImg(context),
               commentCountAndPostTime(),
               postMessage(model),
-              SizedBox(height: 16.0),
+              verticalSpaceSmall,
+              postTags(model),
               Divider(
                 thickness: 4.0,
                 color: appPostBorderColor(),

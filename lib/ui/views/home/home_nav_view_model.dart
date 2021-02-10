@@ -2,6 +2,8 @@ import 'package:location/location.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
@@ -41,7 +43,6 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   initialize() async {
     setBusy(true);
     isConnectedToNetwork().then((connected) {
-
       //check network status
       if (!connected) {
         initErrorStatus = InitErrorStatus.network;
@@ -53,7 +54,6 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
           duration: Duration(seconds: 5),
         );
       } else {
-
         //get location data
         getLocationDetails().then((e) async {
           if (e != null) {
@@ -66,7 +66,6 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
               duration: Duration(seconds: 5),
             );
           } else {
-
             //if there are no errors, check for dynamic links
             initErrorStatus = InitErrorStatus.none;
             await _dynamicLinkService.handleDynamicLinks();
@@ -77,11 +76,13 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     });
   }
 
+  ///NETWORK STATUS
   Future<bool> isConnectedToNetwork() async {
     bool isConnected = await NetworkStatus().isConnected();
     return isConnected;
   }
 
+  ///LOCATION
   Future<String> getLocationDetails() async {
     String error;
     try {
@@ -95,6 +96,42 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     return error;
   }
 
+  ///ADD CONTENT BOTTOM SHEET
+  showAddContentOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.addContent,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "new post") {
+      } else if (res == "new stream") {
+        //
+      } else if (res == "new event") {
+        //
+      }
+      notifyListeners();
+    }
+  }
+
+  ///NAVIGATION
+// replaceWithPage() {
+//   _navigationService.replaceWith(PageRouteName);
+// }
+//
+  navigateToCreatePostPage() {
+    _navigationService.navigateTo(Routes.CreatePostViewRoute);
+  }
+
+  // navigateToCreateStreamPage() {
+  //   _navigationService.navigateTo(Routes.CreateStreamViewRoute);
+  // }
+  //
+  // navigateToCreateEventPage() {
+  //   _navigationService.navigateTo(Routes.CreateEventViewRoute);
+  // }
+
+  ///STREAM DATA
   @override
   void onData(WebblenUser data) {
     if (data != null) {
@@ -119,14 +156,4 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
       }
     }
   }
-
-  ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-// navigateToPage() {
-//   _navigationService.navigateTo(PageRouteName);
-// }
-
 }

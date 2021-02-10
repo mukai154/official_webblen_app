@@ -176,6 +176,25 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  ///ADD CONTENT BOTTOM SHEET
+  showAddContentOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.addContent,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "new post") {
+        //
+      } else if (res == "new stream") {
+        //
+      } else if (res == "new event") {
+        //
+      }
+      notifyListeners();
+    }
+  }
+
   ///NAVIGATION
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);

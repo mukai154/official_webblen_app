@@ -6,6 +6,9 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view_model.dart';
 
 class WalletView extends StatelessWidget {
+  final VoidCallback addContentAction;
+  WalletView({this.addContentAction});
+
   Widget head(WalletViewModel model) {
     return Container(
       height: 50,
@@ -26,7 +29,7 @@ class WalletView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: null, //() => model.navigateToCreateCauseView(),
+                  onPressed: addContentAction,
                   icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
                 ),
               ],

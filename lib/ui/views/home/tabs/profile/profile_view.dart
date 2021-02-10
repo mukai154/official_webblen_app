@@ -13,7 +13,8 @@ import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class ProfileView extends StatefulWidget {
   final WebblenUser user;
-  ProfileView({this.user});
+  final VoidCallback addContentAction;
+  ProfileView({this.user, this.addContentAction});
 
   @override
   _ProfileViewState createState() => _ProfileViewState();
@@ -37,9 +38,22 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
               fontSize: 30.0,
             ),
           ),
-          IconButton(
-            onPressed: () => model.showOptions(),
-            icon: Icon(FontAwesomeIcons.ellipsisH, color: appIconColor(), size: 20),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => model.showOptions(),
+                icon: Icon(
+                  FontAwesomeIcons.ellipsisH,
+                  color: appIconColor(),
+                  size: 20,
+                ),
+              ),
+              IconButton(
+                iconSize: 20,
+                onPressed: widget.addContentAction,
+                icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
+              ),
+            ],
           ),
         ],
       ),

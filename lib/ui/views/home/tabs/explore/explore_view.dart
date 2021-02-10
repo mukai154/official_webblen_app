@@ -16,7 +16,9 @@ import 'explore_view_model.dart';
 
 class ExploreView extends StatefulWidget {
   final WebblenUser user;
-  ExploreView({this.user});
+  final VoidCallback addContentAction;
+  ExploreView({this.user, this.addContentAction});
+
   @override
   _ExploreViewState createState() => _ExploreViewState();
 }
@@ -50,7 +52,7 @@ class _ExploreViewState extends State<ExploreView> with SingleTickerProviderStat
             textEditingController: null,
           ),
           IconButton(
-            onPressed: null, //() => model.navigateToCreateCauseView(),
+            onPressed: widget.addContentAction,
             icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
           ),
         ],
