@@ -3,17 +3,18 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
-import 'package:webblen/services/firestore/comment_data_service.dart';
-import 'package:webblen/services/firestore/notification_data_service.dart';
-import 'package:webblen/services/firestore/platform_data_service.dart';
-import 'package:webblen/services/firestore/post_data_service.dart';
+import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
+import 'package:webblen/services/firestore/data/comment_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services/stripe/stripe_payment_service.dart';
 
 import 'auth/auth_service.dart';
-import 'firestore/user_data_service.dart';
+import 'firestore/data/user_data_service.dart';
 
 ///RUN "flutter pub run build_runner build --delete-conflicting-outputs" in Project Terminal to Generate Service Modules
 
@@ -31,6 +32,8 @@ abstract class ServicesModule {
   SnackbarService get snackBarService;
   @lazySingleton
   AuthService get authService;
+  @lazySingleton
+  FirestoreStorageService get firestoreStorageService;
   @lazySingleton
   PlatformDataService get platformDataService;
   @lazySingleton

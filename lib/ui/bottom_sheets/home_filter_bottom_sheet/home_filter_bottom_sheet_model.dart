@@ -3,7 +3,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
-import 'package:webblen/services/firestore/platform_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 
 class HomeFilterBottomSheetModel extends BaseViewModel {

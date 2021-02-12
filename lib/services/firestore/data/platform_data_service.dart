@@ -21,6 +21,53 @@ class PlatformDataService {
     return updateAvailable;
   }
 
+  ///NEW CONTENT RATES
+  Future<double> getNewPostTaxRate() async {
+    double promo;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    try {
+      promo = snapshot.data()['newPostTaxRate'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return promo;
+  }
+
+  Future<double> getNewStreamTaxRate() async {
+    double promo;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    try {
+      promo = snapshot.data()['newStreamTaxRate'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return promo;
+  }
+
+  Future<double> getNewEventTaxRate() async {
+    double promo;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    try {
+      promo = snapshot.data()['newEventTaxRate'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return promo;
+  }
+
+  ///PROMOTIONS
   Future<double> getPostPromo() async {
     double promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();

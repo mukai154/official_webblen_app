@@ -10,10 +10,10 @@ import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/services/firestore/comment_data_service.dart';
-import 'package:webblen/services/firestore/notification_data_service.dart';
-import 'package:webblen/services/firestore/post_data_service.dart';
-import 'package:webblen/services/firestore/user_data_service.dart';
+import 'package:webblen/services/firestore/data/comment_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/utils/random_string_generator.dart';
 
 class PostViewModel extends BaseViewModel {

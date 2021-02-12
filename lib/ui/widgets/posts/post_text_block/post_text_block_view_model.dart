@@ -7,8 +7,8 @@ import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
-import 'package:webblen/services/firestore/post_data_service.dart';
-import 'package:webblen/services/firestore/user_data_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 
 class PostTextBlockViewModel extends BaseViewModel {

@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
-import 'package:webblen/services/firestore/user_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
 
 @singleton

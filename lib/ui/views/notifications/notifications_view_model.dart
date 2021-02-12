@@ -6,7 +6,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/services/firestore/notification_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
 
 class NotificationsViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();

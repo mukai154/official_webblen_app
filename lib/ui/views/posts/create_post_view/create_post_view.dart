@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view_model.dart';
-import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
-import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/ui/widgets/common/buttons/add_image_button.dart';
+import 'package:webblen/ui/widgets/common/buttons/custom_text_button.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
+import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/text_field/multi_line_text_field.dart';
+import 'package:webblen/ui/widgets/tags/tag_button.dart';
+import 'package:webblen/ui/widgets/tags/tag_dropdown_field.dart';
 
 class CreatePostView extends StatelessWidget {
   final nameController = TextEditingController();
@@ -22,6 +24,21 @@ class CreatePostView extends StatelessWidget {
   final description1Controller = TextEditingController();
   final description2Controller = TextEditingController();
   final description3Controller = TextEditingController();
+
+  Widget selectedTags(CreatePostViewModel model) {
+    return model.post.tags == null || model.post.tags.isEmpty
+        ? Container()
+        : Container(
+            height: 30,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: model.post.tags.length,
+              itemBuilder: (BuildContext context, int index) {
+                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.post.tags[index]);
+              },
+            ),
+          );
+  }
 
   Widget textFieldHeader(String header, String subHeader) {
     return Container(
@@ -51,37 +68,30 @@ class CreatePostView extends StatelessWidget {
   }
 
   Widget imgBtn(BuildContext context, CreatePostViewModel model) {
-    return GestureDetector(
-      onTap: null,
-      child: Container(
-        height: screenHeight(context),
-        width: screenHeight(context),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                FontAwesomeIcons.camera,
-                color: appFontColorAlt(),
-                size: 16,
-              ),
-              verticalSpaceTiny,
-              CustomText(
-                text: '1:1',
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: appFontColorAlt(),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return ImageButton(
+      onTap: () => model.selectImage(context: context),
+      isOptional: true,
+      height: screenWidth(context),
+      width: screenWidth(context),
     );
   }
 
-  Widget imgPreview() {
-    return GestureDetector(
-      onTap: null,
-    );
+  Widget imgPreview(BuildContext context, CreatePostViewModel model) {
+    return model.img == null
+        ? ImagePreviewButton(
+            onTap: () => model.selectImage(context: context),
+            file: null,
+            imgURL: model.post.imageURL,
+            height: screenWidth(context),
+            width: screenWidth(context),
+          )
+        : ImagePreviewButton(
+            onTap: () => model.selectImage(context: context),
+            file: model.img,
+            imgURL: null,
+            height: screenWidth(context),
+            width: screenWidth(context),
+          );
   }
 
   Widget form(BuildContext context, CreatePostViewModel model) {
@@ -89,51 +99,71 @@ class CreatePostView extends StatelessWidget {
       child: ListView(
         shrinkWrap: true,
         children: [
-          verticalSpaceSmall,
-
           ///POST IMAGE
-          imgBtn(context, model),
+          model.img == null && model.post.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
           verticalSpaceMedium,
 
-          ///POST BODY
-          MultiLineTextField(controller: model.postTextController, hintText: "What's on Your Mind?", initialValue: null),
-          verticalSpaceSmall,
+          ///POST TAGS
+          selectedTags(model),
+          verticalSpaceMedium,
 
-          ///POST
-          textFieldHeader(
-            "Tags",
-            "What topics are related this post?",
-          ),
-          verticalSpaceSmall,
+          ///POST FIELDS
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ///POST TAGS
+                textFieldHeader(
+                  "Tags",
+                  "What topics are related to this post?",
+                ),
+                verticalSpaceSmall,
+                TagDropdownField(
+                  enabled: model.textFieldEnabled,
+                  controller: model.tagTextController,
+                  onTagSelected: (tag) => model.addTag(tag),
+                ),
+                verticalSpaceMedium,
 
-          verticalSpaceLarge,
-          CustomButton(
-            height: 48,
-            backgroundColor: appButtonColor(),
-            text: "Done",
-            textColor: Colors.white,
-            isBusy: model.isBusy,
-            onPressed: () async {
-              // bool formSuccess = await model.validateAndSubmitForm(
-              //   name: nameController.text.trim(),
-              //   goal: goalsController.text.trim(),
-              //   why: whyController.text.trim(),
-              //   who: whoController.text.trim(),
-              //   resources: resourcesController.text.trim(),
-              //   charityURL: charityWebsiteController.text.trim(),
-              //   action1: action1Controller.text.trim(),
-              //   action2: action2Controller.text.trim(),
-              //   action3: action3Controller.text.trim(),
-              //   description1: description1Controller.text,
-              //   description2: description2Controller.text,
-              //   description3: description3Controller.text,
-              // );
-              // if (formSuccess) {
-              //   model.displayCauseUploadSuccessBottomSheet();
-              // }
-            },
+                ///POST BODY
+                textFieldHeader(
+                  "Message",
+                  "What would you like to share?",
+                ),
+                verticalSpaceSmall,
+                MultiLineTextField(
+                  enabled: model.textFieldEnabled,
+                  controller: model.postTextController,
+                  hintText: "Don't be shy...",
+                  initialValue: null,
+                ),
+                verticalSpaceMedium,
+              ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget appBarLoadingIndicator() {
+    return Padding(
+      padding: EdgeInsets.only(right: 16),
+      child: AppBarCircleProgressIndicator(color: appActiveColor(), size: 25),
+    );
+  }
+
+  Widget doneButton(CreatePostViewModel model) {
+    return Padding(
+      padding: EdgeInsets.only(right: 16, top: 18),
+      child: CustomTextButton(
+        onTap: () => model.showNewContentConfirmationBottomSheet(),
+        color: appFontColor(),
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        text: 'Done',
+        textAlign: TextAlign.right,
       ),
     );
   }
@@ -141,13 +171,18 @@ class CreatePostView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CreatePostViewModel>.reactive(
+      onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => CreatePostViewModel(),
       builder: (context, model, child) => Scaffold(
-        appBar: CustomAppBar().basicAppBar(title: "New Post", showBackButton: true),
+        appBar: CustomAppBar().basicActionAppBar(
+          title: model.isEditing ? 'Edit Post' : 'New Post',
+          showBackButton: true,
+          actionWidget: model.isBusy ? appBarLoadingIndicator() : doneButton(model),
+        ),
+        //CustomAppBar().a(title: "New Post", showBackButton: true),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
             height: screenHeight(context),
             width: screenWidth(context),
             color: appBackgroundColor(),

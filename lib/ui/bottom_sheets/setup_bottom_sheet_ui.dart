@@ -2,13 +2,14 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/ui/bottom_sheets/add_content_bottom_sheet/add_content_bottom_sheet.dart';
-import 'package:webblen/ui/bottom_sheets/confirmation_bottom_sheet/destructive_confirmation_bottom_sheet.dart';
+import 'package:webblen/ui/bottom_sheets/confirmation_bottom_sheets/destructive_confirmation_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/home_filter_bottom_sheet/home_filter_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_author_bottom_sheet/post_author_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_bottom_sheet/post_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/post_bottom_sheets/post_publish_successful_bottom_sheet/post_publish_successful_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/current_user_options_bottom_sheet/current_user_options_bottom_sheet.dart';
 
+import 'confirmation_bottom_sheets/new_content_confirmation_bottom_sheet/new_content_confirmation_bottom_sheet.dart';
 import 'image_picker_bottom_sheet/image_picker_bottom_sheet.dart';
 
 void setupBottomSheetUI() {
@@ -16,6 +17,8 @@ void setupBottomSheetUI() {
 
   final builders = {
     BottomSheetType.addContent: (context, sheetRequest, completer) => AddContentBottomSheet(request: sheetRequest, completer: completer),
+    BottomSheetType.newContentConfirmation: (context, sheetRequest, completer) =>
+        NewContentConfirmationBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.destructiveConfirmation: (context, sheetRequest, completer) =>
         DestructiveConfirmationBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.homeFilter: (context, sheetRequest, completer) => HomeFilterBottomSheet(request: sheetRequest, completer: completer),

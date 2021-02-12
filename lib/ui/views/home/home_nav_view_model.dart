@@ -8,7 +8,7 @@ import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
-import 'package:webblen/services/firestore/user_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/utils/network_status.dart';
 
@@ -105,6 +105,7 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     if (sheetResponse != null) {
       String res = sheetResponse.responseData;
       if (res == "new post") {
+        navigateToCreatePostPage();
       } else if (res == "new stream") {
         //
       } else if (res == "new event") {

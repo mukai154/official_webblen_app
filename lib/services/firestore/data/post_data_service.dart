@@ -48,49 +48,7 @@ class PostDataService {
     }
   }
 
-  Future createPost({
-    @required String id,
-    @required String parentID,
-    @required String authorID,
-    @required String webAppLink,
-    @required String imageURL,
-    @required List nearbyZipcodes,
-    @required bool paidOut,
-    @required List participantIDs,
-    @required String city,
-    @required String province,
-    @required int postDateTimeInMilliseconds,
-    @required List savedBy,
-    @required List sharedComs,
-    @required List tags,
-    @required List followers,
-    @required bool reported,
-    @required int commentCount,
-    @required String postType,
-    @required String body,
-  }) async {
-    WebblenPost post = WebblenPost(
-      id: id,
-      parentID: parentID,
-      authorID: authorID,
-      webAppLink: webAppLink,
-      imageURL: imageURL,
-      nearbyZipcodes: nearbyZipcodes,
-      paidOut: paidOut,
-      participantIDs: participantIDs,
-      city: city,
-      province: province,
-      postDateTimeInMilliseconds: postDateTimeInMilliseconds,
-      savedBy: savedBy,
-      sharedComs: sharedComs,
-      tags: tags,
-      followers: followers,
-      reported: reported,
-      commentCount: commentCount,
-      postType: postType,
-      body: body,
-    );
-
+  Future createPost({@required post}) async {
     await postsRef.doc(post.id).set(post.toMap()).catchError((e) {
       return e.message;
     });

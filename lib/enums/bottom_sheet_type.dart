@@ -1,5 +1,6 @@
 enum BottomSheetType {
   addContent,
+  newContentConfirmation,
   destructiveConfirmation,
   homeFilter,
   imagePicker,

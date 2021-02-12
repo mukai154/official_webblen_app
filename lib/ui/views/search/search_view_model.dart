@@ -5,7 +5,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/models/search_result.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/services/firestore/user_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 
 import 'all_search_results/all_search_results_view.dart';
 

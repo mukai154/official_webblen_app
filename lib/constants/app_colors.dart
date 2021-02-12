@@ -49,6 +49,10 @@ Color appBorderColorAlt() {
   return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
 }
 
+Color appConfirmationColor() {
+  return CustomColors.darkMountainGreen;
+}
+
 Color appDestructiveColor() {
   return Colors.redAccent;
 }
@@ -70,7 +74,15 @@ Color appShadowColor() {
 }
 
 Color appTextFieldContainerColor() {
-  return _themeService.isDarkMode ? Colors.white38 : CustomColors.iosOffWhite;
+  return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
+}
+
+Color appCursorColor() {
+  return _themeService.isDarkMode ? Colors.white : Colors.black;
+}
+
+Color appImageButtonColor() {
+  return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
 }
 
 Color appTextButtonColor() {

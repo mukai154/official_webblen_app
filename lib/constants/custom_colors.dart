@@ -4,6 +4,7 @@ class CustomColors {
   ///COMMON COLORS
   static const facebookBlue = Color.fromRGBO(59, 89, 152, 1.0);
   static const twitterBlue = Color.fromRGBO(29, 161, 242, 1.0);
+  static const darkMountainGreen = Color.fromRGBO(16, 172, 132, 1.0);
   static const cashAppGreen = Color.fromRGBO(40, 193, 1, 1.0);
   static const iosOffWhite = Color(0xFFF9F9F9);
   static const textFieldGray = Color.fromARGB(255, 241, 241, 241);

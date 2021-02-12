@@ -2,7 +2,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
-import 'package:webblen/services/firestore/notification_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
 
 class NotificationBellViewModel extends StreamViewModel<int> {
   NavigationService _navigationService = locator<NavigationService>();

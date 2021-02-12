@@ -6,8 +6,8 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/firestore/platform_data_service.dart';
-import 'package:webblen/services/firestore/post_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
 
 @singleton
 class HomeViewModel extends BaseViewModel {
@@ -48,6 +48,7 @@ class HomeViewModel extends BaseViewModel {
 
   openFilter() async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
       variant: BottomSheetType.homeFilter,
       takesInput: true,
       customData: {
@@ -57,7 +58,7 @@ class HomeViewModel extends BaseViewModel {
         'currentTagFilter': tagFilter,
       },
     );
-    if (sheetResponse.responseData != null) {
+    if (sheetResponse != null && sheetResponse.responseData != null) {
       cityName = sheetResponse.responseData['cityName'];
       areaCode = sheetResponse.responseData['areaCode'];
       sortBy = sheetResponse.responseData['sortBy'];
@@ -174,25 +175,6 @@ class HomeViewModel extends BaseViewModel {
     //set loading additional posts status
     loadingAdditionalPosts = false;
     notifyListeners();
-  }
-
-  ///ADD CONTENT BOTTOM SHEET
-  showAddContentOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      variant: BottomSheetType.addContent,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "new post") {
-        //
-      } else if (res == "new stream") {
-        //
-      } else if (res == "new event") {
-        //
-      }
-      notifyListeners();
-    }
   }
 
   ///NAVIGATION

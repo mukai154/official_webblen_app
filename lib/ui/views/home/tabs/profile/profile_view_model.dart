@@ -9,7 +9,7 @@ import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/services/firestore/user_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 
 @singleton
 class ProfileViewModel extends BaseViewModel {
