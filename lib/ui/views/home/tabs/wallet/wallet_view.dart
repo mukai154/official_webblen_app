@@ -3,11 +3,12 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view_model.dart';
 
 class WalletView extends StatelessWidget {
-  final VoidCallback addContentAction;
-  WalletView({this.addContentAction});
+  final WebblenUser user;
+  WalletView({this.user});
 
   Widget head(WalletViewModel model) {
     return Container(
@@ -29,7 +30,7 @@ class WalletView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: addContentAction,
+                  onPressed: () => model.showAddContentOptions(),
                   icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
                 ),
               ],

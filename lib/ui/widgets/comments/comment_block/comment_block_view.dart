@@ -16,6 +16,37 @@ class CommentBlockView extends StatelessWidget {
   final WebblenPostComment comment;
   CommentBlockView({@required this.comment, @required this.replyToComment, @required this.deleteComment});
 
+  List<TextSpan> convertToRichText(String text) {
+    List<String> words = text.split(" ");
+    List<TextSpan> richText = [
+      TextSpan(
+        text: '${comment.username} ',
+        style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.bold),
+      ),
+    ];
+    words.forEach((word) {
+      TextSpan textSpan;
+      if (word.startsWith("@")) {
+        textSpan = TextSpan(
+          text: "$word ",
+          style: TextStyle(color: appTextButtonColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+        );
+      } else if (word.startsWith("#")) {
+        textSpan = TextSpan(
+          text: "$word ",
+          style: TextStyle(color: appTextButtonColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+        );
+      } else {
+        textSpan = TextSpan(
+          text: "$word ",
+          style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+        );
+      }
+      richText.add(textSpan);
+    });
+    return richText;
+  }
+
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CommentBlockViewModel>.reactive(
@@ -53,16 +84,7 @@ class CommentBlockView extends StatelessWidget {
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(fontSize: 14.0, color: appFontColor()),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: '${comment.username} ',
-                                  style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: comment.message,
-                                  style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
-                                ),
-                              ],
+                              children: convertToRichText(comment.message),
                             ),
                           ),
                         ),

@@ -30,7 +30,7 @@ class NotificationBellViewModel extends StreamViewModel<int> {
 
   Stream<int> streamNotifCount() async* {
     while (currentUID != null) {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(seconds: 3));
       var res = await _notificationDataService.getNumberOfUnreadNotifications(currentUID);
       if (res is String) {
         yield null;
@@ -43,7 +43,7 @@ class NotificationBellViewModel extends StreamViewModel<int> {
   ///NAVIGATION
   navigateToNotificationsView() {
     notifCount = 0;
-    _navigationService.navigateTo(Routes.NotificationsViewRoute);
     notifyListeners();
+    _navigationService.navigateTo(Routes.NotificationsViewRoute);
   }
 }

@@ -12,18 +12,34 @@ class TagButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Padding(
+      padding: EdgeInsets.only(right: 4),
+      child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          margin: EdgeInsets.only(right: 16),
-          child: CustomText(
-            text: "#$tag",
-            color: appFontColorAlt(),
-            fontSize: 14,
-            textAlign: TextAlign.left,
-            fontWeight: FontWeight.w500,
+        child: Material(
+          elevation: 0,
+          color: appTagBackgroundColorAlt(),
+          borderRadius: BorderRadius.circular(14.0),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14.0),
+            onTap: onTap,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              height: 40,
+              child: Center(
+                child: CustomText(
+                  text: " #$tag",
+                  color: appFontColorAlt(),
+                  fontSize: 12,
+                  textAlign: TextAlign.left,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
-        ));
+        ),
+      ),
+    );
   }
 }
 
@@ -38,7 +54,7 @@ class RemovableTagButton extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Material(
-        elevation: 2.0,
+        elevation: 0,
         color: appBorderColorAlt(),
         borderRadius: BorderRadius.circular(14.0),
         child: InkWell(

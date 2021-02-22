@@ -171,7 +171,7 @@ class CreatePostView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CreatePostViewModel>.reactive(
-      onModelReady: (model) => model.initialize(),
+      onModelReady: (model) => model.initialize(context: context),
       viewModelBuilder: () => CreatePostViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicActionAppBar(

@@ -46,7 +46,7 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
             verticalSpaceSmall,
             CustomIconButton(
               icon: Icon(
-                FontAwesomeIcons.bookmark,
+                FontAwesomeIcons.heart,
                 size: 16,
               ),
               height: 45,

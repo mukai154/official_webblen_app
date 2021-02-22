@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 class CustomColors {
   ///COMMON COLORS
+  static const carminPink = Color.fromRGBO(235, 77, 75, 1.0);
+  static const turboYellow = Color.fromRGBO(249, 202, 36, 1.0);
   static const facebookBlue = Color.fromRGBO(59, 89, 152, 1.0);
   static const twitterBlue = Color.fromRGBO(29, 161, 242, 1.0);
   static const darkMountainGreen = Color.fromRGBO(16, 172, 132, 1.0);

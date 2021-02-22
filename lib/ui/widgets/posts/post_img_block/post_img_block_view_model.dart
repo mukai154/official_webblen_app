@@ -1,10 +1,8 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
-import 'package:webblen/enums/bottom_sheet_type.dart';
-import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
@@ -17,22 +15,18 @@ class PostImgBlockViewModel extends BaseViewModel {
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
   PostDataService _postDataService = locator<PostDataService>();
   UserDataService _userDataService = locator<UserDataService>();
+  SnackbarService _snackbarService = locator<SnackbarService>();
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   ShareService _shareService = locator<ShareService>();
 
-  bool isAuthor = false;
+  bool savedPost = false;
   String authorImageURL = "https://icon2.cleanpng.com/20180228/hdq/kisspng-circle-angle-material-gray-circle-pattern-5a9716f391f119.9417320315198512515978.jpg";
   String authorUsername = "";
 
-  initialize(String postAuthorID) async {
+  initialize({String currentUID, String postID, String postAuthorID}) async {
     setBusy(true);
 
-    //Check if Current User is Author
-    String currentUID = await _authService.getCurrentUserID();
-    if (postAuthorID == currentUID) {
-      isAuthor = true;
-    }
-
+    savedPost = await _postDataService.checkIfPostSaved(userID: currentUID, postID: postID);
     //Get Post Author Data
     _userDataService.getWebblenUserByID(postAuthorID).then((res) {
       if (res is String) {
@@ -46,38 +40,27 @@ class PostImgBlockViewModel extends BaseViewModel {
     });
   }
 
-  showOptions({WebblenPost post, VoidCallback refreshAction}) async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      variant: isAuthor ? BottomSheetType.postAuthorOptions : BottomSheetType.postOptions,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "edit") {
-        // String data = await _navigationService.navigateTo(Routes.CreateForumPostViewRoute, arguments: {
-        //   'postID': post.id,
-        // });
-        // if (data != null && data == 'newPostCreated') {
-        //   refreshAction();
-        // }
-      } else if (res == "share") {
-        //share post link
-        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: authorUsername, post: post);
-        _shareService.shareLink(url);
-      } else if (res == "report") {
-        //report post
-        String currentUID = await _authService.getCurrentUserID();
-        _postDataService.reportPost(postID: post.id, reporterID: currentUID);
-      } else if (res == "delete") {
-        //delete
-      }
-      notifyListeners();
+  saveUnsavePost({String currentUID, String postID}) async {
+    if (savedPost) {
+      savedPost = false;
+    } else {
+      savedPost = true;
     }
+    HapticFeedback.lightImpact();
+    notifyListeners();
+    await _postDataService.saveUnsavePost(userID: currentUID, postID: postID, savedPost: savedPost);
   }
 
   ///NAVIGATION
-  navigateToPostView(String postID) {
-    _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'postID': postID});
+  navigateToPostView(String postID) async {
+    String res = await _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'postID': postID});
+    if (res == "post no longer exists") {
+      _snackbarService.showSnackbar(
+        title: 'Uh Oh...',
+        message: "This post no longer exists",
+        duration: Duration(seconds: 5),
+      );
+    }
   }
 
   navigateToUserView(String uid) {

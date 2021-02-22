@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/utils/random_string_generator.dart';
 
 class PostViewModel extends BaseViewModel {
@@ -25,6 +28,8 @@ class PostViewModel extends BaseViewModel {
   PostDataService _postDataService = locator<PostDataService>();
   CommentDataService _commentDataService = locator<CommentDataService>();
   NotificationDataService _notificationDataService = locator<NotificationDataService>();
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
+  ShareService _shareService = locator<ShareService>();
 
   ///HELPERS
   ScrollController postScrollController = ScrollController();
@@ -57,7 +62,9 @@ class PostViewModel extends BaseViewModel {
     String postID = args['postID'] ?? "";
 
     var res = await _postDataService.getPostByID(postID);
-    if (res is String) {
+    if (res == null) {
+      _navigationService.back(result: 'post no longer exists');
+      return;
     } else {
       post = res;
     }
@@ -71,7 +78,9 @@ class PostViewModel extends BaseViewModel {
     postScrollController.addListener(() {
       double triggerFetchMoreSize = 0.7 * postScrollController.position.maxScrollExtent;
       if (postScrollController.position.pixels > triggerFetchMoreSize) {
-        loadAdditionalComments();
+        try {
+          loadAdditionalComments();
+        } catch (e) {}
       }
     });
     await loadComments();
@@ -224,25 +233,55 @@ class PostViewModel extends BaseViewModel {
   }
 
   ///DIALOGS & BOTTOM SHEETS
-  showPostOptions() async {
+  //show post options
+  showPostOptions({BuildContext context, WebblenPost post}) async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       barrierDismissible: true,
-      variant: isAuthor ? BottomSheetType.postAuthorOptions : BottomSheetType.postOptions,
+      variant: currentUser.id == post.authorID ? BottomSheetType.postAuthorOptions : BottomSheetType.postOptions,
     );
     if (sheetResponse != null) {
       String res = sheetResponse.responseData;
       if (res == "edit") {
-        //edit
+        //edit post
+        _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {
+          'postID': post.id,
+        });
       } else if (res == "share") {
-        //share
+        //share post link
+        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: "@${currentUser.username}", post: post);
+        _shareService.shareLink(url);
       } else if (res == "report") {
-        //report
+        //report post
+        _postDataService.reportPost(postID: post.id, reporterID: currentUser.id);
       } else if (res == "delete") {
         //delete
+        deletePostConfirmation(context: context, post: post);
+      }
+      notifyListeners();
+    }
+  }
+
+  //show delete post confirmation
+  deletePostConfirmation({BuildContext context, WebblenPost post}) async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      title: "Delete Post",
+      description: "Are You Sure You Want to Delete this Post?",
+      mainButtonTitle: "Delete Post",
+      secondaryButtonTitle: "Cancel",
+      barrierDismissible: true,
+      variant: BottomSheetType.destructiveConfirmation,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "confirmed") {
+        _postDataService.deletePost(post: post);
+        _navigationService.back();
+        notifyListeners();
       }
     }
   }
 
+  //show delete comment confirmation
   showDeleteCommentConfirmation({BuildContext context, WebblenPostComment comment}) async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       title: "Delete Comment",

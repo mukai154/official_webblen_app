@@ -85,8 +85,16 @@ Color appImageButtonColor() {
   return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
 }
 
+Color appTagBackgroundColorAlt() {
+  return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
+}
+
 Color appTextButtonColor() {
   return Colors.blue;
+}
+
+Color appSavedContentColor() {
+  return CustomColors.carminPink;
 }
 
 Color appShimmerBaseColor() {

@@ -10,10 +10,14 @@ import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostTextBlockView extends StatelessWidget {
+  final String currentUID;
   final WebblenPost post;
+  final Function(WebblenPost) showPostOptions;
 
   PostTextBlockView({
+    this.currentUID,
     this.post,
+    this.showPostOptions,
   });
 
   Widget head(PostTextBlockViewModel model) {
@@ -68,10 +72,7 @@ class PostTextBlockView extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.more_horiz),
-            onPressed: () => model.showOptions(
-              post: post,
-              refreshAction: null,
-            ),
+            onPressed: () => showPostOptions(post),
           ),
         ],
       ),
@@ -92,28 +93,21 @@ class PostTextBlockView extends StatelessWidget {
     );
   }
 
-  Widget commentCountAndPostTime() {
+  Widget commentSaveAndPostTime(PostTextBlockViewModel model) {
     return Padding(
-      padding: EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0, bottom: 8.0),
+      padding: EdgeInsets.only(left: 16.0, top: 8.0, right: 16.0, bottom: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Icon(
-                FontAwesomeIcons.comment,
-                size: 16,
-                color: appFontColor(),
-              ),
-              SizedBox(
-                width: 8.0,
-              ),
-              Text(
-                post.commentCount.toString(),
-                style: TextStyle(
-                  fontSize: 18,
-                  color: appFontColor(),
+              GestureDetector(
+                onTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
+                child: Icon(
+                  model.savedPost ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                  size: 18,
+                  color: model.savedPost ? appSavedContentColor() : appIconColorAlt(),
                 ),
               ),
             ],
@@ -127,6 +121,26 @@ class PostTextBlockView extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget commentCount(PostTextBlockViewModel model) {
+    return post.commentCount == 0
+        ? Container()
+        : Padding(
+            padding: EdgeInsets.only(left: 16.0, top: 12.0, right: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  post.commentCount == 1 ? "${post.commentCount} comment" : "${post.commentCount} comments",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: appFontColorAlt(),
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 
   Widget postMessage(PostTextBlockViewModel model) {
@@ -162,10 +176,10 @@ class PostTextBlockView extends StatelessWidget {
   }
 
   Widget postTags(PostTextBlockViewModel model) {
-    return post.tags.isEmpty
+    return post.tags == null || post.tags.isEmpty
         ? Container()
         : Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            margin: EdgeInsets.only(left: 16, bottom: 8, right: 16),
             height: 30,
             child: ListView.builder(
               addAutomaticKeepAlives: true,
@@ -193,8 +207,9 @@ class PostTextBlockView extends StatelessWidget {
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
       viewModelBuilder: () => PostTextBlockViewModel(),
-      onModelReady: (model) => model.initialize(post.authorID),
+      onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post.authorID, postID: post.id),
       builder: (context, model, child) => GestureDetector(
+        onDoubleTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
         onTap: () => model.navigateToPostView(post.id),
         child: Container(
           child: Column(
@@ -204,9 +219,11 @@ class PostTextBlockView extends StatelessWidget {
             children: <Widget>[
               head(model),
               postBody(),
-              commentCountAndPostTime(),
+              commentCount(model),
+              commentSaveAndPostTime(model),
               verticalSpaceSmall,
               postTags(model),
+              verticalSpaceTiny,
               Divider(
                 thickness: 4.0,
                 color: appPostBorderColor(),

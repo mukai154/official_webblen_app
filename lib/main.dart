@@ -22,7 +22,7 @@ void setupSnackBarUi() {
   final service = locator<SnackbarService>();
   service.registerSnackbarConfig(
     SnackbarConfig(
-      backgroundColor: Colors.red,
+      backgroundColor: Colors.redAccent,
       textColor: Colors.white,
       mainButtonTextColor: Colors.black,
     ),
@@ -43,7 +43,7 @@ class WebblenApp extends StatelessWidget {
         themeMode: themeMode,
         initialRoute: Routes.RootViewRoute,
         onGenerateRoute: WebblenRouter().onGenerateRoute,
-        navigatorKey: locator<NavigationService>().navigatorKey,
+        navigatorKey: StackedService.navigatorKey,
       ),
     );
   }

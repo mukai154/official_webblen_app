@@ -11,10 +11,13 @@ import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostImgBlockView extends StatelessWidget {
+  final String currentUID;
   final WebblenPost post;
-
+  final Function(WebblenPost) showPostOptions;
   PostImgBlockView({
+    this.currentUID,
     this.post,
+    this.showPostOptions,
   });
 
   Widget head(PostImgBlockViewModel model) {
@@ -79,10 +82,7 @@ class PostImgBlockView extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.more_horiz),
-            onPressed: () => model.showOptions(
-              post: post,
-              refreshAction: null,
-            ),
+            onPressed: () => showPostOptions(post),
           ),
         ],
       ),
@@ -99,7 +99,7 @@ class PostImgBlockView extends StatelessWidget {
     );
   }
 
-  Widget commentCountAndPostTime() {
+  Widget commentSaveAndPostTime(PostImgBlockViewModel model) {
     return Padding(
       padding: EdgeInsets.only(left: 16.0, top: 16.0, right: 16.0, bottom: 8.0),
       child: Row(
@@ -108,19 +108,12 @@ class PostImgBlockView extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
-              Icon(
-                FontAwesomeIcons.comment,
-                size: 16,
-                color: appIconColor(),
-              ),
-              SizedBox(
-                width: 8.0,
-              ),
-              Text(
-                post.commentCount.toString(),
-                style: TextStyle(
-                  fontSize: 18,
-                  color: appFontColor(),
+              GestureDetector(
+                onTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
+                child: Icon(
+                  model.savedPost ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                  size: 18,
+                  color: model.savedPost ? appSavedContentColor() : appIconColorAlt(),
                 ),
               ),
             ],
@@ -136,9 +129,29 @@ class PostImgBlockView extends StatelessWidget {
     );
   }
 
+  Widget commentCount(PostImgBlockViewModel model) {
+    return post.commentCount == 0
+        ? Container()
+        : Padding(
+            padding: EdgeInsets.only(left: 16.0, top: 12.0, right: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Text(
+                  post.commentCount == 1 ? "${post.commentCount} comment" : "${post.commentCount} comments",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: appFontColorAlt(),
+                  ),
+                ),
+              ],
+            ),
+          );
+  }
+
   Widget postMessage(PostImgBlockViewModel model) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      padding: EdgeInsets.only(left: 16, top: 6, right: 16),
       child: RichText(
         text: TextSpan(
           style: TextStyle(
@@ -169,27 +182,29 @@ class PostImgBlockView extends StatelessWidget {
   }
 
   Widget postTags(PostImgBlockViewModel model) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      height: 30,
-      child: ListView.builder(
-        addAutomaticKeepAlives: true,
-        physics: NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        padding: EdgeInsets.only(
-          top: 4.0,
-          bottom: 4.0,
-        ),
-        itemCount: post.tags.length,
-        itemBuilder: (context, index) {
-          return TagButton(
-            onTap: null,
-            tag: post.tags[index],
+    return post.tags == null || post.tags.isEmpty
+        ? Container()
+        : Container(
+            margin: EdgeInsets.only(left: 16, bottom: 8, right: 16),
+            height: 30,
+            child: ListView.builder(
+              addAutomaticKeepAlives: true,
+              physics: NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              padding: EdgeInsets.only(
+                top: 4.0,
+                bottom: 4.0,
+              ),
+              itemCount: post.tags.length,
+              itemBuilder: (context, index) {
+                return TagButton(
+                  onTap: null,
+                  tag: post.tags[index],
+                );
+              },
+            ),
           );
-        },
-      ),
-    );
   }
 
   @override
@@ -198,8 +213,9 @@ class PostImgBlockView extends StatelessWidget {
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
       viewModelBuilder: () => PostImgBlockViewModel(),
-      onModelReady: (model) => model.initialize(post.authorID),
+      onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post.authorID, postID: post.id),
       builder: (context, model, child) => GestureDetector(
+        onDoubleTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
         onTap: () => model.navigateToPostView(post.id),
         child: Container(
           child: Column(
@@ -209,8 +225,9 @@ class PostImgBlockView extends StatelessWidget {
             children: <Widget>[
               head(model),
               postImg(context),
-              commentCountAndPostTime(),
+              commentSaveAndPostTime(model),
               postMessage(model),
+              commentCount(model),
               verticalSpaceSmall,
               postTags(model),
               Divider(

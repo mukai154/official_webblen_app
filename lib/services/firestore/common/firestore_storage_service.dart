@@ -14,4 +14,9 @@ class FirestoreStorageService {
     String downloadUrl = await (await uploadTask).ref.getDownloadURL();
     return downloadUrl;
   }
+
+  deleteImage({@required String storageBucket, @required String folderName, @required String fileName}) async {
+    Reference storageReference = FirebaseStorage.instance.ref();
+    storageReference.child(storageBucket).child(folderName).child(fileName).delete().catchError((e) {});
+  }
 }

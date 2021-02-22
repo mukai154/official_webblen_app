@@ -36,7 +36,7 @@ class SettingsView extends StatelessWidget {
                 showBottomBorder: true,
               ),
               CustomFlatButton(
-                onTap: null,
+                onTap: () => model.signOut(context: context),
                 fontColor: Colors.red,
                 fontSize: 16,
                 text: "Log Out",

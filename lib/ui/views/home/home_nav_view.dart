@@ -24,32 +24,28 @@ class HomeNavView extends StatelessWidget {
           user: model.user,
           initialCityName: model.initialCityName,
           initialAreaCode: model.initialAreaCode,
-          addContentAction: () => model.showAddContentOptions(),
         );
       case 1:
         return ExploreView(
           user: model.user,
-          addContentAction: () => model.showAddContentOptions(),
         );
       case 2:
         return CheckInView(
-          addContentAction: () => model.showAddContentOptions(),
+          user: model.user,
         );
       case 3:
         return WalletView(
-          addContentAction: () => model.showAddContentOptions(),
+          user: model.user,
         );
       case 4:
         return ProfileView(
           user: model.user,
-          addContentAction: () => model.showAddContentOptions(),
         );
       default:
         return HomeView(
           user: model.user,
           initialCityName: model.initialCityName,
           initialAreaCode: model.initialAreaCode,
-          addContentAction: () => model.showAddContentOptions(),
         );
     }
   }

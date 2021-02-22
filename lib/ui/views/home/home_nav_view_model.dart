@@ -33,6 +33,7 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
 
   ///TAB BAR STATE
   int _navBarIndex = 0;
+
   int get navBarIndex => _navBarIndex;
 
   void setNavBarIndex(int index) {
@@ -40,99 +41,7 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
     notifyListeners();
   }
 
-  initialize() async {
-    setBusy(true);
-    isConnectedToNetwork().then((connected) {
-      //check network status
-      if (!connected) {
-        initErrorStatus = InitErrorStatus.network;
-        setBusy(false);
-        notifyListeners();
-        _snackbarService.showSnackbar(
-          title: 'Network Error',
-          message: "There Was an Issue Connecting to the Internet",
-          duration: Duration(seconds: 5),
-        );
-      } else {
-        //get location data
-        getLocationDetails().then((e) async {
-          if (e != null) {
-            initErrorStatus = InitErrorStatus.location;
-            setBusy(false);
-            notifyListeners();
-            _snackbarService.showSnackbar(
-              title: 'Location Error',
-              message: "There Was an Issue Getting Your Location",
-              duration: Duration(seconds: 5),
-            );
-          } else {
-            //if there are no errors, check for dynamic links
-            initErrorStatus = InitErrorStatus.none;
-            await _dynamicLinkService.handleDynamicLinks();
-            notifyListeners();
-          }
-        });
-      }
-    });
-  }
-
-  ///NETWORK STATUS
-  Future<bool> isConnectedToNetwork() async {
-    bool isConnected = await NetworkStatus().isConnected();
-    return isConnected;
-  }
-
-  ///LOCATION
-  Future<String> getLocationDetails() async {
-    String error;
-    try {
-      LocationData location = await _locationService.getCurrentLocation();
-      initialCityName = await _locationService.getCityNameFromLatLon(location.latitude, location.longitude);
-      initialAreaCode = await _locationService.getZipFromLatLon(location.latitude, location.longitude);
-      notifyListeners();
-    } catch (e) {
-      error = "Location Error";
-    }
-    return error;
-  }
-
-  ///ADD CONTENT BOTTOM SHEET
-  showAddContentOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      variant: BottomSheetType.addContent,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "new post") {
-        navigateToCreatePostPage();
-      } else if (res == "new stream") {
-        //
-      } else if (res == "new event") {
-        //
-      }
-      notifyListeners();
-    }
-  }
-
-  ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-  navigateToCreatePostPage() {
-    _navigationService.navigateTo(Routes.CreatePostViewRoute);
-  }
-
-  // navigateToCreateStreamPage() {
-  //   _navigationService.navigateTo(Routes.CreateStreamViewRoute);
-  // }
-  //
-  // navigateToCreateEventPage() {
-  //   _navigationService.navigateTo(Routes.CreateEventViewRoute);
-  // }
-
-  ///STREAM DATA
+  ///STREAM USER DATA
   @override
   void onData(WebblenUser data) {
     if (data != null) {
@@ -157,4 +66,104 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
       }
     }
   }
+
+  ///INITIALIZE DATA
+  initialize() async {
+    setBusy(true);
+    isConnectedToNetwork().then((connected) {
+      //check network status
+      if (connected != null) {
+        if (!connected) {
+          initErrorStatus = InitErrorStatus.network;
+          setBusy(false);
+          notifyListeners();
+          _snackbarService.showSnackbar(
+            title: 'Network Error',
+            message: "There Was an Issue Connecting to the Internet",
+            duration: Duration(seconds: 5),
+          );
+        } else {
+          //get location data
+          getLocationDetails().then((e) async {
+            if (e != null) {
+              initErrorStatus = InitErrorStatus.location;
+              setBusy(false);
+              notifyListeners();
+              _snackbarService.showSnackbar(
+                title: 'Location Error',
+                message: "There Was an Issue Getting Your Location",
+                duration: Duration(seconds: 5),
+              );
+            } else {
+              //if there are no errors, check for dynamic links
+              initErrorStatus = InitErrorStatus.none;
+              await _dynamicLinkService.handleDynamicLinks();
+              notifyListeners();
+            }
+          });
+        }
+      }
+    });
+  }
+
+  ///NETWORK STATUS
+  Future<bool> isConnectedToNetwork() async {
+    bool isConnected = await NetworkStatus().isConnected();
+    return isConnected;
+  }
+
+  ///LOCATION
+  Future<String> getLocationDetails() async {
+    String error;
+    try {
+      LocationData location = await _locationService.getCurrentLocation();
+      initialCityName = await _locationService.getCityNameFromLatLon(location.latitude, location.longitude);
+      initialAreaCode = await _locationService.getZipFromLatLon(location.latitude, location.longitude);
+      notifyListeners();
+    } catch (e) {
+      error = "Location Error";
+    }
+    return error;
+  }
+
+  ///BOTTOM SHEETS
+  //bottom sheet for new post, stream, or event
+  showAddContentOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.addContent,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "new post") {
+        navigateToCreatePostPage();
+      } else if (res == "new stream") {
+        //
+      } else if (res == "new event") {
+        //
+      }
+      notifyListeners();
+    }
+  }
+
+  //bottom sheet for post options
+  showPostOptions() async {}
+
+  ///NAVIGATION
+// replaceWithPage() {
+//   _navigationService.replaceWith(PageRouteName);
+// }
+//
+  navigateToCreatePostPage() {
+    _navigationService.navigateTo(Routes.CreatePostViewRoute);
+  }
+
+// navigateToCreateStreamPage() {
+//   _navigationService.navigateTo(Routes.CreateStreamViewRoute);
+// }
+//
+// navigateToCreateEventPage() {
+//   _navigationService.navigateTo(Routes.CreateEventViewRoute);
+// }
+
 }

@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/algolia/algolia_search_service.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/utils/get_last_word_in_string.dart';
 
 import 'comment_text_field_view_model.dart';
 
@@ -21,6 +27,8 @@ class CommentTextFieldView extends StatelessWidget {
     @required this.replyReceiverUsername,
     @required this.onSubmitted,
   });
+
+  final AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
 
   Widget replyContainer() {
     return Container(
@@ -72,7 +80,7 @@ class CommentTextFieldView extends StatelessWidget {
             isBusy: false,
           ),
           Container(
-            height: isReplying ? 80 : 50,
+            height: isReplying ? 90 : 50,
             width: MediaQuery.of(context).size.width - 90,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -80,35 +88,93 @@ class CommentTextFieldView extends StatelessWidget {
               children: [
                 isReplying ? replyContainer() : Container(),
                 Container(
-                  height: 40,
+                  //height: 30,
                   margin: EdgeInsets.only(left: 8.0),
                   padding: EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0),
                   decoration: BoxDecoration(
-                    color: Colors.black87,
+                    color: isDarkMode() ? Colors.black87 : Colors.black54,
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                   ),
-                  child: TextField(
-                    focusNode: focusNode,
-                    minLines: 1,
-                    maxLines: 5,
-                    maxLengthEnforced: true,
-                    cursorColor: Colors.white,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (val) => onSubmitted(val),
-                    style: TextStyle(color: Colors.white),
-                    controller: commentTextController, //messageFieldController,
-                    textCapitalization: TextCapitalization.sentences,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(150),
-                    ],
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      isDense: true,
-                      hintText: 'Comment',
-                      hintStyle: TextStyle(
-                        color: Colors.white30,
+                  child: TypeAheadField(
+                    keepSuggestionsOnSuggestionSelected: true,
+                    hideOnEmpty: false,
+                    hideOnLoading: true,
+                    hideKeyboard: false,
+                    suggestionsBoxDecoration: SuggestionsBoxDecoration(color: appBackgroundColor(), borderRadius: BorderRadius.all(Radius.circular(8))),
+                    direction: AxisDirection.up,
+                    textFieldConfiguration: TextFieldConfiguration(
+                      onSubmitted: (val) => onSubmitted(val),
+                      focusNode: focusNode,
+                      textInputAction: TextInputAction.send,
+                      minLines: 1,
+                      maxLines: 5,
+                      maxLengthEnforced: true,
+                      enabled: true,
+                      controller: commentTextController,
+                      textCapitalization: TextCapitalization.sentences,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(150),
+                      ],
+                      cursorColor: appCursorColor(),
+                      decoration: InputDecoration(
+                        hintText: "Comment",
+                        border: InputBorder.none,
                       ),
+                      autofocus: false,
                     ),
+                    noItemsFoundBuilder: (context) {
+                      return Container(height: 0, width: 0);
+                    },
+                    suggestionsCallback: (searchTerm) async {
+                      int cursorPosition = commentTextController.selection.baseOffset;
+                      String cursorString = searchTerm.substring(0, cursorPosition);
+                      String lastWord = getLastWordInString(cursorString);
+                      if (lastWord.startsWith("@") && lastWord.length > 1) {
+                        return await _algoliaSearchService.queryUsers(searchTerm: lastWord.substring(1, lastWord.length - 1), resultsLimit: 3);
+                      }
+                      return null;
+                    },
+                    itemBuilder: (context, WebblenUser user) {
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        height: 50,
+                        child: Row(
+                          children: [
+                            UserProfilePic(
+                              userPicUrl: user.profilePicURL,
+                              size: 35,
+                              isBusy: false,
+                            ),
+                            horizontalSpaceTiny,
+                            CustomText(
+                              text: "@${user.username}",
+                              fontSize: 16,
+                              textAlign: TextAlign.left,
+                              fontWeight: FontWeight.bold,
+                              color: appFontColor(),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                    onSuggestionSelected: (WebblenUser user) {
+                      focusNode.requestFocus();
+                      int cursorPosition = commentTextController.selection.baseOffset;
+                      String startOfString = commentTextController.text.substring(0, cursorPosition - 1);
+                      print(startOfString);
+
+                      String endOfString = commentTextController.text.substring(cursorPosition - 1, commentTextController.text.length - 1);
+                      if (endOfString.length == 1) {
+                        endOfString = "";
+                      } else if (endOfString.length > 1) {
+                        endOfString = endOfString.substring(2, endOfString.length - 1);
+                      }
+                      String modifiedStartOfString = replaceLastWordInString(startOfString, "@${user.username} ");
+
+                      commentTextController.text = modifiedStartOfString + " " + endOfString;
+
+                      commentTextController.selection = TextSelection.fromPosition(TextPosition(offset: modifiedStartOfString.length));
+                    },
                   ),
                 ),
               ],

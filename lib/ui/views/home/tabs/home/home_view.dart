@@ -18,14 +18,13 @@ class HomeView extends StatefulWidget {
   final WebblenUser user;
   final String initialCityName;
   final String initialAreaCode;
-  final VoidCallback addContentAction;
-  HomeView({this.user, this.initialCityName, this.initialAreaCode, this.addContentAction});
+  HomeView({this.user, this.initialCityName, this.initialAreaCode});
 
   @override
   _HomeViewState createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin {
+class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   TabController _tabController;
 
   Widget head(HomeViewModel model) {
@@ -61,7 +60,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
               ),
               IconButton(
                 iconSize: 20,
-                onPressed: widget.addContentAction,
+                onPressed: () => model.showAddContentOptions(),
                 icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
               ),
             ],
@@ -96,16 +95,18 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                 refreshData: () async {},
               )
             : ListPosts(
+                currentUID: widget.user.id,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('home-posts'),
                 scrollController: model.scrollController,
+                showPostOptions: (post) => model.showPostOptions(context: context, post: post),
               ),
         ZeroStateView(
           imageAssetName: "video_phone",
           imageSize: 200,
           header: "No Streams in ${model.cityName} Found",
-          subHeader: model.postPromo != null
+          subHeader: model.streamPromo != null
               ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo.toStringAsFixed(2)} WBLN!"
               : "Schedule a Stream for ${model.cityName} Now!",
           mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo.toStringAsFixed(2)} WBLN" : "Create Stream",
@@ -143,6 +144,9 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
   }
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _tabController = TabController(
@@ -153,6 +157,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ViewModelBuilder<HomeViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,

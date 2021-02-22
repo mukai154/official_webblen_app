@@ -13,8 +13,7 @@ import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class ProfileView extends StatefulWidget {
   final WebblenUser user;
-  final VoidCallback addContentAction;
-  ProfileView({this.user, this.addContentAction});
+  ProfileView({this.user});
 
   @override
   _ProfileViewState createState() => _ProfileViewState();
@@ -41,7 +40,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
           Row(
             children: [
               IconButton(
-                onPressed: () => model.showOptions(),
+                onPressed: () => model.showUserOptions(),
                 icon: Icon(
                   FontAwesomeIcons.ellipsisH,
                   color: appIconColor(),
@@ -50,7 +49,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
               ),
               IconButton(
                 iconSize: 20,
-                onPressed: widget.addContentAction,
+                onPressed: () => model.showAddContentOptions(),
                 icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
               ),
             ],
@@ -115,7 +114,13 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 secondaryAction: null,
                 refreshData: model.refreshPosts,
               )
-            : ListPosts(refreshData: model.refreshPosts, postResults: model.postResults, pageStorageKey: PageStorageKey('profile-posts')),
+            : ListPosts(
+                currentUID: widget.user.id,
+                refreshData: model.refreshPosts,
+                postResults: model.postResults,
+                pageStorageKey: PageStorageKey('profile-posts'),
+                showPostOptions: (post) => model.showPostOptions(context: context, post: post),
+              ),
 
         //scheduled streams
         ZeroStateView(
@@ -206,7 +211,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
     return ViewModelBuilder<ProfileViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
-      onModelReady: (model) => model.initialize(_tabController, widget.user),
+      onModelReady: (model) => model.initialize(context: context, tabController: _tabController, currentUser: widget.user),
       viewModelBuilder: () => locator<ProfileViewModel>(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,

@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -14,7 +15,7 @@ import 'package:webblen/ui/widgets/list_builders/list_comments.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostView extends StatelessWidget {
-  final FocusNode focusNode = FocusNode();
+  final FocusNode focusNode = FocusNode(canRequestFocus: debugInstrumentationEnabled, skipTraversal: true);
 
   Widget postHead(PostViewModel model) {
     return Padding(
@@ -201,7 +202,7 @@ class PostView extends StatelessWidget {
           title: "Post",
           showBackButton: true,
           actionWidget: IconButton(
-            onPressed: () => model.showPostOptions(),
+            onPressed: model.isBusy ? () {} : () => model.showPostOptions(context: context, post: model.post),
             icon: Icon(
               FontAwesomeIcons.ellipsisH,
               size: 16,
