@@ -5,7 +5,7 @@ import 'package:location/location.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
-import 'package:webblen/services/firestore/platform_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
 
 class LocationService {
   Map<String, double> currentLocation;
@@ -39,7 +39,7 @@ class LocationService {
   }
 
   Future<List> findNearestZipcodes(String zipcode) async {
-    List zips = [];
+    List zips;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'findNearestZipcodes',
     );
@@ -49,7 +49,7 @@ class LocationService {
         'zipcode': zipcode,
       },
     ).catchError((e) {
-      print(e);
+      //print(e);
     });
     if (result != null) {
       List areaCodes = result.data['data'];
@@ -71,12 +71,45 @@ class LocationService {
         'lon': lon,
       },
     ).catchError((e) {
-      print(e);
+      //print(e);
     });
     if (result != null) {
       data = result.data['data'][0];
     }
     return data;
+  }
+
+  Future<String> getCurrentZipcode() async {
+    LocationData locationData = await getCurrentLocation();
+    if (locationData == null) {
+      return null;
+    }
+    double lat = locationData.latitude;
+    double lon = locationData.longitude;
+    String zip = await getZipFromLatLon(lat, lon);
+    return zip;
+  }
+
+  Future<String> getCurrentCity() async {
+    LocationData locationData = await getCurrentLocation();
+    if (locationData == null) {
+      return null;
+    }
+    double lat = locationData.latitude;
+    double lon = locationData.longitude;
+    String city = await getCityNameFromLatLon(lat, lon);
+    return city;
+  }
+
+  Future<String> getCurrentProvince() async {
+    LocationData locationData = await getCurrentLocation();
+    if (locationData == null) {
+      return null;
+    }
+    double lat = locationData.latitude;
+    double lon = locationData.longitude;
+    String province = await getProvinceFromLatLon(lat, lon);
+    return province;
   }
 
   Future<String> getAddressFromLatLon(double lat, double lon) async {
@@ -107,6 +140,16 @@ class LocationService {
     var address = addresses.first;
     cityName = address.locality;
     return cityName;
+  }
+
+  Future<String> getProvinceFromLatLon(double lat, double lon) async {
+    String province;
+    Coordinates coordinates = Coordinates(lat, lon);
+    String googleAPIKey = await _platformDataService.getGoogleApiKey().catchError((e) {});
+    var addresses = await Geocoder.google(googleAPIKey).findAddressesFromCoordinates(coordinates);
+    var address = addresses.first;
+    province = address.adminArea;
+    return province;
   }
 
   double getLatFromGeoPoint(Map<dynamic, dynamic> geoP) {

@@ -18,11 +18,15 @@ Color appButtonColor() {
 }
 
 Color appButtonColorAlt() {
-  return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
+  return _themeService.isDarkMode ? CustomColors.steelGray : CustomColors.iosOffWhite;
 }
 
 Color appIconColor() {
   return _themeService.isDarkMode ? Colors.white : Colors.black;
+}
+
+Color appIconColorAlt() {
+  return _themeService.isDarkMode ? Colors.white38 : Colors.black45;
 }
 
 Color appFontColor() {
@@ -33,7 +37,7 @@ Color appFontColorAlt() {
   return _themeService.isDarkMode ? Colors.white54 : Colors.black54;
 }
 
-Color appPostBorderColor() {
+Color appDividerColor() {
   return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
 }
 
@@ -43,6 +47,14 @@ Color appBorderColor() {
 
 Color appBorderColorAlt() {
   return _themeService.isDarkMode ? Colors.white12 : Colors.black12;
+}
+
+Color appConfirmationColor() {
+  return CustomColors.darkMountainGreen;
+}
+
+Color appDestructiveColor() {
+  return Colors.redAccent;
 }
 
 Color appActiveColor() {
@@ -62,7 +74,15 @@ Color appShadowColor() {
 }
 
 Color appTextFieldContainerColor() {
-  return _themeService.isDarkMode ? Colors.white38 : CustomColors.iosOffWhite;
+  return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
+}
+
+Color appCursorColor() {
+  return _themeService.isDarkMode ? Colors.white : Colors.black;
+}
+
+Color appImageButtonColor() {
+  return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
 }
 
 Color appTextButtonColor() {

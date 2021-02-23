@@ -10,13 +10,13 @@ class WebblenEvent {
   String imageURL;
   String venueName;
   String streetAddress;
-  List nearbyZipcodes;
+  List<String> nearbyZipcodes;
   String city;
   String province;
   double lat;
   double lon;
-  List sharedComs;
-  List tags;
+  List<String> sharedComs;
+  List<String> tags;
   int clicks;
   String website;
   String fbUsername;
@@ -25,7 +25,7 @@ class WebblenEvent {
   double checkInRadius;
   int estimatedTurnout;
   int actualTurnout;
-  List attendees;
+  List<String> attendees;
   double eventPayout;
   String recurrence;
   int startDateTimeInMilliseconds;
@@ -38,7 +38,7 @@ class WebblenEvent {
   String privacy;
   bool reported;
   String webAppLink;
-  List savedBy;
+  List<String> savedBy;
   bool paidOut;
 
   WebblenEvent({
@@ -97,14 +97,14 @@ class WebblenEvent {
     desc: data['desc'],
     imageURL: data['imageURL'],
     venueName: data['venueName'],
-    nearbyZipcodes: data['nearbyZipcodes'],
+    nearbyZipcodes: data['nearbyZipcodes'].cast<String>(),
     streetAddress: data['streetAddress'],
     city: data['city'],
     province: data['province'],
     lat: data['lat'],
     lon: data['lon'],
-    sharedComs: data['sharedComs'],
-    tags: data['tags'],
+    sharedComs: data['sharedComs'].cast<String>(),
+    tags: data['tags'].cast<String>(),
     clicks: data['clicks'],
     website: data['website'],
     fbUsername: data['fbUsername'],
@@ -113,7 +113,7 @@ class WebblenEvent {
     checkInRadius: data['checkInRadius'] * 1.0001,
     estimatedTurnout: data['estimatedTurnout'],
     actualTurnout: data['actualTurnout'],
-    attendees: data['attendees'],
+    attendees: data['attendees'].cast<String>(),
     eventPayout: data['eventPayout'] * 1.001,
     recurrence: data['recurrence'],
     startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
@@ -126,7 +126,7 @@ class WebblenEvent {
     privacy: data['privacy'],
     reported: false,
     webAppLink: data['webAppLink'],
-    savedBy: data['savedBy'],
+    savedBy: data['savedBy'].cast<String>(),
     paidOut: data['paidOut'],
   );
 

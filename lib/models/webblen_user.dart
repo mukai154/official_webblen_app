@@ -1,93 +1,78 @@
 class WebblenUser {
-  List blockedUsers;
-  String username;
-  String uid;
-  String profile_pic;
-  double webblen;
-  double impactPoints;
-  int lastCheckInTimeInMilliseconds;
-  List eventHistory;
-  List rewards;
-  List savedEvents;
-  List achievements;
-  int lastNotifInMilliseconds;
-  int messageNotificationCount;
-  int notificationCount;
-  int apLvl;
+  // ignore: non_constant_identifier_names
+  double WBLN;
+  List<String> achievements;
   double ap;
-  int lastPayoutTimeInMilliseconds;
+  int apLvl;
+  List<String> blockedUsers;
+  String emailAddress;
   int eventsToLvlUp;
-  List following;
-  List followers;
-  List tags;
+  String fbAccessToken;
+  List<String> followers;
+  List<String> following;
+  String googleAccessToken;
+  String googleIDToken;
+  String id;
+  bool isAdmin;
+  String profilePicURL;
+  String username;
 
   WebblenUser({
-    this.blockedUsers,
-    this.username,
-    this.uid,
-    this.profile_pic,
-    this.webblen,
-    this.impactPoints,
-    this.lastCheckInTimeInMilliseconds,
-    this.eventHistory,
-    this.rewards,
-    this.savedEvents,
+    // ignore: non_constant_identifier_names
+    this.WBLN,
     this.achievements,
-    this.lastNotifInMilliseconds,
-    this.messageNotificationCount,
-    this.notificationCount,
-    this.apLvl,
     this.ap,
-    this.lastPayoutTimeInMilliseconds,
+    this.apLvl,
+    this.blockedUsers,
+    this.emailAddress,
     this.eventsToLvlUp,
-    this.following,
+    this.fbAccessToken,
     this.followers,
+    this.following,
+    this.googleAccessToken,
+    this.googleIDToken,
+    this.id,
+    this.isAdmin,
+    this.profilePicURL,
+    this.username,
   });
 
   WebblenUser.fromMap(Map<String, dynamic> data)
       : this(
-          blockedUsers: data['blockedUsers'],
-          username: data['username'],
-          uid: data['uid'],
-          profile_pic: data['profile_pic'],
-          webblen: data['webblen'] == null ? 0.01 : data['webblen'] * 1.00,
-          impactPoints: data['impactPoints'] * 1.00,
-          lastCheckInTimeInMilliseconds: data['lastCheckInTimeInMilliseconds'],
-          eventHistory: data['eventHistory'],
-          rewards: data['rewards'],
-          savedEvents: data['savedEvents'],
-          achievements: data['acheivements'],
-          lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
-          messageNotificationCount: data['messageNotificationCount'],
-          notificationCount: data['notificationCount'],
+          WBLN: data['WBLN'].toDouble(),
+          achievements: data['achievements'].cast<String>(),
           ap: data['ap'],
           apLvl: data['apLvl'],
-          lastPayoutTimeInMilliseconds: data['lastPayoutTimeInMilliseconds'],
+          blockedUsers: data['blockedUsers'].cast<String>(),
+          emailAddress: data['emailAddress'],
           eventsToLvlUp: data['eventsToLvlUp'],
-          following: data['following'],
-          followers: data['followers'],
+          fbAccessToken: data['fbAccessToken'],
+          followers: data['followers'].cast<String>(),
+          following: data['following'].cast<String>(),
+          googleAccessToken: data['googleAccessToken'],
+          googleIDToken: data['googleIDToken'],
+          id: data['id'],
+          isAdmin: data['isAdmin'],
+          profilePicURL: data['profilePicURL'],
+          username: data['username'],
         );
 
   Map<String, dynamic> toMap() => {
-        'blockedUsers': this.blockedUsers,
-        'username': this.username,
-        'uid': this.uid,
-        'profile_pic': this.profile_pic,
-        'webblen': this.webblen,
-        'impactPoints': this.impactPoints,
-        'lastCheckInTimeInMilliseconds': this.lastCheckInTimeInMilliseconds,
-        'eventHistory': this.eventHistory,
-        'rewards': this.rewards,
-        'savedEvents': this.savedEvents,
+        'WBLN': this.WBLN,
         'achievements': this.achievements,
-        'lastNotifInMilliseconds': this.lastNotifInMilliseconds,
-        'messageNotificationCount': this.messageNotificationCount,
-        'notificationCount': this.notificationCount,
         'ap': this.ap,
         'apLvl': this.apLvl,
-        'lastPayoutTimeInMilliseconds': this.lastPayoutTimeInMilliseconds,
+        'blockedUsers': this.blockedUsers,
+        'emailAddress': this.emailAddress,
         'eventsToLvlUp': this.eventsToLvlUp,
-        'following': this.following,
+        'fbAccessToken': this.fbAccessToken,
         'followers': this.followers,
+        'following': this.following,
+        'googleAccessToken': this.googleAccessToken,
+        'googleIDToken': this.googleIDToken,
+        'id': this.id,
+        'isAdmin': this.isAdmin,
+        'profilePicURL': this.profilePicURL,
+        'username': this.username,
       };
 }

@@ -8,7 +8,9 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
+import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
+import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_widget.dart';
 
 import 'home_view_model.dart';
 
@@ -16,7 +18,8 @@ class HomeView extends StatefulWidget {
   final WebblenUser user;
   final String initialCityName;
   final String initialAreaCode;
-  HomeView({this.user, this.initialCityName, this.initialAreaCode});
+  final VoidCallback addContentAction;
+  HomeView({this.user, this.initialCityName, this.initialAreaCode, this.addContentAction});
 
   @override
   _HomeViewState createState() => _HomeViewState();
@@ -49,11 +52,8 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
           ),
           Row(
             children: [
-              IconButton(
-                iconSize: 20,
-                onPressed: () => model.openSearch(),
-                icon: Icon(FontAwesomeIcons.search, color: appIconColor()),
-              ),
+              NotificationBellWidget(uid: widget.user.id),
+              horizontalSpaceSmall,
               IconButton(
                 iconSize: 20,
                 onPressed: () => model.openFilter(),
@@ -61,7 +61,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
               ),
               IconButton(
                 iconSize: 20,
-                onPressed: () => model.navigateToCreateCauseView(),
+                onPressed: widget.addContentAction,
                 icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
               ),
             ],
@@ -81,15 +81,63 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     return TabBarView(
       controller: _tabController,
       children: [
-        ListPosts(
-          refreshData: model.refreshPosts,
-          postResults: model.postResults,
-          pageStorageKey: PageStorageKey('home-posts'),
-          scrollController: model.scrollController,
+        model.postResults.isEmpty && !model.loadingPosts
+            ? ZeroStateView(
+                imageAssetName: "umbrella_chair",
+                imageSize: 200,
+                header: "No Posts in ${model.cityName} Found",
+                subHeader: model.postPromo != null
+                    ? "Create a Post for ${model.cityName} Now and Earn ${model.postPromo.toStringAsFixed(2)} WBLN!"
+                    : "Create a Post for ${model.cityName} Now!",
+                mainActionButtonTitle: model.postPromo != null ? "Earn ${model.postPromo.toStringAsFixed(2)} WBLN" : "Create Post",
+                mainAction: () {},
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: () async {},
+              )
+            : ListPosts(
+                refreshData: model.refreshPosts,
+                postResults: model.postResults,
+                pageStorageKey: PageStorageKey('home-posts'),
+                scrollController: model.scrollController,
+              ),
+        ZeroStateView(
+          imageAssetName: "video_phone",
+          imageSize: 200,
+          header: "No Streams in ${model.cityName} Found",
+          subHeader: model.postPromo != null
+              ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo.toStringAsFixed(2)} WBLN!"
+              : "Schedule a Stream for ${model.cityName} Now!",
+          mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo.toStringAsFixed(2)} WBLN" : "Create Stream",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
         ),
-        Container(),
-        Container(),
-        Container(),
+        ZeroStateView(
+          imageAssetName: "calendar",
+          imageSize: 200,
+          header: "No Events in ${model.cityName} Found",
+          subHeader: model.eventPromo != null
+              ? "Schedule an Event for ${model.cityName} Now and Earn ${model.eventPromo.toStringAsFixed(2)} WBLN!"
+              : "Schedule an Event for ${model.cityName} Now!",
+          mainActionButtonTitle: model.eventPromo != null ? "Earn ${model.eventPromo.toStringAsFixed(2)} WBLN" : "Create Event",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+        ZeroStateView(
+          imageAssetName: "mobile_people_group",
+          imageSize: 200,
+          header: "You are Not Following Anyone",
+          subHeader: "Find People and Groups to Follow and Get Invovled With",
+          mainActionButtonTitle: "Explore People & Groups",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
       ],
     );
   }
@@ -129,15 +177,15 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                 Expanded(
                   child: model.isBusy
                       ? Center(
-                    child: CustomCircleProgressIndicator(
-                      color: appActiveColor(),
-                      size: 32,
-                    ),
-                  )
+                          child: CustomCircleProgressIndicator(
+                            color: appActiveColor(),
+                            size: 32,
+                          ),
+                        )
                       : DefaultTabController(
-                    length: 4,
-                    child: body(model),
-                  ),
+                          length: 4,
+                          child: body(model),
+                        ),
                 ),
               ],
             ),

@@ -3,10 +3,14 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 
 import 'check_in_view_model.dart';
 
 class CheckInView extends StatelessWidget {
+  final VoidCallback addContentAction;
+  CheckInView({this.addContentAction});
+
   Widget head(CheckInViewModel model) {
     return Container(
       height: 50,
@@ -27,13 +31,29 @@ class CheckInView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: null, //() => model.navigateToCreateCauseView(),
+                  onPressed: addContentAction,
                   icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
                 ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget body(CheckInViewModel model) {
+    return Expanded(
+      child: ZeroStateView(
+        imageAssetName: "map_pins",
+        imageSize: 250,
+        header: "No Events Found",
+        subHeader: "Find Events and Check Into them to Earn WBLN",
+        mainActionButtonTitle: "Explore Events",
+        mainAction: () {},
+        secondaryActionButtonTitle: null,
+        secondaryAction: null,
+        refreshData: () async {},
       ),
     );
   }
@@ -52,6 +72,7 @@ class CheckInView extends StatelessWidget {
             child: Column(
               children: [
                 head(model),
+                body(model),
               ],
             ),
           ),

@@ -6,7 +6,8 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/firestore/post_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
 
 @singleton
 class HomeViewModel extends BaseViewModel {
@@ -14,6 +15,7 @@ class HomeViewModel extends BaseViewModel {
   NavigationService _navigationService = locator<NavigationService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
+  PlatformDataService _platformDataService = locator<PlatformDataService>();
   PostDataService _postDataService = locator<PostDataService>();
 
   ///HELPERS
@@ -33,15 +35,20 @@ class HomeViewModel extends BaseViewModel {
   List<DocumentSnapshot> postResults = [];
   DocumentSnapshot lastPostDocSnap;
 
+  bool loadingPosts = true;
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
 
-  int resultsLimit = 15;
+  int resultsLimit = 10;
 
-  openSearch() {}
+  ///PROMOS
+  double postPromo;
+  double streamPromo;
+  double eventPromo;
 
   openFilter() async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
       variant: BottomSheetType.homeFilter,
       takesInput: true,
       customData: {
@@ -51,7 +58,7 @@ class HomeViewModel extends BaseViewModel {
         'currentTagFilter': tagFilter,
       },
     );
-    if (sheetResponse.responseData != null) {
+    if (sheetResponse != null && sheetResponse.responseData != null) {
       cityName = sheetResponse.responseData['cityName'];
       areaCode = sheetResponse.responseData['areaCode'];
       sortBy = sheetResponse.responseData['sortBy'];
@@ -61,11 +68,21 @@ class HomeViewModel extends BaseViewModel {
     }
   }
 
+  ///INITIALIZE
   initialize({TabController tabController, WebblenUser currentUser, String initialCityName, String initialAreaCode}) async {
+    //get current user
     user = currentUser;
+
+    //get location data
     cityName = initialCityName;
     areaCode = initialAreaCode;
-    notifyListeners();
+
+    //load content promos (if any exists)
+    postPromo = await _platformDataService.getPostPromo();
+    streamPromo = await _platformDataService.getStreamPromo();
+    eventPromo = await _platformDataService.getEventPromo();
+
+    //load additional content on scroll
     scrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * scrollController.position.maxScrollExtent;
       if (scrollController.position.pixels > triggerFetchMoreSize) {
@@ -75,44 +92,71 @@ class HomeViewModel extends BaseViewModel {
       }
     });
     notifyListeners();
+
+    //load content data
     await loadData();
     setBusy(false);
   }
 
+  ///LOAD ALL DATA
   loadData() async {
     await loadPosts();
   }
 
+  ///REFRESH ALL DATA
   Future<void> refreshData() async {
+    //set busy status
     setBusy(true);
+
+    //clear previous data
     postResults = [];
+
+    //load all data
     await loadData();
     notifyListeners();
+
+    //set busy status
     setBusy(false);
   }
 
+  ///POST DATA
   Future<void> refreshPosts() async {
+    //set loading posts status
+    loadingPosts = true;
+
+    //clear previous post data
     postResults = [];
     notifyListeners();
+
+    //load posts
     await loadPosts();
   }
 
   loadPosts() async {
+    //load posts with params
     postResults = await _postDataService.loadPosts(
       areaCode: areaCode,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
     );
+
+    //set loading posts status
+    loadingPosts = false;
     notifyListeners();
   }
 
   loadAdditionalPosts() async {
+    //check if already loading posts or no more posts available
     if (loadingAdditionalPosts || !morePostsAvailable) {
       return;
     }
+
+    //set loading additional posts status
     loadingAdditionalPosts = true;
     notifyListeners();
+
+    //load additional posts
     List<DocumentSnapshot> newResults = await _postDataService.loadAdditionalPosts(
       lastDocSnap: postResults[postResults.length - 1],
       areaCode: areaCode,
@@ -120,11 +164,15 @@ class HomeViewModel extends BaseViewModel {
       tagFilter: tagFilter,
       sortBy: sortBy,
     );
+
+    //notify if no more posts available
     if (newResults.length == 0) {
       morePostsAvailable = false;
     } else {
       postResults.addAll(newResults);
     }
+
+    //set loading additional posts status
     loadingAdditionalPosts = false;
     notifyListeners();
   }

@@ -2,14 +2,20 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
-import 'package:webblen/services/firestore/platform_data_service.dart';
-import 'package:webblen/services/firestore/post_data_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
+import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
+import 'package:webblen/services/firestore/data/comment_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services/stripe/stripe_payment_service.dart';
 
 import 'auth/auth_service.dart';
-import 'firestore/user_data_service.dart';
+import 'firestore/data/user_data_service.dart';
 
 ///RUN "flutter pub run build_runner build --delete-conflicting-outputs" in Project Terminal to Generate Service Modules
 
@@ -28,11 +34,19 @@ abstract class ServicesModule {
   @lazySingleton
   AuthService get authService;
   @lazySingleton
+  FirestoreStorageService get firestoreStorageService;
+  @lazySingleton
   PlatformDataService get platformDataService;
+  @lazySingleton
+  NotificationDataService get notificationDataService;
   @lazySingleton
   UserDataService get userDataService;
   @lazySingleton
   PostDataService get postDataService;
+  @lazySingleton
+  RedeemedRewardDataService get redeemedRewardDataService;
+  @lazySingleton
+  CommentDataService get commentDataService;
   @lazySingleton
   StripePaymentService get stripePaymentService;
   @lazySingleton
@@ -41,4 +55,8 @@ abstract class ServicesModule {
   GooglePlacesService get googlePlacesService;
   @lazySingleton
   AlgoliaSearchService get algoliaSearchService;
+  @lazySingleton
+  DynamicLinkService get dynamicLinkService;
+  @lazySingleton
+  ShareService get shareService;
 }
