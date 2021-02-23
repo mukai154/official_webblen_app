@@ -7,11 +7,11 @@ import 'package:webblen/enums/notifcation_type.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 
-import 'notification_block_view_model.dart';
+import 'notification_block_model.dart';
 
-class NotificationBlockView extends StatelessWidget {
+class NotificationBlockWidget extends StatelessWidget {
   final WebblenNotification notification;
-  NotificationBlockView({
+  NotificationBlockWidget({
     @required this.notification,
   });
 
@@ -37,11 +37,11 @@ class NotificationBlockView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<NotificationBlockViewModel>.reactive(
+    return ViewModelBuilder<NotificationBlockModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
       fireOnModelReadyOnce: true,
-      viewModelBuilder: () => NotificationBlockViewModel(),
+      viewModelBuilder: () => NotificationBlockModel(),
       builder: (context, model, child) => GestureDetector(
         onTap: () => model.onTap(notifType: notification.type, data: notification.additionalData),
         child: Container(

@@ -5,16 +5,16 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
-import 'comment_text_field_view_model.dart';
+import 'comment_text_field_model.dart';
 
-class CommentTextFieldView extends StatelessWidget {
+class CommentTextFieldWidget extends StatelessWidget {
   final FocusNode focusNode;
   final bool isReplying;
   final String replyReceiverUsername;
   final TextEditingController commentTextController;
   final Function(String) onSubmitted;
 
-  CommentTextFieldView({
+  CommentTextFieldWidget({
     @required this.focusNode,
     @required this.commentTextController,
     @required this.isReplying,
@@ -43,7 +43,7 @@ class CommentTextFieldView extends StatelessWidget {
     );
   }
 
-  Widget commentTextField(BuildContext context, CommentTextFieldViewModel model) {
+  Widget commentTextField(BuildContext context, CommentTextFieldModel model) {
     return Container(
       padding: EdgeInsets.only(
         top: 16,
@@ -121,9 +121,9 @@ class CommentTextFieldView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<CommentTextFieldViewModel>.reactive(
+    return ViewModelBuilder<CommentTextFieldModel>.reactive(
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => CommentTextFieldViewModel(),
+      viewModelBuilder: () => CommentTextFieldModel(),
       builder: (context, model, child) => model.isBusy || model.errorDetails != null ? Container() : commentTextField(context, model),
     );
   }

@@ -1,15 +1,15 @@
 class WebblenUser {
   // ignore: non_constant_identifier_names
   double WBLN;
-  List achievements;
+  List<String> achievements;
   double ap;
   int apLvl;
-  List blockedUsers;
+  List<String> blockedUsers;
   String emailAddress;
   int eventsToLvlUp;
   String fbAccessToken;
-  List followers;
-  List following;
+  List<String> followers;
+  List<String> following;
   String googleAccessToken;
   String googleIDToken;
   String id;
@@ -40,15 +40,15 @@ class WebblenUser {
   WebblenUser.fromMap(Map<String, dynamic> data)
       : this(
           WBLN: data['WBLN'].toDouble(),
-          achievements: data['achievements'],
+          achievements: data['achievements'].cast<String>(),
           ap: data['ap'],
           apLvl: data['apLvl'],
-          blockedUsers: data['blockedUsers'],
+          blockedUsers: data['blockedUsers'].cast<String>(),
           emailAddress: data['emailAddress'],
           eventsToLvlUp: data['eventsToLvlUp'],
           fbAccessToken: data['fbAccessToken'],
-          followers: data['followers'],
-          following: data['following'],
+          followers: data['followers'].cast<String>(),
+          following: data['following'].cast<String>(),
           googleAccessToken: data['googleAccessToken'],
           googleIDToken: data['googleIDToken'],
           id: data['id'],

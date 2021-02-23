@@ -2,20 +2,19 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/models/webblen_event.dart';
-import 'package:webblen/models/webblen_stream.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
-import 'stream_block_view_model.dart';
+import 'event_block_model.dart';
 
-class StreamBlockView extends StatelessWidget {
-  final WebblenStream stream;
+class EventBlockWidget extends StatelessWidget {
+  final WebblenEvent event;
 
-  StreamBlockView({@required this.stream});
+  EventBlockWidget({@required this.event});
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<StreamBlockViewModel>.reactive(
-      viewModelBuilder: () => StreamBlockViewModel(),
+    return ViewModelBuilder<EventBlockModel>.reactive(
+      viewModelBuilder: () => EventBlockModel(),
       builder: (context, model, child) => Container(
         height: 220,
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -29,14 +28,14 @@ class StreamBlockView extends StatelessWidget {
                   children: [
                     SizedBox(height: 16),
                     CustomText(
-                      text: stream.startDate
-                          .substring(4, stream.startDate.length - 6),
+                      text: event.startDate
+                          .substring(4, event.startDate.length - 6),
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
                     CustomText(
-                      text: stream.startDate
-                          .substring(0, stream.startDate.length - 9),
+                      text: event.startDate
+                          .substring(0, event.startDate.length - 9),
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
@@ -51,7 +50,7 @@ class StreamBlockView extends StatelessWidget {
                     image: DecorationImage(
                       fit: BoxFit.cover,
                       image: CachedNetworkImageProvider(
-                        stream.imageURL,
+                        event.imageURL,
                       ),
                     ),
                   ),
@@ -87,7 +86,7 @@ class StreamBlockView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CustomOverflowText(
-                                text: stream.title,
+                                text: event.title,
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -107,7 +106,7 @@ class StreamBlockView extends StatelessWidget {
                                     width: 8,
                                   ),
                                   CustomText(
-                                    text: stream.startTime,
+                                    text: event.startTime,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -115,7 +114,7 @@ class StreamBlockView extends StatelessWidget {
                                   SizedBox(
                                     width: 10,
                                   ),
-                                  model.isHappeningNow
+                                  model.eventIsHappeningNow
                                       ? Container(
                                           padding: EdgeInsets.all(4),
                                           decoration: BoxDecoration(
@@ -143,7 +142,7 @@ class StreamBlockView extends StatelessWidget {
                                 color: Colors.white,
                               ),
                               CustomText(
-                                text: "${stream.city}, ${stream.province}",
+                                text: "${event.city}, ${event.province}",
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,

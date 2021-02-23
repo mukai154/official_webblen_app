@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/events/event_block/event_block_view.dart';
+import 'package:webblen/ui/widgets/events/event_block/event_block_widget.dart';
 
 class ListEvents extends StatelessWidget {
   final List dataResults;
@@ -42,7 +42,7 @@ class ListEvents extends StatelessWidget {
           if (dataResults.last == dataResults[index]) {
             displayBottomBorder = false;
           }
-          return EventBlockView(
+          return EventBlockWidget(
             event: event,
           );
         },

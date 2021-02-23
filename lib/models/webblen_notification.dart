@@ -4,7 +4,7 @@ import 'package:webblen/enums/notifcation_type.dart';
 class WebblenNotification {
   String receiverUID;
   String senderUID;
-  String type;
+  NotificationType type;
   String header;
   String subHeader;
   Map<dynamic, dynamic> additionalData;
@@ -28,7 +28,7 @@ class WebblenNotification {
       : this(
           receiverUID: data['receiverUID'],
           senderUID: data['senderUID'],
-          type: data['type'],
+          type: NotificationTypeConverter.stringToNotificationType(data['type']),
           header: data['header'],
           subHeader: data['subHeader'],
           additionalData: data['additionalData'],
@@ -40,7 +40,7 @@ class WebblenNotification {
   Map<String, dynamic> toMap() => {
         'receiverUID': this.receiverUID,
         'senderUID': this.senderUID,
-        'type': this.type,
+        'type': NotificationTypeConverter.notificationTypeToString(this.type),
         'header': this.header,
         'subHeader': this.subHeader,
         'additionalData': this.additionalData,

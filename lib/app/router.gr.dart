@@ -18,6 +18,7 @@ import '../ui/views/root/root_view.dart';
 import '../ui/views/search/all_search_results/all_search_results_view.dart';
 import '../ui/views/search/search_view.dart';
 import '../ui/views/settings/settings_view.dart';
+import '../ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view.dart';
 
 class Routes {
   static const String RootViewRoute = '/';
@@ -29,6 +30,7 @@ class Routes {
   static const String AllSearchResultsViewRoute = '/all-search-results-view';
   static const String NotificationsViewRoute = '/notifications-view';
   static const String SettingsViewRoute = '/settings-view';
+  static const String RedeemedRewardsViewRoute = '/redeemed-rewards-view';
   static const all = <String>{
     RootViewRoute,
     AuthViewRoute,
@@ -39,6 +41,7 @@ class Routes {
     AllSearchResultsViewRoute,
     NotificationsViewRoute,
     SettingsViewRoute,
+    RedeemedRewardsViewRoute,
   };
 }
 
@@ -55,6 +58,7 @@ class WebblenRouter extends RouterBase {
     RouteDef(Routes.AllSearchResultsViewRoute, page: AllSearchResultsView),
     RouteDef(Routes.NotificationsViewRoute, page: NotificationsView),
     RouteDef(Routes.SettingsViewRoute, page: SettingsView),
+    RouteDef(Routes.RedeemedRewardsViewRoute, page: RedeemedRewardsView),
   ];
   @override
   Map<Type, AutoRouteFactory> get pagesMap => _pagesMap;
@@ -113,6 +117,12 @@ class WebblenRouter extends RouterBase {
     SettingsView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => SettingsView(),
+        settings: data,
+      );
+    },
+    RedeemedRewardsView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => RedeemedRewardsView(),
         settings: data,
       );
     },

@@ -3,19 +3,19 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 
-import 'notification_bell_view_model.dart';
+import 'notification_bell_model.dart';
 
-class NotificationBellView extends StatelessWidget {
+class NotificationBellWidget extends StatelessWidget {
   final String uid;
-  NotificationBellView({
+  NotificationBellWidget({
     @required this.uid,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<NotificationBellViewModel>.reactive(
+    return ViewModelBuilder<NotificationBellModel>.reactive(
       onModelReady: (model) => model.initialize(uid),
-      viewModelBuilder: () => NotificationBellViewModel(),
+      viewModelBuilder: () => NotificationBellModel(),
       builder: (context, model, child) => GestureDetector(
         onTap: () => model.navigateToNotificationsView(),
         child: Stack(

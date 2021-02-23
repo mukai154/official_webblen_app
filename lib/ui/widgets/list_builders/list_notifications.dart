@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/notifications/notification_block/notification_block_view.dart';
+import 'package:webblen/ui/widgets/notifications/notification_block/notification_block_widget.dart';
 
 class ListNotifications extends StatelessWidget {
   final List data;
@@ -38,7 +38,7 @@ class ListNotifications extends StatelessWidget {
             notification = data[index];
           }
 
-          return NotificationBlockView(
+          return NotificationBlockWidget(
             notification: notification,
           );
         },

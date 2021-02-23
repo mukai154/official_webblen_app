@@ -1,12 +1,13 @@
 import 'package:stacked/stacked.dart';
+import 'package:webblen/enums/notifcation_type.dart';
 
-class NotificationBlockViewModel extends BaseViewModel {
+class NotificationBlockModel extends BaseViewModel {
   // AuthService _authService = locator<AuthService>();
   // NavigationService _navigationService = locator<NavigationService>();
   // UserDataService _userDataService = locator<UserDataService>();
   // BottomSheetService _bottomSheetService = locator<BottomSheetService>();
 
-  onTap({String notifType, Map<dynamic, dynamic> data}) {
+  onTap({NotificationType notifType, Map<dynamic, dynamic> data}) {
     // if (notifType == NotificationType.newPost.toString() ||
     //     notifType == NotificationType.postComment.toString() ||
     //     notifType == NotificationType.postCommentReply.toString()) {

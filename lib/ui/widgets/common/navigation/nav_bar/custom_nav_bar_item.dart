@@ -10,7 +10,6 @@ class CustomNavBarItem extends StatelessWidget {
   CustomNavBarItem({this.onTap, this.isActive, this.iconData, this.label});
   @override
   Widget build(BuildContext context) {
-
     return GestureDetector(
       onTap: onTap,
       child: Container(

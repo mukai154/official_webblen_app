@@ -5,18 +5,18 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
-import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view_model.dart';
+import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_model.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/utils/time_calc.dart';
 
-class PostTextBlockView extends StatelessWidget {
+class PostTextBlockWidget extends StatelessWidget {
   final WebblenPost post;
 
-  PostTextBlockView({
+  PostTextBlockWidget({
     this.post,
   });
 
-  Widget head(PostTextBlockViewModel model) {
+  Widget head(PostTextBlockModel model) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 4.0),
       child: Row(
@@ -129,7 +129,7 @@ class PostTextBlockView extends StatelessWidget {
     );
   }
 
-  Widget postMessage(PostTextBlockViewModel model) {
+  Widget postMessage(PostTextBlockModel model) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: RichText(
@@ -161,7 +161,7 @@ class PostTextBlockView extends StatelessWidget {
     );
   }
 
-  Widget postTags(PostTextBlockViewModel model) {
+  Widget postTags(PostTextBlockModel model) {
     return post.tags.isEmpty
         ? Container()
         : Container(
@@ -189,10 +189,10 @@ class PostTextBlockView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<PostTextBlockViewModel>.reactive(
+    return ViewModelBuilder<PostTextBlockModel>.reactive(
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
-      viewModelBuilder: () => PostTextBlockViewModel(),
+      viewModelBuilder: () => PostTextBlockModel(),
       onModelReady: (model) => model.initialize(post.authorID),
       builder: (context, model, child) => GestureDetector(
         onTap: () => model.navigateToPostView(post.id),
@@ -209,7 +209,7 @@ class PostTextBlockView extends StatelessWidget {
               postTags(model),
               Divider(
                 thickness: 4.0,
-                color: appPostBorderColor(),
+                color: appDividerColor(),
               ),
             ],
           ),

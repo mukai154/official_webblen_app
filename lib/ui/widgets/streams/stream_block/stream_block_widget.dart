@@ -1,20 +1,19 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_stream.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/ui/widgets/streams/stream_block/stream_block_model.dart';
 
-import 'event_block_view_model.dart';
+class StreamBlockWidget extends StatelessWidget {
+  final WebblenStream stream;
 
-class EventBlockView extends StatelessWidget {
-  final WebblenEvent event;
-
-  EventBlockView({@required this.event});
+  StreamBlockWidget({@required this.stream});
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<EventBlockViewModel>.reactive(
-      viewModelBuilder: () => EventBlockViewModel(),
+    return ViewModelBuilder<StreamBlockModel>.reactive(
+      viewModelBuilder: () => StreamBlockModel(),
       builder: (context, model, child) => Container(
         height: 220,
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
@@ -28,12 +27,14 @@ class EventBlockView extends StatelessWidget {
                   children: [
                     SizedBox(height: 16),
                     CustomText(
-                      text: event.startDate.substring(4, event.startDate.length - 6),
+                      text: stream.startDate
+                          .substring(4, stream.startDate.length - 6),
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
                     CustomText(
-                      text: event.startDate.substring(0, event.startDate.length - 9),
+                      text: stream.startDate
+                          .substring(0, stream.startDate.length - 9),
                       fontSize: 25,
                       fontWeight: FontWeight.bold,
                     ),
@@ -48,7 +49,7 @@ class EventBlockView extends StatelessWidget {
                     image: DecorationImage(
                       fit: BoxFit.cover,
                       image: CachedNetworkImageProvider(
-                        event.imageURL,
+                        stream.imageURL,
                       ),
                     ),
                   ),
@@ -71,7 +72,8 @@ class EventBlockView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.more_horiz, color: Colors.white),
+                                icon:
+                                    Icon(Icons.more_horiz, color: Colors.white),
                                 onPressed: null,
                               )
                             ],
@@ -83,7 +85,7 @@ class EventBlockView extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               CustomOverflowText(
-                                text: event.title,
+                                text: stream.title,
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
@@ -103,7 +105,7 @@ class EventBlockView extends StatelessWidget {
                                     width: 8,
                                   ),
                                   CustomText(
-                                    text: event.startTime,
+                                    text: stream.startTime,
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -111,12 +113,13 @@ class EventBlockView extends StatelessWidget {
                                   SizedBox(
                                     width: 10,
                                   ),
-                                  model.eventIsHappeningNow
+                                  model.isHappeningNow
                                       ? Container(
                                           padding: EdgeInsets.all(4),
                                           decoration: BoxDecoration(
                                             color: Colors.red,
-                                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                                            borderRadius: BorderRadius.all(
+                                                Radius.circular(8)),
                                           ),
                                           child: Center(
                                             child: CustomText(
@@ -138,7 +141,7 @@ class EventBlockView extends StatelessWidget {
                                 color: Colors.white,
                               ),
                               CustomText(
-                                text: "${event.city}, ${event.province}",
+                                text: "${stream.city}, ${stream.province}",
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,

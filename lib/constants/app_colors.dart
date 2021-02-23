@@ -37,7 +37,7 @@ Color appFontColorAlt() {
   return _themeService.isDarkMode ? Colors.white54 : Colors.black54;
 }
 
-Color appPostBorderColor() {
+Color appDividerColor() {
   return _themeService.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
 }
 

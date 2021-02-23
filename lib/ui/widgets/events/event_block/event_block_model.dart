@@ -1,36 +1,37 @@
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
-import 'package:webblen/models/webblen_stream.dart';
+import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 
-class StreamBlockViewModel extends BaseViewModel {
+class EventBlockModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
 
-  WebblenStream stream;
-  bool isHappeningNow;
+  WebblenEvent event;
+  bool eventIsHappeningNow;
 
-  initialize(WebblenStream data) {
-    stream = data;
+  initialize(WebblenEvent data){
+    event = data;
     notifyListeners();
-    determineIfHappeningNow();
+    determineIfEventIsHappeningNow();
   }
 
-  determineIfHappeningNow() {
+  determineIfEventIsHappeningNow(){
     int currentDateInMilli = DateTime.now().millisecondsSinceEpoch;
-    int eventStartDateInMilli = stream.startDateTimeInMilliseconds;
-    int eventEndDateInMilli = stream.endDateTimeInMilliseconds;
-    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli) {
-      isHappeningNow = true;
+    int eventStartDateInMilli = event.startDateTimeInMilliseconds;
+    int eventEndDateInMilli = event.endDateTimeInMilliseconds;
+    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli){
+      eventIsHappeningNow = true;
     } else {
-      isHappeningNow = false;
+      eventIsHappeningNow = false;
     }
     notifyListeners();
   }
 
-  ///NAVIGATION
+
+///NAVIGATION
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);
 // }

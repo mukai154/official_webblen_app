@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/user/user_block/user_block_view.dart';
+import 'package:webblen/ui/widgets/user/user_block/user_block_widget.dart';
 
 class ListUsers extends StatelessWidget {
   final List userResults;
@@ -44,7 +44,7 @@ class ListUsers extends StatelessWidget {
           if (userResults.last == userResults[index]) {
             displayBottomBorder = false;
           }
-          return UserBlockView(
+          return UserBlockWidget(
             user: user,
             displayBottomBorder: displayBottomBorder,
           );

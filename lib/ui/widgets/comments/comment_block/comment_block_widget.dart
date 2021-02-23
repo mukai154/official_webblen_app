@@ -4,23 +4,22 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
+import 'package:webblen/ui/widgets/comments/comment_block/comment_block_model.dart';
 import 'package:webblen/ui/widgets/list_builders/list_comments.dart';
 import 'package:webblen/utils/time_calc.dart';
 
-import 'comment_block_view_model.dart';
-
-class CommentBlockView extends StatelessWidget {
+class CommentBlockWidget extends StatelessWidget {
   final Function(WebblenPostComment) replyToComment;
   final Function(WebblenPostComment) deleteComment;
 
   final WebblenPostComment comment;
-  CommentBlockView({@required this.comment, @required this.replyToComment, @required this.deleteComment});
+  CommentBlockWidget({@required this.comment, @required this.replyToComment, @required this.deleteComment});
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<CommentBlockViewModel>.reactive(
+    return ViewModelBuilder<CommentBlockModel>.reactive(
       onModelReady: (model) => model.initialize(comment.senderUID),
-      viewModelBuilder: () => CommentBlockViewModel(),
+      viewModelBuilder: () => CommentBlockModel(),
       builder: (context, model, child) => model.isBusy || model.errorLoadingData
           ? Container()
           : Container(

@@ -3,8 +3,8 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_view.dart';
-import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view.dart';
+import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_widget.dart';
+import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_widget.dart';
 
 class ListPosts extends StatelessWidget {
   final List postResults;
@@ -28,7 +28,7 @@ class ListPosts extends StatelessWidget {
         itemCount: postResults.length,
         itemBuilder: (context, index) {
           WebblenPost post = WebblenPost.fromMap(postResults[index].data());
-          return post.imageURL == null ? PostTextBlockView(post: post) : PostImgBlockView(post: post);
+          return post.imageURL == null ? PostTextBlockWidget(post: post) : PostImgBlockWidget(post: post);
         },
       ),
     );

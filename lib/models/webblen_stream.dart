@@ -7,19 +7,19 @@ class WebblenStream {
   String desc;
   String imageURL;
   String streetAddress;
-  List nearbyZipcodes;
+  List<String> nearbyZipcodes;
   String city;
   String province;
   double lat;
   double lon;
-  List tags;
+  List<String> tags;
   int clicks;
   String website;
   String fbUsername;
   String twitterUsername;
   String instaUsername;
   int checkInCount;
-  List viewers;
+  List<String> viewers;
   double totalPayout;
   int startDateTimeInMilliseconds;
   int endDateTimeInMilliseconds;
@@ -31,7 +31,7 @@ class WebblenStream {
   String privacy;
   bool reported;
   String webAppLink;
-  List savedBy;
+  List<String> savedBy;
   bool paidOut;
 
   WebblenStream({
@@ -80,20 +80,20 @@ class WebblenStream {
           title: data['title'],
           desc: data['desc'],
           imageURL: data['imageURL'],
-          nearbyZipcodes: data['nearbyZipcodes'],
+          nearbyZipcodes: data['nearbyZipcodes'].cast<String>(),
           streetAddress: data['streetAddress'],
           city: data['city'],
           province: data['province'],
           lat: data['lat'],
           lon: data['lon'],
-          tags: data['tags'],
+          tags: data['tags'].cast<String>(),
           clicks: data['clicks'],
           website: data['website'],
           fbUsername: data['fbUsername'],
           twitterUsername: data['twitterUsername'],
           instaUsername: data['instaUsername'],
           checkInCount: data['checkInCount'],
-          viewers: data['viewers'],
+          viewers: data['viewers'].cast<String>(),
           totalPayout: data['totalPayout'] * 1.001,
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
           endDateTimeInMilliseconds: data['endDateTimeInMilliseconds'],
@@ -105,7 +105,7 @@ class WebblenStream {
           privacy: data['privacy'],
           reported: data['reported'],
           webAppLink: data['webAppLink'],
-          savedBy: data['savedBy'],
+          savedBy: data['savedBy'].cast<String>(),
           paidOut: data['paidOut'],
         );
 

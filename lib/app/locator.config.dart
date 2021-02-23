@@ -23,6 +23,8 @@ import '../services/firestore/data/notification_data_service.dart';
 import '../services/firestore/data/platform_data_service.dart';
 import '../services/firestore/data/post_data_service.dart';
 import '../ui/views/home/tabs/profile/profile_view_model.dart';
+import '../services/firestore/data/redeemed_reward_data_service.dart';
+import '../ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view_model.dart';
 import '../services/services_module.dart';
 import '../services/share/share_service.dart';
 import '../services/stripe/stripe_payment_service.dart';
@@ -57,6 +59,8 @@ GetIt $initGetIt(
   gh.lazySingleton<PlatformDataService>(
       () => servicesModule.platformDataService);
   gh.lazySingleton<PostDataService>(() => servicesModule.postDataService);
+  gh.lazySingleton<RedeemedRewardDataService>(
+      () => servicesModule.redeemedRewardDataService);
   gh.lazySingleton<ShareService>(() => servicesModule.shareService);
   gh.lazySingleton<SnackbarService>(() => servicesModule.snackBarService);
   gh.lazySingleton<StripePaymentService>(
@@ -69,6 +73,7 @@ GetIt $initGetIt(
   gh.singleton<ExploreViewModel>(ExploreViewModel());
   gh.singleton<HomeViewModel>(HomeViewModel());
   gh.singleton<ProfileViewModel>(ProfileViewModel());
+  gh.singleton<RedeemedRewardsViewModel>(RedeemedRewardsViewModel());
   gh.singleton<WalletViewModel>(WalletViewModel());
   return get;
 }
@@ -102,6 +107,9 @@ class _$ServicesModule extends ServicesModule {
   PlatformDataService get platformDataService => PlatformDataService();
   @override
   PostDataService get postDataService => PostDataService();
+  @override
+  RedeemedRewardDataService get redeemedRewardDataService =>
+      RedeemedRewardDataService();
   @override
   ShareService get shareService => ShareService();
   @override

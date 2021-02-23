@@ -4,7 +4,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 
-class CommentBlockViewModel extends BaseViewModel {
+class CommentBlockModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();

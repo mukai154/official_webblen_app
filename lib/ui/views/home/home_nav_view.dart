@@ -37,6 +37,7 @@ class HomeNavView extends StatelessWidget {
         );
       case 3:
         return WalletView(
+          user: model.user,
           addContentAction: () => model.showAddContentOptions(),
         );
       case 4:

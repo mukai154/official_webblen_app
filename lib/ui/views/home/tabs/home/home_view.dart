@@ -10,7 +10,7 @@ import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
-import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_view.dart';
+import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_widget.dart';
 
 import 'home_view_model.dart';
 
@@ -52,7 +52,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
           ),
           Row(
             children: [
-              NotificationBellView(uid: widget.user.id),
+              NotificationBellWidget(uid: widget.user.id),
               horizontalSpaceSmall,
               IconButton(
                 iconSize: 20,

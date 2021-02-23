@@ -6,18 +6,18 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
-import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_view_model.dart';
+import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_model.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/utils/time_calc.dart';
 
-class PostImgBlockView extends StatelessWidget {
+class PostImgBlockWidget extends StatelessWidget {
   final WebblenPost post;
 
-  PostImgBlockView({
+  PostImgBlockWidget({
     this.post,
   });
 
-  Widget head(PostImgBlockViewModel model) {
+  Widget head(PostImgBlockModel model) {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 16.0),
       child: Row(
@@ -136,7 +136,7 @@ class PostImgBlockView extends StatelessWidget {
     );
   }
 
-  Widget postMessage(PostImgBlockViewModel model) {
+  Widget postMessage(PostImgBlockModel model) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: RichText(
@@ -168,7 +168,7 @@ class PostImgBlockView extends StatelessWidget {
     );
   }
 
-  Widget postTags(PostImgBlockViewModel model) {
+  Widget postTags(PostImgBlockModel model) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       height: 30,
@@ -194,10 +194,10 @@ class PostImgBlockView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<PostImgBlockViewModel>.reactive(
+    return ViewModelBuilder<PostImgBlockModel>.reactive(
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
-      viewModelBuilder: () => PostImgBlockViewModel(),
+      viewModelBuilder: () => PostImgBlockModel(),
       onModelReady: (model) => model.initialize(post.authorID),
       builder: (context, model, child) => GestureDetector(
         onTap: () => model.navigateToPostView(post.id),
@@ -215,7 +215,7 @@ class PostImgBlockView extends StatelessWidget {
               postTags(model),
               Divider(
                 thickness: 4.0,
-                color: appPostBorderColor(),
+                color: appDividerColor(),
               ),
             ],
           ),

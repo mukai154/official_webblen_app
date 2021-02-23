@@ -4,7 +4,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 
-class NotificationBellViewModel extends StreamViewModel<int> {
+class NotificationBellModel extends StreamViewModel<int> {
   NavigationService _navigationService = locator<NavigationService>();
   NotificationDataService _notificationDataService = locator<NotificationDataService>();
 

@@ -8,6 +8,7 @@ import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
@@ -42,6 +43,8 @@ abstract class ServicesModule {
   UserDataService get userDataService;
   @lazySingleton
   PostDataService get postDataService;
+  @lazySingleton
+  RedeemedRewardDataService get redeemedRewardDataService;
   @lazySingleton
   CommentDataService get commentDataService;
   @lazySingleton
