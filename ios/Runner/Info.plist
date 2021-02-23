@@ -56,7 +56,7 @@
       <array>
         <string>applinks:app.webblen.io/shared_link</string>
         <string>applinks:app.webblen.io/shared_link?mode=developer</string>
-     </array>
+      </array>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-2136415475966451~5144610810</string>
 	<key>LSApplicationQueriesSchemes</key>

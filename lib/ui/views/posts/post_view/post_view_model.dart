@@ -17,7 +17,7 @@ import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/share/share_service.dart';
-import 'package:webblen/utils/random_string_generator.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class PostViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
@@ -248,7 +248,7 @@ class PostViewModel extends BaseViewModel {
         });
       } else if (res == "share") {
         //share post link
-        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: "@${currentUser.username}", post: post);
+        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: "@${author.username}", post: post);
         _shareService.shareLink(url);
       } else if (res == "report") {
         //report post

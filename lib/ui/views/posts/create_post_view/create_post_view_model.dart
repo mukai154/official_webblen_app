@@ -18,8 +18,7 @@ import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
-import 'package:webblen/utils/random_string_generator.dart';
-import 'package:webblen/utils/string_validator.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
 class CreatePostViewModel extends BaseViewModel {
@@ -156,7 +155,7 @@ class CreatePostViewModel extends BaseViewModel {
   ///FORM VALIDATION
   bool postBodyIsValid() {
     String message = postTextController.text;
-    if (!StringValidator().isValidString(message)) {
+    if (isValidString(message)) {
       return false;
     } else {
       return true;

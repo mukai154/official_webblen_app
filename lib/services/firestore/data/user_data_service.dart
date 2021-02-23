@@ -32,6 +32,17 @@ class UserDataService {
     return user;
   }
 
+  Future getWebblenUserByUsername(String username) async {
+    WebblenUser user;
+    QuerySnapshot querySnapshot = await userRef.where("username", isEqualTo: username).get();
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot doc = querySnapshot.docs.first;
+      Map<String, dynamic> docData = doc.data();
+      user = WebblenUser.fromMap(docData);
+    }
+    return user;
+  }
+
   Future updateWebblenUser(WebblenUser user) async {
     await userRef.doc(user.id).update(user.toMap()).catchError((e) {
       return e.message;

@@ -9,7 +9,7 @@ import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
-import 'package:webblen/utils/get_last_word_in_string.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 import 'comment_text_field_view_model.dart';
 
