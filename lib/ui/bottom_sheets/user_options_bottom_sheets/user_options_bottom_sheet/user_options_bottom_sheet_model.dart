@@ -1,3 +1,3 @@
 import 'package:stacked/stacked.dart';
 
-class UserProfileBottomSheetModel extends BaseViewModel {}
+class UserOptionsBottomSheetModel extends BaseViewModel {}

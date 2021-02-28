@@ -24,9 +24,10 @@ import '../services/firestore/data/platform_data_service.dart';
 import '../services/firestore/data/post_data_service.dart';
 import '../ui/views/home/tabs/profile/profile_view_model.dart';
 import '../services/firestore/data/redeemed_reward_data_service.dart';
-import '../ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view_model.dart';
+import '../ui/views/wallet/redeemed_rewards/redeemed_rewards_view_model.dart';
 import '../services/services_module.dart';
 import '../services/share/share_service.dart';
+import '../services/stripe/stripe_connect_account_service.dart';
 import '../services/stripe/stripe_payment_service.dart';
 import '../services/firestore/data/user_data_service.dart';
 import '../ui/views/home/tabs/wallet/wallet_view_model.dart';
@@ -63,6 +64,8 @@ GetIt $initGetIt(
       () => servicesModule.redeemedRewardDataService);
   gh.lazySingleton<ShareService>(() => servicesModule.shareService);
   gh.lazySingleton<SnackbarService>(() => servicesModule.snackBarService);
+  gh.lazySingleton<StripeConnectAccountService>(
+      () => servicesModule.stripeConnectAccountService);
   gh.lazySingleton<StripePaymentService>(
       () => servicesModule.stripePaymentService);
   gh.lazySingleton<ThemeService>(() => servicesModule.themeService);
@@ -114,6 +117,9 @@ class _$ServicesModule extends ServicesModule {
   ShareService get shareService => ShareService();
   @override
   SnackbarService get snackBarService => SnackbarService();
+  @override
+  StripeConnectAccountService get stripeConnectAccountService =>
+      StripeConnectAccountService();
   @override
   StripePaymentService get stripePaymentService => StripePaymentService();
   @override

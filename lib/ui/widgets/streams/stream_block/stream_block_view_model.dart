@@ -4,7 +4,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/models/webblen_stream.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 
-class StreamBlockModel extends BaseViewModel {
+class StreamBlockViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();

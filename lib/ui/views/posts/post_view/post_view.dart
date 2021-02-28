@@ -5,12 +5,12 @@ import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/views/posts/post_view/post_view_model.dart';
-import 'package:webblen/ui/widgets/comments/comment_text_field/comment_text_field_widget.dart';
-import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/ui/widgets/comments/comment_text_field/comment_text_field_view.dart';
+import 'package:webblen/ui/widgets/common/custom_text_with_links.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/list_builders/list_comments.dart';
+import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostView extends StatelessWidget {
@@ -55,46 +55,31 @@ class PostView extends StatelessWidget {
   }
 
   Widget postMessage(PostViewModel model) {
-    return model.post.imageURL == null
-        ? Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: CustomText(
-              text: model.post.body,
-              textAlign: TextAlign.left,
-              color: appFontColor(),
-              fontWeight: FontWeight.w400,
-              fontSize: 18,
-            ),
-          )
-        : Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: RichText(
-              text: TextSpan(
-                style: TextStyle(
-                  fontSize: 14.0,
-                  color: appFontColor(),
-                ),
-                children: <TextSpan>[
-                  TextSpan(
-                    text: '@${model.author.username} ',
-                    style: TextStyle(
-                      color: appFontColor(),
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  TextSpan(
-                    text: model.post.body.trim(),
-                    style: TextStyle(
-                      color: appFontColor(),
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
+    List<TextSpan> linkifiedText = [];
+
+    if (model.post.imageURL == null) {
+      linkifiedText = linkify(text: model.post.body.trim(), fontSize: 18);
+    } else {
+      TextSpan usernameTextSpan = TextSpan(
+        text: '@${model.author.username} ',
+        style: TextStyle(
+          color: appFontColor(),
+          fontSize: 14,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+      linkifiedText.add(usernameTextSpan);
+      linkifiedText.addAll(linkify(text: model.post.body.trim(), fontSize: 14));
+    }
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: RichText(
+        text: TextSpan(
+          children: linkifiedText,
+        ),
+      ),
+    );
   }
 
   Widget postCommentCountAndTime(PostViewModel model) {
@@ -234,7 +219,7 @@ class PostView extends StatelessWidget {
                       ),
                       Container(
                         alignment: Alignment.bottomCenter,
-                        child: CommentTextFieldWidget(
+                        child: CommentTextFieldView(
                           onSubmitted: model.isReplying
                               ? (val) => model.replyToComment(
                                     context: context,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_stream.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/streams/stream_block/stream_block_widget.dart';
+import 'package:webblen/ui/widgets/streams/stream_block/stream_block_view.dart';
 
 class ListStreams extends StatelessWidget {
   final List dataResults;
@@ -42,7 +42,7 @@ class ListStreams extends StatelessWidget {
           if (dataResults.last == dataResults[index]) {
             displayBottomBorder = false;
           }
-          return StreamBlockWidget(
+          return StreamBlockView(
             stream: stream,
           );
         },

@@ -4,14 +4,15 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
-import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
 
 @singleton
 class ExploreViewModel extends BaseViewModel {
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
-  UserDataService _userDataService = locator<UserDataService>();
+  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
 
   ///HELPERS
   ScrollController streamScrollController = ScrollController();
@@ -164,17 +165,38 @@ class ExploreViewModel extends BaseViewModel {
     // notifyListeners();
   }
 
-  ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
+  ///BOTTOM SHEETS
+  //bottom sheet for new post, stream, or event
+  showAddContentOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.addContent,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "new post") {
+        navigateToCreatePostPage();
+      } else if (res == "new stream") {
+        //
+      } else if (res == "new event") {
+        //
+      }
+      notifyListeners();
+    }
+  }
+
+  //bottom sheet for post options
+  showPostOptions() async {}
+
+  navigateToCreatePostPage() {
+    _navigationService.navigateTo(Routes.CreatePostViewRoute);
+  }
 
   navigateToSearchView() {
     _navigationService.navigateWithTransition(SearchView(), transition: 'fade', opaque: true);
   }
 
-  // navigateToCreateCauseView() {
-  //   _navigationService.navigateTo(Routes.CreateCauseViewRoute);
-  // }
+// navigateToCreateCauseView() {
+//   _navigationService.navigateTo(Routes.CreateCauseViewRoute);
+// }
 }

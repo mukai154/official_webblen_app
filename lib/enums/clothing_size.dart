@@ -8,6 +8,16 @@ enum ClothingSize {
   XXXL,
 }
 
+class CardType {
+  static const String XS = 'XS';
+  static const String S = 'S';
+  static const String M = 'M';
+  static const String L = 'L';
+  static const String XL = 'XL';
+  static const String XXL = 'XXL';
+  static const String XXXL = 'XXXL';
+}
+
 class ClothingSizeConverter {
   static ClothingSize stringToClothingSize(String clothingSize) {
     if (clothingSize == 'XS') {

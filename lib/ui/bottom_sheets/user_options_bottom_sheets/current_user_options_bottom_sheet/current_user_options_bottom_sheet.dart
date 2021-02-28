@@ -32,6 +32,20 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
           children: [
             CustomIconButton(
               icon: Icon(
+                FontAwesomeIcons.heart,
+                size: 16,
+              ),
+              height: 45,
+              onPressed: () => completer(SheetResponse(responseData: "saved")),
+              backgroundColor: appButtonColor(),
+              elevation: 1,
+              text: "Saved",
+              textColor: appFontColor(),
+              centerContent: false,
+            ),
+            verticalSpaceSmall,
+            CustomIconButton(
+              icon: Icon(
                 FontAwesomeIcons.edit,
                 size: 16,
               ),
@@ -46,14 +60,14 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
             verticalSpaceSmall,
             CustomIconButton(
               icon: Icon(
-                FontAwesomeIcons.bookmark,
+                FontAwesomeIcons.link,
                 size: 16,
               ),
               height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "saved")),
+              onPressed: () => completer(SheetResponse(responseData: "share profile")),
               backgroundColor: appButtonColor(),
               elevation: 1,
-              text: "Saved",
+              text: "Share Profile",
               textColor: appFontColor(),
               centerContent: false,
             ),

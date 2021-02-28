@@ -3,7 +3,7 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 
-class UserBlockModel extends BaseViewModel {
+class UserBlockViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
   NavigationService _navigationService = locator<NavigationService>();
 

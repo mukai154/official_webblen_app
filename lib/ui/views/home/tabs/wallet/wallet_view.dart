@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
@@ -11,8 +10,7 @@ import 'package:webblen/ui/widgets/wallet/webblen_balance_block.dart';
 
 class WalletView extends StatelessWidget {
   final WebblenUser user;
-  final VoidCallback addContentAction;
-  WalletView({this.user, this.addContentAction});
+  WalletView({this.user});
 
   Widget head(WalletViewModel model) {
     return Container(
@@ -34,12 +32,8 @@ class WalletView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 IconButton(
-                  onPressed: addContentAction,
-                  icon: Icon(
-                    FontAwesomeIcons.plus,
-                    color: appIconColor(),
-                    size: 20,
-                  ),
+                  onPressed: () => model.showAddContentOptions(),
+                  icon: Icon(FontAwesomeIcons.plus, color: appIconColor(), size: 20),
                 ),
               ],
             ),
@@ -49,8 +43,7 @@ class WalletView extends StatelessWidget {
     );
   }
 
-  Widget optionRow(BuildContext context, Icon icon, String optionName,
-      Color optionColor, VoidCallback onTap) {
+  Widget optionRow(BuildContext context, Icon icon, String optionName, Color optionColor, VoidCallback onTap) {
     return GestureDetector(
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: 16.0),
@@ -97,28 +90,28 @@ class WalletView extends StatelessWidget {
             child: Column(
               children: [
                 head(model),
-                model.stripeAccountIsSetup
-                    ? Container(
-                        margin: EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SizedBox(height: 8.0),
-                            USDBalanceBlock(
-                              onPressed: () {},
-                              balance:
-                                  model.userStripeInfo.availableBalance ?? 0.00,
-                              pendingBalance:
-                                  model.userStripeInfo.pendingBalance ?? 0.00,
-                              // onPressed: () => showStripeAcctBottomSheet(
-                              //     verificationStatus, balance),
+                model.isBusy
+                    ? Container()
+                    : model.stripeAccountIsSetup
+                        ? Container(
+                            margin: EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                SizedBox(height: 8.0),
+                                USDBalanceBlock(
+                                  onPressed: () {},
+                                  balance: model.userStripeInfo.availableBalance ?? 0.00,
+                                  pendingBalance: model.userStripeInfo.pendingBalance ?? 0.00,
+                                  // onPressed: () => showStripeAcctBottomSheet(
+                                  //     verificationStatus, balance),
+                                ),
+                                //stripeAccountMenu(verificationStatus, balance),
+                              ],
                             ),
-                            //stripeAccountMenu(verificationStatus, balance),
-                          ],
-                        ),
-                      )
-                    // ),
-                    : Container(),
+                          )
+                        // ),
+                        : Container(),
                 SizedBox(height: 16.0),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
@@ -194,33 +187,6 @@ class WalletView extends StatelessWidget {
                   height: 0.5,
                 ),
                 SizedBox(height: 8.0),
-                //   StreamBuilder(
-                //     stream: FirebaseFirestore.instance.collection("stripe").doc(widget.currentUser.uid).snapshots(),
-                //     builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-                //       if (!snapshot.hasData) return Container();
-                //       var stripeAccountExists = snapshot.data.exists;
-                //       return !stripeAccountExists
-                //           ? Container(
-                //               child: Column(
-                //                 children: [
-                //                   SizedBox(height: 16.0),
-                //                   Container(
-                //                     color: Colors.black12,
-                //                     height: 0.5,
-                //                   ),
-                //                   SizedBox(height: 8.0),
-                //                   optionRow(
-                //                     Icon(FontAwesomeIcons.briefcase, color: CustomColors.blackPearl, size: 18.0),
-                //                     'Create Earnings Account',
-                //                     CustomColors.blackPearl,
-                //                     () => OpenUrl().launchInWebViewOrVC(context, stripeConnectURL),
-                //                   ),
-                //                 ],
-                //               ),
-                //             )
-                //           : Container();
-                //     },
-                //   ),
                 optionRow(
                   context,
                   Icon(
@@ -245,8 +211,7 @@ class WalletView extends StatelessWidget {
                 SizedBox(height: 8.0),
                 optionRow(
                   context,
-                  Icon(FontAwesomeIcons.questionCircle,
-                      color: appIconColor(), size: 18.0),
+                  Icon(FontAwesomeIcons.questionCircle, color: appIconColor(), size: 18.0),
                   'Help/FAQ',
                   appFontColor(),
                   // () => OpenUrl().launchInWebViewOrVC(

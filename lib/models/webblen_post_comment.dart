@@ -6,7 +6,7 @@ class WebblenPostComment {
   bool isReply;
   String replyReceiverUsername;
   String originalReplyCommentID;
-  List<String> replies;
+  List replies;
   int replyCount;
   int timePostedInMilliseconds;
 
@@ -32,7 +32,7 @@ class WebblenPostComment {
           isReply: data['isReply'],
           replyReceiverUsername: data['replyReceiverUsername'],
           originalReplyCommentID: data['originalReplyCommentID'],
-          replies: data['replies'].cast<String>(),
+          replies: data['replies'],
           replyCount: data['replyCount'],
           timePostedInMilliseconds: data['timePostedInMilliseconds'],
         );

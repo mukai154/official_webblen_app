@@ -1,26 +1,28 @@
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/enums/post_type.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
-import 'package:webblen/utils/random_string_generator.dart';
-import 'package:webblen/utils/string_validator.dart';
+import 'package:webblen/services/share/share_service.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
 class CreatePostViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   PlatformDataService _platformDataService = locator<PlatformDataService>();
@@ -29,6 +31,8 @@ class CreatePostViewModel extends BaseViewModel {
   FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
   PostDataService _postDataService = locator<PostDataService>();
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
+  ShareService _shareService = locator<ShareService>();
 
   ///HELPERS
   TextEditingController postTextController = TextEditingController();
@@ -36,6 +40,8 @@ class CreatePostViewModel extends BaseViewModel {
   bool textFieldEnabled = true;
 
   ///DATA
+  WebblenUser currentUser;
+
   bool isEditing = false;
   File img;
   // File img2;
@@ -47,8 +53,36 @@ class CreatePostViewModel extends BaseViewModel {
   double newPostTaxRate;
 
   ///INITIALIZE
-  initialize() async {
+  initialize({BuildContext context}) async {
     setBusy(true);
+
+    //get current user data
+    String uid = await _authService.getCurrentUserID();
+    var userData = await _userDataService.getWebblenUserByID(uid);
+    if (userData is String) {
+      _snackbarService.showSnackbar(
+        title: 'Post Error',
+        message: userData,
+        duration: Duration(seconds: 3),
+      );
+      setBusy(false);
+      return;
+    }
+
+    currentUser = userData;
+
+    //check if editing existing post
+    Map<String, dynamic> args = RouteData.of(context).arguments;
+    String postID = args['postID'] ?? "";
+    if (postID.isNotEmpty) {
+      post = await _postDataService.getPostByID(postID);
+      if (post != null) {
+        postTextController.text = post.body;
+        isEditing = true;
+      }
+    }
+
+    //get webblen rates
     newPostTaxRate = await _platformDataService.getNewPostTaxRate();
     if (newPostTaxRate == null) {
       newPostTaxRate = 0.05;
@@ -121,7 +155,7 @@ class CreatePostViewModel extends BaseViewModel {
   ///FORM VALIDATION
   bool postBodyIsValid() {
     String message = postTextController.text;
-    if (!StringValidator().isValidString(message)) {
+    if (isValidString(message)) {
       return false;
     } else {
       return true;
@@ -170,19 +204,6 @@ class CreatePostViewModel extends BaseViewModel {
       return false;
     }
 
-    //get current user data
-    String uid = await _authService.getCurrentUserID();
-    var userData = await _userDataService.getWebblenUserByID(uid);
-    if (userData is String) {
-      _snackbarService.showSnackbar(
-        title: 'Post Upload Error',
-        message: userData,
-        duration: Duration(seconds: 3),
-      );
-      return false;
-    }
-
-    WebblenUser user = userData;
     String message = postTextController.text.trim();
 
     //generate new post
@@ -190,13 +211,13 @@ class CreatePostViewModel extends BaseViewModel {
     post = WebblenPost(
       id: newPostID,
       parentID: null,
-      authorID: uid,
+      authorID: currentUser.id,
       imageURL: null,
       body: message,
       nearbyZipcodes: [],
       city: post.city,
       province: post.province,
-      followers: user.followers,
+      followers: currentUser.followers,
       tags: post.tags,
       webAppLink: "https://app.webblen.io/posts/post?id=$newPostID",
       sharedComs: [],
@@ -237,15 +258,78 @@ class CreatePostViewModel extends BaseViewModel {
     return success;
   }
 
+  Future<bool> submitEditedPost() async {
+    bool success = true;
+
+    String message = postTextController.text.trim();
+
+    //update post
+    post = WebblenPost(
+      id: post.id,
+      parentID: post.parentID,
+      authorID: currentUser.id,
+      imageURL: img == null ? post.imageURL : null,
+      body: message,
+      nearbyZipcodes: post.nearbyZipcodes,
+      city: post.city,
+      province: post.province,
+      followers: currentUser.followers,
+      tags: post.tags,
+      webAppLink: post.webAppLink,
+      sharedComs: post.sharedComs,
+      savedBy: post.savedBy,
+      postType: PostType.eventPost,
+      postDateTimeInMilliseconds: post.postDateTimeInMilliseconds,
+      paidOut: post.paidOut,
+      participantIDs: post.participantIDs,
+      commentCount: post.commentCount,
+      reported: post.reported,
+    );
+
+    //upload img if exists
+    if (img != null) {
+      String imageURL = await _firestoreStorageService.uploadImage(img: img, storageBucket: 'images', folderName: 'posts', fileName: post.id);
+      if (imageURL == null) {
+        _snackbarService.showSnackbar(
+          title: 'Post Upload Error',
+          message: 'There was an issue uploading your post. Please try again.',
+          duration: Duration(seconds: 3),
+        );
+        return false;
+      }
+      post.imageURL = imageURL;
+    }
+
+    //upload post data
+    var uploadResult = await _postDataService.updatePost(post: post);
+    if (uploadResult is String) {
+      _snackbarService.showSnackbar(
+        title: 'Post Upload Error',
+        message: 'There was an issue uploading your post. Please try again.',
+        duration: Duration(seconds: 3),
+      );
+      return false;
+    }
+
+    return success;
+  }
+
   submitForm() async {
     setBusy(true);
     //if editing update post, otherwise create new post
     if (isEditing) {
       //update post
+      bool submittedPost = await submitEditedPost();
+      if (submittedPost) {
+        //show bottom sheet
+        displayUploadSuccessBottomSheet();
+      }
     } else {
+      //submit new post
       bool submittedPost = await submitNewPost();
       if (submittedPost) {
         //show bottom sheet
+        displayUploadSuccessBottomSheet();
       }
     }
     setBusy(false);
@@ -285,6 +369,13 @@ class CreatePostViewModel extends BaseViewModel {
       return;
     }
 
+    //check if editing post
+    if (isEditing) {
+      submitForm();
+      return;
+    }
+
+    //display post confirmation
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       barrierDismissible: true,
       title: "Publish Post?",
@@ -319,17 +410,15 @@ class CreatePostViewModel extends BaseViewModel {
     }
   }
 
-  displayCauseUploadSuccessBottomSheet() async {
+  displayUploadSuccessBottomSheet() async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       variant: BottomSheetType.postPublished,
       takesInput: false,
-      barrierDismissible: true,
-      customData: {
-        'causeID': null,
-      },
+      customData: post,
+      barrierDismissible: false,
     );
-    if (sheetResponse == null || sheetResponse.responseData != "return") {
-      //_navigationService.pushNamedAndRemoveUntil(Routes.HomeNavViewRoute);
+    if (sheetResponse == null || sheetResponse.responseData == "done") {
+      _navigationService.pushNamedAndRemoveUntil(Routes.HomeNavViewRoute);
     }
   }
 

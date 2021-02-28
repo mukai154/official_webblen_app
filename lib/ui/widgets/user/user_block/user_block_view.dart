@@ -5,15 +5,15 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
-import 'package:webblen/ui/widgets/user/user_block/user_block_model.dart';
+import 'package:webblen/ui/widgets/user/user_block/user_block_view_model.dart';
 
 import '../user_profile_pic.dart';
 
-class UserBlockWidget extends StatelessWidget {
+class UserBlockView extends StatelessWidget {
   final WebblenUser user;
   final bool displayBottomBorder;
 
-  UserBlockWidget({this.user, this.displayBottomBorder});
+  UserBlockView({this.user, this.displayBottomBorder});
 
   Widget isFollowingUser() {
     return Container(
@@ -37,7 +37,7 @@ class UserBlockWidget extends StatelessWidget {
     );
   }
 
-  Widget body(UserBlockModel model) {
+  Widget body(UserBlockViewModel model) {
     return GestureDetector(
       onTap: () => model.navigateToUserView(user.id),
       child: Container(
@@ -73,12 +73,12 @@ class UserBlockWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<UserBlockModel>.reactive(
+    return ViewModelBuilder<UserBlockViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
       fireOnModelReadyOnce: true,
       onModelReady: (model) => model.initialize(user.followers),
-      viewModelBuilder: () => UserBlockModel(),
+      viewModelBuilder: () => UserBlockViewModel(),
       builder: (context, model, child) => GestureDetector(
         onTap: () => model.navigateToUserView(user.id),
         child: Container(

@@ -4,7 +4,7 @@ import 'package:webblen/enums/notifcation_type.dart';
 class WebblenNotification {
   String receiverUID;
   String senderUID;
-  NotificationType type;
+  String type;
   String header;
   String subHeader;
   Map<dynamic, dynamic> additionalData;
@@ -28,7 +28,7 @@ class WebblenNotification {
       : this(
           receiverUID: data['receiverUID'],
           senderUID: data['senderUID'],
-          type: NotificationTypeConverter.stringToNotificationType(data['type']),
+          type: data['type'],
           header: data['header'],
           subHeader: data['subHeader'],
           additionalData: data['additionalData'],
@@ -40,7 +40,7 @@ class WebblenNotification {
   Map<String, dynamic> toMap() => {
         'receiverUID': this.receiverUID,
         'senderUID': this.senderUID,
-        'type': NotificationTypeConverter.notificationTypeToString(this.type),
+        'type': this.type,
         'header': this.header,
         'subHeader': this.subHeader,
         'additionalData': this.additionalData,
@@ -244,6 +244,28 @@ class WebblenNotification {
       senderUID: senderUID,
       type: NotificationType.postCommentReply,
       header: '$commenterUsername replied to your comment',
+      subHeader: comment,
+      additionalData: {'postID': postID},
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
+
+  //Post Comment Mention Notification
+  WebblenNotification generateWebblenCommentMentionNotification({
+    @required String postID,
+    @required String receiverUID,
+    @required String senderUID,
+    @required String commenterUsername,
+    @required String comment,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: receiverUID,
+      senderUID: senderUID,
+      type: NotificationType.postComment.toString(),
+      header: '$commenterUsername mentioned you in post',
       subHeader: comment,
       additionalData: {'postID': postID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,

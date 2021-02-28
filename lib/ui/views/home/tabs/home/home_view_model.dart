@@ -4,23 +4,33 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
+import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 
 @singleton
 class HomeViewModel extends BaseViewModel {
   ///SERVICES
-  NavigationService _navigationService = locator<NavigationService>();
-  SnackbarService _snackbarService = locator<SnackbarService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
   PlatformDataService _platformDataService = locator<PlatformDataService>();
+  AuthService _authService = locator<AuthService>();
+  DialogService _dialogService = locator<DialogService>();
+  NavigationService _navigationService = locator<NavigationService>();
+  UserDataService _userDataService = locator<UserDataService>();
+  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
+  SnackbarService _snackbarService = locator<SnackbarService>();
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   PostDataService _postDataService = locator<PostDataService>();
+  ShareService _shareService = locator<ShareService>();
 
   ///HELPERS
   ScrollController scrollController = ScrollController();
-  int dateTimeInMilliseconds1MonthAgo = DateTime.now().millisecondsSinceEpoch - 2628000000;
 
   ///CURRENT USER
   WebblenUser user;
@@ -177,12 +187,80 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  ///BOTTOM SHEETS
+  //bottom sheet for new post, stream, or event
+  showAddContentOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.addContent,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "new post") {
+        navigateToCreatePostPage();
+      } else if (res == "new stream") {
+        //
+      } else if (res == "new event") {
+        //
+      }
+      notifyListeners();
+    }
+  }
+
+  //show post options
+  showPostOptions({BuildContext context, WebblenPost post}) async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: user.id == post.authorID ? BottomSheetType.postAuthorOptions : BottomSheetType.postOptions,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "edit") {
+        //edit post
+        _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {
+          'postID': post.id,
+        });
+      } else if (res == "share") {
+        //share post link
+        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: "@${user.username}", post: post);
+        _shareService.shareLink(url);
+      } else if (res == "report") {
+        //report post
+        _postDataService.reportPost(postID: post.id, reporterID: user.id);
+      } else if (res == "delete") {
+        //delete
+        deletePostConfirmation(context: context, post: post);
+      }
+      notifyListeners();
+    }
+  }
+
+  //show delete post confirmation
+  deletePostConfirmation({BuildContext context, WebblenPost post}) async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      title: "Delete Post",
+      description: "Are You Sure You Want to Delete this Post?",
+      mainButtonTitle: "Delete Post",
+      secondaryButtonTitle: "Cancel",
+      barrierDismissible: true,
+      variant: BottomSheetType.destructiveConfirmation,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "confirmed") {
+        _postDataService.deletePost(post: post);
+        postResults.removeWhere((doc) => doc.id == post.id);
+        notifyListeners();
+      }
+    }
+  }
+
   ///NAVIGATION
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);
 // }
 //
-  navigateToCreateCauseView() {
-    //_navigationService.navigateTo(Routes.CreateCauseViewRoute);
+  navigateToCreatePostPage() {
+    _navigationService.navigateTo(Routes.CreatePostViewRoute);
   }
 }

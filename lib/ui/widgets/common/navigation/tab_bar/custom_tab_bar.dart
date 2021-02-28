@@ -177,7 +177,7 @@ class WebblenProfileTabBar extends StatelessWidget {
     FontWeight fontWeight = FontWeight.w600;
     return Container(
       height: 35,
-      padding: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(top: 4, bottom: 8),
       child: TabBar(
         controller: tabController,
         isScrollable: true,

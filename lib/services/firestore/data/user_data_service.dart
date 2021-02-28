@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:webblen/models/user_stripe_info.dart';
+import 'package:stacked_services/stacked_services.dart';
+import 'package:webblen/app/locator.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class UserDataService {
   CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_users');
-  CollectionReference stripeRef = FirebaseFirestore.instance.collection('stripe');
+  FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
+  SnackbarService _snackbarService = locator<SnackbarService>();
 
   Future checkIfUserExists(String id) async {
     bool exists = false;
@@ -34,24 +40,66 @@ class UserDataService {
     return user;
   }
 
+  Future getWebblenUserByUsername(String username) async {
+    WebblenUser user;
+    QuerySnapshot querySnapshot = await userRef.where("username", isEqualTo: username).get();
+    if (querySnapshot.docs.isNotEmpty) {
+      DocumentSnapshot doc = querySnapshot.docs.first;
+      Map<String, dynamic> docData = doc.data();
+      user = WebblenUser.fromMap(docData);
+    }
+    return user;
+  }
+
   Future updateWebblenUser(WebblenUser user) async {
     await userRef.doc(user.id).update(user.toMap()).catchError((e) {
       return e.message;
     });
   }
 
-  // Stream<Map<String, dynamic>> streamStripeAccount(String uid) {
-  //   return stripeRef.doc(uid).snapshots().map((snapshot) => snapshot.data());
-  // }
-
-  Future getUserStripeInfoByID(String id) async {
-    UserStripeInfo userStripeInfo;
-    DocumentSnapshot snapshot = await stripeRef.doc(id).get().catchError((e) {
+  Future updateProfilePic(String id, File img) async {
+    String imgURL = await _firestoreStorageService.uploadImage(
+      img: img,
+      storageBucket: 'webblen_users',
+      folderName: id,
+      fileName: getRandomString(10) + ".png",
+    );
+    await userRef.doc(id).update({
+      "profilePicURL": imgURL,
+    }).catchError((e) {
       return e.message;
     });
-    if (snapshot.exists) {
-      userStripeInfo = UserStripeInfo.fromMap(snapshot.data());
-    }
-    return userStripeInfo;
+  }
+
+  Future<bool> updateBio({String id, String bio}) async {
+    bool updated = true;
+    await userRef.doc(id).update({
+      "bio": bio,
+    }).catchError((e) {
+      updated = false;
+      _snackbarService.showSnackbar(
+        title: 'Error',
+        message: 'There was an issue updating your profile. Please try again.',
+        duration: Duration(seconds: 3),
+      );
+      return updated;
+    });
+    return updated;
+  }
+
+  Future<bool> updateWebsite({String id, String website}) async {
+    bool updated = true;
+    await userRef.doc(id).update({
+      "website": website,
+    }).catchError((e) {
+      updated = false;
+      _snackbarService.showSnackbar(
+        title: 'Error',
+        message: 'There was an issue updating your profile. Please try again.',
+        duration: Duration(seconds: 3),
+      );
+      return updated;
+    });
+    return updated;
   }
 }

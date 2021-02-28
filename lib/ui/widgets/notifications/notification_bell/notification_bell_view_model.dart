@@ -4,7 +4,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 
-class NotificationBellModel extends StreamViewModel<int> {
+class NotificationBellViewModel extends StreamViewModel<int> {
   NavigationService _navigationService = locator<NavigationService>();
   NotificationDataService _notificationDataService = locator<NotificationDataService>();
 
@@ -30,7 +30,7 @@ class NotificationBellModel extends StreamViewModel<int> {
 
   Stream<int> streamNotifCount() async* {
     while (currentUID != null) {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(Duration(seconds: 3));
       var res = await _notificationDataService.getNumberOfUnreadNotifications(currentUID);
       if (res is String) {
         yield null;
@@ -43,7 +43,7 @@ class NotificationBellModel extends StreamViewModel<int> {
   ///NAVIGATION
   navigateToNotificationsView() {
     notifCount = 0;
-    _navigationService.navigateTo(Routes.NotificationsViewRoute);
     notifyListeners();
+    _navigationService.navigateTo(Routes.NotificationsViewRoute);
   }
 }

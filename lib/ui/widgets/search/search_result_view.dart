@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/search_result.dart';
-import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class UserSearchResultView extends StatelessWidget {
   final VoidCallback onTap;

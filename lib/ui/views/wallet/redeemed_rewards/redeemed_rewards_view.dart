@@ -7,7 +7,7 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/enums/reward_status.dart';
 import 'package:webblen/enums/reward_type.dart';
 import 'package:webblen/models/webblen_redeemed_reward.dart';
-import 'package:webblen/ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view_model.dart';
+import 'package:webblen/ui/views/wallet/redeemed_rewards/redeemed_rewards_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/utils/time_calc.dart';
@@ -18,9 +18,9 @@ class RedeemedRewardsView extends StatelessWidget {
       FontAwesomeIcons.solidCircle,
       size: 12.0,
       color: redeemedReward.rewardStatus == RewardStatus.pending
-          ? CustomColors.vibrantYellow
+          ? CustomColors.turboYellow
           : redeemedReward.rewardStatus == RewardStatus.complete
-              ? CustomColors.lightCarribeanGreen
+              ? CustomColors.darkMountainGreen
               : Colors.red,
     );
   }
@@ -35,9 +35,7 @@ class RedeemedRewardsView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Text(
-                redeemedReward.rewardStatus == RewardStatus.complete
-                    ? 'Complete'
-                    : 'Pending',
+                redeemedReward.rewardStatus == RewardStatus.complete ? 'Complete' : 'Pending',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14.0,
@@ -151,15 +149,13 @@ class RedeemedRewardsView extends StatelessWidget {
                     height: MediaQuery.of(context).size.height,
                     child: model.redeemedRewardResults.isEmpty
                         ? LiquidPullToRefresh(
-                            onRefresh: () =>
-                                model.refreshRedeemedRewards(context),
+                            onRefresh: () => model.refreshRedeemedRewards(context),
                             child: Center(
                               child: ListView(
                                 shrinkWrap: true,
                                 children: <Widget>[
                                   Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 16.0),
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0),
                                     child: Image.asset(
                                       'assets/images/online_store.png',
                                       height: 200,
@@ -172,10 +168,7 @@ class RedeemedRewardsView extends StatelessWidget {
                                     children: <Widget>[
                                       Container(
                                         constraints: BoxConstraints(
-                                          maxWidth: MediaQuery.of(context)
-                                                  .size
-                                                  .width -
-                                              16,
+                                          maxWidth: MediaQuery.of(context).size.width - 16,
                                         ),
                                         child: Text(
                                           "You Have Not Purchased Any Rewards Yet!",
@@ -208,7 +201,7 @@ class RedeemedRewardsView extends StatelessWidget {
                                         style: TextStyle(
                                           fontSize: 16.0,
                                           fontWeight: FontWeight.w700,
-                                          color: CustomColors.electronBlue,
+                                          color: appTextButtonColor(),
                                         ),
                                       ),
                                       // ),
@@ -224,14 +217,10 @@ class RedeemedRewardsView extends StatelessWidget {
                             shrinkWrap: true,
                             itemCount: model.redeemedRewardResults.length,
                             itemBuilder: (context, index) {
-                              WebblenRedeemedReward redeemedReward =
-                                  WebblenRedeemedReward.fromMap(
+                              WebblenRedeemedReward redeemedReward = WebblenRedeemedReward.fromMap(
                                 model.redeemedRewardResults[index].data(),
                               );
-                              return redeemedReward.rewardType ==
-                                      RewardType.webblenClothes
-                                  ? merchBlock(redeemedReward)
-                                  : cashBlock(redeemedReward);
+                              return redeemedReward.rewardType == RewardType.webblenClothes ? merchBlock(redeemedReward) : cashBlock(redeemedReward);
                             },
                           ),
                   ),

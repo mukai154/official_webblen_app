@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_post.dart';
@@ -14,7 +15,7 @@ import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/utils/random_string_generator.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class PostViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
@@ -54,7 +55,7 @@ class PostViewModel extends BaseViewModel {
     currentUser = await _userDataService.getWebblenUserByID(uid);
 
     Map<String, dynamic> args = RouteData.of(context).arguments;
-    String postID = args['postID'] ?? "";
+    String postID = args['id'] ?? "";
 
     var res = await _postDataService.getPostByID(postID);
     if (res is String) {
@@ -71,7 +72,9 @@ class PostViewModel extends BaseViewModel {
     postScrollController.addListener(() {
       double triggerFetchMoreSize = 0.7 * postScrollController.position.maxScrollExtent;
       if (postScrollController.position.pixels > triggerFetchMoreSize) {
-        loadAdditionalComments();
+        if (commentResults.isNotEmpty) {
+          loadAdditionalComments();
+        }
       }
     });
     await loadComments();
@@ -261,8 +264,8 @@ class PostViewModel extends BaseViewModel {
   }
 
   ///NAVIGATION
-  navigateToUserView(String uid) {
-    //_navigationService.navigateTo(Routes.UserViewRoute, arguments: {'uid': uid});
+  navigateToUserView(String id) {
+    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);

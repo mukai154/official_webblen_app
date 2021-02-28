@@ -5,6 +5,7 @@ import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/dynamic_link_type.dart';
 import 'package:webblen/models/webblen_post.dart';
+import 'package:webblen/models/webblen_user.dart';
 
 class DynamicLinkService {
   SnackbarService _snackbarService = locator<SnackbarService>();
@@ -14,6 +15,37 @@ class DynamicLinkService {
   String androidPackageName = 'com.webblen.events.webblen';
   String iosBundleID = 'com.webblen.events';
   String iosAppStoreID = '1196159158';
+
+  Future<String> createAccountLink({@required WebblenUser user}) async {
+    //set post uri
+    Uri postURI = Uri.parse('https://app.webblen.io/profiles/profile?id=${user.id}');
+
+    //set dynamic link params
+    final DynamicLinkParameters params = DynamicLinkParameters(
+      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+        shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
+      ),
+      uriPrefix: webblenShareContentPrefix,
+      link: postURI,
+      androidParameters: AndroidParameters(
+        packageName: androidPackageName,
+      ),
+      iosParameters: IosParameters(
+        bundleId: iosBundleID,
+        appStoreId: iosAppStoreID,
+      ),
+      socialMetaTagParameters: SocialMetaTagParameters(
+        title: "Checkout @${user.username}'s account on Webblen",
+        description: user.bio != null ? user.bio : null,
+        imageUrl: user.profilePicURL != null ? Uri.parse(user.profilePicURL) : null,
+      ),
+    );
+
+    ShortDynamicLink shortDynamicLink = await params.buildShortLink();
+    Uri dynamicURL = shortDynamicLink.shortUrl;
+
+    return dynamicURL.toString();
+  }
 
   Future<String> createPostLink({@required String postAuthorUsername, @required WebblenPost post}) async {
     //set post uri
@@ -71,7 +103,9 @@ class DynamicLinkService {
       DynamicLinkType linkType;
       String id = link.queryParameters['id'];
 
-      if (link.pathSegments.contains('post')) {
+      if (link.pathSegments.contains('account')) {
+        _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'id': id});
+      } else if (link.pathSegments.contains('post')) {
         _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'postID': id});
       } else if (link.pathSegments.contains('event')) {
         //_navigationService.navigateTo(Routes.PostViewRoute, arguments: {'postID': id});

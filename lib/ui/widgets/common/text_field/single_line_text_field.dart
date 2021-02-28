@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 
 class SingleLineTextField extends StatelessWidget {
@@ -14,13 +15,14 @@ class SingleLineTextField extends StatelessWidget {
     return TextFieldContainer(
       child: TextFormField(
         controller: controller,
-        cursorColor: Colors.black,
         obscureText: isPassword,
         inputFormatters: textLimit == null
             ? []
             : [
                 LengthLimitingTextInputFormatter(textLimit),
               ],
+        style: TextStyle(color: appFontColor()),
+        cursorColor: appFontColor(),
         decoration: InputDecoration(
           hintText: hintText,
           border: InputBorder.none,

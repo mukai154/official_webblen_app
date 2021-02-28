@@ -12,6 +12,7 @@ import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dar
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
+import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
 import 'package:webblen/services/stripe/stripe_payment_service.dart';
 
 import 'auth/auth_service.dart';
@@ -49,6 +50,8 @@ abstract class ServicesModule {
   CommentDataService get commentDataService;
   @lazySingleton
   StripePaymentService get stripePaymentService;
+  @lazySingleton
+  StripeConnectAccountService get stripeConnectAccountService;
   @lazySingleton
   LocationService get locationService;
   @lazySingleton

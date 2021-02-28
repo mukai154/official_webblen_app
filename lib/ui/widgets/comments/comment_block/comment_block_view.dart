@@ -3,23 +3,55 @@ import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
-import 'package:webblen/ui/widgets/comments/comment_block/comment_block_model.dart';
 import 'package:webblen/ui/widgets/list_builders/list_comments.dart';
+import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
 
-class CommentBlockWidget extends StatelessWidget {
+import 'comment_block_view_model.dart';
+
+class CommentBlockView extends StatelessWidget {
   final Function(WebblenPostComment) replyToComment;
   final Function(WebblenPostComment) deleteComment;
 
   final WebblenPostComment comment;
-  CommentBlockWidget({@required this.comment, @required this.replyToComment, @required this.deleteComment});
+  CommentBlockView({@required this.comment, @required this.replyToComment, @required this.deleteComment});
+
+  List<TextSpan> convertToRichText(String text) {
+    List<String> words = text.split(" ");
+    List<TextSpan> richText = [
+      TextSpan(
+        text: '${comment.username} ',
+        style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.bold),
+      ),
+    ];
+    words.forEach((word) {
+      TextSpan textSpan;
+      if (word.startsWith("@")) {
+        textSpan = TextSpan(
+          text: "$word ",
+          style: TextStyle(color: appTextButtonColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+        );
+      } else if (word.startsWith("#")) {
+        textSpan = TextSpan(
+          text: "$word ",
+          style: TextStyle(color: appTextButtonColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+        );
+      } else {
+        textSpan = TextSpan(
+          text: "$word ",
+          style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+        );
+      }
+      richText.add(textSpan);
+    });
+    return richText;
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<CommentBlockModel>.reactive(
+    return ViewModelBuilder<CommentBlockViewModel>.reactive(
       onModelReady: (model) => model.initialize(comment.senderUID),
-      viewModelBuilder: () => CommentBlockModel(),
+      viewModelBuilder: () => CommentBlockViewModel(),
       builder: (context, model, child) => model.isBusy || model.errorLoadingData
           ? Container()
           : Container(
@@ -52,16 +84,7 @@ class CommentBlockWidget extends StatelessWidget {
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(fontSize: 14.0, color: appFontColor()),
-                              children: <TextSpan>[
-                                TextSpan(
-                                  text: '${comment.username} ',
-                                  style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.bold),
-                                ),
-                                TextSpan(
-                                  text: comment.message,
-                                  style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
-                                ),
-                              ],
+                              children: convertToRichText(comment.message),
                             ),
                           ),
                         ),

@@ -4,23 +4,18 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 
 class RedeemedRewardDataService {
-  CollectionReference purchasedRewardsRef =
-      FirebaseFirestore.instance.collection('purchased_rewards');
+  CollectionReference purchasedRewardsRef = FirebaseFirestore.instance.collection('purchased_rewards');
   SnackbarService _snackbarService = locator<SnackbarService>();
 
-  //Load Comments Created
+  //Load Rewards
   Future<List<DocumentSnapshot>> loadUserRedeemedRewards({
     @required String uid,
     @required int resultsLimit,
   }) async {
     List<DocumentSnapshot> docs = [];
-    Query query = purchasedRewardsRef
-        .where('uid', isEqualTo: uid)
-        .orderBy('timePostedInMilliseconds', descending: true)
-        .limit(resultsLimit);
+    Query query = purchasedRewardsRef.where('uid', isEqualTo: uid).orderBy('timePostedInMilliseconds', descending: true).limit(resultsLimit);
 
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      print(e.message);
       _snackbarService.showSnackbar(
         title: 'Error',
         message: e.message,
@@ -34,7 +29,7 @@ class RedeemedRewardDataService {
     return docs;
   }
 
-  //Load Additional Causes by Follower Count
+  //Load Additional Rewards
   Future<List<DocumentSnapshot>> loadAdditionalUserRedeemedRewards({
     @required String uid,
     @required DocumentSnapshot lastDocSnap,

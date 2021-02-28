@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
-import 'package:webblen/ui/widgets/comments/comment_block/comment_block_widget.dart';
+import 'package:webblen/ui/widgets/comments/comment_block/comment_block_view.dart';
 
 class ListComments extends StatelessWidget {
   final List results;
@@ -46,13 +46,9 @@ class ListComments extends StatelessWidget {
                   comment = results[index];
                 }
 
-                return CommentBlockWidget(
-                  replyToComment: replyToComment == null
-                      ? null
-                      : (val) => replyToComment(val),
-                  deleteComment: deleteComment == null
-                      ? null
-                      : (val) => deleteComment(val),
+                return CommentBlockView(
+                  replyToComment: replyToComment == null ? null : (val) => replyToComment(val),
+                  deleteComment: deleteComment == null ? null : (val) => deleteComment(val),
                   comment: comment,
                 );
               },
@@ -83,7 +79,7 @@ class ListComments extends StatelessWidget {
           comment = results[index];
         }
 
-        return CommentBlockWidget(
+        return CommentBlockView(
           replyToComment: (val) => replyToComment(val),
           deleteComment: (val) => deleteComment(val),
           comment: comment,

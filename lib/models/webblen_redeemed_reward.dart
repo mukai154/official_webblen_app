@@ -1,7 +1,3 @@
-import 'package:webblen/enums/clothing_size.dart';
-import 'package:webblen/enums/reward_status.dart';
-import 'package:webblen/enums/reward_type.dart';
-
 class WebblenRedeemedReward {
   String address1;
   String address2;
@@ -9,9 +5,9 @@ class WebblenRedeemedReward {
   int purchaseTimeInMilliseconds;
   String rewardID;
   String rewardTitle;
-  RewardType rewardType;
-  ClothingSize clothingSize;
-  RewardStatus rewardStatus;
+  String rewardType;
+  String clothingSize;
+  String rewardStatus;
   String uid;
 
   WebblenRedeemedReward({
@@ -35,12 +31,9 @@ class WebblenRedeemedReward {
           purchaseTimeInMilliseconds: data['purchaseTimeInMilliseconds'],
           rewardID: data['rewardID'],
           rewardTitle: data['rewardTitle'],
-          rewardType:
-              RewardTypeConverter.stringToRewardType(data['rewardType']),
-          clothingSize:
-              ClothingSizeConverter.stringToClothingSize(data['size']),
-          rewardStatus:
-              RewardStatusConverter.stringToRewardStatus(data['status']),
+          rewardType: data['rewardType'],
+          clothingSize: data['size'],
+          rewardStatus: data['status'],
           uid: data['uid'],
         );
 
@@ -51,9 +44,9 @@ class WebblenRedeemedReward {
         'purchaseTimeInMilliseconds': this.purchaseTimeInMilliseconds,
         'rewardID': this.rewardID,
         'rewardTitle': this.rewardTitle,
-        'rewardType': RewardTypeConverter.rewardTypeToString(this.rewardType),
-        'size': ClothingSizeConverter.clothingSizeToString(this.clothingSize),
-        'status': RewardStatusConverter.rewardStatusToString(this.rewardStatus),
+        'rewardType': this.rewardType,
+        'size': this.clothingSize,
+        'status': this.rewardStatus,
         'uid': this.uid,
       };
 }

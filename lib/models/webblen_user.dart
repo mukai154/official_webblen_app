@@ -1,21 +1,23 @@
 class WebblenUser {
   // ignore: non_constant_identifier_names
   double WBLN;
-  List<String> achievements;
+  List achievements;
   double ap;
   int apLvl;
-  List<String> blockedUsers;
+  List blockedUsers;
   String emailAddress;
   int eventsToLvlUp;
   String fbAccessToken;
-  List<String> followers;
-  List<String> following;
+  List followers;
+  List following;
   String googleAccessToken;
   String googleIDToken;
   String id;
   bool isAdmin;
   String profilePicURL;
   String username;
+  String bio;
+  String website;
 
   WebblenUser({
     // ignore: non_constant_identifier_names
@@ -35,26 +37,30 @@ class WebblenUser {
     this.isAdmin,
     this.profilePicURL,
     this.username,
+    this.bio,
+    this.website,
   });
 
   WebblenUser.fromMap(Map<String, dynamic> data)
       : this(
           WBLN: data['WBLN'].toDouble(),
-          achievements: data['achievements'].cast<String>(),
+          achievements: data['achievements'],
           ap: data['ap'],
           apLvl: data['apLvl'],
-          blockedUsers: data['blockedUsers'].cast<String>(),
+          blockedUsers: data['blockedUsers'],
           emailAddress: data['emailAddress'],
           eventsToLvlUp: data['eventsToLvlUp'],
           fbAccessToken: data['fbAccessToken'],
-          followers: data['followers'].cast<String>(),
-          following: data['following'].cast<String>(),
+          followers: data['followers'],
+          following: data['following'],
           googleAccessToken: data['googleAccessToken'],
           googleIDToken: data['googleIDToken'],
           id: data['id'],
           isAdmin: data['isAdmin'],
           profilePicURL: data['profilePicURL'],
           username: data['username'],
+          bio: data['bio'],
+          website: data['website'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -74,5 +80,7 @@ class WebblenUser {
         'isAdmin': this.isAdmin,
         'profilePicURL': this.profilePicURL,
         'username': this.username,
+        'bio': this.bio,
+        'website': this.website,
       };
 }

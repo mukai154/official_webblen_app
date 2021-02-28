@@ -1,25 +1,23 @@
-import 'package:webblen/enums/post_type.dart';
-
 class WebblenPost {
   String id;
   String parentID;
   String authorID;
-  PostType postType;
+  String postType;
   String imageURL;
   String body;
-  List<String> nearbyZipcodes;
+  List nearbyZipcodes;
   String city;
   String province;
   int commentCount;
   int postDateTimeInMilliseconds;
   bool reported;
   String webAppLink;
-  List<String> savedBy;
-  List<String> sharedComs;
+  List savedBy;
+  List sharedComs;
   bool paidOut;
-  List<String> tags;
-  List<String> participantIDs;
-  List<String> followers;
+  List tags;
+  List participantIDs;
+  List followers;
 
   WebblenPost({
     this.id,
@@ -48,29 +46,29 @@ class WebblenPost {
           id: data['id'],
           parentID: data['parentID'],
           authorID: data['authorID'],
-          postType: PostTypeConverter.stringToPostType(data['postType']),
+          postType: data['postType'],
           imageURL: data['imageURL'],
           body: data['body'],
-          nearbyZipcodes: data['nearbyZipcodes'].cast<String>(),
+          nearbyZipcodes: data['nearbyZipcodes'],
           city: data['city'],
           province: data['province'],
           commentCount: data['commentCount'],
           postDateTimeInMilliseconds: data['postDateTimeInMilliseconds'],
           reported: false,
           webAppLink: data['webAppLink'],
-          savedBy: data['savedBy'].cast<String>(),
-          sharedComs: data['sharedComs'].cast<String>(),
+          savedBy: data['savedBy'],
+          sharedComs: data['sharedComs'],
           paidOut: data['paidOut'],
-          tags: data['tags'].cast<String>(),
-          participantIDs: data['participantIDs'].cast<String>(),
-          followers: data['followers'].cast<String>(),
+          tags: data['tags'],
+          participantIDs: data['participantIDs'],
+          followers: data['followers'],
         );
 
   Map<String, dynamic> toMap() => {
         'id': this.id,
         'parentID': this.parentID,
         'authorID': this.authorID,
-        'postType': PostTypeConverter.postTypeToString(this.postType),
+        'postType': this.postType,
         'imageURL': this.imageURL,
         'body': this.body,
         'nearbyZipcodes': this.nearbyZipcodes,

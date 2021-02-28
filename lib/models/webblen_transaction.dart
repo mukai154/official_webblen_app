@@ -1,16 +1,13 @@
-import 'package:webblen/enums/transaction_currency.dart';
-import 'package:webblen/enums/transaction_type.dart';
-
 class WebblenTransaction {
   String receiverUID;
   String senderUID;
   String eventID;
   String streamID;
-  TransactionType type;
-  TransactionCurrency currency;
+  String type;
+  String currency;
   String header;
   String subHeader;
-  Map<dynamic, dynamic> additionalData;
+  dynamic additionalData;
   int timePostedInMilliseconds;
   bool read;
 
@@ -34,9 +31,8 @@ class WebblenTransaction {
           senderUID: data['senderUID'],
           eventID: data['eventID'],
           streamID: data['streamID'],
-          type: TransactionTypeConverter.stringToTransactionType(data['type']),
-          currency: TransactionCurrencyConverter.stringToTransactionCurrency(
-              data['currency']),
+          type: data['type'],
+          currency: data['currency'],
           header: data['header'],
           subHeader: data['subHeader'],
           additionalData: data['additionalData'],
@@ -49,9 +45,8 @@ class WebblenTransaction {
         'senderUID': this.senderUID,
         'eventID': this.eventID,
         'streamID': this.streamID,
-        'type': TransactionTypeConverter.transactionTypeToString(this.type),
-        'currency': TransactionCurrencyConverter.transactionCurrencyToString(
-            this.currency),
+        'type': this.type,
+        'currency': this.currency,
         'header': this.header,
         'subHeader': this.subHeader,
         'additionalData': this.additionalData,

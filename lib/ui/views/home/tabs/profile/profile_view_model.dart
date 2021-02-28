@@ -7,9 +7,13 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
+import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
+import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/share/share_service.dart';
 
 @singleton
 class ProfileViewModel extends BaseViewModel {
@@ -19,21 +23,27 @@ class ProfileViewModel extends BaseViewModel {
   UserDataService _userDataService = locator<UserDataService>();
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
-  CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
+  PostDataService _postDataService = locator<PostDataService>();
+  ShareService _shareService = locator<ShareService>();
 
+  ///UI HELPERS
   ScrollController scrollController = ScrollController();
 
+  ///DATA
   List<DocumentSnapshot> postResults = [];
   DocumentSnapshot lastPostDocSnap;
 
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
+  bool reloadingPosts = false;
 
   int resultsLimit = 20;
 
   WebblenUser user;
 
-  initialize(TabController tabController, WebblenUser currentUser) async {
+  ///INITIALIZE
+  initialize({BuildContext context, TabController tabController, WebblenUser currentUser}) async {
     //set busy status
     setBusy(true);
 
@@ -62,95 +72,47 @@ class ProfileViewModel extends BaseViewModel {
   }
 
   Future<void> refreshPosts() async {
-    postResults = [];
-    notifyListeners();
     await loadPosts();
+    notifyListeners();
   }
 
   ///Load Data
   loadPosts() async {
-    Query query;
-    // if (areaCodeFilter.isEmpty) {
-    query = postsRef.where('authorID', isEqualTo: user.id).orderBy('postDateTimeInMilliseconds', descending: true).limit(resultsLimit);
-    // } else {
-    //   query = postsRef
-    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
-    //       .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
-    //       .orderBy('postDateTimeInMilliseconds', descending: true)
-    //       .limit(resultsPerPage);
-    // }
-    QuerySnapshot snapshot = await query.get().catchError((e) {
-      print(e);
-      _snackbarService.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
-    });
-
-    if (snapshot.docs.isNotEmpty) {
-      lastPostDocSnap = snapshot.docs[snapshot.docs.length - 1];
-      postResults = snapshot.docs;
-      // if (tagFilter.isNotEmpty) {
-      //   postResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
-      // }
-      // if (sortBy == "Latest") {
-      //   postResults.sort((docA, docB) => docB.data()['postDateTimeInMilliseconds'].compareTo(docA.data()['postDateTimeInMilliseconds']));
-      // } else {
-      //   postResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
-      // }
-    }
-    notifyListeners();
+    //load posts with params
+    postResults = await _postDataService.loadPostsByUserID(id: user.id, resultsLimit: resultsLimit);
   }
 
   loadAdditionalPosts() async {
+    //check if already loading posts or no more posts available
     if (loadingAdditionalPosts || !morePostsAvailable) {
       return;
     }
+
+    //set loading additional posts status
     loadingAdditionalPosts = true;
     notifyListeners();
-    Query query;
-    // if (areaCodeFilter.isEmpty) {
-    query = postsRef
-        .where('authorID', isEqualTo: user.id)
-        .orderBy('postDateTimeInMilliseconds', descending: true)
-        .startAfterDocument(lastPostDocSnap)
-        .limit(resultsLimit);
-    // } else {
-    //   query = postsRef
-    //       .where('nearbyZipcodes', arrayContains: areaCodeFilter)
-    //       .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1MonthAgo)
-    //       .orderBy('postDateTimeInMilliseconds', descending: true)
-    //       .startAfterDocument(lastPostDocSnap)
-    //       .limit(resultsPerPage);
-    // }
-    QuerySnapshot querySnapshot = await query.get().catchError((e) {
-      print(e);
-      _snackbarService.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
-    });
-    if (querySnapshot.docs.isNotEmpty) {
-      lastPostDocSnap = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+    //load additional posts
+    List<DocumentSnapshot> newResults = await _postDataService.loadAdditionalPostsByUserID(
+      lastDocSnap: postResults[postResults.length - 1],
+      id: user.id,
+      resultsLimit: resultsLimit,
+    );
+
+    //notify if no more posts available
+    if (newResults.length == 0) {
+      morePostsAvailable = false;
+    } else {
+      postResults.addAll(newResults);
     }
-    postResults.addAll(querySnapshot.docs);
-    // if (tagFilter.isNotEmpty) {
-    //   postResults.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
-    // }
-    // if (sortBy == "Most Popular") {
-    //   postResults.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
-    // }
-    // if (querySnapshot.docs.length == 0) {
-    //   morePostsAvailable = false;
-    // }
+
+    //set loading additional posts status
     loadingAdditionalPosts = false;
     notifyListeners();
   }
 
-  ///SHOW OPTIONS
-  showOptions() async {
+  ///BOTTOM SHEETS
+  showUserOptions() async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       barrierDismissible: true,
       variant: BottomSheetType.currentUserOptions,
@@ -159,21 +121,94 @@ class ProfileViewModel extends BaseViewModel {
       String res = sheetResponse.responseData;
       if (res == "edit profile") {
         //edit profile
+        navigateToEditProfileView();
       } else if (res == "saved") {
         //saved
       } else if (res == "settings") {
-        navigateToSettingsPage();
+        navigateToSettingsView();
       }
       notifyListeners();
     }
   }
 
+  //bottom sheet for new post, stream, or event
+  showAddContentOptions() async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.addContent,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "new post") {
+        navigateToCreatePostPage();
+      } else if (res == "new stream") {
+        //
+      } else if (res == "new event") {
+        //
+      }
+      notifyListeners();
+    }
+  }
+
+  //show post options
+  showPostOptions({BuildContext context, WebblenPost post}) async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      barrierDismissible: true,
+      variant: BottomSheetType.postAuthorOptions,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "edit") {
+        //edit post
+        navigateToCreatePostPage(args: {
+          'postID': post.id,
+        });
+      } else if (res == "share") {
+        //share post link
+        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: "@${user.username}", post: post);
+        _shareService.shareLink(url);
+      } else if (res == "delete") {
+        //delete
+        deletePostConfirmation(context: context, post: post);
+      }
+      notifyListeners();
+    }
+  }
+
+  //show delete post confirmation
+  deletePostConfirmation({BuildContext context, WebblenPost post}) async {
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      title: "Delete Post",
+      description: "Are You Sure You Want to Delete this Post?",
+      mainButtonTitle: "Delete Post",
+      secondaryButtonTitle: "Cancel",
+      barrierDismissible: true,
+      variant: BottomSheetType.destructiveConfirmation,
+    );
+    if (sheetResponse != null) {
+      String res = sheetResponse.responseData;
+      if (res == "confirmed") {
+        _postDataService.deletePost(post: post);
+        postResults.removeWhere((doc) => doc.id == post.id);
+        notifyListeners();
+      }
+    }
+  }
+
   ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-  navigateToSettingsPage() {
+  navigateToCreatePostPage({dynamic args}) {
+    if (args == null) {
+      _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: args);
+    } else {
+      _navigationService.navigateTo(Routes.CreatePostViewRoute);
+    }
+  }
+
+  navigateToEditProfileView() {
+    _navigationService.navigateTo(Routes.EditProfileViewRoute, arguments: {'id': user.id});
+  }
+
+  navigateToSettingsView() {
     _navigationService.navigateTo(Routes.SettingsViewRoute);
   }
 }

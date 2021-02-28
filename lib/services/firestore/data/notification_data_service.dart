@@ -38,7 +38,7 @@ class NotificationDataService {
   }
 
   ///QUERY DATA
-  //Load Comments Created
+  //Load Notifications
   Future<List<DocumentSnapshot>> loadNotifications({
     @required String uid,
     @required int resultsLimit,
@@ -58,7 +58,7 @@ class NotificationDataService {
     return docs;
   }
 
-  //Load Additional Causes by Follower Count
+  //Load Additional Notifications
   Future<List<DocumentSnapshot>> loadAdditionalNotifications({
     @required String uid,
     @required DocumentSnapshot lastDocSnap,

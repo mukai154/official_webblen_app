@@ -1,6 +1,3 @@
-import 'package:webblen/enums/card_type.dart';
-import 'package:webblen/enums/verified_status.dart';
-
 class UserBankingInfo {
   String accountHolderName;
   String accountHolderType;
@@ -34,7 +31,7 @@ class UserCardInfo {
   String brand;
   String expMonth;
   String expYear;
-  CardType cardType;
+  String cardType;
   String last4;
 
   UserCardInfo({
@@ -50,7 +47,7 @@ class UserCardInfo {
           brand: data['brand'],
           expMonth: data['expMonth'],
           expYear: data['expYear'],
-          cardType: CardTypeConverter.stringToCardType(data['funding']),
+          cardType: data['funding'],
           last4: data['last4'],
         );
 
@@ -58,7 +55,7 @@ class UserCardInfo {
         'brand': this.brand,
         'expMonth': this.expMonth,
         'expYear': this.expYear,
-        'funding': CardTypeConverter.cardTypeToString(this.cardType),
+        'funding': this.cardType,
         'last4': this.last4,
       };
 }
@@ -69,7 +66,7 @@ class UserStripeInfo {
   UserCardInfo userCardInfo;
   double pendingBalance;
   String stripeUID;
-  VerifiedStatus verifiedStatus;
+  String verified;
 
   UserStripeInfo({
     this.availableBalance,
@@ -77,18 +74,17 @@ class UserStripeInfo {
     this.userCardInfo,
     this.pendingBalance,
     this.stripeUID,
-    this.verifiedStatus,
+    this.verified,
   });
 
   UserStripeInfo.fromMap(Map<String, dynamic> data)
       : this(
           availableBalance: data['availableBalance'],
-          userBankingInfo: UserBankingInfo.fromMap(data['bankInfo']),
-          userCardInfo: UserCardInfo.fromMap(data['cardInfo']),
+          userBankingInfo: data['bankInfo'] == null ? null : UserBankingInfo.fromMap(data['bankInfo']),
+          userCardInfo: data['cardInfo'] == null ? null : UserCardInfo.fromMap(data['cardInfo']),
           pendingBalance: data['pendingBalance'],
           stripeUID: data['stripeUID'],
-          verifiedStatus:
-              VerifiedStatusConverter.stringToVerifiedStatus(data['verified']),
+          verified: data['verified'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -97,7 +93,6 @@ class UserStripeInfo {
         'cardInfo': this.userCardInfo.toMap(),
         'pendingBalance': this.pendingBalance,
         'stripeUID': this.stripeUID,
-        'verified':
-            VerifiedStatusConverter.verifiedStatusToString(this.verifiedStatus),
+        'verified': this.verified,
       };
 }

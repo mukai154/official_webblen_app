@@ -59,7 +59,7 @@ class AuthView extends StatelessWidget {
     );
   }
 
-  Widget serviceAgreement(BuildContext context) {
+  Widget serviceAgreement() {
     return Container(
       child: RichText(
         textAlign: TextAlign.center,
@@ -72,7 +72,7 @@ class AuthView extends StatelessWidget {
             TextSpan(
               text: 'Terms and Conditions ',
               style: TextStyle(color: Colors.blue),
-              recognizer: TapGestureRecognizer()..onTap = () => UrlHandler().launchInWebViewOrVC(context, "https://webblen.io/terms-and-conditions"),
+              recognizer: TapGestureRecognizer()..onTap = () => UrlHandler().launchInWebViewOrVC("https://webblen.io/terms-and-conditions"),
             ),
             TextSpan(
               text: 'and ',
@@ -81,7 +81,7 @@ class AuthView extends StatelessWidget {
             TextSpan(
               text: 'Privacy Policy. ',
               style: TextStyle(color: Colors.blue),
-              recognizer: TapGestureRecognizer()..onTap = () => UrlHandler().launchInWebViewOrVC(context, "https://webblen.io/privacy-policy"),
+              recognizer: TapGestureRecognizer()..onTap = () => UrlHandler().launchInWebViewOrVC("https://webblen.io/privacy-policy"),
             ),
           ],
         ),
@@ -217,7 +217,7 @@ class AuthView extends StatelessWidget {
                   verticalSpaceLarge,
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16.0),
-                    child: serviceAgreement(context),
+                    child: serviceAgreement(),
                   ),
                 ],
               ),

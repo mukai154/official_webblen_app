@@ -12,19 +12,6 @@ import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/ui/widgets/tags/tag_dropdown_field.dart';
 
 class CreatePostView extends StatelessWidget {
-  final nameController = TextEditingController();
-  final goalsController = TextEditingController();
-  final whyController = TextEditingController();
-  final whoController = TextEditingController();
-  final resourcesController = TextEditingController();
-  final charityWebsiteController = TextEditingController();
-  final action1Controller = TextEditingController();
-  final action2Controller = TextEditingController();
-  final action3Controller = TextEditingController();
-  final description1Controller = TextEditingController();
-  final description2Controller = TextEditingController();
-  final description3Controller = TextEditingController();
-
   Widget selectedTags(CreatePostViewModel model) {
     return model.post.tags == null || model.post.tags.isEmpty
         ? Container()
@@ -171,7 +158,7 @@ class CreatePostView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CreatePostViewModel>.reactive(
-      onModelReady: (model) => model.initialize(),
+      onModelReady: (model) => model.initialize(context: context),
       viewModelBuilder: () => CreatePostViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicActionAppBar(

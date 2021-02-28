@@ -20,19 +20,7 @@ class RootView extends StatelessWidget {
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // SizedBox(
-                //   height: 120,
-                //   child: Image.asset(
-                //     model.themeService.isDarkMode ? 'assets/images/webblen_logo_light.png' : 'assets/images/webblen_logo_dark.png',
-                //   ),
-                // ),
-                // SizedBox(height: 32.0),
-                // CustomCircleProgressIndicator(
-                //   color: model.themeService.isDarkMode ? Colors.white54 : Colors.black38,
-                //   size: 30,
-                // ),
-              ],
+              children: [],
             ),
           ),
         ),

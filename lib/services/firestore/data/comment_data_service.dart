@@ -99,7 +99,7 @@ class CommentDataService {
     return docs;
   }
 
-  //Load Additional Causes by Follower Count
+  //Load Additional Comments
   Future<List<DocumentSnapshot>> loadAdditionalComments({
     @required String postID,
     @required DocumentSnapshot lastDocSnap,
