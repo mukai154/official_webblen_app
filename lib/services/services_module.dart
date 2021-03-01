@@ -5,10 +5,13 @@ import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
+import 'package:webblen/services/firestore/data/event_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/purchased_ticket_data_service.dart';
 import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dart';
+import 'package:webblen/services/firestore/data/reward_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
@@ -46,7 +49,13 @@ abstract class ServicesModule {
   @lazySingleton
   RedeemedRewardDataService get redeemedRewardDataService;
   @lazySingleton
+  RewardDataService get rewardDataService;
+  @lazySingleton
   CommentDataService get commentDataService;
+  @lazySingleton
+  PurchasedTicketDataService get purchasedTicketDataService;
+  @lazySingleton
+  EventDataService get eventDataService;
   @lazySingleton
   StripePaymentService get stripePaymentService;
   @lazySingleton

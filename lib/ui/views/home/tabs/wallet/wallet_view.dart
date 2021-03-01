@@ -8,6 +8,7 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view_model.dart';
 import 'package:webblen/ui/widgets/wallet/usd_balance_block.dart';
 import 'package:webblen/ui/widgets/wallet/webblen_balance_block.dart';
+import 'package:webblen/utils/url_handler.dart';
 
 class WalletView extends StatelessWidget {
   final WebblenUser user;
@@ -139,11 +140,7 @@ class WalletView extends StatelessWidget {
                   ),
                   'Shop',
                   appFontColor(),
-                  // () => PageTransitionService(
-                  //   context: context,
-                  //   currentUser: currentUser,
-                  // ).transitionToShopPage(),
-                  () {},
+                  () => model.navigateToShopView(user),
                 ),
                 SizedBox(height: 8.0),
                 Container(
@@ -161,10 +158,6 @@ class WalletView extends StatelessWidget {
                   ),
                   'Reward History',
                   appFontColor(),
-                  // () => PageTransitionService(
-                  //   context: context,
-                  //   currentUser: currentUser,
-                  // ).transitionToRedeemedRewardsPage(),
                   () => model.navigateToRedeemedRewardsView(user),
                 ),
                 SizedBox(height: 8.0),
@@ -183,9 +176,7 @@ class WalletView extends StatelessWidget {
                   ),
                   'My Tickets',
                   appFontColor(),
-                  // () => PageTransitionService(context: context)
-                  //     .transitionToUserTicketsPage(),
-                  () {},
+                  () => model.navigateToUserTicketsView(user),
                 ),
                 SizedBox(height: 8.0),
                 Container(
@@ -249,11 +240,10 @@ class WalletView extends StatelessWidget {
                       color: appIconColor(), size: 18.0),
                   'Help/FAQ',
                   appFontColor(),
-                  // () => OpenUrl().launchInWebViewOrVC(
-                  //   context,
-                  //   'https://www.webblen.io/faq',
-                  // ),
-                  () {},
+                  () => UrlHandler().launchInWebViewOrVC(
+                    context,
+                    'https://www.webblen.io/faq',
+                  ),
                 ),
                 SizedBox(height: 8.0),
                 Container(

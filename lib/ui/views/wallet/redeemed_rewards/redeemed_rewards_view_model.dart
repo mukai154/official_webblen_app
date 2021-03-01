@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dart';
@@ -30,12 +31,16 @@ class RedeemedRewardsViewModel extends BaseViewModel {
 
   int resultsLimit = 10;
 
+  WebblenUser user;
+
   ///INITIALIZE
   initialize(BuildContext context) async {
     setBusy(true);
 
     Map<String, dynamic> args = RouteData.of(context).arguments;
     WebblenUser currentUser = args['currentUser'] ?? "";
+
+    user = currentUser;
 
     //load additional content on scroll
     scrollController.addListener(() {
@@ -140,4 +145,11 @@ class RedeemedRewardsViewModel extends BaseViewModel {
 // navigateToPage() {
 //   _navigationService.navigateTo(PageRouteName);
 // }
+
+  navigateToShopView(WebblenUser user) {
+    _navigationService.navigateTo(
+      Routes.ShopViewRoute,
+      arguments: {'currentUser': user},
+    );
+  }
 }

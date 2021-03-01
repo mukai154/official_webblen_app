@@ -13,7 +13,6 @@ import 'package:webblen/services/stripe/stripe_payment_service.dart';
 @singleton
 class WalletViewModel extends StreamViewModel<UserStripeInfo> {
   AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
   UserDataService _userDataService = locator<UserDataService>();
   StripePaymentService _stripePaymentService = locator<StripePaymentService>();
@@ -70,7 +69,18 @@ class WalletViewModel extends StreamViewModel<UserStripeInfo> {
 //   _navigationService.navigateTo(PageRouteName);
 // }
 
-navigateToRedeemedRewardsView(WebblenUser user) {
-    _navigationService.navigateTo(Routes.RedeemedRewardsViewRoute, arguments: {'currentUser': user});
+  navigateToRedeemedRewardsView(WebblenUser user) {
+    _navigationService.navigateTo(Routes.RedeemedRewardsViewRoute,
+        arguments: {'currentUser': user});
+  }
+
+  navigateToShopView(WebblenUser user) {
+    _navigationService
+        .navigateTo(Routes.ShopViewRoute, arguments: {'currentUser': user});
+  }
+
+  navigateToUserTicketsView(WebblenUser user) {
+    _navigationService.navigateTo(Routes.UserTicketsViewRoute,
+        arguments: {'currentUser': user});
   }
 }

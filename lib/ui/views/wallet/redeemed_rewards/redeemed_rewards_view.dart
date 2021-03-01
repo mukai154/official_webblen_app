@@ -7,7 +7,8 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/enums/reward_status.dart';
 import 'package:webblen/enums/reward_type.dart';
 import 'package:webblen/models/webblen_redeemed_reward.dart';
-import 'package:webblen/ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view_model.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/ui/views/wallet/redeemed_rewards/redeemed_rewards_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/utils/time_calc.dart';
@@ -77,7 +78,7 @@ class RedeemedRewardsView extends StatelessWidget {
     );
   }
 
-  Widget cashBlock(WebblenRedeemedReward redeemedReward) {
+  Widget cashBlock(WebblenRedeemedReward redeemedReward, WebblenUser user) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -92,7 +93,7 @@ class RedeemedRewardsView extends StatelessWidget {
           Row(
             children: [
               Text(
-                "${redeemedReward.rewardTitle} | receiver: ${redeemedReward.uid}",
+                "${redeemedReward.rewardTitle} | receiver: ${user.username}",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20.0,
@@ -192,26 +193,19 @@ class RedeemedRewardsView extends StatelessWidget {
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
-                                      // GestureDetector(
-                                      // onTap: () => Navigator.pushReplacement(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => ShopPage(
-                                      //       currentUser: widget.currentUser,
-                                      //     ),
-                                      //   ),
-                                      // ),
-                                      // child:
-                                      Text(
-                                        "Visit Shop",
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontSize: 16.0,
-                                          fontWeight: FontWeight.w700,
-                                          color: CustomColors.electronBlue,
+                                      GestureDetector(
+                                        onTap: () => model
+                                            .navigateToShopView(model.user),
+                                        child: Text(
+                                          "Visit Shop",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 16.0,
+                                            fontWeight: FontWeight.w700,
+                                            color: CustomColors.electronBlue,
+                                          ),
                                         ),
                                       ),
-                                      // ),
                                     ],
                                   ),
                                   SizedBox(height: 100.0),
@@ -231,7 +225,7 @@ class RedeemedRewardsView extends StatelessWidget {
                               return redeemedReward.rewardType ==
                                       RewardType.webblenClothes
                                   ? merchBlock(redeemedReward)
-                                  : cashBlock(redeemedReward);
+                                  : cashBlock(redeemedReward, model.user);
                             },
                           ),
                   ),

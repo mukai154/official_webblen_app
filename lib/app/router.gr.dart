@@ -18,7 +18,10 @@ import '../ui/views/root/root_view.dart';
 import '../ui/views/search/all_search_results/all_search_results_view.dart';
 import '../ui/views/search/search_view.dart';
 import '../ui/views/settings/settings_view.dart';
-import '../ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view.dart';
+import '../ui/views/wallet/redeemed_rewards/redeemed_rewards_view.dart';
+import '../ui/views/wallet/shop/shop/shop_view.dart';
+import '../ui/views/wallet/shop/shop_item/shop_item_view.dart';
+import '../ui/views/wallet/user_tickets/user_tickets_view.dart';
 
 class Routes {
   static const String RootViewRoute = '/';
@@ -31,6 +34,9 @@ class Routes {
   static const String NotificationsViewRoute = '/notifications-view';
   static const String SettingsViewRoute = '/settings-view';
   static const String RedeemedRewardsViewRoute = '/redeemed-rewards-view';
+  static const String ShopViewRoute = '/shop-view';
+  static const String ShopItemViewRoute = '/shop-item-view';
+  static const String UserTicketsViewRoute = '/user-tickets-view';
   static const all = <String>{
     RootViewRoute,
     AuthViewRoute,
@@ -42,6 +48,9 @@ class Routes {
     NotificationsViewRoute,
     SettingsViewRoute,
     RedeemedRewardsViewRoute,
+    ShopViewRoute,
+    ShopItemViewRoute,
+    UserTicketsViewRoute,
   };
 }
 
@@ -59,6 +68,9 @@ class WebblenRouter extends RouterBase {
     RouteDef(Routes.NotificationsViewRoute, page: NotificationsView),
     RouteDef(Routes.SettingsViewRoute, page: SettingsView),
     RouteDef(Routes.RedeemedRewardsViewRoute, page: RedeemedRewardsView),
+    RouteDef(Routes.ShopViewRoute, page: ShopView),
+    RouteDef(Routes.ShopItemViewRoute, page: ShopItemView),
+    RouteDef(Routes.UserTicketsViewRoute, page: UserTicketsView),
   ];
   @override
   Map<Type, AutoRouteFactory> get pagesMap => _pagesMap;
@@ -123,6 +135,24 @@ class WebblenRouter extends RouterBase {
     RedeemedRewardsView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => RedeemedRewardsView(),
+        settings: data,
+      );
+    },
+    ShopView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => ShopView(),
+        settings: data,
+      );
+    },
+    ShopItemView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => ShopItemView(),
+        settings: data,
+      );
+    },
+    UserTicketsView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => UserTicketsView(),
         settings: data,
       );
     },

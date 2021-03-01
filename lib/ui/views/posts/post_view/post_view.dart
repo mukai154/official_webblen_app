@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
+
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/user_widgets/user_profile_pic.dart';
@@ -34,7 +35,10 @@ class PostView extends StatelessWidget {
                 horizontalSpaceSmall,
                 Text(
                   "@${model.author.username}",
-                  style: TextStyle(color: appFontColor(), fontSize: 16.0, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: appFontColor(),
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -122,7 +126,8 @@ class PostView extends StatelessWidget {
             ],
           ),
           Text(
-            TimeCalc().getPastTimeFromMilliseconds(model.post.postDateTimeInMilliseconds),
+            TimeCalc().getPastTimeFromMilliseconds(
+                model.post.postDateTimeInMilliseconds),
             style: TextStyle(
               color: appFontColorAlt(),
             ),
@@ -187,7 +192,8 @@ class PostView extends StatelessWidget {
       refreshingData: false,
       results: model.commentResults,
       replyToComment: (val) => model.toggleReply(focusNode, val),
-      deleteComment: (val) => model.showDeleteCommentConfirmation(context: context, comment: val),
+      deleteComment: (val) =>
+          model.showDeleteCommentConfirmation(context: context, comment: val),
     );
   }
 
@@ -240,11 +246,14 @@ class PostView extends StatelessWidget {
                                     context: context,
                                     commentVal: val,
                                   )
-                              : (val) => model.submitComment(context: context, commentVal: val),
+                              : (val) => model.submitComment(
+                                  context: context, commentVal: val),
                           focusNode: focusNode,
                           commentTextController: model.commentTextController,
                           isReplying: model.isReplying,
-                          replyReceiverUsername: model.isReplying ? model.commentToReplyTo.username : null,
+                          replyReceiverUsername: model.isReplying
+                              ? model.commentToReplyTo.username
+                              : null,
                         ),
                       ),
                     ],

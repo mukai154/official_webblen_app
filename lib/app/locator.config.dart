@@ -14,6 +14,7 @@ import '../services/auth/auth_service.dart';
 import '../ui/views/home/tabs/check_in/check_in_view_model.dart';
 import '../services/firestore/data/comment_data_service.dart';
 import '../services/dynamic_links/dynamic_link_service.dart';
+import '../services/firestore/data/event_data_service.dart';
 import '../ui/views/home/tabs/explore/explore_view_model.dart';
 import '../services/firestore/common/firestore_storage_service.dart';
 import '../services/location/google_places_service.dart';
@@ -23,12 +24,17 @@ import '../services/firestore/data/notification_data_service.dart';
 import '../services/firestore/data/platform_data_service.dart';
 import '../services/firestore/data/post_data_service.dart';
 import '../ui/views/home/tabs/profile/profile_view_model.dart';
+import '../services/firestore/data/purchased_ticket_data_service.dart';
 import '../services/firestore/data/redeemed_reward_data_service.dart';
-import '../ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view_model.dart';
+import '../ui/views/wallet/redeemed_rewards/redeemed_rewards_view_model.dart';
+import '../services/firestore/data/reward_data_service.dart';
 import '../services/services_module.dart';
 import '../services/share/share_service.dart';
+import '../ui/views/wallet/shop/shop_item/shop_item_view_model.dart';
+import '../ui/views/wallet/shop/shop/shop_view_model.dart';
 import '../services/stripe/stripe_payment_service.dart';
 import '../services/firestore/data/user_data_service.dart';
+import '../ui/views/wallet/user_tickets/user_tickets_view_model.dart';
 import '../ui/views/home/tabs/wallet/wallet_view_model.dart';
 
 /// adds generated dependencies
@@ -48,6 +54,7 @@ GetIt $initGetIt(
   gh.lazySingleton<CommentDataService>(() => servicesModule.commentDataService);
   gh.lazySingleton<DialogService>(() => servicesModule.dialogService);
   gh.lazySingleton<DynamicLinkService>(() => servicesModule.dynamicLinkService);
+  gh.lazySingleton<EventDataService>(() => servicesModule.eventDataService);
   gh.lazySingleton<FirestoreStorageService>(
       () => servicesModule.firestoreStorageService);
   gh.lazySingleton<GooglePlacesService>(
@@ -59,8 +66,11 @@ GetIt $initGetIt(
   gh.lazySingleton<PlatformDataService>(
       () => servicesModule.platformDataService);
   gh.lazySingleton<PostDataService>(() => servicesModule.postDataService);
+  gh.lazySingleton<PurchasedTicketDataService>(
+      () => servicesModule.purchasedTicketDataService);
   gh.lazySingleton<RedeemedRewardDataService>(
       () => servicesModule.redeemedRewardDataService);
+  gh.lazySingleton<RewardDataService>(() => servicesModule.rewardDataService);
   gh.lazySingleton<ShareService>(() => servicesModule.shareService);
   gh.lazySingleton<SnackbarService>(() => servicesModule.snackBarService);
   gh.lazySingleton<StripePaymentService>(
@@ -74,6 +84,9 @@ GetIt $initGetIt(
   gh.singleton<HomeViewModel>(HomeViewModel());
   gh.singleton<ProfileViewModel>(ProfileViewModel());
   gh.singleton<RedeemedRewardsViewModel>(RedeemedRewardsViewModel());
+  gh.singleton<ShopItemViewModel>(ShopItemViewModel());
+  gh.singleton<ShopViewModel>(ShopViewModel());
+  gh.singleton<UserTicketsViewModel>(UserTicketsViewModel());
   gh.singleton<WalletViewModel>(WalletViewModel());
   return get;
 }
@@ -92,6 +105,8 @@ class _$ServicesModule extends ServicesModule {
   @override
   DynamicLinkService get dynamicLinkService => DynamicLinkService();
   @override
+  EventDataService get eventDataService => EventDataService();
+  @override
   FirestoreStorageService get firestoreStorageService =>
       FirestoreStorageService();
   @override
@@ -108,8 +123,13 @@ class _$ServicesModule extends ServicesModule {
   @override
   PostDataService get postDataService => PostDataService();
   @override
+  PurchasedTicketDataService get purchasedTicketDataService =>
+      PurchasedTicketDataService();
+  @override
   RedeemedRewardDataService get redeemedRewardDataService =>
       RedeemedRewardDataService();
+  @override
+  RewardDataService get rewardDataService => RewardDataService();
   @override
   ShareService get shareService => ShareService();
   @override

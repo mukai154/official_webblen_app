@@ -40,10 +40,6 @@ class UserDataService {
     });
   }
 
-  // Stream<Map<String, dynamic>> streamStripeAccount(String uid) {
-  //   return stripeRef.doc(uid).snapshots().map((snapshot) => snapshot.data());
-  // }
-
   Future getUserStripeInfoByID(String id) async {
     UserStripeInfo userStripeInfo;
     DocumentSnapshot snapshot = await stripeRef.doc(id).get().catchError((e) {
@@ -53,5 +49,17 @@ class UserDataService {
       userStripeInfo = UserStripeInfo.fromMap(snapshot.data());
     }
     return userStripeInfo;
+  }
+
+  Future<String> depositWebblen(double depositAmount, String uid) async {
+    String error;
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    WebblenUser user = WebblenUser.fromMap(snapshot.data());
+    double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN;
+    double newBalance = depositAmount + initialBalance;
+    await userRef.doc(uid).update({'WBLN': newBalance}).catchError((e) {
+      error = e.toString();
+    });
+    return error;
   }
 }

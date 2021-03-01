@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/ui/widgets/common/webblen_icon_and_balance.dart';
 
 class WebblenBalanceBlock extends StatelessWidget {
   final double balance;
@@ -40,26 +41,8 @@ class WebblenBalanceBlock extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Container(
-                  child: Row(
-                    children: [
-                      Image.asset(
-                        'assets/images/webblen_coin.png',
-                        height: 20,
-                        width: 20,
-                        fit: BoxFit.contain,
-                      ),
-                      SizedBox(width: 4),
-                      Text(
-                        "${balance.toStringAsFixed(2)}",
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          color: appFontColor(),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                WebblenIconAndBalance(
+                  balance: balance, fontSize: 18,
                 ),
               ],
             ),

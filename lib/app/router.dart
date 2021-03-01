@@ -8,7 +8,10 @@ import 'package:webblen/ui/views/root/root_view.dart';
 import 'package:webblen/ui/views/search/all_search_results/all_search_results_view.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
 import 'package:webblen/ui/views/settings/settings_view.dart';
-import 'package:webblen/ui/views/wallet_views/redeemed_rewards/redeemed_rewards_view.dart';
+import 'package:webblen/ui/views/wallet/redeemed_rewards/redeemed_rewards_view.dart';
+import 'package:webblen/ui/views/wallet/shop/shop/shop_view.dart';
+import 'package:webblen/ui/views/wallet/shop/shop_item/shop_item_view.dart';
+import 'package:webblen/ui/views/wallet/user_tickets/user_tickets_view.dart';
 
 ///RUN "flutter pub run build_runner build --delete-conflicting-outputs" in Project Terminal to Generate Routes
 
@@ -41,6 +44,9 @@ import 'package:webblen/ui/views/wallet_views/redeemed_rewards/redeemed_rewards_
 
     //WALLET
     MaterialRoute(page: RedeemedRewardsView, name: 'RedeemedRewardsViewRoute'),
+    MaterialRoute(page: ShopView, name: 'ShopViewRoute'),
+    MaterialRoute(page: ShopItemView, name: 'ShopItemViewRoute'),
+    MaterialRoute(page: UserTicketsView, name: 'UserTicketsViewRoute')
   ],
 )
 class $WebblenRouter {}
