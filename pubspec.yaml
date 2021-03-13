@@ -68,6 +68,9 @@ dependencies:
   google_maps_webservice:
   #flutter_background_geolocation: ^1.3.2
 
+  #DATE & TIME
+  flutter_calendar_carousel:
+
   #UI
   font_awesome_flutter:
   shimmer:
@@ -76,6 +79,8 @@ dependencies:
   flutter_typeahead:
   introduction_screen:
   flutter_masked_text:
+  syncfusion_flutter_sliders:
+  syncfusion_flutter_charts:
   intl_phone_field:
   liquid_pull_to_refresh:
 

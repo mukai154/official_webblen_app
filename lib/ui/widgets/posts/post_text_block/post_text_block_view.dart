@@ -3,7 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
-import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_widget.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
+import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view_model.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
@@ -26,7 +27,7 @@ class PostTextBlockView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: null,
+            onTap: () => model.navigateToUserView(post.authorID),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
@@ -219,6 +220,7 @@ class PostTextBlockView extends StatelessWidget {
               head(model),
               postBody(),
               commentCount(model),
+              verticalSpaceTiny,
               commentSaveAndPostTime(model),
               postTags(model),
               Divider(

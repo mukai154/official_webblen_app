@@ -27,7 +27,7 @@ class CheckInViewModel extends BaseViewModel {
       } else if (res == "new stream") {
         //
       } else if (res == "new event") {
-        //
+        navigateToCreateEventPage();
       }
       notifyListeners();
     }
@@ -37,11 +37,11 @@ class CheckInViewModel extends BaseViewModel {
   showPostOptions() async {}
 
   ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
   navigateToCreatePostPage() {
     _navigationService.navigateTo(Routes.CreatePostViewRoute);
+  }
+
+  navigateToCreateEventPage() {
+    _navigationService.navigateTo(Routes.CreateEventViewRoute);
   }
 }

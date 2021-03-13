@@ -1,3 +1,4 @@
+import 'package:injectable/injectable.dart';
 import 'package:location/location.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -12,7 +13,8 @@ import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/utils/network_status.dart';
 
-class HomeNavViewModel extends StreamViewModel<WebblenUser> {
+@singleton
+class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
   ///SERVICES
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
@@ -24,11 +26,12 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
 
   ///INITIAL DATA
-  InitErrorStatus initErrorStatus = InitErrorStatus.network;
+  InitErrorStatus initErrorStatus = InitErrorStatus.none;
   String initialCityName;
   String initialAreaCode;
 
   ///CURRENT USER
+  String uid;
   WebblenUser user;
 
   ///TAB BAR STATE
@@ -45,9 +48,11 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   @override
   void onData(WebblenUser data) {
     if (data != null) {
-      user = data;
-      notifyListeners();
-      setBusy(false);
+      if (user != data) {
+        user = data;
+        notifyListeners();
+        setBusy(false);
+      }
     }
   }
 
@@ -56,54 +61,54 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
 
   Stream<WebblenUser> streamUser() async* {
     while (true) {
-      await Future.delayed(Duration(seconds: 1));
-      String uid = await _authService.getCurrentUserID();
-      var res = await _userDataService.getWebblenUserByID(uid);
-      if (res is String) {
+      if (uid == null) {
         yield null;
-      } else {
-        yield res;
       }
+      await Future.delayed(Duration(seconds: 1));
+      WebblenUser user = await _userDataService.getWebblenUserByID(uid);
+      yield user;
     }
   }
 
   ///INITIALIZE DATA
   initialize() async {
     setBusy(true);
-    isConnectedToNetwork().then((connected) {
-      //check network status
-      if (connected != null) {
-        if (!connected) {
-          initErrorStatus = InitErrorStatus.network;
-          setBusy(false);
-          notifyListeners();
-          _snackbarService.showSnackbar(
-            title: 'Network Error',
-            message: "There Was an Issue Connecting to the Internet",
-            duration: Duration(seconds: 5),
-          );
-        } else {
-          //get location data
-          getLocationDetails().then((e) async {
-            if (e != null) {
-              initErrorStatus = InitErrorStatus.location;
-              setBusy(false);
-              notifyListeners();
-              _snackbarService.showSnackbar(
-                title: 'Location Error',
-                message: "There Was an Issue Getting Your Location",
-                duration: Duration(seconds: 5),
-              );
-            } else {
-              //if there are no errors, check for dynamic links
-              initErrorStatus = InitErrorStatus.none;
-              await _dynamicLinkService.handleDynamicLinks();
-              notifyListeners();
-            }
-          });
-        }
-      }
-    });
+    uid = await _authService.getCurrentUserID();
+    notifyListeners();
+
+    //check network status
+    bool connectedToNetwork = await isConnectedToNetwork();
+    if (!connectedToNetwork) {
+      initErrorStatus = InitErrorStatus.network;
+      notifyListeners();
+      _snackbarService.showSnackbar(
+        title: 'Network Error',
+        message: "There Was an Issue Connecting to the Internet",
+        duration: Duration(seconds: 5),
+      );
+      setBusy(false);
+      return;
+    }
+
+    //check gps permissions
+    bool locationGranted = await getLocationDetails();
+    if (!locationGranted) {
+      initErrorStatus = InitErrorStatus.location;
+      notifyListeners();
+      _snackbarService.showSnackbar(
+        title: 'Location Error',
+        message: "There Was an Issue Getting Your Location",
+        duration: Duration(seconds: 5),
+      );
+      setBusy(false);
+      return;
+    }
+
+    //if there are no errors, check for dynamic links
+    initErrorStatus = InitErrorStatus.none;
+    await _dynamicLinkService.handleDynamicLinks();
+    notifyListeners();
+    setBusy(false);
   }
 
   ///NETWORK STATUS
@@ -113,17 +118,16 @@ class HomeNavViewModel extends StreamViewModel<WebblenUser> {
   }
 
   ///LOCATION
-  Future<String> getLocationDetails() async {
-    String error;
+  Future<bool> getLocationDetails() async {
     try {
       LocationData location = await _locationService.getCurrentLocation();
       initialCityName = await _locationService.getCityNameFromLatLon(location.latitude, location.longitude);
       initialAreaCode = await _locationService.getZipFromLatLon(location.latitude, location.longitude);
       notifyListeners();
     } catch (e) {
-      error = "Location Error";
+      return false;
     }
-    return error;
+    return true;
   }
 
   ///BOTTOM SHEETS

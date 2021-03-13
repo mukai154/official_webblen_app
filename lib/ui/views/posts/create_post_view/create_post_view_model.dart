@@ -40,7 +40,7 @@ class CreatePostViewModel extends BaseViewModel {
   bool textFieldEnabled = true;
 
   ///DATA
-  WebblenUser currentUser;
+  WebblenUser user;
 
   bool isEditing = false;
   File img;
@@ -58,27 +58,18 @@ class CreatePostViewModel extends BaseViewModel {
 
     //get current user data
     String uid = await _authService.getCurrentUserID();
-    var userData = await _userDataService.getWebblenUserByID(uid);
-    if (userData is String) {
-      _snackbarService.showSnackbar(
-        title: 'Post Error',
-        message: userData,
-        duration: Duration(seconds: 3),
-      );
-      setBusy(false);
-      return;
-    }
-
-    currentUser = userData;
+    user = await _userDataService.getWebblenUserByID(uid);
 
     //check if editing existing post
     Map<String, dynamic> args = RouteData.of(context).arguments;
-    String postID = args['postID'] ?? "";
-    if (postID.isNotEmpty) {
-      post = await _postDataService.getPostByID(postID);
-      if (post != null) {
-        postTextController.text = post.body;
-        isEditing = true;
+    if (args != null) {
+      String postID = args['id'] ?? "";
+      if (postID.isNotEmpty) {
+        post = await _postDataService.getPostByID(postID);
+        if (post != null) {
+          postTextController.text = post.body;
+          isEditing = true;
+        }
       }
     }
 
@@ -155,11 +146,7 @@ class CreatePostViewModel extends BaseViewModel {
   ///FORM VALIDATION
   bool postBodyIsValid() {
     String message = postTextController.text;
-    if (isValidString(message)) {
-      return false;
-    } else {
-      return true;
-    }
+    return isValidString(message);
   }
 
   bool postTagsAreValid() {
@@ -211,13 +198,13 @@ class CreatePostViewModel extends BaseViewModel {
     post = WebblenPost(
       id: newPostID,
       parentID: null,
-      authorID: currentUser.id,
+      authorID: user.id,
       imageURL: null,
       body: message,
       nearbyZipcodes: [],
       city: post.city,
       province: post.province,
-      followers: currentUser.followers,
+      followers: user.followers,
       tags: post.tags,
       webAppLink: "https://app.webblen.io/posts/post?id=$newPostID",
       sharedComs: [],
@@ -267,13 +254,13 @@ class CreatePostViewModel extends BaseViewModel {
     post = WebblenPost(
       id: post.id,
       parentID: post.parentID,
-      authorID: currentUser.id,
+      authorID: user.id,
       imageURL: img == null ? post.imageURL : null,
       body: message,
       nearbyZipcodes: post.nearbyZipcodes,
       city: post.city,
       province: post.province,
-      followers: currentUser.followers,
+      followers: user.followers,
       tags: post.tags,
       webAppLink: post.webAppLink,
       sharedComs: post.sharedComs,
@@ -341,7 +328,7 @@ class CreatePostViewModel extends BaseViewModel {
       barrierDismissible: true,
       variant: BottomSheetType.imagePicker,
     );
-    if (sheetResponse.responseData != null) {
+    if (sheetResponse != null) {
       String res = sheetResponse.responseData;
 
       //disable text fields while fetching image
@@ -385,7 +372,7 @@ class CreatePostViewModel extends BaseViewModel {
       customData: newPostTaxRate,
       variant: BottomSheetType.newContentConfirmation,
     );
-    if (sheetResponse.responseData != null) {
+    if (sheetResponse != null) {
       String res = sheetResponse.responseData;
 
       //disable text fields while fetching image
@@ -412,7 +399,7 @@ class CreatePostViewModel extends BaseViewModel {
 
   displayUploadSuccessBottomSheet() async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
-      variant: BottomSheetType.postPublished,
+      variant: BottomSheetType.addContentSuccessful,
       takesInput: false,
       customData: post,
       barrierDismissible: false,
@@ -421,17 +408,4 @@ class CreatePostViewModel extends BaseViewModel {
       _navigationService.pushNamedAndRemoveUntil(Routes.HomeNavViewRoute);
     }
   }
-
-  ///NAVIGATION
-  pushAndReplaceUntilHomeNavView() {
-    //_navigationService.pushNamedAndRemoveUntil(Routes.HomeNavViewRoute);
-  }
-
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-// navigateToPage() {
-//   _navigationService.navigateTo(PageRouteName);
-// }
 }

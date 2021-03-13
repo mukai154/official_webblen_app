@@ -111,6 +111,18 @@ class PostDataService {
     }
   }
 
+  Future deleteEventOrStreamPost({@required String eventOrStreamID, @required String postType}) async {
+    QuerySnapshot snapshot = await postsRef.where("parentID", isEqualTo: eventOrStreamID).get();
+    snapshot.docs.forEach((doc) async {
+      await postsRef.doc(doc.id).delete();
+      if (postType == 'event'){
+        await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'events', fileName: eventOrStreamID);
+      } else {
+        await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'streams', fileName: eventOrStreamID);
+      }
+    });
+  }
+
   Future getPostByID(String id) async {
     WebblenPost post;
     DocumentSnapshot snapshot = await postsRef.doc(id).get().catchError((e) {
@@ -149,12 +161,14 @@ class PostDataService {
           .limit(resultsLimit);
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      _snackbarService.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
-      return docs;
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
     });
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
@@ -193,11 +207,14 @@ class PostDataService {
           .limit(resultsLimit);
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      _snackbarService.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
     });
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
@@ -217,11 +234,14 @@ class PostDataService {
     List<DocumentSnapshot> docs = [];
     Query query = postsRef.where('authorID', isEqualTo: id).orderBy('postDateTimeInMilliseconds', descending: true).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      _snackbarService.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
     });
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
@@ -238,11 +258,14 @@ class PostDataService {
     Query query =
         postsRef.where('authorID', isEqualTo: id).orderBy('postDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      _snackbarService.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
     });
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;

@@ -63,7 +63,7 @@ class PostTextBlockViewModel extends BaseViewModel {
     }
   }
 
-  navigateToUserView(String uid) {
-    // _navigationService.navigateTo(Routes.UserViewRoute, arguments: {'uid': uid});
+  navigateToUserView(String id) {
+    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
 }

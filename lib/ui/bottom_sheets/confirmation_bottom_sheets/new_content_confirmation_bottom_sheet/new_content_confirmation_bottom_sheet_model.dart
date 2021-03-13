@@ -9,7 +9,7 @@ class NewContentConfirmationBottomSheetModel extends StreamViewModel<double> {
   UserDataService _userDataService = locator<UserDataService>();
 
   ///CURRENT USER WBLN BALANCE
-  double webblenBalance = 0.00;
+  double webblenBalance;
 
   ///STREAM DATA
   @override

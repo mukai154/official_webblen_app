@@ -7,15 +7,17 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
+import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 
-class UserProfileViewModel extends BaseViewModel {
+class UserProfileViewModel extends StreamViewModel<WebblenUser> {
   AuthService _authService = locator<AuthService>();
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
@@ -25,6 +27,7 @@ class UserProfileViewModel extends BaseViewModel {
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   PostDataService _postDataService = locator<PostDataService>();
   ShareService _shareService = locator<ShareService>();
+  NotificationDataService _notificationDataService = locator<NotificationDataService>();
 
   ///UI HELPERS
   ScrollController scrollController = ScrollController();
@@ -39,17 +42,61 @@ class UserProfileViewModel extends BaseViewModel {
 
   int resultsLimit = 20;
 
+  ///USER DATA
+  String uid;
+  WebblenUser currentUser;
   WebblenUser user;
+  bool isFollowingUser;
+  bool sendNotification = false;
+
+  ///STREAM USER DATA
+  @override
+  void onData(WebblenUser data) {
+    if (data != null) {
+      user = data;
+      if (isFollowingUser == null) {
+        if (user.followers.contains(currentUser.id)) {
+          isFollowingUser = true;
+        } else {
+          isFollowingUser = false;
+        }
+      }
+      notifyListeners();
+      loadData();
+    }
+  }
+
+  @override
+  Stream<WebblenUser> get stream => streamUser();
+
+  Stream<WebblenUser> streamUser() async* {
+    while (true) {
+      if (uid == null) {
+        yield null;
+      }
+      await Future.delayed(Duration(seconds: 1));
+      var res = await _userDataService.getWebblenUserByID(uid);
+      if (res is String) {
+        yield null;
+      } else {
+        yield res;
+      }
+    }
+  }
 
   ///INITIALIZE
   initialize({BuildContext context, TabController tabController}) async {
     //set busy status
     setBusy(true);
 
+    //get current user
+    String currentUID = await _authService.getCurrentUserID();
+    currentUser = await _userDataService.getWebblenUserByID(currentUID);
+    notifyListeners();
+
     //get user
     Map<String, dynamic> args = RouteData.of(context).arguments;
-    String uid = args['id'] ?? "";
-    user = await _userDataService.getWebblenUserByID(uid);
+    uid = args['id'] ?? "";
     notifyListeners();
 
     //load additional data on scroll
@@ -64,12 +111,12 @@ class UserProfileViewModel extends BaseViewModel {
     notifyListeners();
 
     //load profile data
-    await loadData();
-    setBusy(false);
   }
 
   loadData() async {
     await loadPosts();
+    notifyListeners();
+    setBusy(false);
   }
 
   Future<void> refreshPosts() async {
@@ -112,6 +159,29 @@ class UserProfileViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  ///FOLLOW UNFOLLOW USER
+  followUnfollowUser() async {
+    if (isFollowingUser) {
+      isFollowingUser = false;
+      notifyListeners();
+      bool followedUser = await _userDataService.unFollowUser(currentUser.id, user.id);
+      if (followedUser) {
+        WebblenNotification notification = WebblenNotification().generateNewFollowerNotification(
+          receiverUID: user.id,
+          senderUID: currentUser.id,
+          followerUsername: "@${currentUser.username}",
+        );
+        _notificationDataService.sendNotification(notif: notification);
+        followedUser = true;
+        notifyListeners();
+      }
+    } else {
+      isFollowingUser = true;
+      notifyListeners();
+      _userDataService.followUser(currentUser.id, user.id);
+    }
+  }
+
   ///BOTTOM SHEETS
   showUserOptions() async {
     var sheetResponse = await _bottomSheetService.showCustomSheet(
@@ -122,6 +192,8 @@ class UserProfileViewModel extends BaseViewModel {
       String res = sheetResponse.responseData;
       if (res == "share profile") {
         //share profile
+        String url = await _dynamicLinkService.createProfileLink(user: user);
+        _shareService.shareLink(url);
       } else if (res == "message") {
         //message user
       } else if (res == "block") {

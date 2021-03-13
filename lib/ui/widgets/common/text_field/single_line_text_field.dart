@@ -8,12 +8,24 @@ class SingleLineTextField extends StatelessWidget {
   final String hintText;
   final int textLimit;
   final bool isPassword;
-  SingleLineTextField({@required this.controller, @required this.hintText, @required this.textLimit, @required this.isPassword});
+  final bool enabled;
+  final Function(String) onChanged;
+  final TextInputType keyboardType;
+  SingleLineTextField(
+      {@required this.controller,
+      @required this.hintText,
+      @required this.textLimit,
+      @required this.isPassword,
+      this.enabled,
+      this.onChanged,
+      this.keyboardType});
 
   @override
   Widget build(BuildContext context) {
     return TextFieldContainer(
+      height: 38,
       child: TextFormField(
+        enabled: enabled != null ? enabled : true,
         controller: controller,
         obscureText: isPassword,
         inputFormatters: textLimit == null
@@ -23,6 +35,8 @@ class SingleLineTextField extends StatelessWidget {
               ],
         style: TextStyle(color: appFontColor()),
         cursorColor: appFontColor(),
+        onChanged: onChanged == null ? null : (val) => onChanged(val),
+        keyboardType: keyboardType == null ? TextInputType.text : keyboardType,
         decoration: InputDecoration(
           hintText: hintText,
           border: InputBorder.none,

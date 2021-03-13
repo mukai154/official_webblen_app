@@ -7,13 +7,13 @@ import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_text_button.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
-import 'post_publish_successful_bottom_sheet_model.dart';
+import 'add_content_successful_bottom_sheet_model.dart';
 
-class PostSuccessfulBottomSheet extends StatelessWidget {
+class AddContentSuccessfulBottomSheet extends StatelessWidget {
   final SheetRequest request;
   final Function(SheetResponse) completer;
 
-  const PostSuccessfulBottomSheet({
+  const AddContentSuccessfulBottomSheet({
     Key key,
     this.request,
     this.completer,
@@ -21,8 +21,8 @@ class PostSuccessfulBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<PostSuccessfulBottomSheetModel>.nonReactive(
-      viewModelBuilder: () => PostSuccessfulBottomSheetModel(),
+    return ViewModelBuilder<AddContentSuccessfulBottomSheetModel>.nonReactive(
+      viewModelBuilder: () => AddContentSuccessfulBottomSheetModel(),
       builder: (context, model, child) => Container(
         margin: EdgeInsets.symmetric(horizontal: 16, vertical: 25),
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -36,7 +36,7 @@ class PostSuccessfulBottomSheet extends StatelessWidget {
           children: [
             verticalSpaceSmall,
             CustomText(
-              text: "Post Published!",
+              text: request.title,
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: appFontColor(),

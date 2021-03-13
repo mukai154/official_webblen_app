@@ -64,14 +64,7 @@ class EditProfileViewModel extends BaseViewModel {
       }
       notifyListeners();
       if (updatedProfilePic != null) {
-        var uploadImgStatus = await _userDataService.updateProfilePic(id, updatedProfilePic);
-        if (uploadImgStatus is String) {
-          _snackbarService.showSnackbar(
-            title: 'Photo Upload Error',
-            message: uploadImgStatus,
-            duration: Duration(seconds: 5),
-          );
-        }
+        await _userDataService.updateProfilePic(id, updatedProfilePic);
       }
     }
   }

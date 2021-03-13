@@ -267,6 +267,7 @@ class PostViewModel extends BaseViewModel {
   navigateToUserView(String id) {
     _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
+
 // replaceWithPage() {
 //   _navigationService.replaceWith(PageRouteName);
 // }

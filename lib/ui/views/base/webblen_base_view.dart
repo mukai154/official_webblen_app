@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/ui/views/home/init_error_views/location_error/location_error_view.dart';
@@ -14,17 +15,21 @@ import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar.dart
 import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar_item.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 
-import 'home_nav_view_model.dart';
+import 'webblen_base_view_model.dart';
 
 class HomeNavView extends StatelessWidget {
-  Widget getViewForIndex(int index, HomeNavViewModel model) {
+  Widget getViewForIndex(int index, WebblenBaseViewModel model) {
     switch (index) {
       case 0:
-        return HomeView(
-          user: model.user,
-          initialCityName: model.initialCityName,
-          initialAreaCode: model.initialAreaCode,
-        );
+        return model.user == null || model.initialAreaCode == null || model.initialCityName == null
+            ? Container(
+                color: appBackgroundColor(),
+              )
+            : HomeView(
+                user: model.user,
+                initialCityName: model.initialCityName,
+                initialAreaCode: model.initialAreaCode,
+              );
       case 1:
         return ExploreView(
           user: model.user,
@@ -42,19 +47,25 @@ class HomeNavView extends StatelessWidget {
           user: model.user,
         );
       default:
-        return HomeView(
-          user: model.user,
-          initialCityName: model.initialCityName,
-          initialAreaCode: model.initialAreaCode,
-        );
+        return model.user == null || model.initialAreaCode == null || model.initialCityName == null
+            ? Container(
+                color: appBackgroundColor(),
+              )
+            : HomeView(
+                user: model.user,
+                initialCityName: model.initialCityName,
+                initialAreaCode: model.initialAreaCode,
+              );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<HomeNavViewModel>.reactive(
+    return ViewModelBuilder<WebblenBaseViewModel>.reactive(
+      disposeViewModel: false,
+      fireOnModelReadyOnce: true,
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => HomeNavViewModel(),
+      viewModelBuilder: () => locator<WebblenBaseViewModel>(),
       builder: (context, model, child) => Scaffold(
         body: model.isBusy
             ? Container(

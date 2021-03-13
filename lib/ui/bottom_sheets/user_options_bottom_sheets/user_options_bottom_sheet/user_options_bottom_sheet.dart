@@ -4,7 +4,6 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/user_options_bottom_sheet/user_options_bottom_sheet_model.dart';
-import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class UserOptionsBottomSheet extends StatelessWidget {
@@ -42,48 +41,48 @@ class UserOptionsBottomSheet extends StatelessWidget {
               textColor: appFontColor(),
               centerContent: false,
             ),
-            verticalSpaceSmall,
-            CustomIconButton(
-              icon: Icon(
-                FontAwesomeIcons.paperPlane,
-                size: 16,
-              ),
-              height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "message")),
-              backgroundColor: appButtonColor(),
-              elevation: 1,
-              text: "Message",
-              textColor: appFontColor(),
-              centerContent: false,
-            ),
-            verticalSpaceSmall,
-            CustomIconButton(
-              icon: Icon(
-                FontAwesomeIcons.ban,
-                size: 16,
-              ),
-              height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "block")),
-              backgroundColor: appButtonColor(),
-              elevation: 1,
-              text: "Block",
-              textColor: appFontColor(),
-              centerContent: false,
-            ),
-            verticalSpaceSmall,
-            CustomIconButton(
-              icon: Icon(
-                FontAwesomeIcons.flag,
-                size: 16,
-              ),
-              height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "report")),
-              backgroundColor: appButtonColor(),
-              elevation: 1,
-              text: "Report",
-              textColor: appFontColor(),
-              centerContent: false,
-            ),
+            // verticalSpaceSmall,
+            // CustomIconButton(
+            //   icon: Icon(
+            //     FontAwesomeIcons.paperPlane,
+            //     size: 16,
+            //   ),
+            //   height: 45,
+            //   onPressed: () => completer(SheetResponse(responseData: "message")),
+            //   backgroundColor: appButtonColor(),
+            //   elevation: 1,
+            //   text: "Message",
+            //   textColor: appFontColor(),
+            //   centerContent: false,
+            // ),
+            // verticalSpaceSmall,
+            // CustomIconButton(
+            //   icon: Icon(
+            //     FontAwesomeIcons.ban,
+            //     size: 16,
+            //   ),
+            //   height: 45,
+            //   onPressed: () => completer(SheetResponse(responseData: "block")),
+            //   backgroundColor: appButtonColor(),
+            //   elevation: 1,
+            //   text: "Block",
+            //   textColor: appFontColor(),
+            //   centerContent: false,
+            // ),
+            // verticalSpaceSmall,
+            // CustomIconButton(
+            //   icon: Icon(
+            //     FontAwesomeIcons.flag,
+            //     size: 16,
+            //   ),
+            //   height: 45,
+            //   onPressed: () => completer(SheetResponse(responseData: "report")),
+            //   backgroundColor: appButtonColor(),
+            //   elevation: 1,
+            //   text: "Report",
+            //   textColor: appFontColor(),
+            //   centerContent: false,
+            // ),
           ],
         ),
       ),

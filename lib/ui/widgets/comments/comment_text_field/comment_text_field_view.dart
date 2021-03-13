@@ -118,6 +118,7 @@ class CommentTextFieldView extends StatelessWidget {
                       cursorColor: appCursorColor(),
                       decoration: InputDecoration(
                         hintText: "Comment",
+                        hintStyle: TextStyle(color: Colors.white54),
                         border: InputBorder.none,
                       ),
                       autofocus: false,

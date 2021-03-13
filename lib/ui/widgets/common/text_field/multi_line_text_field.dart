@@ -8,7 +8,9 @@ class MultiLineTextField extends StatelessWidget {
   final String hintText;
   final String initialValue;
   final int maxLines;
-  MultiLineTextField({@required this.enabled, @required this.controller, @required this.hintText, @required this.initialValue, @required this.maxLines});
+  final Function(String) onChanged;
+  MultiLineTextField(
+      {@required this.enabled, @required this.controller, @required this.hintText, @required this.initialValue, @required this.maxLines, this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +21,7 @@ class MultiLineTextField extends StatelessWidget {
         controller: controller,
         maxLines: maxLines,
         cursorColor: appFontColorAlt(),
+        onChanged: onChanged == null ? null : (val) => onChanged(val),
         style: TextStyle(color: appFontColor()),
         decoration: InputDecoration(
           hintText: hintText,

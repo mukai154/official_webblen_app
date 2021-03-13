@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/users/user_profile_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
+import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
-import 'package:webblen/ui/widgets/user/follow_stats_row.dart';
+import 'package:webblen/ui/widgets/user/follow_unfollow_button.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class UserProfileView extends StatefulWidget {
@@ -70,12 +72,9 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
             ),
           ),
           SizedBox(height: 8),
-          FollowStatsRow(
-            followersLength: model.user.followers.length,
-            followingLength: model.user.following.length,
-            viewFollowersAction: null,
-            viewFollowingAction: null,
-          ),
+          model.isFollowingUser == null
+              ? Container()
+              : FollowUnfollowButton(isFollowing: model.isFollowingUser, followUnfollowAction: () => model.followUnfollowUser()),
         ],
       ),
     );
@@ -218,47 +217,56 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
           ),
         ),
         body: Container(
-          child: Column(
-            children: [
-              Expanded(
-                child: DefaultTabController(
-                  key: null,
-                  length: 4,
-                  child: NestedScrollView(
-                    key: null,
-                    controller: model.scrollController,
-                    headerSliverBuilder: (context, innerBoxIsScrolled) {
-                      return [
-                        SliverAppBar(
+          height: screenHeight(context),
+          width: screenWidth(context),
+          color: appBackgroundColor(),
+          child: model.isBusy
+              ? Column(
+                  children: [
+                    CustomLinearProgressIndicator(color: appActiveColor()),
+                  ],
+                )
+              : Column(
+                  children: [
+                    Expanded(
+                      child: DefaultTabController(
+                        key: null,
+                        length: 4,
+                        child: NestedScrollView(
                           key: null,
-                          pinned: true,
-                          floating: true,
-                          forceElevated: innerBoxIsScrolled,
-                          expandedHeight: 200,
-                          leading: Container(),
-                          backgroundColor: appBackgroundColor(),
-                          flexibleSpace: FlexibleSpaceBar(
-                            background: Container(
-                              child: Column(
-                                children: [
-                                  model.user == null ? Container() : userDetails(model),
-                                ],
+                          controller: model.scrollController,
+                          headerSliverBuilder: (context, innerBoxIsScrolled) {
+                            return [
+                              SliverAppBar(
+                                key: null,
+                                pinned: true,
+                                floating: true,
+                                forceElevated: innerBoxIsScrolled,
+                                expandedHeight: 200,
+                                leading: Container(),
+                                backgroundColor: appBackgroundColor(),
+                                flexibleSpace: FlexibleSpaceBar(
+                                  background: Container(
+                                    child: Column(
+                                      children: [
+                                        model.user == null ? Container() : userDetails(model),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                bottom: PreferredSize(
+                                  preferredSize: Size.fromHeight(40),
+                                  child: tabBar(),
+                                ),
                               ),
-                            ),
-                          ),
-                          bottom: PreferredSize(
-                            preferredSize: Size.fromHeight(40),
-                            child: tabBar(),
-                          ),
+                            ];
+                          },
+                          body: model.isBusy ? Container() : body(model),
                         ),
-                      ];
-                    },
-                    body: model.isBusy ? Container() : body(model),
-                  ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

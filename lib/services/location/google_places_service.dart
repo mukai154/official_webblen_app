@@ -28,7 +28,11 @@ class GooglePlacesService {
     if (response.status.errorMessage == null) {
       double lat = response.result.geometry.location.lat;
       double lon = response.result.geometry.location.lng;
+      details['lat'] = lat;
+      details['lon'] = lon;
+      details['address'] = response.result.formattedAddress;
       details['cityName'] = await _locationService.getCityNameFromLatLon(lat, lon);
+      details['province'] = await _locationService.getProvinceFromLatLon(lat, lon);
       details['areaCode'] = await _locationService.getZipFromLatLon(lat, lon);
     }
     return details;

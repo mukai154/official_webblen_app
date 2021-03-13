@@ -4,7 +4,13 @@ List<String> timeListFromSelectedTime(String selectedTime) {
   return newList;
 }
 
-final List timeList = [
+String getCurrentTimezone() {
+  double offset = (DateTime.now().timeZoneOffset.inMinutes / 60).toDouble();
+  String timezone = timezones.firstWhere((timezone) => timezone['offset'] == offset)['abbr'];
+  return timezone;
+}
+
+final List<String> timeList = [
   '12:00 AM',
   '12:30 AM',
   '1:00 AM',
@@ -55,162 +61,66 @@ final List timeList = [
   '11:30 PM',
 ];
 
-final List timezones = [
+final List<Map<String, dynamic>> timezones = [
+  {
+    "value": "Samoa Standard Time",
+    "abbr": "SST",
+    "offset": -13,
+    "text": "(UTC-13:00) Pacific/Apia",
+  },
   {
     "value": "Dateline Standard Time",
     "abbr": "DST",
     "offset": -12,
-    "isdst": false,
-    "text": "(UTC-12:00) International Date Line West",
-    "utc": ["Etc/GMT+12"]
+    "text": "(UTC-12:00) Etc/GMT+12",
+  },
+  {
+    "value": "UTC-11",
+    "abbr": "UTC-11",
+    "offset": -11,
+    "text": "(UTC-11:00) Pacific/Midway",
   },
   {
     "value": "Hawaiian Standard Time",
     "abbr": "HST",
     "offset": -10,
-    "isdst": false,
-    "text": "(UTC-10:00) Hawaii",
-    "utc": ["Etc/GMT+10", "Pacific/Honolulu", "Pacific/Johnston", "Pacific/Rarotonga", "Pacific/Tahiti"]
+    "text": "(UTC-10:00) Pacific/Honolulu	",
   },
   {
     "value": "Alaskan Standard Time",
-    "abbr": "AKDT",
-    "offset": -8,
-    "isdst": true,
-    "text": "(UTC-09:00) Alaska",
-    "utc": ["America/Anchorage", "America/Juneau", "America/Nome", "America/Sitka", "America/Yakutat"]
-  },
-  {
-    "value": "Pacific Daylight Time",
-    "abbr": "PDT",
-    "offset": -7,
-    "isdst": true,
-    "text": "(UTC-07:00) Pacific Time (US & Canada & Mexico)",
-    "utc": ["America/Dawson", "America/Los_Angeles", "America/Tijuana", "America/Vancouver", "America/Whitehorse"]
+    "abbr": "AST",
+    "offset": -9,
+    "text": "(UTC-09:00) America/Anchorage",
   },
   {
     "value": "Pacific Standard Time",
     "abbr": "PST",
     "offset": -8,
-    "isdst": false,
-    "text": "(UTC-08:00) Pacific Time (US & Canada)",
-    "utc": ["America/Dawson", "America/Los_Angeles", "America/Tijuana", "America/Vancouver", "America/Whitehorse", "PST8PDT"]
+    "text": "(UTC-08:00) America/Los_Angeles, America/Santa_Isabel",
   },
   {
-    "value": "US Mountain Standard Time",
-    "abbr": "UMST",
+    "value": "Mountain Standard Time",
+    "abbr": "MST",
     "offset": -7,
-    "isdst": false,
-    "text": "(UTC-07:00) Arizona",
-    "utc": ["America/Creston", "America/Dawson_Creek", "America/Hermosillo", "America/Phoenix", "Etc/GMT+7"]
-  },
-  {
-    "value": "Mountain/Central America Standard Time",
-    "abbr": "MDT/CAST",
-    "offset": -6,
-    "isdst": true,
-    "text": "(UTC-07:00) Mountain Time (US & Canada & Mexico), Central America",
-    "utc": [
-      "America/Boise",
-      "America/Cambridge_Bay",
-      "America/Denver",
-      "America/Edmonton",
-      "America/Inuvik",
-      "America/Ojinaga",
-      "America/Yellowknife",
-      "MST7MDT"
-    ]
+    "text": "(UTC-07:00) America/Denver, America/Chihuahua, America/Phoenix",
   },
   {
     "value": "Central Standard Time",
-    "abbr": "CDT",
-    "offset": -5,
-    "isdst": true,
-    "text": "(UTC-06:00) Central Time (US & Canada & Mexico)",
-    "utc": [
-      "America/Chicago",
-      "America/Indiana/Knox",
-      "America/Indiana/Tell_City",
-      "America/Matamoros",
-      "America/Menominee",
-      "America/North_Dakota/Beulah",
-      "America/North_Dakota/Center",
-      "America/North_Dakota/New_Salem",
-      "America/Rainy_River",
-      "America/Rankin_Inlet",
-      "America/Resolute",
-      "America/Winnipeg",
-      "CST6CDT"
-    ]
-  },
-  {
-    "value": "Canada Central Standard Time",
-    "abbr": "CCST",
+    "abbr": "CST",
     "offset": -6,
-    "isdst": false,
-    "text": "(UTC-06:00) Saskatchewan",
-    "utc": ["America/Regina", "America/Swift_Current"]
-  },
-  {
-    "value": "SA Pacific Standard Time",
-    "abbr": "SPST",
-    "offset": -5,
-    "isdst": false,
-    "text": "(UTC-05:00) Bogota, Lima, Quito",
-    "utc": [
-      "America/Bogota",
-      "America/Cayman",
-      "America/Coral_Harbour",
-      "America/Eirunepe",
-      "America/Guayaquil",
-      "America/Jamaica",
-      "America/Lima",
-      "America/Panama",
-      "America/Rio_Branco",
-      "Etc/GMT+5"
-    ]
+    "text": "(UTC-06:00) America/Chicago, America/Regina, America/Guatemala",
   },
   {
     "value": "Eastern Standard Time",
-    "abbr": "EDT",
-    "offset": -4,
-    "isdst": true,
-    "text": "(UTC-05:00) Eastern Time (US & Canada)",
-    "utc": [
-      "America/Detroit",
-      "America/Havana",
-      "America/Indiana/Petersburg",
-      "America/Indiana/Vincennes",
-      "America/Indiana/Winamac",
-      "America/Iqaluit",
-      "America/Kentucky/Monticello",
-      "America/Louisville",
-      "America/Montreal",
-      "America/Nassau",
-      "America/New_York",
-      "America/Nipigon",
-      "America/Pangnirtung",
-      "America/Port-au-Prince",
-      "America/Thunder_Bay",
-      "America/Toronto",
-      "EST5EDT"
-    ]
-  },
-  {
-    "value": "US Eastern Standard Time",
-    "abbr": "UEDT",
-    "offset": -4,
-    "isdst": true,
-    "text": "(UTC-05:00) Indiana (East)",
-    "utc": ["America/Indiana/Marengo", "America/Indiana/Vevay", "America/Indianapolis"]
+    "abbr": "EST",
+    "offset": -5,
+    "text": "(UTC-05:00) America/Chicago, America/Indianapolis, America/Bogota",
   },
   {
     "value": "Venezuela Standard Time",
     "abbr": "VST",
     "offset": -4.5,
-    "isdst": false,
-    "text": "(UTC-04:30) Caracas",
-    "utc": ["America/Caracas"]
+    "text": "(UTC-04:30) America/Caracas",
   },
   {
     "value": "Paraguay Standard Time",
@@ -276,16 +186,8 @@ final List timezones = [
     ]
   },
   {
-    "value": "Pacific SA Standard Time",
-    "abbr": "PSST",
-    "offset": -4,
-    "isdst": false,
-    "text": "(UTC-04:00) Santiago",
-    "utc": ["America/Santiago", "Antarctica/Palmer"]
-  },
-  {
     "value": "Newfoundland Standard Time",
-    "abbr": "NDT",
+    "abbr": "NST",
     "offset": -2.5,
     "isdst": true,
     "text": "(UTC-03:30) Newfoundland",
@@ -321,7 +223,7 @@ final List timezones = [
   },
   {
     "value": "Greenland/Montevideo Standard Time",
-    "abbr": "GDT/MST",
+    "abbr": "GST/MST",
     "offset": -3,
     "isdst": true,
     "text": "(UTC-03:00) Greenland, Montevideo",
@@ -337,7 +239,7 @@ final List timezones = [
   },
   {
     "value": "Cape/Azores Verde Standard Time",
-    "abbr": "CVST/ADT",
+    "abbr": "CVST/AST",
     "offset": -1,
     "isdst": false,
     "text": "(UTC-01:00) Cape Verde Is., Azores",
@@ -345,7 +247,7 @@ final List timezones = [
   },
   {
     "value": "Morocco Standard Time",
-    "abbr": "MDT",
+    "abbr": "MST",
     "offset": 1,
     "isdst": true,
     "text": "(UTC) Casablanca",
@@ -401,7 +303,7 @@ final List timezones = [
   },
   {
     "value": "W. Europe Standard Time",
-    "abbr": "WEDT",
+    "abbr": "WEST",
     "offset": 2,
     "isdst": true,
     "text": "(UTC+01:00) Amsterdam, Berlin, Bern, Rome, Stockholm, Vienna",
@@ -427,7 +329,7 @@ final List timezones = [
   },
   {
     "value": "Romance Standard Time",
-    "abbr": "RDT",
+    "abbr": "RST",
     "offset": 2,
     "isdst": true,
     "text": "(UTC+01:00) Brussels, Copenhagen, Madrid, Paris",
@@ -482,7 +384,7 @@ final List timezones = [
   },
   {
     "value": "Middle East Standard Time",
-    "abbr": "MEDT",
+    "abbr": "MEST",
     "offset": 3,
     "isdst": true,
     "text": "(UTC+02:00) Beirut",
@@ -745,14 +647,6 @@ final List timezones = [
     "isdst": false,
     "text": "(UTC+07:00) Novosibirsk",
     "utc": ["Asia/Novokuznetsk", "Asia/Novosibirsk", "Asia/Omsk"]
-  },
-  {
-    "value": "China Standard Time",
-    "abbr": "CST",
-    "offset": 8,
-    "isdst": false,
-    "text": "(UTC+08:00) Beijing, Chongqing, Hong Kong, Urumqi",
-    "utc": ["Asia/Hong_Kong", "Asia/Macau", "Asia/Shanghai"]
   },
   {
     "value": "North Asia Standard Time",

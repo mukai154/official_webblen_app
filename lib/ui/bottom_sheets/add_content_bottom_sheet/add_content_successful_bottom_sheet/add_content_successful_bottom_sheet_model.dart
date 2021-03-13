@@ -8,7 +8,7 @@ import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/utils/copy_shareable_link.dart';
 
-class PostSuccessfulBottomSheetModel extends BaseViewModel {
+class AddContentSuccessfulBottomSheetModel extends BaseViewModel {
   SnackbarService _snackbarService = locator<SnackbarService>();
   UserDataService _userDataService = locator<UserDataService>();
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();

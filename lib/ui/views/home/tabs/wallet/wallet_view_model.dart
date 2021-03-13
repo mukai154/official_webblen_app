@@ -56,7 +56,7 @@ class WalletViewModel extends StreamViewModel<UserStripeInfo> {
       } else if (res == "new stream") {
         //
       } else if (res == "new event") {
-        //
+        navigateToCreateEventPage();
       }
       notifyListeners();
     }
@@ -98,5 +98,9 @@ class WalletViewModel extends StreamViewModel<UserStripeInfo> {
 
   navigateToRedeemedRewardsView(WebblenUser user) {
     _navigationService.navigateTo(Routes.RedeemedRewardsViewRoute, arguments: {'currentUser': user});
+  }
+
+  navigateToCreateEventPage() {
+    _navigationService.navigateTo(Routes.CreateEventViewRoute);
   }
 }

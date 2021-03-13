@@ -179,7 +179,7 @@ class ExploreViewModel extends BaseViewModel {
       } else if (res == "new stream") {
         //
       } else if (res == "new event") {
-        //
+        navigateToCreateEventPage();
       }
       notifyListeners();
     }
@@ -196,7 +196,7 @@ class ExploreViewModel extends BaseViewModel {
     _navigationService.navigateWithTransition(SearchView(), transition: 'fade', opaque: true);
   }
 
-// navigateToCreateCauseView() {
-//   _navigationService.navigateTo(Routes.CreateCauseViewRoute);
-// }
+  navigateToCreateEventPage() {
+    _navigationService.navigateTo(Routes.CreateEventViewRoute);
+  }
 }

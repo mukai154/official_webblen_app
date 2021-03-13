@@ -5,6 +5,7 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 
 import 'new_content_confirmation_bottom_sheet_model.dart';
 
@@ -61,13 +62,15 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                   color: appFontColor(),
                   textAlign: TextAlign.left,
                 ),
-                CustomText(
-                  text: "${model.webblenBalance.toStringAsFixed(2)} WBLN",
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: appFontColor(),
-                  textAlign: TextAlign.right,
-                ),
+                model.webblenBalance == null
+                    ? CustomCircleProgressIndicator(size: 10, color: appActiveColor())
+                    : CustomText(
+                        text: "${model.webblenBalance.toStringAsFixed(2)} WBLN",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: appFontColor(),
+                        textAlign: TextAlign.right,
+                      ),
               ],
             ),
             verticalSpaceSmall,
@@ -85,7 +88,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                   text: "-${request.customData.toStringAsFixed(2)} WBLN",
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: appDestructiveColor(),
+                  color: model.webblenBalance == null ? Colors.transparent : appDestructiveColor(),
                   textAlign: TextAlign.right,
                 ),
               ],
@@ -99,37 +102,41 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
               height: 4,
             ),
             verticalSpaceMedium,
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Container(
-                  height: 15,
-                  width: 15,
-                  child: Image.asset(
-                    'assets/images/webblen_coin.png',
+            model.webblenBalance == null
+                ? Container(height: 15)
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        height: 15,
+                        width: 15,
+                        child: Image.asset(
+                          'assets/images/webblen_coin.png',
+                        ),
+                      ),
+                      horizontalSpaceSmall,
+                      CustomText(
+                        text: "${(model.webblenBalance - request.customData).toStringAsFixed(2)} WBLN",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: appFontColor(),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
                   ),
-                ),
-                horizontalSpaceSmall,
-                CustomText(
-                  text: "${(model.webblenBalance - request.customData).toStringAsFixed(2)} WBLN",
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: appFontColor(),
-                  textAlign: TextAlign.right,
-                ),
-              ],
-            ),
             verticalSpaceLarge,
             CustomButton(
-              onPressed: model.webblenBalance < request.customData
-                  ? () => completer(SheetResponse(responseData: "insufficient funds"))
-                  : () => completer(SheetResponse(responseData: "confirmed")),
-              text: request.mainButtonTitle,
+              onPressed: model.webblenBalance == null
+                  ? null
+                  : model.webblenBalance < request.customData
+                      ? () => completer(SheetResponse(responseData: "insufficient funds"))
+                      : () => completer(SheetResponse(responseData: "confirmed")),
+              text: model.webblenBalance == null ? "Calculating Total..." : request.mainButtonTitle,
               textSize: 16,
-              textColor: Colors.white,
+              textColor: model.webblenBalance == null ? appFontColorAlt() : Colors.white,
               height: 40,
               width: screenWidth(context),
-              backgroundColor: appConfirmationColor(),
+              backgroundColor: model.webblenBalance == null ? appButtonColor() : appConfirmationColor(),
               elevation: 1.0,
               isBusy: false,
             ),

@@ -16,7 +16,7 @@ class DynamicLinkService {
   String iosBundleID = 'com.webblen.events';
   String iosAppStoreID = '1196159158';
 
-  Future<String> createAccountLink({@required WebblenUser user}) async {
+  Future<String> createProfileLink({@required WebblenUser user}) async {
     //set post uri
     Uri postURI = Uri.parse('https://app.webblen.io/profiles/profile?id=${user.id}');
 
@@ -103,10 +103,10 @@ class DynamicLinkService {
       DynamicLinkType linkType;
       String id = link.queryParameters['id'];
 
-      if (link.pathSegments.contains('account')) {
-        _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'id': id});
+      if (link.pathSegments.contains('profile')) {
+        _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
       } else if (link.pathSegments.contains('post')) {
-        _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'postID': id});
+        _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'id': id});
       } else if (link.pathSegments.contains('event')) {
         //_navigationService.navigateTo(Routes.PostViewRoute, arguments: {'postID': id});
       } else if (link.pathSegments.contains('stream')) {

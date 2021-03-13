@@ -1,3 +1,6 @@
+import 'package:auto_route/auto_route.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
+
 class WebblenEvent {
   String id;
   String authorID;
@@ -5,9 +8,10 @@ class WebblenEvent {
   bool flashEvent;
   bool hasStream;
   String title;
-  String desc;
+  String description;
   String imageURL;
   String venueName;
+  String venueSize;
   String streetAddress;
   List nearbyZipcodes;
   String city;
@@ -39,6 +43,7 @@ class WebblenEvent {
   String webAppLink;
   List savedBy;
   bool paidOut;
+  bool openToSponsors;
 
   WebblenEvent({
     this.id,
@@ -47,9 +52,10 @@ class WebblenEvent {
     this.hasStream,
     this.flashEvent,
     this.title,
-    this.desc,
+    this.description,
     this.imageURL,
     this.venueName,
+    this.venueSize,
     this.nearbyZipcodes,
     this.streetAddress,
     this.city,
@@ -81,6 +87,7 @@ class WebblenEvent {
     this.webAppLink,
     this.savedBy,
     this.paidOut,
+    this.openToSponsors,
   });
 
   WebblenEvent.fromMap(Map<String, dynamic> data)
@@ -91,9 +98,10 @@ class WebblenEvent {
           flashEvent: data['flashEvent'],
           hasStream: data['hasStream'],
           title: data['title'],
-          desc: data['desc'],
+          description: data['description'],
           imageURL: data['imageURL'],
           venueName: data['venueName'],
+          venueSize: data['venueSize'],
           nearbyZipcodes: data['nearbyZipcodes'],
           streetAddress: data['streetAddress'],
           city: data['city'],
@@ -125,6 +133,7 @@ class WebblenEvent {
           webAppLink: data['webAppLink'],
           savedBy: data['savedBy'],
           paidOut: data['paidOut'],
+          openToSponsors: data['openToSponsors'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -134,9 +143,10 @@ class WebblenEvent {
         'flashEvent': this.flashEvent,
         'hasStream': this.hasStream,
         'title': this.title,
-        'desc': this.desc,
+        'description': this.description,
         'imageURL': this.imageURL,
         'venueName': this.venueName,
+        'venueSize': this.venueSize,
         'nearbyZipcodes': this.nearbyZipcodes,
         'streetAddress': this.streetAddress,
         'city': this.city,
@@ -168,5 +178,26 @@ class WebblenEvent {
         'webAppLink': this.webAppLink,
         'savedBy': this.savedBy,
         'paidOut': this.paidOut,
+        'openToSponsors': this.openToSponsors,
       };
+
+  WebblenEvent generateNewWebblenEvent({@required String authorID}) {
+    String id = getRandomString(30);
+    WebblenEvent event = WebblenEvent(
+      id: id,
+      authorID: authorID,
+      privacy: "Public",
+      reported: false,
+      hasStream: false,
+      hasTickets: false,
+      paidOut: false,
+      openToSponsors: false,
+      tags: [],
+      savedBy: [],
+      attendees: [],
+      clicks: 0,
+      estimatedTurnout: 0,
+    );
+    return event;
+  }
 }

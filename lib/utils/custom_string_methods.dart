@@ -8,21 +8,26 @@ String getRandomString(int length) => String.fromCharCodes(Iterable.generate(len
 
 ///STRING VALIDATION
 bool isValidUrl(String val) {
-  bool urlValid =
+  bool isValid =
       RegExp(r"((https?:www\.)|(https?:\/\/)|(www\.))[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9]{1,6}(\/[-a-zA-Z0-9()@:%_\+.~#?&\/=]*)?").hasMatch(val);
-  return urlValid;
+  return isValid;
 }
 
 bool isValidEmail(String val) {
-  bool emailValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(val);
-  return emailValid;
+  bool isValid = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+").hasMatch(val);
+  return isValid;
+}
+
+bool isValidUsername(String val) {
+  bool isValid = RegExp(r"^[A-Za-z0-9_-]*$").hasMatch(val);
+  return isValid;
 }
 
 bool isValidPassword(String val) {
-  bool passwordValid = RegExp(
+  bool isValid = RegExp(
           r'^(?:(?=.*?[A-Z])(?:(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=])|(?=.*?[a-z])(?:(?=.*?[0-9])|(?=.*?[-!@#$%^&*()_[\]{},.<>+=])))|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=]))[A-Za-z0-9!@#$%^&*()_[\]{},.<>+=-]{7,50}$')
       .hasMatch(val);
-  return passwordValid;
+  return isValid;
 }
 
 bool isValidString(String val) {

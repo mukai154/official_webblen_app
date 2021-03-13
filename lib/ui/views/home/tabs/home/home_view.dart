@@ -161,6 +161,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     return ViewModelBuilder<HomeViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
+      fireOnModelReadyOnce: true,
       onModelReady: (model) => model.initialize(
         tabController: _tabController,
         currentUser: widget.user,
@@ -173,27 +174,27 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
         color: appBackgroundColor(),
         child: SafeArea(
           child: Container(
-            child: Column(
-              children: [
-                head(model),
-                SizedBox(height: 4),
-                tabBar(),
-                SizedBox(height: 4),
-                Expanded(
-                  child: model.isBusy
-                      ? Center(
-                          child: CustomCircleProgressIndicator(
-                            color: appActiveColor(),
-                            size: 32,
-                          ),
-                        )
-                      : DefaultTabController(
+            child: model.isBusy
+                ? Center(
+                    child: CustomCircleProgressIndicator(
+                      color: appActiveColor(),
+                      size: 32,
+                    ),
+                  )
+                : Column(
+                    children: [
+                      head(model),
+                      SizedBox(height: 4),
+                      tabBar(),
+                      SizedBox(height: 4),
+                      Expanded(
+                        child: DefaultTabController(
                           length: 4,
                           child: body(model),
                         ),
-                ),
-              ],
-            ),
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),

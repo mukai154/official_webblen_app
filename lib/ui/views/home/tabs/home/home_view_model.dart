@@ -10,6 +10,7 @@ import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
+import 'package:webblen/services/firestore/data/event_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
@@ -27,6 +28,7 @@ class HomeViewModel extends BaseViewModel {
   SnackbarService _snackbarService = locator<SnackbarService>();
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   PostDataService _postDataService = locator<PostDataService>();
+  EventDataService _eventDataService = locator<EventDataService>();
   ShareService _shareService = locator<ShareService>();
 
   ///HELPERS
@@ -41,7 +43,7 @@ class HomeViewModel extends BaseViewModel {
   String sortBy = "Latest";
   String tagFilter = "";
 
-  ///DATA RESULTS
+  ///POST RESULTS
   List<DocumentSnapshot> postResults = [];
   DocumentSnapshot lastPostDocSnap;
 
@@ -49,7 +51,15 @@ class HomeViewModel extends BaseViewModel {
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
 
-  int resultsLimit = 10;
+  ///POST RESULTS
+  List<DocumentSnapshot> eventResults = [];
+  DocumentSnapshot lastEventDocSnap;
+
+  bool loadingEvents = true;
+  bool loadingAdditionalEvents = false;
+  bool moreEventsAvailable = true;
+
+  int resultsLimit = 30;
 
   ///PROMOS
   double postPromo;
@@ -98,11 +108,14 @@ class HomeViewModel extends BaseViewModel {
       if (scrollController.position.pixels > triggerFetchMoreSize) {
         if (tabController.index == 0) {
           loadAdditionalPosts();
+        } else if (tabController.index == 1) {
+          //load additional streams
+        } else if (tabController.index == 2) {
+          loadAdditionalEvents();
         }
       }
     });
     notifyListeners();
-
     //load content data
     await loadData();
     setBusy(false);
@@ -111,6 +124,7 @@ class HomeViewModel extends BaseViewModel {
   ///LOAD ALL DATA
   loadData() async {
     await loadPosts();
+    await loadEvents();
   }
 
   ///REFRESH ALL DATA
@@ -120,6 +134,7 @@ class HomeViewModel extends BaseViewModel {
 
     //clear previous data
     postResults = [];
+    eventResults = [];
 
     //load all data
     await loadData();
@@ -187,6 +202,64 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  ///EVENT DATA
+  Future<void> refreshEvents() async {
+    //set loading posts status
+    loadingEvents = true;
+
+    //clear previous post data
+    eventResults = [];
+    notifyListeners();
+
+    //load posts
+    await loadEvents();
+  }
+
+  loadEvents() async {
+    //load events with params
+    // eventResults = await _eventDataService.loadEvents(
+    //   areaCode: areaCode,
+    //   resultsLimit: resultsLimit,
+    //   tagFilter: tagFilter,
+    //   sortBy: sortBy,
+    // );
+
+    //set loading events status
+    loadingEvents = false;
+    notifyListeners();
+  }
+
+  loadAdditionalEvents() async {
+    //check if already loading events or no more events available
+    if (loadingAdditionalEvents || !moreEventsAvailable) {
+      return;
+    }
+
+    //set loading additional events status
+    loadingAdditionalEvents = true;
+    notifyListeners();
+
+    //load additional events
+    // List<DocumentSnapshot> newResults = await _eventDataService.loadAdditionalEvents(
+    //   lastDocSnap: eventResults[eventResults.length - 1],
+    //   areaCode: areaCode,
+    //   resultsLimit: resultsLimit,
+    //   tagFilter: tagFilter,
+    //   sortBy: sortBy,
+    // );
+
+    //notify if no more events available
+    // if (newResults.length == 0) {
+    //   moreEventsAvailable = false;
+    // } else {
+    //   eventResults.addAll(newResults);
+    // }
+
+    //set loading additional events status
+    loadingAdditionalEvents = false;
+    notifyListeners();
+  }
+
   ///BOTTOM SHEETS
   //bottom sheet for new post, stream, or event
   showAddContentOptions() async {
@@ -201,7 +274,7 @@ class HomeViewModel extends BaseViewModel {
       } else if (res == "new stream") {
         //
       } else if (res == "new event") {
-        //
+        navigateToCreateEventPage();
       }
       notifyListeners();
     }
@@ -256,11 +329,11 @@ class HomeViewModel extends BaseViewModel {
   }
 
   ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
   navigateToCreatePostPage() {
     _navigationService.navigateTo(Routes.CreatePostViewRoute);
+  }
+
+  navigateToCreateEventPage() {
+    _navigationService.navigateTo(Routes.CreateEventViewRoute);
   }
 }

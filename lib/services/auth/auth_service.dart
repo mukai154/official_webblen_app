@@ -40,11 +40,12 @@ class AuthService {
     try {
       UserCredential credential = await firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
       if (credential.user != null) {
-        if (credential.user.emailVerified) {
-          return true;
-        } else {
-          return "Email Confirmation Required";
-        }
+        return true;
+        // if (credential.user.emailVerified) {
+        //   return true;
+        // } else {
+        //   return "Email Confirmation Required";
+        // }
       }
     } catch (e) {
       return e.message;

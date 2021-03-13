@@ -119,11 +119,15 @@ class ProfileViewModel extends BaseViewModel {
     );
     if (sheetResponse != null) {
       String res = sheetResponse.responseData;
-      if (res == "edit profile") {
+      if (res == "saved") {
+        //saved
+      } else if (res == "edit profile") {
         //edit profile
         navigateToEditProfileView();
-      } else if (res == "saved") {
-        //saved
+      } else if (res == "share profile") {
+        //share profile
+        String url = await _dynamicLinkService.createProfileLink(user: user);
+        _shareService.shareLink(url);
       } else if (res == "settings") {
         navigateToSettingsView();
       }
@@ -144,7 +148,7 @@ class ProfileViewModel extends BaseViewModel {
       } else if (res == "new stream") {
         //
       } else if (res == "new event") {
-        //
+        navigateToCreateEventPage();
       }
       notifyListeners();
     }
@@ -202,6 +206,10 @@ class ProfileViewModel extends BaseViewModel {
     } else {
       _navigationService.navigateTo(Routes.CreatePostViewRoute);
     }
+  }
+
+  navigateToCreateEventPage() {
+    _navigationService.navigateTo(Routes.CreateEventViewRoute);
   }
 
   navigateToEditProfileView() {

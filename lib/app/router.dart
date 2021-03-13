@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route_annotations.dart';
 import 'package:webblen/ui/views/auth/auth_view.dart';
-import 'package:webblen/ui/views/home/home_nav_view.dart';
+import 'package:webblen/ui/views/base/webblen_base_view.dart';
+import 'package:webblen/ui/views/events/create_event_view/create_event_view.dart';
 import 'package:webblen/ui/views/home/tabs/profile/edit_profile/edit_profile_view.dart';
 import 'package:webblen/ui/views/notifications/notifications_view.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view.dart';
@@ -25,12 +26,16 @@ import 'package:webblen/ui/views/wallet/redeemed_rewards/redeemed_rewards_view.d
     //ONBOARDING
     // MaterialRoute(page: OnboardingView, name: "OnboardingViewRoute"),
 
-    // //HOME
+    //HOME
     MaterialRoute(page: HomeNavView, name: "HomeNavViewRoute"),
 
     //POST
     MaterialRoute(page: PostView, name: "PostViewRoute"),
     MaterialRoute(page: CreatePostView, name: "CreatePostViewRoute"),
+
+    //EVENT
+    // MaterialRoute(page: EventView, name: "EventViewRoute"),
+    MaterialRoute(page: CreateEventView, name: "CreateEventViewRoute"),
 
     //SEARCH
     MaterialRoute(page: SearchView, name: "SearchViewRoute"),
