@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/models/search_result.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/ui/views/home/tabs/search/recent_search_view_model.dart';
 
 import 'all_search_results/all_search_results_view.dart';
 
@@ -15,6 +18,8 @@ class SearchViewModel extends BaseViewModel {
   NavigationService _navigationService = locator<NavigationService>();
   AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
   UserDataService _userDataService = locator<UserDataService>();
+  RecentSearchViewModel _recentSearchViewModel = locator<RecentSearchViewModel>();
+  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   TextEditingController searchTextController = TextEditingController();
@@ -30,20 +35,30 @@ class SearchViewModel extends BaseViewModel {
   int userResultsLimit = 16;
 
   ///DATA
-  String uid;
 
-  initialize() async {
+  initialize({String term}) async {
     setBusy(true);
-    uid = await _authService.getCurrentUserID();
-    recentSearchTerms = await _algoliaSearchService.getRecentSearchTerms(uid: uid);
+
+    //check if user clicked recently searched term
+    if (term != null && term.trim().isNotEmpty) {
+      searchTextController.text = term;
+      querySearchResults(term);
+    }
+
+    //get recent search
+    recentSearchTerms = _recentSearchViewModel.recentSearchTerms;
+
     notifyListeners();
     setBusy(false);
   }
 
   querySearchResults(String searchTerm) async {
+    await Future.delayed(Duration(seconds: 1));
+    if (searchTextController.text != searchTerm) {
+      return;
+    }
     setBusy(true);
     if (searchTerm == null || searchTerm.trim().isEmpty) {
-      await Future.delayed(Duration(seconds: 2));
       streamResults = [];
       eventResults = [];
       userResults = [];
@@ -61,7 +76,7 @@ class SearchViewModel extends BaseViewModel {
     if (searchTerm.trim().isNotEmpty) {
       searchTextController.text = searchTerm;
       notifyListeners();
-      _algoliaSearchService.storeSearchTerm(uid: uid, searchTerm: searchTerm);
+      _algoliaSearchService.storeSearchTerm(uid: webblenBaseViewModel.uid, searchTerm: searchTerm);
       await _navigationService.navigateWithTransition(AllSearchResultsView(searchTerm: searchTerm), transition: 'fade', opaque: true);
       searchTextController.selection = TextSelection(baseOffset: 0, extentOffset: searchTextController.text.length);
       FocusScope.of(context).previousFocus();
@@ -72,8 +87,9 @@ class SearchViewModel extends BaseViewModel {
     //_navigationService.navigateTo(Routes.CauseViewRoute, arguments: {'id': id});
   }
 
-  navigateToUserView(String uid) {
-    //_navigationService.navigateTo(Routes.UserViewRoute, arguments: {'uid': uid});
+  navigateToUserView(Map<String, dynamic> userData) {
+    _algoliaSearchService.storeSearchTerm(uid: webblenBaseViewModel.uid, searchTerm: userData['username']);
+    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': userData['id']});
   }
 
   navigateToPreviousView() {

@@ -3,18 +3,18 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/profile/profile_view_model.dart';
+import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
+import 'package:webblen/ui/widgets/list_builders/list_events.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
+import 'package:webblen/ui/widgets/list_builders/list_streams.dart';
 import 'package:webblen/ui/widgets/user/follow_stats_row.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class ProfileView extends StatefulWidget {
-  final WebblenUser user;
-  ProfileView({this.user});
-
   @override
   _ProfileViewState createState() => _ProfileViewState();
 }
@@ -59,32 +59,80 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
     );
   }
 
-  Widget userDetails() {
+  Widget userBioAndWebsite(ProfileViewModel model) {
+    return Container(
+      child: Column(
+        children: [
+          model.webblenBaseViewModel.user.bio != null && model.webblenBaseViewModel.user.bio.isNotEmpty
+              ? Container(
+                  margin: EdgeInsets.only(top: 4),
+                  child: CustomText(
+                    text: model.webblenBaseViewModel.user.bio,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: appFontColor(),
+                  ),
+                )
+              : Container(),
+          model.webblenBaseViewModel.user.website != null && model.webblenBaseViewModel.user.website.isNotEmpty
+              ? GestureDetector(
+                  onTap: () => model.openWebsite(),
+                  child: Container(
+                    margin: EdgeInsets.only(top: 4),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          FontAwesomeIcons.link,
+                          size: 12,
+                          color: appFontColor(),
+                        ),
+                        horizontalSpaceTiny,
+                        CustomText(
+                          text: model.webblenBaseViewModel.user.website,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: appFontColor(),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Container(),
+        ],
+      ),
+    );
+  }
+
+  Widget userDetails(ProfileViewModel model) {
     return Container(
       child: Column(
         children: [
           SizedBox(height: 16),
           UserProfilePic(
-            userPicUrl: widget.user.profilePicURL,
+            userPicUrl: model.webblenBaseViewModel.user.profilePicURL,
             size: 60,
             isBusy: false,
           ),
           SizedBox(height: 8),
           Text(
-            "@${widget.user.username}",
+            "@${model.webblenBaseViewModel.user.username}",
             style: TextStyle(
               color: appFontColor(),
               fontWeight: FontWeight.bold,
               fontSize: 18.0,
             ),
           ),
-          SizedBox(height: 8),
+          verticalSpaceSmall,
           FollowStatsRow(
-            followersLength: widget.user.followers.length,
-            followingLength: widget.user.following.length,
-            viewFollowersAction: null,
-            viewFollowingAction: null,
+            followersLength: model.webblenBaseViewModel.user.followers.length,
+            followingLength: model.webblenBaseViewModel.user.following.length,
+            viewFollowersAction: () => model.navigateToUserFollowersView(),
+            viewFollowingAction: () => model.navigateToUserFollowingView(),
           ),
+          verticalSpaceSmall,
+          userBioAndWebsite(model),
         ],
       ),
     );
@@ -109,43 +157,58 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 header: "You Have No Posts",
                 subHeader: "Create a New Post to Share with the Community",
                 mainActionButtonTitle: "Create Post",
-                mainAction: () {},
+                mainAction: () => model.webblenBaseViewModel.navigateToCreatePostPage(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
                 refreshData: model.refreshPosts,
               )
             : ListPosts(
-                currentUID: widget.user.id,
+                currentUID: model.webblenBaseViewModel.user.id,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('profile-posts'),
-                showPostOptions: (post) => model.showPostOptions(context: context, post: post),
+                showPostOptions: (post) => model.showContentOptions(content: post),
               ),
 
         //scheduled streams
-        ZeroStateView(
-          imageAssetName: "video_phone",
-          imageSize: 200,
-          header: "You Have Not Scheduled Any Streams",
-          subHeader: "Find Your Audience and Create a Stream",
-          mainActionButtonTitle: "Create Stream",
-          mainAction: () {},
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
-        ZeroStateView(
-          imageAssetName: "calendar",
-          imageSize: 200,
-          header: "You Have Not Scheduled Any Events",
-          subHeader: "Create an Event for the Community",
-          mainActionButtonTitle: "Create Event",
-          mainAction: () {},
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-          scrollController: null,
-        ),
+        model.streamResults.isEmpty && !model.reloadingStreams
+            ? ZeroStateView(
+                imageAssetName: "video_phone",
+                imageSize: 200,
+                header: "You Have Not Scheduled Any Streams",
+                subHeader: "Find Your Audience and Create a Stream",
+                mainActionButtonTitle: "Create Stream",
+                mainAction: () => model.webblenBaseViewModel.navigateToCreateStreamPage(),
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: () async {},
+              )
+            : ListLiveStreams(
+                refreshData: model.refreshEvents,
+                dataResults: model.streamResults,
+                pageStorageKey: PageStorageKey('home-events'),
+                showStreamOptions: (stream) => model.showContentOptions(content: stream),
+              ),
+        model.eventResults.isEmpty && !model.reloadingEvents
+            ? ZeroStateView(
+                imageAssetName: "calendar",
+                imageSize: 200,
+                header: "You Have Not Scheduled Any Events",
+                subHeader: "Create an Event for the Community",
+                mainActionButtonTitle: "Create Event",
+                mainAction: () => model.webblenBaseViewModel.navigateToCreateEventPage(),
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: () async {},
+                scrollController: null,
+              )
+            : ListEvents(
+                refreshData: model.refreshEvents,
+                dataResults: model.eventResults,
+                pageStorageKey: PageStorageKey('profile-events'),
+                scrollController: null,
+                showEventOptions: (event) => model.showContentOptions(content: event),
+              ),
         ZeroStateView(
           imageAssetName: null,
           header: "You Have No Recent Activity",
@@ -210,8 +273,9 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return ViewModelBuilder<ProfileViewModel>.reactive(
       disposeViewModel: false,
+      fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
-      onModelReady: (model) => model.initialize(context: context, tabController: _tabController, currentUser: widget.user),
+      onModelReady: (model) => model.initialize(context: context, tabController: _tabController),
       viewModelBuilder: () => locator<ProfileViewModel>(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,
@@ -234,14 +298,18 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                             key: PageStorageKey('profile-app-bar-key'),
                             pinned: true,
                             floating: true,
+                            snap: true,
                             forceElevated: innerBoxIsScrolled,
-                            expandedHeight: 200,
+                            expandedHeight: (model.webblenBaseViewModel.user.bio == null || model.webblenBaseViewModel.user.bio.isEmpty) &&
+                                    (model.webblenBaseViewModel.user.website == null || model.webblenBaseViewModel.user.website.isEmpty)
+                                ? 200
+                                : 250,
                             backgroundColor: appBackgroundColor(),
                             flexibleSpace: FlexibleSpaceBar(
                               background: Container(
                                 child: Column(
                                   children: [
-                                    widget.user == null ? Container() : userDetails(),
+                                    model.webblenBaseViewModel.user == null ? Container() : userDetails(model),
                                   ],
                                 ),
                               ),

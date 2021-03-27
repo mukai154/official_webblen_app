@@ -58,7 +58,7 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,
       senderUID: senderUID,
-      type: NotificationType.newFollower,
+      type: NotificationType.follower,
       header: 'You have a new follower',
       subHeader: '$followerUsername has started following you',
       additionalData: null,
@@ -78,10 +78,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.newPost,
+      type: NotificationType.post,
       header: '$postAuthorUsername created a new post',
       subHeader: 'Check it out!',
-      additionalData: {'postID': postID},
+      additionalData: {'id': postID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -98,10 +98,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.newEvent,
+      type: NotificationType.event,
       header: '$hostUsername scheduled a new event',
       subHeader: 'View Details',
-      additionalData: {'eventID': eventID},
+      additionalData: {'id': eventID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -118,10 +118,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.editedEvent,
+      type: NotificationType.event,
       header: '$hostUsername edited an upcoming event',
       subHeader: 'View Changes',
-      additionalData: {'eventID': eventID},
+      additionalData: {'id': eventID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -138,10 +138,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.eventIsLive,
+      type: NotificationType.event,
       header: '$eventTitle is happening now!',
       subHeader: 'View Event Details',
-      additionalData: {'eventID': eventID},
+      additionalData: {'id': eventID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -158,10 +158,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.newStream,
+      type: NotificationType.stream,
       header: '$hostUsername scheduled a new stream',
       subHeader: 'View Details',
-      additionalData: {'streamID': streamID},
+      additionalData: {'id': streamID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -178,10 +178,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.newStream,
+      type: NotificationType.stream,
       header: '$hostUsername edited an upcoming stream',
       subHeader: 'View Changes',
-      additionalData: {'streamID': streamID},
+      additionalData: {'id': streamID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -198,10 +198,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
       senderUID: senderUID,
-      type: NotificationType.streamIsLive,
+      type: NotificationType.stream,
       header: '$streamTitle is live!',
       subHeader: "Watch Now",
-      additionalData: {'streamID': streamID},
+      additionalData: {'id': streamID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -223,7 +223,7 @@ class WebblenNotification {
       type: NotificationType.postComment,
       header: '$commenterUsername commented on your post',
       subHeader: comment,
-      additionalData: {'postID': postID},
+      additionalData: {'id': postID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -245,7 +245,7 @@ class WebblenNotification {
       type: NotificationType.postCommentReply,
       header: '$commenterUsername replied to your comment',
       subHeader: comment,
-      additionalData: {'postID': postID},
+      additionalData: {'id': postID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -264,10 +264,10 @@ class WebblenNotification {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,
       senderUID: senderUID,
-      type: NotificationType.postComment.toString(),
+      type: NotificationType.postComment,
       header: '$commenterUsername mentioned you in post',
       subHeader: comment,
-      additionalData: {'postID': postID},
+      additionalData: {'id': postID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -289,7 +289,7 @@ class WebblenNotification {
       type: NotificationType.webblenReceived,
       header: '$senderUsername sent you WBLN',
       subHeader: '$amountReceived WBLN has been deposited in your wallet',
-      additionalData: {'postID': postID},
+      additionalData: null,
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,

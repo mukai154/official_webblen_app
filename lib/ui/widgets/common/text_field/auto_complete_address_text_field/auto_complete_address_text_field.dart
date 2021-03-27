@@ -19,43 +19,42 @@ class AutoCompleteAddressTextField extends StatelessWidget {
       viewModelBuilder: () => AutoCompleteAddressTextFieldModel(),
       builder: (context, model, child) => TextFieldContainer(
         height: 38,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: 10,
-          ),
-          child: TypeAheadField(
-            hideOnEmpty: true,
-            hideOnLoading: true,
-            getImmediateSuggestions: false,
-            animationDuration: Duration(milliseconds: 0),
-            direction: AxisDirection.up,
-            textFieldConfiguration: TextFieldConfiguration(
-              controller: model.locationTextController,
-              cursorColor: appFontColor(),
-              decoration: InputDecoration(
-                hintText: hintText,
-                border: InputBorder.none,
-              ),
-              autofocus: false,
+        child: TypeAheadField(
+          hideOnEmpty: true,
+          hideOnLoading: true,
+          getImmediateSuggestions: false,
+          animationDuration: Duration(milliseconds: 0),
+          direction: AxisDirection.up,
+          textFieldConfiguration: TextFieldConfiguration(
+            controller: model.locationTextController,
+            cursorColor: appFontColor(),
+            style: TextStyle(
+              color: appFontColor(),
             ),
-            suggestionsCallback: (searchTerm) async {
-              Map<String, dynamic> res = await model.googlePlacesService.googleSearchAutoComplete(key: model.googleAPIKey, input: searchTerm);
-              model.setPlacesSearchResults(res);
-              return model.placeSearchResults.keys.toList();
-            },
-            itemBuilder: (context, place) {
-              return ListTile(
-                title: Text(
-                  place,
-                  style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w500),
-                ),
-              );
-            },
-            onSuggestionSelected: (val) async {
-              Map<String, dynamic> details = await model.getPlaceDetails(val);
-              onSelectedAddress(details);
-            },
+            decoration: InputDecoration(
+              contentPadding: EdgeInsets.only(bottom: 10),
+              hintText: hintText,
+              border: InputBorder.none,
+            ),
+            autofocus: false,
           ),
+          suggestionsCallback: (searchTerm) async {
+            Map<String, dynamic> res = await model.googlePlacesService.googleSearchAutoComplete(key: model.googleAPIKey, input: searchTerm);
+            model.setPlacesSearchResults(res);
+            return model.placeSearchResults.keys.toList();
+          },
+          itemBuilder: (context, place) {
+            return ListTile(
+              title: Text(
+                place,
+                style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w500),
+              ),
+            );
+          },
+          onSuggestionSelected: (val) async {
+            Map<String, dynamic> details = await model.getPlaceDetails(val);
+            onSelectedAddress(details);
+          },
         ),
       ),
     );

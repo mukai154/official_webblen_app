@@ -18,6 +18,8 @@ class WebblenUser {
   String username;
   String bio;
   String website;
+  bool isPrivate;
+  List recentSearchTerms;
 
   WebblenUser({
     // ignore: non_constant_identifier_names
@@ -39,6 +41,8 @@ class WebblenUser {
     this.username,
     this.bio,
     this.website,
+    this.isPrivate,
+    this.recentSearchTerms,
   });
 
   WebblenUser.fromMap(Map<String, dynamic> data)
@@ -61,6 +65,8 @@ class WebblenUser {
           username: data['username'],
           bio: data['bio'],
           website: data['website'],
+          isPrivate: data['isPrivate'],
+          recentSearchTerms: data['recentSearchTerms'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -82,5 +88,7 @@ class WebblenUser {
         'username': this.username,
         'bio': this.bio,
         'website': this.website,
+        'isPrivate': this.isPrivate,
+        'recentSearchTerms': this.recentSearchTerms,
       };
 }

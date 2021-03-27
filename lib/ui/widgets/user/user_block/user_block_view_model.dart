@@ -1,6 +1,7 @@
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 
 class UserBlockViewModel extends BaseViewModel {
@@ -18,7 +19,7 @@ class UserBlockViewModel extends BaseViewModel {
   }
 
   ///NAVIGATION
-  navigateToUserView(String uid) {
-    // _navigationService.navigateTo(Routes.UserViewRoute, arguments: {'uid': uid});
+  navigateToUserView(String id) {
+    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
 }

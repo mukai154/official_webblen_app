@@ -34,7 +34,7 @@ dependencies:
   #ADD CANCELLABLE ACTIONS TO ASYNC
   async:
 
-  #FULL TEXT SEARCh
+  #FULL TEXT SEARCH
   algolia:
 
   #FIRESTORE DATABASE
@@ -46,11 +46,16 @@ dependencies:
   cloud_functions:
   firebase_dynamic_links:
 
+  #STREAM & VIDEO
+  agora_rtc_engine: ^3.3.1
+
   #PHONE UTILITIES
   url_launcher:
   share:
   permission_handler:
   app_settings:
+  shared_preferences:
+  wakelock:
 
   #IMAGES
   cached_network_image:
@@ -61,15 +66,16 @@ dependencies:
 
   #LOCATION
   location:
-  geoflutterfire:
   geocoder:
   flutter_google_places:
   flutter_google_places_api:
   google_maps_webservice:
+  maps_launcher: ^1.2.2+2
   #flutter_background_geolocation: ^1.3.2
 
   #DATE & TIME
   flutter_calendar_carousel:
+  add_2_calendar:
 
   #UI
   font_awesome_flutter:

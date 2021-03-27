@@ -16,7 +16,7 @@ class EventDataService {
   SnackbarService _snackbarService = locator<SnackbarService>();
   FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
 
-  int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
+  int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
 
   Future<bool> checkIfEventExists(String id) async {
     bool exists = false;
@@ -58,7 +58,7 @@ class EventDataService {
     List savedBy = [];
     DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
       _snackbarService.showSnackbar(
-        title: 'Post Error',
+        title: 'Event Error',
         message: e.message,
         duration: Duration(seconds: 5),
       );
@@ -132,6 +132,7 @@ class EventDataService {
   Future getEventByID(String id) async {
     WebblenEvent event;
     DocumentSnapshot snapshot = await eventsRef.doc(id).get().catchError((e) {
+      print(e.message);
       _snackbarService.showSnackbar(
         title: 'Event Error',
         message: e.message,
@@ -141,141 +142,148 @@ class EventDataService {
     });
     if (snapshot.exists) {
       event = WebblenEvent.fromMap(snapshot.data());
+    } else if (!snapshot.exists) {
+      _snackbarService.showSnackbar(
+        title: 'This Event No Longer Exists',
+        message: 'This event has been deleted',
+        duration: Duration(seconds: 5),
+      );
+      return null;
     }
     return event;
   }
 
   ///READ & QUERIES
-  // Future<List<DocumentSnapshot>> loadEvents({
-  //   @required String areaCode,
-  //   @required int resultsLimit,
-  //   @required String tagFilter,
-  //   @required String sortBy,
-  // }) async {
-  //   Query query;
-  //   List<DocumentSnapshot> docs = [];
-  //   if (areaCode.isEmpty) {
-  //     query = eventsRef
-  //         .where('endDateTimeInMilliseconds', isGreaterThan: currentDateTimeInMilliseconds)
-  //         .orderBy('endDateTimeInMilliseconds', descending: true)
-  //         .limit(resultsLimit);
-  //   } else {
-  //     query = eventsRef
-  //         .where('nearbyZipcodes', arrayContains: areaCode)
-  //         .where('endDateTimeInMilliseconds', isGreaterThan: currentDateTimeInMilliseconds)
-  //         .orderBy('endDateTimeInMilliseconds', descending: true)
-  //         .limit(resultsLimit);
-  //   }
-  //   QuerySnapshot snapshot = await query.get().catchError((e) {
-  //     if (!e.message.contains("insufficient permissions")) {
-  //       _snackbarService.showSnackbar(
-  //         title: 'Error',
-  //         message: e.message,
-  //         duration: Duration(seconds: 5),
-  //       );
-  //     }
-  //     return [];
-  //   });
-  //   if (snapshot.docs.isNotEmpty) {
-  //     docs = snapshot.docs;
-  //     if (tagFilter.isNotEmpty) {
-  //       docs.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
-  //     }
-  //     if (sortBy == "Latest") {
-  //       docs.sort((docA, docB) => docB.data()['endDateTimeInMilliseconds'].compareTo(docA.data()['endDateTimeInMilliseconds']));
-  //     } else {
-  //       docs.sort((docA, docB) => docB.data()['savedBy'].length.compareTo(docA.data()['savedBy'].length));
-  //     }
-  //   }
-  //   return docs;
-  // }
-  //
-  // Future<List<DocumentSnapshot>> loadAdditionalPosts(
-  //     {@required DocumentSnapshot lastDocSnap,
-  //     @required String areaCode,
-  //     @required int resultsLimit,
-  //     @required String tagFilter,
-  //     @required String sortBy}) async {
-  //   Query query;
-  //   List<DocumentSnapshot> docs = [];
-  //   if (areaCode.isEmpty) {
-  //     query = postsRef
-  //         .where('endDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1YearAgo)
-  //         .orderBy('postDateTimeInMilliseconds', descending: true)
-  //         .startAfterDocument(lastDocSnap)
-  //         .limit(resultsLimit);
-  //   } else {
-  //     query = postsRef
-  //         .where('nearbyZipcodes', arrayContains: areaCode)
-  //         .where('postDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds1YearAgo)
-  //         .orderBy('postDateTimeInMilliseconds', descending: true)
-  //         .startAfterDocument(lastDocSnap)
-  //         .limit(resultsLimit);
-  //   }
-  //   QuerySnapshot snapshot = await query.get().catchError((e) {
-  //     if (!e.message.contains("insufficient permissions")) {
-  //       _snackbarService.showSnackbar(
-  //         title: 'Error',
-  //         message: e.message,
-  //         duration: Duration(seconds: 5),
-  //       );
-  //     }
-  //     return [];
-  //   });
-  //   if (snapshot.docs.isNotEmpty) {
-  //     docs = snapshot.docs;
-  //     if (tagFilter.isNotEmpty) {
-  //       docs.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
-  //     }
-  //     if (sortBy == "Latest") {
-  //       docs.sort((docA, docB) => docB.data()['postDateTimeInMilliseconds'].compareTo(docA.data()['postDateTimeInMilliseconds']));
-  //     } else {
-  //       docs.sort((docA, docB) => docB.data()['commentCount'].compareTo(docA.data()['commentCount']));
-  //     }
-  //   }
-  //   return docs;
-  // }
-  //
-  // Future<List<DocumentSnapshot>> loadPostsByUserID({@required String id, @required int resultsLimit}) async {
-  //   List<DocumentSnapshot> docs = [];
-  //   Query query = postsRef.where('authorID', isEqualTo: id).orderBy('postDateTimeInMilliseconds', descending: true).limit(resultsLimit);
-  //   QuerySnapshot snapshot = await query.get().catchError((e) {
-  //     if (!e.message.contains("insufficient permissions")) {
-  //       _snackbarService.showSnackbar(
-  //         title: 'Error',
-  //         message: e.message,
-  //         duration: Duration(seconds: 5),
-  //       );
-  //     }
-  //     return [];
-  //   });
-  //   if (snapshot.docs.isNotEmpty) {
-  //     docs = snapshot.docs;
-  //   }
-  //   return docs;
-  // }
-  //
-  // Future<List<DocumentSnapshot>> loadAdditionalEventsByUserID({
-  //   @required String id,
-  //   @required DocumentSnapshot lastDocSnap,
-  //   @required int resultsLimit,
-  // }) async {
-  //   List<DocumentSnapshot> docs = [];
-  //   Query query =
-  //       postsRef.where('authorID', isEqualTo: id).orderBy('postDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
-  //   QuerySnapshot snapshot = await query.get().catchError((e) {
-  //     if (!e.message.contains("insufficient permissions")) {
-  //       _snackbarService.showSnackbar(
-  //         title: 'Error',
-  //         message: e.message,
-  //         duration: Duration(seconds: 5),
-  //       );
-  //     }
-  //     return [];
-  //   });
-  //   if (snapshot.docs.isNotEmpty) {
-  //     docs = snapshot.docs;
-  //   }
-  //   return docs;
-  // }
+  Future<List<DocumentSnapshot>> loadEvents({
+    @required String areaCode,
+    @required int resultsLimit,
+    @required String tagFilter,
+    @required String sortBy,
+  }) async {
+    Query query;
+    List<DocumentSnapshot> docs = [];
+    if (areaCode.isEmpty) {
+      query = eventsRef
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .orderBy('startDateTimeInMilliseconds', descending: false)
+          .limit(resultsLimit);
+    } else {
+      query = eventsRef
+          .where('nearbyZipcodes', arrayContains: areaCode)
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .orderBy('startDateTimeInMilliseconds', descending: false)
+          .limit(resultsLimit);
+    }
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+      if (tagFilter.isNotEmpty) {
+        docs.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
+      }
+      if (sortBy == "Latest") {
+        docs.sort((docA, docB) => docB.data()['startDateTimeInMilliseconds'].compareTo(docA.data()['startDateTimeInMilliseconds']));
+      } else {
+        docs.sort((docA, docB) => docB.data()['savedBy'].length.compareTo(docA.data()['savedBy'].length));
+      }
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalEvents(
+      {@required DocumentSnapshot lastDocSnap,
+      @required String areaCode,
+      @required int resultsLimit,
+      @required String tagFilter,
+      @required String sortBy}) async {
+    Query query;
+    List<DocumentSnapshot> docs = [];
+    if (areaCode.isEmpty) {
+      query = eventsRef
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .orderBy('startDateTimeInMilliseconds', descending: true)
+          .startAfterDocument(lastDocSnap)
+          .limit(resultsLimit);
+    } else {
+      query = eventsRef
+          .where('nearbyZipcodes', arrayContains: areaCode)
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .orderBy('startDateTimeInMilliseconds', descending: true)
+          .startAfterDocument(lastDocSnap)
+          .limit(resultsLimit);
+    }
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+      if (tagFilter.isNotEmpty) {
+        docs.removeWhere((doc) => !doc.data()['tags'].contains(tagFilter));
+      }
+      if (sortBy == "Latest") {
+        docs.sort((docA, docB) => docB.data()['startDateTimeInMilliseconds'].compareTo(docA.data()['startDateTimeInMilliseconds']));
+      } else {
+        docs.sort((docA, docB) => docB.data()['savedBy'].length.compareTo(docA.data()['savedBy'].length));
+      }
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadEventsByUserID({@required String id, @required int resultsLimit}) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = eventsRef.where('authorID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalEventsByUserID({
+    @required String id,
+    @required DocumentSnapshot lastDocSnap,
+    @required int resultsLimit,
+  }) async {
+    List<DocumentSnapshot> docs = [];
+    Query query =
+        eventsRef.where('authorID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
 }

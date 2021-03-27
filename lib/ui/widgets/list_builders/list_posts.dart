@@ -36,7 +36,13 @@ class ListPosts extends StatelessWidget {
         ),
         itemCount: postResults.length,
         itemBuilder: (context, index) {
-          WebblenPost post = WebblenPost.fromMap(postResults[index].data());
+          WebblenPost post;
+          if (postResults[index] is WebblenPost) {
+            post = postResults[index];
+          } else {
+            post = WebblenPost.fromMap(postResults[index].data());
+          }
+
           return post.imageURL == null
               ? PostTextBlockView(
                   currentUID: currentUID,

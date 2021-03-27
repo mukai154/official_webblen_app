@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
@@ -95,6 +96,7 @@ class PostImgBlockView extends StatelessWidget {
       height: screenWidth(context),
       width: screenWidth(context),
       fadeInCurve: Curves.easeIn,
+      fit: BoxFit.cover,
       filterQuality: FilterQuality.high,
     );
   }
@@ -216,6 +218,10 @@ class PostImgBlockView extends StatelessWidget {
       onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post.authorID, postID: post.id),
       builder: (context, model, child) => GestureDetector(
         onDoubleTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
+        onLongPress: () {
+          HapticFeedback.lightImpact();
+          showPostOptions(post);
+        },
         onTap: () => model.navigateToPostView(post.id),
         child: Container(
           child: Column(

@@ -5,6 +5,7 @@ List<String> timeListFromSelectedTime(String selectedTime) {
 }
 
 String getCurrentTimezone() {
+  print(DateTime.now().timeZoneName);
   double offset = (DateTime.now().timeZoneOffset.inMinutes / 60).toDouble();
   String timezone = timezones.firstWhere((timezone) => timezone['offset'] == offset)['abbr'];
   return timezone;
@@ -389,14 +390,6 @@ final List<Map<String, dynamic>> timezones = [
     "isdst": true,
     "text": "(UTC+02:00) Beirut",
     "utc": ["Asia/Beirut"]
-  },
-  {
-    "value": "Egypt Standard Time",
-    "abbr": "EST",
-    "offset": 2,
-    "isdst": false,
-    "text": "(UTC+02:00) Cairo",
-    "utc": ["Africa/Cairo"]
   },
   {
     "value": "Syria Standard Time",

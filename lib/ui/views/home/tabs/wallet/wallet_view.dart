@@ -2,16 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view_model.dart';
 import 'package:webblen/ui/widgets/wallet/usd_balance_block.dart';
 import 'package:webblen/ui/widgets/wallet/webblen_balance_block.dart';
 
 class WalletView extends StatelessWidget {
-  final WebblenUser user;
-  WalletView({this.user});
-
   Widget head(WalletViewModel model) {
     return Container(
       height: 50,
@@ -80,7 +76,7 @@ class WalletView extends StatelessWidget {
     return ViewModelBuilder<WalletViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
-      onModelReady: (model) => model.initialize(user),
+      onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => WalletViewModel(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,
@@ -116,7 +112,7 @@ class WalletView extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: WebblenBalanceBlock(
-                    balance: user.WBLN,
+                    balance: model.webblenBaseViewModel.user.WBLN,
                     onPressed: () {},
                     // balance: webblenBalance,
                     // onPressed: () => showWebblenBottomSheet(webblenBalance),
@@ -158,7 +154,7 @@ class WalletView extends StatelessWidget {
                   //   context: context,
                   //   currentUser: currentUser,
                   // ).transitionToRedeemedRewardsPage(),
-                  () => model.navigateToRedeemedRewardsView(user),
+                  () => model.navigateToRedeemedRewardsView(),
                 ),
                 SizedBox(height: 8.0),
                 Container(

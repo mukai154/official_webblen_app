@@ -1,16 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_stream.dart';
+import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/streams/stream_block/stream_block_view.dart';
+import 'package:webblen/ui/widgets/live_streams/live_stream_block/live_stream_block_view.dart';
 
-class ListStreams extends StatelessWidget {
+class ListLiveStreams extends StatelessWidget {
   final List dataResults;
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
   final ScrollController scrollController;
-  ListStreams({@required this.refreshData, @required this.dataResults, @required this.pageStorageKey, @required this.scrollController});
+  final Function(WebblenLiveStream) showStreamOptions;
+  ListLiveStreams(
+      {@required this.refreshData,
+      @required this.dataResults,
+      @required this.pageStorageKey,
+      @required this.scrollController,
+      @required this.showStreamOptions});
 
   Widget listData() {
     return RefreshIndicator(
@@ -28,22 +34,18 @@ class ListStreams extends StatelessWidget {
         ),
         itemCount: dataResults.length,
         itemBuilder: (context, index) {
-          WebblenStream stream;
-          bool displayBottomBorder = true;
+          WebblenLiveStream stream;
 
           ///GET CAUSE OBJECT
           if (dataResults[index] is DocumentSnapshot) {
-            stream = WebblenStream.fromMap(dataResults[index].data());
+            stream = WebblenLiveStream.fromMap(dataResults[index].data());
           } else {
             stream = dataResults[index];
           }
 
-          ///DISPLAY BOTTOM BORDER
-          if (dataResults.last == dataResults[index]) {
-            displayBottomBorder = false;
-          }
-          return StreamBlockView(
+          return LiveStreamBlockView(
             stream: stream,
+            showStreamOptions: (stream) => showStreamOptions(stream),
           );
         },
       ),

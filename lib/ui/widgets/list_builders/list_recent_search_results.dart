@@ -12,24 +12,27 @@ class ListRecentSearchResults extends StatelessWidget {
   ListRecentSearchResults({@required this.onSearchTermSelected, @required this.searchTerms, @required this.isScrollable, @required this.scrollController});
 
   Widget listResults() {
-    return ListView.builder(
-      controller: scrollController,
-      physics: isScrollable ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
-      addAutomaticKeepAlives: true,
-      shrinkWrap: true,
-      padding: EdgeInsets.only(
-        top: 4.0,
-        bottom: 4.0,
+    return Material(
+      type: MaterialType.transparency,
+      child: ListView.builder(
+        controller: scrollController,
+        physics: isScrollable ? AlwaysScrollableScrollPhysics() : NeverScrollableScrollPhysics(),
+        addAutomaticKeepAlives: true,
+        shrinkWrap: true,
+        padding: EdgeInsets.only(
+          top: 4.0,
+          bottom: 4.0,
+        ),
+        itemCount: searchTerms.length,
+        itemBuilder: (context, index) {
+          return RecentSearchTermView(
+            onSearchTermSelected: () => onSearchTermSelected(searchTerms[index]),
+            searchTerm: searchTerms[index],
+            displayBottomBorder: index == searchTerms.length - 1 ? false : true,
+            displayIcon: true,
+          );
+        },
       ),
-      itemCount: searchTerms.length,
-      itemBuilder: (context, index) {
-        return RecentSearchTermView(
-          onSearchTermSelected: () => onSearchTermSelected(searchTerms[index]),
-          searchTerm: searchTerms[index],
-          displayBottomBorder: index == searchTerms.length - 1 ? false : true,
-          displayIcon: true,
-        );
-      },
     );
   }
 

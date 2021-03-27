@@ -185,7 +185,7 @@ class CreateEventView extends StatelessWidget {
                 ///EVENT BODY
                 textFieldHeader(
                   header: "Description",
-                  subHeader: "Describe what this event is all about",
+                  subHeader: "Provide details about the event",
                   required: true,
                 ),
                 verticalSpaceSmall,
@@ -252,7 +252,7 @@ class CreateEventView extends StatelessWidget {
                 verticalSpaceSmall,
                 EventVenueSizeSlider(
                   initialValue: model.event.venueSize,
-                  onChanged: (val) => model.setEventVenueName(val),
+                  onChanged: (val) => model.setEventVenueSize(val),
                 ),
 
                 formSectionDivider(sectionName: "DATE & TIME"),
@@ -457,7 +457,7 @@ class CreateEventView extends StatelessWidget {
                 ///EVENT SPONSORSHIP
                 CustomDetailedCheckbox(
                   header: "Available for Sponsors",
-                  subHeader: "Webblen will help acquire sponsors for this event.\nSponsors are not "
+                  subHeader: "Webblen will help acquire sponsors for this event. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
                       "guaranteed.",
                   initialValue: model.event.openToSponsors,
                   onChanged: (val) => model.setSponsorshipStatus(val),
@@ -622,7 +622,7 @@ class CreateEventView extends StatelessWidget {
             height: screenHeight(context),
             width: screenWidth(context),
             color: appBackgroundColor(),
-            child: form(context, model),
+            child: model.initialized && model.event != null ? form(context, model) : Container(),
           ),
         ),
       ),

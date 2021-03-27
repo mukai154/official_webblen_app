@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
@@ -16,7 +17,7 @@ class CommentBlockView extends StatelessWidget {
   final WebblenPostComment comment;
   CommentBlockView({@required this.comment, @required this.replyToComment, @required this.deleteComment});
 
-  List<TextSpan> convertToRichText(String text) {
+  List<TextSpan> convertToRichText(String text, CommentBlockViewModel model) {
     List<String> words = text.split(" ");
     List<TextSpan> richText = [
       TextSpan(
@@ -30,6 +31,7 @@ class CommentBlockView extends StatelessWidget {
         textSpan = TextSpan(
           text: "$word ",
           style: TextStyle(color: appTextButtonColor(), fontSize: 14.0, fontWeight: FontWeight.w400),
+          recognizer: TapGestureRecognizer()..onTap = () => model.navigateToMentionedUser(word.replaceAll("@", "")),
         );
       } else if (word.startsWith("#")) {
         textSpan = TextSpan(
@@ -62,7 +64,7 @@ class CommentBlockView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     GestureDetector(
-                      onTap: () {}, //viewUser,
+                      onTap: () => model.navigateToUserPage(comment.senderUID), //viewUser,
                       child: Row(
                         children: <Widget>[
                           UserProfilePic(
@@ -84,7 +86,7 @@ class CommentBlockView extends StatelessWidget {
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(fontSize: 14.0, color: appFontColor()),
-                              children: convertToRichText(comment.message),
+                              children: convertToRichText(comment.message, model),
                             ),
                           ),
                         ),

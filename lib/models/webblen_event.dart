@@ -25,11 +25,10 @@ class WebblenEvent {
   String fbUsername;
   String twitterUsername;
   String instaUsername;
-  double checkInRadius;
   int estimatedTurnout;
   int actualTurnout;
-  List attendees;
-  double eventPayout;
+  Map<dynamic, dynamic> attendees;
+  double payout;
   String recurrence;
   int startDateTimeInMilliseconds;
   int endDateTimeInMilliseconds;
@@ -44,6 +43,7 @@ class WebblenEvent {
   List savedBy;
   bool paidOut;
   bool openToSponsors;
+  List suggestedUIDs;
 
   WebblenEvent({
     this.id,
@@ -69,11 +69,10 @@ class WebblenEvent {
     this.fbUsername,
     this.twitterUsername,
     this.instaUsername,
-    this.checkInRadius,
     this.estimatedTurnout,
     this.actualTurnout,
     this.attendees,
-    this.eventPayout,
+    this.payout,
     this.recurrence,
     this.startDateTimeInMilliseconds,
     this.endDateTimeInMilliseconds,
@@ -88,6 +87,7 @@ class WebblenEvent {
     this.savedBy,
     this.paidOut,
     this.openToSponsors,
+    this.suggestedUIDs,
   });
 
   WebblenEvent.fromMap(Map<String, dynamic> data)
@@ -115,11 +115,10 @@ class WebblenEvent {
           fbUsername: data['fbUsername'],
           twitterUsername: data['twitterUsername'],
           instaUsername: data['instaUsername'],
-          checkInRadius: data['checkInRadius'] * 1.0001,
           estimatedTurnout: data['estimatedTurnout'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
-          eventPayout: data['eventPayout'] * 1.001,
+          payout: data['payout'] == null ? null : data['payout'] * 1.001,
           recurrence: data['recurrence'],
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
           endDateTimeInMilliseconds: data['endDateTimeInMilliseconds'],
@@ -134,6 +133,7 @@ class WebblenEvent {
           savedBy: data['savedBy'],
           paidOut: data['paidOut'],
           openToSponsors: data['openToSponsors'],
+          suggestedUIDs: data['suggestedUIDs'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -160,11 +160,10 @@ class WebblenEvent {
         'fbUsername': this.fbUsername,
         'twitterUsername': this.twitterUsername,
         'instaUsername': this.instaUsername,
-        'checkInRadius': this.checkInRadius,
         'estimatedTurnout': this.estimatedTurnout,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
-        'eventPayout': this.eventPayout,
+        'eventPayout': this.payout,
         'recurrence': this.recurrence,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
         'endDateTimeInMilliseconds': this.endDateTimeInMilliseconds,
@@ -179,6 +178,7 @@ class WebblenEvent {
         'savedBy': this.savedBy,
         'paidOut': this.paidOut,
         'openToSponsors': this.openToSponsors,
+        'suggestedUIDs': this.suggestedUIDs,
       };
 
   WebblenEvent generateNewWebblenEvent({@required String authorID}) {
@@ -194,7 +194,7 @@ class WebblenEvent {
       openToSponsors: false,
       tags: [],
       savedBy: [],
-      attendees: [],
+      attendees: {},
       clicks: 0,
       estimatedTurnout: 0,
     );

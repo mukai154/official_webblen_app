@@ -8,6 +8,7 @@ import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 class AuthViewModel extends BaseViewModel {
   AuthService _authService = locator<AuthService>();
@@ -15,7 +16,7 @@ class AuthViewModel extends BaseViewModel {
   NavigationService _navigationService = locator<NavigationService>();
   ThemeService themeService = locator<ThemeService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
-
+  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
   bool signInViaPhone = true;
   String phoneNo;
   String phoneVerificationID;
@@ -166,6 +167,9 @@ class AuthViewModel extends BaseViewModel {
 
   ///NAVIGATION
   navigateToHomePage() {
-    _navigationService.navigateTo(Routes.HomeNavViewRoute);
+    if (_webblenBaseViewModel.initialised) {
+      _webblenBaseViewModel.initialize();
+    }
+    _navigationService.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
   }
 }

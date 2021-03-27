@@ -58,7 +58,7 @@ class _EventVenueSizeSliderState extends State<EventVenueSizeSlider> {
               setState(() {
                 sliderVal = val;
               });
-              widget.onChanged(sizeName);
+              widget.onChanged(sizeName.toLowerCase());
             },
           ),
           CustomText(

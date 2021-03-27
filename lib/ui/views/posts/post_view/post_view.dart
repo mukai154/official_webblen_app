@@ -50,6 +50,7 @@ class PostView extends StatelessWidget {
       height: screenWidth(context),
       width: screenWidth(context),
       fadeInCurve: Curves.easeIn,
+      fit: BoxFit.cover,
       filterQuality: FilterQuality.high,
     );
   }
@@ -186,7 +187,7 @@ class PostView extends StatelessWidget {
           title: "Post",
           showBackButton: true,
           actionWidget: IconButton(
-            onPressed: () => model.showPostOptions(),
+            onPressed: model.post == null ? null : () => model.showContentOptions(),
             icon: Icon(
               FontAwesomeIcons.ellipsisH,
               size: 16,
@@ -201,39 +202,41 @@ class PostView extends StatelessWidget {
             color: appBackgroundColor(),
             child: model.isBusy
                 ? Container()
-                : Stack(
-                    children: [
-                      LiquidPullToRefresh(
-                        backgroundColor: appBackgroundColor(),
-                        onRefresh: () async {},
-                        child: ListView(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          controller: model.postScrollController,
-                          shrinkWrap: true,
-                          children: [
-                            postBody(context, model),
-                            postComments(context, model),
-                            SizedBox(height: 50),
-                          ],
-                        ),
+                : model.post == null
+                    ? Container()
+                    : Stack(
+                        children: [
+                          LiquidPullToRefresh(
+                            backgroundColor: appBackgroundColor(),
+                            onRefresh: () async {},
+                            child: ListView(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              controller: model.postScrollController,
+                              shrinkWrap: true,
+                              children: [
+                                postBody(context, model),
+                                postComments(context, model),
+                                SizedBox(height: 80),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.bottomCenter,
+                            child: CommentTextFieldView(
+                              onSubmitted: model.isReplying
+                                  ? (val) => model.replyToComment(
+                                        context: context,
+                                        commentData: val,
+                                      )
+                                  : (val) => model.submitComment(context: context, commentData: val),
+                              focusNode: focusNode,
+                              commentTextController: model.commentTextController,
+                              isReplying: model.isReplying,
+                              replyReceiverUsername: model.isReplying ? model.commentToReplyTo.username : null,
+                            ),
+                          ),
+                        ],
                       ),
-                      Container(
-                        alignment: Alignment.bottomCenter,
-                        child: CommentTextFieldView(
-                          onSubmitted: model.isReplying
-                              ? (val) => model.replyToComment(
-                                    context: context,
-                                    commentVal: val,
-                                  )
-                              : (val) => model.submitComment(context: context, commentVal: val),
-                          focusNode: focusNode,
-                          commentTextController: model.commentTextController,
-                          isReplying: model.isReplying,
-                          replyReceiverUsername: model.isReplying ? model.commentToReplyTo.username : null,
-                        ),
-                      ),
-                    ],
-                  ),
           ),
         ),
       ),

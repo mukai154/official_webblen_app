@@ -74,6 +74,28 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
               ],
             ),
             verticalSpaceSmall,
+            request.customData['promo'] != null
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CustomText(
+                        text: "Bonus:",
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: appFontColor(),
+                        textAlign: TextAlign.left,
+                      ),
+                      CustomText(
+                        text: "+${request.customData['promo'].toStringAsFixed(2)} WBLN",
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: model.webblenBalance == null ? Colors.transparent : appConfirmationColor(),
+                        textAlign: TextAlign.right,
+                      ),
+                    ],
+                  )
+                : Container(),
+            request.customData['promo'] != null ? verticalSpaceSmall : Container(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -85,7 +107,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
                 CustomText(
-                  text: "-${request.customData.toStringAsFixed(2)} WBLN",
+                  text: "-${request.customData['fee'].toStringAsFixed(2)} WBLN",
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: model.webblenBalance == null ? Colors.transparent : appDestructiveColor(),
@@ -116,7 +138,9 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                       ),
                       horizontalSpaceSmall,
                       CustomText(
-                        text: "${(model.webblenBalance - request.customData).toStringAsFixed(2)} WBLN",
+                        text: request.customData['promo'] == null
+                            ? "${(model.webblenBalance - request.customData['fee']).toStringAsFixed(2)} WBLN"
+                            : "${(model.webblenBalance + request.customData['promo'] - request.customData['fee']).toStringAsFixed(2)} WBLN",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: appFontColor(),
@@ -128,7 +152,8 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
             CustomButton(
               onPressed: model.webblenBalance == null
                   ? null
-                  : model.webblenBalance < request.customData
+                  : request.customData['promo'] != null && (model.webblenBalance + request.customData['promo']) < request.customData['fee'] ||
+                          request.customData['promo'] == null && model.webblenBalance < request.customData['fee']
                       ? () => completer(SheetResponse(responseData: "insufficient funds"))
                       : () => completer(SheetResponse(responseData: "confirmed")),
               text: model.webblenBalance == null ? "Calculating Total..." : request.mainButtonTitle,

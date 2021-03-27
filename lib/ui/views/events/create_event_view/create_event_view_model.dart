@@ -4,6 +4,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text/flutter_masked_text.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
@@ -46,6 +47,7 @@ class CreateEventViewModel extends BaseViewModel {
   TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
   StripeConnectAccountService _stripeConnectAccountService = locator<StripeConnectAccountService>();
   WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  SharedPreferences _sharedPreferences;
 
   ///EVENT DETAILS CONTROLLERS
   TextEditingController tagTextController = TextEditingController();
@@ -89,6 +91,7 @@ class CreateEventViewModel extends BaseViewModel {
   );
 
   ///HELPERS
+  bool initialized = false;
   bool textFieldEnabled = true;
 
   ///USER DATA
@@ -137,15 +140,15 @@ class CreateEventViewModel extends BaseViewModel {
   String discountCodeQuantity;
   String discountCodePercentage;
 
-  ///EVENT PRIVACY
-  List<String> privacyOptions = ['public', 'private'];
-
   ///WEBBLEN CURRENCY
   double newEventTaxRate;
+  double promo;
 
   ///INITIALIZE
   initialize({BuildContext context}) async {
     setBusy(true);
+
+    _sharedPreferences = await SharedPreferences.getInstance();
 
     //generate new event
     event = WebblenEvent().generateNewWebblenEvent(authorID: _webblenBaseViewModel.user.id);
@@ -159,9 +162,16 @@ class CreateEventViewModel extends BaseViewModel {
     event.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
     notifyListeners();
 
-    //check if editing existing event
+    //set previously used social accounts
+    fbUsernameTextController.text = _sharedPreferences.getString('fbUsername');
+    instaUsernameTextController.text = _sharedPreferences.getString('instaUsername');
+    twitterUsernameTextController.text = _sharedPreferences.getString('twitterUsername');
+    websiteTextController.text = _sharedPreferences.getString('website');
+
+    //check for promos & if editing existing event
     Map<String, dynamic> args = RouteData.of(context).arguments;
     if (args != null) {
+      promo = args['promo'] ?? null;
       String eventID = args['id'] ?? "";
       if (eventID.isNotEmpty) {
         event = await _eventDataService.getEventByID(eventID);
@@ -175,8 +185,9 @@ class CreateEventViewModel extends BaseViewModel {
           instaUsernameTextController.text = event.instaUsername;
           twitterUsernameTextController.text = event.twitterUsername;
           websiteTextController.text = event.website;
+          selectedStartDate = dateFormatter.parse(event.startDate);
+          selectedEndDate = dateFormatter.parse(event.endDate);
           isEditing = true;
-
           //check if editing with ticket distro
           if (event.hasTickets) {
             ticketDistro = await _ticketDistroDataService.getTicketDistroByID(event.id);
@@ -190,6 +201,10 @@ class CreateEventViewModel extends BaseViewModel {
     if (newEventTaxRate == null) {
       newEventTaxRate = 0.05;
     }
+
+    //complete initialization
+    initialized = true;
+
     notifyListeners();
     setBusy(false);
   }
@@ -231,7 +246,7 @@ class CreateEventViewModel extends BaseViewModel {
       if (tags.length == 3) {
         _snackbarService.showSnackbar(
           title: 'Tag Limit Reached',
-          message: 'You can only add up to 3 tags for your post',
+          message: 'You can only add up to 3 tags for your event',
           duration: Duration(seconds: 5),
         );
       } else {
@@ -727,7 +742,7 @@ class CreateEventViewModel extends BaseViewModel {
     return isValid;
   }
 
-  Future<bool> submitNewEvent() async {
+  Future<bool> submitEvent() async {
     bool success = true;
 
     //upload img if exists
@@ -744,8 +759,17 @@ class CreateEventViewModel extends BaseViewModel {
       event.imageURL = imageURL;
     }
 
-    //upload post data
-    var uploadResult = await _eventDataService.createEvent(event: event);
+    //set suggested uids for event
+    event.suggestedUIDs = event.suggestedUIDs == null ? _webblenBaseViewModel.user.followers : event.suggestedUIDs;
+
+    //upload event data
+    var uploadResult;
+    if (isEditing) {
+      uploadResult = await _eventDataService.updateEvent(event: event);
+    } else {
+      uploadResult = await _eventDataService.createEvent(event: event);
+    }
+
     if (uploadResult is String) {
       _snackbarService.showSnackbar(
         title: 'Event Upload Error',
@@ -755,82 +779,22 @@ class CreateEventViewModel extends BaseViewModel {
       return false;
     }
 
-    return success;
-  }
-
-  Future<bool> submitEditedEvent() async {
-    bool success = true;
-
-    // String message = postTextController.text.trim();
-    //
-    // //update post
-    // post = WebblenPost(
-    //   id: post.id,
-    //   parentID: post.parentID,
-    //   authorID: user.id,
-    //   imageURL: img == null ? post.imageURL : null,
-    //   body: message,
-    //   nearbyZipcodes: post.nearbyZipcodes,
-    //   city: post.city,
-    //   province: post.province,
-    //   followers: user.followers,
-    //   tags: post.tags,
-    //   webAppLink: post.webAppLink,
-    //   sharedComs: post.sharedComs,
-    //   savedBy: post.savedBy,
-    //   postType: PostType.eventPost,
-    //   postDateTimeInMilliseconds: post.postDateTimeInMilliseconds,
-    //   paidOut: post.paidOut,
-    //   participantIDs: post.participantIDs,
-    //   commentCount: post.commentCount,
-    //   reported: post.reported,
-    // );
-    //
-    // //upload img if exists
-    // if (img != null) {
-    //   String imageURL = await _firestoreStorageService.uploadImage(img: img, storageBucket: 'images', folderName: 'posts', fileName: post.id);
-    //   if (imageURL == null) {
-    //     _snackbarService.showSnackbar(
-    //       title: 'Post Upload Error',
-    //       message: 'There was an issue uploading your post. Please try again.',
-    //       duration: Duration(seconds: 3),
-    //     );
-    //     return false;
-    //   }
-    //   post.imageURL = imageURL;
-    // }
-    //
-    // //upload post data
-    // var uploadResult = await _postDataService.updatePost(post: post);
-    // if (uploadResult is String) {
-    //   _snackbarService.showSnackbar(
-    //     title: 'Post Upload Error',
-    //     message: 'There was an issue uploading your post. Please try again.',
-    //     duration: Duration(seconds: 3),
-    //   );
-    //   return false;
-    // }
+    //cache username data
+    await _sharedPreferences.setString('fbUsername', event.fbUsername);
+    await _sharedPreferences.setString('instaUsername', event.instaUsername);
+    await _sharedPreferences.setString('twitterUsername', event.twitterUsername);
+    await _sharedPreferences.setString('website', event.website);
 
     return success;
   }
 
   submitForm() async {
     setBusy(true);
-    //if editing update post, otherwise create new post
-    if (isEditing) {
-      //update post
-      bool submitted = await submitEditedEvent();
-      if (submitted) {
-        //show bottom sheet
-        displayUploadSuccessBottomSheet();
-      }
-    } else {
-      //submit new post
-      bool submitted = await submitNewEvent();
-      if (submitted) {
-        //show bottom sheet
-        displayUploadSuccessBottomSheet();
-      }
+    //submit new post
+    bool submitted = await submitEvent();
+    if (submitted) {
+      //show bottom sheet
+      displayUploadSuccessBottomSheet();
     }
     setBusy(false);
   }
@@ -850,14 +814,14 @@ class CreateEventViewModel extends BaseViewModel {
       return;
     }
 
-    //display post confirmation
+    //display event confirmation
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       barrierDismissible: true,
       title: "Schedule Event?",
       description: event.privacy == "Public" ? "Schedule this event for everyone to see" : "Your event is ready to be scheduled and shared",
       mainButtonTitle: "Schedule Event",
       secondaryButtonTitle: "Cancel",
-      customData: newEventTaxRate,
+      customData: {'fee': newEventTaxRate, 'promo': promo},
       variant: BottomSheetType.newContentConfirmation,
     );
     if (sheetResponse != null) {
@@ -886,14 +850,22 @@ class CreateEventViewModel extends BaseViewModel {
   }
 
   displayUploadSuccessBottomSheet() async {
+    //deposit and/or withdraw webblen & promo
+    if (promo != null) {
+      _userDataService.depositWebblen(uid: _webblenBaseViewModel.uid, amount: promo);
+    }
+    _userDataService.withdrawWebblen(uid: _webblenBaseViewModel.uid, amount: newEventTaxRate);
+
+    //display success
     var sheetResponse = await _bottomSheetService.showCustomSheet(
         variant: BottomSheetType.addContentSuccessful,
         takesInput: false,
         customData: event,
         barrierDismissible: false,
-        title: "Your Event has been Scheduled! 🎉");
+        title: isEditing ? "Your Event has been Updated" : "Your Event has been Scheduled! 🎉");
+
     if (sheetResponse == null || sheetResponse.responseData == "done") {
-      _navigationService.pushNamedAndRemoveUntil(Routes.HomeNavViewRoute);
+      _navigationService.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
     }
   }
 
@@ -901,7 +873,7 @@ class CreateEventViewModel extends BaseViewModel {
   navigateBack() async {
     DialogResponse response = await _dialogService.showDialog(
       title: "Cancel Editing Event?",
-      description: "The details for this event will not be saved",
+      description: isEditing ? "Changes to this event will not be saved" : "The details for this event will not be saved",
       cancelTitle: "Cancel",
       cancelTitleColor: appDestructiveColor(),
       buttonTitle: "Continue Editing",
@@ -916,7 +888,7 @@ class CreateEventViewModel extends BaseViewModel {
   navigateBackToWalletPage() async {
     DialogResponse response = await _dialogService.showDialog(
       title: "Create an Earnings Account?",
-      description: "The details for this event will not be saved",
+      description: isEditing ? "Changes to this event will not be saved" : "The details for this event will not be saved",
       cancelTitle: "Continue Editing",
       cancelTitleColor: appTextButtonColor(),
       buttonTitle: "Create Earnings Account",

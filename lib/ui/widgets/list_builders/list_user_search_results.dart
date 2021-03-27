@@ -5,12 +5,18 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/search/search_result_view.dart';
 
 class ListUsersSearchResults extends StatelessWidget {
-  final Function(String) onSearchTermSelected;
+  final Function(Map<String, dynamic>) onSearchTermSelected;
+  final List usersFollowing;
   final List<SearchResult> results;
   final ScrollController scrollController;
   final bool isScrollable;
 
-  ListUsersSearchResults({@required this.onSearchTermSelected, @required this.results, @required this.isScrollable, @required this.scrollController});
+  ListUsersSearchResults(
+      {@required this.onSearchTermSelected,
+      @required this.results,
+      @required this.usersFollowing,
+      @required this.isScrollable,
+      @required this.scrollController});
 
   Widget listResults() {
     return ListView.builder(
@@ -25,9 +31,12 @@ class ListUsersSearchResults extends StatelessWidget {
       itemCount: results.length,
       itemBuilder: (context, index) {
         return UserSearchResultView(
-          onTap: () => onSearchTermSelected(results[index].id),
+          onTap: () => onSearchTermSelected({
+            'id': results[index].id,
+            'username': results[index].name,
+          }),
           searchResult: results[index],
-          isFollowing: false,
+          isFollowing: usersFollowing.contains(results[index].id),
           displayBottomBorder: index == results.length - 1 ? false : true,
         );
       },

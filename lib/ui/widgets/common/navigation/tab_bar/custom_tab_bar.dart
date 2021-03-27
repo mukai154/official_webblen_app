@@ -31,7 +31,23 @@ class WebblenHomePageTabBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  "News",
+                  "For You",
+                  style: TextStyle(fontWeight: fontWeight),
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: Container(
+              height: 30,
+              width: 75,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Posts",
                   style: TextStyle(fontWeight: fontWeight),
                 ),
               ),
@@ -69,31 +85,15 @@ class WebblenHomePageTabBar extends StatelessWidget {
               ),
             ),
           ),
-          Tab(
-            child: Container(
-              height: 30,
-              width: 75,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(60),
-              ),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Following",
-                  style: TextStyle(fontWeight: fontWeight),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 }
 
-class WebblenExplorePageTabBar extends StatelessWidget {
+class WebblenAllSearchResultsTabBar extends StatelessWidget {
   final TabController tabController;
-  WebblenExplorePageTabBar({this.tabController});
+  WebblenAllSearchResultsTabBar({this.tabController});
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +117,23 @@ class WebblenExplorePageTabBar extends StatelessWidget {
           Tab(
             child: Container(
               height: 30,
-              width: 100,
+              width: 90,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  "Posts",
+                  style: TextStyle(fontWeight: fontWeight),
+                ),
+              ),
+            ),
+          ),
+          Tab(
+            child: Container(
+              height: 30,
+              width: 90,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(60),
               ),
@@ -133,7 +149,7 @@ class WebblenExplorePageTabBar extends StatelessWidget {
           Tab(
             child: Container(
               height: 30,
-              width: 100,
+              width: 90,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(60),
               ),

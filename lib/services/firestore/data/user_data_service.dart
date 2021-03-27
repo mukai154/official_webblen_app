@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
@@ -120,6 +121,20 @@ class UserDataService {
     return true;
   }
 
+  Future<bool> updateLastSeenZipcode({String id, String zip}) async {
+    await userRef.doc(id).update({
+      "lastSeenZipcode": zip,
+    }).catchError((e) {
+      _snackbarService.showSnackbar(
+        title: 'Error',
+        message: 'There was an issue updating your profile. Please try again.',
+        duration: Duration(seconds: 3),
+      );
+      return false;
+    });
+    return true;
+  }
+
   Future<bool> followUser(String currentUID, String targetUserID) async {
     DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
     DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
@@ -192,5 +207,118 @@ class UserDataService {
       }
     });
     return true;
+  }
+
+  Future<bool> depositWebblen({String uid, double amount}) async {
+    //String error;
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    WebblenUser user = WebblenUser.fromMap(snapshot.data());
+    double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN;
+    double newBalance = amount + initialBalance;
+    await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
+      print(e.message);
+      //error = e.toString();
+    });
+    return true;
+  }
+
+  Future<bool> withdrawWebblen({String uid, double amount}) async {
+    //String error;
+
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    WebblenUser user = WebblenUser.fromMap(snapshot.data());
+    double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN;
+    double newBalance = initialBalance - amount;
+
+    await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
+      print(e.message);
+      //error = e.toString();
+    });
+    return true;
+  }
+
+  ///QUERIES
+  Future<List<DocumentSnapshot>> loadUserFollowers({@required String id, @required int resultsLimit}) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = userRef.where('following', arrayContains: id).orderBy('username', descending: false).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalUserFollowers({
+    @required String id,
+    @required DocumentSnapshot lastDocSnap,
+    @required int resultsLimit,
+  }) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = userRef.where('following', isEqualTo: id).orderBy('username', descending: false).startAfterDocument(lastDocSnap).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadUserFollowing({@required String id, @required int resultsLimit}) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = userRef.where('followers', arrayContains: id).orderBy('username', descending: false).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalUserFollowing({
+    @required String id,
+    @required DocumentSnapshot lastDocSnap,
+    @required int resultsLimit,
+  }) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = userRef.where('followers', isEqualTo: id).orderBy('username', descending: false).startAfterDocument(lastDocSnap).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        _snackbarService.showSnackbar(
+          title: 'Error',
+          message: e.message,
+          duration: Duration(seconds: 5),
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
   }
 }

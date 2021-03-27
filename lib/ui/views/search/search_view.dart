@@ -6,6 +6,7 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/search/search_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
+import 'package:webblen/ui/widgets/common/zero_state_view.dart';
 import 'package:webblen/ui/widgets/list_builders/list_recent_search_results.dart';
 import 'package:webblen/ui/widgets/list_builders/list_streams_search_results.dart';
 import 'package:webblen/ui/widgets/list_builders/list_user_search_results.dart';
@@ -13,6 +14,9 @@ import 'package:webblen/ui/widgets/search/search_field.dart';
 import 'package:webblen/ui/widgets/search/search_result_view.dart';
 
 class SearchView extends StatelessWidget {
+  final String term;
+  SearchView({this.term});
+
   Widget head(BuildContext context, SearchViewModel model) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -43,11 +47,24 @@ class SearchView extends StatelessWidget {
     );
   }
 
-  Widget causesHeader() {
+  Widget streamsHeader() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: CustomText(
-        text: "Causes",
+        text: "Livestreams",
+        fontWeight: FontWeight.bold,
+        textAlign: TextAlign.left,
+        fontSize: 24,
+        color: appFontColorAlt(),
+      ),
+    );
+  }
+
+  Widget eventsHeader() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: CustomText(
+        text: "Events",
         fontWeight: FontWeight.bold,
         textAlign: TextAlign.left,
         fontSize: 24,
@@ -60,7 +77,7 @@ class SearchView extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: CustomText(
-        text: "Changemakers",
+        text: "People",
         fontWeight: FontWeight.bold,
         textAlign: TextAlign.left,
         fontSize: 24,
@@ -69,7 +86,7 @@ class SearchView extends StatelessWidget {
     );
   }
 
-  Widget causeUserSearchDivider(BuildContext context) {
+  Widget eventUserSearchDivider(BuildContext context) {
     return Column(
       children: [
         Container(
@@ -84,32 +101,45 @@ class SearchView extends StatelessWidget {
 
   Widget listResults(BuildContext context, SearchViewModel model) {
     return Expanded(
-      child: ListView(
-        shrinkWrap: true,
-        children: [
-          model.streamResults.isEmpty && model.eventResults.isEmpty && model.userResults.isEmpty && model.searchTextController.text.trim().isEmpty
-              ? listRecentResults(context, model)
-              : Container(),
-          model.streamResults.isNotEmpty ? listStreamResults(model) : Container(),
-          (model.streamResults.isNotEmpty || model.eventResults.isNotEmpty) && model.userResults.isNotEmpty ? causeUserSearchDivider(context) : Container(),
-          model.userResults.isNotEmpty ? listUserResults(model) : Container(),
-          model.searchTextController.text.trim().isNotEmpty && !model.isBusy
-              ? ViewAllResultsSearchTermView(
-                  onSearchTermSelected: () => model.viewAllResultsForSearchTerm(context: context, searchTerm: model.searchTextController.text.trim()),
-                  searchTerm: "View all results for \"${model.searchTextController.text.trim()}\"",
+      child: model.streamResults.isEmpty && model.eventResults.isEmpty && model.userResults.isEmpty && model.searchTextController.text.trim().isEmpty
+          ? model.webblenBaseViewModel.user.recentSearchTerms == null
+              ? ZeroStateView(
+                  imageAssetName: "search",
+                  imageSize: 200,
+                  opacity: 0.3,
+                  header: "No Recent Searches Found",
+                  subHeader: "Search for anything you'd like",
+                  refreshData: null,
                 )
-              : Container(),
-        ],
-      ),
+              : listRecentResults(context, model)
+          : ListView(
+              shrinkWrap: true,
+              children: [
+                model.streamResults.isNotEmpty ? listStreamResults(model) : Container(),
+                (model.streamResults.isNotEmpty || model.eventResults.isNotEmpty) && model.userResults.isNotEmpty
+                    ? eventUserSearchDivider(context)
+                    : Container(),
+                model.userResults.isNotEmpty ? listUserResults(model) : Container(),
+                model.searchTextController.text.trim().isNotEmpty && !model.isBusy
+                    ? ViewAllResultsSearchTermView(
+                        onSearchTermSelected: () => model.viewAllResultsForSearchTerm(context: context, searchTerm: model.searchTextController.text.trim()),
+                        searchTerm: "View all results for \"${model.searchTextController.text.trim()}\"",
+                      )
+                    : Container(),
+              ],
+            ),
     );
   }
 
   Widget listRecentResults(BuildContext context, SearchViewModel model) {
-    return ListRecentSearchResults(
-      searchTerms: model.recentSearchTerms,
-      scrollController: null,
-      isScrollable: false,
-      onSearchTermSelected: (val) => model.viewAllResultsForSearchTerm(context: context, searchTerm: val),
+    return Hero(
+      tag: 'recent-searches',
+      child: ListRecentSearchResults(
+        searchTerms: model.webblenBaseViewModel.user.recentSearchTerms,
+        scrollController: null,
+        isScrollable: false,
+        onSearchTermSelected: (val) => model.viewAllResultsForSearchTerm(context: context, searchTerm: val),
+      ),
     );
   }
 
@@ -117,7 +147,7 @@ class SearchView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        causesHeader(),
+        streamsHeader(),
         ListStreamSearchResults(
           results: model.streamResults,
           scrollController: null,
@@ -135,6 +165,7 @@ class SearchView extends StatelessWidget {
         usersHeader(),
         ListUsersSearchResults(
           results: model.userResults,
+          usersFollowing: model.webblenBaseViewModel.user.following,
           scrollController: null,
           isScrollable: false,
           onSearchTermSelected: (val) => model.navigateToUserView(val),
@@ -146,7 +177,7 @@ class SearchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<SearchViewModel>.reactive(
-      onModelReady: (model) => model.initialize(),
+      onModelReady: (model) => model.initialize(term: term),
       viewModelBuilder: () => SearchViewModel(),
       builder: (context, model, child) => Scaffold(
         body: GestureDetector(

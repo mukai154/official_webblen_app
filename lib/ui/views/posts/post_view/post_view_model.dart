@@ -11,10 +11,13 @@ import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/share/share_service.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class PostViewModel extends BaseViewModel {
@@ -26,6 +29,9 @@ class PostViewModel extends BaseViewModel {
   PostDataService _postDataService = locator<PostDataService>();
   CommentDataService _commentDataService = locator<CommentDataService>();
   NotificationDataService _notificationDataService = locator<NotificationDataService>();
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
+  ShareService _shareService = locator<ShareService>();
+  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   ScrollController postScrollController = ScrollController();
@@ -40,7 +46,6 @@ class PostViewModel extends BaseViewModel {
   int resultsLimit = 10;
 
   ///DATA
-  WebblenUser currentUser;
   WebblenUser author;
   WebblenPost post;
   bool isAuthor = false;
@@ -51,20 +56,20 @@ class PostViewModel extends BaseViewModel {
   ///INITIALIZE
   initialize(BuildContext context) async {
     setBusy(true);
-    String uid = await _authService.getCurrentUserID();
-    currentUser = await _userDataService.getWebblenUserByID(uid);
 
     Map<String, dynamic> args = RouteData.of(context).arguments;
     String postID = args['id'] ?? "";
 
     var res = await _postDataService.getPostByID(postID);
-    if (res is String) {
-    } else {
+    if (res is WebblenPost) {
       post = res;
+    } else {
+      return;
     }
+
     author = await _userDataService.getWebblenUserByID(post.authorID);
 
-    if (currentUser.id == post.authorID) {
+    if (_webblenBaseViewModel.uid == post.authorID) {
       isAuthor = true;
     }
 
@@ -121,34 +126,47 @@ class PostViewModel extends BaseViewModel {
     focusNode.requestFocus();
   }
 
-  submitComment({BuildContext context, String commentVal}) async {
+  submitComment({BuildContext context, Map<String, dynamic> commentData}) async {
     isReplying = false;
-    String text = commentVal.trim();
+    String text = commentData['comment'].trim();
     if (text.isNotEmpty) {
       WebblenPostComment comment = WebblenPostComment(
         postID: post.id,
-        senderUID: currentUser.id,
-        username: currentUser.username,
+        senderUID: _webblenBaseViewModel.uid,
+        username: _webblenBaseViewModel.user.username,
         message: text,
         isReply: false,
         replies: [],
         replyCount: 0,
         timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       );
+
+      //send comment & notification
       await _commentDataService.sendComment(post.id, post.authorID, comment);
-      sendCommentNotification(text);
+      if (_webblenBaseViewModel.uid != post.authorID) {
+        sendCommentNotification(text);
+      }
+
+      //send notification to mentioned users
+      if (commentData['mentionedUsers'].isNotEmpty) {
+        List<WebblenUser> users = commentData['mentionedUsers'];
+        users.forEach((user) {
+          sendCommentMentionNotification(user.id, text);
+        });
+      }
+
       clearState(context);
     }
     refreshComments();
   }
 
-  replyToComment({BuildContext context, String commentVal}) async {
-    String text = commentVal.trim();
+  replyToComment({BuildContext context, Map<String, dynamic> commentData}) async {
+    String text = commentData['comment'].trim();
     if (text.isNotEmpty) {
       WebblenPostComment comment = WebblenPostComment(
         postID: post.id,
-        senderUID: currentUser.id,
-        username: currentUser.username,
+        senderUID: _webblenBaseViewModel.uid,
+        username: _webblenBaseViewModel.user.username,
         message: text,
         isReply: true,
         replies: [],
@@ -164,7 +182,17 @@ class PostViewModel extends BaseViewModel {
         comment,
       );
     }
+
     sendCommentReplyNotification(commentToReplyTo.senderUID, text);
+
+    //send notification to mentioned users
+    if (commentData['mentionedUsers'].isNotEmpty) {
+      List<WebblenUser> users = commentData['mentionedUsers'];
+      users.forEach((user) {
+        sendCommentMentionNotification(user.id, text);
+      });
+    }
+
     clearState(context);
     refreshComments();
   }
@@ -208,8 +236,8 @@ class PostViewModel extends BaseViewModel {
     WebblenNotification notification = WebblenNotification().generatePostCommentNotification(
       postID: post.id,
       receiverUID: post.authorID,
-      senderUID: currentUser.id,
-      commenterUsername: "@${currentUser.username}",
+      senderUID: _webblenBaseViewModel.uid,
+      commenterUsername: "@${_webblenBaseViewModel.user.username}",
       comment: comment,
     );
     _notificationDataService.sendNotification(notif: notification);
@@ -219,30 +247,29 @@ class PostViewModel extends BaseViewModel {
     WebblenNotification notification = WebblenNotification().generatePostCommentNotification(
       postID: post.id,
       receiverUID: receiverUID,
-      senderUID: currentUser.id,
-      commenterUsername: "@${currentUser.username}",
+      senderUID: _webblenBaseViewModel.uid,
+      commenterUsername: "@${_webblenBaseViewModel.user.username}",
+      comment: comment,
+    );
+    _notificationDataService.sendNotification(notif: notification);
+  }
+
+  sendCommentMentionNotification(String receiverUID, String comment) {
+    WebblenNotification notification = WebblenNotification().generateWebblenCommentMentionNotification(
+      postID: post.id,
+      receiverUID: receiverUID,
+      senderUID: _webblenBaseViewModel.uid,
+      commenterUsername: "@${_webblenBaseViewModel.user.username}",
       comment: comment,
     );
     _notificationDataService.sendNotification(notif: notification);
   }
 
   ///DIALOGS & BOTTOM SHEETS
-  showPostOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      variant: isAuthor ? BottomSheetType.postAuthorOptions : BottomSheetType.postOptions,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "edit") {
-        //edit
-      } else if (res == "share") {
-        //share
-      } else if (res == "report") {
-        //report
-      } else if (res == "delete") {
-        //delete
-      }
+  showContentOptions() async {
+    var actionPerformed = await _webblenBaseViewModel.showContentOptions(content: post);
+    if (actionPerformed == "deleted content") {
+      _navigationService.back();
     }
   }
 

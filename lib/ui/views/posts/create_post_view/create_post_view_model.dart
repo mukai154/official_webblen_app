@@ -9,7 +9,6 @@ import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/enums/post_type.dart';
 import 'package:webblen/models/webblen_post.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
@@ -18,6 +17,7 @@ import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
@@ -33,6 +33,7 @@ class CreatePostViewModel extends BaseViewModel {
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   ShareService _shareService = locator<ShareService>();
+  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   TextEditingController postTextController = TextEditingController();
@@ -40,8 +41,6 @@ class CreatePostViewModel extends BaseViewModel {
   bool textFieldEnabled = true;
 
   ///DATA
-  WebblenUser user;
-
   bool isEditing = false;
   File img;
   // File img2;
@@ -51,18 +50,16 @@ class CreatePostViewModel extends BaseViewModel {
 
   ///WEBBLEN CURRENCY
   double newPostTaxRate;
+  double promo;
 
   ///INITIALIZE
   initialize({BuildContext context}) async {
     setBusy(true);
 
-    //get current user data
-    String uid = await _authService.getCurrentUserID();
-    user = await _userDataService.getWebblenUserByID(uid);
-
     //check if editing existing post
     Map<String, dynamic> args = RouteData.of(context).arguments;
     if (args != null) {
+      promo = args['promo'] ?? null;
       String postID = args['id'] ?? "";
       if (postID.isNotEmpty) {
         post = await _postDataService.getPostByID(postID);
@@ -198,13 +195,13 @@ class CreatePostViewModel extends BaseViewModel {
     post = WebblenPost(
       id: newPostID,
       parentID: null,
-      authorID: user.id,
+      authorID: _webblenBaseViewModel.uid,
       imageURL: null,
       body: message,
-      nearbyZipcodes: [],
+      nearbyZipcodes: post.nearbyZipcodes,
       city: post.city,
       province: post.province,
-      followers: user.followers,
+      followers: _webblenBaseViewModel.user.followers,
       tags: post.tags,
       webAppLink: "https://app.webblen.io/posts/post?id=$newPostID",
       sharedComs: [],
@@ -215,6 +212,7 @@ class CreatePostViewModel extends BaseViewModel {
       participantIDs: [],
       commentCount: 0,
       reported: false,
+      suggestedUIDs: post.suggestedUIDs == null ? _webblenBaseViewModel.user.followers : post.suggestedUIDs,
     );
 
     //upload img if exists
@@ -254,13 +252,13 @@ class CreatePostViewModel extends BaseViewModel {
     post = WebblenPost(
       id: post.id,
       parentID: post.parentID,
-      authorID: user.id,
+      authorID: _webblenBaseViewModel.uid,
       imageURL: img == null ? post.imageURL : null,
       body: message,
       nearbyZipcodes: post.nearbyZipcodes,
       city: post.city,
       province: post.province,
-      followers: user.followers,
+      followers: _webblenBaseViewModel.user.followers,
       tags: post.tags,
       webAppLink: post.webAppLink,
       sharedComs: post.sharedComs,
@@ -271,6 +269,7 @@ class CreatePostViewModel extends BaseViewModel {
       participantIDs: post.participantIDs,
       commentCount: post.commentCount,
       reported: post.reported,
+      suggestedUIDs: post.suggestedUIDs == null ? _webblenBaseViewModel.user.followers : post.suggestedUIDs,
     );
 
     //upload img if exists
@@ -369,7 +368,7 @@ class CreatePostViewModel extends BaseViewModel {
       description: "Publish this post for everyone to see",
       mainButtonTitle: "Publish Post",
       secondaryButtonTitle: "Cancel",
-      customData: newPostTaxRate,
+      customData: {'fee': newPostTaxRate, 'promo': promo},
       variant: BottomSheetType.newContentConfirmation,
     );
     if (sheetResponse != null) {
@@ -398,14 +397,22 @@ class CreatePostViewModel extends BaseViewModel {
   }
 
   displayUploadSuccessBottomSheet() async {
+    //deposit and/or withdraw webblen & promo
+    if (promo != null) {
+      await _userDataService.depositWebblen(uid: _webblenBaseViewModel.uid, amount: promo);
+    }
+    await _userDataService.withdrawWebblen(uid: _webblenBaseViewModel.uid, amount: newPostTaxRate);
+
+    //display success
     var sheetResponse = await _bottomSheetService.showCustomSheet(
-      variant: BottomSheetType.addContentSuccessful,
-      takesInput: false,
-      customData: post,
-      barrierDismissible: false,
-    );
+        variant: BottomSheetType.addContentSuccessful,
+        takesInput: false,
+        customData: post,
+        barrierDismissible: false,
+        title: isEditing ? "Your Post has been Updated" : "Your Post has been Published! 🎉");
+
     if (sheetResponse == null || sheetResponse.responseData == "done") {
-      _navigationService.pushNamedAndRemoveUntil(Routes.HomeNavViewRoute);
+      _navigationService.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
     }
   }
 }

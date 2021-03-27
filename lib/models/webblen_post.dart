@@ -8,6 +8,8 @@ class WebblenPost {
   List nearbyZipcodes;
   String city;
   String province;
+  double lat;
+  double lon;
   int commentCount;
   int postDateTimeInMilliseconds;
   bool reported;
@@ -18,6 +20,7 @@ class WebblenPost {
   List tags;
   List participantIDs;
   List followers;
+  List suggestedUIDs;
 
   WebblenPost({
     this.id,
@@ -29,6 +32,8 @@ class WebblenPost {
     this.nearbyZipcodes,
     this.city,
     this.province,
+    this.lat,
+    this.lon,
     this.commentCount,
     this.postDateTimeInMilliseconds,
     this.reported,
@@ -39,6 +44,7 @@ class WebblenPost {
     this.tags,
     this.participantIDs,
     this.followers,
+    this.suggestedUIDs,
   });
 
   WebblenPost.fromMap(Map<String, dynamic> data)
@@ -52,6 +58,8 @@ class WebblenPost {
           nearbyZipcodes: data['nearbyZipcodes'],
           city: data['city'],
           province: data['province'],
+          lat: data['lat'],
+          lon: data['lon'],
           commentCount: data['commentCount'],
           postDateTimeInMilliseconds: data['postDateTimeInMilliseconds'],
           reported: false,
@@ -62,6 +70,7 @@ class WebblenPost {
           tags: data['tags'],
           participantIDs: data['participantIDs'],
           followers: data['followers'],
+          suggestedUIDs: data['suggestedUIDs'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -74,6 +83,8 @@ class WebblenPost {
         'nearbyZipcodes': this.nearbyZipcodes,
         'city': this.city,
         'province': this.province,
+        'lat': this.lat,
+        'lon': this.lon,
         'commentCount': this.commentCount,
         'postDateTimeInMilliseconds': this.postDateTimeInMilliseconds,
         'reported': this.reported,
@@ -84,5 +95,6 @@ class WebblenPost {
         'tags': this.tags,
         'participantIDs': this.participantIDs,
         'followers': this.followers,
+        'suggestedUIDs': this.suggestedUIDs,
       };
 }

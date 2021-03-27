@@ -7,9 +7,9 @@ import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/ui/views/home/init_error_views/location_error/location_error_view.dart';
 import 'package:webblen/ui/views/home/init_error_views/network_error/network_error_view.dart';
 import 'package:webblen/ui/views/home/tabs/check_in/check_in_view.dart';
-import 'package:webblen/ui/views/home/tabs/explore/explore_view.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view.dart';
 import 'package:webblen/ui/views/home/tabs/profile/profile_view.dart';
+import 'package:webblen/ui/views/home/tabs/search/recent_search_view.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view.dart';
 import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar.dart';
 import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar_item.dart';
@@ -17,53 +17,40 @@ import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progr
 
 import 'webblen_base_view_model.dart';
 
-class HomeNavView extends StatelessWidget {
-  Widget getViewForIndex(int index, WebblenBaseViewModel model) {
-    switch (index) {
-      case 0:
-        return model.user == null || model.initialAreaCode == null || model.initialCityName == null
-            ? Container(
-                color: appBackgroundColor(),
-              )
-            : HomeView(
-                user: model.user,
-                initialCityName: model.initialCityName,
-                initialAreaCode: model.initialAreaCode,
-              );
-      case 1:
-        return ExploreView(
-          user: model.user,
-        );
-      case 2:
-        return CheckInView(
-          user: model.user,
-        );
-      case 3:
-        return WalletView(
-          user: model.user,
-        );
-      case 4:
-        return ProfileView(
-          user: model.user,
-        );
-      default:
-        return model.user == null || model.initialAreaCode == null || model.initialCityName == null
-            ? Container(
-                color: appBackgroundColor(),
-              )
-            : HomeView(
-                user: model.user,
-                initialCityName: model.initialCityName,
-                initialAreaCode: model.initialAreaCode,
-              );
-    }
-  }
-
+class WebblenBaseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Widget getViewForIndex(int index, WebblenBaseViewModel model) {
+      switch (index) {
+        case 0:
+          return model.user == null || model.initialAreaCode == null || model.initialCityName == null
+              ? Container(
+                  color: appBackgroundColor(),
+                )
+              : HomeView();
+        case 1:
+          return RecentSearchView();
+        case 2:
+          return CheckInView(
+            user: model.user,
+          );
+        case 3:
+          return WalletView();
+        case 4:
+          return ProfileView();
+        default:
+          return model.user == null || model.initialAreaCode == null || model.initialCityName == null
+              ? Container(
+                  color: appBackgroundColor(),
+                )
+              : HomeView();
+      }
+    }
+
     return ViewModelBuilder<WebblenBaseViewModel>.reactive(
       disposeViewModel: false,
       fireOnModelReadyOnce: true,
+      initialiseSpecialViewModelsOnce: true,
       onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => locator<WebblenBaseViewModel>(),
       builder: (context, model, child) => Scaffold(

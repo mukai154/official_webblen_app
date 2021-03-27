@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class FollowStatsRow extends StatelessWidget {
   final int followersLength;
@@ -23,13 +25,17 @@ class FollowStatsRow extends StatelessWidget {
             onTap: viewFollowersAction,
             child: Column(
               children: [
-                Text(
-                  followersLength.toString(),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                CustomText(
+                  text: followersLength.toString(),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: appFontColor(),
                 ),
-                Text(
-                  "Followers",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                CustomText(
+                  text: "Followers",
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: appFontColorAlt(),
                 ),
               ],
             ),
@@ -39,13 +45,17 @@ class FollowStatsRow extends StatelessWidget {
             onTap: viewFollowingAction,
             child: Column(
               children: [
-                Text(
-                  followingLength.toString(),
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                CustomText(
+                  text: followingLength.toString(),
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: appFontColor(),
                 ),
-                Text(
-                  "Following",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w400),
+                CustomText(
+                  text: "Following",
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: appFontColorAlt(),
                 ),
               ],
             ),

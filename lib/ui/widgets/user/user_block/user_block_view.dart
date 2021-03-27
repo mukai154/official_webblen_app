@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/user/user_block/user_block_view_model.dart';
 
@@ -12,8 +14,9 @@ import '../user_profile_pic.dart';
 class UserBlockView extends StatelessWidget {
   final WebblenUser user;
   final bool displayBottomBorder;
-
   UserBlockView({this.user, this.displayBottomBorder});
+
+  final WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   Widget isFollowingUser() {
     return Container(
@@ -56,7 +59,7 @@ class UserBlockView extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                true ? isFollowingUser() : Container(),
+                _webblenBaseViewModel.user.following.contains(user.id) ? isFollowingUser() : Container(),
                 CustomText(
                   text: "@${user.username}",
                   fontSize: 16,

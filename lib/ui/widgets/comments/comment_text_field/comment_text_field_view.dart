@@ -14,13 +14,15 @@ import 'package:webblen/utils/custom_string_methods.dart';
 import 'comment_text_field_view_model.dart';
 
 class CommentTextFieldView extends StatelessWidget {
+  final String contentID;
   final FocusNode focusNode;
   final bool isReplying;
   final String replyReceiverUsername;
   final TextEditingController commentTextController;
-  final Function(String) onSubmitted;
+  final Function(Map<String, dynamic>) onSubmitted;
 
   CommentTextFieldView({
+    @required this.contentID,
     @required this.focusNode,
     @required this.commentTextController,
     @required this.isReplying,
@@ -75,7 +77,7 @@ class CommentTextFieldView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           UserProfilePic(
-            userPicUrl: model.currentUserProfilePicURL,
+            userPicUrl: model.webblenBaseViewModel.user.profilePicURL,
             size: 45,
             isBusy: false,
           ),
@@ -103,7 +105,14 @@ class CommentTextFieldView extends StatelessWidget {
                     suggestionsBoxDecoration: SuggestionsBoxDecoration(color: appBackgroundColor(), borderRadius: BorderRadius.all(Radius.circular(8))),
                     direction: AxisDirection.up,
                     textFieldConfiguration: TextFieldConfiguration(
-                      onSubmitted: (val) => onSubmitted(val),
+                      onSubmitted: (val) {
+                        List<WebblenUser> mentionedUsers = model.getMentionedUsers(commentText: val);
+                        Map<String, dynamic> commentData = {
+                          'comment': val,
+                          'mentionedUsers': mentionedUsers,
+                        };
+                        return onSubmitted(commentData);
+                      },
                       focusNode: focusNode,
                       textInputAction: TextInputAction.send,
                       minLines: 1,
@@ -115,7 +124,8 @@ class CommentTextFieldView extends StatelessWidget {
                       inputFormatters: [
                         LengthLimitingTextInputFormatter(150),
                       ],
-                      cursorColor: appCursorColor(),
+                      cursorColor: Colors.white,
+                      style: TextStyle(color: Colors.white),
                       decoration: InputDecoration(
                         hintText: "Comment",
                         hintStyle: TextStyle(color: Colors.white54),
@@ -159,11 +169,10 @@ class CommentTextFieldView extends StatelessWidget {
                       );
                     },
                     onSuggestionSelected: (WebblenUser user) {
+                      model.addUserToMentions(user);
                       focusNode.requestFocus();
                       int cursorPosition = commentTextController.selection.baseOffset;
                       String startOfString = commentTextController.text.substring(0, cursorPosition - 1);
-                      print(startOfString);
-
                       String endOfString = commentTextController.text.substring(cursorPosition - 1, commentTextController.text.length - 1);
                       if (endOfString.length == 1) {
                         endOfString = "";
@@ -189,9 +198,8 @@ class CommentTextFieldView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CommentTextFieldViewModel>.reactive(
-      onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => CommentTextFieldViewModel(),
-      builder: (context, model, child) => model.isBusy || model.errorDetails != null ? Container() : commentTextField(context, model),
+      builder: (context, model, child) => commentTextField(context, model),
     );
   }
 }

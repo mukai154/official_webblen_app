@@ -40,7 +40,8 @@ class NotificationsView extends StatelessWidget {
       child: model.notifResults.isEmpty && !model.isReloading
           ? Center(
               child: ZeroStateView(
-                imageAssetName: 'coding',
+                imageAssetName: 'beach_sun',
+                imageSize: 150,
                 header: "No Recent Activity Found",
                 subHeader: "Check Back Later!",
               ),

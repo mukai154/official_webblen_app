@@ -1,12 +1,8 @@
 class NotificationType {
-  static const String newFollower = 'newFollower';
-  static const String newPost = 'newPost';
-  static const String newEvent = 'newEvent';
-  static const String editedEvent = 'editedEvent';
-  static const String eventIsLive = 'eventIsLive';
-  static const String newStream = 'newStream';
-  static const String editedStream = 'editedStream';
-  static const String streamIsLive = 'streamIsLive';
+  static const String follower = 'follower';
+  static const String post = 'post';
+  static const String event = 'event';
+  static const String stream = 'stream';
   static const String postComment = 'postComment';
   static const String postCommentReply = 'postCommentReply';
   static const String webblenSent = 'webblenSent';

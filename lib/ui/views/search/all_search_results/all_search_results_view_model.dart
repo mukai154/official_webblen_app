@@ -3,23 +3,32 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/models/webblen_event.dart';
-import 'package:webblen/models/webblen_stream.dart';
+import 'package:webblen/models/webblen_live_stream.dart';
+import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 class AllSearchResultsViewModel extends BaseViewModel {
   NavigationService _navigationService = locator<NavigationService>();
   AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
+  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   TextEditingController searchTextController = TextEditingController();
+  ScrollController postScrollController = ScrollController();
   ScrollController streamScrollController = ScrollController();
   ScrollController eventScrollController = ScrollController();
   ScrollController userScrollController = ScrollController();
 
   ///DATA RESULTS
   String searchTerm;
-  List<WebblenStream> streamResults = [];
+  List<WebblenPost> postResults = [];
+  bool loadingAdditionalPosts = false;
+  bool morePostsAvailable = true;
+  int postResultsPageNum = 1;
+
+  List<WebblenLiveStream> streamResults = [];
   bool loadingAdditionalStreams = false;
   bool moreStreamsAvailable = true;
   int streamResultsPageNum = 1;
@@ -40,6 +49,12 @@ class AllSearchResultsViewModel extends BaseViewModel {
     searchTerm = searchTermVal;
     searchTextController.text = searchTerm;
     notifyListeners();
+    postScrollController.addListener(() {
+      double triggerFetchMoreSize = 0.9 * postScrollController.position.maxScrollExtent;
+      if (postScrollController.position.pixels > triggerFetchMoreSize) {
+        loadAdditionalPosts();
+      }
+    });
     streamScrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * streamScrollController.position.maxScrollExtent;
       if (streamScrollController.position.pixels > triggerFetchMoreSize) {
@@ -59,10 +74,45 @@ class AllSearchResultsViewModel extends BaseViewModel {
       }
     });
     notifyListeners();
+    await loadPosts();
     await loadStreams();
     await loadEvents();
     await loadUsers();
     setBusy(false);
+  }
+
+  ///STREAMS
+  Future<void> refreshPosts() async {
+    postResults = [];
+    await loadPosts();
+    notifyListeners();
+  }
+
+  loadPosts() async {
+    postResults = await _algoliaSearchService.queryPosts(searchTerm: searchTerm, resultsLimit: resultsLimit);
+    postResultsPageNum += 1;
+    notifyListeners();
+  }
+
+  loadAdditionalPosts() async {
+    if (loadingAdditionalPosts || !morePostsAvailable) {
+      return;
+    }
+    loadingAdditionalPosts = true;
+    notifyListeners();
+    List<WebblenPost> newResults = await _algoliaSearchService.queryAdditionalPosts(
+      searchTerm: searchTerm,
+      resultsLimit: resultsLimit,
+      pageNum: streamResultsPageNum,
+    );
+    if (newResults.length == 0) {
+      morePostsAvailable = false;
+    } else {
+      postResults.addAll(newResults);
+    }
+
+    loadingAdditionalPosts = false;
+    notifyListeners();
   }
 
   ///STREAMS
@@ -84,7 +134,7 @@ class AllSearchResultsViewModel extends BaseViewModel {
     }
     loadingAdditionalStreams = true;
     notifyListeners();
-    List<WebblenStream> newResults = await _algoliaSearchService.queryAdditionalStreams(
+    List<WebblenLiveStream> newResults = await _algoliaSearchService.queryAdditionalStreams(
       searchTerm: searchTerm,
       resultsLimit: resultsLimit,
       pageNum: streamResultsPageNum,
@@ -93,13 +143,12 @@ class AllSearchResultsViewModel extends BaseViewModel {
       moreStreamsAvailable = false;
     } else {
       streamResults.addAll(newResults);
-      streamResultsPageNum += 1;
     }
     loadingAdditionalStreams = false;
     notifyListeners();
   }
 
-  ///STREAMS
+  ///EVENTS
   Future<void> refreshEvents() async {
     eventResults = [];
     notifyListeners();
@@ -127,7 +176,6 @@ class AllSearchResultsViewModel extends BaseViewModel {
       moreEventsAvailable = false;
     } else {
       eventResults.addAll(newResults);
-      eventResultsPageNum += 1;
     }
     loadingAdditionalStreams = false;
     notifyListeners();
@@ -165,6 +213,26 @@ class AllSearchResultsViewModel extends BaseViewModel {
     }
     loadingAdditionalUsers = false;
     notifyListeners();
+  }
+
+  //show content options
+  showContentOptions({@required dynamic content}) async {
+    var actionPerformed = await webblenBaseViewModel.showContentOptions(content: content);
+    if (actionPerformed == "deleted content") {
+      if (content is WebblenPost) {
+        //deleted post
+        postResults.removeWhere((doc) => doc.id == content.id);
+        notifyListeners();
+      } else if (content is WebblenEvent) {
+        //deleted event
+        eventResults.removeWhere((doc) => doc.id == content.id);
+        notifyListeners();
+      } else if (content is WebblenLiveStream) {
+        //deleted stream
+        streamResults.removeWhere((doc) => doc.id == content.id);
+        notifyListeners();
+      }
+    }
   }
 
   ///NAVIGATION

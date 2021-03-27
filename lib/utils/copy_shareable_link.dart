@@ -8,7 +8,7 @@ copyShareableLink({String link}) async {
   HapticFeedback.lightImpact();
   dialogService.showDialog(
     title: "Link Copied!",
-    description: "",
+    description: "Share it anywhere you'd like",
     barrierDismissible: true,
     buttonTitle: "Ok",
   );

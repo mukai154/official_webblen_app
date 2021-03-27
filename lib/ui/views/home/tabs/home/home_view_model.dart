@@ -4,17 +4,20 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
+import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
+import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/share/share_service.dart';
+import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 @singleton
 class HomeViewModel extends BaseViewModel {
@@ -28,8 +31,10 @@ class HomeViewModel extends BaseViewModel {
   SnackbarService _snackbarService = locator<SnackbarService>();
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   PostDataService _postDataService = locator<PostDataService>();
+  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
   EventDataService _eventDataService = locator<EventDataService>();
   ShareService _shareService = locator<ShareService>();
+  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   ScrollController scrollController = ScrollController();
@@ -43,7 +48,13 @@ class HomeViewModel extends BaseViewModel {
   String sortBy = "Latest";
   String tagFilter = "";
 
-  ///POST RESULTS
+  ///FOR YOU DATA
+  List<dynamic> forYouResults = [];
+  bool loadingForYou = true;
+  bool loadingAdditionalForYou = false;
+  bool moreForYouAvailable = true;
+
+  ///POST DATA
   List<DocumentSnapshot> postResults = [];
   DocumentSnapshot lastPostDocSnap;
 
@@ -51,13 +62,21 @@ class HomeViewModel extends BaseViewModel {
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
 
-  ///POST RESULTS
+  ///EVENT DATA
   List<DocumentSnapshot> eventResults = [];
   DocumentSnapshot lastEventDocSnap;
 
   bool loadingEvents = true;
   bool loadingAdditionalEvents = false;
   bool moreEventsAvailable = true;
+
+  ///STREAM DATA
+  List<DocumentSnapshot> streamResults = [];
+  DocumentSnapshot lastStreamDocSnap;
+
+  bool reloadingStreams = false;
+  bool loadingAdditionalStreams = false;
+  bool moreStreamsAvailable = true;
 
   int resultsLimit = 30;
 
@@ -89,13 +108,10 @@ class HomeViewModel extends BaseViewModel {
   }
 
   ///INITIALIZE
-  initialize({TabController tabController, WebblenUser currentUser, String initialCityName, String initialAreaCode}) async {
-    //get current user
-    user = currentUser;
-
+  initialize({TabController tabController}) async {
     //get location data
-    cityName = initialCityName;
-    areaCode = initialAreaCode;
+    cityName = webblenBaseViewModel.initialCityName;
+    areaCode = webblenBaseViewModel.initialAreaCode;
 
     //load content promos (if any exists)
     postPromo = await _platformDataService.getPostPromo();
@@ -106,11 +122,11 @@ class HomeViewModel extends BaseViewModel {
     scrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * scrollController.position.maxScrollExtent;
       if (scrollController.position.pixels > triggerFetchMoreSize) {
-        if (tabController.index == 0) {
+        if (tabController.index == 1) {
           loadAdditionalPosts();
-        } else if (tabController.index == 1) {
-          //load additional streams
         } else if (tabController.index == 2) {
+          loadAdditionalStreams();
+        } else if (tabController.index == 3) {
           loadAdditionalEvents();
         }
       }
@@ -124,7 +140,9 @@ class HomeViewModel extends BaseViewModel {
   ///LOAD ALL DATA
   loadData() async {
     await loadPosts();
+    await loadStreams();
     await loadEvents();
+    //await loadForYouContent();
   }
 
   ///REFRESH ALL DATA
@@ -134,7 +152,9 @@ class HomeViewModel extends BaseViewModel {
 
     //clear previous data
     postResults = [];
+    streamResults = [];
     eventResults = [];
+    //forYouResults = [];
 
     //load all data
     await loadData();
@@ -202,6 +222,64 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  ///STREAM DATA
+  Future<void> refreshStreams() async {
+    //set loading streams status
+    reloadingStreams = true;
+
+    //clear previous stream data
+    streamResults = [];
+    notifyListeners();
+
+    //load streams
+    await loadStreams();
+  }
+
+  loadStreams() async {
+    //load events with params
+    streamResults = await _liveStreamDataService.loadStreams(
+      areaCode: areaCode,
+      resultsLimit: resultsLimit,
+      tagFilter: tagFilter,
+      sortBy: sortBy,
+    );
+
+    //set loading events status
+    loadingEvents = false;
+    notifyListeners();
+  }
+
+  loadAdditionalStreams() async {
+    //check if already loading streams or no more streams available
+    if (loadingAdditionalStreams || !moreStreamsAvailable) {
+      return;
+    }
+
+    //set loading additional streams status
+    loadingAdditionalStreams = true;
+    notifyListeners();
+
+    //load additional streams
+    List<DocumentSnapshot> newResults = await _liveStreamDataService.loadAdditionalStreams(
+      lastDocSnap: streamResults[streamResults.length - 1],
+      areaCode: areaCode,
+      resultsLimit: resultsLimit,
+      tagFilter: tagFilter,
+      sortBy: sortBy,
+    );
+
+    //notify if no more streams available
+    if (newResults.length == 0) {
+      moreStreamsAvailable = false;
+    } else {
+      streamResults.addAll(newResults);
+    }
+
+    //set loading additional streams status
+    loadingAdditionalStreams = false;
+    notifyListeners();
+  }
+
   ///EVENT DATA
   Future<void> refreshEvents() async {
     //set loading posts status
@@ -217,12 +295,12 @@ class HomeViewModel extends BaseViewModel {
 
   loadEvents() async {
     //load events with params
-    // eventResults = await _eventDataService.loadEvents(
-    //   areaCode: areaCode,
-    //   resultsLimit: resultsLimit,
-    //   tagFilter: tagFilter,
-    //   sortBy: sortBy,
-    // );
+    eventResults = await _eventDataService.loadEvents(
+      areaCode: areaCode,
+      resultsLimit: resultsLimit,
+      tagFilter: tagFilter,
+      sortBy: sortBy,
+    );
 
     //set loading events status
     loadingEvents = false;
@@ -240,100 +318,62 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional events
-    // List<DocumentSnapshot> newResults = await _eventDataService.loadAdditionalEvents(
-    //   lastDocSnap: eventResults[eventResults.length - 1],
-    //   areaCode: areaCode,
-    //   resultsLimit: resultsLimit,
-    //   tagFilter: tagFilter,
-    //   sortBy: sortBy,
-    // );
+    List<DocumentSnapshot> newResults = await _eventDataService.loadAdditionalEvents(
+      lastDocSnap: eventResults[eventResults.length - 1],
+      areaCode: areaCode,
+      resultsLimit: resultsLimit,
+      tagFilter: tagFilter,
+      sortBy: sortBy,
+    );
 
     //notify if no more events available
-    // if (newResults.length == 0) {
-    //   moreEventsAvailable = false;
-    // } else {
-    //   eventResults.addAll(newResults);
-    // }
+    if (newResults.length == 0) {
+      moreEventsAvailable = false;
+    } else {
+      eventResults.addAll(newResults);
+    }
 
     //set loading additional events status
     loadingAdditionalEvents = false;
     notifyListeners();
   }
 
+  ///PROMO
+  createPostWithPromo() {
+    webblenBaseViewModel.createPostWithPromo(promo: postPromo);
+  }
+
+  createEventWithPromo() {
+    webblenBaseViewModel.createEventWithPromo(promo: eventPromo);
+  }
+
+  createStreamWithPromo() {
+    webblenBaseViewModel.createStreamWithPromo(promo: streamPromo);
+  }
+
   ///BOTTOM SHEETS
   //bottom sheet for new post, stream, or event
   showAddContentOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      variant: BottomSheetType.addContent,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "new post") {
-        navigateToCreatePostPage();
-      } else if (res == "new stream") {
-        //
-      } else if (res == "new event") {
-        navigateToCreateEventPage();
-      }
-      notifyListeners();
-    }
+    webblenBaseViewModel.showAddContentOptions();
   }
 
-  //show post options
-  showPostOptions({BuildContext context, WebblenPost post}) async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      variant: user.id == post.authorID ? BottomSheetType.postAuthorOptions : BottomSheetType.postOptions,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "edit") {
-        //edit post
-        _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {
-          'postID': post.id,
-        });
-      } else if (res == "share") {
-        //share post link
-        String url = await _dynamicLinkService.createPostLink(postAuthorUsername: "@${user.username}", post: post);
-        _shareService.shareLink(url);
-      } else if (res == "report") {
-        //report post
-        _postDataService.reportPost(postID: post.id, reporterID: user.id);
-      } else if (res == "delete") {
-        //delete
-        deletePostConfirmation(context: context, post: post);
-      }
-      notifyListeners();
-    }
-  }
-
-  //show delete post confirmation
-  deletePostConfirmation({BuildContext context, WebblenPost post}) async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
-      title: "Delete Post",
-      description: "Are You Sure You Want to Delete this Post?",
-      mainButtonTitle: "Delete Post",
-      secondaryButtonTitle: "Cancel",
-      barrierDismissible: true,
-      variant: BottomSheetType.destructiveConfirmation,
-    );
-    if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
-      if (res == "confirmed") {
-        _postDataService.deletePost(post: post);
-        postResults.removeWhere((doc) => doc.id == post.id);
+  //show content options
+  showContentOptions({@required dynamic content}) async {
+    var actionPerformed = await webblenBaseViewModel.showContentOptions(content: content);
+    if (actionPerformed == "deleted content") {
+      if (content is WebblenPost) {
+        //deleted post
+        postResults.removeWhere((doc) => doc.id == content.id);
+        notifyListeners();
+      } else if (content is WebblenEvent) {
+        //deleted event
+        eventResults.removeWhere((doc) => doc.id == content.id);
+        notifyListeners();
+      } else if (content is WebblenLiveStream) {
+        //deleted stream
+        streamResults.removeWhere((doc) => doc.id == content.id);
         notifyListeners();
       }
     }
-  }
-
-  ///NAVIGATION
-  navigateToCreatePostPage() {
-    _navigationService.navigateTo(Routes.CreatePostViewRoute);
-  }
-
-  navigateToCreateEventPage() {
-    _navigationService.navigateTo(Routes.CreateEventViewRoute);
   }
 }

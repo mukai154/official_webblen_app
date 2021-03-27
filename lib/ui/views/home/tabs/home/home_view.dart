@@ -3,23 +3,19 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/locator.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
+import 'package:webblen/ui/widgets/list_builders/list_events.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
+import 'package:webblen/ui/widgets/list_builders/list_streams.dart';
 import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_view.dart';
 
 import 'home_view_model.dart';
 
 class HomeView extends StatefulWidget {
-  final WebblenUser user;
-  final String initialCityName;
-  final String initialAreaCode;
-  HomeView({this.user, this.initialCityName, this.initialAreaCode});
-
   @override
   _HomeViewState createState() => _HomeViewState();
 }
@@ -51,7 +47,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
           ),
           Row(
             children: [
-              NotificationBellView(uid: widget.user.id),
+              NotificationBellView(uid: model.webblenBaseViewModel.uid),
               horizontalSpaceSmall,
               IconButton(
                 iconSize: 20,
@@ -80,8 +76,24 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     return TabBarView(
       controller: _tabController,
       children: [
+        ///FOR YOU
+        ZeroStateView(
+          scrollController: model.scrollController,
+          imageAssetName: "mobile_people_group",
+          imageSize: 200,
+          header: "You are Not Following Anyone",
+          subHeader: "Find People and Groups to Follow and Get Involved With",
+          mainActionButtonTitle: "Explore People & Groups",
+          mainAction: () {},
+          secondaryActionButtonTitle: null,
+          secondaryAction: null,
+          refreshData: () async {},
+        ),
+
+        ///POSTS
         model.postResults.isEmpty && !model.loadingPosts
             ? ZeroStateView(
+                scrollController: model.scrollController,
                 imageAssetName: "umbrella_chair",
                 imageSize: 200,
                 header: "No Posts in ${model.cityName} Found",
@@ -89,56 +101,67 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                     ? "Create a Post for ${model.cityName} Now and Earn ${model.postPromo.toStringAsFixed(2)} WBLN!"
                     : "Create a Post for ${model.cityName} Now!",
                 mainActionButtonTitle: model.postPromo != null ? "Earn ${model.postPromo.toStringAsFixed(2)} WBLN" : "Create Post",
-                mainAction: () {},
+                mainAction: () => model.createPostWithPromo(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
                 refreshData: () async {},
               )
             : ListPosts(
-                currentUID: widget.user.id,
+                currentUID: model.webblenBaseViewModel.uid,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('home-posts'),
                 scrollController: model.scrollController,
-                showPostOptions: (post) => model.showPostOptions(context: context, post: post),
+                showPostOptions: (post) => model.showContentOptions(content: post),
               ),
-        ZeroStateView(
-          imageAssetName: "video_phone",
-          imageSize: 200,
-          header: "No Streams in ${model.cityName} Found",
-          subHeader: model.streamPromo != null
-              ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo.toStringAsFixed(2)} WBLN!"
-              : "Schedule a Stream for ${model.cityName} Now!",
-          mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo.toStringAsFixed(2)} WBLN" : "Create Stream",
-          mainAction: () {},
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
-        ZeroStateView(
-          imageAssetName: "calendar",
-          imageSize: 200,
-          header: "No Events in ${model.cityName} Found",
-          subHeader: model.eventPromo != null
-              ? "Schedule an Event for ${model.cityName} Now and Earn ${model.eventPromo.toStringAsFixed(2)} WBLN!"
-              : "Schedule an Event for ${model.cityName} Now!",
-          mainActionButtonTitle: model.eventPromo != null ? "Earn ${model.eventPromo.toStringAsFixed(2)} WBLN" : "Create Event",
-          mainAction: () {},
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
-        ZeroStateView(
-          imageAssetName: "mobile_people_group",
-          imageSize: 200,
-          header: "You are Not Following Anyone",
-          subHeader: "Find People and Groups to Follow and Get Invovled With",
-          mainActionButtonTitle: "Explore People & Groups",
-          mainAction: () {},
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
+
+        ///STREAMS & VIDEO
+        model.streamResults.isEmpty && !model.reloadingStreams
+            ? ZeroStateView(
+                scrollController: model.scrollController,
+                imageAssetName: "video_phone",
+                imageSize: 200,
+                header: "No Streams in ${model.cityName} Found",
+                subHeader: model.streamPromo != null
+                    ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo.toStringAsFixed(2)} WBLN!"
+                    : "Schedule a Stream for ${model.cityName} Now!",
+                mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo.toStringAsFixed(2)} WBLN" : "Create Stream",
+                mainAction: () => model.createStreamWithPromo(),
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: () async {},
+              )
+            : ListLiveStreams(
+                refreshData: model.refreshEvents,
+                dataResults: model.streamResults,
+                pageStorageKey: PageStorageKey('home-events'),
+                scrollController: model.scrollController,
+                showStreamOptions: (stream) => model.showContentOptions(content: stream),
+              ),
+
+        ///EVENTS
+        model.eventResults.isEmpty && !model.loadingEvents
+            ? ZeroStateView(
+                scrollController: model.scrollController,
+                imageAssetName: "calendar",
+                imageSize: 200,
+                header: "No Events in ${model.cityName} Found",
+                subHeader: model.eventPromo != null
+                    ? "Schedule an Event for ${model.cityName} Now and Earn ${model.eventPromo.toStringAsFixed(2)} WBLN!"
+                    : "Schedule an Event for ${model.cityName} Now!",
+                mainActionButtonTitle: model.eventPromo != null ? "Earn ${model.eventPromo.toStringAsFixed(2)} WBLN" : "Create Event",
+                mainAction: () => model.createEventWithPromo(),
+                secondaryActionButtonTitle: null,
+                secondaryAction: null,
+                refreshData: () async {},
+              )
+            : ListEvents(
+                refreshData: model.refreshEvents,
+                dataResults: model.eventResults,
+                pageStorageKey: PageStorageKey('home-events'),
+                scrollController: model.scrollController,
+                showEventOptions: (event) => model.showContentOptions(content: event),
+              ),
       ],
     );
   }
@@ -160,13 +183,10 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
     super.build(context);
     return ViewModelBuilder<HomeViewModel>.reactive(
       disposeViewModel: false,
-      initialiseSpecialViewModelsOnce: true,
       fireOnModelReadyOnce: true,
+      initialiseSpecialViewModelsOnce: true,
       onModelReady: (model) => model.initialize(
         tabController: _tabController,
-        currentUser: widget.user,
-        initialCityName: widget.initialCityName,
-        initialAreaCode: widget.initialAreaCode,
       ),
       viewModelBuilder: () => locator<HomeViewModel>(),
       builder: (context, model, child) => Container(

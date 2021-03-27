@@ -5,6 +5,7 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
+import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
 import 'package:webblen/ui/widgets/list_builders/list_streams.dart';
 import 'package:webblen/ui/widgets/list_builders/list_users.dart';
 import 'package:webblen/ui/widgets/search/search_field.dart';
@@ -66,8 +67,18 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
     return TabBarView(
       controller: _tabController,
       children: [
+        model.postResults.isNotEmpty
+            ? ListPosts(
+                currentUID: model.webblenBaseViewModel.uid,
+                refreshData: model.refreshPosts,
+                postResults: model.postResults,
+                pageStorageKey: PageStorageKey('post-results'),
+                scrollController: model.postScrollController,
+                showPostOptions: (post) => model.showContentOptions(content: post),
+              )
+            : noResultsFound(),
         model.streamResults.isNotEmpty
-            ? ListStreams(
+            ? ListLiveStreams(
                 refreshData: model.refreshStreams,
                 dataResults: model.streamResults,
                 pageStorageKey: PageStorageKey('stream-results'),
@@ -75,7 +86,7 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
               )
             : noResultsFound(),
         model.eventResults.isNotEmpty
-            ? ListStreams(
+            ? ListLiveStreams(
                 refreshData: model.refreshEvents,
                 dataResults: model.eventResults,
                 pageStorageKey: PageStorageKey('event-results'),
@@ -95,7 +106,7 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
   }
 
   Widget tabBar() {
-    return WebblenExplorePageTabBar(
+    return WebblenAllSearchResultsTabBar(
       tabController: _tabController,
     );
   }
@@ -104,7 +115,7 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 3,
+      length: 4,
       vsync: this,
     );
   }

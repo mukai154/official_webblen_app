@@ -3,14 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/events/event_block/event_block_widget.dart';
+import 'package:webblen/ui/widgets/events/event_block/event_block_view.dart';
 
 class ListEvents extends StatelessWidget {
   final List dataResults;
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
   final ScrollController scrollController;
-  ListEvents({@required this.refreshData, @required this.dataResults, @required this.pageStorageKey, @required this.scrollController});
+  final Function(WebblenEvent) showEventOptions;
+  ListEvents(
+      {@required this.refreshData,
+      @required this.dataResults,
+      @required this.pageStorageKey,
+      @required this.scrollController,
+      @required this.showEventOptions});
 
   Widget listData() {
     return RefreshIndicator(
@@ -29,21 +35,17 @@ class ListEvents extends StatelessWidget {
         itemCount: dataResults.length,
         itemBuilder: (context, index) {
           WebblenEvent event;
-          bool displayBottomBorder = true;
 
-          ///GET CAUSE OBJECT
+          ///GET EVENT OBJECT
           if (dataResults[index] is DocumentSnapshot) {
             event = WebblenEvent.fromMap(dataResults[index].data());
           } else {
             event = dataResults[index];
           }
 
-          ///DISPLAY BOTTOM BORDER
-          if (dataResults.last == dataResults[index]) {
-            displayBottomBorder = false;
-          }
           return EventBlockWidget(
             event: event,
+            showEventOptions: (event) => showEventOptions(event),
           );
         },
       ),

@@ -5,7 +5,10 @@ import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
+import 'package:webblen/services/firestore/data/content_gift_pool_data_service.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
+import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
+import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
@@ -48,6 +51,12 @@ abstract class ServicesModule {
   PostDataService get postDataService;
   @lazySingleton
   EventDataService get eventDataService;
+  @lazySingleton
+  LiveStreamDataService get liveStreamDataService;
+  @lazySingleton
+  LiveStreamChatDataService get liveStreamChatDataService;
+  @lazySingleton
+  ContentGiftPoolDataService get contentGiftPoolDataService;
   @lazySingleton
   TicketDistroDataService get ticketDistroDataService;
   @lazySingleton

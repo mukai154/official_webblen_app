@@ -1,7 +1,9 @@
+import 'package:auto_route/auto_route.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:location/location.dart';
+import 'package:maps_launcher/maps_launcher.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
@@ -22,6 +24,7 @@ class LocationService {
         _snackbarService.showSnackbar(
           title: 'Error',
           message: "Please Enable Location Services from Your App Settings to Find Events",
+          mainButtonTitle: "Open App Settings",
           onTap: (val) => openAppSettings(),
           duration: Duration(seconds: 5),
         );
@@ -29,6 +32,7 @@ class LocationService {
         _snackbarService.showSnackbar(
           title: 'Error',
           message: "Please Enable Location Services from Your App Settings to Find Events",
+          mainButtonTitle: "Open App Settings",
           onTap: (val) => openAppSettings(),
           duration: Duration(seconds: 5),
         );
@@ -164,5 +168,9 @@ class LocationService {
     List coordinates = geoP.values.toList();
     lon = coordinates[1];
     return lon == null ? 0.0 : lon;
+  }
+
+  openMaps({@required String address}) {
+    MapsLauncher.launchQuery(address);
   }
 }

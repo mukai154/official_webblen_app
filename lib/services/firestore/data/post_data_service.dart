@@ -115,7 +115,7 @@ class PostDataService {
     QuerySnapshot snapshot = await postsRef.where("parentID", isEqualTo: eventOrStreamID).get();
     snapshot.docs.forEach((doc) async {
       await postsRef.doc(doc.id).delete();
-      if (postType == 'event'){
+      if (postType == 'event') {
         await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'events', fileName: eventOrStreamID);
       } else {
         await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'streams', fileName: eventOrStreamID);
@@ -135,6 +135,13 @@ class PostDataService {
     });
     if (snapshot.exists) {
       post = WebblenPost.fromMap(snapshot.data());
+    } else {
+      _snackbarService.showSnackbar(
+        title: 'Post Error',
+        message: "This post no longer exists",
+        duration: Duration(seconds: 5),
+      );
+      return null;
     }
     return post;
   }

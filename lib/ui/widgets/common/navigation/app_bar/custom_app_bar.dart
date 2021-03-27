@@ -17,12 +17,7 @@ class CustomAppBar {
       brightness: appBrightness(),
       leading: showBackButton ? BackButton(color: appIconColor()) : Container(),
       bottom: PreferredSize(
-        child: bottomWidget == null
-            ? Container(
-                color: appBorderColor(),
-                height: 1.0,
-              )
-            : bottomWidget,
+        child: bottomWidget == null ? Container() : bottomWidget,
         preferredSize: Size.fromHeight(bottomWidgetHeight == null ? 4.0 : bottomWidgetHeight),
       ),
     );
@@ -57,12 +52,7 @@ class CustomAppBar {
         actionWidget,
       ],
       bottom: PreferredSize(
-        child: bottomWidget == null
-            ? Container(
-                color: appBorderColor(),
-                height: 1.0,
-              )
-            : bottomWidget,
+        child: bottomWidget == null ? Container() : bottomWidget,
         preferredSize: Size.fromHeight(bottomWidgetHeight == null ? 4.0 : bottomWidgetHeight),
       ),
     );

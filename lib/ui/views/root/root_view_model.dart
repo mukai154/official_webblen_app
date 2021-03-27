@@ -22,7 +22,7 @@ class RootViewModel extends BaseViewModel {
       String uid = await _authService.getCurrentUserID();
       bool userExists = await _userDataService.checkIfUserExists(uid);
       if (userExists) {
-        _navigationService.replaceWith(Routes.HomeNavViewRoute);
+        _navigationService.replaceWith(Routes.WebblenBaseViewRoute);
       } else {
         //_navigationService.replaceWith(Routes.OnboardingViewRoute);
       }

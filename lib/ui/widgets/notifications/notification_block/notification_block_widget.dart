@@ -17,15 +17,15 @@ class NotificationBlockWidget extends StatelessWidget {
 
   Widget notifIcon() {
     return Icon(
-      notification.type == NotificationType.newFollower
+      notification.type == NotificationType.follower
           ? FontAwesomeIcons.user
           : notification.type == NotificationType.postComment || notification.type == NotificationType.postCommentReply
               ? FontAwesomeIcons.comment
-              : notification.type == NotificationType.newEvent || notification.type == NotificationType.editedEvent
+              : notification.type == NotificationType.event
                   ? FontAwesomeIcons.calendar
-                  : notification.type == NotificationType.newStream || notification.type == NotificationType.editedStream
+                  : notification.type == NotificationType.stream
                       ? FontAwesomeIcons.broadcastTower
-                      : notification.type == NotificationType.newPost
+                      : notification.type == NotificationType.post
                           ? FontAwesomeIcons.newspaper
                           : notification.type == NotificationType.webblenReceived
                               ? FontAwesomeIcons.plus
