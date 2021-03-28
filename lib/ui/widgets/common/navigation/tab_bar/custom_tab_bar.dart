@@ -252,65 +252,17 @@ class WebblenProfileTabBar extends StatelessWidget {
               ),
             ),
           ),
-          Tab(
-            child: Container(
-              height: 30,
-              width: 75,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(60),
-              ),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  "Activity",
-                  style: TextStyle(fontWeight: fontWeight),
-                ),
-              ),
-            ),
-          ),
           // Tab(
           //   child: Container(
           //     height: 30,
-          //     width: 110,
+          //     width: 75,
           //     decoration: BoxDecoration(
           //       borderRadius: BorderRadius.circular(60),
           //     ),
           //     child: Align(
           //       alignment: Alignment.center,
           //       child: Text(
-          //         "Saved Posts",
-          //         style: TextStyle(fontWeight: fontWeight),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          // Tab(
-          //   child: Container(
-          //     height: 30,
-          //     width: 110,
-          //     decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(60),
-          //     ),
-          //     child: Align(
-          //       alignment: Alignment.center,
-          //       child: Text(
-          //         "Saved Streams",
-          //         style: TextStyle(fontWeight: fontWeight),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          // Tab(
-          //   child: Container(
-          //     height: 30,
-          //     width: 110,
-          //     decoration: BoxDecoration(
-          //       borderRadius: BorderRadius.circular(60),
-          //     ),
-          //     child: Align(
-          //       alignment: Alignment.center,
-          //       child: Text(
-          //         "Saved Events",
+          //         "Activity",
           //         style: TextStyle(fontWeight: fontWeight),
           //       ),
           //     ),

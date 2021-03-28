@@ -209,40 +209,10 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 scrollController: null,
                 showEventOptions: (event) => model.showContentOptions(content: event),
               ),
-        ZeroStateView(
-          imageAssetName: null,
-          header: "You Have No Recent Activity",
-          subHeader: "Get Involved in Your Community to Change That!",
-          mainActionButtonTitle: null,
-          mainAction: null,
-          secondaryActionButtonTitle: null,
-          secondaryAction: null,
-          refreshData: () async {},
-        ),
         // ZeroStateView(
         //   imageAssetName: null,
-        //   header: "No Posts Found",
-        //   subHeader: "Posts You Save Will Show Up Here",
-        //   mainActionButtonTitle: null,
-        //   mainAction: null,
-        //   secondaryActionButtonTitle: null,
-        //   secondaryAction: null,
-        //   refreshData: () async {},
-        // ),
-        // ZeroStateView(
-        //   imageAssetName: null,
-        //   header: "No Streams Found",
-        //   subHeader: "Streams You Save Will Show Up Here",
-        //   mainActionButtonTitle: null,
-        //   mainAction: null,
-        //   secondaryActionButtonTitle: null,
-        //   secondaryAction: null,
-        //   refreshData: () async {},
-        // ),
-        // ZeroStateView(
-        //   imageAssetName: null,
-        //   header: "No Events Found",
-        //   subHeader: "Events You Save Will Show Up Here",
+        //   header: "You Have No Recent Activity",
+        //   subHeader: "Get Involved in Your Community to Change That!",
         //   mainActionButtonTitle: null,
         //   mainAction: null,
         //   secondaryActionButtonTitle: null,
@@ -257,7 +227,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: 4,
+      length: 3, //4,
       vsync: this,
     );
   }

@@ -6,6 +6,7 @@ import 'package:webblen/ui/views/events/event_view/event_view.dart';
 import 'package:webblen/ui/views/live_streams/create_live_stream_view/create_live_stream_view.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_details_view/live_stream_details_view.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_host_view/live_stream_host_view.dart';
+import 'package:webblen/ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
 import 'package:webblen/ui/views/notifications/notifications_view.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view.dart';
 import 'package:webblen/ui/views/posts/post_view/post_view.dart';
@@ -47,7 +48,8 @@ import 'package:webblen/ui/views/wallet/redeemed_rewards/redeemed_rewards_view.d
     MaterialRoute(page: LiveStreamDetailsView, name: "LiveStreamViewRoute"),
     MaterialRoute(page: CreateLiveStreamView, name: "CreateLiveStreamViewRoute"),
     MaterialRoute(page: LiveStreamHostView, name: "LiveStreamHostViewRoute"),
-    //MaterialRoute(page: LiveStreamViewerView, name: "LiveStreamViewerViewRoute"),
+    MaterialRoute(page: LiveStreamViewerView, name: "LiveStreamViewerViewRoute"),
+
     //SEARCH
     MaterialRoute(page: SearchView, name: "SearchViewRoute"),
     MaterialRoute(page: AllSearchResultsView, name: "AllSearchResultsViewRoute"),

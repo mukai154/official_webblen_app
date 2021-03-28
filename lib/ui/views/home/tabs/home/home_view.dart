@@ -116,7 +116,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
               ),
 
         ///STREAMS & VIDEO
-        model.streamResults.isEmpty && !model.reloadingStreams
+        model.streamResults.isEmpty && !model.loadingStreams
             ? ZeroStateView(
                 scrollController: model.scrollController,
                 imageAssetName: "video_phone",

@@ -7,6 +7,7 @@ import 'package:webblen/ui/views/search/search_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
+import 'package:webblen/ui/widgets/list_builders/list_events_search_results.dart';
 import 'package:webblen/ui/widgets/list_builders/list_recent_search_results.dart';
 import 'package:webblen/ui/widgets/list_builders/list_streams_search_results.dart';
 import 'package:webblen/ui/widgets/list_builders/list_user_search_results.dart';
@@ -152,7 +153,22 @@ class SearchView extends StatelessWidget {
           results: model.streamResults,
           scrollController: null,
           isScrollable: false,
-          onSearchTermSelected: (val) => model.navigateToCauseView(val),
+          onSearchTermSelected: (val) => model.navigateToLiveStreamView(val),
+        ),
+      ],
+    );
+  }
+
+  Widget listEventResults(SearchViewModel model) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        eventsHeader(),
+        ListEventSearchResults(
+          results: model.eventResults,
+          scrollController: null,
+          isScrollable: false,
+          onSearchTermSelected: (val) => model.navigateToEventView(val),
         ),
       ],
     );

@@ -251,7 +251,7 @@ class AlgoliaSearchService {
           SearchResult result = SearchResult(
             id: snapshot.data['id'],
             type: 'stream',
-            name: snapshot.data['name'],
+            name: snapshot.data['title'],
             additionalData: null,
           );
           results.add(result);

@@ -32,7 +32,7 @@ class SearchViewModel extends BaseViewModel {
 
   int streamResultsLimit = 5;
   int eventResultsLimit = 5;
-  int userResultsLimit = 16;
+  int userResultsLimit = 5;
 
   ///DATA
 
@@ -90,6 +90,17 @@ class SearchViewModel extends BaseViewModel {
   navigateToUserView(Map<String, dynamic> userData) {
     _algoliaSearchService.storeSearchTerm(uid: webblenBaseViewModel.uid, searchTerm: userData['username']);
     _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': userData['id']});
+  }
+
+  navigateToLiveStreamView(Map<String, dynamic> streamData) {
+    _algoliaSearchService.storeSearchTerm(uid: webblenBaseViewModel.uid, searchTerm: streamData['name']);
+    _navigationService.navigateTo(Routes.LiveStreamViewRoute, arguments: {'id': streamData['id']});
+  }
+
+  navigateToEventView(Map<String, dynamic> eventData) {
+    print(eventData);
+    _algoliaSearchService.storeSearchTerm(uid: webblenBaseViewModel.uid, searchTerm: eventData['name']);
+    _navigationService.navigateTo(Routes.EventViewRoute, arguments: {'id': eventData['id']});
   }
 
   navigateToPreviousView() {

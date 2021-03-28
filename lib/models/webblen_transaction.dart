@@ -1,8 +1,7 @@
 class WebblenTransaction {
   String receiverUID;
   String senderUID;
-  String eventID;
-  String streamID;
+  String contentID;
   String type;
   String currency;
   String header;
@@ -14,8 +13,7 @@ class WebblenTransaction {
   WebblenTransaction({
     this.receiverUID,
     this.senderUID,
-    this.eventID,
-    this.streamID,
+    this.contentID,
     this.type,
     this.currency,
     this.header,
@@ -29,8 +27,7 @@ class WebblenTransaction {
       : this(
           receiverUID: data['receiverUID'],
           senderUID: data['senderUID'],
-          eventID: data['eventID'],
-          streamID: data['streamID'],
+          contentID: data['contentID'],
           type: data['type'],
           currency: data['currency'],
           header: data['header'],
@@ -43,8 +40,7 @@ class WebblenTransaction {
   Map<String, dynamic> toMap() => {
         'receiverUID': this.receiverUID,
         'senderUID': this.senderUID,
-        'eventID': this.eventID,
-        'streamID': this.streamID,
+        'contentID': this.contentID,
         'type': this.type,
         'currency': this.currency,
         'header': this.header,

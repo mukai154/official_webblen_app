@@ -2,13 +2,18 @@ import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/locator.dart';
+import 'package:webblen/models/webblen_activity.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 
+import 'activity_data_service.dart';
+
 class CommentDataService {
+  final ActivityDataService _activityDataService = locator<ActivityDataService>();
   final SnackbarService _snackbarService = locator<SnackbarService>();
   final CollectionReference commentsRef = FirebaseFirestore.instance.collection("comments");
   final CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
+
   //CREATE
   Future<String> sendComment(String parentID, String postAuthorID, WebblenPostComment comment) async {
     String error;

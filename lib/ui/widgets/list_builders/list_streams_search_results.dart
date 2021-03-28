@@ -5,7 +5,7 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/search/search_result_view.dart';
 
 class ListStreamSearchResults extends StatelessWidget {
-  final Function(String) onSearchTermSelected;
+  final Function(Map<String, dynamic>) onSearchTermSelected;
   final List<SearchResult> results;
   final ScrollController scrollController;
   final bool isScrollable;
@@ -25,7 +25,7 @@ class ListStreamSearchResults extends StatelessWidget {
       itemCount: results.length,
       itemBuilder: (context, index) {
         return StreamSearchResultView(
-          onTap: () => onSearchTermSelected(results[index].id),
+          onTap: () => onSearchTermSelected(results[index].toMap()),
           searchResult: results[index],
           displayBottomBorder: index == results.length - 1 ? false : true,
         );

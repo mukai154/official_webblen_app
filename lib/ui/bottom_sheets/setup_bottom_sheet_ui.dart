@@ -5,6 +5,7 @@ import 'package:webblen/ui/bottom_sheets/calendar_bottom_sheet/calendar_bottom_s
 import 'package:webblen/ui/bottom_sheets/confirmation_bottom_sheets/destructive_confirmation_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/content_bottom_sheets/content_options_bottom_sheet/content_options_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/home_filter_bottom_sheet/home_filter_bottom_sheet.dart';
+import 'package:webblen/ui/bottom_sheets/purchase_webblen_bottom_sheet/purchase_webblen_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/current_user_options_bottom_sheet/current_user_options_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/user_options_bottom_sheet/user_options_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/video_streaming_bottom_sheets/host/gifters_bottom_sheet.dart';
@@ -36,7 +37,7 @@ void setupBottomSheetUI() {
     BottomSheetType.homeFilter: (context, sheetRequest, completer) => HomeFilterBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.imagePicker: (context, sheetRequest, completer) => ImagePickerBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.calendar: (context, sheetRequest, completer) => CalendarBottomSheet(request: sheetRequest, completer: completer),
-    // BottomSheetType.eventPublished: (context, sheetRequest, completer) => CausePublishSuccessfulBottomSheet(request: sheetRequest, completer: completer),
+    BottomSheetType.purchaseWBLN: (context, sheetRequest, completer) => PurchaseWebblenBottomSheet(request: sheetRequest, completer: completer),
     // BottomSheetType.eventCreatorOptions: (context, sheetRequest, completer) => CauseCreatorBottomSheet(request: sheetRequest, completer: completer),
     // BottomSheetType.eventOptions: (context, sheetRequest, completer) => CauseBottomSheet(request: sheetRequest, completer: completer),
     // BottomSheetType.streamPublished: (context, sheetRequest, completer) => CausePublishSuccessfulBottomSheet(request: sheetRequest, completer: completer),

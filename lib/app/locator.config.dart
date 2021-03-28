@@ -9,6 +9,7 @@ import 'package:injectable/injectable.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 
+import '../services/firestore/data/activity_data_service.dart';
 import '../services/algolia/algolia_search_service.dart';
 import '../services/auth/auth_service.dart';
 import '../ui/views/home/tabs/check_in/check_in_view_model.dart';
@@ -19,6 +20,7 @@ import '../services/firestore/data/event_data_service.dart';
 import '../services/firestore/common/firestore_storage_service.dart';
 import '../services/location/google_places_service.dart';
 import '../ui/views/home/tabs/home/home_view_model.dart';
+import '../services/in_app_purchases/in_app_purchase_service.dart';
 import '../services/firestore/data/live_stream_chat_data_service.dart';
 import '../services/firestore/data/live_stream_data_service.dart';
 import '../services/location/location_service.dart';
@@ -35,6 +37,7 @@ import '../services/stripe/stripe_connect_account_service.dart';
 import '../services/stripe/stripe_payment_service.dart';
 import '../services/firestore/data/ticket_distro_data_service.dart';
 import '../services/firestore/data/user_data_service.dart';
+import '../services/firestore/data/user_preference_data_service.dart';
 import '../ui/views/home/tabs/wallet/wallet_view_model.dart';
 import '../ui/views/base/webblen_base_view_model.dart';
 
@@ -48,6 +51,8 @@ GetIt $initGetIt(
 }) {
   final gh = GetItHelper(get, environment, environmentFilter);
   final servicesModule = _$ServicesModule();
+  gh.lazySingleton<ActivityDataService>(
+      () => servicesModule.activityDataService);
   gh.lazySingleton<AlgoliaSearchService>(
       () => servicesModule.algoliaSearchService);
   gh.lazySingleton<AuthService>(() => servicesModule.authService);
@@ -62,6 +67,8 @@ GetIt $initGetIt(
       () => servicesModule.firestoreStorageService);
   gh.lazySingleton<GooglePlacesService>(
       () => servicesModule.googlePlacesService);
+  gh.lazySingleton<InAppPurchaseService>(
+      () => servicesModule.inAppPurchaseService);
   gh.lazySingleton<LiveStreamChatDataService>(
       () => servicesModule.liveStreamChatDataService);
   gh.lazySingleton<LiveStreamDataService>(
@@ -85,6 +92,8 @@ GetIt $initGetIt(
   gh.lazySingleton<TicketDistroDataService>(
       () => servicesModule.ticketDistroDataService);
   gh.lazySingleton<UserDataService>(() => servicesModule.userDataService);
+  gh.lazySingleton<UserPreferenceDataService>(
+      () => servicesModule.userPreferenceDataService);
   gh.lazySingleton<WebblenBaseViewModel>(() => WebblenBaseViewModel());
 
   // Eager singletons must be registered in the right order
@@ -98,6 +107,8 @@ GetIt $initGetIt(
 }
 
 class _$ServicesModule extends ServicesModule {
+  @override
+  ActivityDataService get activityDataService => ActivityDataService();
   @override
   AlgoliaSearchService get algoliaSearchService => AlgoliaSearchService();
   @override
@@ -120,6 +131,8 @@ class _$ServicesModule extends ServicesModule {
       FirestoreStorageService();
   @override
   GooglePlacesService get googlePlacesService => GooglePlacesService();
+  @override
+  InAppPurchaseService get inAppPurchaseService => InAppPurchaseService();
   @override
   LiveStreamChatDataService get liveStreamChatDataService =>
       LiveStreamChatDataService();
@@ -153,4 +166,7 @@ class _$ServicesModule extends ServicesModule {
       TicketDistroDataService();
   @override
   UserDataService get userDataService => UserDataService();
+  @override
+  UserPreferenceDataService get userPreferenceDataService =>
+      UserPreferenceDataService();
 }

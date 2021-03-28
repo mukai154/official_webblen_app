@@ -74,7 +74,7 @@ class HomeViewModel extends BaseViewModel {
   List<DocumentSnapshot> streamResults = [];
   DocumentSnapshot lastStreamDocSnap;
 
-  bool reloadingStreams = false;
+  bool loadingStreams = false;
   bool loadingAdditionalStreams = false;
   bool moreStreamsAvailable = true;
 
@@ -225,7 +225,7 @@ class HomeViewModel extends BaseViewModel {
   ///STREAM DATA
   Future<void> refreshStreams() async {
     //set loading streams status
-    reloadingStreams = true;
+    loadingStreams = true;
 
     //clear previous stream data
     streamResults = [];
@@ -245,7 +245,7 @@ class HomeViewModel extends BaseViewModel {
     );
 
     //set loading events status
-    loadingEvents = false;
+    loadingStreams = false;
     notifyListeners();
   }
 

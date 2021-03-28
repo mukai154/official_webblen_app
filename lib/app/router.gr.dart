@@ -16,6 +16,7 @@ import '../ui/views/events/event_view/event_view.dart';
 import '../ui/views/live_streams/create_live_stream_view/create_live_stream_view.dart';
 import '../ui/views/live_streams/live_stream_details_view/live_stream_details_view.dart';
 import '../ui/views/live_streams/live_stream_host_view/live_stream_host_view.dart';
+import '../ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
 import '../ui/views/notifications/notifications_view.dart';
 import '../ui/views/posts/create_post_view/create_post_view.dart';
 import '../ui/views/posts/post_view/post_view.dart';
@@ -40,6 +41,7 @@ class Routes {
   static const String LiveStreamViewRoute = '/live-stream-details-view';
   static const String CreateLiveStreamViewRoute = '/create-live-stream-view';
   static const String LiveStreamHostViewRoute = '/live-stream-host-view';
+  static const String LiveStreamViewerViewRoute = '/live-stream-viewer-view';
   static const String SearchViewRoute = '/search-view';
   static const String AllSearchResultsViewRoute = '/all-search-results-view';
   static const String NotificationsViewRoute = '/notifications-view';
@@ -60,6 +62,7 @@ class Routes {
     LiveStreamViewRoute,
     CreateLiveStreamViewRoute,
     LiveStreamHostViewRoute,
+    LiveStreamViewerViewRoute,
     SearchViewRoute,
     AllSearchResultsViewRoute,
     NotificationsViewRoute,
@@ -86,6 +89,7 @@ class WebblenRouter extends RouterBase {
     RouteDef(Routes.LiveStreamViewRoute, page: LiveStreamDetailsView),
     RouteDef(Routes.CreateLiveStreamViewRoute, page: CreateLiveStreamView),
     RouteDef(Routes.LiveStreamHostViewRoute, page: LiveStreamHostView),
+    RouteDef(Routes.LiveStreamViewerViewRoute, page: LiveStreamViewerView),
     RouteDef(Routes.SearchViewRoute, page: SearchView),
     RouteDef(Routes.AllSearchResultsViewRoute, page: AllSearchResultsView),
     RouteDef(Routes.NotificationsViewRoute, page: NotificationsView),
@@ -156,6 +160,12 @@ class WebblenRouter extends RouterBase {
     LiveStreamHostView: (data) {
       return MaterialPageRoute<dynamic>(
         builder: (context) => LiveStreamHostView(),
+        settings: data,
+      );
+    },
+    LiveStreamViewerView: (data) {
+      return MaterialPageRoute<dynamic>(
+        builder: (context) => LiveStreamViewerView(),
         settings: data,
       );
     },
