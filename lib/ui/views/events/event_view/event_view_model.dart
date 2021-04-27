@@ -1,9 +1,7 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
@@ -22,43 +20,43 @@ import 'package:webblen/utils/add_to_calendar.dart';
 import 'package:webblen/utils/url_handler.dart';
 
 class EventViewModel extends BaseViewModel {
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  EventDataService _eventDataService = locator<EventDataService>();
-  TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
-  LocationService _locationService = locator<LocationService>();
-  CommentDataService _commentDataService = locator<CommentDataService>();
-  NotificationDataService _notificationDataService = locator<NotificationDataService>();
-  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
-  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
-  ShareService _shareService = locator<ShareService>();
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  EventDataService? _eventDataService = locator<EventDataService>();
+  TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
+  LocationService? _locationService = locator<LocationService>();
+  CommentDataService? _commentDataService = locator<CommentDataService>();
+  NotificationDataService? _notificationDataService = locator<NotificationDataService>();
+  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  ShareService? _shareService = locator<ShareService>();
 
   ///EVENT AUTHOR
-  WebblenUser author;
+  WebblenUser? author;
   bool isAuthor = false;
 
   ///EVENT
-  WebblenEvent event;
+  late WebblenEvent event;
   bool hasSocialAccounts = false;
   bool eventIsHappeningNow = false;
 
   ///TICKETS
-  WebblenTicketDistro ticketDistro;
+  WebblenTicketDistro? ticketDistro;
 
   ///INITIALIZE
   initialize(BuildContext context) async {
     setBusy(true);
 
-    Map<String, dynamic> args = RouteData.of(context).arguments;
+    Map<String, dynamic> args = {};//RouteData.of(context).arguments;
     String eventID = args['id'] ?? "";
 
     //get event data
-    var res = await _eventDataService.getEventByID(eventID);
+    var res = await _eventDataService!.getEventByID(eventID);
     if (res == null) {
-      _navigationService.back();
+      _navigationService!.back();
       return;
     } else {
       event = res;
@@ -68,21 +66,21 @@ class EventViewModel extends BaseViewModel {
     isEventHappeningNow(event);
 
     //get tickets if they exist
-    if (event.hasTickets) {
-      ticketDistro = await _ticketDistroDataService.getTicketDistroByID(event.id);
+    if (event.hasTickets!) {
+      ticketDistro = await (_ticketDistroDataService!.getTicketDistroByID(event.id) as FutureOr<WebblenTicketDistro?>);
     }
 
     //check if event has social accounts
-    if ((event.fbUsername != null && event.fbUsername.isNotEmpty) ||
-        (event.instaUsername != null && event.instaUsername.isNotEmpty) ||
-        (event.twitterUsername != null && event.twitterUsername.isNotEmpty) ||
-        (event.website != null && event.website.isNotEmpty)) {
+    if ((event.fbUsername != null && event.fbUsername!.isNotEmpty) ||
+        (event.instaUsername != null && event.instaUsername!.isNotEmpty) ||
+        (event.twitterUsername != null && event.twitterUsername!.isNotEmpty) ||
+        (event.website != null && event.website!.isNotEmpty)) {
       hasSocialAccounts = true;
     }
     //get author info
-    author = await _userDataService.getWebblenUserByID(event.authorID);
+    author = await _userDataService!.getWebblenUserByID(event.authorID);
 
-    if (_webblenBaseViewModel.uid == event.authorID) {
+    if (_webblenBaseViewModel!.uid == event.authorID) {
       isAuthor = true;
     }
 
@@ -92,9 +90,9 @@ class EventViewModel extends BaseViewModel {
 
   isEventHappeningNow(WebblenEvent event) {
     int currentDateInMilli = DateTime.now().millisecondsSinceEpoch;
-    int eventStartDateInMilli = event.startDateTimeInMilliseconds;
-    int eventEndDateInMilli = event.endDateTimeInMilliseconds;
-    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli) {
+    int eventStartDateInMilli = event.startDateTimeInMilliseconds!;
+    int? eventEndDateInMilli = event.endDateTimeInMilliseconds;
+    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli!) {
       eventIsHappeningNow = true;
     } else {
       eventIsHappeningNow = false;
@@ -107,7 +105,7 @@ class EventViewModel extends BaseViewModel {
   }
 
   openMaps() {
-    _locationService.openMaps(address: event.streetAddress);
+    _locationService!.openMaps(address: event.streetAddress!);
   }
 
   openFacebook() {
@@ -133,32 +131,32 @@ class EventViewModel extends BaseViewModel {
 
   openWebsite() {
     if (event.website != null) {
-      String url = event.website;
+      String url = event.website!;
       UrlHandler().launchInWebViewOrVC(url);
     }
   }
 
   ///DIALOGS & BOTTOM SHEETS
   showContentOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: isAuthor ? BottomSheetType.contentAuthorOptions : BottomSheetType.contentOptions,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "edit") {
         //edit
-        _navigationService.navigateTo(Routes.CreateEventViewRoute, arguments: {
-          'id': event.id,
-        });
+        // _navigationService.navigateTo(Routes.CreateEventViewRoute, arguments: {
+        //   'id': event.id,
+        // });
       } else if (res == "share") {
         //share
-        WebblenUser author = await _userDataService.getWebblenUserByID(event.authorID);
-        String url = await _dynamicLinkService.createEventLink(authorUsername: author.username, event: event);
-        _shareService.shareLink(url);
+        WebblenUser author = await (_userDataService!.getWebblenUserByID(event.authorID) as FutureOr<WebblenUser>);
+        String url = await _dynamicLinkService!.createEventLink(authorUsername: author.username, event: event);
+        _shareService!.shareLink(url);
       } else if (res == "report") {
         //report
-        _eventDataService.reportEvent(eventID: event.id, reporterID: _webblenBaseViewModel.uid);
+        _eventDataService!.reportEvent(eventID: event.id, reporterID: _webblenBaseViewModel!.uid);
       } else if (res == "delete") {
         //delete
         deleteContentConfirmation();
@@ -167,7 +165,7 @@ class EventViewModel extends BaseViewModel {
   }
 
   deleteContentConfirmation() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       title: "Delete Event",
       description: "Are You Sure You Want to Delete this Event?",
       mainButtonTitle: "Delete Event",
@@ -176,17 +174,17 @@ class EventViewModel extends BaseViewModel {
       variant: BottomSheetType.destructiveConfirmation,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "confirmed") {
-        await _eventDataService.deleteEvent(event: event);
-        _navigationService.back();
+        await _eventDataService!.deleteEvent(event: event);
+        _navigationService!.back();
       }
     }
   }
 
   ///NAVIGATION
-  navigateToUserView(String id) {
-    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
+  navigateToUserView(String? id) {
+   // _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
 
 // replaceWithPage() {

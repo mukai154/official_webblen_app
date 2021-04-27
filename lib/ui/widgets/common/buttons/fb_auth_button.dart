@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/custom_colors.dart';
 
 class FacebookAuthButton extends StatelessWidget {
-  final VoidCallback action;
+  final VoidCallback? action;
   FacebookAuthButton({this.action});
 
   @override

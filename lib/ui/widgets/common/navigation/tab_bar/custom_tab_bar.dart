@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class WebblenHomePageTabBar extends StatelessWidget {
-  final TabController tabController;
+  final TabController? tabController;
   WebblenHomePageTabBar({this.tabController});
 
   @override
@@ -92,7 +92,7 @@ class WebblenHomePageTabBar extends StatelessWidget {
 }
 
 class WebblenAllSearchResultsTabBar extends StatelessWidget {
-  final TabController tabController;
+  final TabController? tabController;
   WebblenAllSearchResultsTabBar({this.tabController});
 
   @override
@@ -185,7 +185,7 @@ class WebblenAllSearchResultsTabBar extends StatelessWidget {
 }
 
 class WebblenProfileTabBar extends StatelessWidget {
-  final TabController tabController;
+  final TabController? tabController;
   WebblenProfileTabBar({this.tabController});
 
   @override

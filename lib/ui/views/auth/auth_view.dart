@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_credit_card/credit_card_widget.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/auth/auth_view_model.dart';

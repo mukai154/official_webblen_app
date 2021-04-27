@@ -1,49 +1,49 @@
-import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class WebblenEvent {
-  String id;
-  String authorID;
-  bool hasTickets;
-  bool flashEvent;
-  bool hasStream;
-  String title;
-  String description;
-  String imageURL;
-  String venueName;
-  String venueSize;
-  String streetAddress;
-  List nearbyZipcodes;
-  String city;
-  String province;
-  double lat;
-  double lon;
-  List sharedComs;
-  List tags;
-  int clicks;
-  String website;
-  String fbUsername;
-  String twitterUsername;
-  String instaUsername;
-  int estimatedTurnout;
-  int actualTurnout;
-  Map<dynamic, dynamic> attendees;
-  double payout;
-  String recurrence;
-  int startDateTimeInMilliseconds;
-  int endDateTimeInMilliseconds;
-  String startDate;
-  String startTime;
-  String endDate;
-  String endTime;
-  String timezone;
-  String privacy;
-  bool reported;
-  String webAppLink;
-  List savedBy;
-  bool paidOut;
-  bool openToSponsors;
-  List suggestedUIDs;
+  String? id;
+  String? authorID;
+  bool? hasTickets;
+  bool? flashEvent;
+  bool? hasStream;
+  String? title;
+  String? description;
+  String? imageURL;
+  String? venueName;
+  String? venueSize;
+  String? streetAddress;
+  List? nearbyZipcodes;
+  String? city;
+  String? province;
+  double? lat;
+  double? lon;
+  List? sharedComs;
+  List? tags;
+  int? clicks;
+  String? website;
+  String? fbUsername;
+  String? twitterUsername;
+  String? instaUsername;
+  int? estimatedTurnout;
+  int? actualTurnout;
+  Map<dynamic, dynamic>? attendees;
+  double? payout;
+  String? recurrence;
+  int? startDateTimeInMilliseconds;
+  int? endDateTimeInMilliseconds;
+  String? startDate;
+  String? startTime;
+  String? endDate;
+  String? endTime;
+  String? timezone;
+  String? privacy;
+  bool? reported;
+  String? webAppLink;
+  List? savedBy;
+  bool? paidOut;
+  bool? openToSponsors;
+  List? suggestedUIDs;
 
   WebblenEvent({
     this.id,
@@ -181,7 +181,7 @@ class WebblenEvent {
         'suggestedUIDs': this.suggestedUIDs,
       };
 
-  WebblenEvent generateNewWebblenEvent({@required String authorID}) {
+  WebblenEvent generateNewWebblenEvent({required String? authorID}) {
     String id = getRandomString(30);
     WebblenEvent event = WebblenEvent(
       id: id,

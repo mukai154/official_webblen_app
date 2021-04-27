@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/profile/profile_view_model.dart';
@@ -20,7 +20,7 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   Widget head(ProfileViewModel model) {
     return Container(
@@ -63,18 +63,18 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
     return Container(
       child: Column(
         children: [
-          model.webblenBaseViewModel.user.bio != null && model.webblenBaseViewModel.user.bio.isNotEmpty
+          model.webblenBaseViewModel!.user!.bio != null && model.webblenBaseViewModel!.user!.bio!.isNotEmpty
               ? Container(
                   margin: EdgeInsets.only(top: 4),
                   child: CustomText(
-                    text: model.webblenBaseViewModel.user.bio,
+                    text: model.webblenBaseViewModel!.user!.bio,
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: appFontColor(),
                   ),
                 )
               : Container(),
-          model.webblenBaseViewModel.user.website != null && model.webblenBaseViewModel.user.website.isNotEmpty
+          model.webblenBaseViewModel!.user!.website != null && model.webblenBaseViewModel!.user!.website!.isNotEmpty
               ? GestureDetector(
                   onTap: () => model.openWebsite(),
                   child: Container(
@@ -90,7 +90,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                         ),
                         horizontalSpaceTiny,
                         CustomText(
-                          text: model.webblenBaseViewModel.user.website,
+                          text: model.webblenBaseViewModel!.user!.website,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
                           color: appFontColor(),
@@ -111,13 +111,13 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
         children: [
           SizedBox(height: 16),
           UserProfilePic(
-            userPicUrl: model.webblenBaseViewModel.user.profilePicURL,
+            userPicUrl: model.webblenBaseViewModel!.user!.profilePicURL,
             size: 60,
             isBusy: false,
           ),
           SizedBox(height: 8),
           Text(
-            "@${model.webblenBaseViewModel.user.username}",
+            "@${model.webblenBaseViewModel!.user!.username}",
             style: TextStyle(
               color: appFontColor(),
               fontWeight: FontWeight.bold,
@@ -126,8 +126,8 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
           ),
           verticalSpaceSmall,
           FollowStatsRow(
-            followersLength: model.webblenBaseViewModel.user.followers.length,
-            followingLength: model.webblenBaseViewModel.user.following.length,
+            followersLength: model.webblenBaseViewModel!.user!.followers!.length,
+            followingLength: model.webblenBaseViewModel!.user!.following!.length,
             viewFollowersAction: () => model.navigateToUserFollowersView(),
             viewFollowingAction: () => model.navigateToUserFollowingView(),
           ),
@@ -157,13 +157,13 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 header: "You Have No Posts",
                 subHeader: "Create a New Post to Share with the Community",
                 mainActionButtonTitle: "Create Post",
-                mainAction: () => model.webblenBaseViewModel.navigateToCreatePostPage(),
+                mainAction: () => model.webblenBaseViewModel!.navigateToCreatePostPage(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
                 refreshData: model.refreshPosts,
               )
             : ListPosts(
-                currentUID: model.webblenBaseViewModel.user.id,
+                currentUID: model.webblenBaseViewModel!.user!.id,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('profile-posts'),
@@ -178,7 +178,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 header: "You Have Not Scheduled Any Streams",
                 subHeader: "Find Your Audience and Create a Stream",
                 mainActionButtonTitle: "Create Stream",
-                mainAction: () => model.webblenBaseViewModel.navigateToCreateStreamPage(),
+                mainAction: () => model.webblenBaseViewModel!.navigateToCreateStreamPage(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
                 refreshData: () async {},
@@ -196,7 +196,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                 header: "You Have Not Scheduled Any Events",
                 subHeader: "Create an Event for the Community",
                 mainActionButtonTitle: "Create Event",
-                mainAction: () => model.webblenBaseViewModel.navigateToCreateEventPage(),
+                mainAction: () => model.webblenBaseViewModel!.navigateToCreateEventPage(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
                 refreshData: () async {},
@@ -236,7 +236,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _tabController.dispose();
+    _tabController!.dispose();
   }
 
   @override
@@ -270,8 +270,8 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                             floating: true,
                             snap: true,
                             forceElevated: innerBoxIsScrolled,
-                            expandedHeight: (model.webblenBaseViewModel.user.bio == null || model.webblenBaseViewModel.user.bio.isEmpty) &&
-                                    (model.webblenBaseViewModel.user.website == null || model.webblenBaseViewModel.user.website.isEmpty)
+                            expandedHeight: (model.webblenBaseViewModel!.user!.bio == null || model.webblenBaseViewModel!.user!.bio!.isEmpty) &&
+                                    (model.webblenBaseViewModel!.user!.website == null || model.webblenBaseViewModel!.user!.website!.isEmpty)
                                 ? 200
                                 : 250,
                             backgroundColor: appBackgroundColor(),
@@ -279,7 +279,7 @@ class _ProfileViewState extends State<ProfileView> with SingleTickerProviderStat
                               background: Container(
                                 child: Column(
                                   children: [
-                                    model.webblenBaseViewModel.user == null ? Container() : userDetails(model),
+                                    model.webblenBaseViewModel!.user == null ? Container() : userDetails(model),
                                   ],
                                 ),
                               ),

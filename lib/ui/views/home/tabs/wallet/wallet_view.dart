@@ -97,8 +97,8 @@ class WalletView extends StatelessWidget {
                                 SizedBox(height: 8.0),
                                 USDBalanceBlock(
                                   onPressed: () {},
-                                  balance: model.userStripeInfo.availableBalance ?? 0.00,
-                                  pendingBalance: model.userStripeInfo.pendingBalance ?? 0.00,
+                                  balance: model.userStripeInfo!.availableBalance ?? 0.00,
+                                  pendingBalance: model.userStripeInfo!.pendingBalance ?? 0.00,
                                   // onPressed: () => showStripeAcctBottomSheet(
                                   //     verificationStatus, balance),
                                 ),
@@ -112,7 +112,7 @@ class WalletView extends StatelessWidget {
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16),
                   child: WebblenBalanceBlock(
-                    balance: model.webblenBaseViewModel.user.WBLN,
+                    balance: model.webblenBaseViewModel!.user!.WBLN,
                     onPressed: () {},
                     // balance: webblenBalance,
                     // onPressed: () => showWebblenBottomSheet(webblenBalance),

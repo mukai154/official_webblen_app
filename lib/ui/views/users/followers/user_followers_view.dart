@@ -58,7 +58,7 @@ class UserFollowersView extends StatelessWidget {
       onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => UserFollowersViewModel(),
       builder: (context, model, child) => Scaffold(
-        appBar: appBar(model),
+        appBar: appBar(model) as PreferredSizeWidget?,
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: Container(

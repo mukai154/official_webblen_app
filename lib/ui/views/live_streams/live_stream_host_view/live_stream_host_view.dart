@@ -20,8 +20,8 @@ class LiveStreamHostView extends StatefulWidget {
 
 class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   ScrollController chatViewController = ScrollController();
-  AnimationController giftAnimationController;
-  Animation giftAnimation;
+  late AnimationController giftAnimationController;
+  late Animation giftAnimation;
 
   /// Helper function to get list of native views
   List<Widget> getRenderedViews(LiveStreamHostViewModel model) {
@@ -82,7 +82,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                 Container(
                   width: MediaQuery.of(context).size.width * 0.85,
                   child: Text(
-                    model.webblenLiveStream.title,
+                    model.webblenLiveStream!.title!,
                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -105,7 +105,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                 SizedBox(width: 8.0),
                 ViewerCountBox(viewCount: 1),
                 SizedBox(width: 8.0),
-                CheckInCountBox(checkInCount: model.webblenLiveStream.viewers.length),
+                CheckInCountBox(checkInCount: model.webblenLiveStream!.viewers!.length),
               ],
             ),
           ),
@@ -350,7 +350,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
 
   @override
   Widget build(BuildContext context) {
-    SchedulerBinding.instance.addPostFrameCallback((_) => scrollToChatMessage());
+    SchedulerBinding.instance!.addPostFrameCallback((_) => scrollToChatMessage());
 
     Widget messageList(LiveStreamHostViewModel model) {
       return Container(
@@ -368,18 +368,18 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                   .where('timePostedInMilliseconds', isGreaterThan: model.startChatAfterTimeInMilliseconds)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data.docs.isEmpty) return Container();
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return Container();
                 return ListView.builder(
                   controller: chatViewController,
-                  itemCount: snapshot.data.docs.length,
+                  itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
-                    if (snapshot.data.docs.length > 3) {
+                    if (snapshot.data!.docs.length > 3) {
                       scrollToChatMessage();
                     }
-                    String uid = snapshot.data.docs[index].data()['senderUID'];
-                    String username = '@' + snapshot.data.docs[index].data()['username'];
-                    String message = snapshot.data.docs[index].data()['message'];
-                    String userImgURL = snapshot.data.docs[index].data()['userImgURL'];
+                    String? uid = snapshot.data!.docs[index].data()['senderUID'];
+                    String username = '@' + snapshot.data!.docs[index].data()['username'];
+                    String? message = snapshot.data!.docs[index].data()['message'];
+                    String? userImgURL = snapshot.data!.docs[index].data()['userImgURL'];
                     return username == '@system'
                         ? Container(
                             margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -408,7 +408,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                                     children: [
                                       SizedBox(height: 4.0),
                                       CachedNetworkImage(
-                                        imageUrl: userImgURL,
+                                        imageUrl: userImgURL!,
                                         imageBuilder: (context, imageProvider) => Container(
                                           width: 32.0,
                                           height: 32.0,
@@ -441,7 +441,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                                           horizontal: 8,
                                         ),
                                         child: Text(
-                                          message,
+                                          message!,
                                           style: TextStyle(color: Colors.white, fontSize: 14),
                                         ),
                                       ),
@@ -470,22 +470,22 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("webblen_content_gift_pools")
-                  .doc(model.webblenLiveStream.id)
+                  .doc(model.webblenLiveStream!.id)
                   .collection("logs")
                   .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
                   .orderBy("timePostedInMilliseconds", descending: false)
                   .snapshots(),
               builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data.docs.isEmpty) return Container();
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return Container();
                 return ListView.builder(
                   //controller: chatViewController,
                   itemCount: 1, //snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    int giftID = snapshot.data.docs.last.data()['giftID'];
-                    String message = snapshot.data.docs.last.data()['message'].toStringAsFixed(2);
+                    int? giftID = snapshot.data!.docs.last.data()['giftID'];
+                    String? message = snapshot.data!.docs.last.data()['message'].toStringAsFixed(2);
                     giftAnimationController.forward();
                     return FadeTransition(
-                      opacity: giftAnimation,
+                      opacity: giftAnimation as Animation<double>,
                       child: Container(
                         width: MediaQuery.of(context).size.width - 32,
                         child: Column(

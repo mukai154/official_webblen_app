@@ -6,10 +6,10 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class ListTicketsForEditing extends StatelessWidget {
-  final WebblenTicketDistro ticketDistro;
+  final WebblenTicketDistro? ticketDistro;
   final Function(int) editTicketAtIndex;
 
-  ListTicketsForEditing({@required this.ticketDistro, @required this.editTicketAtIndex});
+  ListTicketsForEditing({required this.ticketDistro, required this.editTicketAtIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +79,7 @@ class ListTicketsForEditing extends StatelessWidget {
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: ticketDistro.tickets.length,
+            itemCount: ticketDistro!.tickets!.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
@@ -89,7 +89,7 @@ class ListTicketsForEditing extends StatelessWidget {
                     Container(
                       width: 150,
                       child: CustomText(
-                        text: ticketDistro.tickets[index]["ticketName"],
+                        text: ticketDistro!.tickets![index]["ticketName"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,
@@ -99,7 +99,7 @@ class ListTicketsForEditing extends StatelessWidget {
                     Container(
                       width: 70,
                       child: CustomText(
-                        text: ticketDistro.tickets[index]["ticketQuantity"],
+                        text: ticketDistro!.tickets![index]["ticketQuantity"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,
@@ -109,7 +109,7 @@ class ListTicketsForEditing extends StatelessWidget {
                     Container(
                       width: 70.0,
                       child: CustomText(
-                        text: ticketDistro.tickets[index]["ticketPrice"],
+                        text: ticketDistro!.tickets![index]["ticketPrice"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,

@@ -9,11 +9,11 @@ import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'destructive_confirmation_bottom_sheet_model.dart';
 
 class DestructiveConfirmationBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const DestructiveConfirmationBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -36,7 +36,7 @@ class DestructiveConfirmationBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CustomText(
-              text: request.title,
+              text: request!.title,
               fontSize: 16,
               fontWeight: FontWeight.bold,
               color: appFontColor(),
@@ -44,7 +44,7 @@ class DestructiveConfirmationBottomSheet extends StatelessWidget {
             ),
             verticalSpaceTiny,
             CustomText(
-              text: request.description,
+              text: request!.description,
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: appFontColorAlt(),
@@ -52,8 +52,8 @@ class DestructiveConfirmationBottomSheet extends StatelessWidget {
             ),
             verticalSpaceMedium,
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "confirmed")),
-              text: request.mainButtonTitle,
+              onPressed: () => completer!(SheetResponse(responseData: "confirmed")),
+              text: request!.mainButtonTitle,
               textSize: 16,
               textColor: Colors.white,
               height: 40,
@@ -64,8 +64,8 @@ class DestructiveConfirmationBottomSheet extends StatelessWidget {
             ),
             verticalSpaceSmall,
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "cancelled")),
-              text: request.secondaryButtonTitle,
+              onPressed: () => completer!(SheetResponse(responseData: "cancelled")),
+              text: request!.secondaryButtonTitle,
               textSize: 16,
               textColor: appFontColor(),
               height: 40,

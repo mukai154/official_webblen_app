@@ -31,21 +31,21 @@ import 'create_live_stream_view_model.dart';
 
 class CreateLiveStreamView extends StatelessWidget {
   Widget selectedTags(CreateLiveStreamViewModel model) {
-    return model.stream.tags == null || model.stream.tags.isEmpty
+    return model.stream!.tags == null || model.stream!.tags!.isEmpty
         ? Container()
         : Container(
             height: 30,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: model.stream.tags.length,
+              itemCount: model.stream!.tags!.length,
               itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.stream.tags[index]);
+                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.stream!.tags![index]);
               },
             ),
           );
   }
 
-  Widget textFieldHeader({@required String header, @required String subHeader, @required bool required}) {
+  Widget textFieldHeader({required String header, required String subHeader, required bool required}) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -100,7 +100,7 @@ class CreateLiveStreamView extends StatelessWidget {
         ? ImagePreviewButton(
             onTap: () => model.selectImage(),
             file: null,
-            imgURL: model.stream.imageURL,
+            imgURL: model.stream!.imageURL,
             height: screenWidth(context),
             width: screenWidth(context),
           )
@@ -113,7 +113,7 @@ class CreateLiveStreamView extends StatelessWidget {
           );
   }
 
-  Widget formSectionDivider({@required String sectionName}) {
+  Widget formSectionDivider({required String sectionName}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -139,7 +139,7 @@ class CreateLiveStreamView extends StatelessWidget {
         shrinkWrap: true,
         children: [
           ///POST IMAGE
-          model.img == null && model.stream.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
+          model.img == null && model.stream!.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
           verticalSpaceMedium,
 
           ///POST TAGS
@@ -207,7 +207,7 @@ class CreateLiveStreamView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 EventPrivacyDropdown(
-                  privacy: model.stream.privacy,
+                  privacy: model.stream!.privacy,
                   onChanged: (val) => model.onSelectedPrivacyFromDropdown(val),
                 ),
 
@@ -221,7 +221,7 @@ class CreateLiveStreamView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 AutoCompleteAddressTextField(
-                  initialValue: model.stream.audienceLocation,
+                  initialValue: model.stream!.audienceLocation,
                   hintText: "Location",
                   onSelectedAddress: (val) => model.setStreamAudienceLocation(val),
                 ),
@@ -246,7 +246,7 @@ class CreateLiveStreamView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 TimeDropdown(
-                  selectedTime: model.stream.startTime,
+                  selectedTime: model.stream!.startTime,
                   onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: true, time: val),
                 ),
                 verticalSpaceMedium,
@@ -270,7 +270,7 @@ class CreateLiveStreamView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 TimeDropdown(
-                  selectedTime: model.stream.endTime,
+                  selectedTime: model.stream!.endTime,
                   onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: false, time: val),
                 ),
                 verticalSpaceMedium,
@@ -283,12 +283,12 @@ class CreateLiveStreamView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 TimezoneDropdown(
-                  selectedTimezone: model.stream.timezone,
+                  selectedTimezone: model.stream!.timezone,
                   onChanged: (val) => model.onSelectedTimezoneFromDropdown(val),
                 ),
 
                 ///EVENT TICKETING, FEES, AND DISCOUNTS
-                model.hasEarningsAccount == null || !model.hasEarningsAccount
+                model.hasEarningsAccount == null || !model.hasEarningsAccount!
                     ? Container()
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -303,7 +303,7 @@ class CreateLiveStreamView extends StatelessWidget {
                           verticalSpaceSmall,
 
                           //list tickets
-                          model.ticketDistro.tickets.isEmpty
+                          model.ticketDistro!.tickets!.isEmpty
                               ? Container()
                               : ListTicketsForEditing(
                                   ticketDistro: model.ticketDistro,
@@ -311,8 +311,8 @@ class CreateLiveStreamView extends StatelessWidget {
                                 ),
 
                           //list fees
-                          model.ticketDistro.fees.isEmpty || model.ticketDistro.tickets.isEmpty ? Container() : verticalSpaceSmall,
-                          model.ticketDistro.fees.isEmpty || model.ticketDistro.tickets.isEmpty
+                          model.ticketDistro!.fees!.isEmpty || model.ticketDistro!.tickets!.isEmpty ? Container() : verticalSpaceSmall,
+                          model.ticketDistro!.fees!.isEmpty || model.ticketDistro!.tickets!.isEmpty
                               ? Container()
                               : ListFeesForEditing(
                                   ticketDistro: model.ticketDistro,
@@ -320,8 +320,8 @@ class CreateLiveStreamView extends StatelessWidget {
                                 ),
 
                           //list discount codes
-                          model.ticketDistro.discountCodes.isEmpty || model.ticketDistro.discountCodes.isEmpty ? Container() : verticalSpaceSmall,
-                          model.ticketDistro.discountCodes.isEmpty || model.ticketDistro.discountCodes.isEmpty
+                          model.ticketDistro!.discountCodes!.isEmpty || model.ticketDistro!.discountCodes!.isEmpty ? Container() : verticalSpaceSmall,
+                          model.ticketDistro!.discountCodes!.isEmpty || model.ticketDistro!.discountCodes!.isEmpty
                               ? Container()
                               : ListDiscountsForEditing(
                                   ticketDistro: model.ticketDistro,
@@ -378,7 +378,7 @@ class CreateLiveStreamView extends StatelessWidget {
                                                 backgroundColor: appButtonColorAlt(),
                                               ),
                                               horizontalSpaceSmall,
-                                              model.ticketDistro.tickets.isEmpty
+                                              model.ticketDistro!.tickets!.isEmpty
                                                   ? Container()
                                                   : CustomIconButton(
                                                       height: 40,
@@ -393,7 +393,7 @@ class CreateLiveStreamView extends StatelessWidget {
                                                       backgroundColor: appButtonColorAlt(),
                                                     ),
                                               horizontalSpaceSmall,
-                                              model.ticketDistro.tickets.isEmpty
+                                              model.ticketDistro!.tickets!.isEmpty
                                                   ? Container()
                                                   : CustomIconButton(
                                                       height: 40,
@@ -420,7 +420,7 @@ class CreateLiveStreamView extends StatelessWidget {
                   header: "Available for Sponsors",
                   subHeader: "Webblen will acquire sponsors for this stream. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
                       "guaranteed.",
-                  initialValue: model.stream.openToSponsors,
+                  initialValue: model.stream!.openToSponsors,
                   onChanged: (val) => model.setSponsorshipStatus(val),
                 ),
                 verticalSpaceMedium,
@@ -555,7 +555,7 @@ class CreateLiveStreamView extends StatelessWidget {
           showBackButton: true,
           onPressedBack: () => model.navigateBack(),
           actionWidget: model.isBusy ? appBarLoadingIndicator() : doneButton(context, model),
-          bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount
+          bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount!
               ? GestureDetector(
                   onTap: () => model.navigateBackToWalletPage(),
                   child: Container(
@@ -574,8 +574,8 @@ class CreateLiveStreamView extends StatelessWidget {
                   ),
                 )
               : null,
-          bottomWidgetHeight: model.hasEarningsAccount != null && !model.hasEarningsAccount ? 40 : null,
-        ),
+          bottomWidgetHeight: model.hasEarningsAccount != null && !model.hasEarningsAccount! ? 40 : null,
+        ) as PreferredSizeWidget?,
         //CustomAppBar().a(title: "New Post", showBackButton: true),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

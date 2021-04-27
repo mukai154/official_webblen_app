@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 
 class PlatformDataService {
-  SnackbarService _snackbarService = locator<SnackbarService>();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
   CollectionReference appReleaseRef = FirebaseFirestore.instance.collection("app_release_info");
   CollectionReference webblenCurrencyRef = FirebaseFirestore.instance.collection("webblen_currency");
 
@@ -13,20 +13,20 @@ class PlatformDataService {
     bool updateAvailable = false;
     String currentVersion = "9.2.1";
     DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
-    String releasedVersion = docSnapshot.data()["versionNumber"];
-    bool versionIsRequired = docSnapshot.data()["versionIsRequired"];
-    if (currentVersion != releasedVersion && versionIsRequired) {
+    String? releasedVersion = docSnapshot.data()!["versionNumber"];
+    bool? versionIsRequired = docSnapshot.data()!["versionIsRequired"];
+    if (currentVersion != releasedVersion && versionIsRequired!) {
       updateAvailable = true;
     }
     return updateAvailable;
   }
 
   ///NEW CONTENT RATES
-  Future<double> getNewPostTaxRate() async {
-    double promo;
+  Future<double?> getNewPostTaxRate() async {
+    double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
     try {
-      promo = snapshot.data()['newPostTaxRate'].toDouble();
+      promo = snapshot.data()!['newPostTaxRate'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -37,11 +37,11 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double> getNewStreamTaxRate() async {
-    double promo;
+  Future<double?> getNewStreamTaxRate() async {
+    double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
     try {
-      promo = snapshot.data()['newStreamTaxRate'].toDouble();
+      promo = snapshot.data()!['newStreamTaxRate'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -52,11 +52,11 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double> getNewEventTaxRate() async {
-    double promo;
+  Future<double?> getNewEventTaxRate() async {
+    double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
     try {
-      promo = snapshot.data()['newEventTaxRate'].toDouble();
+      promo = snapshot.data()!['newEventTaxRate'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -68,11 +68,11 @@ class PlatformDataService {
   }
 
   ///PROMOTIONS
-  Future<double> getPostPromo() async {
-    double promo;
+  Future<double?> getPostPromo() async {
+    double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
     try {
-      promo = snapshot.data()['postPromo'].toDouble();
+      promo = snapshot.data()!['postPromo'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -83,11 +83,11 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double> getStreamPromo() async {
-    double promo;
+  Future<double?> getStreamPromo() async {
+    double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
     try {
-      promo = snapshot.data()['streamPromo'].toDouble();
+      promo = snapshot.data()!['streamPromo'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -98,11 +98,11 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double> getEventPromo() async {
-    double promo;
+  Future<double?> getEventPromo() async {
+    double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
     try {
-      promo = snapshot.data()['eventPromo'].toDouble();
+      promo = snapshot.data()!['eventPromo'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -113,38 +113,38 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double> getEventTicketFee() async {
-    double eventTicketFee;
+  Future<double?> getEventTicketFee() async {
+    double? eventTicketFee;
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
-    eventTicketFee = snapshot.data()['ticketFee'];
+    eventTicketFee = snapshot.data()!['ticketFee'];
     return eventTicketFee;
   }
 
-  Future<double> getTaxRate() async {
-    double taxRate;
+  Future<double?> getTaxRate() async {
+    double? taxRate;
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
-    taxRate = snapshot.data()['taxRate'];
+    taxRate = snapshot.data()!['taxRate'];
     return taxRate;
   }
 
-  Future<String> getStripePubKey() async {
-    String pubKey;
+  Future<String?> getStripePubKey() async {
+    String? pubKey;
     DocumentSnapshot snapshot = await appReleaseRef.doc('stripe').get();
-    pubKey = snapshot.data()['pubKey'];
+    pubKey = snapshot.data()!['pubKey'];
     return pubKey;
   }
 
-  Future<String> getAgoraAppID() async {
-    String appID;
+  Future<String?> getAgoraAppID() async {
+    String? appID;
     DocumentSnapshot snapshot = await appReleaseRef.doc('agora').get();
-    appID = snapshot.data()['appID'];
+    appID = snapshot.data()!['appID'];
     return appID;
   }
 
-  Future<String> getGoogleApiKey() async {
-    String key;
+  Future<String?> getGoogleApiKey() async {
+    String? key;
     DocumentSnapshot snapshot = await appReleaseRef.doc('google').get();
-    key = snapshot.data()['apiKey'];
+    key = snapshot.data()!['apiKey'];
     return key;
   }
 }

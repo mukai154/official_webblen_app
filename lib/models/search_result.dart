@@ -1,8 +1,8 @@
 class SearchResult {
-  String id;
-  String type;
-  String name;
-  String additionalData;
+  String? id;
+  String? type;
+  String? name;
+  String? additionalData;
 
   SearchResult({
     this.id,

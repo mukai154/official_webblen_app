@@ -1,45 +1,45 @@
-import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class WebblenLiveStream {
-  String id;
-  String hostID;
-  bool hasTickets;
-  String title;
-  String description;
-  String imageURL;
-  String audienceLocation;
-  List nearbyZipcodes;
-  String city;
-  String province;
-  double lat;
-  double lon;
-  List sharedComs;
-  List tags;
-  int clicks;
-  String website;
-  String fbUsername;
-  String twitterUsername;
-  String instaUsername;
-  int actualTurnout;
-  List viewers;
-  double payout;
-  int startDateTimeInMilliseconds;
-  int endDateTimeInMilliseconds;
-  String startDate;
-  String startTime;
-  String endDate;
-  String endTime;
-  String timezone;
-  String privacy;
-  bool reported;
-  String webAppLink;
-  List savedBy;
-  bool paidOut;
-  bool openToSponsors;
-  List<Map<dynamic, dynamic>> gifters;
-  double totalGiftAmount;
-  List suggestedUIDs;
+  String? id;
+  String? hostID;
+  bool? hasTickets;
+  String? title;
+  String? description;
+  String? imageURL;
+  String? audienceLocation;
+  List? nearbyZipcodes;
+  String? city;
+  String? province;
+  double? lat;
+  double? lon;
+  List? sharedComs;
+  List? tags;
+  int? clicks;
+  String? website;
+  String? fbUsername;
+  String? twitterUsername;
+  String? instaUsername;
+  int? actualTurnout;
+  List? viewers;
+  double? payout;
+  int? startDateTimeInMilliseconds;
+  int? endDateTimeInMilliseconds;
+  String? startDate;
+  String? startTime;
+  String? endDate;
+  String? endTime;
+  String? timezone;
+  String? privacy;
+  bool? reported;
+  String? webAppLink;
+  List? savedBy;
+  bool? paidOut;
+  bool? openToSponsors;
+  List<Map<dynamic, dynamic>>? gifters;
+  double? totalGiftAmount;
+  List? suggestedUIDs;
 
   WebblenLiveStream({
     this.id,
@@ -165,7 +165,7 @@ class WebblenLiveStream {
         'suggestedUIDs': this.suggestedUIDs,
       };
 
-  WebblenLiveStream generateNewWebblenLiveStream({@required String hostID}) {
+  WebblenLiveStream generateNewWebblenLiveStream({required String? hostID}) {
     String id = getRandomString(30);
     WebblenLiveStream stream = WebblenLiveStream(
       id: id,

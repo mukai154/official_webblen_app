@@ -1,10 +1,10 @@
 class WebblenTicketDistro {
-  String eventID;
-  String authorID;
-  List tickets;
-  List fees;
-  List discountCodes;
-  bool soldOut;
+  String? eventID;
+  String? authorID;
+  List? tickets;
+  List? fees;
+  List? discountCodes;
+  bool? soldOut;
 
   WebblenTicketDistro({
     this.eventID,

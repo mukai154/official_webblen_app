@@ -1,12 +1,12 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/material.dart';
 import 'package:webblen/models/user_stripe_info.dart';
 
 class StripeConnectAccountService {
   CollectionReference stripeRef = FirebaseFirestore.instance.collection('stripe');
 
-  Future<bool> isStripeConnectAccountSetup(String uid) async {
+  Future<bool> isStripeConnectAccountSetup(String? uid) async {
     bool isSetup = false;
     DocumentSnapshot documentSnapshot = await stripeRef.doc(uid).get();
     if (documentSnapshot.exists) {
@@ -15,31 +15,31 @@ class StripeConnectAccountService {
     return isSetup;
   }
 
-  Future<String> getStripeUID(String uid) async {
-    String stripeUID;
+  Future<String?> getStripeUID(String? uid) async {
+    String? stripeUID;
     DocumentSnapshot snapshot = await stripeRef.doc(uid).get();
     if (snapshot.exists) {
-      Map<String, dynamic> data = snapshot.data();
+      Map<String, dynamic> data = snapshot.data()!;
       stripeUID = data['stripeUID'];
     }
     return stripeUID;
   }
 
-  Future getStripeConnectAccountByUID(String uid) async {
-    UserStripeInfo userStripeInfo;
+  Future getStripeConnectAccountByUID(String? uid) async {
+    UserStripeInfo? userStripeInfo;
     DocumentSnapshot snapshot = await stripeRef.doc(uid).get().catchError((e) {
       return e.message;
     });
     if (snapshot.exists) {
       print(snapshot.data());
-      userStripeInfo = UserStripeInfo.fromMap(snapshot.data());
+      userStripeInfo = UserStripeInfo.fromMap(snapshot.data()!);
     }
     return userStripeInfo;
   }
 
   ///TODO: CREATE/RENAME CLOUD FUNCTION
-  Future<Map<String, dynamic>> getStripeConnectAccountVerificationStatus(String uid) async {
-    Map<String, dynamic> res;
+  Future<Map<String, dynamic>?> getStripeConnectAccountVerificationStatus(String uid) async {
+    Map<String, dynamic>? res;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'getStripeConnectAccountVerificationStatus',
     );
@@ -56,15 +56,15 @@ class StripeConnectAccountService {
 
   Future<String> updateStripeAccountVerificationStatus(String uid) async {
     String status = "pending";
-    Map<String, dynamic> res = await getStripeConnectAccountVerificationStatus(uid);
+    Map<String, dynamic> res = await (getStripeConnectAccountVerificationStatus(uid) as FutureOr<Map<String, dynamic>>);
 
     //Check if additional KYC data is required
     List currentlyDue = res['currently_due'];
 
     //Check if any stripe connect account data is pending verification
-    List pending = res['pending_verification'];
+    List? pending = res['pending_verification'];
 
-    if (currentlyDue.length > 1 || pending.isNotEmpty) {
+    if (currentlyDue.length > 1 || pending!.isNotEmpty) {
       await stripeRef.doc(uid).update({"verified": "pending"});
     } else {
       await stripeRef.doc(uid).update({"verified": "verified"});
@@ -73,11 +73,11 @@ class StripeConnectAccountService {
     return status;
   }
 
-  Future<Map<String, dynamic>> getStripeAccountBalance({
-    @required String uid,
-    @required String stripeUID,
+  Future<Map<String, dynamic>?> getStripeAccountBalance({
+    required String uid,
+    required String stripeUID,
   }) async {
-    Map<String, dynamic> res;
+    Map<String, dynamic>? res;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'getStripeAccountBalance',
     );
@@ -93,11 +93,11 @@ class StripeConnectAccountService {
     return res;
   }
 
-  Future<String> performInstantStripePayout({
-    @required String uid,
-    @required String stripeUID,
+  Future<String?> performInstantStripePayout({
+    required String uid,
+    required String stripeUID,
   }) async {
-    String status;
+    String? status;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'performInstantStripePayout',
     );
@@ -113,15 +113,15 @@ class StripeConnectAccountService {
     return status;
   }
 
-  Future<String> submitBankingInfoToStripe({
-    @required String uid,
-    @required String stripeUID,
-    @required String accountHolderName,
-    @required String accountHolderType,
-    @required String routingNumber,
-    @required String accountNumber,
+  Future<String?> submitBankingInfoToStripe({
+    required String uid,
+    required String stripeUID,
+    required String accountHolderName,
+    required String accountHolderType,
+    required String routingNumber,
+    required String accountNumber,
   }) async {
-    String status;
+    String? status;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'submitBankingInfoWeb',
     );
@@ -141,16 +141,16 @@ class StripeConnectAccountService {
     return status;
   }
 
-  Future<String> submitCardInfoToStripe({
-    @required String uid,
-    @required String stripeUID,
-    @required String cardNumber,
-    @required int expMonth,
-    @required int expYear,
-    @required String cvcNumber,
-    @required String cardHolderName,
+  Future<String?> submitCardInfoToStripe({
+    required String uid,
+    required String stripeUID,
+    required String cardNumber,
+    required int expMonth,
+    required int expYear,
+    required String cvcNumber,
+    required String cardHolderName,
   }) async {
-    String status;
+    String? status;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'submitCardInfoWeb',
     );

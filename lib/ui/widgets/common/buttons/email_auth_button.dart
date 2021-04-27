@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class EmailAuthButton extends StatelessWidget {
-  final VoidCallback action;
+  final VoidCallback? action;
   EmailAuthButton({this.action});
 
   @override

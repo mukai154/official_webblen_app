@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 
 class CustomLinearProgressIndicator extends StatelessWidget {
-  final Color color;
+  final Color? color;
 
   const CustomLinearProgressIndicator({this.color});
 
@@ -15,7 +15,7 @@ class CustomLinearProgressIndicator extends StatelessWidget {
         height: 1,
         width: screenWidth(context),
         child: LinearProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(
+          valueColor: AlwaysStoppedAnimation<Color?>(
             color == null ? Colors.black38 : color,
           ),
         ),

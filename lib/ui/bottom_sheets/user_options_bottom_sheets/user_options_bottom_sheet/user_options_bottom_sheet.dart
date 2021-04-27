@@ -7,11 +7,11 @@ import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/user_options
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class UserOptionsBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const UserOptionsBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -34,7 +34,7 @@ class UserOptionsBottomSheet extends StatelessWidget {
                 size: 16,
               ),
               height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "share profile")),
+              onPressed: () => completer!(SheetResponse(responseData: "share profile")),
               backgroundColor: appButtonColor(),
               elevation: 1,
               text: "Share Profile",

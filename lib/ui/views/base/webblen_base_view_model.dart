@@ -1,10 +1,8 @@
-import 'package:auto_route/auto_route.dart';
-import 'package:injectable/injectable.dart';
+import 'package:flutter/material.dart';
 import 'package:location/location.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/models/webblen_event.dart';
@@ -21,30 +19,29 @@ import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/utils/network_status.dart';
 
-@lazySingleton
 class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
   ///SERVICES
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  LocationService _locationService = locator<LocationService>();
-  SnackbarService _snackbarService = locator<SnackbarService>();
-  PostDataService _postDataService = locator<PostDataService>();
-  EventDataService _eventDataService = locator<EventDataService>();
-  ShareService _shareService = locator<ShareService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
-  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
-  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  LocationService? _locationService = locator<LocationService>();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
+  PostDataService? _postDataService = locator<PostDataService>();
+  EventDataService? _eventDataService = locator<EventDataService>();
+  ShareService? _shareService = locator<ShareService>();
+  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  LiveStreamDataService? _liveStreamDataService = locator<LiveStreamDataService>();
 
   ///INITIAL DATA
   InitErrorStatus initErrorStatus = InitErrorStatus.none;
-  String initialCityName;
-  String initialAreaCode;
+  String? initialCityName;
+  String? initialAreaCode;
 
   ///CURRENT USER
-  String uid;
-  WebblenUser user;
+  String? uid;
+  WebblenUser? user;
 
   ///TAB BAR STATE
   int _navBarIndex = 0;
@@ -58,7 +55,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
 
   ///STREAM USER DATA
   @override
-  void onData(WebblenUser data) {
+  void onData(WebblenUser? data) {
     if (data != null) {
       if (user != data) {
         user = data;
@@ -77,15 +74,15 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
         yield null;
       }
       await Future.delayed(Duration(seconds: 1));
-      WebblenUser user = await _userDataService.getWebblenUserByID(uid);
-      yield user;
+      WebblenUser? user = await _userDataService!.getWebblenUserByID(uid);
+      yield user!;
     }
   }
 
   ///INITIALIZE DATA
   initialize() async {
     setBusy(true);
-    uid = await _authService.getCurrentUserID();
+    uid = await _authService!.getCurrentUserID();
     notifyListeners();
 
     //check network status
@@ -93,7 +90,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
     if (!connectedToNetwork) {
       initErrorStatus = InitErrorStatus.network;
       notifyListeners();
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Network Error',
         message: "There Was an Issue Connecting to the Internet",
         duration: Duration(seconds: 5),
@@ -107,7 +104,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
     if (!locationGranted) {
       initErrorStatus = InitErrorStatus.location;
       notifyListeners();
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Location Error',
         message: "There Was an Issue Getting Your Location",
         duration: Duration(seconds: 5),
@@ -118,7 +115,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
 
     //if there are no errors, check for dynamic links
     initErrorStatus = InitErrorStatus.none;
-    await _dynamicLinkService.handleDynamicLinks();
+    await _dynamicLinkService!.handleDynamicLinks();
     notifyListeners();
     setBusy(false);
   }
@@ -132,10 +129,10 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
   ///LOCATION
   Future<bool> getLocationDetails() async {
     try {
-      LocationData location = await _locationService.getCurrentLocation();
-      initialCityName = await _locationService.getCityNameFromLatLon(location.latitude, location.longitude);
-      initialAreaCode = await _locationService.getZipFromLatLon(location.latitude, location.longitude);
-      _userDataService.updateLastSeenZipcode(id: uid, zip: initialAreaCode);
+      LocationData location = await (_locationService!.getCurrentLocation() as FutureOr<LocationData>);
+      initialCityName = await _locationService!.getCityNameFromLatLon(location.latitude, location.longitude);
+      initialAreaCode = await _locationService!.getZipFromLatLon(location.latitude, location.longitude);
+      _userDataService!.updateLastSeenZipcode(id: uid, zip: initialAreaCode);
       notifyListeners();
     } catch (e) {
       return false;
@@ -146,12 +143,12 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
   ///BOTTOM SHEETS
   //bottom sheet for new post, event, or stream
   showAddContentOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: BottomSheetType.addContent,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "new post") {
         navigateToCreatePostPage();
       } else if (res == "new stream") {
@@ -164,64 +161,64 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
   }
 
   //bottom sheet for options one can take with post, event, or stream
-  Future showContentOptions({@required dynamic content}) async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+  Future showContentOptions({required dynamic content}) async {
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: content is WebblenLiveStream
-          ? user.id == content.hostID
+          ? user!.id == content.hostID
               ? BottomSheetType.contentAuthorOptions
               : BottomSheetType.contentOptions
-          : user.id == content.authorID
+          : user!.id == content.authorID
               ? BottomSheetType.contentAuthorOptions
               : BottomSheetType.contentOptions,
     );
 
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "edit") {
         if (content is WebblenPost) {
           //edit post
-          _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {
-            'id': content.id,
-          });
+          // _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {
+          //   'id': content.id,
+          // });
         } else if (content is WebblenEvent) {
           //edit event
-          _navigationService.navigateTo(Routes.CreateEventViewRoute, arguments: {
-            'id': content.id,
-          });
+          // _navigationService.navigateTo(Routes.CreateEventViewRoute, arguments: {
+          //   'id': content.id,
+          // });
         } else if (content is WebblenLiveStream) {
           //edit stream
-          _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {
-            'id': content.id,
-          });
+          // _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {
+          //   'id': content.id,
+          // });
         }
       } else if (res == "share") {
         if (content is WebblenPost) {
           //share post link
-          WebblenUser author = await _userDataService.getWebblenUserByID(content.authorID);
-          String url = await _dynamicLinkService.createPostLink(authorUsername: author.username, post: content);
-          _shareService.shareLink(url);
+          WebblenUser author = await (_userDataService!.getWebblenUserByID(content.authorID) as FutureOr<WebblenUser>);
+          String url = await _dynamicLinkService!.createPostLink(authorUsername: author.username, post: content);
+          _shareService!.shareLink(url);
         } else if (content is WebblenEvent) {
           //share event link
-          WebblenUser author = await _userDataService.getWebblenUserByID(content.authorID);
-          String url = await _dynamicLinkService.createEventLink(authorUsername: author.username, event: content);
-          _shareService.shareLink(url);
+          WebblenUser author = await (_userDataService!.getWebblenUserByID(content.authorID) as FutureOr<WebblenUser>);
+          String url = await _dynamicLinkService!.createEventLink(authorUsername: author.username, event: content);
+          _shareService!.shareLink(url);
         } else if (content is WebblenLiveStream) {
           //share stream link
-          WebblenUser author = await _userDataService.getWebblenUserByID(content.hostID);
-          String url = await _dynamicLinkService.createLiveStreamLink(authorUsername: author.username, stream: content);
-          _shareService.shareLink(url);
+          WebblenUser author = await (_userDataService!.getWebblenUserByID(content.hostID) as FutureOr<WebblenUser>);
+          String url = await _dynamicLinkService!.createLiveStreamLink(authorUsername: author.username, stream: content);
+          _shareService!.shareLink(url);
         }
       } else if (res == "report") {
         if (content is WebblenPost) {
           //report post
-          _postDataService.reportPost(postID: content.id, reporterID: user.id);
+          _postDataService!.reportPost(postID: content.id, reporterID: user!.id);
         } else if (content is WebblenEvent) {
           //report event
-          _eventDataService.reportEvent(eventID: content.id, reporterID: user.id);
+          _eventDataService!.reportEvent(eventID: content.id, reporterID: user!.id);
         } else if (content is WebblenLiveStream) {
           //report stream
-          _liveStreamDataService.reportStream(streamID: content.id, reporterID: user.id);
+          _liveStreamDataService!.reportStream(streamID: content.id, reporterID: user!.id);
         }
       } else if (res == "delete") {
         //delete content
@@ -236,7 +233,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
   //bottom sheet for confirming the removal of a post, event, or stream
   Future<bool> deleteContentConfirmation({dynamic content}) async {
     if (content is WebblenPost) {
-      var sheetResponse = await _bottomSheetService.showCustomSheet(
+      var sheetResponse = await _bottomSheetService!.showCustomSheet(
         title: "Delete Post",
         description: "Are You Sure You Want to Delete this Post?",
         mainButtonTitle: "Delete Post",
@@ -245,10 +242,10 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
         variant: BottomSheetType.destructiveConfirmation,
       );
       if (sheetResponse != null) {
-        String res = sheetResponse.responseData;
+        String? res = sheetResponse.responseData;
         if (res == "confirmed") {
-          _postDataService.deletePost(post: content);
-          _snackbarService.showSnackbar(
+          _postDataService!.deletePost(post: content);
+          _snackbarService!.showSnackbar(
             title: 'Post Deleted',
             message: "Your post has been deleted",
             duration: Duration(seconds: 5),
@@ -257,7 +254,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
         }
       }
     } else if (content is WebblenEvent) {
-      var sheetResponse = await _bottomSheetService.showCustomSheet(
+      var sheetResponse = await _bottomSheetService!.showCustomSheet(
         title: "Delete Event",
         description: "Are You Sure You Want to Delete this Event?",
         mainButtonTitle: "Delete Event",
@@ -266,10 +263,10 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
         variant: BottomSheetType.destructiveConfirmation,
       );
       if (sheetResponse != null) {
-        String res = sheetResponse.responseData;
+        String? res = sheetResponse.responseData;
         if (res == "confirmed") {
-          _eventDataService.deleteEvent(event: content);
-          _snackbarService.showSnackbar(
+          _eventDataService!.deleteEvent(event: content);
+          _snackbarService!.showSnackbar(
             title: 'Event Deleted',
             message: "Your event has been deleted",
             duration: Duration(seconds: 5),
@@ -278,7 +275,7 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
         }
       }
     } else if (content is WebblenLiveStream) {
-      var sheetResponse = await _bottomSheetService.showCustomSheet(
+      var sheetResponse = await _bottomSheetService!.showCustomSheet(
         title: "Delete Stream",
         description: "Are You Sure You Want to Delete this Stream?",
         mainButtonTitle: "Delete Post",
@@ -287,10 +284,10 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
         variant: BottomSheetType.destructiveConfirmation,
       );
       if (sheetResponse != null) {
-        String res = sheetResponse.responseData;
+        String? res = sheetResponse.responseData;
         if (res == "confirmed") {
-          _liveStreamDataService.deleteStream(stream: content);
-          _snackbarService.showSnackbar(
+          _liveStreamDataService!.deleteStream(stream: content);
+          _snackbarService!.showSnackbar(
             title: 'Stream Deleted',
             message: "Your stream has been deleted",
             duration: Duration(seconds: 5),
@@ -304,37 +301,37 @@ class WebblenBaseViewModel extends StreamViewModel<WebblenUser> {
 
   ///NAVIGATION
   navigateToCreatePostPage() {
-    _navigationService.navigateTo(Routes.CreatePostViewRoute);
+   // _navigationService.navigateTo(Routes.CreatePostViewRoute);
   }
 
   navigateToCreateEventPage() {
-    _navigationService.navigateTo(Routes.CreateEventViewRoute);
+   //_navigationService.navigateTo(Routes.CreateEventViewRoute);
   }
 
   navigateToCreateStreamPage() {
-    _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute);
+    //_navigationService.navigateTo(Routes.CreateLiveStreamViewRoute);
   }
 
   ///PROMOS
-  createPostWithPromo({@required double promo}) {
+  createPostWithPromo({required double? promo}) {
     if (promo != null) {
-      _navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {'promo': promo});
+      //_navigationService.navigateTo(Routes.CreatePostViewRoute, arguments: {'promo': promo});
     } else {
       navigateToCreatePostPage();
     }
   }
 
-  createEventWithPromo({@required double promo}) {
+  createEventWithPromo({required double? promo}) {
     if (promo != null) {
-      _navigationService.navigateTo(Routes.CreateEventViewRoute, arguments: {'promo': promo});
+      //_navigationService.navigateTo(Routes.CreateEventViewRoute, arguments: {'promo': promo});
     } else {
       navigateToCreatePostPage();
     }
   }
 
-  createStreamWithPromo({@required double promo}) {
+  createStreamWithPromo({required double? promo}) {
     if (promo != null) {
-      _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {'promo': promo});
+      ///_navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {'promo': promo});
     } else {
       navigateToCreatePostPage();
     }

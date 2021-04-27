@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class WebblenBalanceBlock extends StatelessWidget {
-  final double balance;
-  final VoidCallback onPressed;
+  final double? balance;
+  final VoidCallback? onPressed;
   WebblenBalanceBlock({this.balance, this.onPressed});
 
   @override
@@ -51,7 +51,7 @@ class WebblenBalanceBlock extends StatelessWidget {
                       ),
                       SizedBox(width: 4),
                       Text(
-                        "${balance.toStringAsFixed(2)}",
+                        "${balance!.toStringAsFixed(2)}",
                         style: TextStyle(
                           fontSize: 18.0,
                           color: appFontColor(),

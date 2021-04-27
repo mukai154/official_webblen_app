@@ -30,7 +30,7 @@ bool isValidPassword(String val) {
   return isValid;
 }
 
-bool isValidString(String val) {
+bool isValidString(String? val) {
   bool isValid = true;
   if (val == null || val.isEmpty) {
     isValid = false;

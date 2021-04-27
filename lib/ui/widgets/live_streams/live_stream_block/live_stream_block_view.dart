@@ -15,7 +15,7 @@ class LiveStreamBlockView extends StatelessWidget {
   final WebblenLiveStream stream;
   final Function(WebblenLiveStream) showStreamOptions;
 
-  LiveStreamBlockView({@required this.stream, @required this.showStreamOptions});
+  LiveStreamBlockView({required this.stream, required this.showStreamOptions});
 
   Widget streamStartDate(LiveStreamBlockViewModel model) {
     return Container(
@@ -24,13 +24,13 @@ class LiveStreamBlockView extends StatelessWidget {
         children: [
           SizedBox(height: 16),
           CustomText(
-            text: stream.startDate.substring(4, stream.startDate.length - 6),
+            text: stream.startDate!.substring(4, stream.startDate!.length - 6),
             color: appFontColor(),
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
           CustomText(
-            text: stream.startDate.substring(0, stream.startDate.length - 9),
+            text: stream.startDate!.substring(0, stream.startDate!.length - 9),
             color: appFontColorAlt(),
             fontSize: 16,
             fontWeight: FontWeight.bold,
@@ -63,7 +63,7 @@ class LiveStreamBlockView extends StatelessWidget {
               image: DecorationImage(
                 fit: BoxFit.cover,
                 image: CachedNetworkImageProvider(
-                  stream.imageURL,
+                  stream.imageURL!,
                 ),
               ),
             ),
@@ -197,7 +197,7 @@ class LiveStreamBlockView extends StatelessWidget {
   }
 
   Widget streamTags(LiveStreamBlockViewModel model) {
-    return stream.tags == null || stream.tags.isEmpty
+    return stream.tags == null || stream.tags!.isEmpty
         ? Container()
         : Container(
             margin: EdgeInsets.only(top: 4, bottom: 8, right: 16),
@@ -211,11 +211,11 @@ class LiveStreamBlockView extends StatelessWidget {
                 top: 4.0,
                 bottom: 4.0,
               ),
-              itemCount: stream.tags.length,
+              itemCount: stream.tags!.length,
               itemBuilder: (context, index) {
                 return TagButton(
                   onTap: null,
-                  tag: stream.tags[index],
+                  tag: stream.tags![index],
                 );
               },
             ),

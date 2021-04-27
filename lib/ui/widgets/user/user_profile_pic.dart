@@ -7,9 +7,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class UserProfilePic extends StatelessWidget {
-  final String userPicUrl;
-  final double size;
-  final bool isBusy;
+  final String? userPicUrl;
+  final double? size;
+  final bool? isBusy;
 
   UserProfilePic({
     this.userPicUrl,
@@ -19,12 +19,12 @@ class UserProfilePic extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return isBusy
+    return isBusy!
         ? Container(
             height: size,
             width: size,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(size / 2),
+              borderRadius: BorderRadius.circular(size! / 2),
               child: Container(
                 height: size,
                 width: size,
@@ -44,10 +44,10 @@ class UserProfilePic extends StatelessWidget {
             height: size,
             width: size,
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(size / 2),
+              borderRadius: BorderRadius.circular(size! / 2),
               child: CachedNetworkImage(
                 fit: BoxFit.cover,
-                imageUrl: userPicUrl,
+                imageUrl: userPicUrl!,
                 filterQuality: FilterQuality.medium,
                 placeholder: (context, url) => Container(
                   height: size,
@@ -78,8 +78,8 @@ class UserProfilePic extends StatelessWidget {
 }
 
 class UserProfilePicFromFile extends StatelessWidget {
-  final File file;
-  final double size;
+  final File? file;
+  final double? size;
 
   UserProfilePicFromFile({
     this.file,
@@ -92,12 +92,12 @@ class UserProfilePicFromFile extends StatelessWidget {
       height: size,
       width: size,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(size / 2),
+        borderRadius: BorderRadius.circular(size! / 2),
         child: Container(
           height: size,
           width: size,
           child: Image.file(
-            file,
+            file!,
             filterQuality: FilterQuality.medium,
             fit: BoxFit.cover,
           ),

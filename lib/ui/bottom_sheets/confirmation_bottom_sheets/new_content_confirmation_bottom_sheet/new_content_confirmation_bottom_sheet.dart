@@ -10,11 +10,11 @@ import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progr
 import 'new_content_confirmation_bottom_sheet_model.dart';
 
 class NewContentConfirmationBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const NewContentConfirmationBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -37,7 +37,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             CustomText(
-              text: request.title,
+              text: request!.title,
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: appFontColor(),
@@ -45,7 +45,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
             ),
             verticalSpaceTiny,
             CustomText(
-              text: request.description,
+              text: request!.description,
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: appFontColorAlt(),
@@ -65,7 +65,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                 model.webblenBalance == null
                     ? CustomCircleProgressIndicator(size: 10, color: appActiveColor())
                     : CustomText(
-                        text: "${model.webblenBalance.toStringAsFixed(2)} WBLN",
+                        text: "${model.webblenBalance!.toStringAsFixed(2)} WBLN",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: appFontColor(),
@@ -74,7 +74,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
               ],
             ),
             verticalSpaceSmall,
-            request.customData['promo'] != null
+            request!.customData['promo'] != null
                 ? Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -86,7 +86,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                         textAlign: TextAlign.left,
                       ),
                       CustomText(
-                        text: "+${request.customData['promo'].toStringAsFixed(2)} WBLN",
+                        text: "+${request!.customData['promo'].toStringAsFixed(2)} WBLN",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: model.webblenBalance == null ? Colors.transparent : appConfirmationColor(),
@@ -95,7 +95,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                     ],
                   )
                 : Container(),
-            request.customData['promo'] != null ? verticalSpaceSmall : Container(),
+            request!.customData['promo'] != null ? verticalSpaceSmall : Container(),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -107,7 +107,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
                 CustomText(
-                  text: "-${request.customData['fee'].toStringAsFixed(2)} WBLN",
+                  text: "-${request!.customData['fee'].toStringAsFixed(2)} WBLN",
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: model.webblenBalance == null ? Colors.transparent : appDestructiveColor(),
@@ -138,9 +138,9 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                       ),
                       horizontalSpaceSmall,
                       CustomText(
-                        text: request.customData['promo'] == null
-                            ? "${(model.webblenBalance - request.customData['fee']).toStringAsFixed(2)} WBLN"
-                            : "${(model.webblenBalance + request.customData['promo'] - request.customData['fee']).toStringAsFixed(2)} WBLN",
+                        text: request!.customData['promo'] == null
+                            ? "${(model.webblenBalance! - request!.customData['fee']).toStringAsFixed(2)} WBLN"
+                            : "${(model.webblenBalance! + request!.customData['promo'] - request!.customData['fee']).toStringAsFixed(2)} WBLN",
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
                         color: appFontColor(),
@@ -152,11 +152,11 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
             CustomButton(
               onPressed: model.webblenBalance == null
                   ? null
-                  : request.customData['promo'] != null && (model.webblenBalance + request.customData['promo']) < request.customData['fee'] ||
-                          request.customData['promo'] == null && model.webblenBalance < request.customData['fee']
-                      ? () => completer(SheetResponse(responseData: "insufficient funds"))
-                      : () => completer(SheetResponse(responseData: "confirmed")),
-              text: model.webblenBalance == null ? "Calculating Total..." : request.mainButtonTitle,
+                  : request!.customData['promo'] != null && (model.webblenBalance! + request!.customData['promo']) < request!.customData['fee'] ||
+                          request!.customData['promo'] == null && model.webblenBalance! < request!.customData['fee']
+                      ? () => completer!(SheetResponse(responseData: "insufficient funds"))
+                      : () => completer!(SheetResponse(responseData: "confirmed")),
+              text: model.webblenBalance == null ? "Calculating Total..." : request!.mainButtonTitle,
               textSize: 16,
               textColor: model.webblenBalance == null ? appFontColorAlt() : Colors.white,
               height: 40,
@@ -167,8 +167,8 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
             ),
             verticalSpaceSmall,
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "cancelled")),
-              text: request.secondaryButtonTitle,
+              onPressed: () => completer!(SheetResponse(responseData: "cancelled")),
+              text: request!.secondaryButtonTitle,
               textSize: 16,
               textColor: appFontColor(),
               height: 40,

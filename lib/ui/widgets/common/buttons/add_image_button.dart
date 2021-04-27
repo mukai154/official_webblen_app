@@ -13,7 +13,7 @@ class ImageButton extends StatelessWidget {
   final bool isOptional;
   final double height;
   final double width;
-  ImageButton({@required this.onTap, @required this.isOptional, @required this.height, @required this.width});
+  ImageButton({required this.onTap, required this.isOptional, required this.height, required this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -58,12 +58,12 @@ class ImageButton extends StatelessWidget {
 
 class ImagePreviewButton extends StatelessWidget {
   final VoidCallback onTap;
-  final File file;
-  final String imgURL;
+  final File? file;
+  final String? imgURL;
   final double height;
   final double width;
 
-  ImagePreviewButton({@required this.onTap, @required this.file, @required this.imgURL, @required this.height, @required this.width});
+  ImagePreviewButton({required this.onTap, required this.file, required this.imgURL, required this.height, required this.width});
 
   @override
   Widget build(BuildContext context) {
@@ -73,8 +73,8 @@ class ImagePreviewButton extends StatelessWidget {
         height: height,
         width: width,
         child: file == null
-            ? CachedNetworkImage(imageUrl: imgURL == null ? "" : imgURL, fit: BoxFit.contain, filterQuality: FilterQuality.medium)
-            : Image.file(file, fit: BoxFit.contain, filterQuality: FilterQuality.medium),
+            ? CachedNetworkImage(imageUrl: imgURL == null ? "" : imgURL!, fit: BoxFit.contain, filterQuality: FilterQuality.medium)
+            : Image.file(file!, fit: BoxFit.contain, filterQuality: FilterQuality.medium),
       ),
     );
   }

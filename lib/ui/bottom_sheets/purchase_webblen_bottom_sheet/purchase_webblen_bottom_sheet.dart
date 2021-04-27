@@ -4,18 +4,18 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/ui/bottom_sheets/purchase_webblen_bottom_sheet/purchase_webblen_bottom_sheet_model.dart';
 
 class PurchaseWebblenBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const PurchaseWebblenBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
 
-  Widget _gridItem({int itemNum, String prodID, PurchaseWebblenBottomSheetModel model}) {
+  Widget _gridItem({int? itemNum, String? prodID, PurchaseWebblenBottomSheetModel? model}) {
     return GestureDetector(
-      onTap: () => model.purchaseProduct(prodID),
+      onTap: () => model!.purchaseProduct(prodID!),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.grey[850],
@@ -107,7 +107,7 @@ class PurchaseWebblenBottomSheet extends StatelessWidget {
                         child: Row(
                           children: <Widget>[
                             Text(
-                              model.webblenBaseViewModel.user.WBLN.toStringAsFixed(2),
+                              model.webblenBaseViewModel!.user!.WBLN!.toStringAsFixed(2),
                               style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
                             ),
                           ],
@@ -156,7 +156,7 @@ class PurchaseWebblenBottomSheet extends StatelessWidget {
                   color: Colors.white,
                 ),
               ),
-              onTap: () => completer(SheetResponse(responseData: "back")),
+              onTap: () => completer!(SheetResponse(responseData: "back")),
             ),
           ],
         ),

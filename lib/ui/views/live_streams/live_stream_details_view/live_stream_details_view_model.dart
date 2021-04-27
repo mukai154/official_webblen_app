@@ -1,10 +1,10 @@
-import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
@@ -24,43 +24,44 @@ import 'package:webblen/utils/add_to_calendar.dart';
 import 'package:webblen/utils/url_handler.dart';
 
 class LiveStreamDetailsViewModel extends BaseViewModel {
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  LiveStreamDataService _streamDataService = locator<LiveStreamDataService>();
-  TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
-  LocationService _locationService = locator<LocationService>();
-  CommentDataService _commentDataService = locator<CommentDataService>();
-  NotificationDataService _notificationDataService = locator<NotificationDataService>();
-  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
-  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
-  ShareService _shareService = locator<ShareService>();
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  LiveStreamDataService? _streamDataService = locator<LiveStreamDataService>();
+  TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
+  LocationService? _locationService = locator<LocationService>();
+  CommentDataService? _commentDataService = locator<CommentDataService>();
+  NotificationDataService? _notificationDataService = locator<NotificationDataService>();
+  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  ShareService? _shareService = locator<ShareService>();
 
   ///STREAM HOST
-  WebblenUser host;
+  WebblenUser? host;
   bool isHost = false;
 
   ///STREAM
-  WebblenLiveStream stream;
+  late WebblenLiveStream stream;
   bool hasSocialAccounts = false;
   bool streamIsLive = false;
 
   ///TICKETS
-  WebblenTicketDistro ticketDistro;
+  WebblenTicketDistro? ticketDistro;
 
   ///INITIALIZE
   initialize(BuildContext context) async {
     setBusy(true);
 
-    Map<String, dynamic> args = RouteData.of(context).arguments;
+    Map<String, dynamic> args = {};
+
     String streamID = args['id'] ?? "";
 
     //get stream data
-    var res = await _streamDataService.getStreamByID(streamID);
+    var res = await _streamDataService!.getStreamByID(streamID);
     if (res == null) {
-      _navigationService.back();
+      _navigationService!.back();
       return;
     } else {
       stream = res;
@@ -70,22 +71,22 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
     isStreamLive();
 
     //get tickets if they exist
-    if (stream.hasTickets) {
-      ticketDistro = await _ticketDistroDataService.getTicketDistroByID(stream.id);
+    if (stream.hasTickets!) {
+      ticketDistro = await (_ticketDistroDataService!.getTicketDistroByID(stream.id) as FutureOr<WebblenTicketDistro?>);
     }
 
     //check if stream has social accounts
-    if ((stream.fbUsername != null && stream.fbUsername.isNotEmpty) ||
-        (stream.instaUsername != null && stream.instaUsername.isNotEmpty) ||
-        (stream.twitterUsername != null && stream.twitterUsername.isNotEmpty) ||
-        (stream.website != null && stream.website.isNotEmpty)) {
+    if ((stream.fbUsername != null && stream.fbUsername!.isNotEmpty) ||
+        (stream.instaUsername != null && stream.instaUsername!.isNotEmpty) ||
+        (stream.twitterUsername != null && stream.twitterUsername!.isNotEmpty) ||
+        (stream.website != null && stream.website!.isNotEmpty)) {
       hasSocialAccounts = true;
     }
 
     //get author info
-    host = await _userDataService.getWebblenUserByID(stream.hostID);
+    host = await _userDataService!.getWebblenUserByID(stream.hostID);
 
-    if (_webblenBaseViewModel.uid == stream.hostID) {
+    if (_webblenBaseViewModel!.uid == stream.hostID) {
       isHost = true;
     }
 
@@ -95,9 +96,9 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
 
   isStreamLive() {
     int currentDateInMilli = DateTime.now().millisecondsSinceEpoch;
-    int eventStartDateInMilli = stream.startDateTimeInMilliseconds;
-    int eventEndDateInMilli = stream.endDateTimeInMilliseconds;
-    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli) {
+    int eventStartDateInMilli = stream.startDateTimeInMilliseconds!;
+    int? eventEndDateInMilli = stream.endDateTimeInMilliseconds;
+    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli!) {
       streamIsLive = true;
     } else {
       streamIsLive = false;
@@ -137,7 +138,7 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
 
   openWebsite() {
     if (stream.website != null) {
-      String url = stream.website;
+      String url = stream.website!;
       UrlHandler().launchInWebViewOrVC(url);
     }
   }
@@ -153,11 +154,11 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
   Future<bool> verifyPermissions() async {
     //check camera permissions
     PermissionStatus cameraPermission = await Permission.camera.status;
-    if (cameraPermission == PermissionStatus.undetermined) {
+    if (cameraPermission == null) {
       cameraPermission = await Permission.camera.request();
     }
     if (cameraPermission == PermissionStatus.denied || cameraPermission == PermissionStatus.permanentlyDenied) {
-      DialogResponse response = await _dialogService.showDialog(
+      DialogResponse? response = await _dialogService!.showDialog(
         title: "Camera Usage Required",
         description: "Enable access to your camera in order to stream video on Webblen in the app settings.",
         cancelTitle: "Cancel",
@@ -174,11 +175,11 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
 
     //check microphone permissions
     PermissionStatus micorphonePermission = await Permission.microphone.status;
-    if (micorphonePermission == PermissionStatus.undetermined) {
+    if (micorphonePermission == null) {
       micorphonePermission = await Permission.microphone.request();
     }
     if (micorphonePermission == PermissionStatus.denied || micorphonePermission == PermissionStatus.permanentlyDenied) {
-      DialogResponse response = await _dialogService.showDialog(
+      DialogResponse? response = await _dialogService!.showDialog(
         title: "Microphone Usage Required",
         description: "Enable access to your microphone in order to stream video on Webblen in the app settings.",
         cancelTitle: "Cancel",
@@ -198,25 +199,25 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
 
   ///DIALOGS & BOTTOM SHEETS
   showContentOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: isHost ? BottomSheetType.contentAuthorOptions : BottomSheetType.contentOptions,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "edit") {
         //edit
-        _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {
-          'id': stream.id,
-        });
+        // _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {
+        //   'id': stream.id,
+        // });
       } else if (res == "share") {
         //share
-        WebblenUser author = await _userDataService.getWebblenUserByID(stream.hostID);
-        String url = await _dynamicLinkService.createLiveStreamLink(authorUsername: author.username, stream: stream);
-        _shareService.shareLink(url);
+        WebblenUser author = await (_userDataService!.getWebblenUserByID(stream.hostID) as FutureOr<WebblenUser>);
+        String url = await _dynamicLinkService!.createLiveStreamLink(authorUsername: author.username, stream: stream);
+        _shareService!.shareLink(url);
       } else if (res == "report") {
         //report
-        _streamDataService.reportStream(streamID: stream.id, reporterID: _webblenBaseViewModel.uid);
+        _streamDataService!.reportStream(streamID: stream.id, reporterID: _webblenBaseViewModel!.uid);
       } else if (res == "delete") {
         //delete
         deleteContentConfirmation();
@@ -225,7 +226,7 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
   }
 
   deleteContentConfirmation() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       title: "Delete Stream",
       description: "Are You Sure You Want to Delete this Stream?",
       mainButtonTitle: "Delete Stream",
@@ -234,21 +235,21 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
       variant: BottomSheetType.destructiveConfirmation,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "confirmed") {
-        await _streamDataService.deleteStream(stream: stream);
-        _navigationService.back();
+        await _streamDataService!.deleteStream(stream: stream);
+        _navigationService!.back();
       }
     }
   }
 
   ///NAVIGATION
-  navigateToUserView(String id) {
-    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
+  navigateToUserView(String? id) {
+   // _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
 
-  navigateToStreamHost(String id) {
-    _navigationService.navigateTo(Routes.LiveStreamHostViewRoute, arguments: {'id': id});
+  navigateToStreamHost(String? id) {
+    //_navigationService.navigateTo(Routes.LiveStreamHostViewRoute, arguments: {'id': id});
   }
 
 // replaceWithPage() {

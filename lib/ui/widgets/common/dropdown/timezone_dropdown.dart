@@ -5,9 +5,9 @@ import 'package:webblen/constants/time.dart';
 import '../custom_text.dart';
 
 class TimezoneDropdown extends StatelessWidget {
-  final String selectedTimezone;
-  final Function(String) onChanged;
-  TimezoneDropdown({@required this.selectedTimezone, @required this.onChanged});
+  final String? selectedTimezone;
+  final Function(String?) onChanged;
+  TimezoneDropdown({required this.selectedTimezone, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +43,7 @@ class TimezoneDropdown extends StatelessWidget {
           ),
         );
       }).toList(),
-      onChanged: (val) => onChanged(val),
+      onChanged: (dynamic val) => onChanged(val),
     );
   }
 }

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 
 class EventPrivacyDropdown extends StatelessWidget {
-  final String privacy;
-  final Function(String) onChanged;
-  EventPrivacyDropdown({@required this.privacy, @required this.onChanged});
+  final String? privacy;
+  final Function(String?) onChanged;
+  EventPrivacyDropdown({required this.privacy, required this.onChanged});
 
   final List<String> privacyOptions = ['Public', 'Private'];
   @override
@@ -23,7 +23,7 @@ class EventPrivacyDropdown extends StatelessWidget {
               child: Text(val),
             );
           }).toList(),
-          onChanged: (val) => onChanged(val),
+          onChanged: (dynamic val) => onChanged(val),
         ),
       ),
     );

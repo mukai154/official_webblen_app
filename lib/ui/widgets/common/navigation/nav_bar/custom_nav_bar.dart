@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class CustomNavBar extends StatelessWidget {
-  final List<Widget> navBarItems;
+  final List<Widget>? navBarItems;
 
   CustomNavBar({this.navBarItems});
 
@@ -28,7 +28,7 @@ class CustomNavBar extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: navBarItems,
+        children: navBarItems!,
       ),
     );
   }

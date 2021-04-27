@@ -1,21 +1,21 @@
 import 'package:flutter/material.dart';
 
 class WebblenUserPreferences {
-  String id;
-  bool notifyNewFollowers;
-  bool notifyMentions;
-  bool notifyEvents;
-  bool notifyPosts;
-  bool notifyStreams;
-  bool notifyContentSaves;
-  bool notifyContentComments;
-  bool notifyAvailableCheckIns;
-  bool displayCreateEventActivity;
-  bool displayCheckInEventActivity;
-  bool displayCreateLiveStreamActivity;
-  bool displayCheckInLiveStreamActivity;
-  bool displayCreatePostActivity;
-  bool displayCommentPostActivity;
+  String? id;
+  bool? notifyNewFollowers;
+  bool? notifyMentions;
+  bool? notifyEvents;
+  bool? notifyPosts;
+  bool? notifyStreams;
+  bool? notifyContentSaves;
+  bool? notifyContentComments;
+  bool? notifyAvailableCheckIns;
+  bool? displayCreateEventActivity;
+  bool? displayCheckInEventActivity;
+  bool? displayCreateLiveStreamActivity;
+  bool? displayCheckInLiveStreamActivity;
+  bool? displayCreatePostActivity;
+  bool? displayCommentPostActivity;
 
   WebblenUserPreferences({
     this.id,
@@ -72,7 +72,7 @@ class WebblenUserPreferences {
         'displayCommentPostActivity': this.displayCommentPostActivity,
       };
 
-  WebblenUserPreferences generateNewPreferences({@required String id}) {
+  WebblenUserPreferences generateNewPreferences({required String id}) {
     WebblenUserPreferences preferences = WebblenUserPreferences(
       id: id,
       notifyNewFollowers: true,

@@ -59,7 +59,7 @@ class RedeemedRewardsView extends StatelessWidget {
             children: [
               Text(
                 TimeCalc().getPastTimeFromMilliseconds(
-                  redeemedReward.purchaseTimeInMilliseconds,
+                  redeemedReward.purchaseTimeInMilliseconds!,
                 ),
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -103,7 +103,7 @@ class RedeemedRewardsView extends StatelessWidget {
             children: [
               Text(
                 TimeCalc().getPastTimeFromMilliseconds(
-                  redeemedReward.purchaseTimeInMilliseconds,
+                  redeemedReward.purchaseTimeInMilliseconds!,
                 ),
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -133,7 +133,7 @@ class RedeemedRewardsView extends StatelessWidget {
             appBar: CustomAppBar().basicAppBar(
               title: "Redeemed Rewards",
               showBackButton: true,
-            ),
+            ) as PreferredSizeWidget?,
             body: model.isBusy
                 ? Container(
                     color: appBackgroundColor(),
@@ -218,7 +218,7 @@ class RedeemedRewardsView extends StatelessWidget {
                             itemCount: model.redeemedRewardResults.length,
                             itemBuilder: (context, index) {
                               WebblenRedeemedReward redeemedReward = WebblenRedeemedReward.fromMap(
-                                model.redeemedRewardResults[index].data(),
+                                model.redeemedRewardResults[index].data()!,
                               );
                               return redeemedReward.rewardType == RewardType.webblenClothes ? merchBlock(redeemedReward) : cashBlock(redeemedReward);
                             },

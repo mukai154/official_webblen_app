@@ -1,8 +1,8 @@
 class UserBankingInfo {
-  String accountHolderName;
-  String accountHolderType;
-  String bankName;
-  String last4;
+  String? accountHolderName;
+  String? accountHolderType;
+  String? bankName;
+  String? last4;
 
   UserBankingInfo({
     this.accountHolderName,
@@ -28,11 +28,11 @@ class UserBankingInfo {
 }
 
 class UserCardInfo {
-  String brand;
-  String expMonth;
-  String expYear;
-  String cardType;
-  String last4;
+  String? brand;
+  String? expMonth;
+  String? expYear;
+  String? cardType;
+  String? last4;
 
   UserCardInfo({
     this.brand,
@@ -61,12 +61,12 @@ class UserCardInfo {
 }
 
 class UserStripeInfo {
-  double availableBalance;
-  UserBankingInfo userBankingInfo;
-  UserCardInfo userCardInfo;
-  double pendingBalance;
-  String stripeUID;
-  String verified;
+  double? availableBalance;
+  UserBankingInfo? userBankingInfo;
+  UserCardInfo? userCardInfo;
+  double? pendingBalance;
+  String? stripeUID;
+  String? verified;
 
   UserStripeInfo({
     this.availableBalance,
@@ -89,8 +89,8 @@ class UserStripeInfo {
 
   Map<String, dynamic> toMap() => {
         'availableBalance': this.availableBalance,
-        'bankInfo': this.userBankingInfo.toMap(),
-        'cardInfo': this.userCardInfo.toMap(),
+        'bankInfo': this.userBankingInfo!.toMap(),
+        'cardInfo': this.userCardInfo!.toMap(),
         'pendingBalance': this.pendingBalance,
         'stripeUID': this.stripeUID,
         'verified': this.verified,

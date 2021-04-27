@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class PhoneAuthButton extends StatelessWidget {
-  final VoidCallback action;
+  final VoidCallback? action;
   PhoneAuthButton({this.action});
 
   @override

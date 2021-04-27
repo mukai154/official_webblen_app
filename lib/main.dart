@@ -2,8 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/app/theme_config.dart';
 import 'package:webblen/ui/bottom_sheets/setup_bottom_sheet_ui.dart';
 
@@ -42,8 +42,8 @@ class WebblenApp extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: themeMode,
         initialRoute: Routes.RootViewRoute,
-        onGenerateRoute: WebblenRouter().onGenerateRoute,
-        navigatorKey: locator<NavigationService>().navigatorKey,
+        onGenerateRoute: StackedRouter().onGenerateRoute,
+        navigatorKey: StackedService.navigatorKey,
       ),
     );
   }

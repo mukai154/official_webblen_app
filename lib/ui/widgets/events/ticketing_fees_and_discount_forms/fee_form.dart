@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/custom_colors.dart';
@@ -16,11 +16,11 @@ class FeeForm extends StatelessWidget {
   final VoidCallback validateAndSubmitFee;
   final VoidCallback deleteFee;
   FeeForm({
-    @required this.editingFee,
-    @required this.feeNameTextController,
-    @required this.feePriceTextController,
-    @required this.validateAndSubmitFee,
-    @required this.deleteFee,
+    required this.editingFee,
+    required this.feeNameTextController,
+    required this.feePriceTextController,
+    required this.validateAndSubmitFee,
+    required this.deleteFee,
   });
 
   @override

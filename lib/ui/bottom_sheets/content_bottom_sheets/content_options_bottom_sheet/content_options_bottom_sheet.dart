@@ -7,11 +7,11 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class ContentOptionsBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const ContentOptionsBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -29,7 +29,7 @@ class ContentOptionsBottomSheet extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "share")),
+              onPressed: () => completer!(SheetResponse(responseData: "share")),
               text: "Share",
               textSize: 16,
               textColor: appFontColor(),
@@ -41,7 +41,7 @@ class ContentOptionsBottomSheet extends StatelessWidget {
             ),
             verticalSpaceSmall,
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "report")),
+              onPressed: () => completer!(SheetResponse(responseData: "report")),
               text: "Report",
               textSize: 16,
               textColor: appDestructiveColor(),

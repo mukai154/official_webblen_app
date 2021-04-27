@@ -14,7 +14,7 @@ class SettingsView extends StatelessWidget {
         appBar: CustomAppBar().basicAppBar(
           title: "Settings",
           showBackButton: true,
-        ),
+        ) as PreferredSizeWidget?,
         body: Container(
           color: Theme.of(context).backgroundColor,
           padding: EdgeInsets.symmetric(vertical: 8.0),

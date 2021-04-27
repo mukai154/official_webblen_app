@@ -1,14 +1,14 @@
 class WebblenPostComment {
-  String postID;
-  String senderUID;
-  String username;
-  String message;
-  bool isReply;
-  String replyReceiverUsername;
-  String originalReplyCommentID;
-  List replies;
-  int replyCount;
-  int timePostedInMilliseconds;
+  String? postID;
+  String? senderUID;
+  String? username;
+  String? message;
+  bool? isReply;
+  String? replyReceiverUsername;
+  String? originalReplyCommentID;
+  List? replies;
+  int? replyCount;
+  int? timePostedInMilliseconds;
 
   WebblenPostComment({
     this.postID,

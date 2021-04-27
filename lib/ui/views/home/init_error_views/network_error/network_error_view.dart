@@ -8,7 +8,7 @@ import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class NetworkErrorView extends StatelessWidget {
   final VoidCallback tryAgainAction;
-  NetworkErrorView({@required this.tryAgainAction});
+  NetworkErrorView({required this.tryAgainAction});
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<NetworkErrorViewModel>.nonReactive(

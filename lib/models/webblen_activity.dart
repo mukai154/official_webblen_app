@@ -2,16 +2,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class WebblenActivity {
-  String id;
-  String uid;
-  String contentID;
-  String type;
-  String header;
-  String subHeader;
+  String? id;
+  String? uid;
+  String? contentID;
+  String? type;
+  String? header;
+  String? subHeader;
   dynamic additionalData;
-  int timePostedInMilliseconds;
-  List associatedTags;
-  bool isPublic;
+  int? timePostedInMilliseconds;
+  List? associatedTags;
+  bool? isPublic;
 
   WebblenActivity({
     this.id,
@@ -54,7 +54,7 @@ class WebblenActivity {
       };
 
   WebblenActivity generateCreatePostActivity(
-      {@required String uid, @required String username, @required String contentID, @required List associatedTags, @required bool isPublic}) {
+      {required String uid, required String username, required String contentID, required List associatedTags, required bool isPublic}) {
     String id = getRandomString(30);
 
     WebblenActivity activity = WebblenActivity(
@@ -74,12 +74,12 @@ class WebblenActivity {
   }
 
   WebblenActivity generatePostCommentActivity(
-      {@required String uid,
-      @required String username,
-      @required String contentID,
-      @required List associatedTags,
-      @required bool isPublic,
-      @required String commentID}) {
+      {required String uid,
+      required String username,
+      required String contentID,
+      required List associatedTags,
+      required bool isPublic,
+      required String commentID}) {
     String id = getRandomString(30);
 
     WebblenActivity activity = WebblenActivity(
@@ -99,7 +99,7 @@ class WebblenActivity {
   }
 
   WebblenActivity generateCreateStreamActivity(
-      {@required String uid, @required String username, @required String contentID, @required List associatedTags, @required bool isPublic}) {
+      {required String uid, required String username, required String contentID, required List associatedTags, required bool isPublic}) {
     String id = getRandomString(30);
 
     WebblenActivity activity = WebblenActivity(
@@ -118,7 +118,7 @@ class WebblenActivity {
   }
 
   WebblenActivity generateCheckIntoStreamActivity(
-      {@required String uid, @required String username, @required String contentID, @required List associatedTags, @required bool isPublic}) {
+      {required String uid, required String username, required String contentID, required List associatedTags, required bool isPublic}) {
     String id = getRandomString(30);
 
     WebblenActivity activity = WebblenActivity(
@@ -137,7 +137,7 @@ class WebblenActivity {
   }
 
   WebblenActivity generateNewEventActivity(
-      {@required String uid, @required String username, @required String contentID, @required List associatedTags, @required bool isPublic}) {
+      {required String uid, required String username, required String contentID, required List associatedTags, required bool isPublic}) {
     String id = getRandomString(30);
 
     WebblenActivity activity = WebblenActivity(
@@ -156,7 +156,7 @@ class WebblenActivity {
   }
 
   WebblenActivity generateCheckIntoEventActivity(
-      {@required String uid, @required String username, @required String contentID, @required List associatedTags, @required bool isPublic}) {
+      {required String uid, required String username, required String contentID, required List associatedTags, required bool isPublic}) {
     String id = getRandomString(30);
 
     WebblenActivity activity = WebblenActivity(

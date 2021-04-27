@@ -1,14 +1,14 @@
 class WebblenRedeemedReward {
-  String address1;
-  String address2;
-  String email;
-  int purchaseTimeInMilliseconds;
-  String rewardID;
-  String rewardTitle;
-  String rewardType;
-  String clothingSize;
-  String rewardStatus;
-  String uid;
+  String? address1;
+  String? address2;
+  String? email;
+  int? purchaseTimeInMilliseconds;
+  String? rewardID;
+  String? rewardTitle;
+  String? rewardType;
+  String? clothingSize;
+  String? rewardStatus;
+  String? uid;
 
   WebblenRedeemedReward({
     this.address1,

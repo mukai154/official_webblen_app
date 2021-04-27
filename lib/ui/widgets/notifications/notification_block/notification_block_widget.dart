@@ -12,7 +12,7 @@ import 'notification_block_model.dart';
 class NotificationBlockWidget extends StatelessWidget {
   final WebblenNotification notification;
   NotificationBlockWidget({
-    @required this.notification,
+    required this.notification,
   });
 
   Widget notifIcon() {
@@ -66,7 +66,7 @@ class NotificationBlockWidget extends StatelessWidget {
                   children: [
                     FittedBox(
                       child: Text(
-                        notification.header,
+                        notification.header!,
                         style: TextStyle(
                           fontSize: 14,
                           color: appFontColor(),
@@ -76,7 +76,7 @@ class NotificationBlockWidget extends StatelessWidget {
                     ),
                     SizedBox(height: 2),
                     Text(
-                      notification.subHeader == null || notification.subHeader.isEmpty ? "View" : notification.subHeader,
+                      notification.subHeader == null || notification.subHeader!.isEmpty ? "View" : notification.subHeader!,
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey,

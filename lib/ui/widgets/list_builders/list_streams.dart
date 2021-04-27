@@ -12,15 +12,15 @@ class ListLiveStreams extends StatelessWidget {
   final ScrollController scrollController;
   final Function(WebblenLiveStream) showStreamOptions;
   ListLiveStreams(
-      {@required this.refreshData,
-      @required this.dataResults,
-      @required this.pageStorageKey,
-      @required this.scrollController,
-      @required this.showStreamOptions});
+      {required this.refreshData,
+      required this.dataResults,
+      required this.pageStorageKey,
+      required this.scrollController,
+      required this.showStreamOptions});
 
   Widget listData() {
     return RefreshIndicator(
-      onRefresh: refreshData,
+      onRefresh: refreshData as Future<void> Function(),
       backgroundColor: appBackgroundColor(),
       child: ListView.builder(
         physics: AlwaysScrollableScrollPhysics(),

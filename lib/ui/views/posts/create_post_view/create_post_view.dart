@@ -13,15 +13,15 @@ import 'package:webblen/ui/widgets/tags/tag_dropdown_field.dart';
 
 class CreatePostView extends StatelessWidget {
   Widget selectedTags(CreatePostViewModel model) {
-    return model.post.tags == null || model.post.tags.isEmpty
+    return model.post!.tags == null || model.post!.tags!.isEmpty
         ? Container()
         : Container(
             height: 30,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: model.post.tags.length,
+              itemCount: model.post!.tags!.length,
               itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.post.tags[index]);
+                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.post!.tags![index]);
               },
             ),
           );
@@ -68,7 +68,7 @@ class CreatePostView extends StatelessWidget {
         ? ImagePreviewButton(
             onTap: () => model.selectImage(context: context),
             file: null,
-            imgURL: model.post.imageURL,
+            imgURL: model.post!.imageURL,
             height: screenWidth(context),
             width: screenWidth(context),
           )
@@ -87,7 +87,7 @@ class CreatePostView extends StatelessWidget {
         shrinkWrap: true,
         children: [
           ///POST IMAGE
-          model.img == null && model.post.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
+          model.img == null && model.post!.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
           verticalSpaceMedium,
 
           ///POST TAGS
@@ -165,7 +165,7 @@ class CreatePostView extends StatelessWidget {
           title: model.isEditing ? 'Edit Post' : 'New Post',
           showBackButton: true,
           actionWidget: model.isBusy ? appBarLoadingIndicator() : doneButton(model),
-        ),
+        ) as PreferredSizeWidget?,
         //CustomAppBar().a(title: "New Post", showBackButton: true),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

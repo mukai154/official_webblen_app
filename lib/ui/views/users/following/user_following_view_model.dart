@@ -2,18 +2,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 class UserFollowingViewModel extends BaseViewModel {
-  NavigationService _navigationService = locator<NavigationService>();
-  AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  AlgoliaSearchService? _algoliaSearchService = locator<AlgoliaSearchService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   TextEditingController searchTextController = TextEditingController();
@@ -21,7 +20,7 @@ class UserFollowingViewModel extends BaseViewModel {
 
   ///DATA
   List<DocumentSnapshot> userResults = [];
-  DocumentSnapshot lastUserDocSnap;
+  DocumentSnapshot? lastUserDocSnap;
 
   bool loadingAdditionalUsers = false;
   bool moreUsersAvailable = true;
@@ -81,7 +80,7 @@ class UserFollowingViewModel extends BaseViewModel {
   ///USER DATA
   loadUsers() async {
     //load posts with params
-    userResults = await _userDataService.loadUserFollowing(id: webblenBaseViewModel.uid, resultsLimit: usersResultsLimit);
+    userResults = await _userDataService!.loadUserFollowing(id: webblenBaseViewModel!.uid, resultsLimit: usersResultsLimit);
   }
 
   loadAdditionalUsers() async {
@@ -95,9 +94,9 @@ class UserFollowingViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional posts
-    List<DocumentSnapshot> newResults = await _userDataService.loadAdditionalUserFollowing(
+    List<DocumentSnapshot> newResults = await _userDataService!.loadAdditionalUserFollowing(
       lastDocSnap: userResults[userResults.length - 1],
-      id: webblenBaseViewModel.uid,
+      id: webblenBaseViewModel!.uid,
       resultsLimit: usersResultsLimit,
     );
 
@@ -128,9 +127,9 @@ class UserFollowingViewModel extends BaseViewModel {
     if (searchTerm == null || searchTerm.trim().isEmpty) {
       userSearchResults = [];
     } else {
-      userSearchResults = await _algoliaSearchService.queryUsersByFollowing(
+      userSearchResults = await _algoliaSearchService!.queryUsersByFollowing(
         searchTerm: searchTerm,
-        uid: webblenBaseViewModel.uid,
+        uid: webblenBaseViewModel!.uid,
       );
     }
     notifyListeners();
@@ -139,6 +138,6 @@ class UserFollowingViewModel extends BaseViewModel {
 
   ///NAVIGATION
   navigateToUserView(Map<String, dynamic> userData) {
-    _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': userData['id']});
+    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': userData['id']});
   }
 }

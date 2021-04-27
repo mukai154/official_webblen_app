@@ -2,11 +2,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class LiveStreamGifterContainer extends StatelessWidget {
-  final String imgURL;
-  final String username;
-  final double amountGifted;
+  final String? imgURL;
+  final String? username;
+  final double? amountGifted;
 
-  LiveStreamGifterContainer({@required this.imgURL, @required this.username, @required this.amountGifted});
+  LiveStreamGifterContainer({required this.imgURL, required this.username, required this.amountGifted});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +15,7 @@ class LiveStreamGifterContainer extends StatelessWidget {
       child: Column(
         children: [
           CachedNetworkImage(
-            imageUrl: imgURL,
+            imageUrl: imgURL!,
             imageBuilder: (context, imageProvider) => Container(
               width: 32.0,
               height: 32.0,
@@ -47,7 +47,7 @@ class LiveStreamGifterContainer extends StatelessWidget {
               ),
               SizedBox(width: 4),
               Text(
-                amountGifted.toStringAsFixed(2),
+                amountGifted!.toStringAsFixed(2),
                 style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
               ),
             ],

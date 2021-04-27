@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class TextFieldContainer extends StatelessWidget {
-  final Widget child;
-  final double height;
-  final double width;
+  final Widget? child;
+  final double? height;
+  final double? width;
   TextFieldContainer({this.child, this.height, this.width});
 
   @override

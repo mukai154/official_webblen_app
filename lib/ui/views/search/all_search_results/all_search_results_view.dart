@@ -13,14 +13,14 @@ import 'package:webblen/ui/widgets/search/search_field.dart';
 import 'all_search_results_view_model.dart';
 
 class AllSearchResultsView extends StatefulWidget {
-  final String searchTerm;
+  final String? searchTerm;
   AllSearchResultsView({this.searchTerm});
   @override
   _AllSearchResultsViewState createState() => _AllSearchResultsViewState();
 }
 
 class _AllSearchResultsViewState extends State<AllSearchResultsView> with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   Widget noResultsFound() {
     return Container(
@@ -69,7 +69,7 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
       children: [
         model.postResults.isNotEmpty
             ? ListPosts(
-                currentUID: model.webblenBaseViewModel.uid,
+                currentUID: model.webblenBaseViewModel!.uid,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('post-results'),

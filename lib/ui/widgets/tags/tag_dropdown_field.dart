@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
@@ -9,10 +9,10 @@ import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 class TagDropdownField extends StatelessWidget {
   final bool enabled;
   final TextEditingController controller;
-  final Function(String) onTagSelected;
-  TagDropdownField({@required this.enabled, @required this.controller, @required this.onTagSelected});
+  final Function(String?) onTagSelected;
+  TagDropdownField({required this.enabled, required this.controller, required this.onTagSelected});
 
-  final AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
+  final AlgoliaSearchService? _algoliaSearchService = locator<AlgoliaSearchService>();
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +61,9 @@ class TagDropdownField extends StatelessWidget {
                 );
         },
         suggestionsCallback: (searchTerm) async {
-          return await _algoliaSearchService.queryTags(searchTerm);
+          return await _algoliaSearchService!.queryTags(searchTerm);
         },
-        itemBuilder: (context, tag) {
+        itemBuilder: (context, dynamic tag) {
           return ListTile(
             title: CustomText(
               text: tag,
@@ -74,7 +74,7 @@ class TagDropdownField extends StatelessWidget {
             ),
           );
         },
-        onSuggestionSelected: (tag) => onTagSelected(tag),
+        onSuggestionSelected: (dynamic tag) => onTagSelected(tag),
       ),
     );
   }

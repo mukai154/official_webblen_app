@@ -1,5 +1,5 @@
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/ui/bottom_sheets/calendar_bottom_sheet/calendar_bottom_sheet.dart';
 import 'package:webblen/ui/bottom_sheets/confirmation_bottom_sheets/destructive_confirmation_bottom_sheet.dart';

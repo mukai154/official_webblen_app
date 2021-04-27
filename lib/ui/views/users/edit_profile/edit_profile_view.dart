@@ -42,7 +42,7 @@ class EditProfileView extends StatelessWidget {
                       ),
                     ),
                   ),
-          ),
+          ) as PreferredSizeWidget?,
           body: Container(
             height: screenHeight(context),
             color: appBackgroundColor(),

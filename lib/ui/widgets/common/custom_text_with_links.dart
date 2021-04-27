@@ -8,7 +8,7 @@ const String emailPattern = r'\S+@\S+';
 const String phonePattern = r'[\d-]{9,}';
 final RegExp linkRegExp = RegExp('($urlPattern)|($emailPattern)|($phonePattern)', caseSensitive: false);
 
-List<TextSpan> linkify({String text, double fontSize}) {
+List<TextSpan> linkify({required String text, double? fontSize}) {
   String modifiedText = text.replaceAll("\n", "!***NEWLINE***!");
   var linkMatches = linkRegExp.allMatches(modifiedText);
 

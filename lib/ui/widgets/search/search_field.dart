@@ -4,21 +4,21 @@ import 'package:webblen/constants/app_colors.dart';
 
 class SearchField extends StatelessWidget {
   final String heroTag;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool enabled;
-  final TextEditingController textEditingController;
+  final TextEditingController? textEditingController;
   final Function(String) onChanged;
   final Function(String) onFieldSubmitted;
   final bool autoFocus;
 
   SearchField({
-    @required this.heroTag,
-    @required this.onTap,
-    @required this.enabled,
-    @required this.textEditingController,
-    @required this.onChanged,
-    @required this.onFieldSubmitted,
-    @required this.autoFocus,
+    required this.heroTag,
+    required this.onTap,
+    required this.enabled,
+    required this.textEditingController,
+    required this.onChanged,
+    required this.onFieldSubmitted,
+    required this.autoFocus,
   });
 
   @override
@@ -137,10 +137,10 @@ class FollowerFollowingSearchField extends StatelessWidget {
   final bool autoFocus;
 
   FollowerFollowingSearchField({
-    @required this.textEditingController,
-    @required this.onChanged,
-    @required this.onFieldSubmitted,
-    @required this.autoFocus,
+    required this.textEditingController,
+    required this.onChanged,
+    required this.onFieldSubmitted,
+    required this.autoFocus,
   });
 
   @override

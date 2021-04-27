@@ -4,10 +4,10 @@ List<String> timeListFromSelectedTime(String selectedTime) {
   return newList;
 }
 
-String getCurrentTimezone() {
+String? getCurrentTimezone() {
   print(DateTime.now().timeZoneName);
   double offset = (DateTime.now().timeZoneOffset.inMinutes / 60).toDouble();
-  String timezone = timezones.firstWhere((timezone) => timezone['offset'] == offset)['abbr'];
+  String? timezone = timezones.firstWhere((timezone) => timezone['offset'] == offset)['abbr'];
   return timezone;
 }
 

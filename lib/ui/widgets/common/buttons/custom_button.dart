@@ -5,15 +5,15 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 
 class CustomButton extends StatelessWidget {
-  final String text;
-  final double height;
-  final double width;
-  final double textSize;
-  final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color textColor;
-  final double elevation;
-  final bool isBusy;
+  final String? text;
+  final double? height;
+  final double? width;
+  final double? textSize;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double? elevation;
+  final bool? isBusy;
 
   CustomButton({
     this.text,
@@ -30,12 +30,12 @@ class CustomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: elevation == null ? 2.0 : elevation,
+      elevation: elevation == null ? 2.0 : elevation!,
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14.0),
       child: InkWell(
         borderRadius: BorderRadius.circular(14.0),
-        onTap: isBusy ? null : onPressed,
+        onTap: isBusy! ? null : onPressed,
         child: Container(
           height: height,
           width: width,
@@ -48,11 +48,11 @@ class CustomButton extends StatelessWidget {
                   data: MediaQuery.of(context).copyWith(
                     textScaleFactor: 1.0,
                   ),
-                  child: isBusy
-                      ? CustomCircleProgressIndicator(size: height / 2, color: textColor)
+                  child: isBusy!
+                      ? CustomCircleProgressIndicator(size: height! / 2, color: textColor)
                       : FittedBox(
                           child: Text(
-                            text,
+                            text!,
                             style: TextStyle(
                               color: textColor,
                               fontSize: textSize != null ? textSize : 16.0,
@@ -72,15 +72,15 @@ class CustomButton extends StatelessWidget {
 }
 
 class CustomIconButton extends StatelessWidget {
-  final Icon icon;
-  final String text;
-  final double height;
-  final double width;
-  final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color textColor;
-  final double elevation;
-  final bool centerContent;
+  final Icon? icon;
+  final String? text;
+  final double? height;
+  final double? width;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final Color? textColor;
+  final double? elevation;
+  final bool? centerContent;
 
   CustomIconButton({
     this.icon,
@@ -97,7 +97,7 @@ class CustomIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: elevation == null ? 2.0 : elevation,
+      elevation: elevation == null ? 2.0 : elevation!,
       color: backgroundColor,
       borderRadius: BorderRadius.circular(14.0),
       child: InkWell(
@@ -109,9 +109,9 @@ class CustomIconButton extends StatelessWidget {
           width: width,
           child: text != null
               ? Row(
-                  mainAxisAlignment: centerContent ? MainAxisAlignment.center : MainAxisAlignment.start,
+                  mainAxisAlignment: centerContent! ? MainAxisAlignment.center : MainAxisAlignment.start,
                   children: <Widget>[
-                    icon,
+                    icon!,
                     SizedBox(
                       width: 10.0,
                     ),
@@ -122,7 +122,7 @@ class CustomIconButton extends StatelessWidget {
                           textScaleFactor: 1.0,
                         ),
                         child: Text(
-                          text,
+                          text!,
                           style: TextStyle(
                             color: textColor,
                             fontSize: 14.0,
@@ -143,19 +143,19 @@ class CustomIconButton extends StatelessWidget {
 }
 
 class CustomFlatButton extends StatelessWidget {
-  final String text;
+  final String? text;
   final TextAlign textAlign;
   final Color fontColor;
   final double fontSize;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final bool showBottomBorder;
   CustomFlatButton({
-    @required this.onTap,
-    @required this.fontColor,
-    @required this.fontSize,
-    @required this.text,
-    @required this.textAlign,
-    @required this.showBottomBorder,
+    required this.onTap,
+    required this.fontColor,
+    required this.fontSize,
+    required this.text,
+    required this.textAlign,
+    required this.showBottomBorder,
   });
   @override
   Widget build(BuildContext context) {
@@ -172,7 +172,7 @@ class CustomFlatButton extends StatelessWidget {
           ),
         ),
         child: Text(
-          text,
+          text!,
           textAlign: textAlign == null ? TextAlign.left : textAlign,
           style: TextStyle(
             fontSize: fontSize,
@@ -194,12 +194,12 @@ class CustomSwitchButton extends StatelessWidget {
   final bool isActive;
 
   CustomSwitchButton({
-    @required this.onTap,
-    @required this.fontColor,
-    @required this.fontSize,
-    @required this.text,
-    @required this.isActive,
-    @required this.showBottomBorder,
+    required this.onTap,
+    required this.fontColor,
+    required this.fontSize,
+    required this.text,
+    required this.isActive,
+    required this.showBottomBorder,
   });
   @override
   Widget build(BuildContext context) {

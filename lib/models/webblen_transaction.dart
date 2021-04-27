@@ -1,14 +1,14 @@
 class WebblenTransaction {
-  String receiverUID;
-  String senderUID;
-  String contentID;
-  String type;
-  String currency;
-  String header;
-  String subHeader;
+  String? receiverUID;
+  String? senderUID;
+  String? contentID;
+  String? type;
+  String? currency;
+  String? header;
+  String? subHeader;
   dynamic additionalData;
-  int timePostedInMilliseconds;
-  bool read;
+  int? timePostedInMilliseconds;
+  bool? read;
 
   WebblenTransaction({
     this.receiverUID,

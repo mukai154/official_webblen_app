@@ -18,7 +18,7 @@ class UserProfileView extends StatefulWidget {
 }
 
 class _UserProfileViewState extends State<UserProfileView> with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   Widget head(UserProfileViewModel model) {
     return Container(
@@ -58,13 +58,13 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
         children: [
           SizedBox(height: 16),
           UserProfilePic(
-            userPicUrl: model.user.profilePicURL,
+            userPicUrl: model.user!.profilePicURL,
             size: 60,
             isBusy: false,
           ),
           SizedBox(height: 8),
           Text(
-            "@${model.user.username}",
+            "@${model.user!.username}",
             style: TextStyle(
               color: appFontColor(),
               fontWeight: FontWeight.bold,
@@ -96,7 +96,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
             ? ZeroStateView(
                 imageAssetName: "umbrella_chair",
                 imageSize: 200,
-                header: "@${model.user.username} Does Not Have Any Posts",
+                header: "@${model.user!.username} Does Not Have Any Posts",
                 subHeader: "",
                 mainActionButtonTitle: null,
                 mainAction: null,
@@ -105,7 +105,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
                 refreshData: model.refreshPosts,
               )
             : ListPosts(
-                currentUID: model.user.id,
+                currentUID: model.user!.id,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('user-posts'),
@@ -116,7 +116,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
         ZeroStateView(
           imageAssetName: "video_phone",
           imageSize: 200,
-          header: "@${model.user.username} Has Not Scheduled Any Streams",
+          header: "@${model.user!.username} Has Not Scheduled Any Streams",
           subHeader: "",
           mainActionButtonTitle: null,
           mainAction: null,
@@ -127,7 +127,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
         ZeroStateView(
           imageAssetName: "calendar",
           imageSize: 200,
-          header: "@${model.user.username} Has Not Scheduled Any Events",
+          header: "@${model.user!.username} Has Not Scheduled Any Events",
           subHeader: "",
           mainActionButtonTitle: null,
           mainAction: null,
@@ -152,7 +152,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
   void dispose() {
     // TODO: implement dispose
     super.dispose();
-    _tabController.dispose();
+    _tabController!.dispose();
   }
 
   @override
@@ -164,7 +164,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
       viewModelBuilder: () => UserProfileViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicActionAppBar(
-          title: model.user == null ? "" : model.user.username,
+          title: model.user == null ? "" : model.user!.username!,
           showBackButton: true,
           actionWidget: IconButton(
             onPressed: () => model.showUserOptions(),
@@ -174,7 +174,7 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
               color: appIconColor(),
             ),
           ),
-        ),
+        ) as PreferredSizeWidget?,
         body: Container(
           height: screenHeight(context),
           width: screenWidth(context),

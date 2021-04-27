@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
@@ -20,27 +19,26 @@ import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 import 'package:webblen/utils/url_handler.dart';
 
-@singleton
 class ProfileViewModel extends BaseViewModel {
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
-  SnackbarService _snackbarService = locator<SnackbarService>();
-  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
-  PostDataService _postDataService = locator<PostDataService>();
-  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
-  EventDataService _eventDataService = locator<EventDataService>();
-  ShareService _shareService = locator<ShareService>();
-  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
+  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  PostDataService? _postDataService = locator<PostDataService>();
+  LiveStreamDataService? _liveStreamDataService = locator<LiveStreamDataService>();
+  EventDataService? _eventDataService = locator<EventDataService>();
+  ShareService? _shareService = locator<ShareService>();
+  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///UI HELPERS
   ScrollController scrollController = ScrollController();
 
   ///POST DATA
   List<DocumentSnapshot> postResults = [];
-  DocumentSnapshot lastPostDocSnap;
+  DocumentSnapshot? lastPostDocSnap;
 
   bool loadingAdditionalPosts = false;
   bool morePostsAvailable = true;
@@ -48,7 +46,7 @@ class ProfileViewModel extends BaseViewModel {
 
   ///EVENT DATA
   List<DocumentSnapshot> eventResults = [];
-  DocumentSnapshot lastEventDocSnap;
+  DocumentSnapshot? lastEventDocSnap;
 
   bool reloadingEvents = false;
   bool loadingAdditionalEvents = false;
@@ -56,7 +54,7 @@ class ProfileViewModel extends BaseViewModel {
 
   ///STREAM DATA
   List<DocumentSnapshot> streamResults = [];
-  DocumentSnapshot lastStreamDocSnap;
+  DocumentSnapshot? lastStreamDocSnap;
 
   bool reloadingStreams = false;
   bool loadingAdditionalStreams = false;
@@ -65,7 +63,7 @@ class ProfileViewModel extends BaseViewModel {
   int resultsLimit = 20;
 
   ///INITIALIZE
-  initialize({BuildContext context, TabController tabController}) async {
+  initialize({BuildContext? context, TabController? tabController}) async {
     //set busy status
     setBusy(true);
 
@@ -76,7 +74,7 @@ class ProfileViewModel extends BaseViewModel {
     scrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * scrollController.position.maxScrollExtent;
       if (scrollController.position.pixels > triggerFetchMoreSize) {
-        if (tabController.index == 0 && postResults.length > 2) {
+        if (tabController!.index == 0 && postResults.length > 2) {
           loadAdditionalPosts();
         } else if (tabController.index == 1 && streamResults.length > 2) {
           loadAdditionalStreams();
@@ -127,7 +125,7 @@ class ProfileViewModel extends BaseViewModel {
   ///POST DATA
   loadPosts() async {
     //load posts with params
-    postResults = await _postDataService.loadPostsByUserID(id: webblenBaseViewModel.uid, resultsLimit: resultsLimit);
+    postResults = await _postDataService!.loadPostsByUserID(id: webblenBaseViewModel!.uid, resultsLimit: resultsLimit);
   }
 
   loadAdditionalPosts() async {
@@ -141,9 +139,9 @@ class ProfileViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional posts
-    List<DocumentSnapshot> newResults = await _postDataService.loadAdditionalPostsByUserID(
+    List<DocumentSnapshot> newResults = await _postDataService!.loadAdditionalPostsByUserID(
       lastDocSnap: postResults[postResults.length - 1],
-      id: webblenBaseViewModel.uid,
+      id: webblenBaseViewModel!.uid,
       resultsLimit: resultsLimit,
     );
 
@@ -174,8 +172,8 @@ class ProfileViewModel extends BaseViewModel {
 
   loadStreams() async {
     //load streams with params
-    streamResults = await _liveStreamDataService.loadStreamsByUserID(
-      id: webblenBaseViewModel.uid,
+    streamResults = await _liveStreamDataService!.loadStreamsByUserID(
+      id: webblenBaseViewModel!.uid,
       resultsLimit: resultsLimit,
     );
 
@@ -195,8 +193,8 @@ class ProfileViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional streams
-    List<DocumentSnapshot> newResults = await _liveStreamDataService.loadAdditionalStreamsByUserID(
-      id: webblenBaseViewModel.uid,
+    List<DocumentSnapshot> newResults = await _liveStreamDataService!.loadAdditionalStreamsByUserID(
+      id: webblenBaseViewModel!.uid,
       lastDocSnap: streamResults[streamResults.length - 1],
       resultsLimit: resultsLimit,
     );
@@ -228,8 +226,8 @@ class ProfileViewModel extends BaseViewModel {
 
   loadEvents() async {
     //load events with params
-    eventResults = await _eventDataService.loadEventsByUserID(
-      id: webblenBaseViewModel.uid,
+    eventResults = await _eventDataService!.loadEventsByUserID(
+      id: webblenBaseViewModel!.uid,
       resultsLimit: resultsLimit,
     );
 
@@ -249,9 +247,9 @@ class ProfileViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional events
-    List<DocumentSnapshot> newResults = await _eventDataService.loadAdditionalEventsByUserID(
+    List<DocumentSnapshot> newResults = await _eventDataService!.loadAdditionalEventsByUserID(
       lastDocSnap: postResults[postResults.length - 1],
-      id: webblenBaseViewModel.uid,
+      id: webblenBaseViewModel!.uid,
       resultsLimit: resultsLimit,
     );
 
@@ -269,17 +267,17 @@ class ProfileViewModel extends BaseViewModel {
 
   ///OTHER
   openWebsite() {
-    UrlHandler().launchInWebViewOrVC(webblenBaseViewModel.user.website);
+    UrlHandler().launchInWebViewOrVC(webblenBaseViewModel!.user!.website!);
   }
 
   ///BOTTOM SHEETS
   showUserOptions() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: BottomSheetType.currentUserOptions,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
       if (res == "saved") {
         //saved
       } else if (res == "edit profile") {
@@ -287,8 +285,8 @@ class ProfileViewModel extends BaseViewModel {
         navigateToEditProfileView();
       } else if (res == "share profile") {
         //share profile
-        String url = await _dynamicLinkService.createProfileLink(user: webblenBaseViewModel.user);
-        _shareService.shareLink(url);
+        String url = await _dynamicLinkService!.createProfileLink(user: webblenBaseViewModel!.user!);
+        _shareService!.shareLink(url);
       } else if (res == "settings") {
         navigateToSettingsView();
       }
@@ -298,13 +296,13 @@ class ProfileViewModel extends BaseViewModel {
 
   //bottom sheet for new post, stream, or event
   showAddContentOptions() async {
-    webblenBaseViewModel.showAddContentOptions();
+    webblenBaseViewModel!.showAddContentOptions();
   }
 
   //show content options
-  showContentOptions({@required dynamic content}) async {
+  showContentOptions({required dynamic content}) async {
     print(content);
-    var actionPerformed = await webblenBaseViewModel.showContentOptions(content: content);
+    var actionPerformed = await webblenBaseViewModel!.showContentOptions(content: content);
     if (actionPerformed == "deleted content") {
       if (content is WebblenPost) {
         //deleted post
@@ -324,18 +322,18 @@ class ProfileViewModel extends BaseViewModel {
 
   ///NAVIGATION
   navigateToEditProfileView() {
-    _navigationService.navigateTo(Routes.EditProfileViewRoute, arguments: {'id': webblenBaseViewModel.uid});
+    _navigationService!.navigateTo(Routes.EditProfileViewRoute, arguments: {'id': webblenBaseViewModel!.uid});
   }
 
   navigateToUserFollowersView() {
-    _navigationService.navigateTo(Routes.UserFollowersViewRoute);
+    // _navigationService.navigateTo(Routes.UserFollowersViewRoute);
   }
 
   navigateToUserFollowingView() {
-    _navigationService.navigateTo(Routes.UserFollowingViewRoute);
+    //_navigationService.navigateTo(Routes.UserFollowingViewRoute);
   }
 
   navigateToSettingsView() {
-    _navigationService.navigateTo(Routes.SettingsViewRoute);
+    //_navigationService.navigateTo(Routes.SettingsViewRoute);
   }
 }

@@ -3,12 +3,12 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class FollowUnfollowButton extends StatelessWidget {
-  final bool isFollowing;
+  final bool? isFollowing;
   final VoidCallback followUnfollowAction;
 
   FollowUnfollowButton({
-    @required this.isFollowing,
-    @required this.followUnfollowAction,
+    required this.isFollowing,
+    required this.followUnfollowAction,
   });
 
   @override

@@ -17,7 +17,7 @@ import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 class LiveStreamDetailsView extends StatelessWidget {
   final FocusNode focusNode = FocusNode();
 
-  Widget sectionDivider({@required String sectionName}) {
+  Widget sectionDivider({required String sectionName}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -44,17 +44,17 @@ class LiveStreamDetailsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: () => model.navigateToUserView(model.host.id),
+            onTap: () => model.navigateToUserView(model.host!.id),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
                   isBusy: false,
-                  userPicUrl: model.host.profilePicURL,
+                  userPicUrl: model.host!.profilePicURL,
                   size: 35,
                 ),
                 horizontalSpaceSmall,
                 Text(
-                  "@${model.host.username}",
+                  "@${model.host!.username}",
                   style: TextStyle(color: appFontColor(), fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -93,7 +93,7 @@ class LiveStreamDetailsView extends StatelessWidget {
   }
 
   Widget streamTags(LiveStreamDetailsViewModel model) {
-    return model.stream.tags == null || model.stream.tags.isEmpty
+    return model.stream.tags == null || model.stream.tags!.isEmpty
         ? Container()
         : Container(
             margin: EdgeInsets.only(top: 4, bottom: 8, left: 16, right: 16),
@@ -107,11 +107,11 @@ class LiveStreamDetailsView extends StatelessWidget {
                 top: 4.0,
                 bottom: 4.0,
               ),
-              itemCount: model.stream.tags.length,
+              itemCount: model.stream.tags!.length,
               itemBuilder: (context, index) {
                 return TagButton(
                   onTap: null,
-                  tag: model.stream.tags[index],
+                  tag: model.stream.tags![index],
                 );
               },
             ),
@@ -121,7 +121,7 @@ class LiveStreamDetailsView extends StatelessWidget {
   Widget streamDesc(LiveStreamDetailsViewModel model) {
     List<TextSpan> linkifiedText = [];
 
-    linkifiedText.addAll(linkify(text: model.stream.description.trim(), fontSize: 16));
+    linkifiedText.addAll(linkify(text: model.stream.description!.trim(), fontSize: 16));
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -192,7 +192,7 @@ class LiveStreamDetailsView extends StatelessWidget {
           verticalSpaceTiny,
           Row(
             children: [
-              model.stream.fbUsername == null || model.stream.fbUsername.isEmpty
+              model.stream.fbUsername == null || model.stream.fbUsername!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -205,7 +205,7 @@ class LiveStreamDetailsView extends StatelessWidget {
                         ),
                       ),
                     ),
-              model.stream.instaUsername == null || model.stream.instaUsername.isEmpty
+              model.stream.instaUsername == null || model.stream.instaUsername!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -218,7 +218,7 @@ class LiveStreamDetailsView extends StatelessWidget {
                         ),
                       ),
                     ),
-              model.stream.twitterUsername == null || model.stream.twitterUsername.isEmpty
+              model.stream.twitterUsername == null || model.stream.twitterUsername!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -231,7 +231,7 @@ class LiveStreamDetailsView extends StatelessWidget {
                         ),
                       ),
                     ),
-              model.stream.website == null || model.stream.website.isEmpty
+              model.stream.website == null || model.stream.website!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -261,7 +261,7 @@ class LiveStreamDetailsView extends StatelessWidget {
           verticalSpaceSmall,
           streamHead(model),
           verticalSpaceSmall,
-          streamImg(context, model.stream.imageURL),
+          streamImg(context, model.stream.imageURL!),
           streamTags(model),
           verticalSpaceSmall,
           sectionDivider(sectionName: "Details"),
@@ -298,7 +298,7 @@ class LiveStreamDetailsView extends StatelessWidget {
               color: appIconColor(),
             ),
           ),
-        ),
+        ) as PreferredSizeWidget?,
         body: Container(
           height: screenHeight(context),
           color: appBackgroundColor(),

@@ -3,10 +3,10 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class FollowStatsRow extends StatelessWidget {
-  final int followersLength;
-  final int followingLength;
-  final VoidCallback viewFollowersAction;
-  final VoidCallback viewFollowingAction;
+  final int? followersLength;
+  final int? followingLength;
+  final VoidCallback? viewFollowersAction;
+  final VoidCallback? viewFollowingAction;
 
   FollowStatsRow({
     this.followersLength,

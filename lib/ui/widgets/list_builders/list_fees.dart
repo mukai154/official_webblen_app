@@ -6,10 +6,10 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class ListFeesForEditing extends StatelessWidget {
-  final WebblenTicketDistro ticketDistro;
+  final WebblenTicketDistro? ticketDistro;
   final Function(int) editFeeAtIndex;
 
-  ListFeesForEditing({@required this.ticketDistro, @required this.editFeeAtIndex});
+  ListFeesForEditing({required this.ticketDistro, required this.editFeeAtIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +70,7 @@ class ListFeesForEditing extends StatelessWidget {
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: ticketDistro.fees.length,
+            itemCount: ticketDistro!.fees!.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
@@ -80,7 +80,7 @@ class ListFeesForEditing extends StatelessWidget {
                     Container(
                       width: 150,
                       child: CustomText(
-                        text: ticketDistro.fees[index]["feeName"],
+                        text: ticketDistro!.fees![index]["feeName"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,
@@ -90,7 +90,7 @@ class ListFeesForEditing extends StatelessWidget {
                     Container(
                       width: 70.0,
                       child: CustomText(
-                        text: ticketDistro.fees[index]["feePrice"],
+                        text: ticketDistro!.fees![index]["feePrice"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,

@@ -8,7 +8,7 @@ import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class LocationErrorView extends StatelessWidget {
   final VoidCallback tryAgainAction;
-  LocationErrorView({@required this.tryAgainAction});
+  LocationErrorView({required this.tryAgainAction});
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<LocationErrorViewModel>.nonReactive(

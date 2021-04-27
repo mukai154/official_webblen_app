@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
@@ -11,11 +10,11 @@ class ListNotifications extends StatelessWidget {
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
   final ScrollController scrollController;
-  ListNotifications({@required this.refreshData, @required this.data, @required this.pageStorageKey, @required this.scrollController});
+  ListNotifications({required this.refreshData, required this.data, required this.pageStorageKey, required this.scrollController});
 
   Widget listCauses() {
     return RefreshIndicator(
-      onRefresh: refreshData,
+      onRefresh: refreshData as Future<void> Function(),
       backgroundColor: appBackgroundColor(),
       child: ListView.builder(
         physics: AlwaysScrollableScrollPhysics(),

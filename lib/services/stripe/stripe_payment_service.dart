@@ -7,7 +7,7 @@ class StripePaymentService {
   // CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("ticket_distros");
   // CollectionReference purchasedTicketsRef = FirebaseFirestore.instance.collection("purchased_tickets");
 
-  Future<String> purchaseTickets(
+  Future<String?> purchaseTickets(
     String eventTitle,
     String purchaserID,
     String eventHostID,
@@ -22,9 +22,9 @@ class StripePaymentService {
     String cardHolderName,
     String email,
   ) async {
-    String status;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'liveWebPurchaseTickets',
+    String? status;
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+      'liveWebPurchaseTickets',
     );
 
     int ticketChargeInCents = int.parse((ticketCharge.toStringAsFixed(2)).replaceAll(".", ""));
@@ -56,14 +56,14 @@ class StripePaymentService {
     return status;
   }
 
-  Future<String> sendEmailConfirmation(
+  Future<String?> sendEmailConfirmation(
     String emailAddress,
     String eventTitle,
     String numOfTicketsPurchased,
   ) async {
-    String status;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'sendEmailConfirmation',
+    String? status;
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+      'sendEmailConfirmation',
     );
     final HttpsCallableResult result = await callable.call(
       <String, dynamic>{

@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:webblen/enums/notifcation_type.dart';
 
 class WebblenNotification {
-  String receiverUID;
-  String senderUID;
-  String type;
-  String header;
-  String subHeader;
-  Map<dynamic, dynamic> additionalData;
-  int timePostedInMilliseconds;
-  int expDateInMilliseconds;
-  bool read;
+  String? receiverUID;
+  String? senderUID;
+  String? type;
+  String? header;
+  String? subHeader;
+  Map<dynamic, dynamic>? additionalData;
+  int? timePostedInMilliseconds;
+  int? expDateInMilliseconds;
+  bool? read;
 
   WebblenNotification({
     this.receiverUID,
@@ -51,9 +51,9 @@ class WebblenNotification {
 
   //New Follower Notification
   WebblenNotification generateNewFollowerNotification({
-    @required String receiverUID,
-    @required String senderUID,
-    @required String followerUsername,
+    required String? receiverUID,
+    required String? senderUID,
+    required String followerUsername,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,
@@ -71,9 +71,9 @@ class WebblenNotification {
 
   //New Post Notification
   WebblenNotification generateNewPostNotification({
-    @required String senderUID,
-    @required String postAuthorUsername,
-    @required String postID,
+    required String senderUID,
+    required String postAuthorUsername,
+    required String postID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -91,9 +91,9 @@ class WebblenNotification {
 
   //New Event Notification
   WebblenNotification generateNewEventNotification({
-    @required String senderUID,
-    @required String hostUsername,
-    @required String eventID,
+    required String senderUID,
+    required String hostUsername,
+    required String eventID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -111,9 +111,9 @@ class WebblenNotification {
 
   //Edited Event Notification
   WebblenNotification generateEditedEventNotification({
-    @required String senderUID,
-    @required String hostUsername,
-    @required String eventID,
+    required String senderUID,
+    required String hostUsername,
+    required String eventID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -131,9 +131,9 @@ class WebblenNotification {
 
   //Event Is Live Notification
   WebblenNotification generateEventIsLiveNotification({
-    @required String senderUID,
-    @required String eventTitle,
-    @required String eventID,
+    required String senderUID,
+    required String eventTitle,
+    required String eventID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -151,9 +151,9 @@ class WebblenNotification {
 
   //New Stream Notification
   WebblenNotification generateNewStreamNotification({
-    @required String senderUID,
-    @required String hostUsername,
-    @required String streamID,
+    required String senderUID,
+    required String hostUsername,
+    required String streamID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -171,9 +171,9 @@ class WebblenNotification {
 
   //Edited Stream Notification
   WebblenNotification generateEditedStreamNotification({
-    @required String senderUID,
-    @required String hostUsername,
-    @required String streamID,
+    required String senderUID,
+    required String hostUsername,
+    required String streamID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -191,9 +191,9 @@ class WebblenNotification {
 
   //Stream is Live Notification
   WebblenNotification generateStreamIsLiveNotification({
-    @required String senderUID,
-    @required String streamTitle,
-    @required String streamID,
+    required String senderUID,
+    required String streamTitle,
+    required String streamID,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: null,
@@ -211,11 +211,11 @@ class WebblenNotification {
 
   //Post Comment Notification
   WebblenNotification generatePostCommentNotification({
-    @required String postID,
-    @required String receiverUID,
-    @required String senderUID,
-    @required String commenterUsername,
-    @required String comment,
+    required String? postID,
+    required String? receiverUID,
+    required String? senderUID,
+    required String commenterUsername,
+    required String comment,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,
@@ -233,11 +233,11 @@ class WebblenNotification {
 
   //Post Comment Reply Notification
   WebblenNotification generatePostCommentReplyNotification({
-    @required String postID,
-    @required String receiverUID,
-    @required String senderUID,
-    @required String commenterUsername,
-    @required String comment,
+    required String postID,
+    required String receiverUID,
+    required String senderUID,
+    required String commenterUsername,
+    required String comment,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,
@@ -255,11 +255,11 @@ class WebblenNotification {
 
   //Post Comment Mention Notification
   WebblenNotification generateWebblenCommentMentionNotification({
-    @required String postID,
-    @required String receiverUID,
-    @required String senderUID,
-    @required String commenterUsername,
-    @required String comment,
+    required String? postID,
+    required String? receiverUID,
+    required String? senderUID,
+    required String commenterUsername,
+    required String comment,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,
@@ -277,11 +277,11 @@ class WebblenNotification {
 
   //Webblen Received Notification
   WebblenNotification generateWebblenReceivedNotification({
-    @required String postID,
-    @required String receiverUID,
-    @required String senderUID,
-    @required String senderUsername,
-    @required String amountReceived,
+    required String postID,
+    required String receiverUID,
+    required String senderUID,
+    required String senderUsername,
+    required String amountReceived,
   }) {
     WebblenNotification notif = WebblenNotification(
       receiverUID: receiverUID,

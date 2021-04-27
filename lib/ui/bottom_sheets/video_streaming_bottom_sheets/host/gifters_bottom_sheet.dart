@@ -7,11 +7,11 @@ import 'package:webblen/ui/widgets/live_streams/video_ui/live_stream_gifter_cont
 import 'gifters_bottom_sheet_model.dart';
 
 class GiftersBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const GiftersBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -54,7 +54,7 @@ class GiftersBottomSheet extends StatelessWidget {
   }
 
   giftersView(GiftersBottomSheetModel model) {
-    Map<dynamic, dynamic> giftersMap = model.giftPool == null ? {} : model.giftPool.gifters;
+    Map<dynamic, dynamic> giftersMap = model.giftPool == null ? {} : model.giftPool!.gifters!;
     List gifters = giftersMap.values.toList(growable: true);
     if (gifters.length > 1) {
       gifters.sort((a, b) => b['totalGiftAmount'].compareTo(a['totalGiftAmount']));
@@ -177,7 +177,7 @@ class GiftersBottomSheet extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       Text(
-                        model.giftPool.totalGiftAmount.toStringAsFixed(2),
+                        model.giftPool!.totalGiftAmount!.toStringAsFixed(2),
                         style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.w300),
                       ),
                     ],
@@ -194,7 +194,7 @@ class GiftersBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<GiftersBottomSheetModel>.reactive(
-      onModelReady: (model) => model.initialize(id: request.customData),
+      onModelReady: (model) => model.initialize(id: request!.customData),
       viewModelBuilder: () => GiftersBottomSheetModel(),
       builder: (context, model, child) => model.isBusy
           ? Container()

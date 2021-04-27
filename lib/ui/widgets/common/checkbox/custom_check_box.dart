@@ -3,17 +3,17 @@ import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/custom_colors.dart';
 
 class CustomCheckbox extends StatefulWidget {
-  final bool initialValue;
-  final Function(bool) onChanged;
+  final bool? initialValue;
+  final Function(bool?) onChanged;
 
-  CustomCheckbox({@required this.initialValue, @required this.onChanged});
+  CustomCheckbox({required this.initialValue, required this.onChanged});
 
   @override
   _CustomCheckboxState createState() => _CustomCheckboxState();
 }
 
 class _CustomCheckboxState extends State<CustomCheckbox> {
-  bool isChecked = false;
+  bool? isChecked = false;
 
   @override
   void initState() {
@@ -43,17 +43,17 @@ class _CustomCheckboxState extends State<CustomCheckbox> {
 class CustomDetailedCheckbox extends StatefulWidget {
   final String header;
   final String subHeader;
-  final bool initialValue;
+  final bool? initialValue;
   final Function(bool) onChanged;
 
-  CustomDetailedCheckbox({@required this.header, @required this.subHeader, @required this.initialValue, @required this.onChanged});
+  CustomDetailedCheckbox({required this.header, required this.subHeader, required this.initialValue, required this.onChanged});
 
   @override
   _CustomDetailedCheckboxState createState() => _CustomDetailedCheckboxState();
 }
 
 class _CustomDetailedCheckboxState extends State<CustomDetailedCheckbox> {
-  bool isChecked = false;
+  bool? isChecked = false;
 
   @override
   void initState() {

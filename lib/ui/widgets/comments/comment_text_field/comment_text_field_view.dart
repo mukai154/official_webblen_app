@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/app/app.locator.dart';import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
@@ -17,20 +16,20 @@ class CommentTextFieldView extends StatelessWidget {
   final String contentID;
   final FocusNode focusNode;
   final bool isReplying;
-  final String replyReceiverUsername;
+  final String? replyReceiverUsername;
   final TextEditingController commentTextController;
   final Function(Map<String, dynamic>) onSubmitted;
 
   CommentTextFieldView({
-    @required this.contentID,
-    @required this.focusNode,
-    @required this.commentTextController,
-    @required this.isReplying,
-    @required this.replyReceiverUsername,
-    @required this.onSubmitted,
+    required this.contentID,
+    required this.focusNode,
+    required this.commentTextController,
+    required this.isReplying,
+    required this.replyReceiverUsername,
+    required this.onSubmitted,
   });
 
-  final AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
+  final AlgoliaSearchService? _algoliaSearchService = locator<AlgoliaSearchService>();
 
   Widget replyContainer() {
     return Container(
@@ -77,7 +76,7 @@ class CommentTextFieldView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           UserProfilePic(
-            userPicUrl: model.webblenBaseViewModel.user.profilePicURL,
+            userPicUrl: model.webblenBaseViewModel!.user!.profilePicURL,
             size: 45,
             isBusy: false,
           ),
@@ -141,10 +140,10 @@ class CommentTextFieldView extends StatelessWidget {
                       String cursorString = searchTerm.substring(0, cursorPosition);
                       String lastWord = getLastWordInString(cursorString);
                       if (lastWord.startsWith("@") && lastWord.length > 1) {
-                        return await _algoliaSearchService.queryUsers(searchTerm: lastWord.substring(1, lastWord.length - 1), resultsLimit: 3);
+                        return await _algoliaSearchService!.queryUsers(searchTerm: lastWord.substring(1, lastWord.length - 1), resultsLimit: 3);
                       }
                       return null;
-                    },
+                    } as FutureOr<Iterable<_>> Function(String),
                     itemBuilder: (context, WebblenUser user) {
                       return Container(
                         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),

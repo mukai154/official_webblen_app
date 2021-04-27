@@ -31,21 +31,21 @@ import 'package:webblen/ui/widgets/tags/tag_dropdown_field.dart';
 
 class CreateEventView extends StatelessWidget {
   Widget selectedTags(CreateEventViewModel model) {
-    return model.event.tags == null || model.event.tags.isEmpty
+    return model.event!.tags == null || model.event!.tags!.isEmpty
         ? Container()
         : Container(
             height: 30,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: model.event.tags.length,
+              itemCount: model.event!.tags!.length,
               itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.event.tags[index]);
+                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.event!.tags![index]);
               },
             ),
           );
   }
 
-  Widget textFieldHeader({@required String header, @required String subHeader, @required bool required}) {
+  Widget textFieldHeader({required String header, required String subHeader, required bool required}) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -100,7 +100,7 @@ class CreateEventView extends StatelessWidget {
         ? ImagePreviewButton(
             onTap: () => model.selectImage(),
             file: null,
-            imgURL: model.event.imageURL,
+            imgURL: model.event!.imageURL,
             height: screenWidth(context),
             width: screenWidth(context),
           )
@@ -113,7 +113,7 @@ class CreateEventView extends StatelessWidget {
           );
   }
 
-  Widget formSectionDivider({@required String sectionName}) {
+  Widget formSectionDivider({required String sectionName}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -139,7 +139,7 @@ class CreateEventView extends StatelessWidget {
         shrinkWrap: true,
         children: [
           ///POST IMAGE
-          model.img == null && model.event.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
+          model.img == null && model.event!.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
           verticalSpaceMedium,
 
           ///POST TAGS
@@ -207,7 +207,7 @@ class CreateEventView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 EventPrivacyDropdown(
-                  privacy: model.event.privacy,
+                  privacy: model.event!.privacy,
                   onChanged: (val) => model.onSelectedPrivacyFromDropdown(val),
                 ),
 
@@ -221,7 +221,7 @@ class CreateEventView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 AutoCompleteAddressTextField(
-                  initialValue: model.event.streetAddress,
+                  initialValue: model.event!.streetAddress,
                   hintText: "Address",
                   onSelectedAddress: (val) => model.setEventLocation(val),
                 ),
@@ -251,7 +251,7 @@ class CreateEventView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 EventVenueSizeSlider(
-                  initialValue: model.event.venueSize,
+                  initialValue: model.event!.venueSize,
                   onChanged: (val) => model.setEventVenueSize(val),
                 ),
 
@@ -276,7 +276,7 @@ class CreateEventView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 TimeDropdown(
-                  selectedTime: model.event.startTime,
+                  selectedTime: model.event!.startTime,
                   onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: true, time: val),
                 ),
                 verticalSpaceMedium,
@@ -300,7 +300,7 @@ class CreateEventView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 TimeDropdown(
-                  selectedTime: model.event.endTime,
+                  selectedTime: model.event!.endTime,
                   onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: false, time: val),
                 ),
                 verticalSpaceMedium,
@@ -313,12 +313,12 @@ class CreateEventView extends StatelessWidget {
                 ),
                 verticalSpaceSmall,
                 TimezoneDropdown(
-                  selectedTimezone: model.event.timezone,
+                  selectedTimezone: model.event!.timezone,
                   onChanged: (val) => model.onSelectedTimezoneFromDropdown(val),
                 ),
 
                 ///EVENT TICKETING, FEES, AND DISCOUNTS
-                model.hasEarningsAccount == null || !model.hasEarningsAccount
+                model.hasEarningsAccount == null || !model.hasEarningsAccount!
                     ? Container()
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -333,7 +333,7 @@ class CreateEventView extends StatelessWidget {
                           verticalSpaceSmall,
 
                           //list tickets
-                          model.ticketDistro.tickets.isEmpty
+                          model.ticketDistro!.tickets!.isEmpty
                               ? Container()
                               : ListTicketsForEditing(
                                   ticketDistro: model.ticketDistro,
@@ -341,8 +341,8 @@ class CreateEventView extends StatelessWidget {
                                 ),
 
                           //list fees
-                          model.ticketDistro.fees.isEmpty || model.ticketDistro.tickets.isEmpty ? Container() : verticalSpaceSmall,
-                          model.ticketDistro.fees.isEmpty || model.ticketDistro.tickets.isEmpty
+                          model.ticketDistro!.fees!.isEmpty || model.ticketDistro!.tickets!.isEmpty ? Container() : verticalSpaceSmall,
+                          model.ticketDistro!.fees!.isEmpty || model.ticketDistro!.tickets!.isEmpty
                               ? Container()
                               : ListFeesForEditing(
                                   ticketDistro: model.ticketDistro,
@@ -350,8 +350,8 @@ class CreateEventView extends StatelessWidget {
                                 ),
 
                           //list discount codes
-                          model.ticketDistro.discountCodes.isEmpty || model.ticketDistro.discountCodes.isEmpty ? Container() : verticalSpaceSmall,
-                          model.ticketDistro.discountCodes.isEmpty || model.ticketDistro.discountCodes.isEmpty
+                          model.ticketDistro!.discountCodes!.isEmpty || model.ticketDistro!.discountCodes!.isEmpty ? Container() : verticalSpaceSmall,
+                          model.ticketDistro!.discountCodes!.isEmpty || model.ticketDistro!.discountCodes!.isEmpty
                               ? Container()
                               : ListDiscountsForEditing(
                                   ticketDistro: model.ticketDistro,
@@ -408,7 +408,7 @@ class CreateEventView extends StatelessWidget {
                                                 backgroundColor: appButtonColorAlt(),
                                               ),
                                               horizontalSpaceSmall,
-                                              model.ticketDistro.tickets.isEmpty
+                                              model.ticketDistro!.tickets!.isEmpty
                                                   ? Container()
                                                   : CustomIconButton(
                                                       height: 40,
@@ -423,7 +423,7 @@ class CreateEventView extends StatelessWidget {
                                                       backgroundColor: appButtonColorAlt(),
                                                     ),
                                               horizontalSpaceSmall,
-                                              model.ticketDistro.tickets.isEmpty
+                                              model.ticketDistro!.tickets!.isEmpty
                                                   ? Container()
                                                   : CustomIconButton(
                                                       height: 40,
@@ -449,7 +449,7 @@ class CreateEventView extends StatelessWidget {
                 CustomDetailedCheckbox(
                   header: "Schedule Live Stream",
                   subHeader: "Schedule a live video stream for this event",
-                  initialValue: model.event.hasStream,
+                  initialValue: model.event!.hasStream,
                   onChanged: (val) => model.setVideoStreamStatus(val),
                 ),
                 verticalSpaceSmall,
@@ -459,7 +459,7 @@ class CreateEventView extends StatelessWidget {
                   header: "Available for Sponsors",
                   subHeader: "Webblen will help acquire sponsors for this event. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
                       "guaranteed.",
-                  initialValue: model.event.openToSponsors,
+                  initialValue: model.event!.openToSponsors,
                   onChanged: (val) => model.setSponsorshipStatus(val),
                 ),
                 verticalSpaceMedium,
@@ -594,7 +594,7 @@ class CreateEventView extends StatelessWidget {
           showBackButton: true,
           onPressedBack: () => model.navigateBack(),
           actionWidget: model.isBusy ? appBarLoadingIndicator() : doneButton(context, model),
-          bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount
+          bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount!
               ? GestureDetector(
                   onTap: () => model.navigateBackToWalletPage(),
                   child: Container(
@@ -613,8 +613,8 @@ class CreateEventView extends StatelessWidget {
                   ),
                 )
               : null,
-          bottomWidgetHeight: model.hasEarningsAccount != null && !model.hasEarningsAccount ? 40 : null,
-        ),
+          bottomWidgetHeight: model.hasEarningsAccount != null && !model.hasEarningsAccount! ? 40 : null,
+        ) as PreferredSizeWidget?,
         //CustomAppBar().a(title: "New Post", showBackButton: true),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

@@ -15,7 +15,7 @@ import 'package:webblen/ui/widgets/search/search_field.dart';
 import 'package:webblen/ui/widgets/search/search_result_view.dart';
 
 class SearchView extends StatelessWidget {
-  final String term;
+  final String? term;
   SearchView({this.term});
 
   Widget head(BuildContext context, SearchViewModel model) {
@@ -103,7 +103,7 @@ class SearchView extends StatelessWidget {
   Widget listResults(BuildContext context, SearchViewModel model) {
     return Expanded(
       child: model.streamResults.isEmpty && model.eventResults.isEmpty && model.userResults.isEmpty && model.searchTextController.text.trim().isEmpty
-          ? model.webblenBaseViewModel.user.recentSearchTerms == null
+          ? model.webblenBaseViewModel!.user!.recentSearchTerms == null
               ? ZeroStateView(
                   imageAssetName: "search",
                   imageSize: 200,
@@ -136,7 +136,7 @@ class SearchView extends StatelessWidget {
     return Hero(
       tag: 'recent-searches',
       child: ListRecentSearchResults(
-        searchTerms: model.webblenBaseViewModel.user.recentSearchTerms,
+        searchTerms: model.webblenBaseViewModel!.user!.recentSearchTerms,
         scrollController: null,
         isScrollable: false,
         onSearchTermSelected: (val) => model.viewAllResultsForSearchTerm(context: context, searchTerm: val),
@@ -181,7 +181,7 @@ class SearchView extends StatelessWidget {
         usersHeader(),
         ListUsersSearchResults(
           results: model.userResults,
-          usersFollowing: model.webblenBaseViewModel.user.following,
+          usersFollowing: model.webblenBaseViewModel!.user!.following,
           scrollController: null,
           isScrollable: false,
           onSearchTermSelected: (val) => model.navigateToUserView(val),

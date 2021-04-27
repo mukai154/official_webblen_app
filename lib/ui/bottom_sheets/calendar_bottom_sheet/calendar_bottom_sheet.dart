@@ -8,11 +8,11 @@ import 'package:webblen/ui/bottom_sheets/calendar_bottom_sheet/calendar_bottom_s
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class CalendarBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const CalendarBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -34,7 +34,7 @@ class CalendarBottomSheet extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               CustomText(
-                text: request.title,
+                text: request!.title,
                 textAlign: TextAlign.center,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -59,9 +59,9 @@ class CalendarBottomSheet extends StatelessWidget {
                 weekendTextStyle: TextStyle(
                   color: appSavedContentColor(),
                 ),
-                selectedDateTime: request.customData['selectedDate'],
-                minSelectedDate: request.customData['minSelectedDate'],
-                onDayPressed: (DateTime date, List<Event> events) => completer(SheetResponse(responseData: date)),
+                selectedDateTime: request!.customData['selectedDate'],
+                minSelectedDate: request!.customData['minSelectedDate'],
+                onDayPressed: (DateTime date, List<Event> events) => completer!(SheetResponse(responseData: date)),
               ),
             ],
           ),

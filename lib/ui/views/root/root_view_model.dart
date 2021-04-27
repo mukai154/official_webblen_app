@@ -1,14 +1,14 @@
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 
 class RootViewModel extends BaseViewModel {
-  AuthService _authService = locator<AuthService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  NavigationService _navigationService = locator<NavigationService>();
+  AuthService? _authService = locator<AuthService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  NavigationService? _navigationService = locator<NavigationService>();
 
   initialize() async {
     checkAuthState();
@@ -16,18 +16,18 @@ class RootViewModel extends BaseViewModel {
 
   ///CHECKS IF USER IS LOGGED IN
   Future checkAuthState() async {
-    bool isLoggedIn = await _authService.isLoggedIn();
+    bool isLoggedIn = await _authService!.isLoggedIn();
     if (isLoggedIn) {
       ///CHECK IF USER HAS CREATED PROFILE
-      String uid = await _authService.getCurrentUserID();
-      bool userExists = await _userDataService.checkIfUserExists(uid);
+      String? uid = await _authService!.getCurrentUserID();
+      bool userExists = await (_userDataService!.checkIfUserExists(uid) as FutureOr<bool>);
       if (userExists) {
-        _navigationService.replaceWith(Routes.WebblenBaseViewRoute);
+        _navigationService!.replaceWith(Routes.WebblenBaseViewRoute);
       } else {
         //_navigationService.replaceWith(Routes.OnboardingViewRoute);
       }
     } else {
-      _navigationService.replaceWith(Routes.AuthViewRoute);
+      _navigationService!.replaceWith(Routes.AuthViewRoute);
     }
   }
 }

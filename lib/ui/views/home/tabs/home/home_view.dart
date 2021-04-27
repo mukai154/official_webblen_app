@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
@@ -21,7 +21,7 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
-  TabController _tabController;
+  TabController? _tabController;
 
   Widget head(HomeViewModel model) {
     return Container(
@@ -47,7 +47,7 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
           ),
           Row(
             children: [
-              NotificationBellView(uid: model.webblenBaseViewModel.uid),
+              NotificationBellView(uid: model.webblenBaseViewModel!.uid),
               horizontalSpaceSmall,
               IconButton(
                 iconSize: 20,
@@ -98,16 +98,16 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                 imageSize: 200,
                 header: "No Posts in ${model.cityName} Found",
                 subHeader: model.postPromo != null
-                    ? "Create a Post for ${model.cityName} Now and Earn ${model.postPromo.toStringAsFixed(2)} WBLN!"
+                    ? "Create a Post for ${model.cityName} Now and Earn ${model.postPromo!.toStringAsFixed(2)} WBLN!"
                     : "Create a Post for ${model.cityName} Now!",
-                mainActionButtonTitle: model.postPromo != null ? "Earn ${model.postPromo.toStringAsFixed(2)} WBLN" : "Create Post",
+                mainActionButtonTitle: model.postPromo != null ? "Earn ${model.postPromo!.toStringAsFixed(2)} WBLN" : "Create Post",
                 mainAction: () => model.createPostWithPromo(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
                 refreshData: () async {},
               )
             : ListPosts(
-                currentUID: model.webblenBaseViewModel.uid,
+                currentUID: model.webblenBaseViewModel!.uid,
                 refreshData: model.refreshPosts,
                 postResults: model.postResults,
                 pageStorageKey: PageStorageKey('home-posts'),
@@ -123,9 +123,9 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                 imageSize: 200,
                 header: "No Streams in ${model.cityName} Found",
                 subHeader: model.streamPromo != null
-                    ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo.toStringAsFixed(2)} WBLN!"
+                    ? "Schedule a Stream for ${model.cityName} Now and Earn ${model.streamPromo!.toStringAsFixed(2)} WBLN!"
                     : "Schedule a Stream for ${model.cityName} Now!",
-                mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo.toStringAsFixed(2)} WBLN" : "Create Stream",
+                mainActionButtonTitle: model.streamPromo != null ? "Earn ${model.streamPromo!.toStringAsFixed(2)} WBLN" : "Create Stream",
                 mainAction: () => model.createStreamWithPromo(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,
@@ -147,9 +147,9 @@ class _HomeViewState extends State<HomeView> with SingleTickerProviderStateMixin
                 imageSize: 200,
                 header: "No Events in ${model.cityName} Found",
                 subHeader: model.eventPromo != null
-                    ? "Schedule an Event for ${model.cityName} Now and Earn ${model.eventPromo.toStringAsFixed(2)} WBLN!"
+                    ? "Schedule an Event for ${model.cityName} Now and Earn ${model.eventPromo!.toStringAsFixed(2)} WBLN!"
                     : "Schedule an Event for ${model.cityName} Now!",
-                mainActionButtonTitle: model.eventPromo != null ? "Earn ${model.eventPromo.toStringAsFixed(2)} WBLN" : "Create Event",
+                mainActionButtonTitle: model.eventPromo != null ? "Earn ${model.eventPromo!.toStringAsFixed(2)} WBLN" : "Create Event",
                 mainAction: () => model.createEventWithPromo(),
                 secondaryActionButtonTitle: null,
                 secondaryAction: null,

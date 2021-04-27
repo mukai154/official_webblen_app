@@ -10,10 +10,10 @@ class NotificationRow extends StatelessWidget {
   final String notifType;
   final VoidCallback onTap;
   NotificationRow({
-    @required this.onTap,
-    @required this.header,
-    @required this.subHeader,
-    @required this.notifType,
+    required this.onTap,
+    required this.header,
+    required this.subHeader,
+    required this.notifType,
   });
   @override
   Widget build(BuildContext context) {

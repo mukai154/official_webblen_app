@@ -5,10 +5,10 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class TagButton extends StatelessWidget {
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   final String tag;
 
-  TagButton({@required this.onTap, @required this.tag});
+  TagButton({required this.onTap, required this.tag});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class RemovableTagButton extends StatelessWidget {
   final VoidCallback onTap;
   final String tag;
 
-  RemovableTagButton({@required this.onTap, @required this.tag});
+  RemovableTagButton({required this.onTap, required this.tag});
 
   @override
   Widget build(BuildContext context) {

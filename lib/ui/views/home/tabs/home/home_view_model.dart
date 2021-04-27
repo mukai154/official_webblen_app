@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:injectable/injectable.dart';
+
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
@@ -19,34 +19,33 @@ import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
-@singleton
 class HomeViewModel extends BaseViewModel {
   ///SERVICES
-  PlatformDataService _platformDataService = locator<PlatformDataService>();
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
-  SnackbarService _snackbarService = locator<SnackbarService>();
-  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
-  PostDataService _postDataService = locator<PostDataService>();
-  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
-  EventDataService _eventDataService = locator<EventDataService>();
-  ShareService _shareService = locator<ShareService>();
-  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  PlatformDataService? _platformDataService = locator<PlatformDataService>();
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
+  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  PostDataService? _postDataService = locator<PostDataService>();
+  LiveStreamDataService? _liveStreamDataService = locator<LiveStreamDataService>();
+  EventDataService? _eventDataService = locator<EventDataService>();
+  ShareService? _shareService = locator<ShareService>();
+  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   ///HELPERS
   ScrollController scrollController = ScrollController();
 
   ///CURRENT USER
-  WebblenUser user;
+  WebblenUser? user;
 
   ///FILTERS
-  String cityName;
-  String areaCode;
-  String sortBy = "Latest";
-  String tagFilter = "";
+  String? cityName;
+  String? areaCode;
+  String? sortBy = "Latest";
+  String? tagFilter = "";
 
   ///FOR YOU DATA
   List<dynamic> forYouResults = [];
@@ -56,7 +55,7 @@ class HomeViewModel extends BaseViewModel {
 
   ///POST DATA
   List<DocumentSnapshot> postResults = [];
-  DocumentSnapshot lastPostDocSnap;
+  DocumentSnapshot? lastPostDocSnap;
 
   bool loadingPosts = true;
   bool loadingAdditionalPosts = false;
@@ -64,7 +63,7 @@ class HomeViewModel extends BaseViewModel {
 
   ///EVENT DATA
   List<DocumentSnapshot> eventResults = [];
-  DocumentSnapshot lastEventDocSnap;
+  DocumentSnapshot? lastEventDocSnap;
 
   bool loadingEvents = true;
   bool loadingAdditionalEvents = false;
@@ -72,7 +71,7 @@ class HomeViewModel extends BaseViewModel {
 
   ///STREAM DATA
   List<DocumentSnapshot> streamResults = [];
-  DocumentSnapshot lastStreamDocSnap;
+  DocumentSnapshot? lastStreamDocSnap;
 
   bool loadingStreams = false;
   bool loadingAdditionalStreams = false;
@@ -81,12 +80,12 @@ class HomeViewModel extends BaseViewModel {
   int resultsLimit = 30;
 
   ///PROMOS
-  double postPromo;
-  double streamPromo;
-  double eventPromo;
+  double? postPromo;
+  double? streamPromo;
+  double? eventPromo;
 
   openFilter() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: BottomSheetType.homeFilter,
       takesInput: true,
@@ -108,21 +107,21 @@ class HomeViewModel extends BaseViewModel {
   }
 
   ///INITIALIZE
-  initialize({TabController tabController}) async {
+  initialize({TabController? tabController}) async {
     //get location data
-    cityName = webblenBaseViewModel.initialCityName;
-    areaCode = webblenBaseViewModel.initialAreaCode;
+    cityName = webblenBaseViewModel!.initialCityName;
+    areaCode = webblenBaseViewModel!.initialAreaCode;
 
     //load content promos (if any exists)
-    postPromo = await _platformDataService.getPostPromo();
-    streamPromo = await _platformDataService.getStreamPromo();
-    eventPromo = await _platformDataService.getEventPromo();
+    postPromo = await _platformDataService!.getPostPromo();
+    streamPromo = await _platformDataService!.getStreamPromo();
+    eventPromo = await _platformDataService!.getEventPromo();
 
     //load additional content on scroll
     scrollController.addListener(() {
       double triggerFetchMoreSize = 0.9 * scrollController.position.maxScrollExtent;
       if (scrollController.position.pixels > triggerFetchMoreSize) {
-        if (tabController.index == 1) {
+        if (tabController!.index == 1) {
           loadAdditionalPosts();
         } else if (tabController.index == 2) {
           loadAdditionalStreams();
@@ -179,8 +178,8 @@ class HomeViewModel extends BaseViewModel {
 
   loadPosts() async {
     //load posts with params
-    postResults = await _postDataService.loadPosts(
-      areaCode: areaCode,
+    postResults = await _postDataService!.loadPosts(
+      areaCode: areaCode!,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
@@ -202,9 +201,9 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional posts
-    List<DocumentSnapshot> newResults = await _postDataService.loadAdditionalPosts(
+    List<DocumentSnapshot> newResults = await _postDataService!.loadAdditionalPosts(
       lastDocSnap: postResults[postResults.length - 1],
-      areaCode: areaCode,
+      areaCode: areaCode!,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
@@ -237,8 +236,8 @@ class HomeViewModel extends BaseViewModel {
 
   loadStreams() async {
     //load events with params
-    streamResults = await _liveStreamDataService.loadStreams(
-      areaCode: areaCode,
+    streamResults = await _liveStreamDataService!.loadStreams(
+      areaCode: areaCode!,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
@@ -260,9 +259,9 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional streams
-    List<DocumentSnapshot> newResults = await _liveStreamDataService.loadAdditionalStreams(
+    List<DocumentSnapshot> newResults = await _liveStreamDataService!.loadAdditionalStreams(
       lastDocSnap: streamResults[streamResults.length - 1],
-      areaCode: areaCode,
+      areaCode: areaCode!,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
@@ -295,8 +294,8 @@ class HomeViewModel extends BaseViewModel {
 
   loadEvents() async {
     //load events with params
-    eventResults = await _eventDataService.loadEvents(
-      areaCode: areaCode,
+    eventResults = await _eventDataService!.loadEvents(
+      areaCode: areaCode!,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
@@ -318,9 +317,9 @@ class HomeViewModel extends BaseViewModel {
     notifyListeners();
 
     //load additional events
-    List<DocumentSnapshot> newResults = await _eventDataService.loadAdditionalEvents(
+    List<DocumentSnapshot> newResults = await _eventDataService!.loadAdditionalEvents(
       lastDocSnap: eventResults[eventResults.length - 1],
-      areaCode: areaCode,
+      areaCode: areaCode!,
       resultsLimit: resultsLimit,
       tagFilter: tagFilter,
       sortBy: sortBy,
@@ -340,26 +339,26 @@ class HomeViewModel extends BaseViewModel {
 
   ///PROMO
   createPostWithPromo() {
-    webblenBaseViewModel.createPostWithPromo(promo: postPromo);
+    webblenBaseViewModel!.createPostWithPromo(promo: postPromo);
   }
 
   createEventWithPromo() {
-    webblenBaseViewModel.createEventWithPromo(promo: eventPromo);
+    webblenBaseViewModel!.createEventWithPromo(promo: eventPromo);
   }
 
   createStreamWithPromo() {
-    webblenBaseViewModel.createStreamWithPromo(promo: streamPromo);
+    webblenBaseViewModel!.createStreamWithPromo(promo: streamPromo);
   }
 
   ///BOTTOM SHEETS
   //bottom sheet for new post, stream, or event
   showAddContentOptions() async {
-    webblenBaseViewModel.showAddContentOptions();
+    webblenBaseViewModel!.showAddContentOptions();
   }
 
   //show content options
-  showContentOptions({@required dynamic content}) async {
-    var actionPerformed = await webblenBaseViewModel.showContentOptions(content: content);
+  showContentOptions({required dynamic content}) async {
+    var actionPerformed = await webblenBaseViewModel!.showContentOptions(content: content);
     if (actionPerformed == "deleted content") {
       if (content is WebblenPost) {
         //deleted post

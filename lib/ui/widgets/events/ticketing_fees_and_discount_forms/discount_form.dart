@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/custom_colors.dart';
@@ -19,12 +19,12 @@ class DiscountForm extends StatelessWidget {
   final VoidCallback deleteDiscount;
 
   DiscountForm(
-      {@required this.editingDiscount,
-      @required this.discountNameTextController,
-      @required this.discountLimitTextController,
-      @required this.discountValueTextController,
-      @required this.validateAndSubmitDiscount,
-      @required this.deleteDiscount});
+      {required this.editingDiscount,
+      required this.discountNameTextController,
+      required this.discountLimitTextController,
+      required this.discountValueTextController,
+      required this.validateAndSubmitDiscount,
+      required this.deleteDiscount});
 
   @override
   Widget build(BuildContext context) {

@@ -11,9 +11,9 @@ import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostTextBlockView extends StatelessWidget {
-  final String currentUID;
-  final WebblenPost post;
-  final Function(WebblenPost) showPostOptions;
+  final String? currentUID;
+  final WebblenPost? post;
+  final Function(WebblenPost?)? showPostOptions;
 
   PostTextBlockView({
     this.currentUID,
@@ -28,7 +28,7 @@ class PostTextBlockView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: () => model.navigateToUserView(post.authorID),
+            onTap: () => model.navigateToUserView(post!.authorID),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
@@ -39,7 +39,7 @@ class PostTextBlockView extends StatelessWidget {
                 SizedBox(
                   width: 10.0,
                 ),
-                post.city == null || post.city.isEmpty
+                post!.city == null || post!.city!.isEmpty
                     ? Text(
                         "@${model.authorUsername}",
                         style: TextStyle(
@@ -60,7 +60,7 @@ class PostTextBlockView extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            post.tags.toString().replaceAll("[", "").replaceAll("]", ""),
+                            post!.tags.toString().replaceAll("[", "").replaceAll("]", ""),
                             style: TextStyle(
                               fontSize: 14,
                               color: appFontColorAlt(),
@@ -73,7 +73,7 @@ class PostTextBlockView extends StatelessWidget {
           ),
           IconButton(
             icon: Icon(Icons.more_horiz),
-            onPressed: () => showPostOptions(post),
+            onPressed: () => showPostOptions!(post),
           ),
         ],
       ),
@@ -84,7 +84,7 @@ class PostTextBlockView extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Text(
-        post.body,
+        post!.body!,
         style: TextStyle(
           color: appFontColor(),
           fontSize: 18.0,
@@ -113,7 +113,7 @@ class PostTextBlockView extends StatelessWidget {
               ),
             ),
             TextSpan(
-              text: post.body.trim(),
+              text: post!.body!.trim(),
               style: TextStyle(
                 color: appFontColor(),
                 fontSize: 14.0,
@@ -127,7 +127,7 @@ class PostTextBlockView extends StatelessWidget {
   }
 
   Widget commentCount(PostTextBlockViewModel model) {
-    return post.commentCount == 0
+    return post!.commentCount == 0
         ? Container(height: 4)
         : Padding(
             padding: EdgeInsets.only(left: 16.0, top: 8, bottom: 4, right: 16.0),
@@ -135,7 +135,7 @@ class PostTextBlockView extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
-                  post.commentCount == 1 ? "${post.commentCount} comment" : "${post.commentCount} comments",
+                  post!.commentCount == 1 ? "${post!.commentCount} comment" : "${post!.commentCount} comments",
                   style: TextStyle(
                     fontSize: 14,
                     color: appFontColorAlt(),
@@ -156,7 +156,7 @@ class PostTextBlockView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               GestureDetector(
-                onTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
+                onTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post!.id),
                 child: Icon(
                   model.savedPost ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                   size: 18,
@@ -166,7 +166,7 @@ class PostTextBlockView extends StatelessWidget {
             ],
           ),
           Text(
-            TimeCalc().getPastTimeFromMilliseconds(post.postDateTimeInMilliseconds),
+            TimeCalc().getPastTimeFromMilliseconds(post!.postDateTimeInMilliseconds!),
             style: TextStyle(
               color: Colors.grey,
             ),
@@ -177,7 +177,7 @@ class PostTextBlockView extends StatelessWidget {
   }
 
   Widget postTags(PostTextBlockViewModel model) {
-    return post.tags == null || post.tags.isEmpty
+    return post!.tags == null || post!.tags!.isEmpty
         ? Container()
         : Container(
             margin: EdgeInsets.only(left: 16, top: 4, bottom: 8, right: 16),
@@ -191,11 +191,11 @@ class PostTextBlockView extends StatelessWidget {
                 top: 4.0,
                 bottom: 4.0,
               ),
-              itemCount: post.tags.length,
+              itemCount: post!.tags!.length,
               itemBuilder: (context, index) {
                 return TagButton(
                   onTap: null,
-                  tag: post.tags[index],
+                  tag: post!.tags![index],
                 );
               },
             ),
@@ -208,14 +208,14 @@ class PostTextBlockView extends StatelessWidget {
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
       viewModelBuilder: () => PostTextBlockViewModel(),
-      onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post.authorID, postID: post.id),
+      onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post!.authorID, postID: post!.id),
       builder: (context, model, child) => GestureDetector(
-        onDoubleTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post.id),
+        onDoubleTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post!.id),
         onLongPress: () {
           HapticFeedback.lightImpact();
-          showPostOptions(post);
+          showPostOptions!(post);
         },
-        onTap: () => model.navigateToPostView(post.id),
+        onTap: () => model.navigateToPostView(post!.id),
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

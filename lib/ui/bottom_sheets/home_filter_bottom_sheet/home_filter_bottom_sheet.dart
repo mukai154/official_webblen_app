@@ -9,11 +9,11 @@ import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 import 'home_filter_bottom_sheet_model.dart';
 
 class HomeFilterBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const HomeFilterBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -22,10 +22,10 @@ class HomeFilterBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<HomeFilterBottomSheetModel>.reactive(
       onModelReady: (model) => model.initialize(
-        request.customData['currentSortBy'],
-        request.customData['currentCityName'],
-        request.customData['currentAreaCode'],
-        request.customData['currentTagFilter'],
+        request!.customData['currentSortBy'],
+        request!.customData['currentCityName'],
+        request!.customData['currentAreaCode'],
+        request!.customData['currentTagFilter'],
       ),
       viewModelBuilder: () => HomeFilterBottomSheetModel(),
       builder: (context, model, child) => Container(
@@ -72,7 +72,7 @@ class HomeFilterBottomSheet extends StatelessWidget {
                           child: Text(val),
                         );
                       }).toList(),
-                      onChanged: (val) {}),
+                      onChanged: (dynamic val) {}),
                 ),
                 SizedBox(height: 32),
                 Text(
@@ -104,11 +104,11 @@ class HomeFilterBottomSheet extends StatelessWidget {
                         autofocus: false,
                       ),
                       suggestionsCallback: (searchTerm) async {
-                        Map<String, dynamic> res = await model.googlePlacesService.googleSearchAutoComplete(key: model.googleAPIKey, input: searchTerm);
+                        Map<String, dynamic> res = await (model.googlePlacesService!.googleSearchAutoComplete(key: model.googleAPIKey, input: searchTerm) as FutureOr<Map<String, dynamic>>);
                         model.setPlacesSearchResults(res);
                         return model.placeSearchResults.keys.toList();
                       },
-                      itemBuilder: (context, place) {
+                      itemBuilder: (context, dynamic place) {
                         return ListTile(
                           title: Text(
                             place,
@@ -116,7 +116,7 @@ class HomeFilterBottomSheet extends StatelessWidget {
                           ),
                         );
                       },
-                      onSuggestionSelected: (val) => model.getPlaceDetails(val),
+                      onSuggestionSelected: (dynamic val) => model.getPlaceDetails(val),
                     ),
                   ),
                 ),
@@ -167,9 +167,9 @@ class HomeFilterBottomSheet extends StatelessWidget {
                         autofocus: false,
                       ),
                       suggestionsCallback: (searchTerm) async {
-                        return await model.algoliaSearchService.queryTags(searchTerm);
+                        return await model.algoliaSearchService!.queryTags(searchTerm);
                       },
-                      itemBuilder: (context, tag) {
+                      itemBuilder: (context, dynamic tag) {
                         return ListTile(
                           title: Text(
                             tag,
@@ -177,7 +177,7 @@ class HomeFilterBottomSheet extends StatelessWidget {
                           ),
                         );
                       },
-                      onSuggestionSelected: (val) => model.setTagFilter(val),
+                      onSuggestionSelected: (dynamic val) => model.setTagFilter(val),
                     ),
                   ),
                 ),
@@ -196,7 +196,7 @@ class HomeFilterBottomSheet extends StatelessWidget {
                 SizedBox(height: 32),
                 FlatButton(
                   minWidth: screenWidth(context),
-                  onPressed: () => completer(SheetResponse(responseData: model.returnPreferences())),
+                  onPressed: () => completer!(SheetResponse(responseData: model.returnPreferences())),
                   child: Text(
                     "Apply",
                     style: TextStyle(

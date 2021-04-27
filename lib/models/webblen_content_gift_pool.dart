@@ -1,9 +1,9 @@
 class WebblenContentGiftPool {
-  String id;
-  String hostID;
-  Map<dynamic, dynamic> gifters;
-  double totalGiftAmount;
-  bool paidOut;
+  String? id;
+  String? hostID;
+  Map<dynamic, dynamic>? gifters;
+  double? totalGiftAmount;
+  bool? paidOut;
 
   WebblenContentGiftPool({
     this.id,

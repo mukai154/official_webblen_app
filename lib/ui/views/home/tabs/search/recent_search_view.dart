@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
@@ -33,12 +33,12 @@ class RecentSearchView extends StatelessWidget {
   }
 
   Widget body(RecentSearchViewModel model) {
-    return model.webblenBaseViewModel.user.recentSearchTerms != null && model.webblenBaseViewModel.user.recentSearchTerms.isNotEmpty
+    return model.webblenBaseViewModel!.user!.recentSearchTerms != null && model.webblenBaseViewModel!.user!.recentSearchTerms!.isNotEmpty
         ? Hero(
             tag: 'recent-searches',
             child: ListRecentSearchResults(
               onSearchTermSelected: (val) => model.researchTerm(val),
-              searchTerms: model.webblenBaseViewModel.user.recentSearchTerms,
+              searchTerms: model.webblenBaseViewModel!.user!.recentSearchTerms,
               isScrollable: false,
               scrollController: null,
             ),

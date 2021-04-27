@@ -16,7 +16,7 @@ import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 class EventView extends StatelessWidget {
   final FocusNode focusNode = FocusNode();
 
-  Widget sectionDivider({@required String sectionName}) {
+  Widget sectionDivider({required String sectionName}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -43,17 +43,17 @@ class EventView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: () => model.navigateToUserView(model.author.id),
+            onTap: () => model.navigateToUserView(model.author!.id),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
                   isBusy: false,
-                  userPicUrl: model.author.profilePicURL,
+                  userPicUrl: model.author!.profilePicURL,
                   size: 35,
                 ),
                 horizontalSpaceSmall,
                 Text(
-                  "@${model.author.username}",
+                  "@${model.author!.username}",
                   style: TextStyle(color: appFontColor(), fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -92,7 +92,7 @@ class EventView extends StatelessWidget {
   }
 
   Widget eventTags(EventViewModel model) {
-    return model.event.tags == null || model.event.tags.isEmpty
+    return model.event.tags == null || model.event.tags!.isEmpty
         ? Container()
         : Container(
             margin: EdgeInsets.only(top: 4, bottom: 8, left: 16, right: 16),
@@ -106,11 +106,11 @@ class EventView extends StatelessWidget {
                 top: 4.0,
                 bottom: 4.0,
               ),
-              itemCount: model.event.tags.length,
+              itemCount: model.event.tags!.length,
               itemBuilder: (context, index) {
                 return TagButton(
                   onTap: null,
-                  tag: model.event.tags[index],
+                  tag: model.event.tags![index],
                 );
               },
             ),
@@ -120,7 +120,7 @@ class EventView extends StatelessWidget {
   Widget eventDesc(EventViewModel model) {
     List<TextSpan> linkifiedText = [];
 
-    linkifiedText.addAll(linkify(text: model.event.description.trim(), fontSize: 16));
+    linkifiedText.addAll(linkify(text: model.event.description!.trim(), fontSize: 16));
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -198,7 +198,7 @@ class EventView extends StatelessWidget {
           verticalSpaceTiny,
           Row(
             children: [
-              model.event.fbUsername == null || model.event.fbUsername.isEmpty
+              model.event.fbUsername == null || model.event.fbUsername!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -211,7 +211,7 @@ class EventView extends StatelessWidget {
                         ),
                       ),
                     ),
-              model.event.instaUsername == null || model.event.instaUsername.isEmpty
+              model.event.instaUsername == null || model.event.instaUsername!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -224,7 +224,7 @@ class EventView extends StatelessWidget {
                         ),
                       ),
                     ),
-              model.event.twitterUsername == null || model.event.twitterUsername.isEmpty
+              model.event.twitterUsername == null || model.event.twitterUsername!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -237,7 +237,7 @@ class EventView extends StatelessWidget {
                         ),
                       ),
                     ),
-              model.event.website == null || model.event.website.isEmpty
+              model.event.website == null || model.event.website!.isEmpty
                   ? Container()
                   : Container(
                       margin: EdgeInsets.only(right: 16),
@@ -267,7 +267,7 @@ class EventView extends StatelessWidget {
           verticalSpaceSmall,
           eventHead(model),
           verticalSpaceSmall,
-          eventImg(context, model.event.imageURL),
+          eventImg(context, model.event.imageURL!),
           eventTags(model),
           verticalSpaceSmall,
           sectionDivider(sectionName: "Details"),
@@ -304,7 +304,7 @@ class EventView extends StatelessWidget {
               color: appIconColor(),
             ),
           ),
-        ),
+        ) as PreferredSizeWidget?,
         body: Container(
           height: screenHeight(context),
           color: appBackgroundColor(),

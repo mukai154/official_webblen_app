@@ -9,11 +9,11 @@ import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'current_user_options_bottom_sheet_model.dart';
 
 class CurrentUserOptionsBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const CurrentUserOptionsBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -36,7 +36,7 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
                 size: 16,
               ),
               height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "saved")),
+              onPressed: () => completer!(SheetResponse(responseData: "saved")),
               backgroundColor: appButtonColor(),
               elevation: 1,
               text: "Saved",
@@ -50,7 +50,7 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
                 size: 16,
               ),
               height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "edit profile")),
+              onPressed: () => completer!(SheetResponse(responseData: "edit profile")),
               backgroundColor: appButtonColor(),
               elevation: 1,
               text: "Edit Profile",
@@ -64,7 +64,7 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
                 size: 16,
               ),
               height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "share profile")),
+              onPressed: () => completer!(SheetResponse(responseData: "share profile")),
               backgroundColor: appButtonColor(),
               elevation: 1,
               text: "Share Profile",
@@ -78,7 +78,7 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
                 size: 16,
               ),
               height: 45,
-              onPressed: () => completer(SheetResponse(responseData: "settings")),
+              onPressed: () => completer!(SheetResponse(responseData: "settings")),
               backgroundColor: appButtonColor(),
               elevation: 1,
               text: "Settings",

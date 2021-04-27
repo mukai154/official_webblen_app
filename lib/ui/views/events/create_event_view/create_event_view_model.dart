@@ -1,14 +1,13 @@
 import 'dart:io';
 
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text/flutter_masked_text.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/time.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
@@ -31,23 +30,23 @@ import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
 class CreateEventViewModel extends BaseViewModel {
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  SnackbarService _snackbarService = locator<SnackbarService>();
-  PlatformDataService _platformDataService = locator<PlatformDataService>();
-  UserDataService _userDataService = locator<UserDataService>();
-  LocationService _locationService = locator<LocationService>();
-  FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
-  EventDataService _eventDataService = locator<EventDataService>();
-  PostDataService _postDataService = locator<PostDataService>();
-  BottomSheetService _bottomSheetService = locator<BottomSheetService>();
-  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
-  ShareService _shareService = locator<ShareService>();
-  TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
-  StripeConnectAccountService _stripeConnectAccountService = locator<StripeConnectAccountService>();
-  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
-  SharedPreferences _sharedPreferences;
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
+  PlatformDataService? _platformDataService = locator<PlatformDataService>();
+  UserDataService? _userDataService = locator<UserDataService>();
+  LocationService? _locationService = locator<LocationService>();
+  FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
+  EventDataService? _eventDataService = locator<EventDataService>();
+  PostDataService? _postDataService = locator<PostDataService>();
+  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  ShareService? _shareService = locator<ShareService>();
+  TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
+  StripeConnectAccountService? _stripeConnectAccountService = locator<StripeConnectAccountService>();
+  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  late SharedPreferences _sharedPreferences;
 
   ///EVENT DETAILS CONTROLLERS
   TextEditingController tagTextController = TextEditingController();
@@ -95,16 +94,16 @@ class CreateEventViewModel extends BaseViewModel {
   bool textFieldEnabled = true;
 
   ///USER DATA
-  bool hasEarningsAccount;
+  bool? hasEarningsAccount;
 
   ///EVENT DATA
   bool isEditing = false;
-  int ticketToEditIndex;
-  int feeToEditIndex;
-  int discountToEditIndex;
-  File img;
+  int? ticketToEditIndex;
+  int? feeToEditIndex;
+  int? discountToEditIndex;
+  File? img;
 
-  WebblenEvent event = WebblenEvent();
+  WebblenEvent? event = WebblenEvent();
 
   ///FORMATTERS
   //Date & Time Details
@@ -119,10 +118,10 @@ class CreateEventViewModel extends BaseViewModel {
   DateFormat timeFormatter = DateFormat('h:mm a');
   DateFormat dateTimeFormatter = DateFormat('MMM dd, yyyy h:mm a');
   DateTime selectedStartDate = DateTime.now();
-  DateTime selectedEndDate;
+  DateTime? selectedEndDate;
 
   ///TICKETING
-  WebblenTicketDistro ticketDistro = WebblenTicketDistro(tickets: [], fees: [], discountCodes: []);
+  WebblenTicketDistro? ticketDistro = WebblenTicketDistro(tickets: [], fees: [], discountCodes: []);
   GlobalKey ticketFormKey = GlobalKey<FormState>();
   GlobalKey feeFormKey = GlobalKey<FormState>();
   GlobalKey discountFormKey = GlobalKey<FormState>();
@@ -131,73 +130,73 @@ class CreateEventViewModel extends BaseViewModel {
   bool showFeeForm = false;
   bool showDiscountCodeForm = false;
 
-  String ticketName;
-  String ticketPrice;
-  String ticketQuantity;
-  String feeName;
-  String feeAmount;
-  String discountCodeName;
-  String discountCodeQuantity;
-  String discountCodePercentage;
+  String? ticketName;
+  String? ticketPrice;
+  String? ticketQuantity;
+  String? feeName;
+  String? feeAmount;
+  String? discountCodeName;
+  String? discountCodeQuantity;
+  String? discountCodePercentage;
 
   ///WEBBLEN CURRENCY
-  double newEventTaxRate;
-  double promo;
+  double? newEventTaxRate;
+  double? promo;
 
   ///INITIALIZE
-  initialize({BuildContext context}) async {
+  initialize({BuildContext? context}) async {
     setBusy(true);
 
     _sharedPreferences = await SharedPreferences.getInstance();
 
     //generate new event
-    event = WebblenEvent().generateNewWebblenEvent(authorID: _webblenBaseViewModel.user.id);
+    event = WebblenEvent().generateNewWebblenEvent(authorID: _webblenBaseViewModel!.user!.id);
 
     //check if user has earnings account
-    hasEarningsAccount = await _stripeConnectAccountService.isStripeConnectAccountSetup(_webblenBaseViewModel.user.id);
+    hasEarningsAccount = await _stripeConnectAccountService!.isStripeConnectAccountSetup(_webblenBaseViewModel!.user!.id);
 
     //set timezone
-    event.timezone = getCurrentTimezone();
-    event.startTime = timeFormatter.format(DateTime.now().add(Duration(hours: 1)).roundDown(delta: Duration(minutes: 30)));
-    event.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
+    event!.timezone = getCurrentTimezone();
+    event!.startTime = timeFormatter.format(DateTime.now().add(Duration(hours: 1)).roundDown(delta: Duration(minutes: 30)));
+    event!.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
     notifyListeners();
 
     //set previously used social accounts
-    fbUsernameTextController.text = _sharedPreferences.getString('fbUsername');
-    instaUsernameTextController.text = _sharedPreferences.getString('instaUsername');
-    twitterUsernameTextController.text = _sharedPreferences.getString('twitterUsername');
-    websiteTextController.text = _sharedPreferences.getString('website');
+    fbUsernameTextController.text = _sharedPreferences.getString('fbUsername')!;
+    instaUsernameTextController.text = _sharedPreferences.getString('instaUsername')!;
+    twitterUsernameTextController.text = _sharedPreferences.getString('twitterUsername')!;
+    websiteTextController.text = _sharedPreferences.getString('website')!;
 
     //check for promos & if editing existing event
-    Map<String, dynamic> args = RouteData.of(context).arguments;
+    Map<String, dynamic> args = {};//RouteData.of(context).arguments;
     if (args != null) {
       promo = args['promo'] ?? null;
       String eventID = args['id'] ?? "";
       if (eventID.isNotEmpty) {
-        event = await _eventDataService.getEventByID(eventID);
+        event = await (_eventDataService!.getEventByID(eventID) as FutureOr<WebblenEvent?>);
         if (event != null) {
-          eventTitleTextController.text = event.title;
-          eventDescTextController.text = event.description;
-          eventVenueNameTextController.text = event.venueName;
-          eventStartDateTextController.text = event.startDate;
-          eventEndDateTextController.text = event.endDate;
-          fbUsernameTextController.text = event.fbUsername;
-          instaUsernameTextController.text = event.instaUsername;
-          twitterUsernameTextController.text = event.twitterUsername;
-          websiteTextController.text = event.website;
-          selectedStartDate = dateFormatter.parse(event.startDate);
-          selectedEndDate = dateFormatter.parse(event.endDate);
+          eventTitleTextController.text = event!.title!;
+          eventDescTextController.text = event!.description!;
+          eventVenueNameTextController.text = event!.venueName!;
+          eventStartDateTextController.text = event!.startDate!;
+          eventEndDateTextController.text = event!.endDate!;
+          fbUsernameTextController.text = event!.fbUsername!;
+          instaUsernameTextController.text = event!.instaUsername!;
+          twitterUsernameTextController.text = event!.twitterUsername!;
+          websiteTextController.text = event!.website!;
+          selectedStartDate = dateFormatter.parse(event!.startDate!);
+          selectedEndDate = dateFormatter.parse(event!.endDate!);
           isEditing = true;
           //check if editing with ticket distro
-          if (event.hasTickets) {
-            ticketDistro = await _ticketDistroDataService.getTicketDistroByID(event.id);
+          if (event!.hasTickets!) {
+            ticketDistro = await (_ticketDistroDataService!.getTicketDistroByID(event!.id) as FutureOr<WebblenTicketDistro?>);
           }
         }
       }
     }
 
     //get webblen rates
-    newEventTaxRate = await _platformDataService.getNewEventTaxRate();
+    newEventTaxRate = await _platformDataService!.getNewEventTaxRate();
     if (newEventTaxRate == null) {
       newEventTaxRate = 0.05;
     }
@@ -211,12 +210,12 @@ class CreateEventViewModel extends BaseViewModel {
 
   ///EVENT IMAGE
   selectImage() async {
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       variant: BottomSheetType.imagePicker,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
 
       //disable text fields while fetching image
       textFieldEnabled = false;
@@ -238,13 +237,13 @@ class CreateEventViewModel extends BaseViewModel {
 
   ///EVENT TAGS
   addTag(String tag) {
-    List tags = event.tags == null ? [] : event.tags.toList(growable: true);
+    List tags = event!.tags == null ? [] : event!.tags!.toList(growable: true);
 
     //check if tag already listed
     if (!tags.contains(tag)) {
       //check if tag limit has been reached
       if (tags.length == 3) {
-        _snackbarService.showSnackbar(
+        _snackbarService!.showSnackbar(
           title: 'Tag Limit Reached',
           message: 'You can only add up to 3 tags for your event',
           duration: Duration(seconds: 5),
@@ -252,7 +251,7 @@ class CreateEventViewModel extends BaseViewModel {
       } else {
         //add tag
         tags.add(tag);
-        event.tags = tags;
+        event!.tags = tags;
         notifyListeners();
       }
     }
@@ -260,25 +259,25 @@ class CreateEventViewModel extends BaseViewModel {
   }
 
   removeTagAtIndex(int index) {
-    List tags = event.tags == null ? [] : event.tags.toList(growable: true);
+    List tags = event!.tags == null ? [] : event!.tags!.toList(growable: true);
     tags.removeAt(index);
-    event.tags = tags;
+    event!.tags = tags;
     notifyListeners();
   }
 
   ///EVENT INFO
   setEventTitle(String val) {
-    event.title = val;
+    event!.title = val;
     notifyListeners();
   }
 
   setEventDescription(String val) {
-    event.description = val;
+    event!.description = val;
     notifyListeners();
   }
 
   onSelectedPrivacyFromDropdown(String val) {
-    event.privacy = val;
+    event!.privacy = val;
     notifyListeners();
   }
 
@@ -291,25 +290,25 @@ class CreateEventViewModel extends BaseViewModel {
     }
 
     //set nearest zipcodes
-    event.nearbyZipcodes = await _locationService.findNearestZipcodes(details['areaCode']);
-    if (event.nearbyZipcodes == null) {
+    event!.nearbyZipcodes = await _locationService!.findNearestZipcodes(details['areaCode']);
+    if (event!.nearbyZipcodes == null) {
       return false;
     }
 
     //set lat
-    event.lat = details['lat'];
+    event!.lat = details['lat'];
 
     //set lon
-    event.lon = details['lon'];
+    event!.lon = details['lon'];
 
     //set address
-    event.streetAddress = details['address'];
+    event!.streetAddress = details['address'];
 
     //set city
-    event.city = details['cityName'];
+    event!.city = details['cityName'];
 
     //get province
-    event.province = details['province'];
+    event!.province = details['province'];
 
     notifyListeners();
 
@@ -317,22 +316,22 @@ class CreateEventViewModel extends BaseViewModel {
   }
 
   setEventVenueName(String val) {
-    event.venueName = val;
+    event!.venueName = val;
     notifyListeners();
   }
 
   setEventVenueSize(String val) {
-    event.venueSize = val;
+    event!.venueSize = val;
     notifyListeners();
   }
 
   ///EVENT DATA & TIME
-  selectDate({@required bool selectingStartDate}) async {
+  selectDate({required bool selectingStartDate}) async {
     //set selectable dates
     Map<String, dynamic> customData = selectingStartDate
         ? {'minSelectedDate': DateTime.now().subtract(Duration(days: 1)), 'selectedDate': selectedStartDate}
         : {'minSelectedDate': selectedStartDate, 'selectedDate': selectedEndDate ?? selectedStartDate};
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       title: selectingStartDate ? "Start Date" : "End Date",
       customData: customData,
       barrierDismissible: true,
@@ -346,36 +345,36 @@ class CreateEventViewModel extends BaseViewModel {
       //set start date
       if (selectingStartDate) {
         selectedStartDate = selectedDate;
-        event.startDate = formattedDate;
+        event!.startDate = formattedDate;
         eventStartDateTextController.text = formattedDate;
       }
       //set end date
       if (!selectingStartDate || selectedEndDate == null) {
         selectedEndDate = selectedDate;
-        event.endDate = formattedDate;
+        event!.endDate = formattedDate;
         eventEndDateTextController.text = formattedDate;
       }
       notifyListeners();
     }
   }
 
-  onSelectedTimeFromDropdown({@required bool selectedStartTime, @required String time}) {
+  onSelectedTimeFromDropdown({required bool selectedStartTime, required String time}) {
     if (selectedStartTime) {
-      event.startTime = time;
+      event!.startTime = time;
     } else {
-      event.endTime = time;
+      event!.endTime = time;
     }
     notifyListeners();
   }
 
   onSelectedTimezoneFromDropdown(String val) {
-    event.timezone = val;
+    event!.timezone = val;
     notifyListeners();
   }
 
   ///EVENT TICKETING, FEES, AND DISCOUNTS
   //tickets
-  toggleTicketForm({@required int ticketIndex}) {
+  toggleTicketForm({required int? ticketIndex}) {
     if (ticketIndex == null) {
       if (showTicketForm) {
         showTicketForm = false;
@@ -384,7 +383,7 @@ class CreateEventViewModel extends BaseViewModel {
       }
     } else {
       showTicketForm = true;
-      Map<String, dynamic> ticket = ticketDistro.tickets[ticketIndex];
+      Map<String, dynamic> ticket = ticketDistro!.tickets![ticketIndex];
       ticketNameTextController.text = ticket['ticketName'];
       ticketQuantityTextController.text = ticket['ticketQuantity'];
       ticketPriceTextController.text = ticket['ticketPrice'];
@@ -395,14 +394,14 @@ class CreateEventViewModel extends BaseViewModel {
 
   addTicket() {
     if (ticketNameTextController.text.trim().isEmpty) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Ticket Name Required',
         message: 'Please add a name for this ticket',
         duration: Duration(seconds: 3),
       );
       return;
     } else if (ticketQuantityTextController.text.trim().isEmpty) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Ticket Quantity Required',
         message: 'Please set a quantity for this ticket',
         duration: Duration(seconds: 3),
@@ -421,10 +420,10 @@ class CreateEventViewModel extends BaseViewModel {
     ticketPriceTextController.text = "\$0.00";
 
     if (ticketToEditIndex != null) {
-      ticketDistro.tickets[ticketToEditIndex] = eventTicket;
+      ticketDistro!.tickets![ticketToEditIndex!] = eventTicket;
       ticketToEditIndex = null;
     } else {
-      ticketDistro.tickets.add(eventTicket);
+      ticketDistro!.tickets!.add(eventTicket);
     }
     showTicketForm = false;
     notifyListeners();
@@ -436,14 +435,14 @@ class CreateEventViewModel extends BaseViewModel {
     ticketPriceTextController.text = "\$0.00";
     showTicketForm = false;
     if (ticketToEditIndex != null) {
-      ticketDistro.tickets.removeAt(ticketToEditIndex);
+      ticketDistro!.tickets!.removeAt(ticketToEditIndex!);
       ticketToEditIndex = null;
     }
     notifyListeners();
   }
 
   //fees
-  toggleFeeForm({@required int feeIndex}) {
+  toggleFeeForm({required int? feeIndex}) {
     if (feeIndex == null) {
       if (showFeeForm) {
         showFeeForm = false;
@@ -452,7 +451,7 @@ class CreateEventViewModel extends BaseViewModel {
       }
     } else {
       showFeeForm = true;
-      Map<String, dynamic> fee = ticketDistro.fees[feeIndex];
+      Map<String, dynamic> fee = ticketDistro!.fees![feeIndex];
       feeNameTextController.text = fee['feeName'];
       feePriceTextController.text = fee['feePrice'];
       feeToEditIndex = feeIndex;
@@ -462,7 +461,7 @@ class CreateEventViewModel extends BaseViewModel {
 
   addFee() {
     if (feeNameTextController.text.trim().isEmpty) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Fee Name Required',
         message: 'Please add a name for this fee',
         duration: Duration(seconds: 3),
@@ -479,10 +478,10 @@ class CreateEventViewModel extends BaseViewModel {
     feePriceTextController.text = "\$0.00";
 
     if (feeToEditIndex != null) {
-      ticketDistro.fees[feeToEditIndex] = eventFee;
+      ticketDistro!.fees![feeToEditIndex!] = eventFee;
       feeToEditIndex = null;
     } else {
-      ticketDistro.fees.add(eventFee);
+      ticketDistro!.fees!.add(eventFee);
     }
     showFeeForm = false;
     notifyListeners();
@@ -493,14 +492,14 @@ class CreateEventViewModel extends BaseViewModel {
     feePriceTextController.text = "\$0.00";
     showFeeForm = false;
     if (feeToEditIndex != null) {
-      ticketDistro.fees.removeAt(feeToEditIndex);
+      ticketDistro!.fees!.removeAt(feeToEditIndex!);
       feeToEditIndex = null;
     }
     notifyListeners();
   }
 
   //discounts
-  toggleDiscountsForm({@required int discountIndex}) {
+  toggleDiscountsForm({required int? discountIndex}) {
     if (discountIndex == null) {
       if (showDiscountCodeForm) {
         showDiscountCodeForm = false;
@@ -509,7 +508,7 @@ class CreateEventViewModel extends BaseViewModel {
       }
     } else {
       showDiscountCodeForm = true;
-      Map<String, dynamic> discount = ticketDistro.discountCodes[discountIndex];
+      Map<String, dynamic> discount = ticketDistro!.discountCodes![discountIndex];
       discountNameTextController.text = discount['discountName'];
       discountLimitTextController.text = discount['discountLimit'];
       discountValueTextController.text = discount['discountValue'];
@@ -520,14 +519,14 @@ class CreateEventViewModel extends BaseViewModel {
 
   addDiscount() {
     if (discountNameTextController.text.trim().isEmpty) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Discount Code Required',
         message: 'Please add a code for this discount',
         duration: Duration(seconds: 3),
       );
       return;
     } else if (discountLimitTextController.text.trim().isEmpty) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Discount Limit Required',
         message: 'Please set a limit for the number of times this discount can be used',
         duration: Duration(seconds: 5),
@@ -546,10 +545,10 @@ class CreateEventViewModel extends BaseViewModel {
     discountValueTextController.text = "\$0.00";
 
     if (discountToEditIndex != null) {
-      ticketDistro.discountCodes[discountToEditIndex] = eventDiscount;
+      ticketDistro!.discountCodes![discountToEditIndex!] = eventDiscount;
       discountToEditIndex = null;
     } else {
-      ticketDistro.discountCodes.add(eventDiscount);
+      ticketDistro!.discountCodes!.add(eventDiscount);
     }
     showDiscountCodeForm = false;
     notifyListeners();
@@ -561,7 +560,7 @@ class CreateEventViewModel extends BaseViewModel {
     discountValueTextController.text = "\$0.00";
     showDiscountCodeForm = false;
     if (discountToEditIndex != null) {
-      ticketDistro.discountCodes.removeAt(discountToEditIndex);
+      ticketDistro!.discountCodes!.removeAt(discountToEditIndex!);
       discountToEditIndex = null;
     }
     notifyListeners();
@@ -569,38 +568,38 @@ class CreateEventViewModel extends BaseViewModel {
 
   ///ADDITIONAL EVENT INFO
   setVideoStreamStatus(bool val) {
-    event.hasStream = val;
+    event!.hasStream = val;
     notifyListeners();
   }
 
   setSponsorshipStatus(bool val) {
-    event.openToSponsors = val;
+    event!.openToSponsors = val;
     notifyListeners();
   }
 
   setFBUsername(String val) {
-    event.fbUsername = val.trim();
+    event!.fbUsername = val.trim();
     notifyListeners();
   }
 
   setInstaUsername(String val) {
-    event.instaUsername = val.trim();
+    event!.instaUsername = val.trim();
     notifyListeners();
   }
 
   setTwitterUsername(String val) {
-    event.twitterUsername = val.trim();
+    event!.twitterUsername = val.trim();
     notifyListeners();
   }
 
   setWebsite(String val) {
-    event.website = val.trim();
+    event!.website = val.trim();
     notifyListeners();
   }
 
   ///FORM VALIDATION
   bool eventTagsAreValid() {
-    if (event.tags == null || event.tags.isEmpty) {
+    if (event!.tags == null || event!.tags!.isEmpty) {
       return false;
     } else {
       return true;
@@ -608,38 +607,38 @@ class CreateEventViewModel extends BaseViewModel {
   }
 
   bool eventTitleIsValid() {
-    return isValidString(event.title);
+    return isValidString(event!.title);
   }
 
   bool eventDescIsValid() {
-    return isValidString(event.description);
+    return isValidString(event!.description);
   }
 
   bool eventAddressIsValid() {
-    return isValidString(event.streetAddress);
+    return isValidString(event!.streetAddress);
   }
 
   bool eventVenueNameIsValid() {
-    return isValidString(event.venueName);
+    return isValidString(event!.venueName);
   }
 
   bool eventStartDateIsValid() {
-    bool isValid = isValidString(event.startDate);
+    bool isValid = isValidString(event!.startDate);
     if (isValid) {
-      String eventStartDateAndTime = event.startDate + " " + event.startTime;
-      event.startDateTimeInMilliseconds = dateTimeFormatter.parse(eventStartDateAndTime).millisecondsSinceEpoch;
+      String eventStartDateAndTime = event!.startDate! + " " + event!.startTime!;
+      event!.startDateTimeInMilliseconds = dateTimeFormatter.parse(eventStartDateAndTime).millisecondsSinceEpoch;
       notifyListeners();
     }
     return isValid;
   }
 
   bool eventEndDateIsValid() {
-    bool isValid = isValidString(event.endDate);
+    bool isValid = isValidString(event!.endDate);
     if (isValid) {
-      String eventEndDateAndTime = event.endDate + " " + event.endTime;
-      event.endDateTimeInMilliseconds = dateTimeFormatter.parse(eventEndDateAndTime).millisecondsSinceEpoch;
+      String eventEndDateAndTime = event!.endDate! + " " + event!.endTime!;
+      event!.endDateTimeInMilliseconds = dateTimeFormatter.parse(eventEndDateAndTime).millisecondsSinceEpoch;
       notifyListeners();
-      if (event.endDateTimeInMilliseconds < event.startDateTimeInMilliseconds) {
+      if (event!.endDateTimeInMilliseconds! < event!.startDateTimeInMilliseconds!) {
         isValid = false;
       }
     }
@@ -647,91 +646,91 @@ class CreateEventViewModel extends BaseViewModel {
   }
 
   bool fbUsernameIsValid() {
-    return isValidUsername(event.fbUsername);
+    return isValidUsername(event!.fbUsername!);
   }
 
   bool instaUsernameIsValid() {
-    return isValidUsername(event.instaUsername);
+    return isValidUsername(event!.instaUsername!);
   }
 
   bool twitterUsernameIsValid() {
-    return isValidUsername(event.twitterUsername);
+    return isValidUsername(event!.twitterUsername!);
   }
 
   bool websiteIsValid() {
-    return isValidUrl(event.website);
+    return isValidUrl(event!.website!);
   }
 
   bool formIsValid() {
     bool isValid = false;
-    if (img == null && event.imageURL == null) {
-      _snackbarService.showSnackbar(
+    if (img == null && event!.imageURL == null) {
+      _snackbarService!.showSnackbar(
         title: 'Event Image Error',
         message: 'Your event must have an image',
         duration: Duration(seconds: 3),
       );
     } else if (!eventTagsAreValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Tag Error',
         message: 'Your event must contain at least 1 tag',
         duration: Duration(seconds: 3),
       );
     } else if (!eventTitleIsValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event Title Required',
         message: 'The title for your event cannot be empty',
         duration: Duration(seconds: 3),
       );
     } else if (!eventDescIsValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event Description Required',
         message: 'The description for your event cannot be empty',
         duration: Duration(seconds: 3),
       );
     } else if (!eventAddressIsValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event Address Required',
         message: 'The address for your event cannot be empty',
         duration: Duration(seconds: 3),
       );
     } else if (!eventVenueNameIsValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event Venue Name Required',
         message: 'The venue name for your event cannot be empty',
         duration: Duration(seconds: 3),
       );
     } else if (!eventStartDateIsValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event Start Date Required',
         message: 'The start date & time for your event cannot be empty',
         duration: Duration(seconds: 3),
       );
     } else if (!eventEndDateIsValid()) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event End Date Error',
         message: "End date & time must be set after the start date & time",
         duration: Duration(seconds: 5),
       );
-    } else if (event.fbUsername != null && event.fbUsername.isNotEmpty && !fbUsernameIsValid()) {
-      _snackbarService.showSnackbar(
+    } else if (event!.fbUsername != null && event!.fbUsername!.isNotEmpty && !fbUsernameIsValid()) {
+      _snackbarService!.showSnackbar(
         title: 'Facebook Username Error',
         message: "Facebook username must be valid",
         duration: Duration(seconds: 3),
       );
-    } else if (event.instaUsername != null && event.instaUsername.isNotEmpty && !instaUsernameIsValid()) {
-      _snackbarService.showSnackbar(
+    } else if (event!.instaUsername != null && event!.instaUsername!.isNotEmpty && !instaUsernameIsValid()) {
+      _snackbarService!.showSnackbar(
         title: 'Instagram Username Error',
         message: "Instagram username must be valid",
         duration: Duration(seconds: 3),
       );
-    } else if (event.twitterUsername != null && event.twitterUsername.isNotEmpty && !twitterUsernameIsValid()) {
-      _snackbarService.showSnackbar(
+    } else if (event!.twitterUsername != null && event!.twitterUsername!.isNotEmpty && !twitterUsernameIsValid()) {
+      _snackbarService!.showSnackbar(
         title: 'Twitter Username Error',
         message: "Twitter username must be valid",
         duration: Duration(seconds: 3),
       );
-    } else if (event.website != null && event.website.isNotEmpty && !websiteIsValid()) {
-      _snackbarService.showSnackbar(
+    } else if (event!.website != null && event!.website!.isNotEmpty && !websiteIsValid()) {
+      _snackbarService!.showSnackbar(
         title: 'Website URL Error',
         message: "Website URL must be valid",
         duration: Duration(seconds: 3),
@@ -747,31 +746,31 @@ class CreateEventViewModel extends BaseViewModel {
 
     //upload img if exists
     if (img != null) {
-      String imageURL = await _firestoreStorageService.uploadImage(img: img, storageBucket: 'images', folderName: 'events', fileName: event.id);
+      String imageURL = await _firestoreStorageService!.uploadImage(img: img!, storageBucket: 'images', folderName: 'events', fileName: event!.id!);
       if (imageURL == null) {
-        _snackbarService.showSnackbar(
+        _snackbarService!.showSnackbar(
           title: 'Event Upload Error',
           message: 'There was an issue uploading your event. Please try again.',
           duration: Duration(seconds: 3),
         );
         return false;
       }
-      event.imageURL = imageURL;
+      event!.imageURL = imageURL;
     }
 
     //set suggested uids for event
-    event.suggestedUIDs = event.suggestedUIDs == null ? _webblenBaseViewModel.user.followers : event.suggestedUIDs;
+    event!.suggestedUIDs = event!.suggestedUIDs == null ? _webblenBaseViewModel!.user!.followers : event!.suggestedUIDs;
 
     //upload event data
     var uploadResult;
     if (isEditing) {
-      uploadResult = await _eventDataService.updateEvent(event: event);
+      uploadResult = await _eventDataService!.updateEvent(event: event!);
     } else {
-      uploadResult = await _eventDataService.createEvent(event: event);
+      uploadResult = await _eventDataService!.createEvent(event: event!);
     }
 
     if (uploadResult is String) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Event Upload Error',
         message: 'There was an issue uploading your event. Please try again.',
         duration: Duration(seconds: 3),
@@ -780,10 +779,10 @@ class CreateEventViewModel extends BaseViewModel {
     }
 
     //cache username data
-    await _sharedPreferences.setString('fbUsername', event.fbUsername);
-    await _sharedPreferences.setString('instaUsername', event.instaUsername);
-    await _sharedPreferences.setString('twitterUsername', event.twitterUsername);
-    await _sharedPreferences.setString('website', event.website);
+    await _sharedPreferences.setString('fbUsername', event!.fbUsername!);
+    await _sharedPreferences.setString('instaUsername', event!.instaUsername!);
+    await _sharedPreferences.setString('twitterUsername', event!.twitterUsername!);
+    await _sharedPreferences.setString('website', event!.website!);
 
     return success;
   }
@@ -799,7 +798,7 @@ class CreateEventViewModel extends BaseViewModel {
     setBusy(false);
   }
 
-  showNewContentConfirmationBottomSheet({BuildContext context}) async {
+  showNewContentConfirmationBottomSheet({required BuildContext context}) async {
     FocusScope.of(context).unfocus();
 
     //exit function if form is invalid
@@ -815,17 +814,17 @@ class CreateEventViewModel extends BaseViewModel {
     }
 
     //display event confirmation
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       title: "Schedule Event?",
-      description: event.privacy == "Public" ? "Schedule this event for everyone to see" : "Your event is ready to be scheduled and shared",
+      description: event!.privacy == "Public" ? "Schedule this event for everyone to see" : "Your event is ready to be scheduled and shared",
       mainButtonTitle: "Schedule Event",
       secondaryButtonTitle: "Cancel",
       customData: {'fee': newEventTaxRate, 'promo': promo},
       variant: BottomSheetType.newContentConfirmation,
     );
     if (sheetResponse != null) {
-      String res = sheetResponse.responseData;
+      String? res = sheetResponse.responseData;
 
       //disable text fields while fetching image
       textFieldEnabled = false;
@@ -833,7 +832,7 @@ class CreateEventViewModel extends BaseViewModel {
 
       //get image from camera or gallery
       if (res == "insufficient funds") {
-        _snackbarService.showSnackbar(
+        _snackbarService!.showSnackbar(
           title: 'Insufficient Funds',
           message: 'You do no have enough WBLN to schedule this event',
           duration: Duration(seconds: 3),
@@ -852,12 +851,12 @@ class CreateEventViewModel extends BaseViewModel {
   displayUploadSuccessBottomSheet() async {
     //deposit and/or withdraw webblen & promo
     if (promo != null) {
-      _userDataService.depositWebblen(uid: _webblenBaseViewModel.uid, amount: promo);
+      _userDataService!.depositWebblen(uid: _webblenBaseViewModel!.uid, amount: promo!);
     }
-    _userDataService.withdrawWebblen(uid: _webblenBaseViewModel.uid, amount: newEventTaxRate);
+    _userDataService!.withdrawWebblen(uid: _webblenBaseViewModel!.uid, amount: newEventTaxRate!);
 
     //display success
-    var sheetResponse = await _bottomSheetService.showCustomSheet(
+    var sheetResponse = await _bottomSheetService!.showCustomSheet(
         variant: BottomSheetType.addContentSuccessful,
         takesInput: false,
         customData: event,
@@ -865,13 +864,13 @@ class CreateEventViewModel extends BaseViewModel {
         title: isEditing ? "Your Event has been Updated" : "Your Event has been Scheduled! 🎉");
 
     if (sheetResponse == null || sheetResponse.responseData == "done") {
-      _navigationService.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
+      _navigationService!.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
     }
   }
 
   ///NAVIGATION
   navigateBack() async {
-    DialogResponse response = await _dialogService.showDialog(
+    DialogResponse? response = await _dialogService!.showDialog(
       title: "Cancel Editing Event?",
       description: isEditing ? "Changes to this event will not be saved" : "The details for this event will not be saved",
       cancelTitle: "Cancel",
@@ -881,12 +880,12 @@ class CreateEventViewModel extends BaseViewModel {
       barrierDismissible: true,
     );
     if (response != null && !response.confirmed) {
-      _navigationService.back();
+      _navigationService!.back();
     }
   }
 
   navigateBackToWalletPage() async {
-    DialogResponse response = await _dialogService.showDialog(
+    DialogResponse? response = await _dialogService!.showDialog(
       title: "Create an Earnings Account?",
       description: isEditing ? "Changes to this event will not be saved" : "The details for this event will not be saved",
       cancelTitle: "Continue Editing",
@@ -896,8 +895,8 @@ class CreateEventViewModel extends BaseViewModel {
       barrierDismissible: true,
     );
     if (response != null && response.confirmed) {
-      _webblenBaseViewModel.setNavBarIndex(3);
-      _navigationService.back();
+      _webblenBaseViewModel!.setNavBarIndex(3);
+      _navigationService!.back();
     }
   }
 }

@@ -6,10 +6,10 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 
 class ListDiscountsForEditing extends StatelessWidget {
-  final WebblenTicketDistro ticketDistro;
+  final WebblenTicketDistro? ticketDistro;
   final Function(int) editDiscountAtIndex;
 
-  ListDiscountsForEditing({@required this.ticketDistro, @required this.editDiscountAtIndex});
+  ListDiscountsForEditing({required this.ticketDistro, required this.editDiscountAtIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +79,7 @@ class ListDiscountsForEditing extends StatelessWidget {
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: ticketDistro.discountCodes.length,
+            itemCount: ticketDistro!.discountCodes!.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
@@ -89,7 +89,7 @@ class ListDiscountsForEditing extends StatelessWidget {
                     Container(
                       width: 150,
                       child: CustomText(
-                        text: ticketDistro.discountCodes[index]["discountName"],
+                        text: ticketDistro!.discountCodes![index]["discountName"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,
@@ -99,7 +99,7 @@ class ListDiscountsForEditing extends StatelessWidget {
                     Container(
                       width: 70,
                       child: CustomText(
-                        text: ticketDistro.discountCodes[index]["discountLimit"],
+                        text: ticketDistro!.discountCodes![index]["discountLimit"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,
@@ -109,7 +109,7 @@ class ListDiscountsForEditing extends StatelessWidget {
                     Container(
                       width: 70.0,
                       child: CustomText(
-                        text: ticketDistro.discountCodes[index]["discountValue"],
+                        text: ticketDistro!.discountCodes![index]["discountValue"],
                         color: appFontColor(),
                         textAlign: TextAlign.left,
                         fontSize: 16.0,

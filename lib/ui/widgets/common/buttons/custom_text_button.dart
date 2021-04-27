@@ -6,14 +6,14 @@ class CustomTextButton extends StatelessWidget {
   final double fontSize;
   final FontWeight fontWeight;
   final Color color;
-  final TextAlign textAlign;
+  final TextAlign? textAlign;
 
   CustomTextButton({
-    @required this.onTap,
-    @required this.text,
-    @required this.fontSize,
-    @required this.fontWeight,
-    @required this.color,
+    required this.onTap,
+    required this.text,
+    required this.fontSize,
+    required this.fontWeight,
+    required this.color,
     this.textAlign,
   });
   @override

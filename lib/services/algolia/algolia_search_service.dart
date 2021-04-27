@@ -1,6 +1,6 @@
 import 'package:algolia/algolia.dart';
-import 'package:auto_route/auto_route.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:webblen/models/search_result.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
@@ -13,16 +13,16 @@ class AlgoliaSearchService {
 
   Future<Algolia> initializeAlgolia() async {
     Algolia algolia;
-    String appID;
-    String apiKey;
+    String? appID;
+    String? apiKey;
     DocumentSnapshot snapshot = await algoliaDocRef.get();
-    appID = snapshot.data()['appID'];
-    apiKey = snapshot.data()['apiKey'];
-    algolia = Algolia.init(applicationId: appID, apiKey: apiKey);
+    appID = snapshot.data()!['appID'];
+    apiKey = snapshot.data()!['apiKey'];
+    algolia = Algolia.init(applicationId: appID!, apiKey: apiKey!);
     return algolia;
   }
 
-  Future<List<SearchResult>> searchUsers({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<SearchResult>> searchUsers({required String searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -43,7 +43,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenUser>> queryUsers({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<WebblenUser>> queryUsers({required String? searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -59,7 +59,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenUser>> queryAdditionalUsers({@required String searchTerm, @required int resultsLimit, @required int pageNum}) async {
+  Future<List<WebblenUser>> queryAdditionalUsers({required String? searchTerm, required int resultsLimit, required int pageNum}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -75,7 +75,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenUser>> queryUsersByFollowers({@required String searchTerm, @required String uid}) async {
+  Future<List<WebblenUser>> queryUsersByFollowers({required String searchTerm, required String? uid}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -84,7 +84,7 @@ class AlgoliaSearchService {
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
           WebblenUser result = WebblenUser.fromMap(snapshot.data);
-          if (result.following.contains(uid)) {
+          if (result.following!.contains(uid)) {
             results.add(result);
           }
         }
@@ -93,7 +93,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenUser>> queryUsersByFollowing({@required String searchTerm, @required String uid}) async {
+  Future<List<WebblenUser>> queryUsersByFollowing({required String searchTerm, required String? uid}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -102,7 +102,7 @@ class AlgoliaSearchService {
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
           WebblenUser result = WebblenUser.fromMap(snapshot.data);
-          if (result.followers.contains(uid)) {
+          if (result.followers!.contains(uid)) {
             results.add(result);
           }
         }
@@ -112,10 +112,10 @@ class AlgoliaSearchService {
   }
 
   Future<List<WebblenUser>> queryAdditionalUsersByFollowing({
-    @required String searchTerm,
-    @required int resultsLimit,
-    @required String uid,
-    @required int pageNum,
+    required String searchTerm,
+    required int resultsLimit,
+    required String uid,
+    required int pageNum,
   }) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenUser> results = [];
@@ -125,7 +125,7 @@ class AlgoliaSearchService {
       eventsSnapshot.hits.forEach((snapshot) {
         if (snapshot.data != null) {
           WebblenUser result = WebblenUser.fromMap(snapshot.data);
-          if (result.followers.contains(uid)) {
+          if (result.followers!.contains(uid)) {
             results.add(result);
           }
         }
@@ -134,7 +134,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<SearchResult>> searchPosts({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<SearchResult>> searchPosts({required String searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -155,7 +155,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenPost>> queryPosts({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<WebblenPost>> queryPosts({required String? searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenPost> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -171,7 +171,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenPost>> queryAdditionalPosts({@required String searchTerm, @required int resultsLimit, @required int pageNum}) async {
+  Future<List<WebblenPost>> queryAdditionalPosts({required String? searchTerm, required int resultsLimit, required int pageNum}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenPost> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -187,7 +187,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<SearchResult>> searchEvents({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<SearchResult>> searchEvents({required String searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -208,7 +208,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenEvent>> queryEvents({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<WebblenEvent>> queryEvents({required String? searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenEvent> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -224,7 +224,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenEvent>> queryAdditionalEvents({@required String searchTerm, @required int resultsLimit, @required int pageNum}) async {
+  Future<List<WebblenEvent>> queryAdditionalEvents({required String? searchTerm, required int resultsLimit, required int pageNum}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenEvent> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -240,7 +240,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<SearchResult>> searchStreams({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<SearchResult>> searchStreams({required String searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<SearchResult> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -261,7 +261,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenLiveStream>> queryStreams({@required String searchTerm, @required resultsLimit}) async {
+  Future<List<WebblenLiveStream>> queryStreams({required String? searchTerm, required resultsLimit}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenLiveStream> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -277,7 +277,7 @@ class AlgoliaSearchService {
     return results;
   }
 
-  Future<List<WebblenLiveStream>> queryAdditionalStreams({@required String searchTerm, @required int resultsLimit, @required int pageNum}) async {
+  Future<List<WebblenLiveStream>> queryAdditionalStreams({required String? searchTerm, required int resultsLimit, required int pageNum}) async {
     Algolia algolia = await initializeAlgolia();
     List<WebblenLiveStream> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
@@ -327,9 +327,9 @@ class AlgoliaSearchService {
   //   return results;
   // }
 
-  Future<List<String>> queryTags(String searchTerm) async {
+  Future<List<String?>> queryTags(String searchTerm) async {
     Algolia algolia = await initializeAlgolia();
-    List<String> results = [];
+    List<String?> results = [];
     if (searchTerm != null && searchTerm.isNotEmpty) {
       AlgoliaQuery query = algolia.instance.index('tags').search(searchTerm);
       AlgoliaQuerySnapshot snapshot = await query.getObjects();
@@ -337,7 +337,7 @@ class AlgoliaSearchService {
         // print(searchTerm);
         // print(snapshot.data);
         if (snapshot.data != null) {
-          String res = snapshot.data['tag'];
+          String? res = snapshot.data['tag'];
           results.add(res);
         }
       });
@@ -365,24 +365,24 @@ class AlgoliaSearchService {
     return allTags;
   }
 
-  Future<List> getRecentSearchTerms({@required String uid}) async {
-    List recentSearchTerms = [];
+  Future<List?> getRecentSearchTerms({required String uid}) async {
+    List? recentSearchTerms = [];
     DocumentSnapshot snapshot = await userDocRef.doc(uid).get();
     if (snapshot.exists) {
-      if (snapshot.data()['recentSearchTerms'] != null) {
-        recentSearchTerms = snapshot.data()['recentSearchTerms'].toList(growable: true);
+      if (snapshot.data()!['recentSearchTerms'] != null) {
+        recentSearchTerms = snapshot.data()!['recentSearchTerms'].toList(growable: true);
       }
     }
     return recentSearchTerms;
   }
 
-  storeSearchTerm({@required String uid, @required String searchTerm}) async {
-    List recentSearchTerms = [];
+  storeSearchTerm({required String? uid, required String? searchTerm}) async {
+    List? recentSearchTerms = [];
     DocumentSnapshot snapshot = await userDocRef.doc(uid).get();
     if (snapshot.exists) {
-      if (snapshot.data()['recentSearchTerms'] != null) {
-        recentSearchTerms = snapshot.data()['recentSearchTerms'].toList(growable: true);
-        if (!recentSearchTerms.contains(searchTerm)) {
+      if (snapshot.data()!['recentSearchTerms'] != null) {
+        recentSearchTerms = snapshot.data()!['recentSearchTerms'].toList(growable: true);
+        if (!recentSearchTerms!.contains(searchTerm)) {
           recentSearchTerms.insert(0, searchTerm);
         }
 

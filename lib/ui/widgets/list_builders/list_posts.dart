@@ -7,24 +7,24 @@ import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_view.dart
 import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view.dart';
 
 class ListPosts extends StatelessWidget {
-  final String currentUID;
+  final String? currentUID;
   final List postResults;
   final Function(WebblenPost) showPostOptions;
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
   final ScrollController scrollController;
   ListPosts({
-    @required this.currentUID,
-    @required this.showPostOptions,
-    @required this.refreshData,
-    @required this.postResults,
-    @required this.pageStorageKey,
-    @required this.scrollController,
+    required this.currentUID,
+    required this.showPostOptions,
+    required this.refreshData,
+    required this.postResults,
+    required this.pageStorageKey,
+    required this.scrollController,
   });
 
   Widget listPosts() {
     return LiquidPullToRefresh(
-      onRefresh: refreshData,
+      onRefresh: refreshData as Future<void> Function(),
       child: ListView.builder(
         controller: scrollController,
         key: pageStorageKey,

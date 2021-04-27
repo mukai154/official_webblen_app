@@ -1,24 +1,23 @@
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 
 class NotificationBellViewModel extends StreamViewModel<int> {
-  NavigationService _navigationService = locator<NavigationService>();
-  NotificationDataService _notificationDataService = locator<NotificationDataService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  NotificationDataService? _notificationDataService = locator<NotificationDataService>();
 
-  String currentUID;
-  int notifCount = 0;
+  String? currentUID;
+  int? notifCount = 0;
 
-  initialize(String uid) async {
+  initialize(String? uid) async {
     currentUID = uid;
     notifyListeners();
   }
 
   ///STREAM DATA
   @override
-  void onData(int data) {
+  void onData(int? data) {
     if (data != 0) {
       notifCount = data;
       notifyListeners();
@@ -31,7 +30,7 @@ class NotificationBellViewModel extends StreamViewModel<int> {
   Stream<int> streamNotifCount() async* {
     while (currentUID != null) {
       await Future.delayed(Duration(seconds: 3));
-      var res = await _notificationDataService.getNumberOfUnreadNotifications(currentUID);
+      var res = await _notificationDataService!.getNumberOfUnreadNotifications(currentUID);
       if (res is String) {
         yield null;
       } else {
@@ -44,6 +43,6 @@ class NotificationBellViewModel extends StreamViewModel<int> {
   navigateToNotificationsView() {
     notifCount = 0;
     notifyListeners();
-    _navigationService.navigateTo(Routes.NotificationsViewRoute);
+    // _navigationService.navigateTo(Routes.NotificationsViewRoute);
   }
 }

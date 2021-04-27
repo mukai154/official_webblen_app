@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class RecordingBox extends StatelessWidget {
-  final VoidCallback endRecording;
+  final VoidCallback? endRecording;
   RecordingBox({this.endRecording});
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class RecordingBox extends StatelessWidget {
 }
 
 class NotRecordingBox extends StatelessWidget {
-  final VoidCallback beginRecording;
+  final VoidCallback? beginRecording;
   NotRecordingBox({this.beginRecording});
   @override
   Widget build(BuildContext context) {

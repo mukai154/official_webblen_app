@@ -13,7 +13,7 @@ class UserSearchResultView extends StatelessWidget {
   final bool isFollowing;
   final bool displayBottomBorder;
 
-  UserSearchResultView({@required this.onTap, @required this.searchResult, @required this.isFollowing, @required this.displayBottomBorder});
+  UserSearchResultView({required this.onTap, required this.searchResult, required this.isFollowing, required this.displayBottomBorder});
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +76,7 @@ class StreamSearchResultView extends StatelessWidget {
   final SearchResult searchResult;
   final bool displayBottomBorder;
 
-  StreamSearchResultView({@required this.onTap, @required this.searchResult, @required this.displayBottomBorder});
+  StreamSearchResultView({required this.onTap, required this.searchResult, required this.displayBottomBorder});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -109,7 +109,7 @@ class EventSearchResultView extends StatelessWidget {
   final SearchResult searchResult;
   final bool displayBottomBorder;
 
-  EventSearchResultView({@required this.onTap, @required this.searchResult, @required this.displayBottomBorder});
+  EventSearchResultView({required this.onTap, required this.searchResult, required this.displayBottomBorder});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -143,7 +143,7 @@ class RecentSearchTermView extends StatelessWidget {
   final bool displayBottomBorder;
   final bool displayIcon;
 
-  RecentSearchTermView({@required this.onSearchTermSelected, @required this.searchTerm, @required this.displayBottomBorder, @required this.displayIcon});
+  RecentSearchTermView({required this.onSearchTermSelected, required this.searchTerm, required this.displayBottomBorder, required this.displayIcon});
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +177,7 @@ class ViewAllResultsSearchTermView extends StatelessWidget {
   final VoidCallback onSearchTermSelected;
   final String searchTerm;
 
-  ViewAllResultsSearchTermView({@required this.onSearchTermSelected, @required this.searchTerm});
+  ViewAllResultsSearchTermView({required this.onSearchTermSelected, required this.searchTerm});
 
   @override
   Widget build(BuildContext context) {

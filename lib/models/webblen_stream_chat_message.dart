@@ -1,9 +1,9 @@
 class WebblenStreamChatMessage {
-  String senderUID;
-  String userImgURL;
-  String username;
-  String message;
-  int timePostedInMilliseconds;
+  String? senderUID;
+  String? userImgURL;
+  String? username;
+  String? message;
+  int? timePostedInMilliseconds;
 
   WebblenStreamChatMessage({
     this.senderUID,

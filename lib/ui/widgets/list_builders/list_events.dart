@@ -9,18 +9,18 @@ class ListEvents extends StatelessWidget {
   final List dataResults;
   final VoidCallback refreshData;
   final PageStorageKey pageStorageKey;
-  final ScrollController scrollController;
+  final ScrollController? scrollController;
   final Function(WebblenEvent) showEventOptions;
   ListEvents(
-      {@required this.refreshData,
-      @required this.dataResults,
-      @required this.pageStorageKey,
-      @required this.scrollController,
-      @required this.showEventOptions});
+      {required this.refreshData,
+      required this.dataResults,
+      required this.pageStorageKey,
+      required this.scrollController,
+      required this.showEventOptions});
 
   Widget listData() {
     return RefreshIndicator(
-      onRefresh: refreshData,
+      onRefresh: refreshData as Future<void> Function(),
       backgroundColor: appBackgroundColor(),
       child: ListView.builder(
         physics: AlwaysScrollableScrollPhysics(),

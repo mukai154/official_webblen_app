@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class GoogleAuthButton extends StatelessWidget {
-  final VoidCallback action;
+  final VoidCallback? action;
   GoogleAuthButton({this.action});
 
   @override

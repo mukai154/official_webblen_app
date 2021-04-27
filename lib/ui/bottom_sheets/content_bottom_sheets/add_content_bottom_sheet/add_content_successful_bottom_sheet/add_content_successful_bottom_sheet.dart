@@ -10,11 +10,11 @@ import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'add_content_successful_bottom_sheet_model.dart';
 
 class AddContentSuccessfulBottomSheet extends StatelessWidget {
-  final SheetRequest request;
-  final Function(SheetResponse) completer;
+  final SheetRequest? request;
+  final Function(SheetResponse)? completer;
 
   const AddContentSuccessfulBottomSheet({
-    Key key,
+    Key? key,
     this.request,
     this.completer,
   }) : super(key: key);
@@ -36,7 +36,7 @@ class AddContentSuccessfulBottomSheet extends StatelessWidget {
           children: [
             verticalSpaceSmall,
             CustomText(
-              text: request.title,
+              text: request!.title,
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: appFontColor(),
@@ -50,7 +50,7 @@ class AddContentSuccessfulBottomSheet extends StatelessWidget {
             ),
             verticalSpaceMedium,
             CustomTextButton(
-              onTap: () => model.shareContentLink(request.customData),
+              onTap: () => model.shareContentLink(request!.customData),
               text: "Share",
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -58,7 +58,7 @@ class AddContentSuccessfulBottomSheet extends StatelessWidget {
             ),
             verticalSpaceMedium,
             CustomTextButton(
-              onTap: () => model.copyContentLink(request.customData),
+              onTap: () => model.copyContentLink(request!.customData),
               text: "Copy Link",
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -66,7 +66,7 @@ class AddContentSuccessfulBottomSheet extends StatelessWidget {
             ),
             verticalSpaceMedium,
             CustomButton(
-              onPressed: () => completer(SheetResponse(responseData: "done")),
+              onPressed: () => completer!(SheetResponse(responseData: "done")),
               text: "Done",
               textSize: 16,
               textColor: appFontColor(),

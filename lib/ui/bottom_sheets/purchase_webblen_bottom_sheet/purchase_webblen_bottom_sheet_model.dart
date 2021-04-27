@@ -4,20 +4,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:flutter_inapp_purchase/modules.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/locator.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/services/in_app_purchases/in_app_purchase_service.dart';
 import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 class PurchaseWebblenBottomSheetModel extends BaseViewModel {
-  InAppPurchaseService _inAppPurchaseService = locator<InAppPurchaseService>();
-  WebblenBaseViewModel webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  InAppPurchaseService? _inAppPurchaseService = locator<InAppPurchaseService>();
+  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
 
   bool completingPurchase = false;
-  StreamSubscription _purchaseUpdatedSubscription;
-  StreamSubscription _purchaseErrorSubscription;
-  StreamSubscription _conectionSubscription;
+  StreamSubscription? _purchaseUpdatedSubscription;
+  StreamSubscription? _purchaseErrorSubscription;
+  StreamSubscription? _conectionSubscription;
   final List<String> _productLists = ['webblen_1', 'webblen_5', 'webblen_25', 'webblen_50', 'webblen_100'];
-  String _platformVersion = 'Unknown';
+  String? _platformVersion = 'Unknown';
   List<IAPItem> _items = [];
   List<PurchasedItem> _purchases = [];
 
@@ -28,7 +28,7 @@ class PurchaseWebblenBottomSheetModel extends BaseViewModel {
   }
 
   initializeFlutterIAP() async {
-    String platformVersion;
+    String? platformVersion;
     try {
       platformVersion = await FlutterInappPurchase.instance.platformVersion;
     } on PlatformException {
@@ -40,7 +40,7 @@ class PurchaseWebblenBottomSheetModel extends BaseViewModel {
 
     // refresh items for android
     try {
-      String msg = await FlutterInappPurchase.instance.consumeAllItems;
+      String? msg = await (FlutterInappPurchase.instance.consumeAllItems as FutureOr<String?>);
       print('consumeAllItems: $msg');
     } catch (err) {
       print('consumeAllItems error: $err');
@@ -51,9 +51,9 @@ class PurchaseWebblenBottomSheetModel extends BaseViewModel {
     });
 
     _purchaseUpdatedSubscription = FlutterInappPurchase.purchaseUpdated.listen((productItem) {
-      String productID = productItem.productId;
+      String? productID = productItem!.productId;
       FlutterInappPurchase.instance.finishTransaction(productItem);
-      InAppPurchaseService().completeInAppPurchase(productID, webblenBaseViewModel.uid).then((error) {
+      InAppPurchaseService().completeInAppPurchase(productID, webblenBaseViewModel!.uid).then((error) {
         if (error != null) {
           print(error);
         }
@@ -105,7 +105,7 @@ class PurchaseWebblenBottomSheetModel extends BaseViewModel {
   }
 
   Future _getPurchases() async {
-    List<PurchasedItem> items = await FlutterInappPurchase.instance.getAvailablePurchases();
+    List<PurchasedItem> items = await (FlutterInappPurchase.instance.getAvailablePurchases() as FutureOr<List<PurchasedItem>>);
     for (var item in items) {
       this._purchases.add(item);
     }
@@ -116,7 +116,7 @@ class PurchaseWebblenBottomSheetModel extends BaseViewModel {
   }
 
   Future _getPurchaseHistory() async {
-    List<PurchasedItem> items = await FlutterInappPurchase.instance.getPurchaseHistory();
+    List<PurchasedItem> items = await (FlutterInappPurchase.instance.getPurchaseHistory() as FutureOr<List<PurchasedItem>>);
     for (var item in items) {
       print('${item.toString()}');
       this._purchases.add(item);

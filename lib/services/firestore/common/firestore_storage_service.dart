@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 class FirestoreStorageService {
   final Reference storageReference = FirebaseStorage.instance.ref();
 
-  Future<String> uploadImage({@required File img, @required String storageBucket, @required String folderName, @required String fileName}) async {
+  Future<String> uploadImage({required File img, required String storageBucket, required String folderName, required String fileName}) async {
     Reference storageReference = FirebaseStorage.instance.ref();
     Reference ref = storageReference.child(storageBucket).child(folderName).child(fileName);
     UploadTask uploadTask = ref.putFile(img);
@@ -15,7 +15,7 @@ class FirestoreStorageService {
     return downloadUrl;
   }
 
-  deleteImage({@required String storageBucket, @required String folderName, @required String fileName}) async {
+  deleteImage({required String storageBucket, required String folderName, required String fileName}) async {
     Reference storageReference = FirebaseStorage.instance.ref();
     storageReference.child(storageBucket).child(folderName).child(fileName).delete().catchError((e) {});
   }

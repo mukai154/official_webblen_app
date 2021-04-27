@@ -5,27 +5,27 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
-import 'package:webblen/app/locator.dart';
-import 'package:webblen/app/router.gr.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 class AuthViewModel extends BaseViewModel {
-  AuthService _authService = locator<AuthService>();
-  DialogService _dialogService = locator<DialogService>();
-  NavigationService _navigationService = locator<NavigationService>();
-  ThemeService themeService = locator<ThemeService>();
-  SnackbarService _snackbarService = locator<SnackbarService>();
-  WebblenBaseViewModel _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  AuthService? _authService = locator<AuthService>();
+  DialogService? _dialogService = locator<DialogService>();
+  NavigationService? _navigationService = locator<NavigationService>();
+  ThemeService? themeService = locator<ThemeService>();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
+  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
   bool signInViaPhone = true;
-  String phoneNo;
-  String phoneVerificationID;
+  String? phoneNo;
+  late String phoneVerificationID;
 
   ///Sign Up Via Email
-  Future signInWithEmail({@required email, @required password}) async {
+  Future signInWithEmail({required email, required password}) async {
     setBusy(true);
 
-    var result = await _authService.signInWithEmail(
+    var result = await _authService!.signInWithEmail(
       email: email,
       password: password,
     );
@@ -36,14 +36,14 @@ class AuthViewModel extends BaseViewModel {
       if (result) {
         navigateToHomePage();
       } else {
-        _snackbarService.showSnackbar(
+        _snackbarService!.showSnackbar(
           title: 'Login Error',
           message: "There Was an Issue Logging In. Please Try Again",
           duration: Duration(seconds: 5),
         );
       }
     } else {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Login Error',
         message: result,
         duration: Duration(seconds: 5),
@@ -51,7 +51,7 @@ class AuthViewModel extends BaseViewModel {
     }
   }
 
-  Future<bool> sendSMSCode({@required phoneNo}) async {
+  Future<bool> sendSMSCode({required phoneNo}) async {
     //Phone Timeout & Verifcation
 
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
@@ -59,15 +59,15 @@ class AuthViewModel extends BaseViewModel {
       notifyListeners();
     };
 
-    final PhoneCodeSent smsCodeSent = (String verId, [int forceCodeResend]) {
+    final PhoneCodeSent smsCodeSent = (String verId, [int? forceCodeResend]) {
       phoneVerificationID = verId;
       notifyListeners();
     };
 
     final PhoneVerificationFailed verificationFailed = (FirebaseAuthException exception) {
-      return _snackbarService.showSnackbar(
+      return _snackbarService!.showSnackbar(
         title: 'Phone Login Error',
-        message: exception.message,
+        message: exception.message!,
         duration: Duration(seconds: 5),
       );
     };
@@ -82,7 +82,7 @@ class AuthViewModel extends BaseViewModel {
 
     if (phoneNo != null && phoneNo.isNotEmpty && phoneNo.length >= 10) {
       //SEND SMS CODE FOR VERIFICATION
-      String error = await _authService.verifyPhoneNum(
+      String? error = await _authService!.verifyPhoneNum(
         phoneNo: phoneNo,
         autoRetrievalTimeout: autoRetrieve,
         smsCodeSent: smsCodeSent,
@@ -91,7 +91,7 @@ class AuthViewModel extends BaseViewModel {
       );
 
       if (error != null) {
-        _snackbarService.showSnackbar(
+        _snackbarService!.showSnackbar(
           title: 'Phone Login Error',
           message: error,
           duration: Duration(seconds: 5),
@@ -103,7 +103,7 @@ class AuthViewModel extends BaseViewModel {
     } else {
       setBusy(false);
 
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Phone Login Error',
         message: "Invalid Phone Number",
         duration: Duration(seconds: 5),
@@ -113,16 +113,16 @@ class AuthViewModel extends BaseViewModel {
     }
   }
 
-  signInWithSMSCode({@required BuildContext context, @required String smsCode}) async {
+  signInWithSMSCode({required BuildContext context, required String smsCode}) async {
     Navigator.of(context).pop();
 
     setBusy(true);
 
-    var res = await _authService.signInWithSMSCode(verificationID: phoneVerificationID, smsCode: smsCode);
+    var res = await _authService!.signInWithSMSCode(verificationID: phoneVerificationID, smsCode: smsCode);
 
     if (res is String) {
       setBusy(false);
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Phone Login Error',
         message: res,
         duration: Duration(seconds: 5),
@@ -149,12 +149,12 @@ class AuthViewModel extends BaseViewModel {
   loginWithFacebook() async {
     setBusy(true);
 
-    var res = await _authService.loginWithFacebook();
+    var res = await _authService!.loginWithFacebook();
 
     setBusy(false);
 
     if (res is String) {
-      _snackbarService.showSnackbar(
+      _snackbarService!.showSnackbar(
         title: 'Facebook Sign In Error',
         message: res,
         duration: Duration(seconds: 5),
@@ -167,9 +167,9 @@ class AuthViewModel extends BaseViewModel {
 
   ///NAVIGATION
   navigateToHomePage() {
-    if (_webblenBaseViewModel.initialised) {
-      _webblenBaseViewModel.initialize();
+    if (_webblenBaseViewModel!.initialised) {
+      _webblenBaseViewModel!.initialize();
     }
-    _navigationService.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
+    _navigationService!.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
   }
 }

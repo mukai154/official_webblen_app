@@ -6,13 +6,13 @@ class IconTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
   final Function(String) onChanged;
-  final TextInputType keyboardType;
+  final TextInputType? keyboardType;
 
   IconTextField({
-    @required this.iconData,
-    @required this.controller,
-    @required this.hintText,
-    @required this.onChanged,
+    required this.iconData,
+    required this.controller,
+    required this.hintText,
+    required this.onChanged,
     this.keyboardType,
   });
 

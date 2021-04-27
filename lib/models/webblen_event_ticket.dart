@@ -1,17 +1,17 @@
 class WebblenEventTicket {
-  String id;
-  String name;
-  String purchaserUID;
-  String eventID;
-  String eventTitle;
-  String eventImageURL;
-  String address;
-  String timezone;
-  String startDate;
-  String endDate;
-  String startTime;
-  String endTime;
-  bool used;
+  String? id;
+  String? name;
+  String? purchaserUID;
+  String? eventID;
+  String? eventTitle;
+  String? eventImageURL;
+  String? address;
+  String? timezone;
+  String? startDate;
+  String? endDate;
+  String? startTime;
+  String? endTime;
+  bool? used;
 
   WebblenEventTicket({
     this.id,

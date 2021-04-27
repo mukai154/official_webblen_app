@@ -9,7 +9,7 @@ class CustomBottomActionBar extends StatelessWidget {
   final String buttonTitle;
   final VoidCallback buttonAction;
 
-  CustomBottomActionBar({@required this.header, @required this.subHeader, @required this.buttonTitle, @required this.buttonAction});
+  CustomBottomActionBar({required this.header, required this.subHeader, required this.buttonTitle, required this.buttonAction});
 
   @override
   Widget build(BuildContext context) {

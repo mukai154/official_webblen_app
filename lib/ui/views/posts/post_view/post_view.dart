@@ -23,17 +23,17 @@ class PostView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: () => model.navigateToUserView(model.author.id),
+            onTap: () => model.navigateToUserView(model.author!.id),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
                   isBusy: false,
-                  userPicUrl: model.author.profilePicURL,
+                  userPicUrl: model.author!.profilePicURL,
                   size: 35,
                 ),
                 horizontalSpaceSmall,
                 Text(
-                  "@${model.author.username}",
+                  "@${model.author!.username}",
                   style: TextStyle(color: appFontColor(), fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
               ],
@@ -58,11 +58,11 @@ class PostView extends StatelessWidget {
   Widget postMessage(PostViewModel model) {
     List<TextSpan> linkifiedText = [];
 
-    if (model.post.imageURL == null) {
-      linkifiedText = linkify(text: model.post.body.trim(), fontSize: 18);
+    if (model.post!.imageURL == null) {
+      linkifiedText = linkify(text: model.post!.body!.trim(), fontSize: 18);
     } else {
       TextSpan usernameTextSpan = TextSpan(
-        text: '@${model.author.username} ',
+        text: '@${model.author!.username} ',
         style: TextStyle(
           color: appFontColor(),
           fontSize: 14,
@@ -70,7 +70,7 @@ class PostView extends StatelessWidget {
         ),
       );
       linkifiedText.add(usernameTextSpan);
-      linkifiedText.addAll(linkify(text: model.post.body.trim(), fontSize: 14));
+      linkifiedText.addAll(linkify(text: model.post!.body!.trim(), fontSize: 14));
     }
 
     return Padding(
@@ -99,7 +99,7 @@ class PostView extends StatelessWidget {
               ),
               horizontalSpaceSmall,
               Text(
-                model.post.commentCount.toString(),
+                model.post!.commentCount.toString(),
                 style: TextStyle(
                   fontSize: 18,
                   color: appFontColor(),
@@ -108,7 +108,7 @@ class PostView extends StatelessWidget {
             ],
           ),
           Text(
-            TimeCalc().getPastTimeFromMilliseconds(model.post.postDateTimeInMilliseconds),
+            TimeCalc().getPastTimeFromMilliseconds(model.post!.postDateTimeInMilliseconds!),
             style: TextStyle(
               color: appFontColorAlt(),
             ),
@@ -119,7 +119,7 @@ class PostView extends StatelessWidget {
   }
 
   Widget postBody(BuildContext context, PostViewModel model) {
-    return model.post.imageURL == null
+    return model.post!.imageURL == null
         ? Container(
             padding: EdgeInsets.symmetric(vertical: 4.0),
             child: Column(
@@ -149,7 +149,7 @@ class PostView extends StatelessWidget {
                 verticalSpaceSmall,
                 postHead(model),
                 verticalSpaceSmall,
-                postImg(context, model.post.imageURL),
+                postImg(context, model.post!.imageURL!),
                 verticalSpaceSmall,
                 postCommentCountAndTime(model),
                 verticalSpaceSmall,
@@ -194,7 +194,7 @@ class PostView extends StatelessWidget {
               color: appIconColor(),
             ),
           ),
-        ),
+        ) as PreferredSizeWidget?,
         body: GestureDetector(
           onTap: () => model.unFocusKeyboard(context),
           child: Container(
@@ -232,7 +232,7 @@ class PostView extends StatelessWidget {
                               focusNode: focusNode,
                               commentTextController: model.commentTextController,
                               isReplying: model.isReplying,
-                              replyReceiverUsername: model.isReplying ? model.commentToReplyTo.username : null,
+                              replyReceiverUsername: model.isReplying ? model.commentToReplyTo!.username : null,
                             ),
                           ),
                         ],

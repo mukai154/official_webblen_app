@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class CustomNavBarItem extends StatelessWidget {
-  final VoidCallback onTap;
-  final bool isActive;
-  final IconData iconData;
-  final String label;
+  final VoidCallback? onTap;
+  final bool? isActive;
+  final IconData? iconData;
+  final String? label;
 
   CustomNavBarItem({this.onTap, this.isActive, this.iconData, this.label});
   @override
@@ -21,17 +21,17 @@ class CustomNavBarItem extends StatelessWidget {
           children: [
             Icon(
               iconData,
-              color: isActive ? appIconColor() : appInActiveColorAlt(),
+              color: isActive! ? appIconColor() : appInActiveColorAlt(),
               size: 24,
             ),
             SizedBox(height: 2),
             label == null
                 ? Container()
                 : Text(
-                    label,
+                    label!,
                     style: TextStyle(
                       fontSize: 12.0,
-                      color: isActive ? appIconColor() : appInActiveColorAlt(),
+                      color: isActive! ? appIconColor() : appInActiveColorAlt(),
                     ),
                   ),
           ],

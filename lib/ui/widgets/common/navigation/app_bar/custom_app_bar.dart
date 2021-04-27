@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class CustomAppBar {
-  Widget basicAppBar({@required String title, @required bool showBackButton, Widget bottomWidget, double bottomWidgetHeight}) {
+  Widget basicAppBar({required String title, required bool showBackButton, Widget? bottomWidget, double? bottomWidgetHeight}) {
     return AppBar(
       elevation: 0,
       backgroundColor: appBackgroundColor(),
@@ -24,12 +24,12 @@ class CustomAppBar {
   }
 
   Widget basicActionAppBar(
-      {@required String title,
-      @required bool showBackButton,
-      @required actionWidget,
-      Widget bottomWidget,
-      double bottomWidgetHeight,
-      VoidCallback onPressedBack}) {
+      {required String title,
+      required bool showBackButton,
+      required actionWidget,
+      Widget? bottomWidget,
+      double? bottomWidgetHeight,
+      VoidCallback? onPressedBack}) {
     return AppBar(
       elevation: 0,
       backgroundColor: appBackgroundColor(),
