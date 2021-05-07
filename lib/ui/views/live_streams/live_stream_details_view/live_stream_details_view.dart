@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_details_view/live_stream_details_view_model.dart';
@@ -15,6 +16,9 @@ import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class LiveStreamDetailsView extends StatelessWidget {
+  final String? id;
+  LiveStreamDetailsView(@PathParam() this.id);
+
   final FocusNode focusNode = FocusNode();
 
   Widget sectionDivider({required String sectionName}) {
@@ -44,7 +48,7 @@ class LiveStreamDetailsView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: () => model.navigateToUserView(model.host!.id),
+            onTap: () => model.navigateToUserView(model.host!.id!),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
@@ -284,7 +288,7 @@ class LiveStreamDetailsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<LiveStreamDetailsViewModel>.reactive(
-      onModelReady: (model) => model.initialize(context),
+      onModelReady: (model) => model.initialize(id!),
       viewModelBuilder: () => LiveStreamDetailsViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicActionAppBar(
@@ -298,7 +302,7 @@ class LiveStreamDetailsView extends StatelessWidget {
               color: appIconColor(),
             ),
           ),
-        ) as PreferredSizeWidget?,
+        ),
         body: Container(
           height: screenHeight(context),
           color: appBackgroundColor(),
@@ -331,13 +335,13 @@ class LiveStreamDetailsView extends StatelessWidget {
                 header: 'Streaming Live',
                 subHeader: "on Webblen",
                 buttonTitle: "Stream Now",
-                buttonAction: () => model.streamNow(),
+                buttonAction: () => model.navigateToStreamHost(id!),
               )
             : CustomBottomActionBar(
                 header: 'Streaming Live',
                 subHeader: "on Webblen",
                 buttonTitle: "Watch Now",
-                buttonAction: () {},
+                buttonAction: () => model.navigateToStreamViewer(id!),
               ),
       ),
     );

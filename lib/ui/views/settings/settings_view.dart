@@ -14,7 +14,7 @@ class SettingsView extends StatelessWidget {
         appBar: CustomAppBar().basicAppBar(
           title: "Settings",
           showBackButton: true,
-        ) as PreferredSizeWidget?,
+        ),
         body: Container(
           color: Theme.of(context).backgroundColor,
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -29,18 +29,20 @@ class SettingsView extends StatelessWidget {
                 showBottomBorder: true,
               ),
               CustomFlatButton(
-                onTap: null,
+                onTap: () => model.getHelpFAQ(),
                 fontColor: appFontColor(),
                 fontSize: 16,
                 text: "Help/FAQ",
                 showBottomBorder: true,
+                textAlign: TextAlign.left,
               ),
               CustomFlatButton(
-                onTap: () => model.signOut(context: context),
+                onTap: () => model.signOut(),
                 fontColor: Colors.red,
                 fontSize: 16,
                 text: "Log Out",
                 showBottomBorder: true,
+                textAlign: TextAlign.left,
               ),
             ],
           ),

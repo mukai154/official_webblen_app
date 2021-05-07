@@ -21,6 +21,13 @@ class PlatformDataService {
     return updateAvailable;
   }
 
+  Future<bool> isUnderMaintenance() async {
+    bool underMaintenance = false;
+    DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
+    underMaintenance = docSnapshot.data()!["underMaintenance"];
+    return underMaintenance;
+  }
+
   ///NEW CONTENT RATES
   Future<double?> getNewPostTaxRate() async {
     double? promo;
@@ -98,8 +105,8 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double?> getEventPromo() async {
-    double? promo;
+  Future<double> getEventPromo() async {
+    double promo = 0;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
     try {
       promo = snapshot.data()!['eventPromo'].toDouble();
@@ -113,25 +120,51 @@ class PlatformDataService {
     return promo;
   }
 
-  Future<double?> getEventTicketFee() async {
-    double? eventTicketFee;
+  Future<double> getEventTicketFee() async {
+    double eventTicketFee = 0;
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
     eventTicketFee = snapshot.data()!['ticketFee'];
     return eventTicketFee;
   }
 
-  Future<double?> getTaxRate() async {
-    double? taxRate;
+  Future<double> getTaxRate() async {
+    double taxRate = 0;
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
     taxRate = snapshot.data()!['taxRate'];
     return taxRate;
   }
 
-  Future<String?> getStripePubKey() async {
-    String? pubKey;
-    DocumentSnapshot snapshot = await appReleaseRef.doc('stripe').get();
-    pubKey = snapshot.data()!['pubKey'];
+  Future<String?> getWebblenDownloadLink() async {
+    String? key;
+    DocumentSnapshot snapshot = await appReleaseRef.doc('webblen').get();
+    key = snapshot.data()!['downloadLink'];
+    return key;
+  }
+
+  Future<String> getStripePubKey() async {
+    String pubKey = "";
+    DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
+    DocumentSnapshot stripeSnapshot = await appReleaseRef.doc('stripe').get();
+    if (snapshot.data()!['underMaintenance']) {
+      pubKey = stripeSnapshot.data()!['testPubKey'];
+    } else {
+      pubKey = stripeSnapshot.data()!['pubKey'];
+    }
     return pubKey;
+  }
+
+  Future<String?> getSendGridApiKey() async {
+    String? appID;
+    DocumentSnapshot snapshot = await appReleaseRef.doc('sendgrid').get();
+    appID = snapshot.data()!['apiKey'];
+    return appID;
+  }
+
+  Future<String?> getSendGridTicketTemplateID() async {
+    String? appID;
+    DocumentSnapshot snapshot = await appReleaseRef.doc('sendgrid').get();
+    appID = snapshot.data()!['ticketEmailTemplateID'];
+    return appID;
   }
 
   Future<String?> getAgoraAppID() async {

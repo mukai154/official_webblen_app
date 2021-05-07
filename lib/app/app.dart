@@ -3,40 +3,70 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
+import 'package:webblen/services/email/email_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/activity_data_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
+import 'package:webblen/services/firestore/data/content_gift_pool_data_service.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
+import 'package:webblen/services/firestore/data/gift_donation_service.dart';
+import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/firestore/data/user_preference_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/permission_handler/permission_handler_service.dart';
+import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
+import 'package:webblen/services/reactive/file_uploader/reactive_file_uploader_service.dart';
+import 'package:webblen/services/reactive/in_app_purchases/reactive_in_app_purchase_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
 import 'package:webblen/services/stripe/stripe_payment_service.dart';
 import 'package:webblen/ui/views/auth/auth_view.dart';
-import 'package:webblen/ui/views/base/webblen_base_view.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/ui/views/base/app_base_view.dart';
+import 'package:webblen/ui/views/base/app_base_view_model.dart';
+import 'package:webblen/ui/views/earnings/how_earnings_work/how_earnings_work_view.dart';
+import 'package:webblen/ui/views/earnings/payout_methods/payout_methods_view.dart';
+import 'package:webblen/ui/views/earnings/set_up_direct_deposit/set_up_direct_deposit_view.dart';
+import 'package:webblen/ui/views/earnings/set_up_instant_deposit/set_up_instant_deposit_view.dart';
+import 'package:webblen/ui/views/earnings/usd_balance_history/usd_balance_history_view.dart';
 import 'package:webblen/ui/views/events/create_event_view/create_event_view.dart';
+import 'package:webblen/ui/views/events/event_view/event_view.dart';
+import 'package:webblen/ui/views/events/tickets/event_tickets/event_tickets_view.dart';
+import 'package:webblen/ui/views/events/tickets/my_tickets/my_tickets_view.dart';
+import 'package:webblen/ui/views/events/tickets/ticket_details/ticket_details_view.dart';
+import 'package:webblen/ui/views/events/tickets/ticket_purchase/ticket_purchase_view.dart';
+import 'package:webblen/ui/views/events/tickets/ticket_selection/ticket_selection_view.dart';
+import 'package:webblen/ui/views/events/tickets/tickets_purchase_success/tickets_purchase_success_view.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
 import 'package:webblen/ui/views/home/tabs/search/recent_search_view_model.dart';
 import 'package:webblen/ui/views/home/tabs/wallet/wallet_view_model.dart';
 import 'package:webblen/ui/views/live_streams/create_live_stream_view/create_live_stream_view.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_details_view/live_stream_details_view.dart';
+import 'package:webblen/ui/views/live_streams/live_stream_host_view/live_stream_host_view.dart';
+import 'package:webblen/ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
+import 'package:webblen/ui/views/notifications/notifications_view.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view.dart';
 import 'package:webblen/ui/views/posts/post_view/post_view.dart';
 import 'package:webblen/ui/views/root/root_view.dart';
 import 'package:webblen/ui/views/search/all_search_results/all_search_results_view.dart';
+import 'package:webblen/ui/views/settings/settings_view.dart';
 import 'package:webblen/ui/views/users/edit_profile/edit_profile_view.dart';
 import 'package:webblen/ui/views/users/followers/user_followers_view.dart';
 import 'package:webblen/ui/views/users/following/user_following_view.dart';
 import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
+import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
 
 @StackedApp(
   routes: [
@@ -52,7 +82,6 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
       page: AuthView,
       name: "AuthViewRoute",
       path: "/login",
-      //transitionsBuilder: ,
       durationInMilliseconds: 0,
     ),
 
@@ -61,10 +90,10 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
 
     //HOME
     CustomRoute(
-      page: WebblenBaseView,
+      page: AppBaseView,
       initial: true,
-      name: "WebblenBaseViewRoute",
-      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      name: "AppBaseViewRoute",
+      path: "/home",
       durationInMilliseconds: 0,
     ),
 
@@ -85,18 +114,16 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
     ),
 
     // //EVENT
-    // CustomRoute(
-    //   page: EventDetailsView,
-    //   name: "EventDetailsViewRoute",
-    //   path: "/event/:id",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
+    CustomRoute(
+      page: EventView,
+      name: "EventViewRoute",
+      path: "/event/:id",
+      durationInMilliseconds: 0,
+    ),
     CustomRoute(
       page: CreateEventView,
       name: "CreateEventViewRoute",
       path: "/event/publish/:id/:promo",
-      //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
 
@@ -105,51 +132,48 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
       page: LiveStreamDetailsView,
       name: "LiveStreamViewRoute",
       path: "/stream/:id",
-      //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: CreateLiveStreamView,
       name: "CreateLiveStreamViewRoute",
       path: "/stream/publish/:id/:promo",
-      //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
-
-    //TICKETS
-    // CustomRoute(
-    //   page: TicketSelectionView,
-    //   name: "TicketSelectionViewRoute",
-    //   path: "/tickets/select/:id",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: TicketPurchaseView,
-    //   name: "TicketPurchaseViewRoute",
-    //   path: "/tickets/purchase/:id/:ticketsToPurchase",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
+    CustomRoute(
+      page: LiveStreamHostView,
+      name: "LiveStreamHostViewRoute",
+      path: "/stream/host/:id",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: LiveStreamViewerView,
+      name: "LiveStreamViewerViewRoute",
+      path: "/stream/viewer/:id",
+      durationInMilliseconds: 0,
+    ),
 
     // //SEARCH
     CustomRoute(
       page: AllSearchResultsView,
       name: "AllSearchResultsViewRoute",
       path: "/all_results/:term",
-      //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
     //
-    // //NOTIFICATIONS
-    // MaterialRoute(page: NotificationsView, name: "NotificationsViewRoute"),
-    //
+    //NOTIFICATIONS
+    CustomRoute(
+      page: NotificationsView,
+      name: "NotificationsViewRoute",
+      path: "/notifications",
+      durationInMilliseconds: 0,
+    ),
+
     //USER PROFILE & SETTINGS
     CustomRoute(
       page: UserProfileView,
       name: "UserProfileView",
       path: "/profile/:id",
-      //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
     CustomRoute(
@@ -159,13 +183,13 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
-    // CustomRoute(
-    //   page: SavedContentView,
-    //   name: "SavedContentViewRoute",
-    //   path: "/saved",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
+    CustomRoute(
+      page: SavedContentView,
+      name: "SavedContentViewRoute",
+      path: "/saved",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
     CustomRoute(
       page: UserFollowersView,
       name: "UserFollowersViewRoute",
@@ -180,72 +204,95 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
-    //CustomRoute(page: SettingsView, name: "SettingsViewRoute"),
 
-    // //WALLET
-    // MaterialRoute(page: RedeemedRewardsView, name: 'RedeemedRewardsViewRoute'),
+    //SETTINGS
+    CustomRoute(
+      page: SettingsView,
+      name: "SettingsViewRoute",
+      path: "/settings",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+
+    //WALLET
+    //MaterialRoute(page: RedeemedRewardsView, name: 'RedeemedRewardsViewRoute'),
 
     //TICKETS
-    // CustomRoute(
-    //   page: MyTicketsView,
-    //   name: "MyTicketsViewRoute",
-    //   path: "/wallet/my_tickets",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: EventTicketsView,
-    //   name: "EventTicketsViewRoute",
-    //   path: "/wallet/my_tickets/event/:id",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: TicketDetailsView,
-    //   name: "TicketDetailsViewRoute",
-    //   path: "/tickets/view/:id",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: TicketsPurchaseSuccessView,
-    //   name: "TicketsPurchaseSuccessViewRoute",
-    //   path: "/ticket_purchase_success/:email",
-    //   //transitionsBuilder: TransitionsBuilders.fadeIn,
-    //   durationInMilliseconds: 0,
-    // ),
+    CustomRoute(
+      page: MyTicketsView,
+      name: "MyTicketsViewRoute",
+      path: "/wallet/my_tickets",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: EventTicketsView,
+      name: "EventTicketsViewRoute",
+      path: "/wallet/my_tickets/event/:id",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: TicketDetailsView,
+      name: "TicketDetailsViewRoute",
+      path: "/tickets/view/:id",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: TicketSelectionView,
+      name: "TicketSelectionViewRoute",
+      path: "/tickets/select/:id",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: TicketPurchaseView,
+      name: "TicketPurchaseViewRoute",
+      path: "/tickets/purchase/:id/:ticketsToPurchase",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: TicketsPurchaseSuccessView,
+      name: "TicketsPurchaseSuccessViewRoute",
+      path: "/ticket_purchase_success/:email",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+
     //
     // //EARNINGS
-    // CustomRoute(
-    //   page: USDBalanceHistoryView,
-    //   name: "USDBalanceHistoryViewRoute",
-    //   path: "/usd-balance-history",
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: PayoutMethodsView,
-    //   name: "PayoutMethodsViewRoute",
-    //   path: "/payout-methods",
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: HowEarningsWorkView,
-    //   name: "HowEarningsWorkViewRoute",
-    //   path: "/how-earnings-work",
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: SetupDirectDepositView,
-    //   name: "SetUpDirectDepositViewRoute",
-    //   path: "/setup-direct-deposit",
-    //   durationInMilliseconds: 0,
-    // ),
-    // CustomRoute(
-    //   page: SetupInstantDepositView,
-    //   name: "SetUpInstantDepositViewRoute",
-    //   path: "/setup-instant-deposit",
-    //   durationInMilliseconds: 0,
-    // ),
+    CustomRoute(
+      page: USDBalanceHistoryView,
+      name: "USDBalanceHistoryViewRoute",
+      path: "/usd-balance-history",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: PayoutMethodsView,
+      name: "PayoutMethodsViewRoute",
+      path: "/payout-methods",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: HowEarningsWorkView,
+      name: "HowEarningsWorkViewRoute",
+      path: "/how-earnings-work",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: SetupDirectDepositView,
+      name: "SetUpDirectDepositViewRoute",
+      path: "/setup-direct-deposit",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: SetupInstantDepositView,
+      name: "SetUpInstantDepositViewRoute",
+      path: "/setup-instant-deposit",
+      durationInMilliseconds: 0,
+    ),
   ],
   dependencies: [
     //LAZY SINGLETONS
@@ -257,8 +304,9 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
     LazySingleton(classType: DialogService),
     LazySingleton(classType: BottomSheetService),
     LazySingleton(classType: SnackbarService),
-    // LazySingleton(classType: CustomBottomSheetService),
-    // LazySingleton(classType: CustomDialogService),
+    LazySingleton(classType: CustomBottomSheetService),
+    LazySingleton(classType: CustomDialogService),
+    LazySingleton(classType: CustomNavigationService),
     LazySingleton(classType: AuthService),
     LazySingleton(classType: FirestoreStorageService),
     LazySingleton(classType: PlatformDataService),
@@ -268,12 +316,12 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
     LazySingleton(classType: PostDataService),
     LazySingleton(classType: EventDataService),
     LazySingleton(classType: LiveStreamDataService),
-    //LazySingleton(classType: LiveStreamChatDataService),
-    //LazySingleton(classType: ContentGiftPoolDataService),
-    //LazySingleton(classType: RedeemedRewardDataService),
+    LazySingleton(classType: LiveStreamChatDataService),
+    LazySingleton(classType: ContentGiftPoolDataService),
+    LazySingleton(classType: RedeemedRewardDataService),
     LazySingleton(classType: TicketDistroDataService),
     LazySingleton(classType: CommentDataService),
-    // LazySingleton(classType: EmailService),
+    LazySingleton(classType: EmailService),
     LazySingleton(classType: StripePaymentService),
     LazySingleton(classType: StripeConnectAccountService),
     LazySingleton(classType: LocationService),
@@ -283,14 +331,17 @@ import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
     LazySingleton(classType: ShareService),
     LazySingleton(classType: ActivityDataService),
     LazySingleton(classType: UserPreferenceDataService),
+    LazySingleton(classType: PermissionHandlerService),
+    LazySingleton(classType: GiftDonationDataService),
 
     //REACTIVE LAZY SINGLETONS
-    // LazySingleton(classType: ReactiveWebblenUserService),
-    // LazySingleton(classType: ReactiveContentFilterService),
-    // LazySingleton(classType: ReactiveFileUploaderService),
+    LazySingleton(classType: ReactiveUserService),
+    LazySingleton(classType: ReactiveContentFilterService),
+    LazySingleton(classType: ReactiveFileUploaderService),
+    LazySingleton(classType: ReactiveInAppPurchaseService),
 
     //SINGLETONS
-    Singleton(classType: WebblenBaseViewModel),
+    Singleton(classType: AppBaseViewModel),
     Singleton(classType: HomeViewModel),
     Singleton(classType: RecentSearchViewModel),
     Singleton(classType: WalletViewModel),

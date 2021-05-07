@@ -11,6 +11,6 @@ enum BottomSheetType {
   userOptions,
   calendar,
   displayContentGifters,
-  giftWBLN,
-  purchaseWBLN,
+  giftOrPurchaseWBLN,
+  stripeAccount,
 }

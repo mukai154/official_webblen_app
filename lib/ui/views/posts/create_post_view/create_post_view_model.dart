@@ -4,69 +4,75 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/app.locator.dart';import 'package:webblen/app/app.router.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
-import 'package:webblen/enums/post_type.dart';
 import 'package:webblen/models/webblen_post.dart';
-import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
-import 'package:webblen/services/share/share_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
-class CreatePostViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  NavigationService? _navigationService = locator<NavigationService>();
-  SnackbarService? _snackbarService = locator<SnackbarService>();
+class CreatePostViewModel extends ReactiveViewModel {
+  CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   PlatformDataService? _platformDataService = locator<PlatformDataService>();
   UserDataService? _userDataService = locator<UserDataService>();
   LocationService? _locationService = locator<LocationService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
   PostDataService? _postDataService = locator<PostDataService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
-  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
-  ShareService? _shareService = locator<ShareService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
 
   ///HELPERS
+  bool initializing = true;
   TextEditingController postTextController = TextEditingController();
   TextEditingController tagTextController = TextEditingController();
   bool textFieldEnabled = true;
 
-  ///DATA
-  bool isEditing = false;
-  File? img;
-  // File img2;
-  // File img3;
+  ///USER DATA
+  bool? hasEarningsAccount;
+  WebblenUser get user => _reactiveUserService.user;
 
-  WebblenPost? post = WebblenPost();
+  ///FILE DATA
+  File? contentImageFile;
+
+  ///DATA
+  String? id;
+  bool isEditing = false;
+
+  WebblenPost post = WebblenPost();
 
   ///WEBBLEN CURRENCY
   double? newPostTaxRate;
   double? promo;
 
+  ///REACTIVE SERVICES
+  @override
+  List<ReactiveServiceMixin> get reactiveServices => [_reactiveUserService];
+
   ///INITIALIZE
-  initialize({BuildContext? context}) async {
+  initialize(String id) async {
     setBusy(true);
 
-    //check if editing existing post
-    Map<String, dynamic> args = {};
+    //generate new stream
+    post = WebblenPost().generateNewWebblenPost(authorID: user.id!, suggestedUIDs: user.followers == null ? [] : user.followers!);
 
-    if (args != null) {
-      promo = args['promo'] ?? null;
-      String postID = args['id'] ?? "";
-      if (postID.isNotEmpty) {
-        post = await (_postDataService!.getPostByID(postID) as FutureOr<WebblenPost?>);
-        if (post != null) {
-          postTextController.text = post!.body!;
-          isEditing = true;
-        }
+    //check if editing existing post
+    if (id != "new") {
+      WebblenPost existingPost = await _postDataService!.getPostToEditByID(id);
+      if (existingPost.isValid()) {
+        post = existingPost;
+        postTextController.text = post.body!;
+        isEditing = true;
       }
     }
 
@@ -75,27 +81,24 @@ class CreatePostViewModel extends BaseViewModel {
     if (newPostTaxRate == null) {
       newPostTaxRate = 0.05;
     }
-    notifyListeners();
+    initializing = false;
     setBusy(false);
+    notifyListeners();
   }
 
   ///POST TAGS
   addTag(String tag) {
-    List tags = post!.tags == null ? [] : post!.tags!.toList(growable: true);
+    List tags = post.tags == null ? [] : post.tags!.toList(growable: true);
 
     //check if tag already listed
     if (!tags.contains(tag)) {
       //check if tag limit has been reached
       if (tags.length == 3) {
-        _snackbarService!.showSnackbar(
-          title: 'Tag Limit Reached',
-          message: 'You can only add up to 3 tags for your post',
-          duration: Duration(seconds: 5),
-        );
+        _customDialogService.showErrorDialog(description: "You can only add up to 3 tags for your post");
       } else {
         //add tag
         tags.add(tag);
-        post!.tags = tags;
+        post.tags = tags;
         notifyListeners();
       }
     }
@@ -103,39 +106,49 @@ class CreatePostViewModel extends BaseViewModel {
   }
 
   removeTagAtIndex(int index) {
-    List tags = post!.tags == null ? [] : post!.tags!.toList(growable: true);
+    List tags = post.tags == null ? [] : post.tags!.toList(growable: true);
     tags.removeAt(index);
-    post!.tags = tags;
+    post.tags = tags;
+    notifyListeners();
+  }
+
+  ///POST MESSAGE
+  setPostMessage(String val) {
+    post.body = val.trim();
     notifyListeners();
   }
 
   ///POST LOCATION
-  Future<bool> setPostLocation() async {
+  Future<bool> setPostLocation(Map<String, dynamic> details) async {
     bool success = true;
+    setBusy(true);
 
-    //get current zip
-    String? zip = await _locationService!.getCurrentZipcode();
-    if (zip == null) {
+    if (details.isEmpty) {
+      _customDialogService.showErrorDialog(description: "There was an issue setting the location. Please try again.");
       return false;
     }
 
-    //get nearest zipcodes
-    post!.nearbyZipcodes = await _locationService!.findNearestZipcodes(zip);
-    if (post!.nearbyZipcodes == null) {
+    //set nearest zipcodes
+    post.nearbyZipcodes = await _locationService!.findNearestZipcodes(details['areaCode']);
+    if (post.nearbyZipcodes == null) {
+      _customDialogService.showErrorDialog(description: "There was an issue setting the location. Please try again.");
       return false;
     }
 
-    //get city
-    post!.city = await _locationService!.getCurrentCity();
-    if (post!.city == null) {
-      return false;
-    }
+    //set lat
+    post.lat = details['lat'];
+
+    //set lon
+    post.lon = details['lon'];
+
+    //set city
+    post.city = details['cityName'];
 
     //get province
-    post!.province = await _locationService!.getCurrentProvince();
-    if (post!.province == null) {
-      return false;
-    }
+    post.province = details['province'];
+
+    notifyListeners();
+    setBusy(false);
 
     return success;
   }
@@ -147,27 +160,25 @@ class CreatePostViewModel extends BaseViewModel {
   }
 
   bool postTagsAreValid() {
-    if (post!.tags == null || post!.tags!.isEmpty) {
+    if (post.tags == null || post.tags!.isEmpty) {
       return false;
     } else {
       return true;
     }
   }
 
+  bool postLocationIsValid() {
+    return isValidString(post.city);
+  }
+
   bool formIsValid() {
     bool isValid = false;
     if (!postTagsAreValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Tag Error',
-        message: 'Your post must contain at least 1 tag',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Your post must contain at least 1 tag");
     } else if (!postBodyIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Post Message Required',
-        message: 'The message for your post cannot be empty',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "The message for your post cannot be empty");
+    } else if (!postLocationIsValid()) {
+      _customDialogService.showErrorDialog(description: "Please choose a location for your post");
     } else {
       isValid = true;
     }
@@ -177,66 +188,24 @@ class CreatePostViewModel extends BaseViewModel {
   Future<bool> submitNewPost() async {
     bool success = true;
 
-    //get current location
-    bool setLocation = await setPostLocation();
-    if (!setLocation) {
-      _snackbarService!.showSnackbar(
-        title: 'Location Error',
-        message: 'There was an issue posting to your location. Please try again.',
-        duration: Duration(seconds: 3),
-      );
-      return false;
-    }
-
-    String message = postTextController.text.trim();
-
-    //generate new post
-    String newPostID = getRandomString(20);
-    post = WebblenPost(
-      id: newPostID,
-      parentID: null,
-      authorID: _webblenBaseViewModel!.uid,
-      imageURL: null,
-      body: message,
-      nearbyZipcodes: post!.nearbyZipcodes,
-      city: post!.city,
-      province: post!.province,
-      followers: _webblenBaseViewModel!.user!.followers,
-      tags: post!.tags,
-      webAppLink: "https://app.webblen.io/posts/post?id=$newPostID",
-      sharedComs: [],
-      savedBy: [],
-      postType: PostType.eventPost,
-      postDateTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
-      paidOut: false,
-      participantIDs: [],
-      commentCount: 0,
-      reported: false,
-      suggestedUIDs: post!.suggestedUIDs == null ? _webblenBaseViewModel!.user!.followers : post!.suggestedUIDs,
-    );
+    //set post time
+    post.postDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
 
     //upload img if exists
-    if (img != null) {
-      String imageURL = await _firestoreStorageService!.uploadImage(img: img!, storageBucket: 'images', folderName: 'posts', fileName: post!.id!);
-      if (imageURL == null) {
-        _snackbarService!.showSnackbar(
-          title: 'Post Upload Error',
-          message: 'There was an issue uploading your post. Please try again.',
-          duration: Duration(seconds: 3),
-        );
+    if (contentImageFile != null) {
+      String? imageURL = await _firestoreStorageService!.uploadImage(img: contentImageFile!, storageBucket: 'images', folderName: 'posts', fileName: post.id!);
+      if (imageURL != null && imageURL.isEmpty) {
+        _customDialogService.showErrorDialog(description: 'There was an issue uploading your post. Please try again.');
         return false;
       }
-      post!.imageURL = imageURL;
+      post.imageURL = imageURL;
+      notifyListeners();
     }
 
     //upload post data
-    var uploadResult = await _postDataService!.createPost(post: post!);
+    var uploadResult = await _postDataService!.createPost(post: post);
     if (uploadResult is String) {
-      _snackbarService!.showSnackbar(
-        title: 'Post Upload Error',
-        message: 'There was an issue uploading your post. Please try again.',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: 'There was an issue uploading your post. Please try again.');
       return false;
     }
 
@@ -246,54 +215,21 @@ class CreatePostViewModel extends BaseViewModel {
   Future<bool> submitEditedPost() async {
     bool success = true;
 
-    String message = postTextController.text.trim();
-
-    //update post
-    post = WebblenPost(
-      id: post!.id,
-      parentID: post!.parentID,
-      authorID: _webblenBaseViewModel!.uid,
-      imageURL: img == null ? post!.imageURL : null,
-      body: message,
-      nearbyZipcodes: post!.nearbyZipcodes,
-      city: post!.city,
-      province: post!.province,
-      followers: _webblenBaseViewModel!.user!.followers,
-      tags: post!.tags,
-      webAppLink: post!.webAppLink,
-      sharedComs: post!.sharedComs,
-      savedBy: post!.savedBy,
-      postType: PostType.eventPost,
-      postDateTimeInMilliseconds: post!.postDateTimeInMilliseconds,
-      paidOut: post!.paidOut,
-      participantIDs: post!.participantIDs,
-      commentCount: post!.commentCount,
-      reported: post!.reported,
-      suggestedUIDs: post!.suggestedUIDs == null ? _webblenBaseViewModel!.user!.followers : post!.suggestedUIDs,
-    );
-
-    //upload img if exists
-    if (img != null) {
-      String imageURL = await _firestoreStorageService!.uploadImage(img: img!, storageBucket: 'images', folderName: 'posts', fileName: post!.id!);
-      if (imageURL == null) {
-        _snackbarService!.showSnackbar(
-          title: 'Post Upload Error',
-          message: 'There was an issue uploading your post. Please try again.',
-          duration: Duration(seconds: 3),
-        );
+    ///upload img if exists
+    if (contentImageFile != null) {
+      String? imageURL = await _firestoreStorageService!.uploadImage(img: contentImageFile!, storageBucket: 'images', folderName: 'posts', fileName: post.id!);
+      if (imageURL != null && imageURL.isEmpty) {
+        _customDialogService.showErrorDialog(description: 'There was an issue uploading your post. Please try again.');
         return false;
       }
-      post!.imageURL = imageURL;
+      post.imageURL = imageURL;
+      notifyListeners();
     }
 
     //upload post data
-    var uploadResult = await _postDataService!.updatePost(post: post!);
+    var uploadResult = await _postDataService!.createPost(post: post);
     if (uploadResult is String) {
-      _snackbarService!.showSnackbar(
-        title: 'Post Upload Error',
-        message: 'There was an issue uploading your post. Please try again.',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: 'There was an issue uploading your post. Please try again.');
       return false;
     }
 
@@ -302,6 +238,7 @@ class CreatePostViewModel extends BaseViewModel {
 
   submitForm() async {
     setBusy(true);
+
     //if editing update post, otherwise create new post
     if (isEditing) {
       //update post
@@ -318,34 +255,13 @@ class CreatePostViewModel extends BaseViewModel {
         displayUploadSuccessBottomSheet();
       }
     }
+
     setBusy(false);
   }
 
   ///BOTTOM SHEETS
-  selectImage({BuildContext? context}) async {
-    var sheetResponse = await _bottomSheetService!.showCustomSheet(
-      barrierDismissible: true,
-      variant: BottomSheetType.imagePicker,
-    );
-    if (sheetResponse != null) {
-      String? res = sheetResponse.responseData;
-
-      //disable text fields while fetching image
-      textFieldEnabled = false;
-      notifyListeners();
-
-      //get image from camera or gallery
-      if (res == "camera") {
-        img = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
-      } else if (res == "gallery") {
-        img = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
-      }
-
-      //wait a bit to re-enable text fields
-      await Future.delayed(Duration(milliseconds: 500));
-      textFieldEnabled = true;
-      notifyListeners();
-    }
+  selectImage() async {
+    WebblenImagePicker().retrieveImageFromLibrary();
   }
 
   showNewContentConfirmationBottomSheet({BuildContext? context}) async {
@@ -380,11 +296,7 @@ class CreatePostViewModel extends BaseViewModel {
 
       //get image from camera or gallery
       if (res == "insufficient funds") {
-        _snackbarService!.showSnackbar(
-          title: 'Insufficient Funds',
-          message: 'You do no have enough WBLN to publish this post',
-          duration: Duration(seconds: 3),
-        );
+        _customDialogService.showErrorDialog(description: 'You do no have enough WBLN to publish this post');
       } else if (res == "confirmed") {
         submitForm();
       }
@@ -399,9 +311,9 @@ class CreatePostViewModel extends BaseViewModel {
   displayUploadSuccessBottomSheet() async {
     //deposit and/or withdraw webblen & promo
     if (promo != null) {
-      await _userDataService!.depositWebblen(uid: _webblenBaseViewModel!.uid, amount: promo!);
+      await _userDataService!.depositWebblen(uid: user.id, amount: promo!);
     }
-    await _userDataService!.withdrawWebblen(uid: _webblenBaseViewModel!.uid, amount: newPostTaxRate!);
+    await _userDataService!.withdrawWebblen(uid: user.id, amount: newPostTaxRate!);
 
     //display success
     var sheetResponse = await _bottomSheetService!.showCustomSheet(
@@ -412,7 +324,20 @@ class CreatePostViewModel extends BaseViewModel {
         title: isEditing ? "Your Post has been Updated" : "Your Post has been Published! 🎉");
 
     if (sheetResponse == null || sheetResponse.responseData == "done") {
-      _navigationService!.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
+      _customNavigationService.navigateToBase();
+    }
+  }
+
+  ///NAVIGATION
+  navigateBack() async {
+    bool confirmed = false;
+    if (isEditing) {
+      confirmed = await _customBottomSheetService.showCancelEditingContentBottomSheet();
+    } else {
+      confirmed = await _customBottomSheetService.showCancelCreatingContentBottomSheet(content: post);
+    }
+    if (confirmed) {
+      _customNavigationService.navigateBack();
     }
   }
 }

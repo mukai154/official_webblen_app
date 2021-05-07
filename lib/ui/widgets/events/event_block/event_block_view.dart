@@ -12,11 +12,11 @@ import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 import 'event_block_view_model.dart';
 
-class EventBlockWidget extends StatelessWidget {
+class EventBlockView extends StatelessWidget {
   final WebblenEvent event;
   final Function(WebblenEvent) showEventOptions;
 
-  EventBlockWidget({required this.event, required this.showEventOptions});
+  EventBlockView({required this.event, required this.showEventOptions});
 
   Widget eventStartDate(EventBlockViewModel model) {
     return Container(
@@ -26,6 +26,7 @@ class EventBlockWidget extends StatelessWidget {
           SizedBox(height: 16),
           CustomText(
             text: event.startDate!.substring(4, event.startDate!.length - 6),
+            color: appFontColor(),
             fontSize: 18,
             fontWeight: FontWeight.w500,
           ),
@@ -86,7 +87,7 @@ class EventBlockWidget extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
-                          onTap: () => model.navigateToUserView(event.authorID),
+                          onTap: () => model.customNavigationService.navigateToUserView(event.authorID!),
                           child: Container(
                             child: Row(
                               children: [
@@ -100,7 +101,7 @@ class EventBlockWidget extends StatelessWidget {
                                 ),
                                 CustomText(
                                   text: "@${model.authorUsername}",
-                                  color: appFontColor(),
+                                  color: Colors.white,
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -129,6 +130,7 @@ class EventBlockWidget extends StatelessWidget {
                       children: [
                         CustomText(
                           text: event.title,
+                          color: Colors.white,
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
@@ -228,22 +230,28 @@ class EventBlockWidget extends StatelessWidget {
       viewModelBuilder: () => EventBlockViewModel(),
       builder: (context, model, child) => model.isBusy
           ? Container()
-          : Container(
-              height: 330,
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: GestureDetector(
-                onDoubleTap: () => model.saveUnsaveEvent(eventID: event.id),
-                onLongPress: () {
-                  HapticFeedback.lightImpact();
-                  showEventOptions(event);
-                },
-                onTap: () => model.navigateToEventView(eventID: event.id),
-                child: Row(
-                  children: [
-                    eventStartDate(model),
-                    horizontalSpaceSmall,
-                    eventBody(context, model),
-                  ],
+          : Align(
+              alignment: Alignment.center,
+              child: Container(
+                height: 330,
+                constraints: BoxConstraints(
+                  maxWidth: 500,
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+                child: GestureDetector(
+                  onDoubleTap: () => model.saveUnsaveEvent(eventID: event.id),
+                  onLongPress: () {
+                    HapticFeedback.lightImpact();
+                    showEventOptions(event);
+                  },
+                  onTap: () => model.customNavigationService.navigateToEventView(event.id!),
+                  child: Row(
+                    children: [
+                      eventStartDate(model),
+                      horizontalSpaceSmall,
+                      eventBody(context, model),
+                    ],
+                  ),
                 ),
               ),
             ),

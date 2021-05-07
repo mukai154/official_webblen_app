@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 
 class AutoCompleteAddressTextFieldModel extends BaseViewModel {
   ///SERVICES
-  PlatformDataService? _platformDataService = locator<PlatformDataService>();
-  SnackbarService? _snackbarService = locator<SnackbarService>();
-  GooglePlacesService? googlePlacesService = locator<GooglePlacesService>();
+  PlatformDataService _platformDataService = locator<PlatformDataService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
+  GooglePlacesService googlePlacesService = locator<GooglePlacesService>();
 
   ///HELPERS
   TextEditingController locationTextController = TextEditingController();
 
   ///RESULTS
+  bool settingLocation = false;
   Map<String, dynamic> placeSearchResults = {};
 
   ///API KEYS
@@ -24,7 +25,7 @@ class AutoCompleteAddressTextFieldModel extends BaseViewModel {
   initialize({required String initialValue}) async {
     locationTextController.text = initialValue;
     notifyListeners();
-    googleAPIKey = await _platformDataService!.getGoogleApiKey();
+    googleAPIKey = await _platformDataService.getGoogleApiKey();
     notifyListeners();
   }
 
@@ -36,18 +37,26 @@ class AutoCompleteAddressTextFieldModel extends BaseViewModel {
 
   ///GET LOCATION DETAILS
   Future<Map<String, dynamic>> getPlaceDetails(String place) async {
-    Map<String, dynamic> details = {};
+    locationTextController.text = "Setting Location...";
+    settingLocation = true;
+    notifyListeners();
+
+    Map<String, dynamic> result = {};
     String? placeID = placeSearchResults[place];
+
+    await googlePlacesService.getDetailsFromPlaceID(key: googleAPIKey, placeID: placeID!).then((details) {
+      if (details.isEmpty) {
+        _customDialogService.showErrorDialog(
+          description: "There was an issue getting the details of this location. Please Try Again.",
+        );
+      } else {
+        result = details;
+      }
+    });
+    settingLocation = false;
     locationTextController.text = place;
     notifyListeners();
-    details = await googlePlacesService!.getDetailsFromPlaceID(key: googleAPIKey, placeID: placeID);
-    if (details.isEmpty) {
-      _snackbarService!.showSnackbar(
-        title: 'Error',
-        message: "There was an issue getting the details of this location. Please Try Again.",
-        duration: Duration(seconds: 5),
-      );
-    }
-    return details;
+
+    return result;
   }
 }

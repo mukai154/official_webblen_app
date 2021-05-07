@@ -6,7 +6,7 @@ import 'package:webblen/ui/widgets/common/text_field/auto_complete_address_text_
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 
 class AutoCompleteAddressTextField extends StatelessWidget {
-  final String? initialValue;
+  final String initialValue;
   final String hintText;
   final Function(Map<String, dynamic>) onSelectedAddress;
 
@@ -15,7 +15,7 @@ class AutoCompleteAddressTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<AutoCompleteAddressTextFieldModel>.reactive(
-      onModelReady: (model) => model.initialize(initialValue: initialValue!),
+      onModelReady: (model) => model.initialize(initialValue: initialValue),
       viewModelBuilder: () => AutoCompleteAddressTextFieldModel(),
       builder: (context, model, child) => TextFieldContainer(
         height: 38,
@@ -39,9 +39,9 @@ class AutoCompleteAddressTextField extends StatelessWidget {
             autofocus: false,
           ),
           suggestionsCallback: (searchTerm) async {
-            Map<String, dynamic> res = await (model.googlePlacesService!.googleSearchAutoComplete(key: model.googleAPIKey, input: searchTerm) as FutureOr<Map<String, dynamic>>);
+            Map<String, dynamic> res = await model.googlePlacesService.googleSearchAutoComplete(key: model.googleAPIKey, input: searchTerm);
             model.setPlacesSearchResults(res);
-            return model.placeSearchResults.keys.toList();
+            return res.keys.toList();
           },
           itemBuilder: (context, dynamic place) {
             return ListTile(

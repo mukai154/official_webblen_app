@@ -18,7 +18,7 @@ class WebblenContentGiftPool {
           id: data['id'],
           hostID: data['hostID'],
           gifters: data['gifters'],
-          totalGiftAmount: data['totalGiftAmount'],
+          totalGiftAmount: data['totalGiftAmount'].toDouble(),
           paidOut: data['paidOut'],
         );
 
@@ -29,4 +29,12 @@ class WebblenContentGiftPool {
         'totalGiftAmount': this.totalGiftAmount,
         'paidOut': this.paidOut,
       };
+
+  bool isValid() {
+    bool isValid = true;
+    if (this.id == null) {
+      isValid = false;
+    }
+    return isValid;
+  }
 }

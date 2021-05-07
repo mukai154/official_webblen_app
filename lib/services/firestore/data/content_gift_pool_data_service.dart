@@ -1,17 +1,17 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_content_gift_pool.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 
 class ContentGiftPoolDataService {
   CollectionReference giftPoolRef = FirebaseFirestore.instance.collection('webblen_content_gift_pools');
   CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_users');
-  FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
 
-  Future<bool> checkIfGiftPoolExists(String? id) async {
+  Future<bool> checkIfGiftPoolExists(String id) async {
     bool exists = false;
     try {
       DocumentSnapshot snapshot = await giftPoolRef.doc(id).get();
@@ -21,7 +21,7 @@ class ContentGiftPoolDataService {
     } catch (e) {
       _snackbarService!.showSnackbar(
         title: 'Error',
-        message: e.message,
+        message: e.toString(),
         duration: Duration(seconds: 5),
       );
       return false;
@@ -35,17 +35,19 @@ class ContentGiftPoolDataService {
     });
   }
 
-  Future<WebblenContentGiftPool?> getGiftPoolByID(String? id) async {
-    WebblenContentGiftPool? giftPool;
+  Future<WebblenContentGiftPool> getGiftPoolByID(String? id) async {
+    WebblenContentGiftPool giftPool = WebblenContentGiftPool();
+    String? error;
     DocumentSnapshot snapshot = await giftPoolRef.doc(id).get().catchError((e) {
-      // _snackbarService.showSnackbar(
-      //   title: 'Unknown Error',
-      //   message: e.message,
-      //   duration: Duration(seconds: 5),
-      // );
-      return null;
+      error = e.message;
     });
-    if (snapshot != null && snapshot.exists) {
+
+    if (error != null) {
+      print(error);
+      return giftPool;
+    }
+
+    if (snapshot.exists) {
       giftPool = WebblenContentGiftPool.fromMap(snapshot.data()!);
     }
     return giftPool;
@@ -65,7 +67,7 @@ class ContentGiftPoolDataService {
 
   Future<bool> addToGiftPool({String? giftPoolID, String? uid, double? amount, int? giftID}) async {
     //get gift pool
-    WebblenContentGiftPool giftPool = await (getGiftPoolByID(giftPoolID) as FutureOr<WebblenContentGiftPool>);
+    WebblenContentGiftPool giftPool = await getGiftPoolByID(giftPoolID);
     Map<dynamic, dynamic> gifters = giftPool.gifters!;
 
     //get user

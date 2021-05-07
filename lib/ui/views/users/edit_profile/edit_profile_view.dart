@@ -42,7 +42,7 @@ class EditProfileView extends StatelessWidget {
                       ),
                     ),
                   ),
-          ) as PreferredSizeWidget?,
+          ),
           body: Container(
             height: screenHeight(context),
             color: appBackgroundColor(),
@@ -50,7 +50,7 @@ class EditProfileView extends StatelessWidget {
             child: ListView(
               children: [
                 verticalSpaceMedium,
-                model.updatedProfilePic == null
+                model.updatedProfilePicFile == null
                     ? GestureDetector(
                         onTap: () => model.selectImage(),
                         child: Align(
@@ -65,7 +65,7 @@ class EditProfileView extends StatelessWidget {
                         onTap: () => model.selectImage(),
                         child: Align(
                           child: UserProfilePicFromFile(
-                            file: model.updatedProfilePic,
+                            file: model.updatedProfilePicFile,
                             size: 80,
                           ),
                         ),
@@ -82,6 +82,20 @@ class EditProfileView extends StatelessWidget {
                       color: appTextButtonColor(),
                     ),
                   ),
+                ),
+                verticalSpaceMedium,
+                CustomText(
+                  text: "Username",
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: appFontColor(),
+                ),
+                verticalSpaceSmall,
+                SingleLineTextField(
+                  controller: model.usernameTextController,
+                  hintText: "Username",
+                  textLimit: 50,
+                  isPassword: false,
                 ),
                 verticalSpaceMedium,
                 CustomText(
@@ -109,6 +123,7 @@ class EditProfileView extends StatelessWidget {
                   controller: model.websiteTextController,
                   hintText: "https://mysite.com",
                   isPassword: false,
+                  textLimit: null,
                 ),
               ],
             ),

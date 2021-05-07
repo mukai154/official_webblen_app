@@ -17,112 +17,141 @@ class TicketingForm extends StatelessWidget {
   final MoneyMaskedTextController ticketPriceTextController;
   final VoidCallback validateAndSubmitTicket;
   final VoidCallback deleteTicket;
-  TicketingForm(
-      {required this.editingTicket,
-      required this.ticketNameTextController,
-      required this.ticketQuantityTextController,
-      required this.ticketPriceTextController,
-      required this.validateAndSubmitTicket,
-      required this.deleteTicket});
+  TicketingForm({
+    required this.editingTicket,
+    required this.ticketNameTextController,
+    required this.ticketQuantityTextController,
+    required this.ticketPriceTextController,
+    required this.validateAndSubmitTicket,
+    required this.deleteTicket,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth(context),
+      constraints: BoxConstraints(
+        maxWidth: 500,
+      ),
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
+            height: 18,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.40,
-                  child: CustomText(
-                    text: 'Ticket Name',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: CustomText(
+                      text: 'Ticket Name',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                  child: CustomText(
-                    text: 'Qty',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: CustomText(
+                      text: 'Qty',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                  child: CustomText(
-                    text: 'Price',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    child: CustomText(
+                      text: 'Price',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           verticalSpaceSmall,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.40,
-                child: SingleLineTextField(
-                  controller: ticketNameTextController,
-                  hintText: "General Admission",
-                  textLimit: 50,
-                  isPassword: false,
+          Container(
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 6),
+                    child: SingleLineTextField(
+                      controller: ticketNameTextController,
+                      hintText: "General Admission",
+                      textLimit: 50,
+                      isPassword: false,
+                    ),
+                  ),
                 ),
-              ),
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                child: NumberTextField(
-                  controller: ticketQuantityTextController,
-                  hintText: "100",
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 6),
+                    child: NumberTextField(
+                      controller: ticketQuantityTextController,
+                      hintText: "100",
+                    ),
+                  ),
                 ),
-              ),
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                child: MoneyTextField(
-                  controller: ticketPriceTextController,
-                  hintText: "\$9.00",
-                  textLimit: null,
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    child: MoneyTextField(
+                      controller: ticketPriceTextController,
+                      hintText: "\$9.99",
+                      textLimit: null,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           verticalSpaceSmall,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              CustomButton(
-                text: !editingTicket ? "Add Ticket" : "Update Ticket",
-                textColor: Colors.white,
-                backgroundColor: CustomColors.darkMountainGreen,
-                height: 30.0,
-                width: 120,
-                onPressed: validateAndSubmitTicket,
-                isBusy: false,
-              ),
-              SizedBox(width: 8.0),
-              CustomIconButton(
-                height: 30,
-                width: 30,
-                icon: Icon(
-                  FontAwesomeIcons.trash,
-                  size: 14,
-                  color: Colors.white,
+          Container(
+            height: 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                CustomButton(
+                  text: !editingTicket ? "Add Ticket" : "Update Ticket",
+                  textColor: Colors.white,
+                  textSize: 14,
+                  backgroundColor: CustomColors.darkMountainGreen,
+                  height: 30.0,
+                  width: 120,
+                  onPressed: validateAndSubmitTicket,
+                  isBusy: false,
+                  elevation: 1,
                 ),
-                onPressed: deleteTicket,
-                centerContent: true,
-                backgroundColor: appDestructiveColor(),
-              ),
-            ],
+                SizedBox(width: 8.0),
+                CustomIconButton(
+                  height: 30,
+                  width: 30,
+                  icon: Icon(
+                    FontAwesomeIcons.trash,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  onPressed: deleteTicket,
+                  centerContent: true,
+                  backgroundColor: appDestructiveColor(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

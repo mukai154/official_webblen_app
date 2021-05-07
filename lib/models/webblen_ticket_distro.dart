@@ -5,6 +5,7 @@ class WebblenTicketDistro {
   List? fees;
   List? discountCodes;
   bool? soldOut;
+  List? validTicketIDs;
 
   WebblenTicketDistro({
     this.eventID,
@@ -13,6 +14,7 @@ class WebblenTicketDistro {
     this.fees,
     this.discountCodes,
     this.soldOut,
+    this.validTicketIDs,
   });
 
   WebblenTicketDistro.fromMap(Map<String, dynamic> data)
@@ -23,6 +25,7 @@ class WebblenTicketDistro {
           fees: data['fees'],
           discountCodes: data['discountCodes'],
           soldOut: data['soldOut'],
+          validTicketIDs: data['validTicketIDs'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -32,5 +35,14 @@ class WebblenTicketDistro {
         'fees': this.fees,
         'discountCodes': this.discountCodes,
         'soldOut': this.soldOut,
+        'validTicketIDs': this.validTicketIDs,
       };
+
+  bool isValid() {
+    bool isValid = true;
+    if (this.eventID == null) {
+      isValid = false;
+    }
+    return false;
+  }
 }

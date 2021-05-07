@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view_model.dart';
@@ -8,20 +9,23 @@ import 'package:webblen/ui/widgets/common/buttons/custom_text_button.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/text_field/multi_line_text_field.dart';
+import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
-import 'package:webblen/ui/widgets/tags/tag_dropdown_field.dart';
 
 class CreatePostView extends StatelessWidget {
+  final String? id;
+  CreatePostView(@PathParam() this.id);
+
   Widget selectedTags(CreatePostViewModel model) {
-    return model.post!.tags == null || model.post!.tags!.isEmpty
+    return model.post.tags == null || model.post.tags!.isEmpty
         ? Container()
         : Container(
             height: 30,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: model.post!.tags!.length,
+              itemCount: model.post.tags!.length,
               itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.post!.tags![index]);
+                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.post.tags![index]);
               },
             ),
           );
@@ -56,7 +60,7 @@ class CreatePostView extends StatelessWidget {
 
   Widget imgBtn(BuildContext context, CreatePostViewModel model) {
     return ImageButton(
-      onTap: () => model.selectImage(context: context),
+      onTap: () => model.selectImage(),
       isOptional: true,
       height: screenWidth(context),
       width: screenWidth(context),
@@ -64,17 +68,17 @@ class CreatePostView extends StatelessWidget {
   }
 
   Widget imgPreview(BuildContext context, CreatePostViewModel model) {
-    return model.img == null
+    return model.contentImageFile == null
         ? ImagePreviewButton(
-            onTap: () => model.selectImage(context: context),
+            onTap: () => model.selectImage(),
             file: null,
             imgURL: model.post!.imageURL,
             height: screenWidth(context),
             width: screenWidth(context),
           )
         : ImagePreviewButton(
-            onTap: () => model.selectImage(context: context),
-            file: model.img,
+            onTap: () => model.selectImage(),
+            file: model.contentImageFile,
             imgURL: null,
             height: screenWidth(context),
             width: screenWidth(context),
@@ -87,7 +91,7 @@ class CreatePostView extends StatelessWidget {
         shrinkWrap: true,
         children: [
           ///POST IMAGE
-          model.img == null && model.post!.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
+          model.contentImageFile == null && model.post!.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
           verticalSpaceMedium,
 
           ///POST TAGS
@@ -106,10 +110,10 @@ class CreatePostView extends StatelessWidget {
                   "What topics are related to this post?",
                 ),
                 verticalSpaceSmall,
-                TagDropdownField(
+                TagAutoCompleteField(
                   enabled: model.textFieldEnabled,
                   controller: model.tagTextController,
-                  onTagSelected: (tag) => model.addTag(tag),
+                  onTagSelected: (tag) => model.addTag(tag!),
                 ),
                 verticalSpaceMedium,
 
@@ -124,6 +128,7 @@ class CreatePostView extends StatelessWidget {
                   controller: model.postTextController,
                   hintText: "Don't be shy...",
                   initialValue: null,
+                  maxLines: 5,
                 ),
                 verticalSpaceMedium,
               ],
@@ -158,14 +163,15 @@ class CreatePostView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<CreatePostViewModel>.reactive(
-      onModelReady: (model) => model.initialize(context: context),
+      onModelReady: (model) => model.initialize(id!),
       viewModelBuilder: () => CreatePostViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicActionAppBar(
           title: model.isEditing ? 'Edit Post' : 'New Post',
           showBackButton: true,
+          onPressedBack: () => model.navigateBack(),
           actionWidget: model.isBusy ? appBarLoadingIndicator() : doneButton(model),
-        ) as PreferredSizeWidget?,
+        ),
         //CustomAppBar().a(title: "New Post", showBackButton: true),
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

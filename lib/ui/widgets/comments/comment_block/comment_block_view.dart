@@ -4,7 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/widgets/list_builders/list_comments.dart';
+import 'package:webblen/ui/widgets/list_builders/list_comments/list_comments.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
 
@@ -64,7 +64,7 @@ class CommentBlockView extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     GestureDetector(
-                      onTap: () => model.navigateToUserPage(comment.senderUID), //viewUser,
+                      onTap: () => model.customNavigationService.navigateToUserView(comment.senderUID!), //viewUser,
                       child: Row(
                         children: <Widget>[
                           UserProfilePic(
@@ -151,6 +151,7 @@ class CommentBlockView extends StatelessWidget {
                                 pageStorageKey: null,
                                 scrollController: null,
                                 refreshingData: null,
+                                replyToComment: (comment) {},
                               )
                             : Container(),
                       ],

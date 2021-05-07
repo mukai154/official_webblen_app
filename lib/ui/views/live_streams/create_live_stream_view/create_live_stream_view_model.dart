@@ -1,33 +1,36 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/app/app.router.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/time.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/extensions/custom_date_time_extensions.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/permission_handler/permission_handler_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
 class CreateLiveStreamViewModel extends BaseViewModel {
+  CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
+  CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
   DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
@@ -39,8 +42,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
   TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
   StripeConnectAccountService? _stripeConnectAccountService = locator<StripeConnectAccountService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
   late SharedPreferences _sharedPreferences;
+
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   ///STREAM DETAILS CONTROLLERS
   TextEditingController tagTextController = TextEditingController();
@@ -96,7 +104,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   int? discountToEditIndex;
   File? img;
 
-  WebblenLiveStream? stream = WebblenLiveStream();
+  WebblenLiveStream stream = WebblenLiveStream();
 
   ///FORMATTERS
   //Date & Time Details
@@ -137,21 +145,21 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   double? promo;
 
   ///INITIALIZE
-  initialize({BuildContext? context}) async {
+  initialize(String id, double promo) async {
     setBusy(true);
 
     _sharedPreferences = await SharedPreferences.getInstance();
 
     //generate new event
-    stream = WebblenLiveStream().generateNewWebblenLiveStream(hostID: _webblenBaseViewModel!.user!.id);
+    stream = WebblenLiveStream().generateNewWebblenLiveStream(hostID: user.id!, suggestedUIDs: []);
 
     //check if user has earnings account
-    hasEarningsAccount = await _stripeConnectAccountService!.isStripeConnectAccountSetup(_webblenBaseViewModel!.user!.id);
+    hasEarningsAccount = await _stripeConnectAccountService!.isStripeConnectAccountSetup(user.id);
 
     //set timezone
-    stream!.timezone = getCurrentTimezone();
-    stream!.startTime = timeFormatter.format(DateTime.now().add(Duration(hours: 1)).roundDown(delta: Duration(minutes: 30)));
-    stream!.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
+    stream.timezone = getCurrentTimezone();
+    stream.startTime = timeFormatter.format(DateTime.now().add(Duration(hours: 1)).roundDown(delta: Duration(minutes: 30)));
+    stream.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
     notifyListeners();
 
     //set previously used social accounts
@@ -160,30 +168,23 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     twitterUsernameTextController.text = _sharedPreferences.getString('twitterUsername')!;
     websiteTextController.text = _sharedPreferences.getString('website')!;
 
-    //check for promos & if editing existing event
-    Map<String, dynamic> args = {};
-
-    if (args != null) {
-      promo = args['promo'] ?? null;
-      String streamID = args['id'] ?? "";
-      if (streamID.isNotEmpty) {
-        stream = await (_liveStreamDataService!.getStreamByID(streamID) as FutureOr<WebblenLiveStream?>);
-        if (stream != null) {
-          titleTextController.text = stream!.title!;
-          descTextController.text = stream!.description!;
-          startDateTextController.text = stream!.startDate!;
-          endDateTextController.text = stream!.endDate!;
-          fbUsernameTextController.text = stream!.fbUsername!;
-          instaUsernameTextController.text = stream!.instaUsername!;
-          twitterUsernameTextController.text = stream!.twitterUsername!;
-          websiteTextController.text = stream!.website!;
-          selectedStartDate = dateFormatter.parse(stream!.startDate!);
-          selectedEndDate = dateFormatter.parse(stream!.endDate!);
-          isEditing = true;
-          //check if editing with ticket distro
-          if (stream!.hasTickets!) {
-            ticketDistro = await (_ticketDistroDataService!.getTicketDistroByID(stream!.id) as FutureOr<WebblenTicketDistro?>);
-          }
+    if (id != "new") {
+      stream = await _liveStreamDataService!.getStreamByID(id);
+      if (stream.isValid()) {
+        titleTextController.text = stream.title!;
+        descTextController.text = stream.description!;
+        startDateTextController.text = stream.startDate!;
+        endDateTextController.text = stream.endDate!;
+        fbUsernameTextController.text = stream.fbUsername == null ? "" : stream.fbUsername!;
+        instaUsernameTextController.text = stream.instaUsername == null ? "" : stream.instaUsername!;
+        twitterUsernameTextController.text = stream.twitterUsername == null ? "" : stream.twitterUsername!;
+        websiteTextController.text = stream.website == null ? "" : stream.website!;
+        selectedStartDate = dateFormatter.parse(stream.startDate!);
+        selectedEndDate = dateFormatter.parse(stream.endDate!);
+        isEditing = true;
+        //check if editing with ticket distro
+        if (stream.hasTickets!) {
+          ticketDistro = await _ticketDistroDataService!.getTicketDistroByID(stream.id);
         }
       }
     }
@@ -203,22 +204,23 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   ///STREAM IMAGE
   selectImage() async {
-    var sheetResponse = await _bottomSheetService!.showCustomSheet(
-      barrierDismissible: true,
-      variant: BottomSheetType.imagePicker,
-    );
-    if (sheetResponse != null) {
-      String? res = sheetResponse.responseData;
-
+    String? source = await _customBottomSheetService.showImageSelectorBottomSheet();
+    if (source != null) {
       //disable text fields while fetching image
       textFieldEnabled = false;
       notifyListeners();
 
       //get image from camera or gallery
-      if (res == "camera") {
-        img = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
-      } else if (res == "gallery") {
-        img = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+      if (source == "camera") {
+        bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
+        if (hasCameraPermission) {
+          img = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        }
+      } else if (source == "gallery") {
+        bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
+        if (hasPhotosPermission) {
+          img = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        }
       }
 
       //wait a bit to re-enable text fields
@@ -230,7 +232,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   ///STREAM TAGS
   addTag(String tag) {
-    List tags = stream!.tags == null ? [] : stream!.tags!.toList(growable: true);
+    List tags = stream.tags == null ? [] : stream.tags!.toList(growable: true);
 
     //check if tag already listed
     if (!tags.contains(tag)) {
@@ -244,7 +246,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       } else {
         //add tag
         tags.add(tag);
-        stream!.tags = tags;
+        stream.tags = tags;
         notifyListeners();
       }
     }
@@ -252,25 +254,25 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   }
 
   removeTagAtIndex(int index) {
-    List tags = stream!.tags == null ? [] : stream!.tags!.toList(growable: true);
+    List tags = stream.tags == null ? [] : stream.tags!.toList(growable: true);
     tags.removeAt(index);
-    stream!.tags = tags;
+    stream.tags = tags;
     notifyListeners();
   }
 
   ///STREAM INFO
   setStreamTitle(String val) {
-    stream!.title = val;
+    stream.title = val;
     notifyListeners();
   }
 
   setStreamDescription(String val) {
-    stream!.description = val;
+    stream.description = val;
     notifyListeners();
   }
 
   onSelectedPrivacyFromDropdown(String val) {
-    stream!.privacy = val;
+    stream.privacy = val;
     notifyListeners();
   }
 
@@ -283,25 +285,25 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     }
 
     //set nearest zipcodes
-    stream!.nearbyZipcodes = await _locationService!.findNearestZipcodes(details['areaCode']);
-    if (stream!.nearbyZipcodes == null) {
+    stream.nearbyZipcodes = await _locationService!.findNearestZipcodes(details['areaCode']);
+    if (stream.nearbyZipcodes == null) {
       return false;
     }
 
     //set lat
-    stream!.lat = details['lat'];
+    stream.lat = details['lat'];
 
     //set lon
-    stream!.lon = details['lon'];
+    stream.lon = details['lon'];
 
     //set address
-    stream!.audienceLocation = details['address'];
+    stream.audienceLocation = details['streetAddress'];
 
     //set city
-    stream!.city = details['cityName'];
+    stream.city = details['cityName'];
 
     //get province
-    stream!.province = details['province'];
+    stream.province = details['province'];
 
     notifyListeners();
 
@@ -328,13 +330,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       //set start date
       if (selectingStartDate) {
         selectedStartDate = selectedDate;
-        stream!.startDate = formattedDate;
+        stream.startDate = formattedDate;
         startDateTextController.text = formattedDate;
       }
       //set end date
       if (!selectingStartDate || selectedEndDate == null) {
         selectedEndDate = selectedDate;
-        stream!.endDate = formattedDate;
+        stream.endDate = formattedDate;
         endDateTextController.text = formattedDate;
       }
       notifyListeners();
@@ -343,15 +345,15 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   onSelectedTimeFromDropdown({required bool selectedStartTime, required String time}) {
     if (selectedStartTime) {
-      stream!.startTime = time;
+      stream.startTime = time;
     } else {
-      stream!.endTime = time;
+      stream.endTime = time;
     }
     notifyListeners();
   }
 
   onSelectedTimezoneFromDropdown(String val) {
-    stream!.timezone = val;
+    stream.timezone = val;
     notifyListeners();
   }
 
@@ -551,33 +553,33 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   ///ADDITIONAL STREAM INFO
   setSponsorshipStatus(bool val) {
-    stream!.openToSponsors = val;
+    stream.openToSponsors = val;
     notifyListeners();
   }
 
   setFBUsername(String val) {
-    stream!.fbUsername = val.trim();
+    stream.fbUsername = val.trim();
     notifyListeners();
   }
 
   setInstaUsername(String val) {
-    stream!.instaUsername = val.trim();
+    stream.instaUsername = val.trim();
     notifyListeners();
   }
 
   setTwitterUsername(String val) {
-    stream!.twitterUsername = val.trim();
+    stream.twitterUsername = val.trim();
     notifyListeners();
   }
 
   setWebsite(String val) {
-    stream!.website = val.trim();
+    stream.website = val.trim();
     notifyListeners();
   }
 
   ///FORM VALIDATION
   bool tagsAreValid() {
-    if (stream!.tags == null || stream!.tags!.isEmpty) {
+    if (stream.tags == null || stream.tags!.isEmpty) {
       return false;
     } else {
       return true;
@@ -585,34 +587,34 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   }
 
   bool titleIsValid() {
-    return isValidString(stream!.title);
+    return isValidString(stream.title);
   }
 
   bool descIsValid() {
-    return isValidString(stream!.description);
+    return isValidString(stream.description);
   }
 
   bool audienceLocationIsValid() {
-    return isValidString(stream!.audienceLocation);
+    return isValidString(stream.audienceLocation);
   }
 
   bool startDateIsValid() {
-    bool isValid = isValidString(stream!.startDate);
+    bool isValid = isValidString(stream.startDate);
     if (isValid) {
-      String eventStartDateAndTime = stream!.startDate! + " " + stream!.startTime!;
-      stream!.startDateTimeInMilliseconds = dateTimeFormatter.parse(eventStartDateAndTime).millisecondsSinceEpoch;
+      String eventStartDateAndTime = stream.startDate! + " " + stream.startTime!;
+      stream.startDateTimeInMilliseconds = dateTimeFormatter.parse(eventStartDateAndTime).millisecondsSinceEpoch;
       notifyListeners();
     }
     return isValid;
   }
 
   bool endDateIsValid() {
-    bool isValid = isValidString(stream!.endDate);
+    bool isValid = isValidString(stream.endDate);
     if (isValid) {
-      String eventEndDateAndTime = stream!.endDate! + " " + stream!.endTime!;
-      stream!.endDateTimeInMilliseconds = dateTimeFormatter.parse(eventEndDateAndTime).millisecondsSinceEpoch;
+      String eventEndDateAndTime = stream.endDate! + " " + stream.endTime!;
+      stream.endDateTimeInMilliseconds = dateTimeFormatter.parse(eventEndDateAndTime).millisecondsSinceEpoch;
       notifyListeners();
-      if (stream!.endDateTimeInMilliseconds! < stream!.startDateTimeInMilliseconds!) {
+      if (stream.endDateTimeInMilliseconds! < stream.startDateTimeInMilliseconds!) {
         isValid = false;
       }
     }
@@ -620,24 +622,24 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   }
 
   bool fbUsernameIsValid() {
-    return isValidUsername(stream!.fbUsername!);
+    return isValidUsername(stream.fbUsername!);
   }
 
   bool instaUsernameIsValid() {
-    return isValidUsername(stream!.instaUsername!);
+    return isValidUsername(stream.instaUsername!);
   }
 
   bool twitterUsernameIsValid() {
-    return isValidUsername(stream!.twitterUsername!);
+    return isValidUsername(stream.twitterUsername!);
   }
 
   bool websiteIsValid() {
-    return isValidUrl(stream!.website!);
+    return isValidUrl(stream.website!);
   }
 
   bool formIsValid() {
     bool isValid = false;
-    if (img == null && stream!.imageURL == null) {
+    if (img == null && stream.imageURL == null) {
       _snackbarService!.showSnackbar(
         title: 'Stream Image Error',
         message: 'Your stream must have an image',
@@ -679,25 +681,25 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         message: "End date & time must be set after the start date & time",
         duration: Duration(seconds: 5),
       );
-    } else if (stream!.fbUsername != null && stream!.fbUsername!.isNotEmpty && !fbUsernameIsValid()) {
+    } else if (stream.fbUsername != null && stream.fbUsername!.isNotEmpty && !fbUsernameIsValid()) {
       _snackbarService!.showSnackbar(
         title: 'Facebook Username Error',
         message: "Facebook username must be valid",
         duration: Duration(seconds: 3),
       );
-    } else if (stream!.instaUsername != null && stream!.instaUsername!.isNotEmpty && !instaUsernameIsValid()) {
+    } else if (stream.instaUsername != null && stream.instaUsername!.isNotEmpty && !instaUsernameIsValid()) {
       _snackbarService!.showSnackbar(
         title: 'Instagram Username Error',
         message: "Instagram username must be valid",
         duration: Duration(seconds: 3),
       );
-    } else if (stream!.twitterUsername != null && stream!.twitterUsername!.isNotEmpty && !twitterUsernameIsValid()) {
+    } else if (stream.twitterUsername != null && stream.twitterUsername!.isNotEmpty && !twitterUsernameIsValid()) {
       _snackbarService!.showSnackbar(
         title: 'Twitter Username Error',
         message: "Twitter username must be valid",
         duration: Duration(seconds: 3),
       );
-    } else if (stream!.website != null && stream!.website!.isNotEmpty && !websiteIsValid()) {
+    } else if (stream.website != null && stream.website!.isNotEmpty && !websiteIsValid()) {
       _snackbarService!.showSnackbar(
         title: 'Website URL Error',
         message: "Website URL must be valid",
@@ -714,7 +716,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
     //upload img if exists
     if (img != null) {
-      String imageURL = await _firestoreStorageService!.uploadImage(img: img!, storageBucket: 'images', folderName: 'streams', fileName: stream!.id!);
+      String? imageURL = await _firestoreStorageService!.uploadImage(img: img!, storageBucket: 'images', folderName: 'streams', fileName: stream.id!);
       if (imageURL == null) {
         _snackbarService!.showSnackbar(
           title: 'Stream Upload Error',
@@ -723,18 +725,18 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         );
         return false;
       }
-      stream!.imageURL = imageURL;
+      stream.imageURL = imageURL;
     }
 
     //set suggested uids for event
-    stream!.suggestedUIDs = stream!.suggestedUIDs == null ? _webblenBaseViewModel!.user!.followers : stream!.suggestedUIDs;
+    stream.suggestedUIDs = stream.suggestedUIDs == null ? user.followers : stream.suggestedUIDs;
 
     //upload stream data
     var uploadResult;
     if (isEditing) {
-      uploadResult = await _liveStreamDataService!.updateStream(stream: stream!);
+      uploadResult = await _liveStreamDataService!.updateStream(stream: stream);
     } else {
-      uploadResult = await _liveStreamDataService!.createStream(stream: stream!);
+      uploadResult = await _liveStreamDataService!.createStream(stream: stream);
     }
 
     if (uploadResult is String) {
@@ -747,10 +749,10 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     }
 
     //cache username data
-    await _sharedPreferences.setString('fbUsername', stream!.fbUsername!);
-    await _sharedPreferences.setString('instaUsername', stream!.instaUsername!);
-    await _sharedPreferences.setString('twitterUsername', stream!.twitterUsername!);
-    await _sharedPreferences.setString('website', stream!.website!);
+    await _sharedPreferences.setString('fbUsername', stream.fbUsername == null ? "" : stream.fbUsername!);
+    await _sharedPreferences.setString('instaUsername', stream.instaUsername == null ? "" : stream.instaUsername!);
+    await _sharedPreferences.setString('twitterUsername', stream.twitterUsername == null ? "" : stream.twitterUsername!);
+    await _sharedPreferences.setString('website', stream.website == null ? "" : stream.website!);
 
     return success;
   }
@@ -785,7 +787,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     var sheetResponse = await _bottomSheetService!.showCustomSheet(
       barrierDismissible: true,
       title: "Schedule Stream?",
-      description: stream!.privacy == "Public" ? "Schedule this stream for everyone to see" : "Your stream ready to be scheduled and shared",
+      description: stream.privacy == "Public" ? "Schedule this stream for everyone to see" : "Your stream ready to be scheduled and shared",
       mainButtonTitle: "Schedule Stream",
       secondaryButtonTitle: "Cancel",
       customData: {'fee': newStreamTaxRate, 'promo': promo},
@@ -819,9 +821,9 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   displayUploadSuccessBottomSheet() async {
     //deposit and/or withdraw webblen & promo
     if (promo != null) {
-      _userDataService!.depositWebblen(uid: _webblenBaseViewModel!.uid, amount: promo!);
+      _userDataService!.depositWebblen(uid: user.id, amount: promo!);
     }
-    _userDataService!.withdrawWebblen(uid: _webblenBaseViewModel!.uid, amount: newStreamTaxRate!);
+    _userDataService!.withdrawWebblen(uid: user.id, amount: newStreamTaxRate!);
 
     //display success
     var sheetResponse = await _bottomSheetService!.showCustomSheet(
@@ -832,23 +834,20 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         title: isEditing ? "Your Stream has been Updated" : "Your Stream has been Scheduled! 🎉");
 
     if (sheetResponse == null || sheetResponse.responseData == "done") {
-      _navigationService!.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
+      _customNavigationService.navigateToBase();
     }
   }
 
   ///NAVIGATION
   navigateBack() async {
-    DialogResponse? response = await _dialogService!.showDialog(
-      title: "Cancel Editing Stream?",
-      description: isEditing ? "Changes to this stream will not be saved" : "The details for this stream will not be saved",
-      cancelTitle: "Cancel",
-      cancelTitleColor: appDestructiveColor(),
-      buttonTitle: "Continue Editing",
-      buttonTitleColor: appTextButtonColor(),
-      barrierDismissible: true,
-    );
-    if (response != null && !response.confirmed) {
-      _navigationService!.back();
+    bool confirmed = false;
+    if (isEditing) {
+      confirmed = await _customBottomSheetService.showCancelEditingContentBottomSheet();
+    } else {
+      confirmed = await _customBottomSheetService.showCancelCreatingContentBottomSheet(content: stream);
+    }
+    if (confirmed) {
+      _customNavigationService.navigateToBase();
     }
   }
 
@@ -863,8 +862,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       barrierDismissible: true,
     );
     if (response != null && response.confirmed) {
-      _webblenBaseViewModel!.setNavBarIndex(3);
-      _navigationService!.back();
+      _customNavigationService.navigateToWalletView();
     }
   }
 }

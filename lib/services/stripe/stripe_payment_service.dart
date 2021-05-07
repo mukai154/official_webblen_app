@@ -1,30 +1,119 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:stripe_sdk/stripe_sdk.dart';
+import 'package:stripe_sdk/stripe_sdk_ui.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
 
 class StripePaymentService {
   CollectionReference stripeRef = FirebaseFirestore.instance.collection("stripe");
-  // CollectionReference stripeActivityRef = FirebaseFirestore.instance.collection("stripe_connect_activity");
-  // CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("ticket_distros");
-  // CollectionReference purchasedTicketsRef = FirebaseFirestore.instance.collection("purchased_tickets");
+  PlatformDataService _platformDataService = locator<PlatformDataService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
 
-  Future<String?> purchaseTickets(
-    String eventTitle,
-    String purchaserID,
-    String eventHostID,
-    String eventHostName,
-    double totalCharge,
-    double ticketCharge,
-    int numberOfTickets,
-    String cardNumber,
-    int expMonth,
-    int expYear,
-    String cvcNumber,
-    String cardHolderName,
-    String email,
-  ) async {
+  Future<bool> validatePaymentMethodFromCard({
+    required String cardNum,
+    required int expMonth,
+    required int expYear,
+    required String cvc,
+    required String name,
+  }) async {
+    String stripeKey = await _platformDataService.getStripePubKey();
+    if (stripeKey.isNotEmpty) {
+      StripeApi.init(stripeKey);
+      StripeCard card = StripeCard(number: cardNum, cvc: cvc, expMonth: expMonth, expYear: expYear);
+      Map<String, dynamic> res = await StripeApi.instance.createPaymentMethodFromCard(card);
+      if (res['card']['funding'] != 'debit') {
+        _customDialogService.showErrorDialog(description: "Please use a valid DEBIT card");
+        return false;
+      }
+      print(res);
+    }
+    return true;
+  }
+
+  Future<String> createPaymentMethodFromCard({
+    required String uid,
+    required String cardNum,
+    required int expMonth,
+    required int expYear,
+    required String cvcNum,
+    required String cardHolderName,
+  }) async {
+    String status = "passed";
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+      'createPaymentMethodFromCard',
+    );
+
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{
+      'uid': uid,
+      "cardNum": cardNum,
+      "expMonth": expMonth,
+      "expYear": expYear,
+      "cvcNum": cvcNum,
+      "cardHolderName": cardHolderName,
+    }).catchError((e) {
+      print(e);
+    });
+
+    if (result.data != null) {
+      if (result.data != "passed") {
+        status = "failed";
+        _customDialogService.showErrorDialog(description: result.data['raw']['message']);
+      }
+    }
+    return status;
+  }
+
+  Future<String> createPaymentMethodFromBankInfo({
+    required String uid,
+    required String accountHolderName,
+    required String accountHolderType,
+    required String routingNumber,
+    required String accountNumber,
+  }) async {
+    String status = "passed";
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+      'createPaymentMethodFromBankInfo',
+    );
+
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{
+      'uid': uid,
+      "accountHolderName": accountHolderName,
+      "accountHolderType": accountHolderType,
+      "routingNumber": routingNumber,
+      "accountNumber": accountNumber,
+    }).catchError((e) {
+      print(e);
+    });
+
+    if (result.data != null) {
+      if (result.data != "passed") {
+        status = "failed";
+        _customDialogService.showErrorDialog(description: result.data['raw']['message']);
+      }
+    }
+    return status;
+  }
+
+  Future<String?> processTicketPurchase({
+    required String eventTitle,
+    required String purchaserID,
+    required String eventHostID,
+    required String eventHostName,
+    required double totalCharge,
+    required double ticketCharge,
+    required int numberOfTickets,
+    required String cardNumber,
+    required int expMonth,
+    required int expYear,
+    required String cvcNumber,
+    required String cardHolderName,
+    required String email,
+  }) async {
     String? status;
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'liveWebPurchaseTickets',
+      'processTicketPurchase',
     );
 
     int ticketChargeInCents = int.parse((ticketCharge.toStringAsFixed(2)).replaceAll(".", ""));
@@ -50,78 +139,32 @@ class StripePaymentService {
       print(e);
     });
     if (result.data != null) {
-      status = result.data['status'];
+      status = result.data.toString();
       print(status);
     }
     return status;
   }
 
-  Future<String?> sendEmailConfirmation(
-    String emailAddress,
-    String eventTitle,
-    String numOfTicketsPurchased,
-  ) async {
-    String? status;
+  Future<String> processInstantPayout({
+    required String uid,
+  }) async {
+    String status = "passed";
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'sendEmailConfirmation',
+      'processInstantPayout',
     );
-    final HttpsCallableResult result = await callable.call(
-      <String, dynamic>{
-        'emailAddress': emailAddress,
-        'eventTitle': eventTitle,
-      },
-    ).catchError((e) {
+
+    final HttpsCallableResult result = await callable.call(<String, dynamic>{
+      'uid': uid,
+    }).catchError((e) {
       print(e);
     });
+
     if (result.data != null) {
-      //status = result.data['status'];
-      print(result.data);
+      if (result.data != "passed") {
+        status = "failed";
+        _customDialogService.showErrorDialog(description: result.data['raw']['message']);
+      }
     }
     return status;
   }
-
-  // Future<String> completeTicketPurchase(String uid, List ticketsToPurchase, WebblenEvent event) async {
-  //   String error = "";
-  //   DocumentSnapshot snapshot = await ticketDistroRef.doc(event.id).get();
-  //   print(snapshot);
-  //   TicketDistro ticketDistro = TicketDistro.fromMap(snapshot.data());
-  //   List validTicketIDs = ticketDistro.validTicketIDs.toList(growable: true);
-  //   ticketsToPurchase.forEach((purchasedTicket) async {
-  //     String ticketName = purchasedTicket['ticketName'];
-  //     int ticketIndex = ticketDistro.tickets.indexWhere((ticket) => ticket["ticketName"] == ticketName);
-  //     int ticketPurchaseQty = purchasedTicket['qty'];
-  //     int ticketAvailableQty = int.parse(purchasedTicket['ticketQuantity']);
-  //     String newTicketAvailableQty = (ticketAvailableQty - ticketPurchaseQty).toString();
-  //     ticketDistro.tickets[ticketIndex]['ticketQuantity'] = newTicketAvailableQty;
-  //     for (int i = ticketPurchaseQty; i >= 1; i--) {
-  //       String ticketID = randomAlphaNumeric(32);
-  //       validTicketIDs.add(ticketID);
-  //       EventTicket newTicket = EventTicket(
-  //         ticketID: ticketID,
-  //         ticketName: ticketName,
-  //         purchaserUID: uid,
-  //         eventID: event.id,
-  //         eventImageURL: event.imageURL,
-  //         eventTitle: event.title,
-  //         address: event.streetAddress,
-  //         startDate: event.startDate,
-  //         endDate: event.endDate,
-  //         startTime: event.startTime,
-  //         endTime: event.endTime,
-  //         timezone: event.timezone,
-  //       );
-  //       await purchasedTicketsRef.doc(ticketID).set(newTicket.toMap()).catchError((e) {
-  //         error = e;
-  //       });
-  //     }
-  //     await ticketDistroRef.doc(event.id).update({
-  //       "tickets": ticketDistro.tickets,
-  //       "validTicketIDs": validTicketIDs,
-  //     }).catchError((e) {
-  //       error = e;
-  //     });
-  //   });
-  //   return error;
-  // }
-
 }

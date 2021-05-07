@@ -1,21 +1,23 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 
 class EventDataService {
   final CollectionReference eventsRef = FirebaseFirestore.instance.collection("webblen_events");
   PostDataService? _postDataService = locator<PostDataService>();
-
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
 
   int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
+  int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
 
   Future<bool?> checkIfEventExists(String id) async {
     bool exists = false;
@@ -27,7 +29,7 @@ class EventDataService {
     } catch (e) {
       _snackbarService!.showSnackbar(
         title: 'Error',
-        message: e.message,
+        message: e.toString(),
         duration: Duration(seconds: 5),
       );
       return null;
@@ -79,6 +81,56 @@ class EventDataService {
     return savedBy.contains(uid);
   }
 
+  Future<bool> checkIntoEvent({required String uid, required String eventID}) async {
+    bool checkedIn = false;
+    DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
+      _customDialogService.showErrorDialog(description: "There was an error checking into this event. Please try again.");
+    });
+    if (snapshot.exists) {
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+      List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
+      //check if user already checked in
+      if (attendeeUIDs.contains(uid)) {
+        checkedIn = true;
+        return checkedIn;
+      }
+
+      event.attendees![uid] = {
+        'checkInTime': DateTime.now().millisecondsSinceEpoch,
+        'checkOutTime': null,
+      };
+
+      await eventsRef.doc(eventID).update({
+        'attendees': event.attendees,
+      });
+
+      checkedIn = true;
+    }
+    return checkedIn;
+  }
+
+  Future<bool> checkOutOfEvent({required String uid, required String eventID}) async {
+    bool checkedOut = false;
+    DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
+      _customDialogService.showErrorDialog(description: "There was an error checking out of this event. Please try again.");
+    });
+    if (snapshot.exists) {
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+      List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
+      //check if user already checked in
+      if (!attendeeUIDs.contains(uid)) {
+        checkedOut = true;
+        return checkedOut;
+      }
+      event.attendees!.remove(uid);
+      await eventsRef.doc(eventID).update({
+        'attendees': event.attendees,
+      });
+      checkedOut = true;
+    }
+    return checkedOut;
+  }
+
   Future reportEvent({required String? eventID, required String? reporterID}) async {
     DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
       _snackbarService!.showSnackbar(
@@ -128,25 +180,34 @@ class EventDataService {
     await _postDataService!.deleteEventOrStreamPost(eventOrStreamID: event.id, postType: 'event');
   }
 
-  Future getEventByID(String id) async {
+  Future<WebblenEvent> getEventByID(String id) async {
+    WebblenEvent event = WebblenEvent();
+    String? error;
+    DocumentSnapshot snapshot = await eventsRef.doc(id).get().catchError((e) {
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
+    });
+    if (error != null) {
+      _customDialogService.showErrorDialog(description: "There was an unknown issue loading this event");
+      return event;
+    }
+    if (snapshot.exists) {
+      event = WebblenEvent.fromMap(snapshot.data()!);
+    } else if (!snapshot.exists) {
+      _customDialogService.showErrorDialog(description: "This Event No Longer Exists");
+      return event;
+    }
+    return event;
+  }
+
+  Future getEventForEditingByID(String id) async {
     WebblenEvent? event;
     DocumentSnapshot snapshot = await eventsRef.doc(id).get().catchError((e) {
-      print(e.message);
-      _snackbarService!.showSnackbar(
-        title: 'Event Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
-      );
       return null;
     });
     if (snapshot.exists) {
       event = WebblenEvent.fromMap(snapshot.data()!);
     } else if (!snapshot.exists) {
-      _snackbarService!.showSnackbar(
-        title: 'This Event No Longer Exists',
-        message: 'This event has been deleted',
-        duration: Duration(seconds: 5),
-      );
       return null;
     }
     return event;
@@ -156,11 +217,12 @@ class EventDataService {
   Future<List<DocumentSnapshot>> loadEvents({
     required String areaCode,
     required int resultsLimit,
-    required String? tagFilter,
-    required String? sortBy,
+    required String tagFilter,
+    required String sortBy,
   }) async {
     Query query;
     List<DocumentSnapshot> docs = [];
+    String? error;
     if (areaCode.isEmpty) {
       query = eventsRef
           .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
@@ -174,18 +236,18 @@ class EventDataService {
           .limit(resultsLimit);
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
-        );
-      }
-      return [];
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
     });
+
+    if (error != null) {
+      return docs;
+    }
+
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
-      if (tagFilter!.isNotEmpty) {
+      if (tagFilter.isNotEmpty) {
         docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
@@ -198,13 +260,10 @@ class EventDataService {
   }
 
   Future<List<DocumentSnapshot>> loadAdditionalEvents(
-      {required DocumentSnapshot lastDocSnap,
-      required String areaCode,
-      required int resultsLimit,
-      required String? tagFilter,
-      required String? sortBy}) async {
+      {required DocumentSnapshot lastDocSnap, required String areaCode, required int resultsLimit, required String tagFilter, required String sortBy}) async {
     Query query;
     List<DocumentSnapshot> docs = [];
+    String? error;
     if (areaCode.isEmpty) {
       query = eventsRef
           .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
@@ -220,18 +279,18 @@ class EventDataService {
           .limit(resultsLimit);
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
-        );
-      }
-      return [];
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
     });
+
+    if (error != null) {
+      return docs;
+    }
+
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
-      if (tagFilter!.isNotEmpty) {
+      if (tagFilter.isNotEmpty) {
         docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
@@ -245,17 +304,18 @@ class EventDataService {
 
   Future<List<DocumentSnapshot>> loadEventsByUserID({required String? id, required int resultsLimit}) async {
     List<DocumentSnapshot> docs = [];
+    String? error;
     Query query = eventsRef.where('authorID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
-        );
-      }
-      return [];
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
     });
+
+    if (error != null) {
+      return docs;
+    }
+
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
     }
@@ -268,21 +328,149 @@ class EventDataService {
     required int resultsLimit,
   }) async {
     List<DocumentSnapshot> docs = [];
+    String? error;
     Query query =
         eventsRef.where('authorID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
-        );
-      }
-      return [];
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
     });
+
+    if (error != null) {
+      return docs;
+    }
+
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
     }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadSavedEvents({required String? id, required int resultsLimit}) async {
+    List<DocumentSnapshot> docs = [];
+    String? error;
+    Query query = eventsRef.where('savedBy', arrayContains: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
+    });
+
+    if (error != null) {
+      return docs;
+    }
+
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalSavedEvents({
+    required String? id,
+    required DocumentSnapshot lastDocSnap,
+    required int resultsLimit,
+  }) async {
+    List<DocumentSnapshot> docs = [];
+    String? error;
+    Query query = eventsRef
+        .where('savedBy', arrayContains: id)
+        .orderBy('startDateTimeInMilliseconds', descending: true)
+        .startAfterDocument(lastDocSnap)
+        .limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
+    });
+
+    if (error != null) {
+      return docs;
+    }
+
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadNearbyEvents({required String areaCode, required double lat, required double lon, required int resultsLimit}) async {
+    Geoflutterfire geoFlutterFire = Geoflutterfire();
+    GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
+    int milli = DateTime.now().millisecondsSinceEpoch;
+    List<DocumentSnapshot> docs = [];
+    String? error;
+    Query query = eventsRef
+        .where('nearbyZipcodes', arrayContains: areaCode)
+        .where('endDateTimeInMilliseconds', isGreaterThan: currentDateTimeInMilliseconds)
+        .orderBy('endDateTimeInMilliseconds', descending: false)
+        .limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
+    });
+
+    if (error != null) {
+      return docs;
+    }
+
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    // if (snapshot.docs.isNotEmpty) {
+    //   snapshot.docs.forEach((doc) {
+    //     double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+    //     if (distanceFromPoint < 5.0) {
+    //       docs.add(doc);
+    //     }
+    //   });
+    // }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalNearbyEvents({
+    required String areaCode,
+    required double lat,
+    required double lon,
+    required DocumentSnapshot lastDocSnap,
+    required int resultsLimit,
+  }) async {
+    Geoflutterfire geoFlutterFire = Geoflutterfire();
+    GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
+    int milli = DateTime.now().millisecondsSinceEpoch;
+    List<DocumentSnapshot> docs = [];
+    String? error;
+    Query query = eventsRef
+        .where('nearbyZipcodes', arrayContains: areaCode)
+        .where('endDateTimeInMilliseconds', isGreaterThan: currentDateTimeInMilliseconds)
+        .orderBy('endDateTimeInMilliseconds', descending: false)
+        .startAfterDocument(lastDocSnap)
+        .limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      print(e.message);
+      error = e.message;
+      _customDialogService.showErrorDialog(description: error!);
+    });
+
+    if (error != null) {
+      return docs;
+    }
+
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+
+    // if (snapshot.docs.isNotEmpty) {
+    //   snapshot.docs.forEach((doc) {
+    //     double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+    //     if (distanceFromPoint < 5.0) {
+    //       docs.add(doc);
+    //     }
+    //   });
+    // }
+
     return docs;
   }
 }

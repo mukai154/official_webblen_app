@@ -28,7 +28,7 @@ class PostTextBlockView extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           GestureDetector(
-            onTap: () => model.navigateToUserView(post!.authorID),
+            onTap: () => model.customNavigationService.navigateToUserView(post!.authorID!),
             child: Row(
               children: <Widget>[
                 UserProfilePic(
@@ -215,7 +215,7 @@ class PostTextBlockView extends StatelessWidget {
           HapticFeedback.lightImpact();
           showPostOptions!(post);
         },
-        onTap: () => model.navigateToPostView(post!.id),
+        onTap: () => model.customNavigationService.navigateToPostView(post!.id!),
         child: Container(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,

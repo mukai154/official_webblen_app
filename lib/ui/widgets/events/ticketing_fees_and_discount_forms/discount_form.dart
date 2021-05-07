@@ -18,18 +18,21 @@ class DiscountForm extends StatelessWidget {
   final VoidCallback validateAndSubmitDiscount;
   final VoidCallback deleteDiscount;
 
-  DiscountForm(
-      {required this.editingDiscount,
-      required this.discountNameTextController,
-      required this.discountLimitTextController,
-      required this.discountValueTextController,
-      required this.validateAndSubmitDiscount,
-      required this.deleteDiscount});
+  DiscountForm({
+    required this.editingDiscount,
+    required this.discountNameTextController,
+    required this.discountLimitTextController,
+    required this.discountValueTextController,
+    required this.validateAndSubmitDiscount,
+    required this.deleteDiscount,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth(context),
+      constraints: BoxConstraints(
+        maxWidth: 500,
+      ),
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         children: [
@@ -37,93 +40,117 @@ class DiscountForm extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.40,
-                  child: CustomText(
-                    text: 'Discount Code',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: CustomText(
+                      text: 'Discount Code',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                  child: CustomText(
-                    text: 'Limit',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: CustomText(
+                      text: 'Limit',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                  child: CustomText(
-                    text: 'Value',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    child: CustomText(
+                      text: 'Value',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
           verticalSpaceSmall,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.40,
-                child: SingleLineTextField(
-                  controller: discountNameTextController,
-                  hintText: "Discount Code",
-                  textLimit: 50,
-                  isPassword: false,
+          Container(
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: SingleLineTextField(
+                      controller: discountNameTextController,
+                      hintText: "Discount Code",
+                      textLimit: 50,
+                      isPassword: false,
+                    ),
+                  ),
                 ),
-              ),
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                child: NumberTextField(
-                  controller: discountLimitTextController,
-                  hintText: "100",
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: NumberTextField(
+                      controller: discountLimitTextController,
+                      hintText: "100",
+                    ),
+                  ),
                 ),
-              ),
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                child: MoneyTextField(
-                  controller: discountValueTextController,
-                  hintText: "\$9.00",
-                  textLimit: null,
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    child: MoneyTextField(
+                      controller: discountValueTextController,
+                      hintText: "\$9.00",
+                      textLimit: null,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           verticalSpaceSmall,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              CustomButton(
-                text: !editingDiscount ? "Add Discount" : "Update Discount",
-                textColor: Colors.white,
-                backgroundColor: CustomColors.darkMountainGreen,
-                height: 30.0,
-                width: 120,
-                onPressed: validateAndSubmitDiscount,
-                isBusy: false,
-              ),
-              SizedBox(width: 8.0),
-              CustomIconButton(
-                height: 30,
-                width: 30,
-                icon: Icon(
-                  FontAwesomeIcons.trash,
-                  size: 14,
-                  color: Colors.white,
+          Container(
+            height: 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                CustomButton(
+                  text: !editingDiscount ? "Add Discount" : "Update Discount",
+                  textSize: 14,
+                  textColor: Colors.white,
+                  elevation: 1,
+                  backgroundColor: CustomColors.darkMountainGreen,
+                  height: 30.0,
+                  width: 120,
+                  onPressed: validateAndSubmitDiscount,
+                  isBusy: false,
                 ),
-                onPressed: deleteDiscount,
-                centerContent: true,
-                backgroundColor: appDestructiveColor(),
-              ),
-            ],
+                SizedBox(width: 8.0),
+                CustomIconButton(
+                  height: 30,
+                  width: 30,
+                  icon: Icon(
+                    FontAwesomeIcons.trash,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  onPressed: deleteDiscount,
+                  centerContent: true,
+                  backgroundColor: appDestructiveColor(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

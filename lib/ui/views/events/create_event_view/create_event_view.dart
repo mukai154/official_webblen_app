@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
+import 'package:stacked_hooks/stacked_hooks.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
@@ -23,29 +28,314 @@ import 'package:webblen/ui/widgets/events/event_venue_size_slider.dart';
 import 'package:webblen/ui/widgets/events/ticketing_fees_and_discount_forms/discount_form.dart';
 import 'package:webblen/ui/widgets/events/ticketing_fees_and_discount_forms/fee_form.dart';
 import 'package:webblen/ui/widgets/events/ticketing_fees_and_discount_forms/ticketing_form.dart';
-import 'package:webblen/ui/widgets/list_builders/list_discounts.dart';
-import 'package:webblen/ui/widgets/list_builders/list_fees.dart';
-import 'package:webblen/ui/widgets/list_builders/list_tickets.dart';
+import 'package:webblen/ui/widgets/list_builders/list_discounts/list_discounts.dart';
+import 'package:webblen/ui/widgets/list_builders/list_fees/list_fees.dart';
+import 'package:webblen/ui/widgets/list_builders/list_tickets/list_tickets.dart';
+import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
-import 'package:webblen/ui/widgets/tags/tag_dropdown_field.dart';
+import 'package:webblen/ui/widgets/wallet/stripe/create_earnings_account/create_earnings_account_block_view.dart';
 
 class CreateEventView extends StatelessWidget {
-  Widget selectedTags(CreateEventViewModel model) {
-    return model.event!.tags == null || model.event!.tags!.isEmpty
-        ? Container()
-        : Container(
-            height: 30,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: model.event!.tags!.length,
-              itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => model.removeTagAtIndex(index), tag: model.event!.tags![index]);
-              },
-            ),
-          );
+  final String? id;
+  final String? promo;
+  CreateEventView(@PathParam() this.id, @PathParam() this.promo);
+
+  Widget appBarLoadingIndicator() {
+    return Padding(
+      padding: EdgeInsets.only(right: 16),
+      child: AppBarCircleProgressIndicator(color: appActiveColor(), size: 25),
+    );
   }
 
-  Widget textFieldHeader({required String header, required String subHeader, required bool required}) {
+  Widget doneButton(BuildContext context, CreateEventViewModel model) {
+    return Padding(
+      padding: EdgeInsets.only(right: 16, top: 18),
+      child: CustomTextButton(
+        onTap: () => model.showNewContentConfirmationBottomSheet(context: context),
+        color: appFontColor(),
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        text: 'Done',
+        textAlign: TextAlign.right,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ViewModelBuilder<CreateEventViewModel>.reactive(
+      onModelReady: (model) => model.initialize(eventID: id, promoVal: promo),
+      viewModelBuilder: () => CreateEventViewModel(),
+      builder: (context, model, child) => Scaffold(
+        appBar: CustomAppBar().basicActionAppBar(
+          title: model.isEditing ? 'Edit Event' : 'New Event',
+          showBackButton: true,
+          onPressedBack: () => model.navigateBack(),
+          actionWidget: !model.initialized
+              ? Container()
+              : model.isBusy
+                  ? appBarLoadingIndicator()
+                  : doneButton(context, model),
+          bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount!
+              ? GestureDetector(
+                  onTap: () => model.navigateBackToWalletPage(),
+                  child: Container(
+                    height: 40,
+                    width: screenWidth(context),
+                    color: CustomColors.darkMountainGreen,
+                    child: Center(
+                      child: CustomText(
+                        text: "Want to Sell Tickets for Your Events?\n Create an Earnings Account!",
+                        textAlign: TextAlign.center,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                )
+              : null,
+          bottomWidgetHeight: model.hasEarningsAccount != null && !model.hasEarningsAccount! ? 40 : null,
+        ),
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            height: screenHeight(context),
+            color: appBackgroundColor(),
+            child: !model.initialized
+                ? Center(
+                    child: CustomCircleProgressIndicator(
+                      size: 10,
+                      color: appActiveColor(),
+                    ),
+                  )
+                : ListView(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    children: [
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: 500,
+                          ),
+                          child: Column(
+                            children: [
+                              model.hasEarningsAccount != null && !model.hasEarningsAccount!
+                                  ? CreateEarningsAccountBlockView(dismissNotice: () => model.dismissEarningsAccountNotice())
+                                  : Container(),
+
+                              ///IMAGE
+                              model.fileToUpload == null && model.event.imageURL == null
+                                  ? _ImageButton(
+                                      selectImage: () => model.selectImage(),
+                                    )
+                                  : _ImagePreview(
+                                      selectImage: () => model.selectImage(),
+                                      imgFile: model.fileToUpload,
+                                      imageURL: model.event.imageURL,
+                                    ),
+                              verticalSpaceMedium,
+
+                              ///TAGS
+                              _SelectedTags(
+                                tags: model.event.tags,
+                                removeTagAtIndex: (index) => model.removeTagAtIndex(index),
+                              ),
+                              verticalSpaceMedium,
+
+                              ///FORM FIELDS
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    ///TAG AUTOCOMPLETE
+                                    _TextFieldHeader(
+                                      header: "Tags",
+                                      subHeader: "What topics are related to this event?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    TagAutoCompleteField(
+                                      enabled: model.textFieldEnabled,
+                                      controller: model.tagTextController,
+                                      onTagSelected: (tag) => model.addTag(tag!),
+                                    ),
+                                    verticalSpaceMedium,
+
+                                    ///TITLE
+                                    _TextFieldHeader(
+                                      header: "Title",
+                                      subHeader: "What is the name of this event?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventTitleField(),
+                                    verticalSpaceMedium,
+
+                                    ///DESCRIPTION
+                                    _TextFieldHeader(
+                                      header: "Description",
+                                      subHeader: "Provide details about the event",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventDescriptionField(),
+                                    verticalSpaceMedium,
+
+                                    ///PRIVACY
+                                    _TextFieldHeader(
+                                      header: "Privacy",
+                                      subHeader: "Is this a public or private event?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventPrivacyDropDownField(),
+
+                                    _FormSectionDivider(sectionName: "LOCATION"),
+
+                                    ///EVENT ADDRESS
+                                    _TextFieldHeader(
+                                      header: "Address",
+                                      subHeader: "Where is this event taking place?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventAddressAutoComplete(),
+                                    verticalSpaceMedium,
+
+                                    ///EVENT VENUE NAME
+                                    _TextFieldHeader(
+                                      header: "Venue Name",
+                                      subHeader: "What is the name of the building/area for the event?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventVenueNameField(),
+                                    verticalSpaceMedium,
+
+                                    ///EVENT VENUE SIZE
+                                    _TextFieldHeader(
+                                      header: "Venue Size",
+                                      subHeader: "What is the size of the venue/area for the event?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventVenueSizeSlider(),
+
+                                    _FormSectionDivider(sectionName: "DATE & TIME"),
+
+                                    ///EVENT START DATE
+                                    _TextFieldHeader(
+                                      header: "Start Date & Time",
+                                      subHeader: "When does this event start?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventStartDateSelector(),
+                                    verticalSpaceSmall,
+                                    _EventStartTimeSelector(),
+                                    verticalSpaceMedium,
+
+                                    ///EVENT END DATE
+                                    _TextFieldHeader(
+                                      header: "End Date & Time",
+                                      subHeader: "When does this event end?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventEndDateSelector(),
+                                    verticalSpaceSmall,
+                                    _EventEndTimeSelector(),
+                                    verticalSpaceMedium,
+
+                                    ///EVENT TIMEZONE
+                                    _TextFieldHeader(
+                                      header: "Timezone",
+                                      subHeader: "Which timezone is the event in?",
+                                      required: true,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _EventTimeZoneSelector(),
+
+                                    ///EVENT TICKETING
+                                    model.hasEarningsAccount != null && model.hasEarningsAccount! ? _EventTicketingForm() : Container(),
+
+                                    _FormSectionDivider(sectionName: "ADDITIONAL INFO"),
+
+                                    ///STREAM EVENT
+                                    _ScheduleLiveStreamCheckBox(),
+                                    verticalSpaceSmall,
+
+                                    ///EVENT SPONSORSHIP
+                                    _AvailableToSponsorsCheckBox(),
+                                    verticalSpaceMedium,
+
+                                    ///SOCIAL ACCOUNTS & WEBSITE
+                                    _TextFieldHeader(
+                                      header: "Social Accounts & Website",
+                                      subHeader: "Link your social accounts and website",
+                                      required: false,
+                                    ),
+                                    verticalSpaceSmall,
+                                    _FBUsernameField(),
+                                    verticalSpaceSmall,
+                                    _InstaUsernameField(),
+                                    verticalSpaceSmall,
+                                    _TwitterUsernameField(),
+                                    verticalSpaceSmall,
+                                    _WebsiteField(),
+                                    verticalSpaceMedium,
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FormSectionDivider extends StatelessWidget {
+  final String sectionName;
+  _FormSectionDivider({required this.sectionName});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        verticalSpaceMedium,
+        verticalSpaceMedium,
+        Text(
+          sectionName,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w300,
+            color: appFontColorAlt(),
+          ),
+        ),
+        verticalSpaceSmall,
+      ],
+    );
+  }
+}
+
+class _TextFieldHeader extends StatelessWidget {
+  final String header;
+  final String subHeader;
+  final bool required;
+  _TextFieldHeader({required this.header, required this.subHeader, required this.required});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -85,546 +375,522 @@ class CreateEventView extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget imgBtn(BuildContext context, CreateEventViewModel model) {
+class _ImageButton extends StatelessWidget {
+  final VoidCallback selectImage;
+  _ImageButton({required this.selectImage});
+
+  @override
+  Widget build(BuildContext context) {
     return ImageButton(
-      onTap: () => model.selectImage(),
+      onTap: selectImage,
       isOptional: false,
       height: screenWidth(context),
       width: screenWidth(context),
     );
   }
+}
 
-  Widget imgPreview(BuildContext context, CreateEventViewModel model) {
-    return model.img == null
+class _ImagePreview extends StatelessWidget {
+  final VoidCallback selectImage;
+  final File? imgFile;
+  final String? imageURL;
+  _ImagePreview({required this.selectImage, this.imgFile, this.imageURL});
+
+  @override
+  Widget build(BuildContext context) {
+    return imgFile == null
         ? ImagePreviewButton(
-            onTap: () => model.selectImage(),
+            onTap: selectImage,
             file: null,
-            imgURL: model.event!.imageURL,
+            imgURL: imageURL,
             height: screenWidth(context),
             width: screenWidth(context),
           )
         : ImagePreviewButton(
-            onTap: () => model.selectImage(),
-            file: model.img,
+            onTap: selectImage,
+            file: imgFile,
             imgURL: null,
             height: screenWidth(context),
             width: screenWidth(context),
           );
   }
+}
 
-  Widget formSectionDivider({required String sectionName}) {
+class _SelectedTags extends StatelessWidget {
+  final List? tags;
+  final String Function(int) removeTagAtIndex;
+  _SelectedTags({this.tags, required this.removeTagAtIndex});
+
+  @override
+  Widget build(BuildContext context) {
+    return tags == null || tags!.isEmpty
+        ? Container()
+        : Container(
+            height: 30,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: tags!.length,
+              itemBuilder: (BuildContext context, int index) {
+                return RemovableTagButton(onTap: () => removeTagAtIndex(index), tag: tags![index]);
+              },
+            ),
+          );
+  }
+}
+
+class _EventTitleField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var title = useTextEditingController();
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousTitle) {
+        title.text = model.loadPreviousTitle();
+      }
+    });
+    //title.text = model.event.title != null ? model.event.title! : "";
+    return SingleLineTextField(
+      controller: title,
+      hintText: "Title",
+      textLimit: 100,
+      isPassword: false,
+      enabled: model.textFieldEnabled,
+      onChanged: (val) {
+        title.selection = TextSelection.fromPosition(TextPosition(offset: title.text.length));
+        model.updateTitle(val);
+      },
+    );
+  }
+}
+
+class _EventDescriptionField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var description = useTextEditingController();
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousDescription) {
+        description.text = model.loadPreviousDesc();
+      }
+    });
+
+    return MultiLineTextField(
+      enabled: model.textFieldEnabled,
+      controller: description,
+      hintText: "Description",
+      initialValue: null,
+      maxLines: null,
+      onChanged: (val) {
+        description.selection = TextSelection.fromPosition(TextPosition(offset: description.text.length));
+        model.updateDescription(val);
+      },
+    );
+  }
+}
+
+class _EventPrivacyDropDownField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return EventPrivacyDropdown(
+      privacy: model.event.privacy,
+      onChanged: (val) => model.onSelectedPrivacyFromDropdown(val!),
+    );
+  }
+}
+
+class _EventAddressAutoComplete extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return AutoCompleteAddressTextField(
+      initialValue: model.event.streetAddress == null ? "" : model.event.streetAddress!,
+      hintText: "Address",
+      onSelectedAddress: (val) => model.updateLocation(val),
+    );
+  }
+}
+
+class _EventVenueNameField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var venueName = useTextEditingController();
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousVenueName) {
+        venueName.text = model.loadPreviousVenueName();
+      }
+    });
+
+    return SingleLineTextField(
+      controller: venueName,
+      hintText: "Venue Name",
+      textLimit: 100,
+      isPassword: false,
+      enabled: model.textFieldEnabled,
+      onChanged: (val) {
+        venueName.selection = TextSelection.fromPosition(TextPosition(offset: venueName.text.length));
+        model.updateVenueName(val);
+      },
+    );
+  }
+}
+
+class _EventVenueSizeSlider extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return EventVenueSizeSlider(
+      initialValue: model.event.venueSize == null ? "Small" : model.event.venueSize!,
+      onChanged: (val) => model.updateVenueSize(val),
+    );
+  }
+}
+
+class _EventStartDateSelector extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return GestureDetector(
+      onTap: !model.textFieldEnabled ? null : () => model.selectDate(selectingStartDate: true),
+      child: SingleLineTextField(
+        controller: model.eventStartDateTextController,
+        hintText: "Start Date",
+        textLimit: null,
+        isPassword: false,
+        enabled: false,
+      ),
+    );
+  }
+}
+
+class _EventStartTimeSelector extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return TimeDropdown(
+      selectedTime: model.event.startTime,
+      onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: true, time: val!),
+    );
+  }
+}
+
+class _EventEndDateSelector extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return GestureDetector(
+      onTap: !model.textFieldEnabled ? null : () => model.selectDate(selectingStartDate: false),
+      child: SingleLineTextField(
+        controller: model.eventEndDateTextController,
+        hintText: "End Date",
+        textLimit: null,
+        isPassword: false,
+        enabled: false,
+      ),
+    );
+  }
+}
+
+class _EventEndTimeSelector extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return TimeDropdown(
+      selectedTime: model.event.endTime,
+      onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: false, time: val!),
+    );
+  }
+}
+
+class _EventTimeZoneSelector extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return TimezoneDropdown(
+      selectedTimezone: model.event.timezone,
+      onChanged: (val) => model.onSelectedTimezoneFromDropdown(val!),
+    );
+  }
+}
+
+class _EventTicketingForm extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        verticalSpaceMedium,
-        verticalSpaceMedium,
-        Text(
-          sectionName,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w300,
-            color: appFontColorAlt(),
-          ),
+        _FormSectionDivider(sectionName: "TICKETING"),
+
+        _TextFieldHeader(
+          header: "Ticketing",
+          subHeader: "Add ticketing, fees, and discount info for your event",
+          required: false,
         ),
         verticalSpaceSmall,
+
+        //list tickets
+        model.ticketDistro.tickets!.isEmpty
+            ? Container()
+            : ListTicketsForEditing(
+                ticketDistro: model.ticketDistro,
+                editTicketAtIndex: (index) => model.toggleTicketForm(ticketIndex: index),
+              ),
+
+        //list fees
+        model.ticketDistro.fees!.isEmpty || model.ticketDistro.tickets!.isEmpty ? Container() : verticalSpaceSmall,
+        model.ticketDistro.fees!.isEmpty || model.ticketDistro.tickets!.isEmpty
+            ? Container()
+            : ListFeesForEditing(
+                ticketDistro: model.ticketDistro,
+                editFeeAtIndex: (index) => model.toggleFeeForm(feeIndex: index),
+              ),
+
+        //list discount codes
+        model.ticketDistro.discountCodes!.isEmpty || model.ticketDistro.discountCodes!.isEmpty ? Container() : verticalSpaceSmall,
+        model.ticketDistro.discountCodes!.isEmpty || model.ticketDistro.discountCodes!.isEmpty
+            ? Container()
+            : ListDiscountsForEditing(
+                ticketDistro: model.ticketDistro,
+                editDiscountAtIndex: (index) => model.toggleDiscountsForm(discountIndex: index),
+              ),
+        verticalSpaceSmall,
+
+        //ticket form
+        model.showTicketForm
+            ? TicketingForm(
+                editingTicket: model.ticketToEditIndex != null ? true : false,
+                ticketNameTextController: model.ticketNameTextController,
+                ticketQuantityTextController: model.ticketQuantityTextController,
+                ticketPriceTextController: model.ticketPriceTextController,
+                validateAndSubmitTicket: () => model.addTicket(),
+                deleteTicket: () => model.deleteTicket(),
+              )
+
+            //fee form
+            : model.showFeeForm
+                ? FeeForm(
+                    editingFee: model.feeToEditIndex != null ? true : false,
+                    feeNameTextController: model.feeNameTextController,
+                    feePriceTextController: model.feePriceTextController,
+                    validateAndSubmitFee: () => model.addFee(),
+                    deleteFee: () => model.deleteFee(),
+                  )
+
+                //discount form
+                : model.showDiscountCodeForm
+                    ? DiscountForm(
+                        editingDiscount: model.discountToEditIndex != null ? true : false,
+                        discountNameTextController: model.discountNameTextController,
+                        discountLimitTextController: model.discountLimitTextController,
+                        discountValueTextController: model.discountValueTextController,
+                        validateAndSubmitDiscount: () => model.addDiscount(),
+                        deleteDiscount: () => model.deleteDiscount(),
+                      )
+
+                    //new ticket, fee, and discount buttons
+                    : Container(
+                        height: 50,
+                        child: Row(
+                          children: [
+                            CustomIconButton(
+                              height: 40,
+                              width: 40,
+                              icon: Icon(
+                                FontAwesomeIcons.ticketAlt,
+                                size: 16,
+                                color: appIconColor(),
+                              ),
+                              onPressed: () => model.toggleTicketForm(ticketIndex: null),
+                              centerContent: true,
+                              backgroundColor: appButtonColorAlt(),
+                            ),
+                            horizontalSpaceSmall,
+                            model.ticketDistro.tickets!.isEmpty
+                                ? Container()
+                                : CustomIconButton(
+                                    height: 40,
+                                    width: 40,
+                                    icon: Icon(
+                                      FontAwesomeIcons.dollarSign,
+                                      size: 16,
+                                      color: appIconColor(),
+                                    ),
+                                    onPressed: () => model.toggleFeeForm(feeIndex: null),
+                                    centerContent: true,
+                                    backgroundColor: appButtonColorAlt(),
+                                  ),
+                            horizontalSpaceSmall,
+                            model.ticketDistro.tickets!.isEmpty
+                                ? Container()
+                                : CustomIconButton(
+                                    height: 40,
+                                    width: 40,
+                                    icon: Icon(
+                                      FontAwesomeIcons.percent,
+                                      size: 16,
+                                      color: appIconColor(),
+                                    ),
+                                    onPressed: () => model.toggleDiscountsForm(discountIndex: null),
+                                    centerContent: true,
+                                    backgroundColor: appButtonColorAlt(),
+                                  ),
+                          ],
+                        ),
+                      ),
       ],
     );
   }
+}
 
-  Widget form(BuildContext context, CreateEventViewModel model) {
+class _ScheduleLiveStreamCheckBox extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return CustomDetailedCheckbox(
+      header: "Schedule Live Stream",
+      subHeader: "Schedule a live video stream for this event",
+      initialValue: model.event.hasStream,
+      onChanged: (val) => model.updateVideoStreamStatus(val),
+    );
+  }
+}
+
+class _AvailableToSponsorsCheckBox extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    return CustomDetailedCheckbox(
+      header: "Available for Sponsors",
+      subHeader: "Webblen will help acquire sponsors for this event. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
+          "guaranteed.",
+      initialValue: model.event.openToSponsors,
+      onChanged: (val) => model.updateSponsorshipStatus(val),
+    );
+  }
+}
+
+class _FBUsernameField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var fbUsername = useTextEditingController();
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousFBUsername) {
+        fbUsername.text = model.loadPreviousFBUsername();
+      }
+    });
+
     return Container(
-      height: screenHeight(context),
-      child: ListView(
-        shrinkWrap: true,
+      child: Row(
         children: [
-          ///POST IMAGE
-          model.img == null && model.event!.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
-          verticalSpaceMedium,
-
-          ///POST TAGS
-          selectedTags(model),
-          verticalSpaceMedium,
-
-          ///POST FIELDS
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                ///EVENT TAGS
-                textFieldHeader(
-                  header: "Tags",
-                  subHeader: "What topics are related to this event?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                TagDropdownField(
-                  enabled: model.textFieldEnabled,
-                  controller: model.tagTextController,
-                  onTagSelected: (tag) => model.addTag(tag),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT TITLE
-                textFieldHeader(
-                  header: "Title",
-                  subHeader: "What is the name of this event?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                SingleLineTextField(
-                  controller: model.eventTitleTextController,
-                  hintText: "Title",
-                  textLimit: 100,
-                  isPassword: false,
-                  onChanged: (val) => model.setEventTitle(val),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT BODY
-                textFieldHeader(
-                  header: "Description",
-                  subHeader: "Provide details about the event",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                MultiLineTextField(
-                  enabled: model.textFieldEnabled,
-                  controller: model.eventDescTextController,
-                  hintText: "Description",
-                  initialValue: null,
-                  maxLines: null,
-                  onChanged: (val) => model.setEventDescription(val),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT PRIVACY
-                textFieldHeader(
-                  header: "Privacy",
-                  subHeader: "Is this a public or private event?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                EventPrivacyDropdown(
-                  privacy: model.event!.privacy,
-                  onChanged: (val) => model.onSelectedPrivacyFromDropdown(val),
-                ),
-
-                formSectionDivider(sectionName: "LOCATION"),
-
-                ///EVENT ADDRESS
-                textFieldHeader(
-                  header: "Address",
-                  subHeader: "Where is this event taking place?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                AutoCompleteAddressTextField(
-                  initialValue: model.event!.streetAddress,
-                  hintText: "Address",
-                  onSelectedAddress: (val) => model.setEventLocation(val),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT VENUE NAME
-                textFieldHeader(
-                  header: "Venue Name",
-                  subHeader: "What is the name of the building/area for the event?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                SingleLineTextField(
-                  controller: model.eventVenueNameTextController,
-                  hintText: "Venue Name",
-                  textLimit: 100,
-                  isPassword: false,
-                  onChanged: (val) => model.setEventVenueName(val),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT VENUE SIZE
-                textFieldHeader(
-                  header: "Venue Size",
-                  subHeader: "What is the size of the venue/area for the event?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                EventVenueSizeSlider(
-                  initialValue: model.event!.venueSize,
-                  onChanged: (val) => model.setEventVenueSize(val),
-                ),
-
-                formSectionDivider(sectionName: "DATE & TIME"),
-
-                ///EVENT START DATE
-                textFieldHeader(
-                  header: "Start Date & Time",
-                  subHeader: "When does this event start?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                GestureDetector(
-                  onTap: () => model.selectDate(selectingStartDate: true),
-                  child: SingleLineTextField(
-                    controller: model.eventStartDateTextController,
-                    hintText: "Start Date",
-                    textLimit: null,
-                    isPassword: false,
-                    enabled: false,
-                  ),
-                ),
-                verticalSpaceSmall,
-                TimeDropdown(
-                  selectedTime: model.event!.startTime,
-                  onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: true, time: val),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT END DATE
-                textFieldHeader(
-                  header: "End Date & Time",
-                  subHeader: "When does this event end?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                GestureDetector(
-                  onTap: () => model.selectDate(selectingStartDate: false),
-                  child: SingleLineTextField(
-                    controller: model.eventEndDateTextController,
-                    hintText: "End Date",
-                    textLimit: null,
-                    isPassword: false,
-                    enabled: false,
-                  ),
-                ),
-                verticalSpaceSmall,
-                TimeDropdown(
-                  selectedTime: model.event!.endTime,
-                  onChanged: (val) => model.onSelectedTimeFromDropdown(selectedStartTime: false, time: val),
-                ),
-                verticalSpaceMedium,
-
-                ///EVENT TIMEZONE
-                textFieldHeader(
-                  header: "Timezone",
-                  subHeader: "Which timezone is the event in?",
-                  required: true,
-                ),
-                verticalSpaceSmall,
-                TimezoneDropdown(
-                  selectedTimezone: model.event!.timezone,
-                  onChanged: (val) => model.onSelectedTimezoneFromDropdown(val),
-                ),
-
-                ///EVENT TICKETING, FEES, AND DISCOUNTS
-                model.hasEarningsAccount == null || !model.hasEarningsAccount!
-                    ? Container()
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          formSectionDivider(sectionName: "TICKETING"),
-
-                          textFieldHeader(
-                            header: "Ticketing",
-                            subHeader: "Add ticketing, fees, and discount info for your event",
-                            required: false,
-                          ),
-                          verticalSpaceSmall,
-
-                          //list tickets
-                          model.ticketDistro!.tickets!.isEmpty
-                              ? Container()
-                              : ListTicketsForEditing(
-                                  ticketDistro: model.ticketDistro,
-                                  editTicketAtIndex: (index) => model.toggleTicketForm(ticketIndex: index),
-                                ),
-
-                          //list fees
-                          model.ticketDistro!.fees!.isEmpty || model.ticketDistro!.tickets!.isEmpty ? Container() : verticalSpaceSmall,
-                          model.ticketDistro!.fees!.isEmpty || model.ticketDistro!.tickets!.isEmpty
-                              ? Container()
-                              : ListFeesForEditing(
-                                  ticketDistro: model.ticketDistro,
-                                  editFeeAtIndex: (index) => model.toggleFeeForm(feeIndex: index),
-                                ),
-
-                          //list discount codes
-                          model.ticketDistro!.discountCodes!.isEmpty || model.ticketDistro!.discountCodes!.isEmpty ? Container() : verticalSpaceSmall,
-                          model.ticketDistro!.discountCodes!.isEmpty || model.ticketDistro!.discountCodes!.isEmpty
-                              ? Container()
-                              : ListDiscountsForEditing(
-                                  ticketDistro: model.ticketDistro,
-                                  editDiscountAtIndex: (index) => model.toggleDiscountsForm(discountIndex: index),
-                                ),
-                          verticalSpaceSmall,
-
-                          //ticket form
-                          model.showTicketForm
-                              ? TicketingForm(
-                                  editingTicket: model.ticketToEditIndex != null ? true : false,
-                                  ticketNameTextController: model.ticketNameTextController,
-                                  ticketQuantityTextController: model.ticketQuantityTextController,
-                                  ticketPriceTextController: model.ticketPriceTextController,
-                                  validateAndSubmitTicket: () => model.addTicket(),
-                                  deleteTicket: () => model.deleteTicket(),
-                                )
-
-                              //fee form
-                              : model.showFeeForm
-                                  ? FeeForm(
-                                      editingFee: model.feeToEditIndex != null ? true : false,
-                                      feeNameTextController: model.feeNameTextController,
-                                      feePriceTextController: model.feePriceTextController,
-                                      validateAndSubmitFee: () => model.addFee(),
-                                      deleteFee: () => model.deleteFee(),
-                                    )
-
-                                  //discount form
-                                  : model.showDiscountCodeForm
-                                      ? DiscountForm(
-                                          editingDiscount: model.discountToEditIndex != null ? true : false,
-                                          discountNameTextController: model.discountNameTextController,
-                                          discountLimitTextController: model.discountLimitTextController,
-                                          discountValueTextController: model.discountValueTextController,
-                                          validateAndSubmitDiscount: () => model.addDiscount(),
-                                          deleteDiscount: () => model.deleteDiscount(),
-                                        )
-
-                                      //new ticket, fee, and discount buttons
-                                      : Container(
-                                          child: Row(
-                                            children: [
-                                              CustomIconButton(
-                                                height: 40,
-                                                width: 40,
-                                                icon: Icon(
-                                                  FontAwesomeIcons.ticketAlt,
-                                                  size: 16,
-                                                  color: appIconColor(),
-                                                ),
-                                                onPressed: () => model.toggleTicketForm(ticketIndex: null),
-                                                centerContent: true,
-                                                backgroundColor: appButtonColorAlt(),
-                                              ),
-                                              horizontalSpaceSmall,
-                                              model.ticketDistro!.tickets!.isEmpty
-                                                  ? Container()
-                                                  : CustomIconButton(
-                                                      height: 40,
-                                                      width: 40,
-                                                      icon: Icon(
-                                                        FontAwesomeIcons.dollarSign,
-                                                        size: 16,
-                                                        color: appIconColor(),
-                                                      ),
-                                                      onPressed: () => model.toggleFeeForm(feeIndex: null),
-                                                      centerContent: true,
-                                                      backgroundColor: appButtonColorAlt(),
-                                                    ),
-                                              horizontalSpaceSmall,
-                                              model.ticketDistro!.tickets!.isEmpty
-                                                  ? Container()
-                                                  : CustomIconButton(
-                                                      height: 40,
-                                                      width: 40,
-                                                      icon: Icon(
-                                                        FontAwesomeIcons.percent,
-                                                        size: 16,
-                                                        color: appIconColor(),
-                                                      ),
-                                                      onPressed: () => model.toggleDiscountsForm(discountIndex: null),
-                                                      centerContent: true,
-                                                      backgroundColor: appButtonColorAlt(),
-                                                    ),
-                                            ],
-                                          ),
-                                        ),
-                        ],
-                      ),
-
-                formSectionDivider(sectionName: "ADDITIONAL INFO"),
-
-                ///STREAM EVENT
-                CustomDetailedCheckbox(
-                  header: "Schedule Live Stream",
-                  subHeader: "Schedule a live video stream for this event",
-                  initialValue: model.event!.hasStream,
-                  onChanged: (val) => model.setVideoStreamStatus(val),
-                ),
-                verticalSpaceSmall,
-
-                ///EVENT SPONSORSHIP
-                CustomDetailedCheckbox(
-                  header: "Available for Sponsors",
-                  subHeader: "Webblen will help acquire sponsors for this event. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
-                      "guaranteed.",
-                  initialValue: model.event!.openToSponsors,
-                  onChanged: (val) => model.setSponsorshipStatus(val),
-                ),
-                verticalSpaceMedium,
-
-                ///SOCIAL ACCOUNTS & WEBSITE
-                textFieldHeader(
-                  header: "Social Accounts & Website",
-                  subHeader: "Link your social accounts and website",
-                  required: false,
-                ),
-                verticalSpaceSmall,
-                Container(
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.facebook,
-                        color: appFontColor(),
-                        size: 24,
-                      ),
-                      horizontalSpaceSmall,
-                      IconTextField(
-                        iconData: FontAwesomeIcons.at,
-                        controller: model.fbUsernameTextController,
-                        hintText: "Facebook Username",
-                        onChanged: (val) => model.setFBUsername(val),
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
-                    ],
-                  ),
-                ),
-                verticalSpaceSmall,
-                Container(
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.instagram,
-                        color: appFontColor(),
-                        size: 24,
-                      ),
-                      horizontalSpaceSmall,
-                      IconTextField(
-                        iconData: FontAwesomeIcons.at,
-                        controller: model.instaUsernameTextController,
-                        hintText: "Instagram Username",
-                        onChanged: (val) => model.setInstaUsername(val),
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
-                    ],
-                  ),
-                ),
-                verticalSpaceSmall,
-                Container(
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.twitter,
-                        color: appFontColor(),
-                        size: 24,
-                      ),
-                      horizontalSpaceSmall,
-                      IconTextField(
-                        iconData: FontAwesomeIcons.at,
-                        controller: model.twitterUsernameTextController,
-                        hintText: "Twitter Username",
-                        onChanged: (val) => model.setTwitterUsername(val),
-                        keyboardType: TextInputType.visiblePassword,
-                      ),
-                    ],
-                  ),
-                ),
-                verticalSpaceSmall,
-                Container(
-                  child: Row(
-                    children: [
-                      Icon(
-                        FontAwesomeIcons.link,
-                        color: appFontColor(),
-                        size: 24,
-                      ),
-                      horizontalSpaceSmall,
-                      Expanded(
-                        child: SingleLineTextField(
-                          controller: model.websiteTextController,
-                          hintText: "https://mywebsite.com",
-                          textLimit: null,
-                          isPassword: false,
-                          onChanged: (val) => model.setWebsite(val),
-                          keyboardType: TextInputType.url,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                verticalSpaceMassive,
-              ],
-            ),
+          Icon(
+            FontAwesomeIcons.facebook,
+            color: appFontColor(),
+            size: 24,
+          ),
+          horizontalSpaceSmall,
+          IconTextField(
+            iconData: FontAwesomeIcons.at,
+            controller: fbUsername,
+            hintText: "Facebook Username",
+            onChanged: model.updateFBUsername,
+            keyboardType: TextInputType.visiblePassword,
           ),
         ],
       ),
     );
   }
+}
 
-  Widget appBarLoadingIndicator() {
-    return Padding(
-      padding: EdgeInsets.only(right: 16),
-      child: AppBarCircleProgressIndicator(color: appActiveColor(), size: 25),
-    );
-  }
+class _InstaUsernameField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var instaUsername = useTextEditingController();
 
-  Widget doneButton(BuildContext context, CreateEventViewModel model) {
-    return Padding(
-      padding: EdgeInsets.only(right: 16, top: 18),
-      child: CustomTextButton(
-        onTap: () => model.showNewContentConfirmationBottomSheet(context: context),
-        color: appFontColor(),
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        text: 'Done',
-        textAlign: TextAlign.right,
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousInstaUsername) {
+        instaUsername.text = model.loadPreviousInstaUsername();
+      }
+    });
+
+    return Container(
+      child: Row(
+        children: [
+          Icon(
+            FontAwesomeIcons.instagram,
+            color: appFontColor(),
+            size: 24,
+          ),
+          horizontalSpaceSmall,
+          IconTextField(
+            iconData: FontAwesomeIcons.at,
+            controller: instaUsername,
+            hintText: "Instagram Username",
+            onChanged: model.updateInstaUsername,
+            keyboardType: TextInputType.visiblePassword,
+          ),
+        ],
       ),
     );
   }
+}
 
+class _TwitterUsernameField extends HookViewModelWidget<CreateEventViewModel> {
   @override
-  Widget build(BuildContext context) {
-    return ViewModelBuilder<CreateEventViewModel>.reactive(
-      onModelReady: (model) => model.initialize(context: context),
-      viewModelBuilder: () => CreateEventViewModel(),
-      builder: (context, model, child) => Scaffold(
-        appBar: CustomAppBar().basicActionAppBar(
-          title: model.isEditing ? 'Edit Event' : 'New Event',
-          showBackButton: true,
-          onPressedBack: () => model.navigateBack(),
-          actionWidget: model.isBusy ? appBarLoadingIndicator() : doneButton(context, model),
-          bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount!
-              ? GestureDetector(
-                  onTap: () => model.navigateBackToWalletPage(),
-                  child: Container(
-                    height: 40,
-                    width: screenWidth(context),
-                    color: CustomColors.darkMountainGreen,
-                    child: Center(
-                      child: CustomText(
-                        text: "Want to Sell Tickets for Your Events?\n Create an Earnings Account!",
-                        textAlign: TextAlign.center,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                )
-              : null,
-          bottomWidgetHeight: model.hasEarningsAccount != null && !model.hasEarningsAccount! ? 40 : null,
-        ) as PreferredSizeWidget?,
-        //CustomAppBar().a(title: "New Post", showBackButton: true),
-        body: GestureDetector(
-          onTap: () => FocusScope.of(context).unfocus(),
-          child: Container(
-            height: screenHeight(context),
-            width: screenWidth(context),
-            color: appBackgroundColor(),
-            child: model.initialized && model.event != null ? form(context, model) : Container(),
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var twitterUsername = useTextEditingController();
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousTwitterUsername) {
+        twitterUsername.text = model.loadPreviousTwitterUsername();
+      }
+    });
+
+    return Container(
+      child: Row(
+        children: [
+          Icon(
+            FontAwesomeIcons.twitter,
+            color: appFontColor(),
+            size: 24,
           ),
-        ),
+          horizontalSpaceSmall,
+          IconTextField(
+            iconData: FontAwesomeIcons.at,
+            controller: twitterUsername,
+            hintText: "Twitter Username",
+            onChanged: model.updateTwitterUsername,
+            keyboardType: TextInputType.visiblePassword,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _WebsiteField extends HookViewModelWidget<CreateEventViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, CreateEventViewModel model) {
+    var website = useTextEditingController();
+
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      if (!model.loadedPreviousWebsite) {
+        website.text = model.loadPreviousWebsite();
+      }
+    });
+
+    return Container(
+      child: Row(
+        children: [
+          Icon(
+            FontAwesomeIcons.link,
+            color: appFontColor(),
+            size: 24,
+          ),
+          horizontalSpaceSmall,
+          Expanded(
+            child: SingleLineTextField(
+              controller: website,
+              hintText: "https://mywebsite.com",
+              textLimit: null,
+              isPassword: false,
+              onChanged: model.updateWebsite,
+              keyboardType: TextInputType.url,
+            ),
+          ),
+        ],
       ),
     );
   }

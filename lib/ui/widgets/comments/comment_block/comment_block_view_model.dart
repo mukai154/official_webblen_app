@@ -2,19 +2,21 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class CommentBlockViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
-  NavigationService? _navigationService = locator<NavigationService>();
-  UserDataService? _userDataService = locator<UserDataService>();
-  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  NavigationService _navigationService = locator<NavigationService>();
+  UserDataService _userDataService = locator<UserDataService>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
 
   ///ERROR STATUS
   bool errorLoadingData = false;
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   ///DATA
   bool isAuthor = false;
@@ -34,18 +36,18 @@ class CommentBlockViewModel extends BaseViewModel {
     setBusy(true);
 
     //get comment author data
-    var res = await _userDataService!.getWebblenUserByID(uid);
+    var res = await _userDataService.getWebblenUserByID(uid);
 
     if (res is String) {
       errorLoadingData = true;
     } else {
       //set author data
-      authorUID = res!.id;
+      authorUID = res.id;
       username = res.username;
       authorProfilePicURL = res.profilePicURL;
 
       //check if author is current user
-      if (authorUID == webblenBaseViewModel!.uid) {
+      if (authorUID == user.id) {
         isAuthor = true;
       }
     }
@@ -67,19 +69,12 @@ class CommentBlockViewModel extends BaseViewModel {
     if (!loadingUser) {
       loadingUser = true;
       notifyListeners();
-      WebblenUser user = await (_userDataService!.getWebblenUserByUsername(username) as FutureOr<WebblenUser>);
+      WebblenUser user = await _userDataService.getWebblenUserByUsername(username);
       loadingUser = false;
       notifyListeners();
-      navigateToUserPage(user.id);
+      if (user.isValid()) {
+        customNavigationService.navigateToUserView(user.id!);
+      }
     }
   }
-
-  ///NAVIGATION
-  navigateToUserPage(String? id) {
-    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
-  }
-//
-// navigateToPage() {
-//   _navigationService.navigateTo(PageRouteName);
-// }
 }

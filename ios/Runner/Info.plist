@@ -46,6 +46,10 @@
 	<string>1366128250170949</string>
 	<key>FacebookDisplayName</key>
 	<string>Webblen</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+    <true/>
+    <key>FacebookAdvertiserIDCollectionEnabled</key>
+    <false/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>FirebaseDynamicLinksCustomDomains</key>

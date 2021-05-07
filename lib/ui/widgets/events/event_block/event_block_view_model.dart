@@ -3,46 +3,46 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
-import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class EventBlockViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
-  SnackbarService? _snackbarService = locator<SnackbarService>();
-  NavigationService? _navigationService = locator<NavigationService>();
-  EventDataService? _eventDataService = locator<EventDataService>();
-  UserDataService? _userDataService = locator<UserDataService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  EventDataService _eventDataService = locator<EventDataService>();
+  UserDataService _userDataService = locator<UserDataService>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  NavigationService _navigationService = locator<NavigationService>();
+  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   bool eventIsHappeningNow = false;
   bool savedEvent = false;
-  String? authorImageURL = "https://icon2.cleanpng.com/20180228/hdq/kisspng-circle-angle-material-gray-circle-pattern-5a9716f391f119.9417320315198512515978.jpg";
+  String? authorImageURL = "";
   String? authorUsername = "";
 
-  initialize(WebblenEvent event) {
+  initialize(WebblenEvent event) async {
     setBusy(true);
 
     //check if user saved event
-    if (event.savedBy!.contains(_webblenBaseViewModel!.uid)) {
+    if (event.savedBy!.contains(_reactiveUserService.user.id)) {
       savedEvent = true;
     }
 
     //check if event is happening now
     isEventHappeningNow(event);
 
-    _userDataService!.getWebblenUserByID(event.authorID).then((res) {
-      if (res is String) {
-        //print(String);
-      } else {
-        authorImageURL = res!.profilePicURL;
-        authorUsername = res.username;
-      }
-      notifyListeners();
-      setBusy(false);
-    });
+    WebblenUser author = await _userDataService.getWebblenUserByID(event.authorID);
+    if (author.isValid()) {
+      authorImageURL = author.profilePicURL;
+      authorUsername = author.username;
+    }
+
+    notifyListeners();
+    setBusy(false);
   }
 
   isEventHappeningNow(WebblenEvent event) {
@@ -65,26 +65,6 @@ class EventBlockViewModel extends BaseViewModel {
     }
     HapticFeedback.lightImpact();
     notifyListeners();
-    await _eventDataService!.saveUnsaveEvent(uid: _webblenBaseViewModel!.uid, eventID: eventID, savedEvent: savedEvent);
-  }
-
-  ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-  navigateToEventView({String? eventID}) async {
-    // String res = await _navigationService.navigateTo(Routes.EventViewRoute, arguments: {'id': eventID});
-    // if (res == "event no longer exists") {
-    //   _snackbarService.showSnackbar(
-    //     title: 'Uh Oh...',
-    //     message: "This event no longer exists",
-    //     duration: Duration(seconds: 5),
-    //   );
-    // }
-  }
-
-  navigateToUserView(String? id) {
-    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
+    await _eventDataService.saveUnsaveEvent(uid: user.id, eventID: eventID, savedEvent: savedEvent);
   }
 }

@@ -1,5 +1,4 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
 import 'package:maps_launcher/maps_launcher.dart';
@@ -89,7 +88,7 @@ class LocationService {
     }
     double? lat = locationData.latitude;
     double? lon = locationData.longitude;
-    String? zip = await getZipFromLatLon(lat, lon);
+    String? zip = await getZipFromLatLon(lat!, lon!);
     return zip;
   }
 
@@ -100,7 +99,7 @@ class LocationService {
     }
     double? lat = locationData.latitude;
     double? lon = locationData.longitude;
-    String? city = await getCityNameFromLatLon(lat, lon);
+    String? city = await getCityNameFromLatLon(lat!, lon!);
     return city;
   }
 
@@ -111,62 +110,44 @@ class LocationService {
     }
     double? lat = locationData.latitude;
     double? lon = locationData.longitude;
-    String? province = await getProvinceFromLatLon(lat, lon);
+    String? province = await getProvinceFromLatLon(lat!, lon!);
     return province;
   }
 
   Future<String?> getAddressFromLatLon(double lat, double lon) async {
     String? foundAddress;
-    // Coordinates coordinates = Coordinates(lat, lon);
-    // String googleAPIKey = await _platformDataService.getGoogleApiKey().catchError((e) {});
-    // var addresses = await Geocoder.google(googleAPIKey).findAddressesFromCoordinates(coordinates);
-    // var address = addresses.first;
-    // foundAddress = address.addressLine;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      foundAddress = data['formattedAddress'];
+    }
     return foundAddress;
   }
 
-  Future<String?> getZipFromLatLon(double? lat, double? lon) async {
+  Future<String?> getZipFromLatLon(double lat, double lon) async {
     String? zip;
-    // Coordinates coordinates = Coordinates(lat, lon);
-    // String googleAPIKey = await _platformDataService.getGoogleApiKey().catchError((e) {});
-    // var addresses = await Geocoder.google(googleAPIKey).findAddressesFromCoordinates(coordinates).catchError((e) {});
-    // var address = addresses.first;
-    // zip = address.postalCode;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      zip = data['zipcode'];
+    }
     return zip;
   }
 
-  Future<String?> getCityNameFromLatLon(double? lat, double? lon) async {
+  Future<String?> getCityNameFromLatLon(double lat, double lon) async {
     String? cityName;
-    // Coordinates coordinates = Coordinates(lat, lon);
-    // String googleAPIKey = await _platformDataService.getGoogleApiKey().catchError((e) {});
-    // var addresses = await Geocoder.google(googleAPIKey).findAddressesFromCoordinates(coordinates);
-    // var address = addresses.first;
-    // cityName = address.locality;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      cityName = data['city'];
+    }
     return cityName;
   }
 
-  Future<String?> getProvinceFromLatLon(double? lat, double? lon) async {
+  Future<String?> getProvinceFromLatLon(double lat, double lon) async {
     String? province;
-    // Coordinates coordinates = Coordinates(lat, lon);
-    // String googleAPIKey = await _platformDataService.getGoogleApiKey().catchError((e) {});
-    // var addresses = await Geocoder.google(googleAPIKey).findAddressesFromCoordinates(coordinates);
-    // var address = addresses.first;
-    // province = address.adminArea;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      province = data['administrativeLevels']['level1short'];
+    }
     return province;
-  }
-
-  double getLatFromGeoPoint(Map<dynamic, dynamic> geoP) {
-    double lat;
-    List coordinates = geoP.values.toList();
-    lat = coordinates[0];
-    return lat == null ? 0.0 : lat;
-  }
-
-  double getLonFromGeopoint(Map<dynamic, dynamic> geoP) {
-    double lon;
-    List coordinates = geoP.values.toList();
-    lon = coordinates[1];
-    return lon == null ? 0.0 : lon;
   }
 
   openMaps({required String address}) {

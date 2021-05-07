@@ -6,13 +6,16 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class UserFollowingViewModel extends BaseViewModel {
   NavigationService? _navigationService = locator<NavigationService>();
   AlgoliaSearchService? _algoliaSearchService = locator<AlgoliaSearchService>();
   UserDataService? _userDataService = locator<UserDataService>();
-  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+
+  ///DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   ///HELPERS
   TextEditingController searchTextController = TextEditingController();
@@ -80,7 +83,7 @@ class UserFollowingViewModel extends BaseViewModel {
   ///USER DATA
   loadUsers() async {
     //load posts with params
-    userResults = await _userDataService!.loadUserFollowing(id: webblenBaseViewModel!.uid, resultsLimit: usersResultsLimit);
+    userResults = await _userDataService!.loadUserFollowing(id: user.id, resultsLimit: usersResultsLimit);
   }
 
   loadAdditionalUsers() async {
@@ -96,7 +99,7 @@ class UserFollowingViewModel extends BaseViewModel {
     //load additional posts
     List<DocumentSnapshot> newResults = await _userDataService!.loadAdditionalUserFollowing(
       lastDocSnap: userResults[userResults.length - 1],
-      id: webblenBaseViewModel!.uid,
+      id: user.id,
       resultsLimit: usersResultsLimit,
     );
 
@@ -129,7 +132,7 @@ class UserFollowingViewModel extends BaseViewModel {
     } else {
       userSearchResults = await _algoliaSearchService!.queryUsersByFollowing(
         searchTerm: searchTerm,
-        uid: webblenBaseViewModel!.uid,
+        uid: user.id,
       );
     }
     notifyListeners();

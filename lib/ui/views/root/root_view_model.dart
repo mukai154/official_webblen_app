@@ -1,33 +1,33 @@
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
+import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/app/app.router.dart';
 import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
 
 class RootViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  UserDataService? _userDataService = locator<UserDataService>();
-  NavigationService? _navigationService = locator<NavigationService>();
-
-  initialize() async {
-    checkAuthState();
-  }
+  AuthService _authService = locator<AuthService>();
+  CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
+  ThemeService _themeService = locator<ThemeService>();
 
   ///CHECKS IF USER IS LOGGED IN
   Future checkAuthState() async {
-    bool isLoggedIn = await _authService!.isLoggedIn();
+    bool isLoggedIn = await _authService.isLoggedIn();
+    print(isLoggedIn);
     if (isLoggedIn) {
-      ///CHECK IF USER HAS CREATED PROFILE
-      String? uid = await _authService!.getCurrentUserID();
-      bool userExists = await (_userDataService!.checkIfUserExists(uid) as FutureOr<bool>);
-      if (userExists) {
-        _navigationService!.replaceWith(Routes.WebblenBaseViewRoute);
+      bool completedSignIn = await _authService.completeUserSignIn();
+      if (!completedSignIn) {
+        navigateToSignIn();
       } else {
-        //_navigationService.replaceWith(Routes.OnboardingViewRoute);
+        _customNavigationService.navigateToBase();
       }
     } else {
-      _navigationService!.replaceWith(Routes.AuthViewRoute);
+      navigateToSignIn();
     }
+  }
+
+  navigateToSignIn() {
+    _themeService.setThemeMode(ThemeManagerMode.light);
+    notifyListeners();
+    _customNavigationService.navigateToAuthView();
   }
 }

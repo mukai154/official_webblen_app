@@ -5,9 +5,10 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
-import 'package:webblen/ui/widgets/list_builders/list_posts.dart';
-import 'package:webblen/ui/widgets/list_builders/list_streams.dart';
-import 'package:webblen/ui/widgets/list_builders/list_users.dart';
+import 'package:webblen/ui/widgets/list_builders/list_events/search/list_full_event_search_results.dart';
+import 'package:webblen/ui/widgets/list_builders/list_live_streams/search/list_full_live_stream_search_results.dart';
+import 'package:webblen/ui/widgets/list_builders/list_posts/search/list_full_post_search_results.dart';
+import 'package:webblen/ui/widgets/list_builders/list_users/list_users.dart';
 import 'package:webblen/ui/widgets/search/search_field.dart';
 
 import 'all_search_results_view_model.dart';
@@ -22,7 +23,7 @@ class AllSearchResultsView extends StatefulWidget {
 class _AllSearchResultsViewState extends State<AllSearchResultsView> with SingleTickerProviderStateMixin {
   TabController? _tabController;
 
-  Widget noResultsFound() {
+  Widget noResultsFound(AllSearchResultsViewModel model) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
       child: CustomText(
@@ -43,13 +44,16 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
         children: [
           SearchField(
             heroTag: 'search',
-            onTap: () => model.navigateToPreviousPage(),
+            onTap: () => model.customNavigationService.navigateBack(),
             enabled: false,
             textEditingController: model.searchTextController,
+            onChanged: (val) {},
+            autoFocus: false,
+            onFieldSubmitted: (val) {},
           ),
           SizedBox(width: 8),
           GestureDetector(
-            onTap: () => model.navigateToHomePage(),
+            onTap: () => model.customNavigationService.navigateToBase(),
             child: CustomText(
               text: "Cancel",
               textAlign: TextAlign.right,
@@ -67,32 +71,9 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
     return TabBarView(
       controller: _tabController,
       children: [
-        model.postResults.isNotEmpty
-            ? ListPosts(
-                currentUID: model.webblenBaseViewModel!.uid,
-                refreshData: model.refreshPosts,
-                postResults: model.postResults,
-                pageStorageKey: PageStorageKey('post-results'),
-                scrollController: model.postScrollController,
-                showPostOptions: (post) => model.showContentOptions(content: post),
-              )
-            : noResultsFound(),
-        model.streamResults.isNotEmpty
-            ? ListLiveStreams(
-                refreshData: model.refreshStreams,
-                dataResults: model.streamResults,
-                pageStorageKey: PageStorageKey('stream-results'),
-                scrollController: model.streamScrollController,
-              )
-            : noResultsFound(),
-        model.eventResults.isNotEmpty
-            ? ListLiveStreams(
-                refreshData: model.refreshEvents,
-                dataResults: model.eventResults,
-                pageStorageKey: PageStorageKey('event-results'),
-                scrollController: model.eventScrollController,
-              )
-            : noResultsFound(),
+        ListFullPostSearchResults(searchTerm: widget.searchTerm!),
+        ListFullLiveStreamSearchResults(searchTerm: widget.searchTerm!),
+        ListFullEventSearchResults(searchTerm: widget.searchTerm!),
         model.userResults.isNotEmpty
             ? ListUsers(
                 refreshData: model.refreshUsers,
@@ -100,7 +81,7 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
                 pageStorageKey: PageStorageKey('user-results'),
                 scrollController: model.userScrollController,
               )
-            : noResultsFound(),
+            : noResultsFound(model),
       ],
     );
   }
@@ -124,7 +105,7 @@ class _AllSearchResultsViewState extends State<AllSearchResultsView> with Single
   Widget build(BuildContext context) {
     return ViewModelBuilder<AllSearchResultsViewModel>.reactive(
       disposeViewModel: true,
-      onModelReady: (model) => model.initialize(context, widget.searchTerm),
+      onModelReady: (model) => model.initialize(widget.searchTerm),
       viewModelBuilder: () => AllSearchResultsViewModel(),
       builder: (context, model, child) => Scaffold(
         body: Container(

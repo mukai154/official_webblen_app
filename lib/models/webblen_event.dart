@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class WebblenEvent {
@@ -181,7 +180,7 @@ class WebblenEvent {
         'suggestedUIDs': this.suggestedUIDs,
       };
 
-  WebblenEvent generateNewWebblenEvent({required String? authorID}) {
+  WebblenEvent generateNewWebblenEvent({required String authorID, required List suggestedUIDs}) {
     String id = getRandomString(30);
     WebblenEvent event = WebblenEvent(
       id: id,
@@ -199,5 +198,14 @@ class WebblenEvent {
       estimatedTurnout: 0,
     );
     return event;
+  }
+
+  //checks if obj is valid
+  bool isValid() {
+    bool isValid = true;
+    if (id == null) {
+      isValid = false;
+    }
+    return isValid;
   }
 }

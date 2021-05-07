@@ -31,22 +31,6 @@ class WebblenHomePageTabBar extends StatelessWidget {
               child: Align(
                 alignment: Alignment.center,
                 child: Text(
-                  "For You",
-                  style: TextStyle(fontWeight: fontWeight),
-                ),
-              ),
-            ),
-          ),
-          Tab(
-            child: Container(
-              height: 30,
-              width: 75,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(60),
-              ),
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
                   "Posts",
                   style: TextStyle(fontWeight: fontWeight),
                 ),

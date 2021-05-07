@@ -194,3 +194,68 @@ class FollowerFollowingSearchField extends StatelessWidget {
     );
   }
 }
+
+class GeneralSearchField extends StatelessWidget {
+  final TextEditingController textEditingController;
+  final Function(String) onChanged;
+  final Function(String) onFieldSubmitted;
+  final bool autoFocus;
+
+  GeneralSearchField({
+    required this.textEditingController,
+    required this.onChanged,
+    required this.onFieldSubmitted,
+    required this.autoFocus,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(left: 8),
+      height: 35,
+      decoration: BoxDecoration(
+        color: appTextFieldContainerColor(),
+        border: Border.all(
+          width: 1.0,
+          color: appBorderColorAlt(),
+        ),
+        borderRadius: BorderRadius.all(
+          Radius.circular(8.0),
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            child: Icon(
+              FontAwesomeIcons.search,
+              color: appFontColorAlt(),
+              size: 16,
+            ),
+          ),
+          Expanded(
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 8),
+              child: Material(
+                color: Colors.transparent,
+                child: TextFormField(
+                  controller: textEditingController,
+                  enabled: true,
+                  autofocus: autoFocus ? true : autoFocus,
+                  cursorColor: appFontColor(),
+                  textInputAction: TextInputAction.search,
+                  onFieldSubmitted: (val) => onFieldSubmitted(val),
+                  onChanged: (val) => onChanged(val),
+                  decoration: InputDecoration(
+                    contentPadding: EdgeInsets.only(bottom: 14),
+                    hintText: "search",
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

@@ -6,11 +6,10 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/search/search_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
-import 'package:webblen/ui/widgets/common/zero_state_view.dart';
-import 'package:webblen/ui/widgets/list_builders/list_events_search_results.dart';
-import 'package:webblen/ui/widgets/list_builders/list_recent_search_results.dart';
-import 'package:webblen/ui/widgets/list_builders/list_streams_search_results.dart';
-import 'package:webblen/ui/widgets/list_builders/list_user_search_results.dart';
+import 'package:webblen/ui/widgets/list_builders/list_search/list_events_search_results.dart';
+import 'package:webblen/ui/widgets/list_builders/list_search/list_recently_searched_terms/list_recently_searched_terms.dart';
+import 'package:webblen/ui/widgets/list_builders/list_search/list_streams_search_results.dart';
+import 'package:webblen/ui/widgets/list_builders/list_users/list_user_search_results.dart';
 import 'package:webblen/ui/widgets/search/search_field.dart';
 import 'package:webblen/ui/widgets/search/search_result_view.dart';
 
@@ -31,6 +30,7 @@ class SearchView extends StatelessWidget {
             textEditingController: model.searchTextController,
             onChanged: (val) => model.querySearchResults(val),
             onFieldSubmitted: (val) => model.viewAllResultsForSearchTerm(context: context, searchTerm: val),
+            autoFocus: true,
           ),
           SizedBox(width: 8),
           GestureDetector(
@@ -103,16 +103,7 @@ class SearchView extends StatelessWidget {
   Widget listResults(BuildContext context, SearchViewModel model) {
     return Expanded(
       child: model.streamResults.isEmpty && model.eventResults.isEmpty && model.userResults.isEmpty && model.searchTextController.text.trim().isEmpty
-          ? model.webblenBaseViewModel!.user!.recentSearchTerms == null
-              ? ZeroStateView(
-                  imageAssetName: "search",
-                  imageSize: 200,
-                  opacity: 0.3,
-                  header: "No Recent Searches Found",
-                  subHeader: "Search for anything you'd like",
-                  refreshData: null,
-                )
-              : listRecentResults(context, model)
+          ? listRecentResults(context, model)
           : ListView(
               shrinkWrap: true,
               children: [
@@ -120,6 +111,8 @@ class SearchView extends StatelessWidget {
                 (model.streamResults.isNotEmpty || model.eventResults.isNotEmpty) && model.userResults.isNotEmpty
                     ? eventUserSearchDivider(context)
                     : Container(),
+                model.eventResults.isNotEmpty ? listEventResults(model) : Container(),
+                model.eventResults.isNotEmpty && model.userResults.isNotEmpty ? eventUserSearchDivider(context) : Container(),
                 model.userResults.isNotEmpty ? listUserResults(model) : Container(),
                 model.searchTextController.text.trim().isNotEmpty && !model.isBusy
                     ? ViewAllResultsSearchTermView(
@@ -133,13 +126,13 @@ class SearchView extends StatelessWidget {
   }
 
   Widget listRecentResults(BuildContext context, SearchViewModel model) {
-    return Hero(
-      tag: 'recent-searches',
-      child: ListRecentSearchResults(
-        searchTerms: model.webblenBaseViewModel!.user!.recentSearchTerms,
-        scrollController: null,
-        isScrollable: false,
-        onSearchTermSelected: (val) => model.viewAllResultsForSearchTerm(context: context, searchTerm: val),
+    return Material(
+      child: Container(
+        color: appBackgroundColor(),
+        child: Hero(
+          tag: 'recent-searches',
+          child: ListRecentlySearchedTerms(),
+        ),
       ),
     );
   }
@@ -181,7 +174,7 @@ class SearchView extends StatelessWidget {
         usersHeader(),
         ListUsersSearchResults(
           results: model.userResults,
-          usersFollowing: model.webblenBaseViewModel!.user!.following,
+          usersFollowing: model.user.following,
           scrollController: null,
           isScrollable: false,
           onSearchTermSelected: (val) => model.navigateToUserView(val),

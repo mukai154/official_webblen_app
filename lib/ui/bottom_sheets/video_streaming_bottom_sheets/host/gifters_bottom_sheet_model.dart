@@ -1,26 +1,24 @@
-import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_content_gift_pool.dart';
 import 'package:webblen/services/firestore/data/content_gift_pool_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 
 class GiftersBottomSheetModel extends StreamViewModel<WebblenContentGiftPool> {
   ///SERVICES
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
   UserDataService? _userDataService = locator<UserDataService>();
-  ContentGiftPoolDataService? _contentGiftPoolDataService = locator<ContentGiftPoolDataService>();
+  ContentGiftPoolDataService _contentGiftPoolDataService = locator<ContentGiftPoolDataService>();
 
   ///CURRENT CONTENT GIFT POOL
   String? giftPoolID;
   late bool giftPoolExists;
-  WebblenContentGiftPool? giftPool;
+  WebblenContentGiftPool giftPool = WebblenContentGiftPool();
+  List gifters = [];
 
   initialize({required String? id}) async {
     setBusy(true);
     giftPoolID = id;
-    giftPoolExists = await _contentGiftPoolDataService!.checkIfGiftPoolExists(giftPoolID);
+    giftPoolExists = await _contentGiftPoolDataService.checkIfGiftPoolExists(giftPoolID!);
     if (!giftPoolExists) {
       setBusy(false);
     }
@@ -31,8 +29,17 @@ class GiftersBottomSheetModel extends StreamViewModel<WebblenContentGiftPool> {
   @override
   void onData(WebblenContentGiftPool? data) {
     if (data != null) {
-      giftPool = data;
-      notifyListeners();
+      if (data.isValid()) {
+        giftPool = data;
+        if (giftPool.gifters != null && giftPool.gifters!.isNotEmpty) {
+          gifters = giftPool.gifters!.values.toList(growable: true);
+          if (gifters.length > 1) {
+            gifters.sort((a, b) => b['totalGiftAmount'].compareTo(a['totalGiftAmount']));
+          }
+        }
+        print(gifters.length);
+        notifyListeners();
+      }
       setBusy(false);
     }
   }
@@ -42,12 +49,9 @@ class GiftersBottomSheetModel extends StreamViewModel<WebblenContentGiftPool> {
 
   Stream<WebblenContentGiftPool> streamGiftPool() async* {
     while (true) {
-      if (giftPoolID == null) {
-        yield null;
-      }
       await Future.delayed(Duration(seconds: 1));
-      WebblenContentGiftPool? val = await _contentGiftPoolDataService!.getGiftPoolByID(giftPoolID);
-      yield val!;
+      WebblenContentGiftPool val = await _contentGiftPoolDataService!.getGiftPoolByID(giftPoolID);
+      yield val;
     }
   }
 }

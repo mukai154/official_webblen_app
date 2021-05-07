@@ -3,10 +3,12 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class LiveStreamBlockViewModel extends BaseViewModel {
   AuthService? _authService = locator<AuthService>();
@@ -14,35 +16,33 @@ class LiveStreamBlockViewModel extends BaseViewModel {
   SnackbarService? _snackbarService = locator<SnackbarService>();
   NavigationService? _navigationService = locator<NavigationService>();
   LiveStreamDataService? _liveStreamDataService = locator<LiveStreamDataService>();
-  UserDataService? _userDataService = locator<UserDataService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  UserDataService _userDataService = locator<UserDataService>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
 
   bool isLive = false;
   bool savedStream = false;
-  String? hostImageURL = "https://icon2.cleanpng.com/20180228/hdq/kisspng-circle-angle-material-gray-circle-pattern-5a9716f391f119.9417320315198512515978.jpg";
+  String? hostImageURL = "";
   String? hostUsername = "";
 
-  initialize(WebblenLiveStream stream) {
+  initialize(WebblenLiveStream stream) async {
     setBusy(true);
 
     //check if user saved event
-    if (stream.savedBy!.contains(_webblenBaseViewModel!.uid)) {
+    if (stream.savedBy!.contains(_reactiveUserService.user.id)) {
       savedStream = true;
     }
 
     //check if event is happening now
     isStreamLive(stream);
 
-    _userDataService!.getWebblenUserByID(stream.hostID).then((res) {
-      if (res is String) {
-        //print(String);
-      } else {
-        hostImageURL = res!.profilePicURL;
-        hostUsername = res.username;
-      }
-      notifyListeners();
-      setBusy(false);
-    });
+    WebblenUser author = await _userDataService.getWebblenUserByID(stream.hostID);
+    if (author.isValid()) {
+      hostImageURL = author.profilePicURL;
+      hostUsername = author.username;
+    }
+    notifyListeners();
+    setBusy(false);
   }
 
   isStreamLive(WebblenLiveStream stream) {
@@ -65,26 +65,6 @@ class LiveStreamBlockViewModel extends BaseViewModel {
     }
     HapticFeedback.lightImpact();
     notifyListeners();
-    await _liveStreamDataService!.saveUnsaveStream(uid: _webblenBaseViewModel!.uid, streamID: streamID, savedStream: savedStream);
-  }
-
-  ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-  navigateToStreamView({String? streamID}) async {
-    // String res = await _navigationService.navigateTo(Routes.LiveStreamViewRoute, arguments: {'id': streamID});
-    // if (res == "stream no longer exists") {
-    //   _snackbarService.showSnackbar(
-    //     title: 'Uh Oh...',
-    //     message: "This stream no longer exists",
-    //     duration: Duration(seconds: 5),
-    //   );
-    // }
-  }
-
-  navigateToUserView(String? id) {
-    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
+    await _liveStreamDataService!.saveUnsaveStream(uid: _reactiveUserService.user.id, streamID: streamID, savedStream: savedStream);
   }
 }

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 
 class WebblenImagePicker {
   final BuildContext? context;
@@ -20,9 +22,19 @@ class WebblenImagePicker {
   final ImagePicker _imagePicker = ImagePicker();
 
   Future<File?> retrieveImageFromLibrary({double? ratioX, double? ratioY}) async {
+    CustomDialogService _customDialogService = locator<CustomDialogService>();
     imageCache!.clear();
     File? croppedImageFile;
-    final pickedFile = await _imagePicker.getImage(source: ImageSource.gallery);
+    final pickedFile = await _imagePicker.getImage(source: ImageSource.gallery).catchError((e) {
+      print(e);
+      if (e.toString().contains("photo_access_denied")) {
+        _customDialogService.showAppSettingsDialog(
+          title: "Camera Permission Required",
+          description: "Please open your app settings and enable your camera",
+        );
+      }
+      return null;
+    });
     if (pickedFile != null) {
       File img = File(pickedFile.path);
       if (img != null) {

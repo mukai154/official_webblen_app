@@ -1,37 +1,48 @@
+import 'dart:async';
+
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/app/app.router.dart';
-import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_stream_chat_message.dart';
-import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
-import 'package:webblen/services/firestore/data/platform_data_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
-  PlatformDataService? _platformDataService = locator<PlatformDataService>();
-  LiveStreamDataService? _liveStreamDataService = locator<LiveStreamDataService>();
+  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
   LiveStreamChatDataService? _liveStreamChatDataService = locator<LiveStreamChatDataService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  CustomBottomSheetService customBottomSheetService = locator<CustomBottomSheetService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
+  UserDataService _userDataService = locator<UserDataService>();
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   ///HELPERS
   final messageFieldController = TextEditingController();
 
   ///STREAM DATA
+  bool isLive = false;
+  bool updatingCheckIn = false;
+  bool checkedIn = false;
   String? streamID;
-  WebblenLiveStream? webblenLiveStream;
+  WebblenLiveStream webblenLiveStream = WebblenLiveStream();
   bool liveStreamSetup = false;
   String agoraAppID = '60693de17bbe4f2598f9f465d1695de1';
   String channelName = 'test';
@@ -44,6 +55,9 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
   bool showWaitingRoom = true;
   List users = <int>[];
 
+  ///HOST DATA
+  String? hostUserName = "";
+
   ///CHAT
   int startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
 
@@ -51,27 +65,39 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
   AnimationController? giftAnimationController;
   Animation? giftAnimation;
 
-  initialize({required BuildContext context}) async {
+  initialize(String id) async {
     setBusy(true);
 
-    //get stream id
-    Map<String, dynamic> args = {};
-
-    streamID = args['id'] ?? "";
-
     //get stream data
-    if (streamID!.isEmpty) {
+    if (id.isEmpty) {
       _snackbarService!.showSnackbar(
         title: 'Stream Error',
-        message: "There was an unknown error starting your stream. Please try again later.",
+        message: "There was an unknown error viewing this stream. Please try again later.",
         duration: Duration(seconds: 5),
       );
-      _navigationService!.back();
       return;
     }
 
+    //get stream
+    streamID = id;
+    webblenLiveStream = await _liveStreamDataService.getStreamByID(streamID);
+    notifyListeners();
+
+    //check if user checked into stream
+    List attendeeUIDs = webblenLiveStream.attendees != null ? webblenLiveStream.attendees!.keys.toList(growable: true) : [];
+    if (attendeeUIDs.contains(user.id)) {
+      checkedIn = true;
+    }
+
+    WebblenUser host = await _userDataService.getWebblenUserByID(webblenLiveStream.hostID);
+    if (host.isValid()) {
+      hostUserName = host.username;
+    }
+
     //join chat
-    _liveStreamChatDataService!.joinChatStream(streamID: streamID, uid: _webblenBaseViewModel!.uid, isHost: true, username: _webblenBaseViewModel!.user!.username);
+    _liveStreamChatDataService!.joinChatStream(streamID: streamID, uid: user.id, isHost: false, username: user.username);
+
+    setBusy(false);
   }
 
   initializeAgoraRtc() async {
@@ -96,14 +122,15 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     await agoraRtcEngine.setClientRole(ClientRole.Audience);
 
     //token = await _liveStreamDataService.generateStreamToken(streamID);
-    agoraRtcEngine.joinChannel(token, channelName, null, _webblenBaseViewModel!.uid.hashCode);
+    agoraRtcEngine.joinChannel(token, channelName, null, user.id.hashCode);
     notifyListeners();
   }
 
-  setAgoraRtcEventHandlers() {
+  bool setAgoraRtcEventHandlers() {
+    String? error;
     agoraRtcEngine.setEventHandler(RtcEngineEventHandler(error: (code) {
       print(code);
-      return false;
+      error = code.toString();
     }, joinChannelSuccess: (channel, uid, elapsed) async {
       //enable wakelock
       print('joinChannelSuccess $channel $uid $elapsed');
@@ -126,6 +153,9 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
       showWaitingRoom = false;
       notifyListeners();
     }));
+    if (error != null) {
+      return false;
+    }
     return true;
   }
 
@@ -144,28 +174,21 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     notifyListeners();
   }
 
-  displayGifters() async {
-    var sheetResponse = await _bottomSheetService!.showCustomSheet(
-      customData: webblenLiveStream!.id,
-      barrierDismissible: true,
-      variant: BottomSheetType.displayContentGifters,
-    );
-    if (sheetResponse != null) {
-      //String res = sheetResponse.responseData;
-    }
+  giftWBLN() async {
+    await customBottomSheetService.showGiftWebblenBottomSheet(contentID: webblenLiveStream.id!, hostID: webblenLiveStream.hostID!);
   }
 
   sendChatMessage(String val) async {
     String text = val.trim();
     if (text.isNotEmpty) {
       WebblenStreamChatMessage message = WebblenStreamChatMessage(
-        userImgURL: _webblenBaseViewModel!.user!.profilePicURL,
-        senderUID: _webblenBaseViewModel!.uid,
-        username: _webblenBaseViewModel!.user!.username,
+        userImgURL: user.profilePicURL,
+        senderUID: user.id,
+        username: user.username,
         message: text,
         timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       );
-      _liveStreamChatDataService!.sendStreamChatMessage(streamID: webblenLiveStream!.id, message: message);
+      _liveStreamChatDataService!.sendStreamChatMessage(streamID: webblenLiveStream.id, message: message);
     }
     messageFieldController.clear();
     notifyListeners();
@@ -176,6 +199,42 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     agoraRtcEngine.leaveChannel();
     agoraRtcEngine.destroy();
     _navigationService!.back();
+  }
+
+  streamIsLive() {
+    int currentDateInMilli = DateTime.now().millisecondsSinceEpoch;
+    int eventStartDateInMilli = webblenLiveStream.startDateTimeInMilliseconds!;
+    int? eventEndDateInMilli = webblenLiveStream.endDateTimeInMilliseconds;
+    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli!) {
+      isLive = true;
+    } else {
+      isLive = false;
+    }
+    notifyListeners();
+  }
+
+  checkInCheckoutOfStream() async {
+    streamIsLive();
+    if (isLive) {
+      updatingCheckIn = true;
+      notifyListeners();
+      if (checkedIn) {
+        bool confirmedCheckout = await customBottomSheetService.showCheckoutEventDialog();
+        if (confirmedCheckout) {
+          bool checkedOut = await _liveStreamDataService.checkOutOfStream(uid: user.id!, streamID: webblenLiveStream.id!);
+          if (checkedOut) {
+            checkedIn = false;
+          }
+        }
+      } else {
+        checkedIn = await _liveStreamDataService.checkIntoStream(uid: user.id!, streamID: webblenLiveStream.id!);
+      }
+      updatingCheckIn = false;
+      notifyListeners();
+      HapticFeedback.lightImpact();
+    } else {
+      _customDialogService.showErrorDialog(description: "You can no longer check in/out of this stream");
+    }
   }
 
   ///STREAM USER DATA
@@ -189,7 +248,7 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
         if (!liveStreamSetup) {
           //channelName = webblenLiveStream.title;
           await initializeAgoraRtc();
-          bool setEventHandlers = await setAgoraRtcEventHandlers();
+          bool setEventHandlers = setAgoraRtcEventHandlers();
           if (!setEventHandlers) {
             _snackbarService!.showSnackbar(
               title: 'Stream Error',
@@ -211,21 +270,13 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
 
   Stream<WebblenLiveStream> streamLiveStreamDetails() async* {
     while (true) {
+      WebblenLiveStream val = WebblenLiveStream();
       if (streamID == null) {
-        yield null;
+        yield val;
       }
       await Future.delayed(Duration(seconds: 1));
-      WebblenLiveStream? val = await (_liveStreamDataService!.getStreamByID(streamID) as FutureOr<WebblenLiveStream?>);
-      yield val!;
+      val = await _liveStreamDataService.getStreamByID(streamID);
+      yield val;
     }
-  }
-
-  ///NAVIGATION
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-
-  navigateToUserView(String? id) {
-    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
   }
 }

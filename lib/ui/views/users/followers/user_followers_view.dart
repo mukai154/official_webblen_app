@@ -5,7 +5,7 @@ import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/users/followers/user_followers_view_model.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
-import 'package:webblen/ui/widgets/list_builders/list_users.dart';
+import 'package:webblen/ui/widgets/list_builders/list_users/list_users.dart';
 import 'package:webblen/ui/widgets/search/search_field.dart';
 
 class UserFollowersView extends StatelessWidget {
@@ -39,6 +39,11 @@ class UserFollowersView extends StatelessWidget {
             header: "No Recent Accounts Found",
             subHeader: "You currently do not have followers",
             refreshData: null,
+            mainActionButtonTitle: '',
+            secondaryAction: () {},
+            secondaryActionButtonTitle: '',
+            scrollController: null,
+            mainAction: () {},
           )
         : listUserResults(model);
   }

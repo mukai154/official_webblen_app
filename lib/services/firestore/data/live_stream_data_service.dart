@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
@@ -12,8 +12,8 @@ import 'package:webblen/utils/custom_string_methods.dart';
 class LiveStreamDataService {
   final CollectionReference streamsRef = FirebaseFirestore.instance.collection("webblen_live_streams");
   PostDataService? _postDataService = locator<PostDataService>();
-
-  SnackbarService? _snackbarService = locator<SnackbarService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
+  DialogService? _dialogService = locator<DialogService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
 
   int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
@@ -26,10 +26,9 @@ class LiveStreamDataService {
         exists = true;
       }
     } catch (e) {
-      _snackbarService!.showSnackbar(
-        title: 'Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
+      _dialogService!.showDialog(
+        title: "Error",
+        description: e.toString(),
       );
       return null;
     }
@@ -57,10 +56,9 @@ class LiveStreamDataService {
   Future saveUnsaveStream({required String? uid, required String? streamID, required bool savedStream}) async {
     List? savedBy = [];
     DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
-      _snackbarService!.showSnackbar(
-        title: 'Event Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
+      _dialogService!.showDialog(
+        title: "Stream Error",
+        description: e.message,
       );
       return false;
     });
@@ -82,28 +80,25 @@ class LiveStreamDataService {
 
   Future reportStream({required String? streamID, required String? reporterID}) async {
     DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
+      _dialogService!.showDialog(
+        title: "Stream Error",
+        description: e.message,
       );
       return null;
     });
     if (snapshot.exists) {
       List reportedBy = snapshot.data()!['reportedBy'] == null ? [] : snapshot.data()!['reportedBy'].toList(growable: true);
       if (reportedBy.contains(reporterID)) {
-        return _snackbarService!.showSnackbar(
-          title: 'Report Error',
-          message: "You've already reported this stream. This stream is currently pending review.",
-          duration: Duration(seconds: 5),
+        _dialogService!.showDialog(
+          title: "Report Error",
+          description: "You've already reported this stream. This stream is currently pending review.",
         );
       } else {
         reportedBy.add(reporterID);
         streamsRef.doc(streamID).update({"reportedBy": reportedBy});
-        return _snackbarService!.showSnackbar(
-          title: 'Stream Reported',
-          message: "This stream is now pending review.",
-          duration: Duration(seconds: 5),
+        return _dialogService!.showDialog(
+          title: "Stream Reported",
+          description: "This stream is now pending review.",
         );
       }
     }
@@ -111,12 +106,14 @@ class LiveStreamDataService {
 
   Future createStream({required WebblenLiveStream stream}) async {
     await streamsRef.doc(stream.id).set(stream.toMap()).catchError((e) {
+      print(e.message);
       return e.message;
     });
   }
 
   Future updateStream({required WebblenLiveStream stream}) async {
     await streamsRef.doc(stream.id).update(stream.toMap()).catchError((e) {
+      print(e.message);
       return e.message;
     });
   }
@@ -129,37 +126,62 @@ class LiveStreamDataService {
     await _postDataService!.deleteEventOrStreamPost(eventOrStreamID: stream.id, postType: 'stream');
   }
 
-  Future getStreamByID(String? id) async {
-    WebblenLiveStream? stream;
+  Future<WebblenLiveStream> getStreamByID(String? id) async {
+    WebblenLiveStream stream = WebblenLiveStream();
+    String? error;
     DocumentSnapshot snapshot = await streamsRef.doc(id).get().catchError((e) {
-      print(e.message);
-      _snackbarService!.showSnackbar(
-        title: 'Event Error',
-        message: e.message,
-        duration: Duration(seconds: 5),
+      error = e.message;
+      _dialogService!.showDialog(
+        title: "Stream Error",
+        description: e.message,
       );
-      return null;
     });
+
+    if (error != null) {
+      return stream;
+    }
+
     if (snapshot.exists) {
       stream = WebblenLiveStream.fromMap(snapshot.data()!);
     } else if (!snapshot.exists) {
-      _snackbarService!.showSnackbar(
-        title: 'This Stream No Longer Exists',
-        message: 'This stream has been deleted',
-        duration: Duration(seconds: 5),
+      _dialogService!.showDialog(
+        title: "his Stream No Longer Exists",
+        description: "This stream has been removed",
       );
-      return null;
+      return stream;
     }
+    return stream;
+  }
+
+  FutureOr<WebblenLiveStream> getStreamForEditingByID(String? id) async {
+    WebblenLiveStream stream = WebblenLiveStream();
+    String? error;
+    DocumentSnapshot snapshot = await streamsRef.doc(id).get().catchError((e) {
+      print(e.message);
+      _dialogService!.showDialog(
+        title: "Stream Error",
+        description: e.message,
+      );
+      error = e.message;
+    });
+
+    if (error != null) {
+      return stream;
+    }
+
+    if (snapshot.exists) {
+      stream = WebblenLiveStream.fromMap(snapshot.data()!);
+    }
+
     return stream;
   }
 
   Future<String?> generateStreamToken(String streamID) async {
     String? token;
     DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
-      _snackbarService!.showSnackbar(
-        title: 'There was an issue starting this stream',
-        message: 'Please try again later',
-        duration: Duration(seconds: 5),
+      _dialogService!.showDialog(
+        title: "There was an issue starting this stream",
+        description: "Please try again",
       );
       return null;
     });
@@ -172,6 +194,56 @@ class LiveStreamDataService {
       }
     }
     return token;
+  }
+
+  Future<bool> checkIntoStream({required String uid, required String streamID}) async {
+    bool checkedIn = false;
+    DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
+      _customDialogService.showErrorDialog(description: "There was an error checking into this stream. Please try again.");
+    });
+    if (snapshot.exists) {
+      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      List attendeeUIDs = stream.attendees != null ? stream.attendees!.keys.toList(growable: true) : [];
+      //check if user already checked in
+      if (attendeeUIDs.contains(uid)) {
+        checkedIn = true;
+        return checkedIn;
+      }
+
+      stream.attendees![uid] = {
+        'checkInTime': DateTime.now().millisecondsSinceEpoch,
+        'checkOutTime': null,
+      };
+
+      await streamsRef.doc(streamID).update({
+        'attendees': stream.attendees,
+      });
+
+      checkedIn = true;
+    }
+    return checkedIn;
+  }
+
+  Future<bool> checkOutOfStream({required String uid, required String streamID}) async {
+    bool checkedOut = false;
+    DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
+      _customDialogService.showErrorDialog(description: "There was an error checking out of this stream. Please try again.");
+    });
+    if (snapshot.exists) {
+      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      List attendeeUIDs = stream.attendees != null ? stream.attendees!.keys.toList(growable: true) : [];
+      //check if user already checked in
+      if (!attendeeUIDs.contains(uid)) {
+        checkedOut = true;
+        return checkedOut;
+      }
+      stream.attendees!.remove(uid);
+      await streamsRef.doc(streamID).update({
+        'attendees': stream.attendees,
+      });
+      checkedOut = true;
+    }
+    return checkedOut;
   }
 
   ///READ & QUERIES
@@ -197,10 +269,10 @@ class LiveStreamDataService {
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
+        print(e.message);
+        _dialogService!.showDialog(
+          title: "Stream Error",
+          description: e.message,
         );
       }
       return [];
@@ -220,33 +292,29 @@ class LiveStreamDataService {
   }
 
   Future<List<DocumentSnapshot>> loadAdditionalStreams(
-      {required DocumentSnapshot lastDocSnap,
-      required String areaCode,
-      required int resultsLimit,
-      required String? tagFilter,
-      required String? sortBy}) async {
+      {required DocumentSnapshot lastDocSnap, required String areaCode, required int resultsLimit, required String? tagFilter, required String? sortBy}) async {
     Query query;
     List<DocumentSnapshot> docs = [];
     if (areaCode.isEmpty) {
       query = streamsRef
           .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
-          .orderBy('startDateTimeInMilliseconds', descending: true)
+          .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
     } else {
       query = streamsRef
           .where('nearbyZipcodes', arrayContains: areaCode)
           .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
-          .orderBy('startDateTimeInMilliseconds', descending: true)
+          .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
+        print(e.message);
+        _dialogService!.showDialog(
+          title: "Stream Error",
+          description: e.message,
         );
       }
       return [];
@@ -270,10 +338,10 @@ class LiveStreamDataService {
     Query query = streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: false).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
+        print(e.message);
+        _dialogService!.showDialog(
+          title: "Stream Error",
+          description: e.message,
         );
       }
       return [];
@@ -291,13 +359,59 @@ class LiveStreamDataService {
   }) async {
     List<DocumentSnapshot> docs = [];
     Query query =
-        streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
+        streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: false).startAfterDocument(lastDocSnap).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
-        _snackbarService!.showSnackbar(
-          title: 'Error',
-          message: e.message,
-          duration: Duration(seconds: 5),
+        print(e.message);
+        _dialogService!.showDialog(
+          title: "Stream Error",
+          description: e.message,
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadSavedStreams({required String? id, required int resultsLimit}) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = streamsRef.where('savedBy', arrayContains: id).orderBy('startDateTimeInMilliseconds', descending: false).limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        print(e.message);
+        _dialogService!.showDialog(
+          title: "Stream Error",
+          description: e.message,
+        );
+      }
+      return [];
+    });
+    if (snapshot.docs.isNotEmpty) {
+      docs = snapshot.docs;
+    }
+    return docs;
+  }
+
+  Future<List<DocumentSnapshot>> loadAdditionalSavedStreams({
+    required String? id,
+    required DocumentSnapshot lastDocSnap,
+    required int resultsLimit,
+  }) async {
+    List<DocumentSnapshot> docs = [];
+    Query query = streamsRef
+        .where('savedBy', arrayContains: id)
+        .orderBy('startDateTimeInMilliseconds', descending: false)
+        .startAfterDocument(lastDocSnap)
+        .limit(resultsLimit);
+    QuerySnapshot snapshot = await query.get().catchError((e) {
+      if (!e.message.contains("insufficient permissions")) {
+        print(e.message);
+        _dialogService!.showDialog(
+          title: "Stream Error",
+          description: e.message,
         );
       }
       return [];

@@ -1,12 +1,18 @@
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
-class CommentTextFieldViewModel extends BaseViewModel {
-  WebblenBaseViewModel? webblenBaseViewModel = locator<WebblenBaseViewModel>();
+class CommentTextFieldViewModel extends ReactiveViewModel {
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   List<WebblenUser> mentionedUsers = [];
+
+  @override
+  List<ReactiveServiceMixin> get reactiveServices => [_reactiveUserService];
 
   addUserToMentions(WebblenUser user) {
     mentionedUsers.add(user);

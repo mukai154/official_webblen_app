@@ -11,7 +11,7 @@ class RootView extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(isDarkMode() ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
     return ViewModelBuilder<RootViewModel>.reactive(
       viewModelBuilder: () => RootViewModel(),
-      onModelReady: (model) => model.initialize(),
+      onModelReady: (model) => model.checkAuthState(),
       builder: (context, model, child) => Scaffold(
         backgroundColor: appBackgroundColor(),
         body: Container(

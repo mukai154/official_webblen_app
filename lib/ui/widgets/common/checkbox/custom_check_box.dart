@@ -78,7 +78,7 @@ class _CustomDetailedCheckboxState extends State<CustomDetailedCheckbox> {
                   color: appFontColor(),
                 ),
               ),
-              CustomCheckbox(initialValue: isChecked, onChanged: (val) => widget.onChanged(val))
+              CustomCheckbox(initialValue: isChecked, onChanged: (val) => widget.onChanged(val!))
             ],
           ),
           Transform.translate(

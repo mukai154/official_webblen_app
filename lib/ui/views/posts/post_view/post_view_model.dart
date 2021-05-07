@@ -1,23 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/app/app.router.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/share/share_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class PostViewModel extends BaseViewModel {
@@ -31,9 +30,14 @@ class PostViewModel extends BaseViewModel {
   NotificationDataService? _notificationDataService = locator<NotificationDataService>();
   DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
   ShareService? _shareService = locator<ShareService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  CustomBottomSheetService customBottomSheetService = locator<CustomBottomSheetService>();
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   ///HELPERS
+  FocusNode focusNode = FocusNode();
   ScrollController postScrollController = ScrollController();
   TextEditingController commentTextController = TextEditingController();
   double postScrollPosition = 0.0;
@@ -54,14 +58,10 @@ class PostViewModel extends BaseViewModel {
   WebblenPostComment? commentToReplyTo;
 
   ///INITIALIZE
-  initialize(BuildContext context) async {
+  initialize(String id) async {
     setBusy(true);
 
-    Map<String, dynamic> args = {};
-
-    String postID = args['id'] ?? "";
-
-    var res = await _postDataService!.getPostByID(postID);
+    var res = await _postDataService!.getPostByID(id);
     if (res is WebblenPost) {
       post = res;
     } else {
@@ -70,7 +70,7 @@ class PostViewModel extends BaseViewModel {
 
     author = await _userDataService!.getWebblenUserByID(post!.authorID);
 
-    if (_webblenBaseViewModel!.uid == post!.authorID) {
+    if (user.id! == post!.authorID) {
       isAuthor = true;
     }
 
@@ -133,8 +133,8 @@ class PostViewModel extends BaseViewModel {
     if (text.isNotEmpty) {
       WebblenPostComment comment = WebblenPostComment(
         postID: post!.id,
-        senderUID: _webblenBaseViewModel!.uid,
-        username: _webblenBaseViewModel!.user!.username,
+        senderUID: user.id!,
+        username: user.username,
         message: text,
         isReply: false,
         replies: [],
@@ -144,7 +144,7 @@ class PostViewModel extends BaseViewModel {
 
       //send comment & notification
       await _commentDataService!.sendComment(post!.id, post!.authorID, comment);
-      if (_webblenBaseViewModel!.uid != post!.authorID) {
+      if (user.id! != post!.authorID) {
         sendCommentNotification(text);
       }
 
@@ -166,8 +166,8 @@ class PostViewModel extends BaseViewModel {
     if (text.isNotEmpty) {
       WebblenPostComment comment = WebblenPostComment(
         postID: post!.id,
-        senderUID: _webblenBaseViewModel!.uid,
-        username: _webblenBaseViewModel!.user!.username,
+        senderUID: user.id!,
+        username: user.username,
         message: text,
         isReply: true,
         replies: [],
@@ -237,8 +237,8 @@ class PostViewModel extends BaseViewModel {
     WebblenNotification notification = WebblenNotification().generatePostCommentNotification(
       postID: post!.id,
       receiverUID: post!.authorID,
-      senderUID: _webblenBaseViewModel!.uid,
-      commenterUsername: "@${_webblenBaseViewModel!.user!.username}",
+      senderUID: user.id!,
+      commenterUsername: "@${user.username}",
       comment: comment,
     );
     _notificationDataService!.sendNotification(notif: notification);
@@ -248,8 +248,8 @@ class PostViewModel extends BaseViewModel {
     WebblenNotification notification = WebblenNotification().generatePostCommentNotification(
       postID: post!.id,
       receiverUID: receiverUID,
-      senderUID: _webblenBaseViewModel!.uid,
-      commenterUsername: "@${_webblenBaseViewModel!.user!.username}",
+      senderUID: user.id!,
+      commenterUsername: "@${user.username}",
       comment: comment,
     );
     _notificationDataService!.sendNotification(notif: notification);
@@ -259,8 +259,8 @@ class PostViewModel extends BaseViewModel {
     WebblenNotification notification = WebblenNotification().generateWebblenCommentMentionNotification(
       postID: post!.id,
       receiverUID: receiverUID,
-      senderUID: _webblenBaseViewModel!.uid,
-      commenterUsername: "@${_webblenBaseViewModel!.user!.username}",
+      senderUID: user.id!,
+      commenterUsername: "@${user.username}",
       comment: comment,
     );
     _notificationDataService!.sendNotification(notif: notification);
@@ -268,7 +268,7 @@ class PostViewModel extends BaseViewModel {
 
   ///DIALOGS & BOTTOM SHEETS
   showContentOptions() async {
-    var actionPerformed = await _webblenBaseViewModel!.showContentOptions(content: post);
+    var actionPerformed = await customBottomSheetService.showContentOptions(content: post);
     if (actionPerformed == "deleted content") {
       _navigationService!.back();
     }

@@ -8,45 +8,53 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
+import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
-class EditProfileViewModel extends BaseViewModel {
+class EditProfileViewModel extends ReactiveViewModel {
   AuthService? _authService = locator<AuthService>();
   DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
-  UserDataService? _userDataService = locator<UserDataService>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
+  UserDataService _userDataService = locator<UserDataService>();
 
+  TextEditingController usernameTextController = TextEditingController();
   TextEditingController bioTextController = TextEditingController();
   TextEditingController websiteTextController = TextEditingController();
 
-  late Map<String, dynamic> args;
-
   bool updatingData = false;
 
-  File? updatedProfilePic;
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
+
+  ///FILE DATA
+  File? updatedProfilePicFile;
+
   String? updatedBio;
-  String? id;
   String initialProfilePicURL = "";
   String initialProfileBio = "";
   String initialWebsiteLink = "";
 
+  ///REACTIVE SERVICES
+  @override
+  List<ReactiveServiceMixin> get reactiveServices => [_reactiveUserService];
+
   initialize(BuildContext context) async {
     setBusy(true);
-    await getParams(context);
-    notifyListeners();
-    setBusy(false);
-  }
-
-  getParams(BuildContext context) async {
-    id = args['id'] ?? "";
-    WebblenUser user = await (_userDataService!.getWebblenUserByID(id) as FutureOr<WebblenUser>);
+    usernameTextController.text = user.username ?? "";
     initialProfilePicURL = user.profilePicURL ?? "";
     bioTextController.text = user.bio ?? "";
     websiteTextController.text = user.website ?? "";
+    notifyListeners();
+    setBusy(false);
   }
 
   selectImage() async {
@@ -57,13 +65,17 @@ class EditProfileViewModel extends BaseViewModel {
     if (sheetResponse != null) {
       String? res = sheetResponse.responseData;
       if (res == "camera") {
-        updatedProfilePic = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
       } else if (res == "gallery") {
-        updatedProfilePic = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
       }
       notifyListeners();
-      if (updatedProfilePic != null) {
-        await _userDataService!.updateProfilePic(id!, updatedProfilePic!);
+      if (updatedProfilePicFile != null) {
+        String? imageURL =
+            await _firestoreStorageService.uploadImage(img: updatedProfilePicFile!, storageBucket: "images", folderName: "users", fileName: user.id!);
+        if (imageURL != null) {
+          await _userDataService.updateProfilePicURL(id: user.id!, url: imageURL);
+        }
       }
     }
   }
@@ -83,23 +95,43 @@ class EditProfileViewModel extends BaseViewModel {
   updateProfile() async {
     updatingData = true;
     notifyListeners();
-    bool updateSuccessFul = true;
+    bool updateSuccessful = true;
 
     //update bio
-    updateSuccessFul = await _userDataService!.updateBio(id: id, bio: bioTextController.text.trim());
+    updateSuccessful = await _userDataService.updateBio(id: user.id!, bio: bioTextController.text.trim());
 
     //update website link
     if (websiteTextController.text.trim().isNotEmpty) {
       if (websiteIsValid()) {
-        updateSuccessFul = await _userDataService!.updateWebsite(id: id, website: websiteTextController.text.trim());
+        updateSuccessful = await _userDataService.updateWebsite(id: user.id!, website: websiteTextController.text.trim());
       } else {
-        updateSuccessFul = false;
+        updateSuccessful = false;
       }
     } else if (websiteTextController.text.trim().isEmpty) {
-      updateSuccessFul = await _userDataService!.updateWebsite(id: id, website: websiteTextController.text.trim());
+      updateSuccessful = await _userDataService.updateWebsite(id: user.id!, website: websiteTextController.text.trim());
     }
 
-    if (updateSuccessFul) {
+    //update username
+    if (user.username != usernameTextController.text) {
+      String username = usernameTextController.text.trim().toLowerCase();
+      if (isValidUsername(username)) {
+        updateSuccessful = await _userDataService.updateUsername(username: username, id: user.id!);
+      } else {
+        _customDialogService.showErrorDialog(
+          description: "Invalid Username",
+        );
+        updatingData = false;
+        notifyListeners();
+        return false;
+      }
+      if (!updateSuccessful) {
+        updatingData = false;
+        notifyListeners();
+        return false;
+      }
+    }
+
+    if (updateSuccessful) {
       navigateBack();
     } else {
       updatingData = false;

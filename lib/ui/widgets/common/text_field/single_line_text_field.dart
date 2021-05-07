@@ -10,6 +10,7 @@ class SingleLineTextField extends StatelessWidget {
   final bool isPassword;
   final bool? enabled;
   final Function(String)? onChanged;
+  final Function()? onFieldSubmitted;
   final TextInputType? keyboardType;
   SingleLineTextField(
       {required this.controller,
@@ -18,12 +19,13 @@ class SingleLineTextField extends StatelessWidget {
       required this.isPassword,
       this.enabled,
       this.onChanged,
+      this.onFieldSubmitted,
       this.keyboardType});
 
   @override
   Widget build(BuildContext context) {
     return TextFieldContainer(
-      height: 38,
+      //height: 38,
       child: TextFormField(
         enabled: enabled != null ? enabled : true,
         controller: controller,
@@ -36,9 +38,14 @@ class SingleLineTextField extends StatelessWidget {
         style: TextStyle(color: appFontColor()),
         cursorColor: appFontColor(),
         onChanged: onChanged == null ? null : (val) => onChanged!(val),
+        onFieldSubmitted: onFieldSubmitted == null ? null : (val) => onFieldSubmitted!(),
         keyboardType: keyboardType == null ? TextInputType.text : keyboardType,
         decoration: InputDecoration(
+          contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
           hintText: hintText,
+          hintStyle: TextStyle(
+            color: appFontColorAlt(),
+          ),
           border: InputBorder.none,
         ),
       ),

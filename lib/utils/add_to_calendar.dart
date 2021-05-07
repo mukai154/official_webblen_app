@@ -1,5 +1,4 @@
 import 'package:add_2_calendar/add_2_calendar.dart';
-import 'package:flutter/material.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
@@ -11,7 +10,7 @@ UserDataService? _userDataService = locator<UserDataService>();
 DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
 
 addEventToCalendar({required WebblenEvent webblenEvent}) async {
-  WebblenUser author = await (_userDataService!.getWebblenUserByID(webblenEvent.authorID) as FutureOr<WebblenUser>);
+  WebblenUser author = await _userDataService!.getWebblenUserByID(webblenEvent.authorID);
   String url = await _dynamicLinkService!.createEventLink(authorUsername: author.username, event: webblenEvent);
   Event calendarEvent = Event(
     title: "Webblen Event: " + webblenEvent.title!,
@@ -23,7 +22,7 @@ addEventToCalendar({required WebblenEvent webblenEvent}) async {
 }
 
 addStreamToCalendar({required WebblenLiveStream webblenStream}) async {
-  WebblenUser author = await (_userDataService!.getWebblenUserByID(webblenStream.hostID) as FutureOr<WebblenUser>);
+  WebblenUser author = await _userDataService!.getWebblenUserByID(webblenStream.hostID);
   String url = await _dynamicLinkService!.createLiveStreamLink(authorUsername: author.username, stream: webblenStream);
   Event calendarEvent = Event(
     title: "Webblen Stream: " + webblenStream.title!,

@@ -7,13 +7,17 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
+import 'package:webblen/ui/widgets/live_streams/check_in_button/virtual_check_in_button.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/check_in_count_box.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/video_streaming_status.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/viewer_count_box.dart';
 
 class LiveStreamViewerView extends StatefulWidget {
+  final String? id;
+  LiveStreamViewerView(@PathParam() this.id);
   @override
   _LiveStreamViewerViewState createState() => _LiveStreamViewerViewState();
 }
@@ -21,7 +25,7 @@ class LiveStreamViewerView extends StatefulWidget {
 class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   ScrollController chatViewController = ScrollController();
   late AnimationController giftAnimationController;
-  late Animation giftAnimation;
+  late Animation<double> giftAnimation;
 
   /// Helper function to get list of native views
   List<Widget> getRenderedViews(LiveStreamViewerViewModel model) {
@@ -82,12 +86,12 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                 Container(
                   width: MediaQuery.of(context).size.width * 0.85,
                   child: Text(
-                    model.webblenLiveStream!.title!,
+                    model.webblenLiveStream.title!,
                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
                 GestureDetector(
-                  onTap: null, //() => model.toggleEndingStream(),
+                  onTap: () => model.toggleEndingStream(),
                   child: Icon(
                     FontAwesomeIcons.times,
                     color: Colors.white60,
@@ -105,46 +109,23 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                 SizedBox(width: 8.0),
                 ViewerCountBox(viewCount: 1),
                 SizedBox(width: 8.0),
-                CheckInCountBox(checkInCount: model.webblenLiveStream!.viewers!.length),
+                CheckInCountBox(checkInCount: model.webblenLiveStream.attendees == null ? 0 : model.webblenLiveStream.attendees!.length),
               ],
             ),
           ),
-
-//          Row(
-//            children: [
-//              GestureDetector(
-//                onTap: recording ? () => stopScreenAndAudioRecord() : () => requestRecordingStart(),
-//                child: Container(
-//                  height: 24,
-//                  width: 30,
-//                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-//                  decoration: BoxDecoration(
-//                    color: finishedRecording
-//                        ? CustomColors.darkMountainGreen
-//                        : recording
-//                            ? CustomColors.webblenRed
-//                            : Colors.black38,
-//                    borderRadius: BorderRadius.all(Radius.circular(8)),
-//                  ),
-//                  child: Icon(
-//                    finishedRecording
-//                        ? FontAwesomeIcons.solidFileVideo
-//                        : recording
-//                            ? FontAwesomeIcons.solidDotCircle
-//                            : FontAwesomeIcons.video,
-//                    color: Colors.white,
-//                    size: 11.0,
-//                  ),
-//                ),
-//              ),
-//            ],
-//          ),
+          GestureDetector(
+            onTap: () => model.customNavigationService.navigateToUserView(model.webblenLiveStream.hostID!),
+            child: Text(
+              "Hosted by: @${model.hostUserName}",
+              style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          )
         ],
       ),
     );
   }
 
-  Widget endStreamButton(LiveStreamViewerViewModel model) {
+  Widget exitStreamButton(LiveStreamViewerViewModel model) {
     return Container(
       width: MediaQuery.of(context).size.width,
       child: Row(
@@ -153,9 +134,9 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
           Padding(
             padding: const EdgeInsets.fromLTRB(15, 15, 15, 15),
             child: GestureDetector(
-              onTap: null, //() => model.toggleEndingStream(),
+              onTap: () => model.toggleEndingStream(),
               child: Text(
-                'END',
+                'X',
                 style: TextStyle(color: Colors.black54, fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
@@ -175,86 +156,67 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
         color: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.only(left: 8, top: 5, right: 8, bottom: 5),
-          child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-            new Expanded(
-              child: Container(
-                padding: EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0),
-                decoration: BoxDecoration(
-                  color: Colors.black26,
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                ),
-                height: 40,
-                child: TextField(
-                  minLines: 1,
-                  maxLines: 5,
-                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                  cursorColor: Colors.white,
-                  textInputAction: TextInputAction.send,
-                  onSubmitted: (val) => model.sendChatMessage(val),
-                  style: TextStyle(color: Colors.white),
-                  controller: model.messageFieldController,
-                  textCapitalization: TextCapitalization.sentences,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(150),
-                  ],
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    hintText: 'Comment',
-                    hintStyle: TextStyle(color: Colors.white),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              new Expanded(
+                child: Container(
+                  padding: EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0),
+                  decoration: BoxDecoration(
+                    color: Colors.black26,
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                  ),
+                  height: 40,
+                  child: TextField(
+                    minLines: 1,
+                    maxLines: 5,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    cursorColor: Colors.white,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (val) => model.sendChatMessage(val),
+                    style: TextStyle(color: Colors.white),
+                    controller: model.messageFieldController,
+                    textCapitalization: TextCapitalization.sentences,
+                    inputFormatters: [
+                      LengthLimitingTextInputFormatter(150),
+                    ],
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      hintText: 'Comment',
+                      hintStyle: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
-              child: MaterialButton(
-                minWidth: 0,
-                onPressed: () => model.displayGifters(),
-                child: Icon(
-                  Icons.card_giftcard,
-                  color: Colors.white,
-                  size: 20.0,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
+                child: MaterialButton(
+                  minWidth: 0,
+                  onPressed: () => model.giftWBLN(),
+                  child: Icon(
+                    Icons.card_giftcard,
+                    color: Colors.white,
+                    size: 20.0,
+                  ),
+                  shape: CircleBorder(),
+                  elevation: 0.0,
+                  color: Colors.black26,
+                  padding: const EdgeInsets.all(12.0),
                 ),
-                shape: CircleBorder(),
-                elevation: 0.0,
-                color: Colors.black26,
-                padding: const EdgeInsets.all(12.0),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
-              child: MaterialButton(
-                minWidth: 0,
-                onPressed: () => model.toggleMute(),
-                child: Icon(
-                  model.muted ? Icons.mic_off : Icons.mic,
-                  color: Colors.white,
-                  size: 20.0,
-                ),
-                shape: CircleBorder(),
-                elevation: 0.0,
-                color: Colors.black26,
-                padding: const EdgeInsets.all(12.0),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(4.0, 0, 0, 0),
-              child: MaterialButton(
-                minWidth: 0,
-                onPressed: () => model.switchCamera(),
-                child: Icon(
-                  Icons.switch_camera,
-                  color: Colors.white,
-                  size: 20.0,
-                ),
-                shape: CircleBorder(),
-                elevation: 0.0,
-                color: Colors.black26,
-                padding: const EdgeInsets.all(12.0),
-              ),
-            )
-          ]),
+              // model.showWaitingRoom
+              //     ? Container(height: 0)
+              //     :
+              model.checkedIn
+                  ? AltCheckInFloatingAction(
+                      checkOutAction: () => model.checkInCheckoutOfStream(),
+                    )
+                  : CheckInFloatingAction(
+                      checkInAction: () => model.checkInCheckoutOfStream(),
+                    ),
+            ],
+          ),
         ),
       ),
     );
@@ -270,7 +232,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
             child: Padding(
               padding: const EdgeInsets.all(30.0),
               child: Text(
-                'Are you sure you want to end your live stream?',
+                'Are you sure you want to leave this live stream?',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
@@ -288,7 +250,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 15),
                         child: Text(
-                          'End Stream',
+                          'Leave Stream',
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -333,7 +295,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
     super.initState();
     giftAnimationController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 3500),
+      duration: Duration(milliseconds: 2500),
     );
     giftAnimation = CurvedAnimation(parent: giftAnimationController, curve: Curves.elasticInOut);
     giftAnimationController.addStatusListener((AnimationStatus status) {
@@ -341,6 +303,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
         giftAnimationController.reverse();
       }
     });
+    setState(() {});
   }
 
   @override
@@ -363,7 +326,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("webblen_live_stream_chats")
-                  .doc(model.streamID)
+                  .doc(model.webblenLiveStream.id)
                   .collection("messages")
                   .where('timePostedInMilliseconds', isGreaterThan: model.startChatAfterTimeInMilliseconds)
                   .snapshots(),
@@ -392,7 +355,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                             ),
                           )
                         : GestureDetector(
-                            onTap: () => model.navigateToUserView(uid),
+                            onTap: () => model.customNavigationService.navigateToUserView(uid!),
                             child: Container(
                               margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                               padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
@@ -470,7 +433,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("webblen_content_gift_pools")
-                  .doc(model.webblenLiveStream!.id)
+                  .doc(model.webblenLiveStream.id)
                   .collection("logs")
                   .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
                   .orderBy("timePostedInMilliseconds", descending: false)
@@ -482,10 +445,10 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                   itemCount: 1, //snapshot.data.docs.length,
                   itemBuilder: (context, index) {
                     int? giftID = snapshot.data!.docs.last.data()['giftID'];
-                    String? message = snapshot.data!.docs.last.data()['message'].toStringAsFixed(2);
+                    String? message = snapshot.data!.docs.last.data()['message'];
                     giftAnimationController.forward();
                     return FadeTransition(
-                      opacity: giftAnimation as Animation<double>,
+                      opacity: giftAnimation,
                       child: Container(
                         width: MediaQuery.of(context).size.width - 32,
                         child: Column(
@@ -533,23 +496,52 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
     }
 
     return ViewModelBuilder<LiveStreamViewerViewModel>.reactive(
-      onModelReady: (model) => model.initialize(context: context),
+      onModelReady: (model) => model.initialize(widget.id!),
       viewModelBuilder: () => LiveStreamViewerViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(
-          body: Container(
-            color: Colors.black,
-            child: Center(
-              child: Stack(
-                children: <Widget>[
-                  model.isBusy ? Container() : viewRows(model), // Video Widget
-                  if (!model.endingStream && !model.isBusy) streamHeader(model),
-                  if (!model.endingStream && !model.isBusy) giftsAndDonationsStream(model),
-                  if (!model.endingStream && !model.isBusy) messageList(model),
-                  if (!model.endingStream && !model.isBusy) bottomBar(model), // send message
-                  if (model.endingStream && !model.isBusy) endLive(model), //
-                  //if (uploadingFiles && !isLoading) upload(), // view message
-                ],
+          body: GestureDetector(
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Container(
+              color: Colors.black,
+              child: Center(
+                child: Stack(
+                  children: <Widget>[
+                    model.isBusy
+                        ? Container(
+                            color: Colors.black,
+                            child: Center(
+                              child: CustomText(
+                                text: "Joining Stream...",
+                                color: Colors.white,
+                                textAlign: TextAlign.left,
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          )
+                        : model.showWaitingRoom
+                            ? Container(
+                                color: Colors.grey,
+                                child: Center(
+                                  child: CustomText(
+                                    text: "Host is Currently Offline",
+                                    color: Colors.white,
+                                    textAlign: TextAlign.left,
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              )
+                            : viewRows(model),
+                    model.isBusy ? Container() : viewRows(model), // Video Widget
+                    if (!model.endingStream && !model.isBusy) streamHeader(model),
+                    if (!model.endingStream && !model.isBusy) giftsAndDonationsStream(model),
+                    if (!model.endingStream && !model.isBusy) messageList(model),
+                    if (!model.endingStream && !model.isBusy) bottomBar(model), // send message
+                    if (model.endingStream && !model.isBusy) endLive(model), //
+                  ],
+                ),
               ),
             ),
           ),

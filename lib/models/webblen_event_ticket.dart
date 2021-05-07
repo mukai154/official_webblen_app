@@ -12,6 +12,8 @@ class WebblenEventTicket {
   String? startTime;
   String? endTime;
   bool? used;
+  String? price;
+  String? ticketURL;
 
   WebblenEventTicket({
     this.id,
@@ -27,38 +29,44 @@ class WebblenEventTicket {
     this.startTime,
     this.endTime,
     this.used,
+    this.price,
+    this.ticketURL,
   });
 
   WebblenEventTicket.fromMap(Map<String, dynamic> data)
       : this(
-    id: data['id'],
-    name: data['name'],
-    purchaserUID: data['purchaserUID'],
-    eventID: data['eventID'],
-    eventTitle: data['eventTitle'],
-    eventImageURL: data['eventImageURL'],
-    address: data['address'],
-    timezone: data['timezone'],
-    startDate: data['startDate'],
-    endDate: data['endDate'],
-    startTime: data['startTime'],
-    endTime: data['endTime'],
-    used: data['used'],
-  );
+          id: data['id'],
+          name: data['name'],
+          purchaserUID: data['purchaserUID'],
+          eventID: data['eventID'],
+          eventTitle: data['eventTitle'],
+          eventImageURL: data['eventImageURL'],
+          address: data['address'],
+          timezone: data['timezone'],
+          startDate: data['startDate'],
+          endDate: data['endDate'],
+          startTime: data['startTime'],
+          endTime: data['endTime'],
+          used: data['used'],
+          price: data['price'],
+          ticketURL: data['ticketURL'],
+        );
 
   Map<String, dynamic> toMap() => {
-    'id': this.id,
-    'name': this.name,
-    'purchaserUID': this.purchaserUID,
-    'eventID': this.eventID,
-    'eventTitle': this.eventTitle,
-    'eventImageURL': this.eventImageURL,
-    'address': this.address,
-    'timezone': this.timezone,
-    'startDate': this.startDate,
-    'endDate': this.endDate,
-    'startTime': this.startTime,
-    'endTime': this.endTime,
-    'used': this.used,
-  };
+        'id': this.id,
+        'name': this.name,
+        'purchaserUID': this.purchaserUID,
+        'eventID': this.eventID,
+        'eventTitle': this.eventTitle,
+        'eventImageURL': this.eventImageURL,
+        'address': this.address,
+        'timezone': this.timezone,
+        'startDate': this.startDate,
+        'endDate': this.endDate,
+        'startTime': this.startTime,
+        'endTime': this.endTime,
+        'used': this.used,
+        'price': this.price,
+        'ticketURL': this.ticketURL,
+      };
 }

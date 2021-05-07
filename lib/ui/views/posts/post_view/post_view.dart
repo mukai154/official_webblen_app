@@ -1,20 +1,22 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
+import 'package:transparent_image/transparent_image.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/posts/post_view/post_view_model.dart';
 import 'package:webblen/ui/widgets/comments/comment_text_field/comment_text_field_view.dart';
 import 'package:webblen/ui/widgets/common/custom_text_with_links.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
-import 'package:webblen/ui/widgets/list_builders/list_comments.dart';
+import 'package:webblen/ui/widgets/list_builders/list_comments/list_comments.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 import 'package:webblen/utils/time_calc.dart';
 
 class PostView extends StatelessWidget {
-  final FocusNode focusNode = FocusNode();
+  final String? id;
+  PostView(@PathParam() this.id);
+  //final FocusNode focusNode = FocusNode();
 
   Widget postHead(PostViewModel model) {
     return Padding(
@@ -39,19 +41,24 @@ class PostView extends StatelessWidget {
               ],
             ),
           ),
+          IconButton(
+            onPressed: () => model.customBottomSheetService.showContentOptions(content: model.post),
+            icon: Icon(
+              FontAwesomeIcons.ellipsisH,
+              size: 16,
+              color: appIconColor(),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget postImg(BuildContext context, String url) {
-    return CachedNetworkImage(
-      imageUrl: url,
-      height: screenWidth(context),
-      width: screenWidth(context),
-      fadeInCurve: Curves.easeIn,
+    return FadeInImage.memoryNetwork(
+      image: url,
       fit: BoxFit.cover,
-      filterQuality: FilterQuality.high,
+      placeholder: kTransparentImage,
     );
   }
 
@@ -165,22 +172,27 @@ class PostView extends StatelessWidget {
   }
 
   postComments(BuildContext context, PostViewModel model) {
-    return ListComments(
-      refreshData: () async {},
-      scrollController: null,
-      showingReplies: false,
-      pageStorageKey: model.commentStorageKey,
-      refreshingData: false,
-      results: model.commentResults,
-      replyToComment: (val) => model.toggleReply(focusNode, val),
-      deleteComment: (val) => model.showDeleteCommentConfirmation(context: context, comment: val),
+    return Container(
+      constraints: BoxConstraints(
+        maxWidth: 500,
+      ),
+      child: ListComments(
+        refreshData: () async {},
+        scrollController: null,
+        showingReplies: false,
+        pageStorageKey: model.commentStorageKey,
+        refreshingData: false,
+        results: model.commentResults,
+        replyToComment: (val) => model.toggleReply(model.focusNode, val),
+        deleteComment: (val) => model.showDeleteCommentConfirmation(context: context, comment: val),
+      ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<PostViewModel>.reactive(
-      onModelReady: (model) => model.initialize(context),
+      onModelReady: (model) => model.initialize(id!),
       viewModelBuilder: () => PostViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicActionAppBar(
@@ -194,7 +206,7 @@ class PostView extends StatelessWidget {
               color: appIconColor(),
             ),
           ),
-        ) as PreferredSizeWidget?,
+        ),
         body: GestureDetector(
           onTap: () => model.unFocusKeyboard(context),
           child: Container(
@@ -206,7 +218,7 @@ class PostView extends StatelessWidget {
                     ? Container()
                     : Stack(
                         children: [
-                          LiquidPullToRefresh(
+                          RefreshIndicator(
                             backgroundColor: appBackgroundColor(),
                             onRefresh: () async {},
                             child: ListView(
@@ -214,13 +226,25 @@ class PostView extends StatelessWidget {
                               controller: model.postScrollController,
                               shrinkWrap: true,
                               children: [
-                                postBody(context, model),
-                                postComments(context, model),
-                                SizedBox(height: 80),
+                                Align(
+                                  alignment: Alignment.center,
+                                  child: Container(
+                                    constraints: BoxConstraints(
+                                      maxWidth: 500,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        postBody(context, model),
+                                        postComments(context, model),
+                                        SizedBox(height: 100),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
-                          Container(
+                          Align(
                             alignment: Alignment.bottomCenter,
                             child: CommentTextFieldView(
                               onSubmitted: model.isReplying
@@ -229,10 +253,11 @@ class PostView extends StatelessWidget {
                                         commentData: val,
                                       )
                                   : (val) => model.submitComment(context: context, commentData: val),
-                              focusNode: focusNode,
+                              focusNode: model.focusNode,
                               commentTextController: model.commentTextController,
                               isReplying: model.isReplying,
                               replyReceiverUsername: model.isReplying ? model.commentToReplyTo!.username : null,
+                              contentID: '',
                             ),
                           ),
                         ],

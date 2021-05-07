@@ -26,85 +26,116 @@ class FeeForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: screenWidth(context),
+      constraints: BoxConstraints(
+        maxWidth: 500,
+      ),
       margin: EdgeInsets.symmetric(vertical: 8.0),
       child: Column(
         children: [
           Container(
+            height: 18,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.60,
-                  child: CustomText(
-                    text: 'Fee Name',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: CustomText(
+                      text: 'Fee Name',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
                 ),
-                Container(
-                  width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                  child: CustomText(
-                    text: 'Price',
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: CustomText(
+                      text: 'Price',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: appFontColor(),
+                    ),
                   ),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Container(),
                 ),
               ],
             ),
           ),
           verticalSpaceSmall,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.60,
-                child: SingleLineTextField(
-                  controller: feeNameTextController,
-                  hintText: "Venue Fee",
-                  textLimit: 50,
-                  isPassword: false,
+          Container(
+            height: 50,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                Expanded(
+                  flex: 2,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: SingleLineTextField(
+                      controller: feeNameTextController,
+                      hintText: "Venue Fee",
+                      textLimit: 50,
+                      isPassword: false,
+                    ),
+                  ),
                 ),
-              ),
-              Container(
-                width: (MediaQuery.of(context).size.width - 16) * 0.20,
-                child: MoneyTextField(
-                  controller: feePriceTextController,
-                  hintText: "\$9.00",
-                  textLimit: null,
+                Expanded(
+                  flex: 1,
+                  child: Container(
+                    margin: EdgeInsets.only(right: 4),
+                    child: MoneyTextField(
+                      controller: feePriceTextController,
+                      hintText: "\$9.99",
+                      textLimit: null,
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                Expanded(
+                  flex: 1,
+                  child: Container(),
+                ),
+              ],
+            ),
           ),
           verticalSpaceSmall,
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              CustomButton(
-                text: !editingFee ? "Add Fee" : "Update Fee",
-                textColor: Colors.white,
-                backgroundColor: CustomColors.darkMountainGreen,
-                height: 30.0,
-                width: 120,
-                onPressed: validateAndSubmitFee,
-                isBusy: false,
-              ),
-              SizedBox(width: 8.0),
-              CustomIconButton(
-                height: 30,
-                width: 30,
-                icon: Icon(
-                  FontAwesomeIcons.trash,
-                  size: 14,
-                  color: Colors.white,
+          Container(
+            height: 40,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                CustomButton(
+                  text: !editingFee ? "Add Fee" : "Update Fee",
+                  textSize: 14,
+                  textColor: Colors.white,
+                  elevation: 1,
+                  backgroundColor: CustomColors.darkMountainGreen,
+                  height: 30.0,
+                  width: 120,
+                  onPressed: validateAndSubmitFee,
+                  isBusy: false,
                 ),
-                onPressed: deleteFee,
-                centerContent: true,
-                backgroundColor: appDestructiveColor(),
-              ),
-            ],
+                SizedBox(width: 8.0),
+                CustomIconButton(
+                  height: 30,
+                  width: 30,
+                  icon: Icon(
+                    FontAwesomeIcons.trash,
+                    size: 14,
+                    color: Colors.white,
+                  ),
+                  onPressed: deleteFee,
+                  centerContent: true,
+                  backgroundColor: appDestructiveColor(),
+                ),
+              ],
+            ),
           ),
         ],
       ),

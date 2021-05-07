@@ -1,3 +1,6 @@
+import 'package:webblen/utils/custom_string_methods.dart';
+import 'package:webblen/utils/random_image_generator.dart';
+
 class WebblenUser {
   // ignore: non_constant_identifier_names
   double? WBLN;
@@ -21,6 +24,9 @@ class WebblenUser {
   bool? isPrivate;
   List? recentSearchTerms;
   bool? onboarded;
+  String? lastSeenZipcode;
+  String? lastSeenCity;
+  List? associatedTags;
 
   WebblenUser({
     // ignore: non_constant_identifier_names
@@ -45,6 +51,9 @@ class WebblenUser {
     this.isPrivate,
     this.recentSearchTerms,
     this.onboarded,
+    this.lastSeenZipcode,
+    this.lastSeenCity,
+    this.associatedTags,
   });
 
   WebblenUser.fromMap(Map<String, dynamic> data)
@@ -70,6 +79,9 @@ class WebblenUser {
           isPrivate: data['isPrivate'],
           recentSearchTerms: data['recentSearchTerms'],
           onboarded: data['onboarded'],
+          lastSeenZipcode: data['lastSeenZipcode'],
+          lastSeenCity: data['lastSeenCity'],
+          associatedTags: data['associatedTags'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -94,5 +106,49 @@ class WebblenUser {
         'isPrivate': this.isPrivate,
         'recentSearchTerms': this.recentSearchTerms,
         'onboarded': this.onboarded,
+        'lastSeenZipcode': this.lastSeenZipcode,
+        'lastSeenCity': this.lastSeenCity,
+        'associatedTags': this.associatedTags,
       };
+
+  WebblenUser generateNewUser(String id) {
+    String randomUsername = "user" + getRandomString(5);
+    String randomImgURL = getRandomImageURL();
+    WebblenUser user = WebblenUser(
+      id: id,
+      WBLN: 5.0001,
+      achievements: [],
+      ap: 1.00,
+      apLvl: 1,
+      blockedUsers: [],
+      emailAddress: null,
+      eventsToLvlUp: 20,
+      fbAccessToken: null,
+      followers: [],
+      following: [],
+      googleAccessToken: null,
+      googleIDToken: googleIDToken,
+      isAdmin: false,
+      profilePicURL: randomImgURL,
+      username: randomUsername,
+      bio: null,
+      website: null,
+      isPrivate: false,
+      recentSearchTerms: [],
+      onboarded: false,
+      lastSeenZipcode: "58104",
+      lastSeenCity: "Fargo",
+      associatedTags: [],
+    );
+    return user;
+  }
+
+  //checks if obj is valid
+  bool isValid() {
+    bool isValid = true;
+    if (id == null) {
+      isValid = false;
+    }
+    return isValid;
+  }
 }

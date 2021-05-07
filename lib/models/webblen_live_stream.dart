@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class WebblenLiveStream {
@@ -22,7 +21,7 @@ class WebblenLiveStream {
   String? twitterUsername;
   String? instaUsername;
   int? actualTurnout;
-  List? viewers;
+  Map<dynamic, dynamic>? attendees;
   double? payout;
   int? startDateTimeInMilliseconds;
   int? endDateTimeInMilliseconds;
@@ -35,6 +34,7 @@ class WebblenLiveStream {
   bool? reported;
   String? webAppLink;
   List? savedBy;
+  List? clickedBy;
   bool? paidOut;
   bool? openToSponsors;
   List<Map<dynamic, dynamic>>? gifters;
@@ -62,7 +62,7 @@ class WebblenLiveStream {
     this.twitterUsername,
     this.instaUsername,
     this.actualTurnout,
-    this.viewers,
+    this.attendees,
     this.payout,
     this.startDateTimeInMilliseconds,
     this.endDateTimeInMilliseconds,
@@ -75,6 +75,7 @@ class WebblenLiveStream {
     this.reported,
     this.webAppLink,
     this.savedBy,
+    this.clickedBy,
     this.paidOut,
     this.openToSponsors,
     this.gifters,
@@ -104,7 +105,7 @@ class WebblenLiveStream {
           twitterUsername: data['twitterUsername'],
           instaUsername: data['instaUsername'],
           actualTurnout: data['actualTurnout'],
-          viewers: data['viewers'],
+          attendees: data['attendees'],
           payout: data['payout'] == null ? null : data['payout'] * 1.001,
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
           endDateTimeInMilliseconds: data['endDateTimeInMilliseconds'],
@@ -117,6 +118,7 @@ class WebblenLiveStream {
           reported: false,
           webAppLink: data['webAppLink'],
           savedBy: data['savedBy'],
+          clickedBy: data['clickedBy'],
           paidOut: data['paidOut'],
           openToSponsors: data['openToSponsors'],
           gifters: data['gifters'],
@@ -145,7 +147,7 @@ class WebblenLiveStream {
         'twitterUsername': this.twitterUsername,
         'instaUsername': this.instaUsername,
         'actualTurnout': this.actualTurnout,
-        'viewers': this.viewers,
+        'attendees': this.attendees,
         'payout': this.payout,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
         'endDateTimeInMilliseconds': this.endDateTimeInMilliseconds,
@@ -158,6 +160,7 @@ class WebblenLiveStream {
         'reported': this.reported,
         'webAppLink': this.webAppLink,
         'savedBy': this.savedBy,
+        'clickedBy': this.clickedBy,
         'paidOut': this.paidOut,
         'openToSponsors': this.openToSponsors,
         'gifters': this.gifters,
@@ -165,7 +168,7 @@ class WebblenLiveStream {
         'suggestedUIDs': this.suggestedUIDs,
       };
 
-  WebblenLiveStream generateNewWebblenLiveStream({required String? hostID}) {
+  WebblenLiveStream generateNewWebblenLiveStream({required String hostID, required List suggestedUIDs}) {
     String id = getRandomString(30);
     WebblenLiveStream stream = WebblenLiveStream(
       id: id,
@@ -177,9 +180,19 @@ class WebblenLiveStream {
       openToSponsors: false,
       tags: [],
       savedBy: [],
-      viewers: [],
+      clickedBy: [],
+      attendees: {},
       clicks: 0,
+      suggestedUIDs: suggestedUIDs,
     );
     return stream;
+  }
+
+  bool isValid() {
+    bool isValid = true;
+    if (this.id == null) {
+      isValid = false;
+    }
+    return isValid;
   }
 }

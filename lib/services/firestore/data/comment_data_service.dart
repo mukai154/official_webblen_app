@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_post.dart';
@@ -21,7 +20,7 @@ class CommentDataService {
     });
     DocumentSnapshot snapshot = await postsRef.doc(parentID).get();
     WebblenPost post = WebblenPost.fromMap(snapshot.data()!);
-    post.commentCount += 1;
+    post.commentCount = post.commentCount! + 1;
     await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
       error = e.details;
     });
@@ -39,7 +38,7 @@ class CommentDataService {
     List replies = originalComment.replies!.toList(growable: true);
     replies.add(comment.toMap());
     originalComment.replies = replies;
-    originalComment.replyCount += 1;
+    originalComment.replyCount = originalComment.replyCount! + 1;
     await commentsRef.doc(parentID).collection("comments").doc(originalCommentID).update(originalComment.toMap()).catchError((e) {
       error = e.details;
     });
@@ -58,7 +57,7 @@ class CommentDataService {
     });
     DocumentSnapshot snapshot = await postsRef.doc(parentID).get();
     WebblenPost post = WebblenPost.fromMap(snapshot.data()!);
-    post.commentCount -= 1;
+    post.commentCount = post.commentCount! - 1;
     await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
       error = e.details;
     });
@@ -73,7 +72,7 @@ class CommentDataService {
     int replyIndex = replies.indexWhere((element) => element['message'] == comment.message);
     replies.removeAt(replyIndex);
     originalComment.replies = replies;
-    originalComment.replyCount -= 1;
+    originalComment.replyCount = originalComment.replyCount! - 1;
     await commentsRef.doc(parentID).collection("comments").doc(comment.originalReplyCommentID).update(originalComment.toMap()).catchError((e) {
       error = e.details;
     });

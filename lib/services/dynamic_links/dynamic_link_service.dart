@@ -1,15 +1,15 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
 
 class DynamicLinkService {
-  SnackbarService? _snackbarService = locator<SnackbarService>();
-  NavigationService? _navigationService = locator<NavigationService>();
+  SnackbarService _snackbarService = locator<SnackbarService>();
+  NavigationService _navigationService = locator<NavigationService>();
 
   String webblenShareContentPrefix = 'https://app.webblen.io/shared_link';
   String androidPackageName = 'com.webblen.events.webblen';
@@ -150,7 +150,7 @@ class DynamicLinkService {
     FirebaseDynamicLinks.instance.onLink(onSuccess: (PendingDynamicLinkData? linkData) async {
       _handleDynamicLink(linkData);
     }, onError: (OnLinkErrorException err) async {
-      _snackbarService!.showSnackbar(
+      _snackbarService.showSnackbar(
         title: 'App Link Error',
         message: err.message!,
         duration: Duration(seconds: 5),
@@ -159,25 +159,36 @@ class DynamicLinkService {
   }
 
   void _handleDynamicLink(PendingDynamicLinkData? linkData) {
+    CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
     final Uri? link = linkData?.link;
     if (link != null) {
+      print(link);
       String? id = link.queryParameters['id'];
-
-      // if (link.pathSegments.contains('profile')) {
-      //   _navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
-      // } else if (link.pathSegments.contains('post')) {
-      //   _navigationService.navigateTo(Routes.PostViewRoute, arguments: {'id': id});
-      // } else if (link.pathSegments.contains('event')) {
-      //   _navigationService.navigateTo(Routes.EventViewRoute, arguments: {'id': id});
-      // } else if (link.pathSegments.contains('stream')) {
-      //   _navigationService.navigateTo(Routes.LiveStreamViewRoute, arguments: {'id': id});
-      // } else {
-      //   _snackbarService.showSnackbar(
-      //     title: 'App Link Error',
-      //     message: 'There was an issues loading the desired link',
-      //     duration: Duration(seconds: 5),
-      //   );
-      // }
+      if (id != null) {
+        if (link.pathSegments.contains('profile')) {
+          _customNavigationService.navigateToUserView(id);
+        } else if (link.pathSegments.contains('post')) {
+          _customNavigationService.navigateToPostView(id);
+        } else if (link.pathSegments.contains('event')) {
+          _customNavigationService.navigateToEventView(id);
+        } else if (link.pathSegments.contains('stream')) {
+          _customNavigationService.navigateToLiveStreamView(id);
+        } else if (link.pathSegments.contains('ticket')) {
+          _customNavigationService.navigateToTicketView(id);
+        } else {
+          _snackbarService.showSnackbar(
+            title: 'App Link Error',
+            message: 'There was an issues loading the desired link',
+            duration: Duration(seconds: 5),
+          );
+        }
+      } else {
+        _snackbarService.showSnackbar(
+          title: 'App Link Error',
+          message: 'There was an issues loading the desired link',
+          duration: Duration(seconds: 5),
+        );
+      }
     }
   }
 }

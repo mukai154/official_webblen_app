@@ -54,11 +54,6 @@ class GiftersBottomSheet extends StatelessWidget {
   }
 
   giftersView(GiftersBottomSheetModel model) {
-    Map<dynamic, dynamic> giftersMap = model.giftPool == null ? {} : model.giftPool!.gifters!;
-    List gifters = giftersMap.values.toList(growable: true);
-    if (gifters.length > 1) {
-      gifters.sort((a, b) => b['totalGiftAmount'].compareTo(a['totalGiftAmount']));
-    }
     Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -79,69 +74,69 @@ class GiftersBottomSheet extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  gifters.length >= 1
-                      ? Container(width: 100)
-                      : LiveStreamGifterContainer(
-                          imgURL: gifters[0]['userImgURL'],
-                          username: gifters[0]['username'],
-                          amountGifted: gifters[0]['totalGiftAmount'],
-                        ),
-                  gifters.length >= 2
-                      ? Container(width: 100)
-                      : Container(
+                  model.gifters.length >= 1
+                      ? LiveStreamGifterContainer(
+                          imgURL: model.gifters[0]['userImgURL'],
+                          username: model.gifters[0]['username'],
+                          amountGifted: model.gifters[0]['totalGiftAmount'],
+                        )
+                      : Container(width: 100),
+                  model.gifters.length >= 2
+                      ? Container(
                           width: 100,
                           child: LiveStreamGifterContainer(
-                            imgURL: gifters[1]['userImgURL'],
-                            username: gifters[1]['username'],
-                            amountGifted: gifters[1]['totalGiftAmount'],
+                            imgURL: model.gifters[1]['userImgURL'],
+                            username: model.gifters[1]['username'],
+                            amountGifted: model.gifters[1]['totalGiftAmount'],
                           ),
-                        ),
-                  gifters.length >= 3
-                      ? Container(width: 100)
-                      : Container(
+                        )
+                      : Container(width: 100),
+                  model.gifters.length >= 3
+                      ? Container(
                           width: 100,
                           child: LiveStreamGifterContainer(
-                            imgURL: gifters[2]['userImgURL'],
-                            username: gifters[2]['username'],
-                            amountGifted: gifters[2]['totalGiftAmount'],
+                            imgURL: model.gifters[2]['userImgURL'],
+                            username: model.gifters[2]['username'],
+                            amountGifted: model.gifters[2]['totalGiftAmount'],
                           ),
-                        ),
+                        )
+                      : Container(width: 100),
                 ],
               ),
               SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  gifters.length >= 4
-                      ? Container(width: 100)
-                      : Container(
+                  model.gifters.length >= 4
+                      ? Container(
                           width: 100,
                           child: LiveStreamGifterContainer(
-                            imgURL: gifters[3]['userImgURL'],
-                            username: gifters[3]['username'],
-                            amountGifted: gifters[3]['totalGiftAmount'],
+                            imgURL: model.gifters[3]['userImgURL'],
+                            username: model.gifters[3]['username'],
+                            amountGifted: model.gifters[3]['totalGiftAmount'],
                           ),
-                        ),
-                  gifters.length >= 5
-                      ? Container(width: 100)
-                      : Container(
+                        )
+                      : Container(width: 100),
+                  model.gifters.length >= 5
+                      ? Container(
                           width: 100,
                           child: LiveStreamGifterContainer(
-                            imgURL: gifters[4]['userImgURL'],
-                            username: gifters[4]['username'],
-                            amountGifted: gifters[4]['totalGiftAmount'],
+                            imgURL: model.gifters[4]['userImgURL'],
+                            username: model.gifters[4]['username'],
+                            amountGifted: model.gifters[4]['totalGiftAmount'],
                           ),
-                        ),
-                  gifters.length >= 6
-                      ? Container(width: 100)
-                      : Container(
+                        )
+                      : Container(width: 100),
+                  model.gifters.length >= 6
+                      ? Container(
                           width: 100,
                           child: LiveStreamGifterContainer(
-                            imgURL: gifters[5]['userImgURL'],
-                            username: gifters[5]['username'],
-                            amountGifted: gifters[5]['totalGiftAmount'],
+                            imgURL: model.gifters[5]['userImgURL'],
+                            username: model.gifters[5]['username'],
+                            amountGifted: model.gifters[5]['totalGiftAmount'],
                           ),
-                        ),
+                        )
+                      : Container(width: 100),
                 ],
               ),
             ],
@@ -197,8 +192,8 @@ class GiftersBottomSheet extends StatelessWidget {
       onModelReady: (model) => model.initialize(id: request!.customData),
       viewModelBuilder: () => GiftersBottomSheetModel(),
       builder: (context, model, child) => model.isBusy
-          ? Container()
-          : model.giftPoolExists
+          ? noGiftersView()
+          : model.giftPoolExists && model.giftPool.isValid()
               ? giftersView(model)
               : noGiftersView(),
     );

@@ -6,52 +6,50 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/app/app.router.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
-import 'package:webblen/ui/views/base/webblen_base_view_model.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class AuthViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
+  AuthService _authService = locator<AuthService>();
+  CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
-  ThemeService? themeService = locator<ThemeService>();
+  ThemeService? _themeService = locator<ThemeService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
-  WebblenBaseViewModel? _webblenBaseViewModel = locator<WebblenBaseViewModel>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
+  UserDataService _userDataService = locator<UserDataService>();
+
+  ///HELPERS
+  //final phoneMaskController = MaskedTextController(mask: '000-000-0000');
+  final smsController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
   bool signInViaPhone = true;
   String? phoneNo;
-  late String phoneVerificationID;
+  String? phoneVerificationID;
 
   ///Sign Up Via Email
   Future signInWithEmail({required email, required password}) async {
     setBusy(true);
 
-    var result = await _authService!.signInWithEmail(
-      email: email,
-      password: password,
-    );
+    bool signedIn = await _authService.signInWithEmail(email: email, password: password);
 
-    setBusy(false);
-
-    if (result is bool) {
-      if (result) {
-        navigateToHomePage();
-      } else {
-        _snackbarService!.showSnackbar(
-          title: 'Login Error',
-          message: "There Was an Issue Logging In. Please Try Again",
-          duration: Duration(seconds: 5),
-        );
+    if (signedIn) {
+      String? uid = await _authService.getCurrentUserID();
+      if (uid != null) {
+        await signUserIn(uid);
       }
     } else {
-      _snackbarService!.showSnackbar(
-        title: 'Login Error',
-        message: result,
-        duration: Duration(seconds: 5),
-      );
+      setBusy(false);
     }
   }
 
-  Future<bool> sendSMSCode({required phoneNo}) async {
+  Future<bool> sendSMSCode({@required phoneNo}) async {
     //Phone Timeout & Verifcation
 
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
@@ -59,30 +57,27 @@ class AuthViewModel extends BaseViewModel {
       notifyListeners();
     };
 
-    final PhoneCodeSent smsCodeSent = (String verId, [int? forceCodeResend]) {
-      phoneVerificationID = verId;
+    final PhoneCodeSent smsCodeSent = (String verID, [int? forceCodeResend]) {
+      phoneVerificationID = verID;
       notifyListeners();
     };
 
     final PhoneVerificationFailed verificationFailed = (FirebaseAuthException exception) {
-      return _snackbarService!.showSnackbar(
-        title: 'Phone Login Error',
-        message: exception.message!,
-        duration: Duration(seconds: 5),
-      );
+      return _customDialogService.showErrorDialog(description: exception.message!);
     };
 
     final PhoneVerificationCompleted verificationCompleted = (PhoneAuthCredential credential) async {
       // ANDROID ONLY!
       // Sign the user in (or link) with the auto-generated credential
       if (Platform.isAndroid) {
-        await FirebaseAuth.instance.signInWithCredential(credential);
+        await _authService.signInWithPhoneCredential(credential: credential);
+        navigateToHomePage();
       }
     };
 
     if (phoneNo != null && phoneNo.isNotEmpty && phoneNo.length >= 10) {
       //SEND SMS CODE FOR VERIFICATION
-      String? error = await _authService!.verifyPhoneNum(
+      bool verifiedPhoneNumber = await _authService.verifyPhoneNum(
         phoneNo: phoneNo,
         autoRetrievalTimeout: autoRetrieve,
         smsCodeSent: smsCodeSent,
@@ -90,27 +85,11 @@ class AuthViewModel extends BaseViewModel {
         verificationFailed: verificationFailed,
       );
 
-      if (error != null) {
-        _snackbarService!.showSnackbar(
-          title: 'Phone Login Error',
-          message: error,
-          duration: Duration(seconds: 5),
-        );
-        return false;
-      } else {
+      if (verifiedPhoneNumber) {
         return true;
       }
-    } else {
-      setBusy(false);
-
-      _snackbarService!.showSnackbar(
-        title: 'Phone Login Error',
-        message: "Invalid Phone Number",
-        duration: Duration(seconds: 5),
-      );
-
-      return false;
     }
+    return false;
   }
 
   signInWithSMSCode({required BuildContext context, required String smsCode}) async {
@@ -118,18 +97,12 @@ class AuthViewModel extends BaseViewModel {
 
     setBusy(true);
 
-    var res = await _authService!.signInWithSMSCode(verificationID: phoneVerificationID, smsCode: smsCode);
+    bool signedIn = await _authService.signInWithSMSCode(verificationID: phoneVerificationID!, smsCode: smsCode);
 
-    if (res is String) {
-      setBusy(false);
-      _snackbarService!.showSnackbar(
-        title: 'Phone Login Error',
-        message: res,
-        duration: Duration(seconds: 5),
-      );
-    } else {
+    if (signedIn) {
       navigateToHomePage();
     }
+    setBusy(false);
   }
 
   setPhoneNo(String val) {
@@ -146,30 +119,68 @@ class AuthViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  loginWithFacebook() async {
+  signInWithApple() async {
     setBusy(true);
 
-    var res = await _authService!.loginWithFacebook();
+    bool signedIn = await _authService.signInWithApple();
 
-    setBusy(false);
-
-    if (res is String) {
-      _snackbarService!.showSnackbar(
-        title: 'Facebook Sign In Error',
-        message: res,
-        duration: Duration(seconds: 5),
-      );
+    if (signedIn) {
+      String? uid = await _authService.getCurrentUserID();
+      if (uid != null) {
+        await signUserIn(uid);
+      }
     } else {
-      print(res);
-      navigateToHomePage();
+      setBusy(false);
     }
+  }
+
+  signInWithGoogle() async {
+    setBusy(true);
+
+    bool signedIn = await _authService.signInWithGoogle();
+
+    if (signedIn) {
+      String? uid = await _authService.getCurrentUserID();
+      if (uid != null) {
+        await signUserIn(uid);
+      }
+    } else {
+      setBusy(false);
+    }
+  }
+
+  signInWithFacebook() async {
+    setBusy(true);
+
+    bool signedIn = await _authService.signInWithFacebook();
+
+    if (signedIn) {
+      String? uid = await _authService.getCurrentUserID();
+      if (uid != null) {
+        await signUserIn(uid);
+      }
+    } else {
+      setBusy(false);
+    }
+  }
+
+  signUserIn(String uid) async {
+    WebblenUser user = WebblenUser();
+    bool? userExists = await _userDataService.checkIfUserExists(uid);
+    if (userExists != null && !userExists) {
+      user = WebblenUser().generateNewUser(uid);
+      await _userDataService.createWebblenUser(user);
+    } else {
+      user = await _userDataService.getWebblenUserByID(uid);
+    }
+    _reactiveUserService.updateUserLoggedIn(true);
+    _reactiveUserService.updateUser(user);
+    notifyListeners();
+    navigateToHomePage();
   }
 
   ///NAVIGATION
   navigateToHomePage() {
-    if (_webblenBaseViewModel!.initialised) {
-      _webblenBaseViewModel!.initialize();
-    }
-    _navigationService!.pushNamedAndRemoveUntil(Routes.WebblenBaseViewRoute);
+    _customNavigationService.navigateToBase();
   }
 }

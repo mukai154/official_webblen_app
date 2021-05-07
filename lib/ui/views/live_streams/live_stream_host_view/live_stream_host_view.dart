@@ -7,6 +7,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_host_view/live_stream_host_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/check_in_count_box.dart';
@@ -14,6 +15,8 @@ import 'package:webblen/ui/widgets/live_streams/video_ui/video_streaming_status.
 import 'package:webblen/ui/widgets/live_streams/video_ui/viewer_count_box.dart';
 
 class LiveStreamHostView extends StatefulWidget {
+  final String? id;
+  LiveStreamHostView(@PathParam() this.id);
   @override
   _LiveStreamHostViewState createState() => _LiveStreamHostViewState();
 }
@@ -82,7 +85,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                 Container(
                   width: MediaQuery.of(context).size.width * 0.85,
                   child: Text(
-                    model.webblenLiveStream!.title!,
+                    model.webblenLiveStream.title!,
                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -105,40 +108,10 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                 SizedBox(width: 8.0),
                 ViewerCountBox(viewCount: 1),
                 SizedBox(width: 8.0),
-                CheckInCountBox(checkInCount: model.webblenLiveStream!.viewers!.length),
+                CheckInCountBox(checkInCount: model.webblenLiveStream.attendees == null ? 0 : model.webblenLiveStream.attendees!.length),
               ],
             ),
           ),
-
-//          Row(
-//            children: [
-//              GestureDetector(
-//                onTap: recording ? () => stopScreenAndAudioRecord() : () => requestRecordingStart(),
-//                child: Container(
-//                  height: 24,
-//                  width: 30,
-//                  padding: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
-//                  decoration: BoxDecoration(
-//                    color: finishedRecording
-//                        ? CustomColors.darkMountainGreen
-//                        : recording
-//                            ? CustomColors.webblenRed
-//                            : Colors.black38,
-//                    borderRadius: BorderRadius.all(Radius.circular(8)),
-//                  ),
-//                  child: Icon(
-//                    finishedRecording
-//                        ? FontAwesomeIcons.solidFileVideo
-//                        : recording
-//                            ? FontAwesomeIcons.solidDotCircle
-//                            : FontAwesomeIcons.video,
-//                    color: Colors.white,
-//                    size: 11.0,
-//                  ),
-//                ),
-//              ),
-//            ],
-//          ),
         ],
       ),
     );
@@ -363,7 +336,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("webblen_live_stream_chats")
-                  .doc(model.streamID)
+                  .doc(model.webblenLiveStream.id)
                   .collection("messages")
                   .where('timePostedInMilliseconds', isGreaterThan: model.startChatAfterTimeInMilliseconds)
                   .snapshots(),
@@ -392,7 +365,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                             ),
                           )
                         : GestureDetector(
-                            onTap: () => model.navigateToUserView(uid),
+                            onTap: () => model.customNavigationService.navigateToUserView(uid!),
                             child: Container(
                               margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
                               padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 8.0),
@@ -470,7 +443,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("webblen_content_gift_pools")
-                  .doc(model.webblenLiveStream!.id)
+                  .doc(model.webblenLiveStream.id)
                   .collection("logs")
                   .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
                   .orderBy("timePostedInMilliseconds", descending: false)
@@ -533,7 +506,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
     }
 
     return ViewModelBuilder<LiveStreamHostViewModel>.reactive(
-      onModelReady: (model) => model.initialize(context: context),
+      onModelReady: (model) => model.initialize(widget.id!),
       viewModelBuilder: () => LiveStreamHostViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(
@@ -542,11 +515,24 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
             child: Center(
               child: Stack(
                 children: <Widget>[
-                  model.isBusy ? Container() : viewRows(model), // Video Widget
-                  if (!model.endingStream && !model.isBusy) streamHeader(model),
-                  if (!model.endingStream && !model.isBusy) giftsAndDonationsStream(model),
-                  if (!model.endingStream && !model.isBusy) messageList(model),
-                  if (!model.endingStream && !model.isBusy) bottomBar(model), // send message
+                  model.isBusy || !model.webblenLiveStream.isValid()
+                      ? Container(
+                          color: Colors.black,
+                          child: Center(
+                            child: CustomText(
+                              text: "Starting Stream...",
+                              color: Colors.white,
+                              textAlign: TextAlign.left,
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        )
+                      : viewRows(model), // Video Widget
+                  if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) streamHeader(model),
+                  if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) giftsAndDonationsStream(model),
+                  if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) messageList(model),
+                  if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) bottomBar(model), // send message
                   if (model.endingStream && !model.isBusy) endLive(model), //
                   //if (uploadingFiles && !isLoading) upload(), // view message
                 ],

@@ -59,7 +59,7 @@ class ZeroStateView extends StatelessWidget {
         shrinkWrap: true,
         controller: scrollController,
         children: [
-          imageAssetName == null ? Container() : customImage(),
+          imageAssetName.isEmpty ? Container() : customImage(),
           verticalSpaceSmall,
           Opacity(
             opacity: opacity != null ? opacity! : 1.0,

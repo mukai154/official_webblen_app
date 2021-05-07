@@ -86,7 +86,7 @@ class LiveStreamBlockView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         GestureDetector(
-                          onTap: () => model.navigateToUserView(stream.hostID),
+                          onTap: () => model.customNavigationService.navigateToUserView(stream.hostID!),
                           child: Container(
                             child: Row(
                               children: [
@@ -238,7 +238,7 @@ class LiveStreamBlockView extends StatelessWidget {
                   HapticFeedback.lightImpact();
                   showStreamOptions(stream);
                 },
-                onTap: () => model.navigateToStreamView(streamID: stream.id),
+                onTap: () => model.customNavigationService.navigateToLiveStreamView(stream.id!),
                 child: Row(
                   children: [
                     streamStartDate(model),

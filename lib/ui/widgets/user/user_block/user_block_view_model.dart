@@ -1,24 +1,17 @@
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
-class UserBlockViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  NavigationService? _navigationService = locator<NavigationService>();
+class UserBlockViewModel extends ReactiveViewModel {
+  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
 
-  bool isFollowingUser = false;
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
-  initialize(List followers) async {
-    String? uid = await _authService!.getCurrentUserID();
-    if (followers.contains(uid)) {
-      isFollowingUser = true;
-    }
-    notifyListeners();
-  }
-
-  ///NAVIGATION
-  navigateToUserView(String? id) {
-    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
-  }
+  @override
+  // TODO: implement reactiveServices
+  List<ReactiveServiceMixin> get reactiveServices => [_reactiveUserService];
 }
