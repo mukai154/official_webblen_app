@@ -157,7 +157,7 @@ class HomeFilterBottomSheet extends HookWidget {
                       controller: tag,
                       cursorColor: Colors.black,
                       decoration: InputDecoration(
-                        hintText: "Search for Tag",
+                        hintText: model.tempTagFilter.isEmpty ? "Search for Tag" : model.tempTagFilter,
                         border: InputBorder.none,
                       ),
                       autofocus: false,

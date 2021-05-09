@@ -180,4 +180,11 @@ class PlatformDataService {
     key = snapshot.data()!['apiKey'];
     return key;
   }
+
+  Future<String> getPlatformLogoURL() async {
+    String url = '';
+    DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
+    url = snapshot.data()!['logoURL'];
+    return url;
+  }
 }

@@ -401,6 +401,49 @@ class CreateLiveStreamView extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(
+                                FontAwesomeIcons.twitch,
+                                color: appFontColor(),
+                                size: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              IconTextField(
+                                iconData: FontAwesomeIcons.at,
+                                controller: model.twitchTextController,
+                                hintText: "Twitch Username",
+                                onChanged: (val) => model.setTwitchUsername(val),
+                                keyboardType: TextInputType.visiblePassword,
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.youtube,
+                                color: appFontColor(),
+                                size: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.youtubeTextController,
+                                  hintText: "https://youtube.com/channel/mychannel",
+                                  textLimit: null,
+                                  isPassword: false,
+                                  onChanged: (val) => model.setYoutube(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(
                                 FontAwesomeIcons.link,
                                 color: appFontColor(),
                                 size: 24,
@@ -413,6 +456,146 @@ class CreateLiveStreamView extends StatelessWidget {
                                   textLimit: null,
                                   isPassword: false,
                                   onChanged: (val) => model.setWebsite(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceMedium,
+
+                        ///STREAM KEYS
+                        textFieldHeader(
+                          header: "Additional Streams",
+                          subHeader: "Stream on Additional Platforms at the Same Time.",
+                          required: false,
+                        ),
+                        verticalSpaceSmall,
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.facebook,
+                                color: appFontColor(),
+                                size: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.fbStreamURLTextController,
+                                  hintText: "Facebook Stream URL",
+                                  textLimit: null,
+                                  isPassword: false,
+                                  onChanged: (val) => model.setFBStreamURL(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Container(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.fbStreamKeyTextController,
+                                  hintText: "Facebook Stream Key",
+                                  textLimit: null,
+                                  isPassword: true,
+                                  onChanged: (val) => model.setFBStreamKey(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceMedium,
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.twitch,
+                                color: appFontColor(),
+                                size: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.twitchStreamURLTextController,
+                                  hintText: "Twitch Stream URL",
+                                  textLimit: null,
+                                  isPassword: false,
+                                  onChanged: (val) => model.setTwitchStreamURL(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Container(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.twitchStreamKeyTextController,
+                                  hintText: "Twitch Stream Key",
+                                  textLimit: null,
+                                  isPassword: true,
+                                  onChanged: (val) => model.setTwitchStreamKey(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceMedium,
+                        Container(
+                          child: Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.youtube,
+                                color: appFontColor(),
+                                size: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.youtubeStreamURLTextController,
+                                  hintText: "Youtube Stream URL",
+                                  textLimit: null,
+                                  isPassword: false,
+                                  onChanged: (val) => model.setYoutubeStreamURL(val),
+                                  keyboardType: TextInputType.url,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        verticalSpaceSmall,
+                        Container(
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 24,
+                              ),
+                              horizontalSpaceSmall,
+                              Expanded(
+                                child: SingleLineTextField(
+                                  controller: model.youtubeStreamKeyTextController,
+                                  hintText: "Youtube Stream Key",
+                                  textLimit: null,
+                                  isPassword: true,
+                                  onChanged: (val) => model.setYoutubeStreamKey(val),
                                   keyboardType: TextInputType.url,
                                 ),
                               ),

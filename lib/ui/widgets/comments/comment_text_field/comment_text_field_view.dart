@@ -45,7 +45,7 @@ class CommentTextFieldView extends StatelessWidget {
           width: 1.5,
         ),
       ),
-      margin: EdgeInsets.only(left: 8.0, bottom: 8.0),
+      margin: EdgeInsets.only(left: 0.0, bottom: 8.0),
       padding: EdgeInsets.all(4.0),
       child: CustomText(
         text: 'Replying to @$replyReceiverUsername',
@@ -59,9 +59,9 @@ class CommentTextFieldView extends StatelessWidget {
   Widget commentTextField(BuildContext context, CommentTextFieldViewModel model) {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: isReplying ? 120 : 80,
+        maxHeight: isReplying ? 130 : 80,
       ),
-      padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
+      padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,

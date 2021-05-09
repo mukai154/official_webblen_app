@@ -20,6 +20,8 @@ class WebblenLiveStream {
   String? fbUsername;
   String? twitterUsername;
   String? instaUsername;
+  String? youtube;
+  String? twitchUsername;
   int? actualTurnout;
   Map<dynamic, dynamic>? attendees;
   double? payout;
@@ -40,6 +42,12 @@ class WebblenLiveStream {
   List<Map<dynamic, dynamic>>? gifters;
   double? totalGiftAmount;
   List? suggestedUIDs;
+  String? youtubeStreamURL;
+  String? youtubeStreamKey;
+  String? twitchStreamURL;
+  String? twitchStreamKey;
+  String? fbStreamURL;
+  String? fbStreamKey;
 
   WebblenLiveStream({
     this.id,
@@ -61,6 +69,8 @@ class WebblenLiveStream {
     this.fbUsername,
     this.twitterUsername,
     this.instaUsername,
+    this.youtube,
+    this.twitchUsername,
     this.actualTurnout,
     this.attendees,
     this.payout,
@@ -81,6 +91,12 @@ class WebblenLiveStream {
     this.gifters,
     this.totalGiftAmount,
     this.suggestedUIDs,
+    this.youtubeStreamURL,
+    this.youtubeStreamKey,
+    this.twitchStreamURL,
+    this.twitchStreamKey,
+    this.fbStreamURL,
+    this.fbStreamKey,
   });
 
   WebblenLiveStream.fromMap(Map<String, dynamic> data)
@@ -104,6 +120,8 @@ class WebblenLiveStream {
           fbUsername: data['fbUsername'],
           twitterUsername: data['twitterUsername'],
           instaUsername: data['instaUsername'],
+          youtube: data['youtube'],
+          twitchUsername: data['twitchUsername'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
           payout: data['payout'] == null ? null : data['payout'] * 1.001,
@@ -124,6 +142,12 @@ class WebblenLiveStream {
           gifters: data['gifters'],
           totalGiftAmount: data['totalGiftAmount'],
           suggestedUIDs: data['suggestedUIDs'],
+          youtubeStreamURL: data['youtubeStreamURL'],
+          youtubeStreamKey: data['youtubeStreamKey'],
+          twitchStreamURL: data['twitchStreamURL'],
+          twitchStreamKey: data['twitchStreamKey'],
+          fbStreamURL: data['fbStreamURL'],
+          fbStreamKey: data['fbStreamKey'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -146,6 +170,8 @@ class WebblenLiveStream {
         'fbUsername': this.fbUsername,
         'twitterUsername': this.twitterUsername,
         'instaUsername': this.instaUsername,
+        'youtube': this.youtube,
+        'twitchUsername': this.twitchUsername,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
         'payout': this.payout,
@@ -166,6 +192,12 @@ class WebblenLiveStream {
         'gifters': this.gifters,
         'totalGiftAmount': this.totalGiftAmount,
         'suggestedUIDs': this.suggestedUIDs,
+        'youtubeStreamURL': this.youtubeStreamURL,
+        'youtubeStreamKey': this.youtubeStreamKey,
+        'twitchStreamURL': this.twitchStreamURL,
+        'twitchStreamKey': this.twitchStreamKey,
+        'fbStreamURL': this.fbStreamURL,
+        'fbStreamKey': this.fbStreamKey,
       };
 
   WebblenLiveStream generateNewWebblenLiveStream({required String hostID, required List suggestedUIDs}) {

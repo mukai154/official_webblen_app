@@ -59,7 +59,15 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   TextEditingController instaUsernameTextController = TextEditingController();
   TextEditingController fbUsernameTextController = TextEditingController();
   TextEditingController twitterUsernameTextController = TextEditingController();
+  TextEditingController twitchTextController = TextEditingController();
+  TextEditingController youtubeTextController = TextEditingController();
   TextEditingController websiteTextController = TextEditingController();
+  TextEditingController fbStreamKeyTextController = TextEditingController();
+  TextEditingController twitchStreamKeyTextController = TextEditingController();
+  TextEditingController youtubeStreamKeyTextController = TextEditingController();
+  TextEditingController fbStreamURLTextController = TextEditingController();
+  TextEditingController twitchStreamURLTextController = TextEditingController();
+  TextEditingController youtubeStreamURLTextController = TextEditingController();
 
   ///TICKET DETAILS CONTROLLERS
   TextEditingController ticketNameTextController = TextEditingController();
@@ -163,10 +171,18 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     notifyListeners();
 
     //set previously used social accounts
-    fbUsernameTextController.text = _sharedPreferences.getString('fbUsername')!;
-    instaUsernameTextController.text = _sharedPreferences.getString('instaUsername')!;
-    twitterUsernameTextController.text = _sharedPreferences.getString('twitterUsername')!;
-    websiteTextController.text = _sharedPreferences.getString('website')!;
+    fbUsernameTextController.text = _sharedPreferences.getString('fbUsername') ?? "";
+    instaUsernameTextController.text = _sharedPreferences.getString('instaUsername') ?? "";
+    twitterUsernameTextController.text = _sharedPreferences.getString('twitterUsername') ?? "";
+    websiteTextController.text = _sharedPreferences.getString('website') ?? "";
+    twitchTextController.text = _sharedPreferences.getString('twitchUsername') ?? "";
+    youtubeTextController.text = _sharedPreferences.getString('youtube') ?? "";
+    fbStreamKeyTextController.text = _sharedPreferences.getString('fbStreamKey') ?? "";
+    twitchStreamKeyTextController.text = _sharedPreferences.getString('twitchStreamKey') ?? "";
+    youtubeStreamKeyTextController.text = _sharedPreferences.getString('youtubeStreamKey') ?? "";
+    fbStreamURLTextController.text = _sharedPreferences.getString('fbStreamURL') ?? "";
+    twitchStreamURLTextController.text = _sharedPreferences.getString('twitchStreamURL') ?? "";
+    youtubeStreamURLTextController.text = _sharedPreferences.getString('youtubeStreamURL') ?? "";
 
     if (id != "new") {
       stream = await _liveStreamDataService!.getStreamByID(id);
@@ -179,6 +195,14 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         instaUsernameTextController.text = stream.instaUsername == null ? "" : stream.instaUsername!;
         twitterUsernameTextController.text = stream.twitterUsername == null ? "" : stream.twitterUsername!;
         websiteTextController.text = stream.website == null ? "" : stream.website!;
+        twitchTextController.text = stream.twitchUsername == null ? "" : stream.twitchUsername!;
+        youtubeTextController.text = stream.youtube == null ? "" : stream.youtube!;
+        fbStreamKeyTextController.text = stream.fbStreamKey == null ? "" : stream.fbStreamKey!;
+        twitchStreamKeyTextController.text = stream.twitchStreamKey == null ? "" : stream.twitchStreamKey!;
+        youtubeStreamKeyTextController.text = stream.youtubeStreamKey == null ? "" : stream.youtubeStreamKey!;
+        fbStreamURLTextController.text = stream.fbStreamURL == null ? "" : stream.fbStreamURL!;
+        twitchStreamURLTextController.text = stream.twitchStreamURL == null ? "" : stream.twitchStreamURL!;
+        youtubeStreamURLTextController.text = stream.youtubeStreamURL == null ? "" : stream.youtubeStreamURL!;
         selectedStartDate = dateFormatter.parse(stream.startDate!);
         selectedEndDate = dateFormatter.parse(stream.endDate!);
         isEditing = true;
@@ -572,8 +596,48 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  setTwitchUsername(String val) {
+    stream.twitchUsername = val.trim();
+    notifyListeners();
+  }
+
+  setYoutube(String val) {
+    stream.youtube = val.trim();
+    notifyListeners();
+  }
+
   setWebsite(String val) {
     stream.website = val.trim();
+    notifyListeners();
+  }
+
+  setYoutubeStreamURL(String val) {
+    stream.youtubeStreamURL = val.trim();
+    notifyListeners();
+  }
+
+  setYoutubeStreamKey(String val) {
+    stream.youtubeStreamKey = val.trim();
+    notifyListeners();
+  }
+
+  setTwitchStreamURL(String val) {
+    stream.twitchStreamURL = val.trim();
+    notifyListeners();
+  }
+
+  setTwitchStreamKey(String val) {
+    stream.twitchStreamKey = val.trim();
+    notifyListeners();
+  }
+
+  setFBStreamURL(String val) {
+    stream.fbStreamURL = val.trim();
+    notifyListeners();
+  }
+
+  setFBStreamKey(String val) {
+    stream.fbStreamKey = val.trim();
     notifyListeners();
   }
 
@@ -631,6 +695,10 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   bool twitterUsernameIsValid() {
     return isValidUsername(stream.twitterUsername!);
+  }
+
+  bool twitchUsernameIsValid() {
+    return isValidUsername(stream.twitchUsername!);
   }
 
   bool websiteIsValid() {
@@ -699,10 +767,22 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         message: "Twitter username must be valid",
         duration: Duration(seconds: 3),
       );
+    } else if (stream.twitchUsername != null && stream.twitchUsername!.isNotEmpty && !twitchUsernameIsValid()) {
+      _snackbarService!.showSnackbar(
+        title: 'Twitch Username Error',
+        message: "Twitch username must be valid",
+        duration: Duration(seconds: 3),
+      );
     } else if (stream.website != null && stream.website!.isNotEmpty && !websiteIsValid()) {
       _snackbarService!.showSnackbar(
         title: 'Website URL Error',
         message: "Website URL must be valid",
+        duration: Duration(seconds: 3),
+      );
+    } else if (stream.youtube != null && stream.youtube!.isNotEmpty && !websiteIsValid()) {
+      _snackbarService!.showSnackbar(
+        title: 'Youtube URL Error',
+        message: "Youtube URL must be valid",
         duration: Duration(seconds: 3),
       );
     } else {
@@ -752,8 +832,15 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     await _sharedPreferences.setString('fbUsername', stream.fbUsername == null ? "" : stream.fbUsername!);
     await _sharedPreferences.setString('instaUsername', stream.instaUsername == null ? "" : stream.instaUsername!);
     await _sharedPreferences.setString('twitterUsername', stream.twitterUsername == null ? "" : stream.twitterUsername!);
+    await _sharedPreferences.setString('twitchUsername', stream.twitchUsername == null ? "" : stream.twitchUsername!);
     await _sharedPreferences.setString('website', stream.website == null ? "" : stream.website!);
-
+    await _sharedPreferences.setString('youtube', stream.youtube == null ? "" : stream.youtube!);
+    await _sharedPreferences.setString('fbStreamKey', stream.fbStreamKey == null ? "" : stream.fbStreamKey!);
+    await _sharedPreferences.setString('twitchStreamKey', stream.twitchStreamKey == null ? "" : stream.twitchStreamKey!);
+    await _sharedPreferences.setString('youtubeStreamKey', stream.youtubeStreamKey == null ? "" : stream.youtubeStreamKey!);
+    await _sharedPreferences.setString('fbStreamURL', stream.fbStreamURL == null ? "" : stream.fbStreamURL!);
+    await _sharedPreferences.setString('twitchStreamURL', stream.twitchStreamURL == null ? "" : stream.twitchStreamURL!);
+    await _sharedPreferences.setString('youtubeStreamURL', stream.youtubeStreamURL == null ? "" : stream.youtubeStreamURL!);
     return success;
   }
 

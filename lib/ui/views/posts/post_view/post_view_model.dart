@@ -184,7 +184,9 @@ class PostViewModel extends BaseViewModel {
       );
     }
 
-    sendCommentReplyNotification(commentToReplyTo!.senderUID, text);
+    if (user.id! != post!.authorID) {
+      sendCommentReplyNotification(commentToReplyTo!.senderUID, text);
+    }
 
     //send notification to mentioned users
     if (commentData['mentionedUsers'].isNotEmpty) {

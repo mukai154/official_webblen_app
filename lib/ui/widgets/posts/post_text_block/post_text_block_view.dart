@@ -39,7 +39,7 @@ class PostTextBlockView extends StatelessWidget {
                 SizedBox(
                   width: 10.0,
                 ),
-                post!.city == null || post!.city!.isEmpty
+                post!.city == null
                     ? Text(
                         "@${model.authorUsername}",
                         style: TextStyle(
@@ -59,12 +59,22 @@ class PostTextBlockView extends StatelessWidget {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          Text(
-                            post!.tags.toString().replaceAll("[", "").replaceAll("]", ""),
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: appFontColorAlt(),
-                            ),
+                          SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.mapMarkerAlt,
+                                size: 10,
+                                color: appFontColorAlt(),
+                              ),
+                              Text(
+                                ' ${post!.city}, ${post!.province}',
+                                style: TextStyle(
+                                  color: appFontColorAlt(),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),

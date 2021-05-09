@@ -34,10 +34,45 @@ class PostView extends StatelessWidget {
                   size: 35,
                 ),
                 horizontalSpaceSmall,
-                Text(
-                  "@${model.author!.username}",
-                  style: TextStyle(color: appFontColor(), fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
+                model.post!.city == null
+                    ? Text(
+                        "@${model.author!.username}",
+                        style: TextStyle(
+                          color: appFontColor(),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "@${model.author!.username}",
+                            style: TextStyle(
+                              color: appFontColor(),
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 2),
+                          Row(
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.mapMarkerAlt,
+                                size: 10,
+                                color: appFontColorAlt(),
+                              ),
+                              Text(
+                                ' ${model.post!.city}, ${model.post!.province}',
+                                style: TextStyle(
+                                  color: appFontColorAlt(),
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
               ],
             ),
           ),

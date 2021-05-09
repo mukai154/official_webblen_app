@@ -10,6 +10,7 @@ import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_stream_chat_message.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
@@ -20,13 +21,14 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   AuthService? _authService = locator<AuthService>();
   DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
-  PlatformDataService? _platformDataService = locator<PlatformDataService>();
+  PlatformDataService _platformDataService = locator<PlatformDataService>();
   LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
   LiveStreamChatDataService? _liveStreamChatDataService = locator<LiveStreamChatDataService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
 
   ///USER DATA
   WebblenUser get user => _reactiveUserService.user;
@@ -37,16 +39,16 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   ///STREAM DATA
   WebblenLiveStream webblenLiveStream = WebblenLiveStream();
   bool liveStreamSetup = false;
-  String agoraAppID = '60693de17bbe4f2598f9f465d1695de1';
   String channelName = 'test';
-  String token = '00660693de17bbe4f2598f9f465d1695de1IAAujUlLurN1dcAHZ79o+d1b8s7NVYfnAdw0oDhv2qU2IQx+f9gAAAAAEAALtir+MDSYYAEAAQAwNJhg';
+  String token = '00660693de17bbe4f2598f9f465d1695de1IADOkSoahT6i8AU8CBDn+69xBCkzOK693n+yCNLKF29b+gx+f9gAAAAAEAALtir+EWWZYAEAAQARZZlg';
+  String watermarkAddress =
+      'https://firebasestorage.googleapis.com/v0/b/webblen-events.appspot.com/o/app_images%2FtinyLogo.png?alt=media&token=c8fdcce3-34a7-4455-b07f-8daf254a65be';
   late RtcEngine agoraRtcEngine;
   bool muted = false;
   bool isInAgoraChannel = true;
   bool isRecording = false;
   bool endingStream = false;
   List users = <int>[];
-  WatermarkOptions watermarkOptions = WatermarkOptions(Rectangle(0, 0, 100, 100), Rectangle(0, 0, 100, 100));
 
   ///CHAT
   int startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
@@ -57,8 +59,12 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
 
   initialize(String id) async {
     setBusy(true);
+    //get watermark
+    watermarkAddress = await _platformDataService.getPlatformLogoURL();
+    notifyListeners();
+
     //Set Device Orientation
-    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
     //get stream data
     if (id.isEmpty) {
@@ -86,18 +92,28 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     _liveStreamChatDataService!.joinChatStream(streamID: webblenLiveStream.id, uid: user.id, isHost: true, username: user.username);
   }
 
-  initializeAgoraRtc() async {
-    RtcEngineConfig config = RtcEngineConfig(agoraAppID);
+  Future<bool> initializeAgoraRtc() async {
+    bool initialized = true;
+    String? appID = await _platformDataService.getAgoraAppID();
+    if (appID == null) {
+      _customDialogService.showErrorDialog(description: "Unknown error starting stream.\nPleas try again");
+      initialized = false;
+      return initialized;
+    }
+    RtcEngineConfig config = RtcEngineConfig(appID);
 
     agoraRtcEngine = await RtcEngine.createWithConfig(config).catchError((e) {
       print(e);
     });
+
+    notifyListeners();
 
     setAgoraRtcEventHandlers();
 
     VideoEncoderConfiguration vidConfig = VideoEncoderConfiguration(
       dimensions: VideoDimensions(720, 1280),
       frameRate: VideoFrameRate.Fps30,
+      orientationMode: VideoOutputOrientationMode.FixedLandscape,
       bitrate: 1130,
     );
 
@@ -105,9 +121,6 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     await agoraRtcEngine.enableVideo();
     await agoraRtcEngine.enableLocalAudio(true);
 
-    await agoraRtcEngine.addVideoWatermark("/assets/images/webblen_coin.png", watermarkOptions).catchError((e) {
-      print(e);
-    });
     await agoraRtcEngine.startPreview();
     await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
@@ -115,6 +128,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     agoraRtcEngine.joinChannel(token, channelName, null, user.id.hashCode);
 
     notifyListeners();
+    return initialized;
   }
 
   setAgoraRtcEventHandlers() {
@@ -124,12 +138,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       //enable wakelock
       print('joinChannelSuccess $channel $uid $elapsed');
       print('publishing...');
-      agoraRtcEngine.addPublishStreamUrl("rtmp://x.rtmp.youtube.com/live2/trcb-ckkm-au16-705r-377v", false).catchError((e) {
-        print(e);
-      });
-      agoraRtcEngine.addPublishStreamUrl("rtmp://den.contribute.live-video.net/app/live_517771288_8d073WYJwkuC1gtXiWjTKW2FMvxBDz", false).catchError((e) {
-        print(e);
-      });
+      publishStreams(uid);
       await Wakelock.enable();
     }, leaveChannel: (stats) {
       //leave channel
@@ -148,6 +157,59 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       //video started
     }));
     return true;
+  }
+
+  publishStreams(int uid) async {
+    if (webblenLiveStream.twitchStreamURL != null &&
+        webblenLiveStream.twitchStreamURL!.isNotEmpty &&
+        webblenLiveStream.twitchStreamKey != null &&
+        webblenLiveStream.twitchStreamKey!.isNotEmpty) {
+      if (!webblenLiveStream.twitchStreamURL!.endsWith("/")) {
+        webblenLiveStream.twitchStreamURL = webblenLiveStream.twitchStreamURL! + "/";
+      }
+      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.twitchStreamURL! + webblenLiveStream.twitchStreamKey!, false).catchError((e) {
+        print(e);
+      });
+    }
+    if (webblenLiveStream.fbStreamURL != null &&
+        webblenLiveStream.fbStreamURL!.isNotEmpty &&
+        webblenLiveStream.fbStreamKey != null &&
+        webblenLiveStream.fbStreamKey!.isNotEmpty) {
+      if (!webblenLiveStream.fbStreamURL!.endsWith("/")) {
+        webblenLiveStream.fbStreamURL = webblenLiveStream.fbStreamURL! + "/";
+      }
+      print('attempt facebook publish...');
+      TranscodingUser transcodingUser = TranscodingUser(uid, 0, 0, width: 1280, height: 720, audioChannel: AudioChannel.Channel0, alpha: 1, zOrder: 0);
+      List<TranscodingUser> transcodingUsers = [transcodingUser];
+      LiveTranscoding transcoding = LiveTranscoding(transcodingUsers);
+      transcoding.audioBitrate = 128;
+      transcoding.videoBitrate = 1130;
+      transcoding.videoFramerate = VideoFrameRate.Fps30;
+      transcoding.width = 1280;
+      transcoding.height = 720;
+      transcoding.videoCodecProfile = VideoCodecProfileType.High;
+      transcoding.transcodingUsers = transcodingUsers;
+      transcoding.watermark = AgoraImage(watermarkAddress, 1220, 660, 50, 50);
+      //transcoding.backgroundImage = AgoraImage(watermarkAddress, 10, 10, 100, 100);
+      await agoraRtcEngine.setLiveTranscoding(transcoding).then((val) {
+        agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.fbStreamURL! + webblenLiveStream.fbStreamKey!, true).onError((error, stackTrace) {
+          print(error.toString());
+        }).catchError((e) {
+          print(e);
+        });
+      });
+    }
+    if (webblenLiveStream.youtubeStreamURL != null &&
+        webblenLiveStream.youtubeStreamURL!.isNotEmpty &&
+        webblenLiveStream.youtubeStreamKey != null &&
+        webblenLiveStream.youtubeStreamKey!.isNotEmpty) {
+      if (!webblenLiveStream.youtubeStreamURL!.endsWith("/")) {
+        webblenLiveStream.youtubeStreamURL = webblenLiveStream.youtubeStreamURL! + "/";
+      }
+      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.youtubeStreamURL! + webblenLiveStream.youtubeStreamKey!, false).catchError((e) {
+        print(e);
+      });
+    }
   }
 
   toggleMute() {
@@ -194,8 +256,10 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
 
   endStream() async {
     await Wakelock.disable();
-    agoraRtcEngine.leaveChannel();
-    agoraRtcEngine.destroy();
+    try {
+      agoraRtcEngine.leaveChannel();
+      agoraRtcEngine.destroy();
+    } catch (e) {}
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _navigationService!.back();
   }

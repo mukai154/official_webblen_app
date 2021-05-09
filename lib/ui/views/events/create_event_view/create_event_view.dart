@@ -116,9 +116,6 @@ class CreateEventView extends StatelessWidget {
                       Align(
                         alignment: Alignment.center,
                         child: Container(
-                          constraints: BoxConstraints(
-                            maxWidth: 500,
-                          ),
                           child: Column(
                             children: [
                               model.hasEarningsAccount != null && !model.hasEarningsAccount!

@@ -298,7 +298,8 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
   }
 
   scrollToChatMessage() async {
-    if (chatViewController.hasClients && chatViewController.position.pixels == chatViewController.position.maxScrollExtent) {
+    if (chatViewController.hasClients &&
+        (chatViewController.position.maxScrollExtent != null && chatViewController.position.pixels == chatViewController.position.maxScrollExtent)) {
       await Future.delayed(Duration(milliseconds: 500));
       if (chatViewController.hasClients) {
         chatViewController.jumpTo(chatViewController.position.maxScrollExtent);

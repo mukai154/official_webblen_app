@@ -1,10 +1,9 @@
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
@@ -19,7 +18,7 @@ import 'package:webblen/utils/url_handler.dart';
 class LiveStreamDetailsViewModel extends BaseViewModel {
   CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
-  BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
+  CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
   UserDataService? _userDataService = locator<UserDataService>();
   LiveStreamDataService? _streamDataService = locator<LiveStreamDataService>();
   TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
@@ -122,6 +121,20 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
     }
   }
 
+  openTwitch() {
+    if (stream.twitterUsername != null) {
+      String url = "https://twitch.tv/${stream.twitchUsername}";
+      UrlHandler().launchInWebViewOrVC(url);
+    }
+  }
+
+  openYoutube() {
+    if (stream.youtube != null) {
+      String url = stream.youtube!;
+      UrlHandler().launchInWebViewOrVC(url);
+    }
+  }
+
   openWebsite() {
     if (stream.website != null) {
       String url = stream.website!;
@@ -131,47 +144,9 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
 
   ///DIALOGS & BOTTOM SHEETS
   showContentOptions() async {
-    var sheetResponse = await _bottomSheetService!.showCustomSheet(
-      barrierDismissible: true,
-      variant: isHost ? BottomSheetType.contentAuthorOptions : BottomSheetType.contentOptions,
-    );
-    if (sheetResponse != null) {
-      String? res = sheetResponse.responseData;
-      if (res == "edit") {
-        //edit
-        // _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute, arguments: {
-        //   'id': stream.id,
-        // });
-      } else if (res == "share") {
-        //share
-        WebblenUser author = await _userDataService!.getWebblenUserByID(stream.hostID);
-        String url = await _dynamicLinkService!.createLiveStreamLink(authorUsername: author.username, stream: stream);
-        _shareService!.shareLink(url);
-      } else if (res == "report") {
-        //report
-        _streamDataService!.reportStream(streamID: stream.id, reporterID: user.id);
-      } else if (res == "delete") {
-        //delete
-        deleteContentConfirmation();
-      }
-    }
-  }
-
-  deleteContentConfirmation() async {
-    var sheetResponse = await _bottomSheetService!.showCustomSheet(
-      title: "Delete Stream",
-      description: "Are You Sure You Want to Delete this Stream?",
-      mainButtonTitle: "Delete Stream",
-      secondaryButtonTitle: "Cancel",
-      barrierDismissible: true,
-      variant: BottomSheetType.destructiveConfirmation,
-    );
-    if (sheetResponse != null) {
-      String? res = sheetResponse.responseData;
-      if (res == "confirmed") {
-        await _streamDataService!.deleteStream(stream: stream);
-        _customNavigationService.navigateBack();
-      }
+    String? res = await _customBottomSheetService.showContentOptions(content: stream);
+    if (res == "deleted content") {
+      _customNavigationService.navigateBack();
     }
   }
 

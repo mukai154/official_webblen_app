@@ -16,6 +16,7 @@ import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/permission_handler/permission_handler_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
@@ -25,16 +26,16 @@ class CreatePostViewModel extends ReactiveViewModel {
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   PlatformDataService? _platformDataService = locator<PlatformDataService>();
   UserDataService? _userDataService = locator<UserDataService>();
-  LocationService? _locationService = locator<LocationService>();
+  LocationService _locationService = locator<LocationService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
   PostDataService? _postDataService = locator<PostDataService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
+  PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
 
   ///HELPERS
   bool initializing = true;
-  TextEditingController postTextController = TextEditingController();
   TextEditingController tagTextController = TextEditingController();
   bool textFieldEnabled = true;
 
@@ -48,7 +49,7 @@ class CreatePostViewModel extends ReactiveViewModel {
   ///DATA
   String? id;
   bool isEditing = false;
-
+  bool loadedPreviousMessage = false;
   WebblenPost post = WebblenPost();
 
   ///WEBBLEN CURRENCY
@@ -71,7 +72,6 @@ class CreatePostViewModel extends ReactiveViewModel {
       WebblenPost existingPost = await _postDataService!.getPostToEditByID(id);
       if (existingPost.isValid()) {
         post = existingPost;
-        postTextController.text = post.body!;
         isEditing = true;
       }
     }
@@ -84,6 +84,19 @@ class CreatePostViewModel extends ReactiveViewModel {
     initializing = false;
     setBusy(false);
     notifyListeners();
+  }
+
+  String loadPreviousMessage() {
+    String val = "";
+    if (!loadedPreviousMessage) {
+      if (isEditing) {
+        val = post.body!;
+        loadedPreviousMessage = true;
+        notifyListeners();
+      }
+    }
+
+    return val;
   }
 
   ///POST TAGS
@@ -113,25 +126,21 @@ class CreatePostViewModel extends ReactiveViewModel {
   }
 
   ///POST MESSAGE
-  setPostMessage(String val) {
+  updatePostMessage(String val) {
     post.body = val.trim();
     notifyListeners();
   }
 
-  ///POST LOCATION
-  Future<bool> setPostLocation(Map<String, dynamic> details) async {
+  Future<bool> updateLocation(Map<String, dynamic> details) async {
     bool success = true;
-    setBusy(true);
 
     if (details.isEmpty) {
-      _customDialogService.showErrorDialog(description: "There was an issue setting the location. Please try again.");
       return false;
     }
 
     //set nearest zipcodes
-    post.nearbyZipcodes = await _locationService!.findNearestZipcodes(details['areaCode']);
+    post.nearbyZipcodes = await _locationService.findNearestZipcodes(details['areaCode']);
     if (post.nearbyZipcodes == null) {
-      _customDialogService.showErrorDialog(description: "There was an issue setting the location. Please try again.");
       return false;
     }
 
@@ -148,15 +157,13 @@ class CreatePostViewModel extends ReactiveViewModel {
     post.province = details['province'];
 
     notifyListeners();
-    setBusy(false);
 
     return success;
   }
 
   ///FORM VALIDATION
   bool postBodyIsValid() {
-    String message = postTextController.text;
-    return isValidString(message);
+    return isValidString(post.body);
   }
 
   bool postTagsAreValid() {
@@ -259,9 +266,32 @@ class CreatePostViewModel extends ReactiveViewModel {
     setBusy(false);
   }
 
-  ///BOTTOM SHEETS
+  ///IMAGE
   selectImage() async {
-    WebblenImagePicker().retrieveImageFromLibrary();
+    String? source = await _customBottomSheetService.showImageSelectorBottomSheet();
+    if (source != null) {
+      //disable text fields while fetching image
+      textFieldEnabled = false;
+      notifyListeners();
+
+      //get image from camera or gallery
+      if (source == "camera") {
+        bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
+        if (hasCameraPermission) {
+          contentImageFile = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        }
+      } else if (source == "gallery") {
+        bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
+        if (hasPhotosPermission) {
+          contentImageFile = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        }
+      }
+
+      //wait a bit to re-enable text fields
+      await Future.delayed(Duration(milliseconds: 500));
+      textFieldEnabled = true;
+      notifyListeners();
+    }
   }
 
   showNewContentConfirmationBottomSheet({BuildContext? context}) async {

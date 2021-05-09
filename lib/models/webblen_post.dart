@@ -120,6 +120,7 @@ class WebblenPost {
       clickedBy: [],
       clicks: 0,
       participantIDs: [],
+      nearbyZipcodes: [],
       suggestedUIDs: suggestedUIDs,
       followers: suggestedUIDs,
       commentCount: 0,

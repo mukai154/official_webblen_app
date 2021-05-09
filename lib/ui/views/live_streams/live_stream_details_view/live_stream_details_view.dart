@@ -162,31 +162,6 @@ class LiveStreamDetailsView extends StatelessWidget {
     );
   }
 
-  // Widget streamLocation(LiveStreamDetailsViewModel model) {
-  //   return Container(
-  //     padding: EdgeInsets.symmetric(horizontal: 16),
-  //     child: Column(
-  //       crossAxisAlignment: CrossAxisAlignment.start,
-  //       children: [
-  //         CustomText(
-  //           text: model.event.streetAddress,
-  //           fontSize: 16,
-  //           fontWeight: FontWeight.w500,
-  //           color: appFontColor(),
-  //         ),
-  //         verticalSpaceTiny,
-  //         CustomTextButton(
-  //           onTap: () => model.openMaps(),
-  //           text: "View in Maps",
-  //           fontSize: 14,
-  //           fontWeight: FontWeight.bold,
-  //           color: appTextButtonColor(),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
-
   Widget streamSocialAccounts(LiveStreamDetailsViewModel model) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -235,6 +210,32 @@ class LiveStreamDetailsView extends StatelessWidget {
                         ),
                       ),
                     ),
+              model.stream.twitchUsername == null || model.stream.twitchUsername!.isEmpty
+                  ? Container()
+                  : Container(
+                margin: EdgeInsets.only(right: 16),
+                child: GestureDetector(
+                  onTap: () => model.openTwitch(),
+                  child: Icon(
+                    FontAwesomeIcons.twitch,
+                    size: 30,
+                    color: appIconColor(),
+                  ),
+                ),
+              ),
+              model.stream.youtube == null || model.stream.youtube!.isEmpty
+                  ? Container()
+                  : Container(
+                margin: EdgeInsets.only(right: 16),
+                child: GestureDetector(
+                  onTap: () => model.openYoutube(),
+                  child: Icon(
+                    FontAwesomeIcons.youtube,
+                    size: 30,
+                    color: appIconColor(),
+                  ),
+                ),
+              ),
               model.stream.website == null || model.stream.website!.isEmpty
                   ? Container()
                   : Container(

@@ -7,6 +7,7 @@ class IconTextField extends StatelessWidget {
   final String hintText;
   final Function(String) onChanged;
   final TextInputType? keyboardType;
+  final bool? hidden;
 
   IconTextField({
     required this.iconData,
@@ -14,6 +15,7 @@ class IconTextField extends StatelessWidget {
     required this.hintText,
     required this.onChanged,
     this.keyboardType,
+    this.hidden,
   });
 
   @override
@@ -52,6 +54,7 @@ class IconTextField extends StatelessWidget {
                     textInputAction: TextInputAction.search,
                     onChanged: onChanged == null ? null : (val) => onChanged(val),
                     keyboardType: keyboardType == null ? TextInputType.text : keyboardType,
+                    obscureText: hidden != null ? hidden! : false,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.only(bottom: 14),
                       hintText: hintText,
