@@ -67,6 +67,8 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
 
   initialize(String id) async {
     setBusy(true);
+    //Set Device Orientation
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
 
     //get stream data
     if (id.isEmpty) {
@@ -198,6 +200,7 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     await Wakelock.disable();
     agoraRtcEngine.leaveChannel();
     agoraRtcEngine.destroy();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _navigationService!.back();
   }
 

@@ -8,4 +8,5 @@ class NotificationType {
   static const String webblenSent = 'webblenSent';
   static const String webblenReceived = 'webblenReceived';
   static const String importantInfo = 'importantInfo';
+  static const String tickets = 'tickets';
 }

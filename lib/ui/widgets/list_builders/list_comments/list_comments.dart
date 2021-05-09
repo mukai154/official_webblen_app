@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/comments/comment_block/comment_block_view.dart';
 
 class ListComments extends StatelessWidget {
@@ -27,7 +28,7 @@ class ListComments extends StatelessWidget {
   Widget listReplies(BuildContext context) {
     return Container(
         constraints: BoxConstraints(
-          maxWidth: 400,
+          maxWidth: screenWidth(context) - 80,
         ),
         child: Column(
           children: [

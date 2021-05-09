@@ -22,151 +22,154 @@ class SetupInstantDepositView extends StatelessWidget {
           title: "Set Up Instant Deposit",
           showBackButton: true,
         ),
-        body: Container(
-          height: screenHeight(context),
-          color: appBackgroundColor(),
-          child: ListView(
-            physics: AlwaysScrollableScrollPhysics(),
-            shrinkWrap: true,
-            children: [
-              Align(
-                alignment: Alignment.topCenter,
-                child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  constraints: BoxConstraints(
-                    maxWidth: 500,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(height: 16.0),
-                      CustomText(
-                        text: "Add your debit card details to receive instant deposits into your bank account.",
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: appFontColor(),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 8.0),
-                      CustomText(
-                        text:
-                            "To keep your earnings secure, payments from Webblen will be placed on hold for 24 hours. Once your bank account has been verified, any earnings from Webblen during this time will be paid out to your account on the following Monday. This is to ensure your earnings go to your bank account.",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        color: appFontColor(),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 32.0),
-                      CustomText(
-                        text: "Card Number",
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: appFontColor(),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 8.0),
-                      _CardNumField(),
-                      SizedBox(height: 16.0),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Container(
-                            width: 100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                CustomText(
-                                  text: "Exp Month",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: appFontColor(),
-                                  textAlign: TextAlign.left,
-                                ),
-                                SizedBox(height: 8.0),
-                                _ExpiryMonthField(),
-                              ],
+        body: GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: Container(
+            height: screenHeight(context),
+            color: appBackgroundColor(),
+            child: ListView(
+              physics: AlwaysScrollableScrollPhysics(),
+              shrinkWrap: true,
+              children: [
+                Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    constraints: BoxConstraints(
+                      maxWidth: 500,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: 16.0),
+                        CustomText(
+                          text: "Add your debit card details to receive instant deposits into your bank account.",
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: appFontColor(),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(height: 8.0),
+                        CustomText(
+                          text:
+                              "To keep your earnings secure, payments from Webblen will be placed on hold for 24 hours. Once your bank account has been verified, any earnings from Webblen during this time will be paid out to your account on the following Monday. This is to ensure your earnings go to your bank account.",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          color: appFontColor(),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(height: 32.0),
+                        CustomText(
+                          text: "Card Number",
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: appFontColor(),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(height: 8.0),
+                        _CardNumField(),
+                        SizedBox(height: 16.0),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            Container(
+                              width: 100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  CustomText(
+                                    text: "Exp Month",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: appFontColor(),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  _ExpiryMonthField(),
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                CustomText(
-                                  text: "Exp Year",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: appFontColor(),
-                                  textAlign: TextAlign.left,
-                                ),
-                                SizedBox(height: 8.0),
-                                _ExpiryYearField(),
-                              ],
+                            Container(
+                              width: 100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  CustomText(
+                                    text: "Exp Year",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: appFontColor(),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  _ExpiryYearField(),
+                                ],
+                              ),
                             ),
-                          ),
-                          Container(
-                            width: 100,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                CustomText(
-                                  text: "CVC",
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: appFontColor(),
-                                  textAlign: TextAlign.left,
-                                ),
-                                SizedBox(height: 8.0),
-                                _CVCField(),
-                              ],
+                            Container(
+                              width: 100,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  CustomText(
+                                    text: "CVC",
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: appFontColor(),
+                                    textAlign: TextAlign.left,
+                                  ),
+                                  SizedBox(height: 8.0),
+                                  _CVCField(),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 16.0),
-                      CustomText(
-                        text: "Card Holder Name",
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: appFontColor(),
-                        textAlign: TextAlign.left,
-                      ),
-                      SizedBox(height: 8.0),
-                      _CardHolderNameField(),
-                      SizedBox(height: 32.0),
-                      CustomText(
-                        text: "Please confirm your card details before submission. \n Incorrect details may lead to delayed payments.",
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: appFontColor(),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 16.0),
-                      CustomButton(
-                        text: "Submit",
-                        textSize: 16,
-                        textColor: appFontColor(),
-                        backgroundColor: appButtonColor(),
-                        height: 45.0,
-                        width: screenWidth(context),
-                        onPressed: () => model.submit(),
-                        elevation: 1,
-                        isBusy: model.isBusy,
-                      ),
-                      SizedBox(height: 16.0),
-                      CustomText(
-                        text: "All data is sent via 256-bit encrypted connection to keep your information secure.",
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: appFontColor(),
-                        textAlign: TextAlign.center,
-                      ),
-                      SizedBox(height: 32.0),
-                    ],
+                          ],
+                        ),
+                        SizedBox(height: 16.0),
+                        CustomText(
+                          text: "Card Holder Name",
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: appFontColor(),
+                          textAlign: TextAlign.left,
+                        ),
+                        SizedBox(height: 8.0),
+                        _CardHolderNameField(),
+                        SizedBox(height: 32.0),
+                        CustomText(
+                          text: "Please confirm your card details before submission. \n Incorrect details may lead to delayed payments.",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: appFontColor(),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 16.0),
+                        CustomButton(
+                          text: "Submit",
+                          textSize: 16,
+                          textColor: appFontColor(),
+                          backgroundColor: appButtonColorAlt(),
+                          height: 45.0,
+                          width: screenWidth(context),
+                          onPressed: () => model.submit(),
+                          elevation: 1,
+                          isBusy: model.isBusy,
+                        ),
+                        SizedBox(height: 16.0),
+                        CustomText(
+                          text: "All data is sent via 256-bit encrypted connection to keep your information secure.",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: appFontColor(),
+                          textAlign: TextAlign.center,
+                        ),
+                        SizedBox(height: 32.0),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -199,7 +202,7 @@ class _CardNumField extends HookViewModelWidget<SetupInstantDepositViewModel> {
           model.updateCardNumber(maskedText);
         },
         style: TextStyle(
-          color: Colors.black,
+          color: appFontColor(),
           fontSize: 18.0,
           fontWeight: FontWeight.w400,
         ),
@@ -240,7 +243,7 @@ class _ExpiryMonthField extends HookViewModelWidget<SetupInstantDepositViewModel
           model.updateExpiryMonth(maskedText);
         },
         style: TextStyle(
-          color: Colors.black,
+          color: appFontColor(),
           fontSize: 18.0,
           fontWeight: FontWeight.w400,
         ),
@@ -282,7 +285,7 @@ class _ExpiryYearField extends HookViewModelWidget<SetupInstantDepositViewModel>
           model.updateExpiryYear(maskedText);
         },
         style: TextStyle(
-          color: Colors.black,
+          color: appFontColor(),
           fontSize: 18.0,
           fontWeight: FontWeight.w400,
         ),
@@ -324,7 +327,7 @@ class _CVCField extends HookViewModelWidget<SetupInstantDepositViewModel> {
           model.updateCVC(maskedText);
         },
         style: TextStyle(
-          color: Colors.black,
+          color: appFontColor(),
           fontSize: 18.0,
           fontWeight: FontWeight.w400,
         ),
@@ -357,7 +360,7 @@ class _CardHolderNameField extends HookViewModelWidget<SetupInstantDepositViewMo
         ),
         onChanged: model.updateCardHolderName,
         style: TextStyle(
-          color: Colors.black,
+          color: appFontColor(),
           fontSize: 18.0,
           fontWeight: FontWeight.w400,
         ),

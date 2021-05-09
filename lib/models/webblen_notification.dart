@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:webblen/enums/notifcation_type.dart';
 
 class WebblenNotification {
@@ -61,7 +60,7 @@ class WebblenNotification {
       type: NotificationType.follower,
       header: 'You have a new follower',
       subHeader: '$followerUsername has started following you',
-      additionalData: null,
+      additionalData: {'id': senderUID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,

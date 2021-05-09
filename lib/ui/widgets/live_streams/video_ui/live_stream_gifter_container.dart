@@ -17,8 +17,8 @@ class LiveStreamGifterContainer extends StatelessWidget {
           CachedNetworkImage(
             imageUrl: imgURL!,
             imageBuilder: (context, imageProvider) => Container(
-              width: 32.0,
-              height: 32.0,
+              width: 40.0,
+              height: 40.0,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
@@ -29,7 +29,7 @@ class LiveStreamGifterContainer extends StatelessWidget {
           Text(
             '@$username',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 16,
               color: Colors.white,
               fontWeight: FontWeight.bold,
             ),

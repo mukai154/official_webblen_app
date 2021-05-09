@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
+import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/permission_handler/permission_handler_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
@@ -25,6 +26,8 @@ class EditProfileViewModel extends ReactiveViewModel {
   FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   UserDataService _userDataService = locator<UserDataService>();
+  PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
+  CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
 
   TextEditingController usernameTextController = TextEditingController();
   TextEditingController bioTextController = TextEditingController();
@@ -58,18 +61,23 @@ class EditProfileViewModel extends ReactiveViewModel {
   }
 
   selectImage() async {
-    var sheetResponse = await _bottomSheetService!.showCustomSheet(
-      barrierDismissible: true,
-      variant: BottomSheetType.imagePicker,
-    );
-    if (sheetResponse != null) {
-      String? res = sheetResponse.responseData;
-      if (res == "camera") {
-        updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
-      } else if (res == "gallery") {
-        updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+    String? source = await _customBottomSheetService.showImageSelectorBottomSheet();
+    if (source != null) {
+      //get image from camera or gallery
+      if (source == "camera") {
+        bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
+        if (hasCameraPermission) {
+          updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        }
+      } else if (source == "gallery") {
+        bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
+        if (hasPhotosPermission) {
+          updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        }
       }
+
       notifyListeners();
+
       if (updatedProfilePicFile != null) {
         String? imageURL =
             await _firestoreStorageService.uploadImage(img: updatedProfilePicFile!, storageBucket: "images", folderName: "users", fileName: user.id!);

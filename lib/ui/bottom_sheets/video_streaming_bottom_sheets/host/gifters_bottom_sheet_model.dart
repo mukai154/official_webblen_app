@@ -37,10 +37,9 @@ class GiftersBottomSheetModel extends StreamViewModel<WebblenContentGiftPool> {
             gifters.sort((a, b) => b['totalGiftAmount'].compareTo(a['totalGiftAmount']));
           }
         }
-        print(gifters.length);
         notifyListeners();
+        setBusy(false);
       }
-      setBusy(false);
     }
   }
 
@@ -50,7 +49,10 @@ class GiftersBottomSheetModel extends StreamViewModel<WebblenContentGiftPool> {
   Stream<WebblenContentGiftPool> streamGiftPool() async* {
     while (true) {
       await Future.delayed(Duration(seconds: 1));
-      WebblenContentGiftPool val = await _contentGiftPoolDataService!.getGiftPoolByID(giftPoolID);
+      if (giftPoolID == null) {
+        yield WebblenContentGiftPool();
+      }
+      WebblenContentGiftPool val = await _contentGiftPoolDataService.getGiftPoolByID(giftPoolID);
       yield val;
     }
   }

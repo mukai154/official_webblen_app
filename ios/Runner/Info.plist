@@ -42,25 +42,20 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>FacebookAdvertiserIDCollectionEnabled</key>
+	<false/>
 	<key>FacebookAppID</key>
 	<string>1366128250170949</string>
+	<key>FacebookAutoLogAppEventsEnabled</key>
+	<true/>
 	<key>FacebookDisplayName</key>
 	<string>Webblen</string>
-	<key>FacebookAutoLogAppEventsEnabled</key>
-    <true/>
-    <key>FacebookAdvertiserIDCollectionEnabled</key>
-    <false/>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>FirebaseDynamicLinksCustomDomains</key>
 	<array>
 		<string>https://app.webblen.io/shared_link</string>
 	</array>
-    <key>com.apple.developer.associated-domains</key>
-      <array>
-        <string>applinks:app.webblen.io/shared_link</string>
-        <string>applinks:app.webblen.io/shared_link?mode=developer</string>
-     </array>
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-2136415475966451~5144610810</string>
 	<key>LSApplicationQueriesSchemes</key>
@@ -87,7 +82,7 @@
 		<true/>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>Webblen Would Like Access to Your Media to Save and Access Audio/Video You&apos;ve Recorded</string>
+	<string>Webblen Would Like Access to Your Media to Save and Access Audio/Video You've Recorded</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Webblen Would Like Access to Your Calendar to Add Events</string>
 	<key>NSCameraUsageDescription</key>
@@ -105,7 +100,7 @@
 	<key>NSMotionUsageDescription</key>
 	<string>Webblen Would Like to Access Your Motion Activity to Let You Check Into Events</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Webblen Would Like Access to Your Media to Save and Access Images You&apos;ve Taken</string>
+	<string>Webblen Would Like Access to Your Media to Save and Access Images You've Taken</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>this will enable you to choose photos from your library and save videos recorded from streams.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
@@ -124,6 +119,8 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
@@ -134,6 +131,11 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:app.webblen.io/shared_link</string>
+		<string>applinks:app.webblen.io/shared_link?mode=developer</string>
+	</array>
 	<key>io.flutter.embedded_views_preview</key>
 	<true/>
 	<key>kTCCServiceMediaLibrary</key>

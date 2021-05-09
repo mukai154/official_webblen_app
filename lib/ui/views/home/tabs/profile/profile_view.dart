@@ -104,7 +104,7 @@ class _ProfileBody extends HookViewModelWidget<ProfileViewModel> {
                 floating: true,
                 snap: true,
                 forceElevated: innerBoxIsScrolled,
-                expandedHeight: ((user.bio?.isNotEmpty ?? true) || (user.website?.isNotEmpty ?? true)) ? 200 : 250,
+                expandedHeight: ((user.bio != null && user.bio!.isNotEmpty) || (user.website != null && user.website!.isNotEmpty)) ? 250 : 200,
                 backgroundColor: appBackgroundColor(),
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
@@ -228,7 +228,7 @@ class _UserDetails extends StatelessWidget {
                     ? GestureDetector(
                         onTap: viewWebsite,
                         child: Container(
-                          margin: EdgeInsets.only(top: 4),
+                          margin: EdgeInsets.only(top: 8),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,

@@ -7,12 +7,15 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 
+import 'notification_data_service.dart';
+
 class UserDataService {
   CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_users');
   CollectionReference postsRef = FirebaseFirestore.instance.collection('posts');
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
+  NotificationDataService _notificationDataService = locator<NotificationDataService>();
 
   Future<bool> checkIfCurrentUserIsAdmin(String id) async {
     bool isAdmin = false;
@@ -96,6 +99,20 @@ class UserDataService {
       user = WebblenUser.fromMap(docData);
     }
     return user;
+  }
+
+  Future<bool> updateUserDeviceToken({String? id, String? messageToken}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "messageToken": messageToken,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
   }
 
   Future<bool> updateWebblenUser(WebblenUser user) async {
@@ -191,24 +208,25 @@ class UserDataService {
   }
 
   Future<bool> followUser(String? currentUID, String? targetUserID) async {
+    bool didFollow = true;
     DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
     DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
     Map<String, dynamic> currentUserData = currentUserSnapshot.data()!;
     Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
-    List currentUserFollowing = currentUserData['following'];
-    List targetUserFollowers = targetUserData['followers'];
+    List currentUserFollowing = currentUserData['following'] == null ? [] : currentUserData['following'].toList(growable: true);
+    List targetUserFollowers = targetUserData['followers'] == null ? [] : targetUserData['followers'].toList(growable: true);
     if (!currentUserFollowing.contains(targetUserID)) {
       currentUserFollowing.add(targetUserID);
       await userRef.doc(currentUID).update({'following': currentUserFollowing}).catchError((e) {
         print(e);
-        return false;
+        didFollow = false;
       });
     }
     if (!targetUserFollowers.contains(currentUID)) {
       targetUserFollowers.add(currentUID);
       await userRef.doc(targetUserID).update({'followers': targetUserFollowers}).catchError((e) {
         print(e);
-        return false;
+        didFollow = false;
       });
     }
 
@@ -220,11 +238,11 @@ class UserDataService {
         followers.add(currentUID);
         postsRef.doc(doc.id).update({'followers': followers}).catchError((e) {
           print(e);
-          return false;
+          didFollow = false;
         });
       }
     });
-    return true;
+    return didFollow;
   }
 
   Future<bool> unFollowUser(String? currentUID, String? targetUserID) async {
@@ -232,8 +250,8 @@ class UserDataService {
     DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
     Map<String, dynamic> currentUserData = currentUserSnapshot.data()!;
     Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
-    List currentUserFollowing = currentUserData['following'].toList(growable: true);
-    List targetUserFollowers = targetUserData['followers'].toList(growable: true);
+    List currentUserFollowing = currentUserData['following'] == null ? [] : currentUserData['following'].toList(growable: true);
+    List targetUserFollowers = targetUserData['followers'] == null ? [] : targetUserData['followers'].toList(growable: true);
     if (currentUserFollowing.contains(targetUserID)) {
       currentUserFollowing.remove(targetUserID);
       await userRef.doc(currentUID).update({'following': currentUserFollowing}).catchError((e) {
@@ -262,6 +280,36 @@ class UserDataService {
       }
     });
     return true;
+  }
+
+  Future<bool> muteUser(String? currentUID, String? targetUserID) async {
+    bool didMute = true;
+    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
+    Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
+    List mutedByList = targetUserData['mutedBy'] == null ? [] : targetUserData['mutedBy'].toList(growable: true);
+    if (!mutedByList.contains(currentUID)) {
+      mutedByList.add(currentUID);
+      await userRef.doc(targetUserID).update({'mutedBy': mutedByList}).catchError((e) {
+        print(e);
+        didMute = false;
+      });
+    }
+    return didMute;
+  }
+
+  Future<bool> unMuteUser(String? currentUID, String? targetUserID) async {
+    bool didUnMute = true;
+    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
+    Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
+    List mutedByList = targetUserData['mutedBy'] == null ? [] : targetUserData['mutedBy'].toList(growable: true);
+    if (mutedByList.contains(currentUID)) {
+      mutedByList.remove(currentUID);
+      await userRef.doc(targetUserID).update({'mutedBy': mutedByList}).catchError((e) {
+        print(e);
+        didUnMute = false;
+      });
+    }
+    return didUnMute;
   }
 
   Future<bool> depositWebblen({String? uid, required double amount}) async {

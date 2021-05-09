@@ -5,6 +5,7 @@ import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/users/profile/user_profile_view_model.dart';
+import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_linear_progress_indicator.dart';
@@ -79,6 +80,52 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
           model.isFollowingUser == null
               ? Container()
               : FollowUnfollowButton(isFollowing: model.isFollowingUser, followUnfollowAction: () => model.followUnfollowUser()),
+
+          ///BIO & WEBSITE
+          Container(
+            margin: EdgeInsets.only(top: 12, bottom: 12),
+            child: Column(
+              children: [
+                model.user!.bio != null && model.user!.bio!.isNotEmpty
+                    ? Container(
+                        margin: EdgeInsets.only(top: 4),
+                        child: CustomText(
+                          text: model.user!.bio!,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: appFontColor(),
+                        ),
+                      )
+                    : Container(),
+                model.user!.website != null && model.user!.website!.isNotEmpty
+                    ? GestureDetector(
+                        onTap: () => model.viewWebsite(),
+                        child: Container(
+                          margin: EdgeInsets.only(top: 8),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                FontAwesomeIcons.link,
+                                size: 12,
+                                color: appFontColor(),
+                              ),
+                              horizontalSpaceTiny,
+                              CustomText(
+                                text: model.user!.website,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                color: appFontColor(),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                    : Container(),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -179,7 +226,10 @@ class _UserProfileViewState extends State<UserProfileView> with SingleTickerProv
                                 floating: true,
                                 snap: true,
                                 forceElevated: innerBoxIsScrolled,
-                                expandedHeight: 200,
+                                expandedHeight: ((model.user!.bio != null && model.user!.bio!.isNotEmpty) ||
+                                        (model.user!.website != null && model.user!.website!.isNotEmpty))
+                                    ? 250
+                                    : 200,
                                 leading: Container(),
                                 backgroundColor: appBackgroundColor(),
                                 flexibleSpace: FlexibleSpaceBar(

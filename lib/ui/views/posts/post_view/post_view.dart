@@ -41,14 +41,6 @@ class PostView extends StatelessWidget {
               ],
             ),
           ),
-          IconButton(
-            onPressed: () => model.customBottomSheetService.showContentOptions(content: model.post),
-            icon: Icon(
-              FontAwesomeIcons.ellipsisH,
-              size: 16,
-              color: appIconColor(),
-            ),
-          ),
         ],
       ),
     );
@@ -174,7 +166,7 @@ class PostView extends StatelessWidget {
   postComments(BuildContext context, PostViewModel model) {
     return Container(
       constraints: BoxConstraints(
-        maxWidth: 500,
+        maxWidth: screenWidth(context),
       ),
       child: ListComments(
         refreshData: () async {},
@@ -230,7 +222,7 @@ class PostView extends StatelessWidget {
                                   alignment: Alignment.center,
                                   child: Container(
                                     constraints: BoxConstraints(
-                                      maxWidth: 500,
+                                      maxWidth: screenWidth(context),
                                     ),
                                     child: Column(
                                       children: [

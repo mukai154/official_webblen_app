@@ -23,6 +23,7 @@ class CommentBlockView extends StatelessWidget {
       TextSpan(
         text: '${comment.username} ',
         style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.bold),
+        recognizer: TapGestureRecognizer()..onTap = () => model.customNavigationService.navigateToUserView(comment.senderUID!),
       ),
     ];
     words.forEach((word) {
@@ -82,7 +83,9 @@ class CommentBlockView extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          width: comment.isReply! ? MediaQuery.of(context).size.width - 120 : MediaQuery.of(context).size.width - 74,
+                          constraints: BoxConstraints(
+                            maxWidth: comment.isReply! ? screenWidth(context) - 110 : screenWidth(context) - 80,
+                          ),
                           child: RichText(
                             text: TextSpan(
                               style: TextStyle(fontSize: 14.0, color: appFontColor()),
@@ -99,7 +102,7 @@ class CommentBlockView extends StatelessWidget {
                               style: TextStyle(color: appFontColorAlt(), fontSize: 12.0, fontWeight: FontWeight.w500),
                             ),
                             SizedBox(width: 8.0),
-                            replyToComment == null
+                            comment.isReply!
                                 ? Container()
                                 : GestureDetector(
                                     onTap: () => replyToComment(comment), //replyAction,
@@ -151,7 +154,7 @@ class CommentBlockView extends StatelessWidget {
                                 pageStorageKey: null,
                                 scrollController: null,
                                 refreshingData: null,
-                                replyToComment: (comment) {},
+                                replyToComment: (WebblenPostComment) {},
                               )
                             : Container(),
                       ],

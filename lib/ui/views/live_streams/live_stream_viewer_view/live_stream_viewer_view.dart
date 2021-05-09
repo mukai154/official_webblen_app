@@ -336,9 +336,9 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                   controller: chatViewController,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
-                    if (snapshot.data!.docs.length > 3) {
+                    try {
                       scrollToChatMessage();
-                    }
+                    } catch (e) {}
                     String? uid = snapshot.data!.docs[index].data()['senderUID'];
                     String username = '@' + snapshot.data!.docs[index].data()['username'];
                     String? message = snapshot.data!.docs[index].data()['message'];

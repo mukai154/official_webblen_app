@@ -60,9 +60,8 @@ class CommentTextFieldView extends StatelessWidget {
     return Container(
       constraints: BoxConstraints(
         maxHeight: isReplying ? 120 : 80,
-        maxWidth: 500,
       ),
-      padding: EdgeInsets.only(left: 8, right: 8, bottom: 16),
+      padding: EdgeInsets.only(left: 16, right: 16, bottom: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.bottomCenter,
@@ -88,6 +87,9 @@ class CommentTextFieldView extends StatelessWidget {
                 size: 45,
                 isBusy: false,
               ),
+              SizedBox(
+                width: 8,
+              ),
               Expanded(
                 child: Container(
                   height: isReplying ? 100 : 50,
@@ -97,9 +99,8 @@ class CommentTextFieldView extends StatelessWidget {
                     children: [
                       isReplying ? replyContainer() : Container(),
                       Container(
-                        //height: 30,
-                        margin: EdgeInsets.only(left: 8),
-                        padding: EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0),
+                        height: 45,
+                        width: MediaQuery.of(context).size.width,
                         decoration: BoxDecoration(
                           color: isDarkMode() ? Colors.black87 : Colors.black54,
                           borderRadius: BorderRadius.all(Radius.circular(10.0)),
@@ -125,6 +126,7 @@ class CommentTextFieldView extends StatelessWidget {
                             maxLines: 5,
                             maxLengthEnforced: true,
                             enabled: true,
+                            autocorrect: true,
                             controller: commentTextController,
                             textCapitalization: TextCapitalization.sentences,
                             inputFormatters: [
@@ -136,6 +138,7 @@ class CommentTextFieldView extends StatelessWidget {
                               hintText: "Comment",
                               hintStyle: TextStyle(color: Colors.white54),
                               border: InputBorder.none,
+                              contentPadding: EdgeInsets.symmetric(horizontal: 8),
                             ),
                             autofocus: false,
                           ),

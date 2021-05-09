@@ -164,7 +164,7 @@ class CustomFlatButton extends StatelessWidget {
       child: Container(
         height: 48,
         width: screenWidth(context),
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: EdgeInsets.only(left: 16, right: 16, top: 14),
         decoration: BoxDecoration(
           color: Colors.transparent,
           border: Border(

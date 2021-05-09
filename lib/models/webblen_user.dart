@@ -11,6 +11,7 @@ class WebblenUser {
   String? emailAddress;
   int? eventsToLvlUp;
   String? fbAccessToken;
+  List? mutedBy;
   List? followers;
   List? following;
   String? googleAccessToken;
@@ -38,6 +39,7 @@ class WebblenUser {
     this.emailAddress,
     this.eventsToLvlUp,
     this.fbAccessToken,
+    this.mutedBy,
     this.followers,
     this.following,
     this.googleAccessToken,
@@ -66,6 +68,7 @@ class WebblenUser {
           emailAddress: data['emailAddress'],
           eventsToLvlUp: data['eventsToLvlUp'],
           fbAccessToken: data['fbAccessToken'],
+    mutedBy: data['mutedBy'],
           followers: data['followers'],
           following: data['following'],
           googleAccessToken: data['googleAccessToken'],
@@ -93,6 +96,7 @@ class WebblenUser {
         'emailAddress': this.emailAddress,
         'eventsToLvlUp': this.eventsToLvlUp,
         'fbAccessToken': this.fbAccessToken,
+    'mutedBy': mutedBy,
         'followers': this.followers,
         'following': this.following,
         'googleAccessToken': this.googleAccessToken,
@@ -124,6 +128,7 @@ class WebblenUser {
       emailAddress: null,
       eventsToLvlUp: 20,
       fbAccessToken: null,
+      mutedBy: [],
       followers: [],
       following: [],
       googleAccessToken: null,

@@ -1,5 +1,6 @@
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:wakelock/wakelock.dart';
@@ -38,13 +39,14 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   bool liveStreamSetup = false;
   String agoraAppID = '60693de17bbe4f2598f9f465d1695de1';
   String channelName = 'test';
-  String token = '00660693de17bbe4f2598f9f465d1695de1IADmbMGw/FwWZJQytuhMkL15RIaKYvu/atA5it7ux2ISlAx+f9gAAAAAEADYCUcog3taYAEAAQCDe1pg';
+  String token = '00660693de17bbe4f2598f9f465d1695de1IAAujUlLurN1dcAHZ79o+d1b8s7NVYfnAdw0oDhv2qU2IQx+f9gAAAAAEAALtir+MDSYYAEAAQAwNJhg';
   late RtcEngine agoraRtcEngine;
   bool muted = false;
   bool isInAgoraChannel = true;
   bool isRecording = false;
   bool endingStream = false;
   List users = <int>[];
+  WatermarkOptions watermarkOptions = WatermarkOptions(Rectangle(0, 0, 100, 100), Rectangle(0, 0, 100, 100));
 
   ///CHAT
   int startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
@@ -55,7 +57,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
 
   initialize(String id) async {
     setBusy(true);
-
+    //Set Device Orientation
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft]);
 
     //get stream data
     if (id.isEmpty) {
@@ -68,7 +71,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       return;
     } else {
       webblenLiveStream = await _liveStreamDataService.getStreamByID(id);
-      if (!webblenLiveStream.isValid()){
+      if (!webblenLiveStream.isValid()) {
         _snackbarService!.showSnackbar(
           title: 'Stream Error',
           message: "There was an unknown error starting your stream. Please try again later.",
@@ -97,15 +100,20 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       frameRate: VideoFrameRate.Fps30,
       bitrate: 1130,
     );
+
     await agoraRtcEngine.setVideoEncoderConfiguration(vidConfig);
     await agoraRtcEngine.enableVideo();
     await agoraRtcEngine.enableLocalAudio(true);
+
+    await agoraRtcEngine.addVideoWatermark("/assets/images/webblen_coin.png", watermarkOptions).catchError((e) {
+      print(e);
+    });
     await agoraRtcEngine.startPreview();
     await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
-
     //token = await _liveStreamDataService.generateStreamToken(streamID);
     agoraRtcEngine.joinChannel(token, channelName, null, user.id.hashCode);
+
     notifyListeners();
   }
 
@@ -115,6 +123,13 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     }, joinChannelSuccess: (channel, uid, elapsed) async {
       //enable wakelock
       print('joinChannelSuccess $channel $uid $elapsed');
+      print('publishing...');
+      agoraRtcEngine.addPublishStreamUrl("rtmp://x.rtmp.youtube.com/live2/trcb-ckkm-au16-705r-377v", false).catchError((e) {
+        print(e);
+      });
+      agoraRtcEngine.addPublishStreamUrl("rtmp://den.contribute.live-video.net/app/live_517771288_8d073WYJwkuC1gtXiWjTKW2FMvxBDz", false).catchError((e) {
+        print(e);
+      });
       await Wakelock.enable();
     }, leaveChannel: (stats) {
       //leave channel
@@ -181,6 +196,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     await Wakelock.disable();
     agoraRtcEngine.leaveChannel();
     agoraRtcEngine.destroy();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _navigationService!.back();
   }
 
@@ -226,5 +242,4 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       yield val;
     }
   }
-
 }

@@ -4,6 +4,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/bottom_sheets/user_options_bottom_sheets/user_options_bottom_sheet/user_options_bottom_sheet_model.dart';
+import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 class UserOptionsBottomSheet extends StatelessWidget {
@@ -41,7 +42,35 @@ class UserOptionsBottomSheet extends StatelessWidget {
               textColor: appFontColor(),
               centerContent: false,
             ),
-            // verticalSpaceSmall,
+            verticalSpaceSmall,
+            request!.customData['muted']
+                ? CustomIconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.bell,
+                      size: 16,
+                    ),
+                    height: 45,
+                    onPressed: () => completer!(SheetResponse(responseData: "unmute")),
+                    backgroundColor: appButtonColor(),
+                    elevation: 1,
+                    text: "Enable Notifications from Account",
+                    textColor: appFontColor(),
+                    centerContent: false,
+                  )
+                : CustomIconButton(
+                    icon: Icon(
+                      FontAwesomeIcons.bellSlash,
+                      size: 16,
+                    ),
+                    height: 45,
+                    onPressed: () => completer!(SheetResponse(responseData: "mute")),
+                    backgroundColor: appButtonColor(),
+                    elevation: 1,
+                    text: "Disable Notifications from Account",
+                    textColor: appFontColor(),
+                    centerContent: false,
+                  ),
+
             // CustomIconButton(
             //   icon: Icon(
             //     FontAwesomeIcons.paperPlane,

@@ -14,12 +14,9 @@ class PayoutMethodBlockView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(
-        maxWidth: 500,
-      ),
       margin: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: appBackgroundColor(),
         border: Border.all(color: Colors.black45, width: 0.3),
         borderRadius: BorderRadius.all(
           Radius.circular(16.0),

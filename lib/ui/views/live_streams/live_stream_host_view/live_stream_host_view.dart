@@ -82,19 +82,24 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                  width: MediaQuery.of(context).size.width * 0.85,
+                Expanded(
+                  flex: 9,
                   child: Text(
                     model.webblenLiveStream.title!,
                     style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-                GestureDetector(
-                  onTap: () => model.toggleEndingStream(),
-                  child: Icon(
-                    FontAwesomeIcons.times,
-                    color: Colors.white60,
-                    size: 24.0,
+                Expanded(
+                  flex: 1,
+                  child: GestureDetector(
+                    onTap: () => model.toggleEndingStream(),
+                    child: Container(
+                      child: Icon(
+                        FontAwesomeIcons.times,
+                        color: Colors.white60,
+                        size: 24.0,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -149,7 +154,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
         child: Padding(
           padding: const EdgeInsets.only(left: 8, top: 5, right: 8, bottom: 5),
           child: Row(mainAxisAlignment: MainAxisAlignment.end, children: <Widget>[
-            new Expanded(
+            Expanded(
               child: Container(
                 padding: EdgeInsets.only(left: 8.0, right: 8.0, top: 2.0),
                 decoration: BoxDecoration(
@@ -332,7 +337,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
         child: FractionallySizedBox(
           heightFactor: 0.3,
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
+            width: 400,
             child: StreamBuilder(
               stream: FirebaseFirestore.instance
                   .collection("webblen_live_stream_chats")
@@ -346,9 +351,9 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                   controller: chatViewController,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
-                    if (snapshot.data!.docs.length > 3) {
+                    try {
                       scrollToChatMessage();
-                    }
+                    } catch (e) {}
                     String? uid = snapshot.data!.docs[index].data()['senderUID'];
                     String username = '@' + snapshot.data!.docs[index].data()['username'];
                     String? message = snapshot.data!.docs[index].data()['message'];
@@ -409,7 +414,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                                         height: 4,
                                       ),
                                       Container(
-                                        width: MediaQuery.of(context).size.width * 0.6,
+                                        width: 330,
                                         padding: const EdgeInsets.symmetric(
                                           horizontal: 8,
                                         ),
@@ -507,6 +512,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
 
     return ViewModelBuilder<LiveStreamHostViewModel>.reactive(
       onModelReady: (model) => model.initialize(widget.id!),
+      onDispose: () => LiveStreamHostViewModel().endStream(),
       viewModelBuilder: () => LiveStreamHostViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(

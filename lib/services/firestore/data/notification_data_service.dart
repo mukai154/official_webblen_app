@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_notification.dart';
@@ -17,7 +16,7 @@ class NotificationDataService {
     return num;
   }
 
-  changeUnreadNotificationStatus(String? uid) async {
+  clearNotifications(String? uid) async {
     QuerySnapshot snapshot = await notifsRef.where('receiverUID', isEqualTo: uid).where('read', isEqualTo: false).get();
     if (snapshot.docs.isNotEmpty) {
       snapshot.docs.forEach((doc) async {
