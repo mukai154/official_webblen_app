@@ -1,6 +1,7 @@
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
+import 'package:webblen/services/agora/agora_live_stream_service.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
@@ -57,6 +58,9 @@ import 'package:webblen/ui/views/live_streams/live_stream_details_view/live_stre
 import 'package:webblen/ui/views/live_streams/live_stream_host_view/live_stream_host_view.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
 import 'package:webblen/ui/views/notifications/notifications_view.dart';
+import 'package:webblen/ui/views/onboarding/event_host_path/event_host_path_view.dart';
+import 'package:webblen/ui/views/onboarding/path_select/onboarding_path_select_view.dart';
+import 'package:webblen/ui/views/onboarding/suggest_accounts/suggest_accounts_view.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view.dart';
 import 'package:webblen/ui/views/posts/post_view/post_view.dart';
 import 'package:webblen/ui/views/root/root_view.dart';
@@ -86,7 +90,18 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
     ),
 
     //ONBOARDING
-    // MaterialRoute(page: OnboardingView, name: "OnboardingViewRoute"),
+    CustomRoute(
+      page: OnboardingPathSelectView,
+      name: "OnboardingPathSelectViewRoute",
+      path: "/onboarding/path_select",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: EventHostPathView,
+      name: "EventHostPathViewRoute",
+      path: "/onboarding/event_host",
+      durationInMilliseconds: 0,
+    ),
 
     //HOME
     CustomRoute(
@@ -201,6 +216,13 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
       page: UserFollowingView,
       name: "UserFollowingViewRoute",
       path: "/profile/following/:id",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: SuggestAccountsView,
+      name: "SuggestAccountsViewRoute",
+      path: "/suggest_accounts",
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
@@ -333,6 +355,7 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
     LazySingleton(classType: UserPreferenceDataService),
     LazySingleton(classType: PermissionHandlerService),
     LazySingleton(classType: GiftDonationDataService),
+    LazySingleton(classType: AgoraLiveStreamService),
 
     //REACTIVE LAZY SINGLETONS
     LazySingleton(classType: ReactiveUserService),

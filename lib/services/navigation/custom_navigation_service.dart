@@ -20,6 +20,11 @@ class CustomNavigationService {
     _navigationService.pushNamedAndRemoveUntil(Routes.AuthViewRoute);
   }
 
+  ///ONBOARDING
+  navigateToOnboardingView() {
+    _navigationService.pushNamedAndRemoveUntil(Routes.OnboardingPathSelectViewRoute);
+  }
+
   ///POSTS
   navigateToPostView(String id) {
     _navigationService.navigateTo(Routes.PostViewRoute(id: id));

@@ -28,7 +28,7 @@ class EventTicketBlock extends StatelessWidget {
       onTap: viewEventTickets,
       child: Container(
         margin: EdgeInsets.only(bottom: 16),
-        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
         decoration: BoxDecoration(
           color: appBackgroundColor(),
           boxShadow: [
@@ -50,11 +50,11 @@ class EventTicketBlock extends StatelessWidget {
             CustomText(
               text: eventTitle,
               textAlign: TextAlign.left,
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.bold,
               color: appFontColor(),
             ),
-            SizedBox(height: 12.0),
+            SizedBox(height: 8.0),
             CustomText(
               text: eventAddress,
               fontSize: 14,
@@ -84,7 +84,7 @@ class EventTicketBlock extends StatelessWidget {
                       Icon(
                         FontAwesomeIcons.ticketAlt,
                         size: 18.0,
-                        color: Colors.black45,
+                        color: appFontColorAlt(),
                       ),
                     ],
                   ),

@@ -85,42 +85,21 @@ class _TicketDetails extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           Container(
-            height: 220,
             margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
             child: QrImage(
               data: ticket.id!,
               version: QrVersions.auto,
+              backgroundColor: Colors.white,
               size: 200.0,
             ),
-            //              Column(
-            //                crossAxisAlignment: CrossAxisAlignment.stretch,
-            //                children: <Widget>[
-            //                  Row(
-            //                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //                    children: <Widget>[
-            //                      WebblenLogo(),
-            //                      TagContainer(tag: "Concert/Performance"),
-            //                    ],
-            //                  ),
-            //                  SizedBox(height: 10.0),
-            //                  Center(
-            //                    child: QrImage(
-            //                      data: "1234567890",
-            //                      version: QrVersions.auto,
-            //                      size: 150.0,
-            //                    ),
-            //                  ),
-            //                ],
-            //              ),
           ),
           Container(
-            height: 250,
             margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Container(
-                  padding: EdgeInsets.all(4.0),
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
                   margin: EdgeInsets.only(bottom: 8.0),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.all(
@@ -131,67 +110,68 @@ class _TicketDetails extends StatelessWidget {
                   child: CustomText(
                     text: ticket.eventTitle,
                     textAlign: TextAlign.center,
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: appFontColor(),
                   ),
                 ),
+                verticalSpaceSmall,
                 CustomText(
                   text: "Ticket Type:",
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: appFontColor(),
                 ),
                 CustomText(
                   text: ticket.name,
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: appFontColor(),
                 ),
-                SizedBox(height: 8.0),
+                SizedBox(height: 14.0),
                 CustomText(
                   text: "Address:",
                   textAlign: TextAlign.left,
-                  fontSize: 12,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: appFontColor(),
                 ),
                 CustomText(
                   text: ticket.address,
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: appFontColor(),
                 ),
-                SizedBox(height: 8.0),
+                SizedBox(height: 14.0),
                 CustomText(
                   text: "Start Date & Time:",
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: appFontColor(),
                 ),
                 CustomText(
-                  text: "${ticket.startDate} | ${ticket.startTime}",
+                  text: "${ticket.startDate} | ${ticket.startTime} ${ticket.timezone}",
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: appFontColor(),
                 ),
-                SizedBox(height: 8.0),
+                SizedBox(height: 14.0),
                 CustomText(
                   text: "End Date & Time:",
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: appFontColor(),
                 ),
                 CustomText(
-                  text: "${ticket.endDate} | ${ticket.endTime}",
+                  text: "${ticket.endDate} | ${ticket.endTime} ${ticket.timezone}",
                   textAlign: TextAlign.left,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: appFontColor(),
                 ),

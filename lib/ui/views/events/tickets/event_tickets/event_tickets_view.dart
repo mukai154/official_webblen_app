@@ -52,7 +52,7 @@ class EventTicketsView extends StatelessWidget {
                         alignment: Alignment.topCenter,
                         child: Column(
                           children: [
-                            SizedBox(height: 32.0),
+                            SizedBox(height: 24.0),
                             model.event.isValid()
                                 ? _EventTicketsHead()
                                 : Container(
@@ -83,83 +83,83 @@ class EventTicketsView extends StatelessWidget {
 class _EventTicketsHead extends HookViewModelWidget<EventTicketsViewModel> {
   @override
   Widget buildViewModelWidget(BuildContext context, EventTicketsViewModel model) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16),
-      constraints: BoxConstraints(
-        maxWidth: 500,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          SizedBox(
-            height: 16.0,
-          ),
-          GestureDetector(
-            onTap: () => model.customNavigationService.navigateToEventView(model.event.id!),
-            child: CustomText(
+    return GestureDetector(
+      onTap: () => model.customNavigationService.navigateToEventView(model.event.id!),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        constraints: BoxConstraints(
+          maxWidth: 500,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            SizedBox(
+              height: 16.0,
+            ),
+            CustomText(
               text: model.event.title,
               textAlign: TextAlign.center,
               fontSize: 30,
               fontWeight: FontWeight.bold,
               color: appFontColor(),
             ),
-          ),
-          SizedBox(
-            height: 4.0,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              CustomText(
-                text: "hosted by ",
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: appFontColor(),
-              ),
-              CustomTextButton(
-                onTap: () => model.customNavigationService.navigateToUserView(model.event.authorID!),
-                text: "@${model.host!.username}",
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: appActiveColor(),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 4.0,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(
-                FontAwesomeIcons.mapMarkerAlt,
-                size: 14.0,
-                color: Colors.black38,
-              ),
-              SizedBox(width: 4.0),
-              CustomText(
-                text: "${model.event.city}, ${model.event.province}",
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                textAlign: TextAlign.left,
-                color: appFontColorAlt(),
-              ),
-            ],
-          ),
-          SizedBox(
-            height: 4.0,
-          ),
-          CustomText(
-            text: "${model.event.startDate} | ${model.event.startTime}",
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            textAlign: TextAlign.center,
-            color: appFontColorAlt(),
-          ),
-          SizedBox(
-            height: 16.0,
-          ),
-        ],
+            SizedBox(
+              height: 4.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                CustomText(
+                  text: "hosted by ",
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: appFontColor(),
+                ),
+                CustomTextButton(
+                  onTap: () => model.customNavigationService.navigateToUserView(model.event.authorID!),
+                  text: "@${model.host!.username}",
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: appActiveColor(),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 8.0,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(
+                  FontAwesomeIcons.mapMarkerAlt,
+                  size: 14.0,
+                  color: appFontColorAlt(),
+                ),
+                SizedBox(width: 4.0),
+                CustomText(
+                  text: "${model.event.city}, ${model.event.province}",
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  textAlign: TextAlign.left,
+                  color: appFontColorAlt(),
+                ),
+              ],
+            ),
+            SizedBox(
+              height: 4.0,
+            ),
+            CustomText(
+              text: "${model.event.startDate} | ${model.event.startTime}",
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              textAlign: TextAlign.center,
+              color: appFontColorAlt(),
+            ),
+            SizedBox(
+              height: 16.0,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -196,7 +196,7 @@ class _EventTicketsList extends HookViewModelWidget<EventTicketsViewModel> {
                               ? "${model.tickets[index].name}"
                               : "${model.tickets[index].name} (Used)",
                           fontSize: 16,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.bold,
                           color: model.ticketDistro!.validTicketIDs!.contains(model.tickets[index].id) ? Colors.blueAccent : appFontColorAlt(),
                         ),
                         CustomText(

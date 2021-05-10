@@ -32,6 +32,7 @@ class AuthViewModel extends BaseViewModel {
   bool signInViaPhone = true;
   String? phoneNo;
   String? phoneVerificationID;
+  int? forceResendToken;
 
   ///Sign Up Via Email
   Future signInWithEmail({required email, required password}) async {
@@ -49,7 +50,7 @@ class AuthViewModel extends BaseViewModel {
     }
   }
 
-  Future<bool> sendSMSCode({@required phoneNo}) async {
+  Future<bool> sendSMSCode({required String phoneNo}) async {
     //Phone Timeout & Verifcation
 
     final PhoneCodeAutoRetrievalTimeout autoRetrieve = (String verId) {
@@ -57,8 +58,9 @@ class AuthViewModel extends BaseViewModel {
       notifyListeners();
     };
 
-    final PhoneCodeSent smsCodeSent = (String verID, [int? forceCodeResend]) {
+    final PhoneCodeSent smsCodeSent = (String verID, [int? token]) {
       phoneVerificationID = verID;
+      forceResendToken = token;
       notifyListeners();
     };
 
@@ -83,6 +85,7 @@ class AuthViewModel extends BaseViewModel {
         smsCodeSent: smsCodeSent,
         verificationCompleted: verificationCompleted,
         verificationFailed: verificationFailed,
+        forceResendToken: forceResendToken ?? 0,
       );
 
       if (verifiedPhoneNumber) {

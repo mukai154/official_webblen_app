@@ -135,7 +135,7 @@ class AuthView extends StatelessWidget {
   }
 
   sendSMSCode(BuildContext context, AuthViewModel model) async {
-    bool receivedConfirmationResult = await model.sendSMSCode(phoneNo: model.phoneNo);
+    bool receivedConfirmationResult = await model.sendSMSCode(phoneNo: model.phoneNo!);
     if (receivedConfirmationResult) {
       displayBottomActionSheet(context, model);
     }

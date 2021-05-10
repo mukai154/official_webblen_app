@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_auth_oauth/firebase_auth_oauth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
@@ -55,6 +56,7 @@ class AuthService {
     required PhoneCodeSent smsCodeSent,
     required PhoneVerificationCompleted verificationCompleted,
     required PhoneVerificationFailed verificationFailed,
+    required int forceResendToken,
   }) async {
     bool verified = true;
     await FirebaseAuth.instance
@@ -65,6 +67,7 @@ class AuthService {
       timeout: const Duration(seconds: 5),
       verificationCompleted: verificationCompleted,
       verificationFailed: verificationFailed,
+      forceResendingToken: forceResendToken,
     )
         .catchError((e) {
       _customDialogService.showErrorDialog(description: e.message);
@@ -236,13 +239,16 @@ class AuthService {
   }
 
   Future<bool> completeUserSignIn() async {
+    ThemeService _themeService = locator<ThemeService>();
     bool completedSignIn = true;
-    String? uid = await getCurrentUserID();
+    String? uid = getCurrentUserID();
     print(uid);
     if (uid != null) {
       bool? userExists = await _userDataService.checkIfUserExists(uid);
       if (userExists == null) {
         _customDialogService.showErrorDialog(description: "Unknown error logging in. Please try again.");
+        _themeService.setThemeMode(ThemeManagerMode.light);
+        _customNavigationService.navigateToAuthView();
         return false;
       } else if (userExists) {
         WebblenUser user = await _userDataService.getWebblenUserByID(uid);
@@ -251,7 +257,7 @@ class AuthService {
 
         ///CHECK IF USER ONBOARDED
         if (user.onboarded == null || !user.onboarded!) {
-          print('onboard');
+          _customNavigationService.navigateToOnboardingView();
         } else {
           _customNavigationService.navigateToBase();
         }
@@ -262,9 +268,11 @@ class AuthService {
         if (createdUser) {
           _reactiveUserService.updateUser(user);
           _reactiveUserService.updateUserLoggedIn(true);
-          print('go onboard');
+          _customNavigationService.navigateToOnboardingView();
         } else {
           _customDialogService.showErrorDialog(description: "Unknown error logging in. Please try again.");
+          _themeService.setThemeMode(ThemeManagerMode.light);
+          _customNavigationService.navigateToAuthView();
           return false;
         }
       }

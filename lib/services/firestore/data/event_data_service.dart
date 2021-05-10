@@ -267,14 +267,14 @@ class EventDataService {
     if (areaCode.isEmpty) {
       query = eventsRef
           .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
-          .orderBy('startDateTimeInMilliseconds', descending: true)
+          .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
     } else {
       query = eventsRef
           .where('nearbyZipcodes', arrayContains: areaCode)
           .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
-          .orderBy('startDateTimeInMilliseconds', descending: true)
+          .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
     }
@@ -419,14 +419,14 @@ class EventDataService {
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
     }
-    // if (snapshot.docs.isNotEmpty) {
-    //   snapshot.docs.forEach((doc) {
-    //     double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
-    //     if (distanceFromPoint < 5.0) {
-    //       docs.add(doc);
-    //     }
-    //   });
-    // }
+    if (snapshot.docs.isNotEmpty) {
+      snapshot.docs.forEach((doc) {
+        double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+        if (distanceFromPoint < 5.0) {
+          docs.add(doc);
+        }
+      });
+    }
     return docs;
   }
 
@@ -462,14 +462,14 @@ class EventDataService {
       docs = snapshot.docs;
     }
 
-    // if (snapshot.docs.isNotEmpty) {
-    //   snapshot.docs.forEach((doc) {
-    //     double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
-    //     if (distanceFromPoint < 5.0) {
-    //       docs.add(doc);
-    //     }
-    //   });
-    // }
+    if (snapshot.docs.isNotEmpty) {
+      snapshot.docs.forEach((doc) {
+        double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+        if (distanceFromPoint < 5.0) {
+          docs.add(doc);
+        }
+      });
+    }
 
     return docs;
   }

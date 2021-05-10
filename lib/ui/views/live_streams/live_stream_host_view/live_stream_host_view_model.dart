@@ -9,6 +9,7 @@ import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_stream_chat_message.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/agora/agora_live_stream_service.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
@@ -29,6 +30,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
+  AgoraLiveStreamService _agoraLiveStreamService = locator<AgoraLiveStreamService>();
 
   ///USER DATA
   WebblenUser get user => _reactiveUserService.user;
@@ -39,16 +41,13 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   ///STREAM DATA
   WebblenLiveStream webblenLiveStream = WebblenLiveStream();
   bool liveStreamSetup = false;
-  String channelName = 'test';
-  String token = '00660693de17bbe4f2598f9f465d1695de1IADOkSoahT6i8AU8CBDn+69xBCkzOK693n+yCNLKF29b+gx+f9gAAAAAEAALtir+EWWZYAEAAQARZZlg';
-  String watermarkAddress =
-      'https://firebasestorage.googleapis.com/v0/b/webblen-events.appspot.com/o/app_images%2FtinyLogo.png?alt=media&token=c8fdcce3-34a7-4455-b07f-8daf254a65be';
+  bool generatedToken = false;
   late RtcEngine agoraRtcEngine;
   bool muted = false;
   bool isInAgoraChannel = true;
-  bool isRecording = false;
   bool endingStream = false;
   List users = <int>[];
+  String appID = '60693de17bbe4f2598f9f465d1695de1';
 
   ///CHAT
   int startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
@@ -59,9 +58,6 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
 
   initialize(String id) async {
     setBusy(true);
-    //get watermark
-    watermarkAddress = await _platformDataService.getPlatformLogoURL();
-    notifyListeners();
 
     //Set Device Orientation
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
@@ -94,12 +90,6 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
 
   Future<bool> initializeAgoraRtc() async {
     bool initialized = true;
-    String? appID = await _platformDataService.getAgoraAppID();
-    if (appID == null) {
-      _customDialogService.showErrorDialog(description: "Unknown error starting stream.\nPleas try again");
-      initialized = false;
-      return initialized;
-    }
     RtcEngineConfig config = RtcEngineConfig(appID);
 
     agoraRtcEngine = await RtcEngine.createWithConfig(config).catchError((e) {
@@ -108,14 +98,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
 
     notifyListeners();
 
-    setAgoraRtcEventHandlers();
-
-    VideoEncoderConfiguration vidConfig = VideoEncoderConfiguration(
-      dimensions: VideoDimensions(720, 1280),
-      frameRate: VideoFrameRate.Fps30,
-      orientationMode: VideoOutputOrientationMode.FixedLandscape,
-      bitrate: 1130,
-    );
+    await setAgoraRtcEventHandlers();
+    VideoEncoderConfiguration vidConfig = _agoraLiveStreamService.getVideoConfig();
 
     await agoraRtcEngine.setVideoEncoderConfiguration(vidConfig);
     await agoraRtcEngine.enableVideo();
@@ -124,14 +108,19 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     await agoraRtcEngine.startPreview();
     await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
-    //token = await _liveStreamDataService.generateStreamToken(streamID);
-    agoraRtcEngine.joinChannel(token, channelName, null, user.id.hashCode);
+
+    String? token = await _agoraLiveStreamService.generateStreamToken(channelName: webblenLiveStream.id!, uid: user.id!, role: "PUBLISHER");
+    if (token != null) {
+      await agoraRtcEngine.joinChannelWithUserAccount(token, webblenLiveStream.id!, user.id!);
+    } else {
+      initialized = false;
+    }
 
     notifyListeners();
     return initialized;
   }
 
-  setAgoraRtcEventHandlers() {
+  setAgoraRtcEventHandlers() async {
     agoraRtcEngine.setEventHandler(RtcEngineEventHandler(error: (code) {
       print(code);
     }, joinChannelSuccess: (channel, uid, elapsed) async {
@@ -160,6 +149,9 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   }
 
   publishStreams(int uid) async {
+    LiveTranscoding transcoding = _agoraLiveStreamService.configureTranscoding(uid);
+    await agoraRtcEngine.setLiveTranscoding(transcoding);
+
     if (webblenLiveStream.twitchStreamURL != null &&
         webblenLiveStream.twitchStreamURL!.isNotEmpty &&
         webblenLiveStream.twitchStreamKey != null &&
@@ -167,7 +159,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       if (!webblenLiveStream.twitchStreamURL!.endsWith("/")) {
         webblenLiveStream.twitchStreamURL = webblenLiveStream.twitchStreamURL! + "/";
       }
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.twitchStreamURL! + webblenLiveStream.twitchStreamKey!, false).catchError((e) {
+      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.twitchStreamURL! + webblenLiveStream.twitchStreamKey!, true).catchError((e) {
         print(e);
       });
     }
@@ -179,24 +171,10 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
         webblenLiveStream.fbStreamURL = webblenLiveStream.fbStreamURL! + "/";
       }
       print('attempt facebook publish...');
-      TranscodingUser transcodingUser = TranscodingUser(uid, 0, 0, width: 1280, height: 720, audioChannel: AudioChannel.Channel0, alpha: 1, zOrder: 0);
-      List<TranscodingUser> transcodingUsers = [transcodingUser];
-      LiveTranscoding transcoding = LiveTranscoding(transcodingUsers);
-      transcoding.audioBitrate = 128;
-      transcoding.videoBitrate = 1130;
-      transcoding.videoFramerate = VideoFrameRate.Fps30;
-      transcoding.width = 1280;
-      transcoding.height = 720;
-      transcoding.videoCodecProfile = VideoCodecProfileType.High;
-      transcoding.transcodingUsers = transcodingUsers;
-      transcoding.watermark = AgoraImage(watermarkAddress, 1220, 660, 50, 50);
-      //transcoding.backgroundImage = AgoraImage(watermarkAddress, 10, 10, 100, 100);
-      await agoraRtcEngine.setLiveTranscoding(transcoding).then((val) {
-        agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.fbStreamURL! + webblenLiveStream.fbStreamKey!, true).onError((error, stackTrace) {
-          print(error.toString());
-        }).catchError((e) {
-          print(e);
-        });
+      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.fbStreamURL! + webblenLiveStream.fbStreamKey!, true).onError((error, stackTrace) {
+        print(error.toString());
+      }).catchError((e) {
+        print(e);
       });
     }
     if (webblenLiveStream.youtubeStreamURL != null &&
@@ -206,7 +184,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       if (!webblenLiveStream.youtubeStreamURL!.endsWith("/")) {
         webblenLiveStream.youtubeStreamURL = webblenLiveStream.youtubeStreamURL! + "/";
       }
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.youtubeStreamURL! + webblenLiveStream.youtubeStreamKey!, false).catchError((e) {
+      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.youtubeStreamURL! + webblenLiveStream.youtubeStreamKey!, true).catchError((e) {
         print(e);
       });
     }
@@ -268,26 +246,35 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   @override
   void onData(WebblenLiveStream? data) async {
     if (data != null) {
-      if (webblenLiveStream != data) {
-        webblenLiveStream = data;
+      if (data.isValid()) {
+        if (webblenLiveStream != data) {
+          webblenLiveStream = data;
 
-        //setup stream
-        if (!liveStreamSetup) {
-          //channelName = webblenLiveStream.title;
-          await initializeAgoraRtc();
-          bool setEventHandlers = await setAgoraRtcEventHandlers();
-          if (!setEventHandlers) {
-            _snackbarService!.showSnackbar(
-              title: 'Stream Error',
-              message: "There was an unknown error starting your stream. Please try again later.",
-              duration: Duration(seconds: 5),
-            );
+          //setup stream
+          if (!liveStreamSetup) {
+            //channelName = webblenLiveStream.title;
+            bool initializedAgora = await initializeAgoraRtc();
+            if (initializedAgora) {
+              bool setEventHandlers = await setAgoraRtcEventHandlers();
+              if (!setEventHandlers) {
+                _snackbarService!.showSnackbar(
+                  title: 'Stream Error',
+                  message: "There was an unknown error starting your stream. Please try again later.",
+                  duration: Duration(seconds: 5),
+                );
+              }
+              liveStreamSetup = true;
+            } else {
+              _snackbarService!.showSnackbar(
+                title: 'Stream Error',
+                message: "There was an unknown error starting your stream. Please try again later.",
+                duration: Duration(seconds: 5),
+              );
+            }
           }
-          liveStreamSetup = true;
+          notifyListeners();
+          setBusy(false);
         }
-
-        notifyListeners();
-        setBusy(false);
       }
     }
   }
@@ -298,9 +285,6 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   Stream<WebblenLiveStream> streamLiveStreamDetails() async* {
     while (true) {
       WebblenLiveStream val = WebblenLiveStream();
-      if (!webblenLiveStream.isValid()) {
-        yield val;
-      }
       await Future.delayed(Duration(seconds: 1));
       val = await _liveStreamDataService.getStreamByID(webblenLiveStream.id);
       yield val;

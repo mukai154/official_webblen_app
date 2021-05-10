@@ -10,16 +10,10 @@ class RootViewModel extends BaseViewModel {
   ThemeService _themeService = locator<ThemeService>();
 
   ///CHECKS IF USER IS LOGGED IN
-  Future checkAuthState() async {
+  checkAuthState() async {
     bool isLoggedIn = await _authService.isLoggedIn();
-    print(isLoggedIn);
     if (isLoggedIn) {
-      bool completedSignIn = await _authService.completeUserSignIn();
-      if (!completedSignIn) {
-        navigateToSignIn();
-      } else {
-        _customNavigationService.navigateToBase();
-      }
+      await _authService.completeUserSignIn();
     } else {
       navigateToSignIn();
     }

@@ -335,7 +335,7 @@ class LiveStreamDataService {
 
   Future<List<DocumentSnapshot>> loadStreamsByUserID({required String? id, required int resultsLimit}) async {
     List<DocumentSnapshot> docs = [];
-    Query query = streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: false).limit(resultsLimit);
+    Query query = streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
         print(e.message);
@@ -359,7 +359,7 @@ class LiveStreamDataService {
   }) async {
     List<DocumentSnapshot> docs = [];
     Query query =
-        streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: false).startAfterDocument(lastDocSnap).limit(resultsLimit);
+        streamsRef.where('hostID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
         print(e.message);
@@ -378,7 +378,7 @@ class LiveStreamDataService {
 
   Future<List<DocumentSnapshot>> loadSavedStreams({required String? id, required int resultsLimit}) async {
     List<DocumentSnapshot> docs = [];
-    Query query = streamsRef.where('savedBy', arrayContains: id).orderBy('startDateTimeInMilliseconds', descending: false).limit(resultsLimit);
+    Query query = streamsRef.where('savedBy', arrayContains: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       if (!e.message.contains("insufficient permissions")) {
         print(e.message);
@@ -403,7 +403,7 @@ class LiveStreamDataService {
     List<DocumentSnapshot> docs = [];
     Query query = streamsRef
         .where('savedBy', arrayContains: id)
-        .orderBy('startDateTimeInMilliseconds', descending: false)
+        .orderBy('startDateTimeInMilliseconds', descending: true)
         .startAfterDocument(lastDocSnap)
         .limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {

@@ -10,6 +10,7 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 
+import '../services/agora/agora_live_stream_service.dart';
 import '../services/algolia/algolia_search_service.dart';
 import '../services/auth/auth_service.dart';
 import '../services/bottom_sheets/custom_bottom_sheets_service.dart';
@@ -83,6 +84,7 @@ void setupLocator() {
   locator.registerLazySingleton(() => UserPreferenceDataService());
   locator.registerLazySingleton(() => PermissionHandlerService());
   locator.registerLazySingleton(() => GiftDonationDataService());
+  locator.registerLazySingleton(() => AgoraLiveStreamService());
   locator.registerLazySingleton(() => ReactiveUserService());
   locator.registerLazySingleton(() => ReactiveContentFilterService());
   locator.registerLazySingleton(() => ReactiveFileUploaderService());

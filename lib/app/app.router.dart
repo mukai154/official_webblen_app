@@ -29,6 +29,9 @@ import '../ui/views/live_streams/live_stream_details_view/live_stream_details_vi
 import '../ui/views/live_streams/live_stream_host_view/live_stream_host_view.dart';
 import '../ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
 import '../ui/views/notifications/notifications_view.dart';
+import '../ui/views/onboarding/event_host_path/event_host_path_view.dart';
+import '../ui/views/onboarding/path_select/onboarding_path_select_view.dart';
+import '../ui/views/onboarding/suggest_accounts/suggest_accounts_view.dart';
 import '../ui/views/posts/create_post_view/create_post_view.dart';
 import '../ui/views/posts/post_view/post_view.dart';
 import '../ui/views/root/root_view.dart';
@@ -43,6 +46,8 @@ import '../ui/views/users/saved/saved_content_view.dart';
 class Routes {
   static const String RootViewRoute = '/';
   static const String AuthViewRoute = '/login';
+  static const String OnboardingPathSelectViewRoute = '/onboarding/path_select';
+  static const String EventHostPathViewRoute = '/onboarding/event_host';
   static const String AppBaseViewRoute = '/home';
   static const String _PostViewRoute = '/post/:id';
   static String PostViewRoute({@required dynamic id}) => '/post/$id';
@@ -82,6 +87,7 @@ class Routes {
   static const String _UserFollowingViewRoute = '/profile/following/:id';
   static String UserFollowingViewRoute({@required dynamic id}) =>
       '/profile/following/$id';
+  static const String SuggestAccountsViewRoute = '/suggest_accounts';
   static const String SettingsViewRoute = '/settings';
   static const String MyTicketsViewRoute = '/wallet/my_tickets';
   static const String _EventTicketsViewRoute = '/wallet/my_tickets/event/:id';
@@ -110,6 +116,8 @@ class Routes {
   static const all = <String>{
     RootViewRoute,
     AuthViewRoute,
+    OnboardingPathSelectViewRoute,
+    EventHostPathViewRoute,
     AppBaseViewRoute,
     _PostViewRoute,
     _CreatePostViewRoute,
@@ -126,6 +134,7 @@ class Routes {
     SavedContentViewRoute,
     _UserFollowersViewRoute,
     _UserFollowingViewRoute,
+    SuggestAccountsViewRoute,
     SettingsViewRoute,
     MyTicketsViewRoute,
     _EventTicketsViewRoute,
@@ -147,6 +156,9 @@ class StackedRouter extends RouterBase {
   final _routes = <RouteDef>[
     RouteDef(Routes.RootViewRoute, page: RootView),
     RouteDef(Routes.AuthViewRoute, page: AuthView),
+    RouteDef(Routes.OnboardingPathSelectViewRoute,
+        page: OnboardingPathSelectView),
+    RouteDef(Routes.EventHostPathViewRoute, page: EventHostPathView),
     RouteDef(Routes.AppBaseViewRoute, page: AppBaseView),
     RouteDef(Routes._PostViewRoute, page: PostView),
     RouteDef(Routes._CreatePostViewRoute, page: CreatePostView),
@@ -163,6 +175,7 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes.SavedContentViewRoute, page: SavedContentView),
     RouteDef(Routes._UserFollowersViewRoute, page: UserFollowersView),
     RouteDef(Routes._UserFollowingViewRoute, page: UserFollowingView),
+    RouteDef(Routes.SuggestAccountsViewRoute, page: SuggestAccountsView),
     RouteDef(Routes.SettingsViewRoute, page: SettingsView),
     RouteDef(Routes.MyTicketsViewRoute, page: MyTicketsView),
     RouteDef(Routes._EventTicketsViewRoute, page: EventTicketsView),
@@ -192,6 +205,22 @@ class StackedRouter extends RouterBase {
       return PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             const AuthView(),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    OnboardingPathSelectView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            OnboardingPathSelectView(),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    EventHostPathView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            EventHostPathView(),
         settings: data,
         transitionDuration: const Duration(milliseconds: 0),
       );
@@ -325,6 +354,14 @@ class StackedRouter extends RouterBase {
       return PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             UserFollowingView(),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    SuggestAccountsView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            SuggestAccountsView(),
         settings: data,
         transitionDuration: const Duration(milliseconds: 0),
       );

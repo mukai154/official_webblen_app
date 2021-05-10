@@ -101,6 +101,18 @@ class UserDataService {
     return user;
   }
 
+  Future<bool> updateAssociatedEmailAddress(String uid, String emailAddress) async {
+    bool updated = true;
+    String? error;
+    userRef.doc(uid).update({"emailAddress": emailAddress}).whenComplete(() {}).catchError((e) {
+          error = e.message;
+        });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
   Future<bool> updateUserDeviceToken({String? id, String? messageToken}) async {
     bool updated = true;
     String? error;
@@ -310,6 +322,43 @@ class UserDataService {
       });
     }
     return didUnMute;
+  }
+
+  Future<List<WebblenUser>> getFollowerSuggestions(String id, String zipcode) async {
+    List<WebblenUser> users = [];
+    QuerySnapshot snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("recommend", isEqualTo: true).get().catchError((e) {
+      //print(e);
+    });
+    snapshot.docs.forEach((doc) {
+      if (doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) {
+        WebblenUser user = WebblenUser.fromMap(doc.data());
+        if (user.id! != id) {
+          users.add(user);
+        }
+      }
+    });
+    if (users.length < 10) {
+      QuerySnapshot query = await userRef
+          // .where("appOpenInMilliseconds", isGreaterThanOrEqualTo: val)
+          .orderBy("appOpenInMilliseconds", descending: true)
+          .limit(50)
+          .get()
+          .catchError((e) {
+        //print(e);
+      });
+      query.docs.forEach((doc) {
+        if (doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) {
+          WebblenUser user = WebblenUser.fromMap(doc.data()['d']);
+          if (user.id != id) {
+            List existing = users.where((x) => x.id == doc.id).toList();
+            if (existing.isEmpty) {
+              users.add(user);
+            }
+          }
+        }
+      });
+    }
+    return users;
   }
 
   Future<bool> depositWebblen({String? uid, required double amount}) async {

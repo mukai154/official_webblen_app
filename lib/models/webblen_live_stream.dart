@@ -48,6 +48,7 @@ class WebblenLiveStream {
   String? twitchStreamKey;
   String? fbStreamURL;
   String? fbStreamKey;
+  String? agoraToken;
 
   WebblenLiveStream({
     this.id,
@@ -97,6 +98,7 @@ class WebblenLiveStream {
     this.twitchStreamKey,
     this.fbStreamURL,
     this.fbStreamKey,
+    this.agoraToken,
   });
 
   WebblenLiveStream.fromMap(Map<String, dynamic> data)
@@ -148,6 +150,7 @@ class WebblenLiveStream {
           twitchStreamKey: data['twitchStreamKey'],
           fbStreamURL: data['fbStreamURL'],
           fbStreamKey: data['fbStreamKey'],
+          agoraToken: data['agoraToken'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -198,6 +201,7 @@ class WebblenLiveStream {
         'twitchStreamKey': this.twitchStreamKey,
         'fbStreamURL': this.fbStreamURL,
         'fbStreamKey': this.fbStreamKey,
+        'agoraToken': this.agoraToken,
       };
 
   WebblenLiveStream generateNewWebblenLiveStream({required String hostID, required List suggestedUIDs}) {
