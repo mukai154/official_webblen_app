@@ -1,20 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:introduction_screen/introduction_screen.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/custom_colors.dart';
-import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 
-import 'event_host_path_view_model.dart';
+import 'explorer_path_view_model.dart';
 
-class EventHostPathView extends StatelessWidget {
+class ExplorerPathView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<EventHostPathViewModel>.reactive(
+    return ViewModelBuilder<ExplorerPathViewModel>.reactive(
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => EventHostPathViewModel(),
+      viewModelBuilder: () => ExplorerPathViewModel(),
       builder: (context, model, child) => Scaffold(
         body: IntroductionScreen(
           globalBackgroundColor: Colors.white,
@@ -53,10 +51,8 @@ class EventHostPathView extends StatelessWidget {
             ),
           ),
           pages: [
-            EventHostPathPages().initialPage(),
-            EventHostPathPages().monetizePage(model),
-            EventHostPathPages().createEarningsAccountPage(model),
-            EventHostPathPages().selectInterestsPage(model),
+            ExplorePathPages().initialPage(),
+            ExplorePathPages().selectInterestsPage(model),
           ],
         ),
       ),
@@ -85,7 +81,7 @@ class _OnboardingImage extends StatelessWidget {
   }
 }
 
-class EventHostPathPages {
+class ExplorePathPages {
   PageDecoration pageDecoration = PageDecoration(
     contentMargin: EdgeInsets.all(0),
     titleTextStyle: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w700),
@@ -99,133 +95,14 @@ class EventHostPathPages {
 
   PageViewModel initialPage() {
     return PageViewModel(
-      title: "Events Just Got A Lot More Fun",
-      body: "Webblen Offers the Best Tools, Network, Benefits, and Resources to Make Your Event a Success",
+      title: "Always Have Something to Do",
+      body: "Webblen Helps You Find Posts, Events, Streams, and People in Your Area that Share Your Interests",
       image: _OnboardingImage(assetName: 'party'),
       decoration: pageDecoration,
     );
   }
 
-  PageViewModel monetizePage(EventHostPathViewModel model) {
-    return PageViewModel(
-      title: "Will You Monetize Your Events?",
-      body: "Selling tickets and taking donations are two examples of how your event can earn you money.",
-      image: _OnboardingImage(assetName: 'online_payment'),
-      decoration: pageDecoration,
-      footer: Container(
-        child: Column(
-          children: [
-            CustomButton(
-              text: "Yes, Of Course",
-              textColor: Colors.black,
-              backgroundColor: Colors.white,
-              width: 300.0,
-              height: 45.0,
-              onPressed: () => model.navigateToNextPage(),
-              isBusy: false,
-            ),
-            SizedBox(height: 16),
-            CustomButton(
-              text: "No, All of My Events Are 100% Free",
-              textColor: Colors.black,
-              backgroundColor: Colors.white,
-              width: 300.0,
-              height: 45.0,
-              onPressed: () => model.skipToSelectInterest(),
-              isBusy: false,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  PageViewModel createEarningsAccountPage(EventHostPathViewModel model) {
-    return PageViewModel(
-      image: _OnboardingImage(assetName: 'wallet'),
-      decoration: pageDecoration,
-      titleWidget: Container(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              "Create a Webblen Earnings Account",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w700),
-            )
-          ],
-        ),
-      ),
-      bodyWidget: Text(
-        "• Sell Event Tickets for Free"
-        "\n• Sign In Event Attendees with Our In-App Ticket Scanner"
-        "\n• Access Funds From Ticket Sales with Same-Day Deposits"
-        "\n• Acquire Sponsors for Your Events",
-        textAlign: TextAlign.left,
-        style: TextStyle(fontSize: 14.0, height: 1.5),
-      ),
-      footer: Container(
-        child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection("stripe").doc(model.user.id).snapshots(),
-          builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (!snapshot.hasData || snapshot.data!.data() == null)
-              return Column(
-                children: [
-                  CustomButton(
-                    text: "Create Earnings Account",
-                    textColor: Colors.black,
-                    backgroundColor: Colors.white,
-                    width: 300.0,
-                    height: 45.0,
-                    onPressed: () => model.createStripeAccount(),
-                    isBusy: false,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(top: 24.0),
-                    child: GestureDetector(
-                      onTap: () => model.skipToSelectInterest(),
-                      child: Text(
-                        "I'll Do This Later",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.black87, fontSize: 16.0, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-                ],
-              );
-            return Column(
-              children: [
-                Text(
-                  snapshot.data!.data()!['verified'] == "pending" || snapshot.data!.data()!['verified'] == "unverified"
-                      ? "Your Earnings Account is Under Review"
-                      : "Your Earnings Account Has Been Approved!",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: snapshot.data!.data()!['verified'] == "pending" || snapshot.data!.data()!['verified'] == "unverified"
-                          ? Colors.black54
-                          : CustomColors.darkMountainGreen,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w700),
-                ),
-                SizedBox(height: 16.0),
-                CustomButton(
-                  text: "Continue",
-                  textColor: Colors.black,
-                  backgroundColor: Colors.white,
-                  width: 300.0,
-                  height: 45.0,
-                  onPressed: () => model.navigateToNextPage(),
-                  isBusy: false,
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  PageViewModel selectInterestsPage(EventHostPathViewModel model) {
+  PageViewModel selectInterestsPage(ExplorerPathViewModel model) {
     return PageViewModel(
       titleWidget: Container(
         child: Column(
@@ -308,7 +185,7 @@ class EventHostPathPages {
   }
 }
 
-// class _OnboardingImage extends HookViewModelWidget<EventHostPathViewModel> {
+// class _OnboardingImage extends HookViewModelWidget<ExplorerPathViewModel> {
 //   @override
 //   Widget buildViewModelWidget(BuildContext context, SetUpDirectDepositViewModel model) {
 //     var accountHolderName = useTextEditingController();

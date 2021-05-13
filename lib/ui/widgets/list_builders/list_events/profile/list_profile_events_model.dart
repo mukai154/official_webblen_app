@@ -86,6 +86,10 @@ class ListProfileEventsModel extends ReactiveViewModel {
       id: id,
       resultsLimit: resultsLimit,
     );
+
+    if (dataResults.length < resultsLimit) {
+      moreDataAvailable = false;
+    }
     notifyListeners();
 
     setBusy(false);

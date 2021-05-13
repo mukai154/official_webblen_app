@@ -127,10 +127,10 @@ class SearchView extends StatelessWidget {
 
   Widget listRecentResults(BuildContext context, SearchViewModel model) {
     return Material(
-      child: Container(
-        color: appBackgroundColor(),
-        child: Hero(
-          tag: 'recent-searches',
+      child: Hero(
+        tag: 'recent-searches',
+        child: Container(
+          color: appBackgroundColor(),
           child: ListRecentlySearchedTerms(),
         ),
       ),

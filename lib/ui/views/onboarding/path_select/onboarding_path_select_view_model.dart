@@ -28,7 +28,7 @@ class OnboardingPathSelectViewModel extends ReactiveViewModel {
   String emailAddress = "";
   bool isLoading = false;
 
-  ///PERMISSSIONS DATA
+  ///PERMISSIONS DATA
   bool notificationError = false;
   bool updatingLocation = false;
   bool locationError = false;
@@ -133,10 +133,10 @@ class OnboardingPathSelectViewModel extends ReactiveViewModel {
   }
 
   transitionToStreamerPath() {
-    //PageTransitionService(context: context).transitionToStreamerPath();
+    _navigationService.navigateTo(Routes.StreamerPathViewRoute);
   }
 
   transitionToExplorerPath() {
-    // PageTransitionService(context: context).transitionToAttendeeViewerPath();
+    _navigationService.navigateTo(Routes.ExplorerPathViewRoute);
   }
 }

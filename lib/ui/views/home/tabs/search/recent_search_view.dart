@@ -28,10 +28,10 @@ class RecentSearchView extends StatelessWidget {
               verticalSpaceSmall,
               Expanded(
                 child: Material(
-                  child: Container(
-                    color: appBackgroundColor(),
-                    child: Hero(
-                      tag: 'recent-searches',
+                  child: Hero(
+                    tag: 'recent-searches',
+                    child: Container(
+                      color: appBackgroundColor(),
                       child: ListRecentlySearchedTerms(),
                     ),
                   ),

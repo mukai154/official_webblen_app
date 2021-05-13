@@ -1,7 +1,6 @@
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/app/app.router.dart';
-import 'package:webblen/ui/views/base/app_base_view_model.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
 
 class CustomNavigationService {
@@ -12,7 +11,7 @@ class CustomNavigationService {
   }
 
   navigateToBase() {
-    _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute);
+    _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute(page: null));
   }
 
   ///AUTH
@@ -23,6 +22,10 @@ class CustomNavigationService {
   ///ONBOARDING
   navigateToOnboardingView() {
     _navigationService.pushNamedAndRemoveUntil(Routes.OnboardingPathSelectViewRoute);
+  }
+
+  navigateToCompleteOnboardingView() {
+    _navigationService.pushNamedAndRemoveUntil(Routes.OnboardingCompleteViewRoute);
   }
 
   ///POSTS
@@ -49,6 +52,14 @@ class CustomNavigationService {
 
   navigateToCreateEventViewWithPromo(String id, String promo) {
     _navigationService.navigateTo(Routes.CreateEventViewRoute(id: id, promo: promo));
+  }
+
+  navigateToCheckInEventAttendees(String id) {
+    _navigationService.navigateTo(Routes.CheckInAttendeesViewRoute(id: id));
+  }
+
+  navigateToTicketScanner(String id) {
+    _navigationService.navigateTo(Routes.ScanAttendeesViewRoute(id: id));
   }
 
   ///TICKETS
@@ -99,9 +110,7 @@ class CustomNavigationService {
 
   ///USERS
   navigateToCurrentUserView() {
-    AppBaseViewModel _appBaseViewModel = locator<AppBaseViewModel>();
-    _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute);
-    _appBaseViewModel.setNavBarIndex(3);
+    _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute(page: "4"));
   }
 
   navigateToUserView(String id) {
@@ -110,9 +119,7 @@ class CustomNavigationService {
 
   ///WALLET
   navigateToWalletView() {
-    AppBaseViewModel _appBaseViewModel = locator<AppBaseViewModel>();
-    _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute);
-    _appBaseViewModel.setNavBarIndex(2);
+    _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute(page: "3"));
   }
 
   ///EARNINGS
@@ -122,6 +129,10 @@ class CustomNavigationService {
 
   navigateToSetUpDirectDepositView() {
     _navigationService.navigateTo(Routes.SetUpDirectDepositViewRoute);
+  }
+
+  navigateToUSDBalanceHistoryView() {
+    _navigationService.navigateTo(Routes.USDBalanceHistoryViewRoute);
   }
 
   ///SEARCH

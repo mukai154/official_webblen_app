@@ -29,6 +29,20 @@ class ContentAuthorBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            request!.customData != null && request!.customData['checkInAttendees']
+                ? CustomButton(
+                    onPressed: () => completer!(SheetResponse(responseData: "check in")),
+                    text: "Check In Attendees",
+                    textSize: 16,
+                    textColor: appFontColor(),
+                    height: 45,
+                    width: screenWidth(context),
+                    backgroundColor: appBackgroundColor(),
+                    elevation: 1.0,
+                    isBusy: false,
+                  )
+                : Container(),
+            request!.customData != null && request!.customData['checkInAttendees'] ? verticalSpaceSmall : Container(),
             CustomButton(
               onPressed: () => completer!(SheetResponse(responseData: "edit")),
               text: "Edit",

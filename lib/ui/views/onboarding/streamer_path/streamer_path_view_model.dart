@@ -10,7 +10,7 @@ import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
 
-class EventHostPathViewModel extends BaseViewModel {
+class StreamerPathViewModel extends BaseViewModel {
   NavigationService _navigationService = locator<NavigationService>();
   AlgoliaSearchService _algoliaSearchService = locator<AlgoliaSearchService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
@@ -84,12 +84,12 @@ class EventHostPathViewModel extends BaseViewModel {
     introKey.currentState!.next();
   }
 
-  navigateToMonetizePage() {
-    introKey.currentState!.animateScroll(1);
-  }
-
   navigateToPreviousPage() {
     introKey.currentState!.animateScroll(pageNum - 1);
+  }
+
+  navigateToMonetizePage() {
+    introKey.currentState!.animateScroll(1);
   }
 
   skipToSelectInterest() {

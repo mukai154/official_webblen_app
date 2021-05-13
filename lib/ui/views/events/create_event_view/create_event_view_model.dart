@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
-import 'package:webblen/app/app.router.dart';
 import 'package:webblen/constants/time.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/extensions/custom_date_time_extensions.dart';
@@ -881,7 +880,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   displayUploadSuccessBottomSheet() async {
     //deposit and/or withdraw webblen & promo
     if (promo != null) {
-      _userDataService.depositWebblen(uid: user.id, amount: promo!);
+      _userDataService.depositWebblen(uid: user.id!, amount: promo!);
     }
     _userDataService.withdrawWebblen(uid: user.id, amount: newEventTaxRate!);
 
@@ -895,7 +894,7 @@ class CreateEventViewModel extends ReactiveViewModel {
 
     if (sheetResponse == null || sheetResponse.responseData == "done") {
       _reactiveFileUploaderService.clearUploaderData();
-      _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute);
+      _customNavigationService.navigateToBase();
     }
   }
 

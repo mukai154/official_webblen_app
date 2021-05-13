@@ -97,6 +97,7 @@ class CustomBottomSheetService {
     WebblenUser user = _reactiveUserService.user;
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       barrierDismissible: true,
+      customData: content is WebblenEvent && user.id == content.authorID && content.hasTickets! ? {'checkInAttendees': true} : {'checkInAttendees': false},
       variant: content is WebblenLiveStream
           ? user.id == content.hostID
               ? BottomSheetType.contentAuthorOptions
@@ -153,6 +154,9 @@ class CustomBottomSheetService {
           //report stream
           _liveStreamDataService.reportStream(streamID: content.id, reporterID: user.id);
         }
+      } else if (res == "check in") {
+        //scanner content
+        _navigationService.navigateTo(Routes.CheckInAttendeesViewRoute(id: content.id));
       } else if (res == "delete") {
         //delete content
         bool deletedContent = await deleteContentConfirmation(content: content);

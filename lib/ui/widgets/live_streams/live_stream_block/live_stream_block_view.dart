@@ -17,47 +17,13 @@ class LiveStreamBlockView extends StatelessWidget {
 
   LiveStreamBlockView({required this.stream, required this.showStreamOptions});
 
-  Widget streamStartDate(LiveStreamBlockViewModel model) {
-    return Container(
-      width: 50,
-      child: Column(
-        children: [
-          SizedBox(height: 16),
-          CustomText(
-            text: stream.startDate!.substring(4, stream.startDate!.length - 6),
-            color: appFontColor(),
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
-          CustomText(
-            text: stream.startDate!.substring(0, stream.startDate!.length - 9),
-            color: appFontColorAlt(),
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-          verticalSpaceTiny,
-          GestureDetector(
-            onTap: () => model.saveUnsaveStream(streamID: stream.id),
-            child: Icon(
-              model.savedStream ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-              size: 18,
-              color: model.savedStream ? appSavedContentColor() : appIconColorAlt(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget streamBody(BuildContext context, LiveStreamBlockViewModel model) {
     return Container(
-      width: screenWidth(context) - 84,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: 250,
-            width: screenWidth(context) - 84,
+            height: 275,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               image: DecorationImage(
@@ -113,9 +79,13 @@ class LiveStreamBlockView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.more_horiz, color: Colors.white),
-                                onPressed: () => showStreamOptions(stream),
-                              )
+                                icon: Icon(
+                                  FontAwesomeIcons.solidHeart,
+                                  size: 18,
+                                  color: model.savedStream ? appSavedContentColor() : Colors.white54,
+                                ),
+                                onPressed: () => model.saveUnsaveStream(streamID: stream.id),
+                              ),
                             ],
                           ),
                         ),
@@ -169,7 +139,7 @@ class LiveStreamBlockView extends StatelessWidget {
                                           width: 8,
                                         ),
                                         CustomText(
-                                          text: "${stream.startTime} - ${stream.endTime}",
+                                          text: "${stream.startDate!.substring(0, stream.startDate!.length - 6)} - ${stream.startTime} ${stream.timezone}",
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -230,8 +200,7 @@ class LiveStreamBlockView extends StatelessWidget {
       builder: (context, model, child) => model.isBusy
           ? Container()
           : Container(
-              height: 330,
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: GestureDetector(
                 onDoubleTap: () => model.saveUnsaveStream(streamID: stream.id),
                 onLongPress: () {
@@ -239,13 +208,7 @@ class LiveStreamBlockView extends StatelessWidget {
                   showStreamOptions(stream);
                 },
                 onTap: () => model.customNavigationService.navigateToLiveStreamView(stream.id!),
-                child: Row(
-                  children: [
-                    streamStartDate(model),
-                    horizontalSpaceSmall,
-                    streamBody(context, model),
-                  ],
-                ),
+                child: streamBody(context, model),
               ),
             ),
     );

@@ -18,68 +18,76 @@ class TicketsPurchaseSuccessView extends StatelessWidget {
       viewModelBuilder: () => TicketsPurchaseSuccessViewModel(),
       builder: (context, model, child) => Scaffold(
         appBar: CustomAppBar().basicAppBar(
-          title: "Tickets Purchased",
+          title: "",
           showBackButton: false,
         ),
         body: Container(
           height: screenHeight(context),
           color: appBackgroundColor(),
-          child: ListView(
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                color: appBackgroundColor(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    verticalSpaceLarge,
-                    CustomText(
-                      text: "Ticket Purchase Successful!",
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: appFontColor(),
-                      textAlign: TextAlign.center,
+          child: Align(
+            alignment: Alignment.center,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16),
+                    color: appBackgroundColor(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        CustomText(
+                          text: "Ticket Purchase Successful!",
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: appFontColor(),
+                          textAlign: TextAlign.center,
+                        ),
+                        verticalSpaceSmall,
+                        CustomText(
+                          text: "An email was sent to $email\n(Be sure to check your spam if you don't see it)",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: appFontColor(),
+                          textAlign: TextAlign.center,
+                        ),
+                        verticalSpaceMedium,
+                        CustomText(
+                          text: "Your tickets are located in your wallet.\nFeel free to screenshot and share them!",
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: appFontColor(),
+                          textAlign: TextAlign.center,
+                        ),
+                        verticalSpaceMedium,
+                        CustomButton(
+                          text: "View Wallet",
+                          textSize: 16,
+                          height: 40,
+                          width: 300,
+                          onPressed: () => model.customNavigationService.navigateToWalletView(),
+                          backgroundColor: appButtonColor(),
+                          textColor: appFontColor(),
+                          elevation: 1,
+                          isBusy: false,
+                        ),
+                        verticalSpaceLarge,
+                        CustomText(
+                          text: "If you have any issues with the event or tickets, please contact team@webblen.com for support.",
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: appFontColor(),
+                          textAlign: TextAlign.center,
+                        ),
+                        verticalSpaceLarge,
+                        verticalSpaceLarge,
+                      ],
                     ),
-                    verticalSpaceSmall,
-                    CustomText(
-                      text: "An email was sent to $email",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: appFontColor(),
-                      textAlign: TextAlign.center,
-                    ),
-                    verticalSpaceSmall,
-                    CustomText(
-                      text: "Your tickets are located in your wallet.\nFeel free to share and screenshot them!",
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: appFontColor(),
-                      textAlign: TextAlign.center,
-                    ),
-                    verticalSpaceMedium,
-                    CustomButton(
-                      text: "View Wallet",
-                      textSize: 16,
-                      height: 40,
-                      width: 300,
-                      onPressed: () => model.customNavigationService.navigateToWalletView(),
-                      backgroundColor: appButtonColor(),
-                      textColor: appFontColor(),
-                      elevation: 1,
-                      isBusy: false,
-                    ),
-                    verticalSpaceLarge,
-                    CustomText(
-                      text: "If you have any issues with the event are tickets, please contact team@webblen.com for support.",
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: appFontColor(),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

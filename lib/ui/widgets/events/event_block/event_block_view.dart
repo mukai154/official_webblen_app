@@ -18,47 +18,13 @@ class EventBlockView extends StatelessWidget {
 
   EventBlockView({required this.event, required this.showEventOptions});
 
-  Widget eventStartDate(EventBlockViewModel model) {
-    return Container(
-      width: 50,
-      child: Column(
-        children: [
-          SizedBox(height: 16),
-          CustomText(
-            text: event.startDate!.substring(4, event.startDate!.length - 6),
-            color: appFontColor(),
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-          ),
-          CustomText(
-            text: event.startDate!.substring(0, event.startDate!.length - 9),
-            color: appFontColorAlt(),
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
-          verticalSpaceTiny,
-          GestureDetector(
-            onTap: () => model.saveUnsaveEvent(eventID: event.id),
-            child: Icon(
-              model.savedEvent ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-              size: 18,
-              color: model.savedEvent ? appSavedContentColor() : appIconColorAlt(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget eventBody(BuildContext context, EventBlockViewModel model) {
     return Container(
-      width: screenWidth(context) - 84,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            height: 250,
-            width: screenWidth(context) - 84,
+            height: 275,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               image: DecorationImage(
@@ -73,9 +39,11 @@ class EventBlockView extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 gradient: LinearGradient(
+                  begin: Alignment.bottomLeft,
+                  end: Alignment.topRight,
                   colors: [
-                    Colors.black.withOpacity(.8),
-                    Colors.black.withOpacity(.4),
+                    Colors.black.withOpacity(.9),
+                    Colors.black.withOpacity(.5),
                   ],
                 ),
               ),
@@ -114,9 +82,13 @@ class EventBlockView extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.more_horiz, color: Colors.white),
-                                onPressed: () => showEventOptions(event),
-                              )
+                                icon: Icon(
+                                  FontAwesomeIcons.solidHeart,
+                                  size: 18,
+                                  color: model.savedEvent ? appSavedContentColor() : Colors.white54,
+                                ),
+                                onPressed: () => model.saveUnsaveEvent(eventID: event.id),
+                              ),
                             ],
                           ),
                         ),
@@ -170,7 +142,7 @@ class EventBlockView extends StatelessWidget {
                                           width: 8,
                                         ),
                                         CustomText(
-                                          text: "${event.startTime} - ${event.endTime}",
+                                          text: "${event.startDate!.substring(0, event.startDate!.length - 6)} - ${event.startTime} ${event.timezone}",
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -230,29 +202,16 @@ class EventBlockView extends StatelessWidget {
       viewModelBuilder: () => EventBlockViewModel(),
       builder: (context, model, child) => model.isBusy
           ? Container()
-          : Align(
-              alignment: Alignment.center,
-              child: Container(
-                height: 330,
-                constraints: BoxConstraints(
-                  maxWidth: 500,
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-                child: GestureDetector(
-                  onDoubleTap: () => model.saveUnsaveEvent(eventID: event.id),
-                  onLongPress: () {
-                    HapticFeedback.lightImpact();
-                    showEventOptions(event);
-                  },
-                  onTap: () => model.customNavigationService.navigateToEventView(event.id!),
-                  child: Row(
-                    children: [
-                      eventStartDate(model),
-                      horizontalSpaceSmall,
-                      eventBody(context, model),
-                    ],
-                  ),
-                ),
+          : Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: GestureDetector(
+                onDoubleTap: () => model.saveUnsaveEvent(eventID: event.id),
+                onLongPress: () {
+                  HapticFeedback.lightImpact();
+                  showEventOptions(event);
+                },
+                onTap: () => model.customNavigationService.navigateToEventView(event.id!),
+                child: eventBody(context, model),
               ),
             ),
     );

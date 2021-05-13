@@ -74,6 +74,21 @@ class PlatformDataService {
     return promo;
   }
 
+  Future<double> getNewAccountReward() async {
+    double val = 1.001;
+    DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    try {
+      val = snapshot.data()!['newAccountReward'].toDouble();
+    } catch (e) {
+      // _snackbarService.showSnackbar(
+      //   title: 'Promotion Error',
+      //   message: "There Was an Issue Getting Webblen Promotions",
+      //   duration: Duration(seconds: 5),
+      // );
+    }
+    return val;
+  }
+
   ///PROMOTIONS
   Future<double?> getPostPromo() async {
     double? promo;

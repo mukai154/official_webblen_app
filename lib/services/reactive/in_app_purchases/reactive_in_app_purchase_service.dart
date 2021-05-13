@@ -129,7 +129,7 @@ class ReactiveInAppPurchaseService with ReactiveServiceMixin {
     } else if (productID == 'webblen_100') {
       depositAmount = 100.00001;
     }
-    bool depositedWBLN = await _userDataService.depositWebblen(uid: uid, amount: depositAmount);
+    bool depositedWBLN = await _userDataService.depositWebblen(uid: uid!, amount: depositAmount);
 
     return depositedWBLN;
   }

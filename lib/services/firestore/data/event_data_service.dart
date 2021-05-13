@@ -1,19 +1,25 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/services.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_event_ticket.dart';
+import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class EventDataService {
   final CollectionReference eventsRef = FirebaseFirestore.instance.collection("webblen_events");
   PostDataService? _postDataService = locator<PostDataService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
+  TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
 
   int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
@@ -79,6 +85,47 @@ class EventDataService {
       await eventsRef.doc(eventID).update({'savedBy': savedBy});
     }
     return savedBy.contains(uid);
+  }
+
+  Future<bool> checkInScannedTicket({required String ticketID, required String eventID}) async {
+    bool checkedIn = true;
+    if (isValidTicket(ticketID)) {
+      WebblenEventTicket ticket = await _ticketDistroDataService.getTicketByID(ticketID);
+      WebblenTicketDistro ticketDistro = await _ticketDistroDataService.getTicketDistroByID(eventID);
+      if (ticketDistro.validTicketIDs!.contains(ticketID)) {
+        if (ticket.used == null || !ticket.used!) {
+          ticket.used = await _ticketDistroDataService.scanInTicket(ticket.id!);
+          if (ticket.used!) {
+            checkIntoEvent(uid: ticket.purchaserUID!, eventID: eventID);
+            HapticFeedback.lightImpact();
+          } else {
+            checkedIn = false;
+            HapticFeedback.heavyImpact();
+            await Future.delayed(Duration(milliseconds: 200));
+            HapticFeedback.heavyImpact();
+          }
+        } else {
+          _customDialogService.showErrorDialog(description: "This ticket has already been checked in");
+          checkedIn = false;
+          HapticFeedback.heavyImpact();
+          await Future.delayed(Duration(milliseconds: 200));
+          HapticFeedback.heavyImpact();
+        }
+      } else {
+        _customDialogService.showErrorDialog(description: "Invalid Ticket");
+        HapticFeedback.heavyImpact();
+        await Future.delayed(Duration(milliseconds: 200));
+        HapticFeedback.heavyImpact();
+        checkedIn = false;
+      }
+    } else {
+      _customDialogService.showErrorDialog(description: "This is not a Webblen Ticket");
+      HapticFeedback.heavyImpact();
+      await Future.delayed(Duration(milliseconds: 200));
+      HapticFeedback.heavyImpact();
+      checkedIn = false;
+    }
+    return checkedIn;
   }
 
   Future<bool> checkIntoEvent({required String uid, required String eventID}) async {
@@ -398,7 +445,6 @@ class EventDataService {
   Future<List<DocumentSnapshot>> loadNearbyEvents({required String areaCode, required double lat, required double lon, required int resultsLimit}) async {
     Geoflutterfire geoFlutterFire = Geoflutterfire();
     GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
-    int milli = DateTime.now().millisecondsSinceEpoch;
     List<DocumentSnapshot> docs = [];
     String? error;
     Query query = eventsRef
@@ -417,13 +463,25 @@ class EventDataService {
     }
 
     if (snapshot.docs.isNotEmpty) {
-      docs = snapshot.docs;
-    }
-    if (snapshot.docs.isNotEmpty) {
       snapshot.docs.forEach((doc) {
         double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
-        if (distanceFromPoint < 5.0) {
-          docs.add(doc);
+        String venueSize = doc.data()['venueSize'] ?? "small";
+        if (venueSize == "small") {
+          if (distanceFromPoint < 0.03) {
+            docs.add(doc);
+          }
+        } else if (venueSize == "medium") {
+          if (distanceFromPoint < 0.06) {
+            docs.add(doc);
+          }
+        } else if (venueSize == "large") {
+          if (distanceFromPoint < 0.1) {
+            docs.add(doc);
+          }
+        } else if (venueSize == "huge") {
+          if (distanceFromPoint < 0.5) {
+            docs.add(doc);
+          }
         }
       });
     }
@@ -439,7 +497,6 @@ class EventDataService {
   }) async {
     Geoflutterfire geoFlutterFire = Geoflutterfire();
     GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
-    int milli = DateTime.now().millisecondsSinceEpoch;
     List<DocumentSnapshot> docs = [];
     String? error;
     Query query = eventsRef
@@ -459,14 +516,25 @@ class EventDataService {
     }
 
     if (snapshot.docs.isNotEmpty) {
-      docs = snapshot.docs;
-    }
-
-    if (snapshot.docs.isNotEmpty) {
       snapshot.docs.forEach((doc) {
         double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
-        if (distanceFromPoint < 5.0) {
-          docs.add(doc);
+        String venueSize = doc.data()['venueSize'] ?? "small";
+        if (venueSize == "small") {
+          if (distanceFromPoint < 0.03) {
+            docs.add(doc);
+          }
+        } else if (venueSize == "medium") {
+          if (distanceFromPoint < 0.06) {
+            docs.add(doc);
+          }
+        } else if (venueSize == "large") {
+          if (distanceFromPoint < 0.1) {
+            docs.add(doc);
+          }
+        } else if (venueSize == "huge") {
+          if (distanceFromPoint < 0.5) {
+            docs.add(doc);
+          }
         }
       });
     }

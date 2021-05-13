@@ -1,8 +1,6 @@
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
@@ -10,9 +8,6 @@ import 'package:webblen/services/navigation/custom_navigation_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class SuggestAccountsViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
-  NavigationService? _navigationService = locator<NavigationService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
   UserDataService _userDataService = locator<UserDataService>();
@@ -26,11 +21,11 @@ class SuggestAccountsViewModel extends BaseViewModel {
   bool isLoading = true;
   bool hasLocation = false;
 
-  initialize() async {
+  Future<void> initialize() async {
     setBusy(true);
     String? zip = await _locationService.getCurrentZipcode();
     if (zip != null) {
-      suggestedUsers = await _userDataService.getFollowerSuggestions(user.id!, zip);
+      suggestedUsers = await _userDataService.getFollowerSuggestions(user.id!, zip, user.tags);
     } else {
       _customDialogService.showErrorDialog(description: "There was an issue loading suggested users");
     }
@@ -60,7 +55,9 @@ class SuggestAccountsViewModel extends BaseViewModel {
     }
   }
 
-  completeOnboarding() {}
+  completeOnboarding() {
+    customNavigationService.navigateToCompleteOnboardingView();
+  }
 
   ///NAVIGATION
 // replaceWithPage() {

@@ -106,7 +106,7 @@ class WebblenApp extends StatelessWidget {
         title: 'Webblen',
         theme: regularTheme,
         darkTheme: darkTheme,
-        themeMode: themeMode,
+        themeMode: themeMode == ThemeMode.system ? ThemeMode.light : themeMode,
         initialRoute: Routes.RootViewRoute,
         onGenerateRoute: StackedRouter().onGenerateRoute,
         navigatorKey: StackedService.navigatorKey,

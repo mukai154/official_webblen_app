@@ -64,7 +64,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
           getLocationDetails();
         }
         if (!configuredMessaging) {
-          //configure firebase messaging
+          //configure firebase messaging && app open
           FirebaseMessagingService().setDeviceMessagingToken(user.id);
           configuredMessaging = true;
         }
@@ -90,8 +90,15 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
   }
 
   ///INITIALIZE DATA
-  initialize() async {
+  initialize(String? page) async {
     setBusy(true);
+
+    if (page != null && page.isNotEmpty) {
+      try {
+        int pageNum = int.parse(page);
+        setNavBarIndex(pageNum);
+      } catch (e) {}
+    }
 
     //check network status
     bool connectedToNetwork = await isConnectedToNetwork();
@@ -179,7 +186,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
         String? areaCode = await _locationService!.getZipFromLatLon(location.latitude!, location.longitude!);
         if (areaCode != null) {
           _reactiveContentFilterService.updateAreaCode(areaCode);
-          _userDataService.updateLastSeenZipcode(id: user.id, zip: areaCode);
+          _userDataService.updateUserAppOpen(uid: user.id!, zipcode: areaCode);
         }
 
         hasLocation = true;

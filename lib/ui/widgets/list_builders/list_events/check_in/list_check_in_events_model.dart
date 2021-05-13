@@ -28,14 +28,7 @@ class ListCheckInEventsModel extends ReactiveViewModel {
   ///FILTER DATA
   double? lat;
   double? lon;
-  String listAreaCode = "";
-  String listTagFilter = "";
-  String listSortByFilter = "Latest";
-
-  String get cityName => _reactiveContentFilterService.cityName;
   String get areaCode => _reactiveContentFilterService.areaCode;
-  String get tagFilter => _reactiveContentFilterService.tagFilter;
-  String get sortByFilter => _reactiveContentFilterService.sortByFilter;
 
   ///DATA
   List<DocumentSnapshot> dataResults = [];
@@ -79,6 +72,10 @@ class ListCheckInEventsModel extends ReactiveViewModel {
 
         //load data with params
         dataResults = await _eventDataService.loadNearbyEvents(areaCode: areaCode, lat: lat!, lon: lon!, resultsLimit: resultsLimit);
+
+        if (dataResults.length < resultsLimit) {
+          moreDataAvailable = false;
+        }
 
         notifyListeners();
       }

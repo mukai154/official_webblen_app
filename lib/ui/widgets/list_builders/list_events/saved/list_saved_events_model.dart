@@ -59,6 +59,10 @@ class ListSavedEventsModel extends ReactiveViewModel {
       resultsLimit: resultsLimit,
     );
 
+    if (dataResults.length < resultsLimit) {
+      moreDataAvailable = false;
+    }
+
     notifyListeners();
 
     setBusy(false);

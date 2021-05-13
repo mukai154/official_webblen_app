@@ -16,9 +16,8 @@ class CreateEarningsAccountBlockView extends StatelessWidget {
     return ViewModelBuilder<CreateEarningsAccountBlockViewModel>.reactive(
       viewModelBuilder: () => CreateEarningsAccountBlockViewModel(),
       builder: (context, model, child) => Container(
-        height: 65,
-        margin: EdgeInsets.only(top: 8),
-        padding: EdgeInsets.only(top: 8, left: 16, right: 16),
+        margin: EdgeInsets.only(top: 8, left: 16, right: 16),
+        padding: EdgeInsets.only(top: 8, left: 16, right: 16, bottom: 8),
         decoration: BoxDecoration(color: appTextFieldContainerColor(), borderRadius: BorderRadius.circular(8)),
         child: Stack(
           children: [
@@ -28,7 +27,7 @@ class CreateEarningsAccountBlockView extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: <Widget>[
                   CustomText(
-                    text: "Interested in Earning Money from Streams and Events for Free?\nCreate an Earnings Account to Get Started!",
+                    text: "Earn Money from Streams and Events for Free!\nCreate an Earnings Account to Get Started!",
                     color: appFontColor(),
                     textAlign: TextAlign.center,
                     fontSize: 14.0,

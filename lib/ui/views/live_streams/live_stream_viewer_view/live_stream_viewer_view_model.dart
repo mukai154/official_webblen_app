@@ -101,7 +101,7 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     setBusy(false);
   }
 
-  initializeAgoraRtc() async {
+  Future<bool> initializeAgoraRtc() async {
     RtcEngineConfig config = RtcEngineConfig(agoraAppID);
 
     agoraRtcEngine = await RtcEngine.createWithConfig(config).catchError((e) {
@@ -126,6 +126,7 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     }
 
     notifyListeners();
+    return true;
   }
 
   Future<bool> setAgoraRtcEventHandlers() async {
@@ -136,6 +137,8 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     }, joinChannelSuccess: (channel, uid, elapsed) async {
       //enable wakelock
       print('joinChannelSuccess $channel $uid $elapsed');
+      showWaitingRoom = false;
+      notifyListeners();
       await Wakelock.enable();
     }, leaveChannel: (stats) {
       //leave channel
@@ -174,6 +177,12 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
   toggleEndingStream() {
     endingStream = !endingStream;
     notifyListeners();
+  }
+
+  switchToLandScape() async {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+    await Future.delayed(Duration(milliseconds: 500));
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
   }
 
   giftWBLN() async {
@@ -240,6 +249,15 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     }
   }
 
+  scrollToChatMessage(ScrollController scrollController) async {
+    if (scrollController.hasClients && scrollController.position.pixels == scrollController.position.maxScrollExtent) {
+      await Future.delayed(Duration(milliseconds: 500));
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
+    }
+  }
+
   ///STREAM USER DATA
   @override
   void onData(WebblenLiveStream? data) async {
@@ -253,14 +271,6 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
             //channelName = webblenLiveStream.title;
             bool initializedAgora = await initializeAgoraRtc();
             if (initializedAgora) {
-              bool setEventHandlers = await setAgoraRtcEventHandlers();
-              if (!setEventHandlers) {
-                _snackbarService!.showSnackbar(
-                  title: 'Stream Error',
-                  message: "There was an unknown error viewing this stream. Please try again later.",
-                  duration: Duration(seconds: 5),
-                );
-              }
               liveStreamSetup = true;
             } else {
               _snackbarService!.showSnackbar(

@@ -47,8 +47,15 @@ class SuggestAccountsView extends StatelessWidget {
         body: model.isBusy
             ? CustomLinearProgressIndicator(color: appActiveColor())
             : Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16,
+                ),
                 color: appBackgroundColor(),
-                child: ListView.builder(
+                child: RefreshIndicator(
+                  color: appFontColor(),
+                  backgroundColor: appBackgroundColor(),
+                  onRefresh: model.initialize,
+                  child: ListView.builder(
                     itemCount: model.suggestedUsers.length, //suggestedUsers.length,
                     itemBuilder: (context, index) {
                       return index == 0
@@ -78,6 +85,7 @@ class SuggestAccountsView extends StatelessWidget {
                                               UserProfilePic(
                                                 size: 60,
                                                 userPicUrl: model.suggestedUsers[index].profilePicURL!,
+                                                isBusy: false,
                                               ),
                                               SizedBox(width: 8),
                                               Text(
@@ -129,6 +137,7 @@ class SuggestAccountsView extends StatelessWidget {
                                         UserProfilePic(
                                           size: 60,
                                           userPicUrl: model.suggestedUsers[index].profilePicURL!,
+                                          isBusy: false,
                                         ),
                                         SizedBox(width: 8),
                                         Text(
@@ -165,7 +174,9 @@ class SuggestAccountsView extends StatelessWidget {
                                 ],
                               ),
                             );
-                    }),
+                    },
+                  ),
+                ),
               ),
       ),
     );

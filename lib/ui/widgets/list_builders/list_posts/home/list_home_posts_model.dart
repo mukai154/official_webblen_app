@@ -78,6 +78,10 @@ class ListHomePostsModel extends ReactiveViewModel {
       sortBy: sortByFilter,
     );
 
+    if (dataResults.length < resultsLimit) {
+      moreDataAvailable = false;
+    }
+
     notifyListeners();
 
     setBusy(false);

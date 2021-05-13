@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/ui/views/base/init_error_views/under_maintenance/under_maintenance_error_view.dart';
@@ -19,6 +20,9 @@ import 'init_error_views/location_error/location_error_view.dart';
 import 'init_error_views/network_error/network_error_view.dart';
 
 class AppBaseView extends StatelessWidget {
+  final String? page;
+  AppBaseView({@PathParam() this.page});
+
   @override
   Widget build(BuildContext context) {
     Widget getViewForIndex(int index, AppBaseViewModel model) {
@@ -42,7 +46,7 @@ class AppBaseView extends StatelessWidget {
       disposeViewModel: false,
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
-      onModelReady: (model) => model.initialize(),
+      onModelReady: (model) => model.initialize(page),
       viewModelBuilder: () => AppBaseViewModel(),
       builder: (context, model, child) => Scaffold(
         body: model.isBusy
@@ -57,19 +61,19 @@ class AppBaseView extends StatelessWidget {
               )
             : model.initErrorStatus == InitErrorStatus.network
                 ? NetworkErrorView(
-                    tryAgainAction: () => model.initialize(),
+                    tryAgainAction: () => model.initialize(page),
                   )
                 : model.initErrorStatus == InitErrorStatus.underMaintenance
                     ? UnderMaintenanceErrorView(
-                        tryAgainAction: () => model.initialize(),
+                        tryAgainAction: () => model.initialize(page),
                       )
                     : model.initErrorStatus == InitErrorStatus.updateRequired
                         ? UpdateRequiredView(
-                            tryAgainAction: () => model.initialize(),
+                            tryAgainAction: () => model.initialize(page),
                           )
                         : model.initErrorStatus == InitErrorStatus.location
                             ? LocationErrorView(
-                                tryAgainAction: () => model.initialize(),
+                                tryAgainAction: () => model.initialize(page),
                               )
                             : getViewForIndex(model.navBarIndex, model),
         bottomNavigationBar: CustomNavBar(

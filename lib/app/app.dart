@@ -42,6 +42,8 @@ import 'package:webblen/ui/views/earnings/payout_methods/payout_methods_view.dar
 import 'package:webblen/ui/views/earnings/set_up_direct_deposit/set_up_direct_deposit_view.dart';
 import 'package:webblen/ui/views/earnings/set_up_instant_deposit/set_up_instant_deposit_view.dart';
 import 'package:webblen/ui/views/earnings/usd_balance_history/usd_balance_history_view.dart';
+import 'package:webblen/ui/views/events/check_in/check_in_attendees/check_in_attendees_view.dart';
+import 'package:webblen/ui/views/events/check_in/scan_attendees/scan_attendees_view.dart';
 import 'package:webblen/ui/views/events/create_event_view/create_event_view.dart';
 import 'package:webblen/ui/views/events/event_view/event_view.dart';
 import 'package:webblen/ui/views/events/tickets/event_tickets/event_tickets_view.dart';
@@ -59,7 +61,10 @@ import 'package:webblen/ui/views/live_streams/live_stream_host_view/live_stream_
 import 'package:webblen/ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
 import 'package:webblen/ui/views/notifications/notifications_view.dart';
 import 'package:webblen/ui/views/onboarding/event_host_path/event_host_path_view.dart';
+import 'package:webblen/ui/views/onboarding/explorer_path/explorer_path_view.dart';
+import 'package:webblen/ui/views/onboarding/onboarding_complete/onboarding_complete_view.dart';
 import 'package:webblen/ui/views/onboarding/path_select/onboarding_path_select_view.dart';
+import 'package:webblen/ui/views/onboarding/streamer_path/streamer_path_view.dart';
 import 'package:webblen/ui/views/onboarding/suggest_accounts/suggest_accounts_view.dart';
 import 'package:webblen/ui/views/posts/create_post_view/create_post_view.dart';
 import 'package:webblen/ui/views/posts/post_view/post_view.dart';
@@ -77,6 +82,7 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
     //ROOT & AUTHENTICATION
     CustomRoute(
       page: RootView,
+      initial: true,
       name: "RootViewRoute",
       path: "/",
       //transitionsBuilder: ,
@@ -102,13 +108,30 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
       path: "/onboarding/event_host",
       durationInMilliseconds: 0,
     ),
+    CustomRoute(
+      page: StreamerPathView,
+      name: "StreamerPathViewRoute",
+      path: "/onboarding/streamer",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: ExplorerPathView,
+      name: "ExplorerPathViewRoute",
+      path: "/onboarding/explorer",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: OnboardingCompleteView,
+      name: "OnboardingCompleteViewRoute",
+      path: "/onboarding/completed",
+      durationInMilliseconds: 0,
+    ),
 
     //HOME
     CustomRoute(
       page: AppBaseView,
-      initial: true,
       name: "AppBaseViewRoute",
-      path: "/home",
+      path: "/home/:page",
       durationInMilliseconds: 0,
     ),
 
@@ -279,6 +302,20 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
       page: TicketsPurchaseSuccessView,
       name: "TicketsPurchaseSuccessViewRoute",
       path: "/ticket_purchase_success/:email",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: CheckInAttendeesView,
+      name: "CheckInAttendeesViewRoute",
+      path: "/check_in_attendees/:id",
+      //transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: ScanAttendeesView,
+      name: "ScanAttendeesViewRoute",
+      path: "/scanner/:id",
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),

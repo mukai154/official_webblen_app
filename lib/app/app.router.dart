@@ -16,6 +16,8 @@ import '../ui/views/earnings/payout_methods/payout_methods_view.dart';
 import '../ui/views/earnings/set_up_direct_deposit/set_up_direct_deposit_view.dart';
 import '../ui/views/earnings/set_up_instant_deposit/set_up_instant_deposit_view.dart';
 import '../ui/views/earnings/usd_balance_history/usd_balance_history_view.dart';
+import '../ui/views/events/check_in/check_in_attendees/check_in_attendees_view.dart';
+import '../ui/views/events/check_in/scan_attendees/scan_attendees_view.dart';
 import '../ui/views/events/create_event_view/create_event_view.dart';
 import '../ui/views/events/event_view/event_view.dart';
 import '../ui/views/events/tickets/event_tickets/event_tickets_view.dart';
@@ -30,7 +32,10 @@ import '../ui/views/live_streams/live_stream_host_view/live_stream_host_view.dar
 import '../ui/views/live_streams/live_stream_viewer_view/live_stream_viewer_view.dart';
 import '../ui/views/notifications/notifications_view.dart';
 import '../ui/views/onboarding/event_host_path/event_host_path_view.dart';
+import '../ui/views/onboarding/explorer_path/explorer_path_view.dart';
+import '../ui/views/onboarding/onboarding_complete/onboarding_complete_view.dart';
 import '../ui/views/onboarding/path_select/onboarding_path_select_view.dart';
+import '../ui/views/onboarding/streamer_path/streamer_path_view.dart';
 import '../ui/views/onboarding/suggest_accounts/suggest_accounts_view.dart';
 import '../ui/views/posts/create_post_view/create_post_view.dart';
 import '../ui/views/posts/post_view/post_view.dart';
@@ -48,7 +53,11 @@ class Routes {
   static const String AuthViewRoute = '/login';
   static const String OnboardingPathSelectViewRoute = '/onboarding/path_select';
   static const String EventHostPathViewRoute = '/onboarding/event_host';
-  static const String AppBaseViewRoute = '/home';
+  static const String StreamerPathViewRoute = '/onboarding/streamer';
+  static const String ExplorerPathViewRoute = '/onboarding/explorer';
+  static const String OnboardingCompleteViewRoute = '/onboarding/completed';
+  static const String _AppBaseViewRoute = '/home/:page';
+  static String AppBaseViewRoute({@required dynamic page}) => '/home/$page';
   static const String _PostViewRoute = '/post/:id';
   static String PostViewRoute({@required dynamic id}) => '/post/$id';
   static const String _CreatePostViewRoute = '/post/publish/:id/:promo';
@@ -108,6 +117,12 @@ class Routes {
       '/ticket_purchase_success/:email';
   static String TicketsPurchaseSuccessViewRoute({@required dynamic email}) =>
       '/ticket_purchase_success/$email';
+  static const String _CheckInAttendeesViewRoute = '/check_in_attendees/:id';
+  static String CheckInAttendeesViewRoute({@required dynamic id}) =>
+      '/check_in_attendees/$id';
+  static const String _ScanAttendeesViewRoute = '/scanner/:id';
+  static String ScanAttendeesViewRoute({@required dynamic id}) =>
+      '/scanner/$id';
   static const String USDBalanceHistoryViewRoute = '/usd-balance-history';
   static const String PayoutMethodsViewRoute = '/payout-methods';
   static const String HowEarningsWorkViewRoute = '/how-earnings-work';
@@ -118,7 +133,10 @@ class Routes {
     AuthViewRoute,
     OnboardingPathSelectViewRoute,
     EventHostPathViewRoute,
-    AppBaseViewRoute,
+    StreamerPathViewRoute,
+    ExplorerPathViewRoute,
+    OnboardingCompleteViewRoute,
+    _AppBaseViewRoute,
     _PostViewRoute,
     _CreatePostViewRoute,
     _EventViewRoute,
@@ -142,6 +160,8 @@ class Routes {
     _TicketSelectionViewRoute,
     _TicketPurchaseViewRoute,
     _TicketsPurchaseSuccessViewRoute,
+    _CheckInAttendeesViewRoute,
+    _ScanAttendeesViewRoute,
     USDBalanceHistoryViewRoute,
     PayoutMethodsViewRoute,
     HowEarningsWorkViewRoute,
@@ -159,7 +179,10 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes.OnboardingPathSelectViewRoute,
         page: OnboardingPathSelectView),
     RouteDef(Routes.EventHostPathViewRoute, page: EventHostPathView),
-    RouteDef(Routes.AppBaseViewRoute, page: AppBaseView),
+    RouteDef(Routes.StreamerPathViewRoute, page: StreamerPathView),
+    RouteDef(Routes.ExplorerPathViewRoute, page: ExplorerPathView),
+    RouteDef(Routes.OnboardingCompleteViewRoute, page: OnboardingCompleteView),
+    RouteDef(Routes._AppBaseViewRoute, page: AppBaseView),
     RouteDef(Routes._PostViewRoute, page: PostView),
     RouteDef(Routes._CreatePostViewRoute, page: CreatePostView),
     RouteDef(Routes._EventViewRoute, page: EventView),
@@ -184,6 +207,8 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes._TicketPurchaseViewRoute, page: TicketPurchaseView),
     RouteDef(Routes._TicketsPurchaseSuccessViewRoute,
         page: TicketsPurchaseSuccessView),
+    RouteDef(Routes._CheckInAttendeesViewRoute, page: CheckInAttendeesView),
+    RouteDef(Routes._ScanAttendeesViewRoute, page: ScanAttendeesView),
     RouteDef(Routes.USDBalanceHistoryViewRoute, page: USDBalanceHistoryView),
     RouteDef(Routes.PayoutMethodsViewRoute, page: PayoutMethodsView),
     RouteDef(Routes.HowEarningsWorkViewRoute, page: HowEarningsWorkView),
@@ -225,9 +250,34 @@ class StackedRouter extends RouterBase {
         transitionDuration: const Duration(milliseconds: 0),
       );
     },
+    StreamerPathView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            StreamerPathView(),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    ExplorerPathView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ExplorerPathView(),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    OnboardingCompleteView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            OnboardingCompleteView(),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
     AppBaseView: (data) {
       return PageRouteBuilder<dynamic>(
-        pageBuilder: (context, animation, secondaryAnimation) => AppBaseView(),
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            AppBaseView(page: data.pathParams['page'].value),
         settings: data,
         transitionDuration: const Duration(milliseconds: 0),
       );
@@ -420,6 +470,22 @@ class StackedRouter extends RouterBase {
       return PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             TicketsPurchaseSuccessView(data.pathParams['email'].value),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    CheckInAttendeesView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            CheckInAttendeesView(id: data.pathParams['id'].value),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    ScanAttendeesView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ScanAttendeesView(id: data.pathParams['id'].value),
         settings: data,
         transitionDuration: const Duration(milliseconds: 0),
       );

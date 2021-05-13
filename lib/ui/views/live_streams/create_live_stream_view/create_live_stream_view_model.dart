@@ -908,7 +908,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   displayUploadSuccessBottomSheet() async {
     //deposit and/or withdraw webblen & promo
     if (promo != null) {
-      _userDataService!.depositWebblen(uid: user.id, amount: promo!);
+      _userDataService!.depositWebblen(uid: user.id!, amount: promo!);
     }
     _userDataService!.withdrawWebblen(uid: user.id, amount: newStreamTaxRate!);
 

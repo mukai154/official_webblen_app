@@ -6,9 +6,11 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_event_ticket.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class TicketDistroDataService {
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   final CollectionReference ticketDistroRef = FirebaseFirestore.instance.collection("webblen_ticket_distros");
   final CollectionReference purchasedTicketRef = FirebaseFirestore.instance.collection("purchased_tickets");
 
@@ -63,9 +65,23 @@ class TicketDistroDataService {
     return ticketDistro;
   }
 
+  Future<bool> scanInTicket(String id) async {
+    bool scannedIn = true;
+    String? error;
+    await purchasedTicketRef.doc(id).update({'used': true}).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      _customDialogService.showErrorDialog(description: "Error scanning ticket. Please try again");
+      scannedIn = false;
+    }
+    return scannedIn;
+  }
+
   FutureOr<WebblenEventTicket> getTicketByID(String? id) async {
     WebblenEventTicket ticket = WebblenEventTicket();
     String? error;
+
     DocumentSnapshot snapshot = await purchasedTicketRef.doc(id).get().catchError((e) {
       _snackbarService!.showSnackbar(
         title: 'Ticket Load Error',

@@ -12,7 +12,7 @@ class CustomText extends StatelessWidget {
     required this.fontWeight,
     required this.color,
     this.textAlign,
-});
+  });
   @override
   Widget build(BuildContext context) {
     return Text(
@@ -22,6 +22,7 @@ class CustomText extends StatelessWidget {
         fontSize: fontSize,
         fontWeight: fontWeight,
         color: color,
+        decoration: TextDecoration.none,
       ),
     );
   }

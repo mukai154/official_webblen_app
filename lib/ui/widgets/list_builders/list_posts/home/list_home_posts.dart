@@ -69,7 +69,7 @@ class _ListHomePostsState extends State<ListHomePosts> with AutomaticKeepAliveCl
                         } else {
                           if (model.moreDataAvailable) {
                             WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              model.loadAdditionalData();
+                             model.loadAdditionalData();
                             });
                             return Align(
                               alignment: Alignment.center,

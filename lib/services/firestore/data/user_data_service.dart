@@ -6,8 +6,7 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
-
-import 'notification_data_service.dart';
+import 'package:webblen/services/location/location_service.dart';
 
 class UserDataService {
   CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_users');
@@ -15,7 +14,7 @@ class UserDataService {
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
-  NotificationDataService _notificationDataService = locator<NotificationDataService>();
+  LocationService _locationService = locator<LocationService>();
 
   Future<bool> checkIfCurrentUserIsAdmin(String id) async {
     bool isAdmin = false;
@@ -205,6 +204,18 @@ class UserDataService {
     return updated;
   }
 
+  Future<bool> updateInterests(String uid, List tags) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(uid).update({"tags": tags}).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
   Future<bool> updateLastSeenZipcode({String? id, String? zip}) async {
     await userRef.doc(id).update({
       "lastSeenZipcode": zip,
@@ -324,19 +335,57 @@ class UserDataService {
     return didUnMute;
   }
 
-  Future<List<WebblenUser>> getFollowerSuggestions(String id, String zipcode) async {
+  Future<void> updateUserAppOpen({required String uid, required String zipcode}) async {
+    int appOpenInMilliseconds = DateTime.now().millisecondsSinceEpoch;
+    DocumentSnapshot snapshot = await userRef.doc(uid).get();
+    List? nearbyZipcodes = snapshot.data()!['nearbyZipcodes'] == null ? [] : snapshot.data()!['nearbyZipcodes'];
+    if (!nearbyZipcodes!.contains(zipcode)) {
+      nearbyZipcodes = await _locationService.findNearestZipcodes(zipcode) ?? nearbyZipcodes;
+    }
+    userRef.doc(uid).update({
+      'appOpenInMilliseconds': appOpenInMilliseconds,
+      'lastSeenZipcode': zipcode,
+      'nearbyZipcodes': nearbyZipcodes,
+    });
+  }
+
+  Future<List<WebblenUser>> getFollowerSuggestions(String id, String zipcode, List? tags) async {
+    print(tags);
     List<WebblenUser> users = [];
-    QuerySnapshot snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("recommend", isEqualTo: true).get().catchError((e) {
+    QuerySnapshot snapshot =
+        await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("suggestedAccount", isEqualTo: true).limit(10).get().catchError((e) {
       //print(e);
     });
     snapshot.docs.forEach((doc) {
-      if (doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) {
+      if ((doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) && doc.id != id) {
         WebblenUser user = WebblenUser.fromMap(doc.data());
         if (user.id! != id) {
           users.add(user);
         }
       }
     });
+    if (tags != null) {
+      snapshot = await userRef.where("nearbyZipcodes", arrayContains: zipcode).limit(100).get().catchError((e) {
+        //print(e);
+      });
+      snapshot.docs.forEach((doc) {
+        if ((doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) && doc.id != id) {
+          WebblenUser user = WebblenUser.fromMap(doc.data());
+          if (user.tags != null) {
+            for (String tag in user.tags!) {
+              print(tags);
+              if (tags.contains(tag)) {
+                if (!users.contains(user)) {
+                  users.add(user);
+                  break;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
     if (users.length < 10) {
       QuerySnapshot query = await userRef
           // .where("appOpenInMilliseconds", isGreaterThanOrEqualTo: val)
@@ -347,8 +396,8 @@ class UserDataService {
         //print(e);
       });
       query.docs.forEach((doc) {
-        if (doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) {
-          WebblenUser user = WebblenUser.fromMap(doc.data()['d']);
+        if ((doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) && doc.id != id) {
+          WebblenUser user = WebblenUser.fromMap(doc.data());
           if (user.id != id) {
             List existing = users.where((x) => x.id == doc.id).toList();
             if (existing.isEmpty) {
@@ -361,7 +410,15 @@ class UserDataService {
     return users;
   }
 
-  Future<bool> depositWebblen({String? uid, required double amount}) async {
+  Future<bool> completeOnboarding({required String uid}) async {
+    bool updated = true;
+    await userRef.doc(uid).update({"onboarded": true}).catchError((e) {
+      print(e.meesage);
+    });
+    return updated;
+  }
+
+  Future<bool> depositWebblen({required String uid, required double amount}) async {
     //String error;
     DocumentSnapshot snapshot = await userRef.doc(uid).get();
     WebblenUser user = WebblenUser.fromMap(snapshot.data()!);

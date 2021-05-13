@@ -7,14 +7,14 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 
-import 'event_host_path_view_model.dart';
+import 'streamer_path_view_model.dart';
 
-class EventHostPathView extends StatelessWidget {
+class StreamerPathView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return ViewModelBuilder<EventHostPathViewModel>.reactive(
+    return ViewModelBuilder<StreamerPathViewModel>.reactive(
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => EventHostPathViewModel(),
+      viewModelBuilder: () => StreamerPathViewModel(),
       builder: (context, model, child) => Scaffold(
         body: IntroductionScreen(
           globalBackgroundColor: Colors.white,
@@ -22,7 +22,7 @@ class EventHostPathView extends StatelessWidget {
           freeze: true,
           onChange: (val) {
             model.updatePageNum(val);
-            if (model.pageNum == 0 || model.pageNum == 3 || model.pageNum == 2) {
+            if (model.pageNum == 0 || model.pageNum == 2) {
               model.updateShowNextButton(true);
             } else {
               model.updateShowNextButton(false);
@@ -53,10 +53,10 @@ class EventHostPathView extends StatelessWidget {
             ),
           ),
           pages: [
-            EventHostPathPages().initialPage(),
-            EventHostPathPages().monetizePage(model),
-            EventHostPathPages().createEarningsAccountPage(model),
-            EventHostPathPages().selectInterestsPage(model),
+            StreamerPathPages().initialPage(),
+            StreamerPathPages().monetizePage(model),
+            StreamerPathPages().createEarningsAccountPage(model),
+            StreamerPathPages().selectInterestsPage(model),
           ],
         ),
       ),
@@ -85,7 +85,7 @@ class _OnboardingImage extends StatelessWidget {
   }
 }
 
-class EventHostPathPages {
+class StreamerPathPages {
   PageDecoration pageDecoration = PageDecoration(
     contentMargin: EdgeInsets.all(0),
     titleTextStyle: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w700),
@@ -99,17 +99,17 @@ class EventHostPathPages {
 
   PageViewModel initialPage() {
     return PageViewModel(
-      title: "Events Just Got A Lot More Fun",
-      body: "Webblen Offers the Best Tools, Network, Benefits, and Resources to Make Your Event a Success",
-      image: _OnboardingImage(assetName: 'party'),
+      title: "Stream Directly to Those Around You",
+      body: "Webblen Let's You Stream Directly to Your Community and Engage with Those Around You Like Never Before",
+      image: _OnboardingImage(assetName: 'video_phone'),
       decoration: pageDecoration,
     );
   }
 
-  PageViewModel monetizePage(EventHostPathViewModel model) {
+  PageViewModel monetizePage(StreamerPathViewModel model) {
     return PageViewModel(
-      title: "Will You Monetize Your Events?",
-      body: "Selling tickets and taking donations are two examples of how your event can earn you money.",
+      title: "Will You Monetize Your Streams?",
+      body: "Sponsorships, advertisements, and donations are 3 examples of how your stream can earn you money.",
       image: _OnboardingImage(assetName: 'online_payment'),
       decoration: pageDecoration,
       footer: Container(
@@ -126,7 +126,7 @@ class EventHostPathPages {
             ),
             SizedBox(height: 16),
             CustomButton(
-              text: "No, All of My Events Are 100% Free",
+              text: "No, All of My Streams Are 100% Free",
               textColor: Colors.black,
               backgroundColor: Colors.white,
               width: 300.0,
@@ -140,7 +140,7 @@ class EventHostPathPages {
     );
   }
 
-  PageViewModel createEarningsAccountPage(EventHostPathViewModel model) {
+  PageViewModel createEarningsAccountPage(StreamerPathViewModel model) {
     return PageViewModel(
       image: _OnboardingImage(assetName: 'wallet'),
       decoration: pageDecoration,
@@ -157,10 +157,9 @@ class EventHostPathPages {
         ),
       ),
       bodyWidget: Text(
-        "• Sell Event Tickets for Free"
-        "\n• Sign In Event Attendees with Our In-App Ticket Scanner"
-        "\n• Access Funds From Ticket Sales with Same-Day Deposits"
-        "\n• Acquire Sponsors for Your Events",
+        "• Acquire Sponsorships"
+        "\n• Earn donations"
+        "\n• Access Funds with Same-Day Deposits",
         textAlign: TextAlign.left,
         style: TextStyle(fontSize: 14.0, height: 1.5),
       ),
@@ -225,7 +224,7 @@ class EventHostPathPages {
     );
   }
 
-  PageViewModel selectInterestsPage(EventHostPathViewModel model) {
+  PageViewModel selectInterestsPage(StreamerPathViewModel model) {
     return PageViewModel(
       titleWidget: Container(
         child: Column(
@@ -308,7 +307,7 @@ class EventHostPathPages {
   }
 }
 
-// class _OnboardingImage extends HookViewModelWidget<EventHostPathViewModel> {
+// class _OnboardingImage extends HookViewModelWidget<StreamerPathViewModel> {
 //   @override
 //   Widget buildViewModelWidget(BuildContext context, SetUpDirectDepositViewModel model) {
 //     var accountHolderName = useTextEditingController();

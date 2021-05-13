@@ -72,7 +72,9 @@ class ListCheckInEvents extends StatelessWidget {
                         } else {
                           if (model.moreDataAvailable) {
                             WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              model.loadAdditionalData();
+                              if (model.dataResults.length > 10) {
+                                model.loadAdditionalData();
+                              }
                             });
                             return Align(
                               alignment: Alignment.center,

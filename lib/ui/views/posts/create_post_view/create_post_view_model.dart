@@ -341,7 +341,7 @@ class CreatePostViewModel extends ReactiveViewModel {
   displayUploadSuccessBottomSheet() async {
     //deposit and/or withdraw webblen & promo
     if (promo != null) {
-      await _userDataService!.depositWebblen(uid: user.id, amount: promo!);
+      await _userDataService!.depositWebblen(uid: user.id!, amount: promo!);
     }
     await _userDataService!.withdrawWebblen(uid: user.id, amount: newPostTaxRate!);
 

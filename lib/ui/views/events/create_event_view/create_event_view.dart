@@ -33,7 +33,6 @@ import 'package:webblen/ui/widgets/list_builders/list_fees/list_fees.dart';
 import 'package:webblen/ui/widgets/list_builders/list_tickets/list_tickets.dart';
 import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
-import 'package:webblen/ui/widgets/wallet/stripe/create_earnings_account/create_earnings_account_block_view.dart';
 
 class CreateEventView extends StatelessWidget {
   final String? id;
@@ -118,10 +117,6 @@ class CreateEventView extends StatelessWidget {
                         child: Container(
                           child: Column(
                             children: [
-                              model.hasEarningsAccount != null && !model.hasEarningsAccount!
-                                  ? CreateEarningsAccountBlockView(dismissNotice: () => model.dismissEarningsAccountNotice())
-                                  : Container(),
-
                               ///IMAGE
                               model.fileToUpload == null && model.event.imageURL == null
                                   ? _ImageButton(
@@ -261,9 +256,9 @@ class CreateEventView extends StatelessWidget {
 
                                     _FormSectionDivider(sectionName: "ADDITIONAL INFO"),
 
-                                    ///STREAM EVENT
-                                    _ScheduleLiveStreamCheckBox(),
-                                    verticalSpaceSmall,
+                                    // ///STREAM EVENT
+                                    // _ScheduleLiveStreamCheckBox(),
+                                    // verticalSpaceSmall,
 
                                     ///EVENT SPONSORSHIP
                                     _AvailableToSponsorsCheckBox(),

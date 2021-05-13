@@ -23,6 +23,11 @@ bool isValidUsername(String val) {
   return isValid;
 }
 
+bool isValidTicket(String val) {
+  bool isValid = RegExp(r"^[A-Za-z0-9]*$").hasMatch(val);
+  return isValid;
+}
+
 bool isValidPassword(String val) {
   bool isValid = RegExp(
           r'^(?:(?=.*?[A-Z])(?:(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=])|(?=.*?[a-z])(?:(?=.*?[0-9])|(?=.*?[-!@#$%^&*()_[\]{},.<>+=])))|(?=.*?[a-z])(?=.*?[0-9])(?=.*?[-!@#$%^&*()_[\]{},.<>+=]))[A-Za-z0-9!@#$%^&*()_[\]{},.<>+=-]{7,50}$')

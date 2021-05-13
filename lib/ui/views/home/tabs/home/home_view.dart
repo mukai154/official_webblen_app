@@ -7,8 +7,6 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/views/home/tabs/home/home_view_model.dart';
-import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
-import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/navigation/tab_bar/custom_tab_bar.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/list_builders/list_events/home/list_home_events.dart';
@@ -143,48 +141,6 @@ class _HomeBody extends StatelessWidget {
 
             ///EVENTS
             ListHomeEvents(),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChooseLocationView extends StatelessWidget {
-  final VoidCallback openFilter;
-  _ChooseLocationView({required this.openFilter});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomText(
-              text: "Welcome to Webblen",
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: appFontColor(),
-            ),
-            CustomText(
-              text: "Choose a location and see what's going on",
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: appFontColor(),
-            ),
-            verticalSpaceMedium,
-            CustomButton(
-              text: "Select a Location",
-              textSize: 16,
-              height: 30,
-              width: 200,
-              onPressed: openFilter,
-              backgroundColor: appBackgroundColor(),
-              textColor: appFontColor(),
-              elevation: 1.0,
-              isBusy: false,
-            ),
           ],
         ),
       ),

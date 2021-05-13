@@ -133,6 +133,18 @@ class EventView extends StatelessWidget {
     );
   }
 
+  Widget eventTitle(EventViewModel model) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: CustomText(
+        text: "${model.event!.title}",
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
+        color: appFontColor(),
+      ),
+    );
+  }
+
   Widget eventDateAndTime(EventViewModel model) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -270,6 +282,9 @@ class EventView extends StatelessWidget {
           verticalSpaceSmall,
           eventImg(model.event!.imageURL!),
           eventTags(model),
+          verticalSpaceSmall,
+          sectionDivider(sectionName: "Title"),
+          eventTitle(model),
           verticalSpaceSmall,
           sectionDivider(sectionName: "Details"),
           eventDesc(model),

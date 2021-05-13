@@ -98,9 +98,9 @@ class _WalletBody extends HookViewModelWidget<WalletViewModel> {
                         ),
                       )
                     // ),
-                    : model.dismissedSetupAccountNotice
+                    : !model.dismissedSetupAccountNotice
                         ? CreateEarningsAccountBlockView(
-                            dismissNotice: model.dismissCreateStripeAccountNotice(),
+                            dismissNotice: () => model.dismissCreateStripeAccountNotice(),
                           )
                         : Container(),
             SizedBox(height: 16.0),
