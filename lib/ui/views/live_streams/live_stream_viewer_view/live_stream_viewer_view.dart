@@ -19,6 +19,7 @@ import 'package:webblen/ui/widgets/live_streams/check_in_button/virtual_check_in
 import 'package:webblen/ui/widgets/live_streams/video_ui/check_in_count_box.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/video_streaming_status.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/viewer_count_box.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class LiveStreamViewerView extends StatefulWidget {
   final String? id;
@@ -513,7 +514,7 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
   }
 }
 
-class _PortraitGiftsAndDonationsAnimator extends HookViewModelWidget<LiveStreamViewerViewModel> {
+class _GiftsAndDonationsAnimator extends HookViewModelWidget<LiveStreamViewerViewModel> {
   @override
   Widget buildViewModelWidget(BuildContext context, LiveStreamViewerViewModel model) {
     AnimationController _animationController = useAnimationController(duration: Duration(milliseconds: 2500));
@@ -525,72 +526,75 @@ class _PortraitGiftsAndDonationsAnimator extends HookViewModelWidget<LiveStreamV
     });
 
     return Container(
-      margin: EdgeInsets.only(bottom: 50),
-      alignment: Alignment.centerLeft,
-      child: FractionallySizedBox(
-        heightFactor: 0.3,
-        child: Container(
-          child: StreamBuilder(
-            stream: FirebaseFirestore.instance
-                .collection("webblen_content_gift_pools")
-                .doc(model.webblenLiveStream.id)
-                .collection("logs")
-                .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
-                .orderBy("timePostedInMilliseconds", descending: false)
-                .snapshots(),
-            builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return Container();
-              return ListView.builder(
-                //controller: chatViewController,
-                itemCount: 1, //snapshot.data.docs.length,
-                itemBuilder: (context, index) {
-                  int? giftID = snapshot.data!.docs.last.data()['giftID'];
-                  String? message = snapshot.data!.docs.last.data()['message'];
-                  _animationController.forward();
-                  return FadeTransition(
-                    opacity: _giftAnimation,
-                    child: Container(
-                      width: MediaQuery.of(context).size.width - 32,
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 50,
-                            width: 50,
-                            child: Image.asset(
-                              giftID == 1
-                                  ? 'assets/images/heart_icon.png'
-                                  : giftID == 2
-                                      ? 'assets/images/double_heart_icon.png'
-                                      : giftID == 3
-                                          ? 'assets/images/confetti_icon.png'
-                                          : giftID == 4
-                                              ? 'assets/images/dj_icon.png'
-                                              : giftID == 5
-                                                  ? 'assets/images/wolf_icon.png'
-                                                  : giftID == 6
-                                                      ? 'assets/images/eagle_icon.png'
-                                                      : giftID == 7
-                                                          ? 'assets/images/heart_fire_icon.png'
-                                                          : 'assets/images/webblen_coin.png',
-                            ),
-                          ),
-                          CustomText(
-                            text: message,
-                            fontSize: 25,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+      alignment: Alignment.center,
+      constraints: BoxConstraints(
+        maxHeight: 300,
+        maxWidth: 500,
+      ),
+      child: StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection("webblen_content_gift_pools")
+            .doc(model.webblenLiveStream.id)
+            .collection("logs")
+            .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
+            .orderBy("timePostedInMilliseconds", descending: false)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return Container();
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: 1,
+            itemBuilder: (context, index) {
+              int? giftID = snapshot.data!.docs.last.data()['giftID'];
+              String? message = snapshot.data!.docs.last.data()['message'];
+              String? senderUsername = snapshot.data!.docs.last.data()['senderUsername'];
+              print(giftID);
+              print(message);
+              _animationController.forward();
+              return FadeTransition(
+                opacity: _giftAnimation,
+                child: Container(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Container(
+                        height: 50,
+                        width: 50,
+                        child: Image.asset(
+                          giftID == 1
+                              ? 'assets/images/heart_icon.png'
+                              : giftID == 2
+                                  ? 'assets/images/double_heart_icon.png'
+                                  : giftID == 3
+                                      ? 'assets/images/confetti_icon.png'
+                                      : giftID == 4
+                                          ? 'assets/images/dj_icon.png'
+                                          : giftID == 5
+                                              ? 'assets/images/wolf_icon.png'
+                                              : giftID == 6
+                                                  ? 'assets/images/eagle_icon.png'
+                                                  : giftID == 7
+                                                      ? 'assets/images/heart_fire_icon.png'
+                                                      : 'assets/images/webblen_coin.png',
+                        ),
                       ),
-                      //color: Colors.green,
-                    ),
-                  );
-                },
+                      Container(
+                        child: CustomText(
+                          text: "@$senderUsername gifted ${getGiftAmountFromGiftID(giftID!)} WBLN",
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                  //color: Colors.green,
+                ),
               );
             },
-          ),
-        ),
+          );
+        },
       ),
     );
   }
@@ -659,17 +663,17 @@ class _PortraitLiveVideoWrapper extends HookViewModelWidget<LiveStreamViewerView
   @override
   Widget buildViewModelWidget(BuildContext context, LiveStreamViewerViewModel model) {
     return Container(
-      color: Colors.grey,
+      color: CustomColors.webblenDarkGray,
       child: AspectRatio(
         aspectRatio: 16.0 / 9.0,
         child: Stack(
           children: <Widget>[
             model.showWaitingRoom
                 ? Container(
-                    color: Colors.grey,
+                    color: CustomColors.webblenDarkGray,
                     child: Center(
                       child: CustomText(
-                        text: "Host is Currently Offline",
+                        text: "Connecting to Host...",
                         color: Colors.white,
                         textAlign: TextAlign.left,
                         fontSize: 14.0,
@@ -706,7 +710,7 @@ class _PortraitLiveVideoWrapper extends HookViewModelWidget<LiveStreamViewerView
                 ),
               ),
             ),
-            if (!model.endingStream && !model.isBusy) _PortraitGiftsAndDonationsAnimator(), // send message
+            if (!model.endingStream && !model.isBusy) _GiftsAndDonationsAnimator(), // send message
             // if (model.endingStream && !model.isBusy) endLive(model), //
           ],
         ),
@@ -719,7 +723,7 @@ class _PortraitStreamVideo extends HookViewModelWidget<LiveStreamViewerViewModel
   @override
   Widget buildViewModelWidget(BuildContext context, LiveStreamViewerViewModel model) {
     return Container(
-      color: Colors.grey,
+      color: CustomColors.webblenDarkGray,
       child: AspectRatio(
         aspectRatio: 16.0 / 9.0,
         child: Stack(
@@ -766,7 +770,7 @@ class _PortraitStreamVideo extends HookViewModelWidget<LiveStreamViewerViewModel
                 ),
               ),
             ),
-            if (!model.endingStream && !model.isBusy) _PortraitGiftsAndDonationsAnimator(), // send message
+            if (!model.endingStream && !model.isBusy) _GiftsAndDonationsAnimator(), // send message
             // if (model.endingStream && !model.isBusy) endLive(model), //
           ],
         ),
@@ -1082,7 +1086,6 @@ class _LandscapeLiveVideoWrapper extends HookViewModelWidget<LiveStreamViewerVie
   Widget buildViewModelWidget(BuildContext context, LiveStreamViewerViewModel model) {
     return Container(
       color: Colors.grey,
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       height: screenHeight(context),
       width: screenWidth(context),
       child: Stack(
@@ -1101,7 +1104,7 @@ class _LandscapeLiveVideoWrapper extends HookViewModelWidget<LiveStreamViewerVie
                   ),
                 )
               : viewRows(model), // Video Widget
-          if (!model.endingStream && !model.isBusy) _PortraitGiftsAndDonationsAnimator(), // send message
+          if (!model.endingStream && !model.isBusy) _GiftsAndDonationsAnimator(), // send message
           // if (model.endingStream && !model.isBusy) endLive(model), //
         ],
       ),
@@ -1148,7 +1151,7 @@ class _LandscapeLiveVideoHeader extends HookViewModelWidget<LiveStreamViewerView
               children: [
                 model.isInAgoraChannel ? Container() : LiveNowBox(),
                 model.isInAgoraChannel ? Container() : SizedBox(width: 8.0),
-                ViewerCountBox(viewCount: 1),
+                ViewerCountBox(viewCount: model.webblenLiveStream.activeViewers == null ? 0 : model.webblenLiveStream.activeViewers!.length),
                 SizedBox(width: 8.0),
                 CheckInCountBox(checkInCount: model.webblenLiveStream.attendees == null ? 0 : model.webblenLiveStream.attendees!.length),
               ],
@@ -1203,7 +1206,7 @@ class _LandscapeStreamVideo extends HookViewModelWidget<LiveStreamViewerViewMode
               child: _LandscapeBottomBar(),
             ),
           ),
-          if (!model.endingStream && !model.isBusy) _PortraitGiftsAndDonationsAnimator(), // send message
+          if (!model.endingStream && !model.isBusy) _GiftsAndDonationsAnimator(), // send message
           // if (model.endingStream && !model.isBusy) endLive(model), //
         ],
       ),

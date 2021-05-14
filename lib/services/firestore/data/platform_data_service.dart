@@ -1,17 +1,14 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:stacked_services/stacked_services.dart';
-import 'package:webblen/app/app.locator.dart';
 
 class PlatformDataService {
-  SnackbarService? _snackbarService = locator<SnackbarService>();
   CollectionReference appReleaseRef = FirebaseFirestore.instance.collection("app_release_info");
   CollectionReference webblenCurrencyRef = FirebaseFirestore.instance.collection("webblen_currency");
 
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "9.2.1";
+    String currentVersion = "10.0.0";
     DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
     String? releasedVersion = docSnapshot.data()!["versionNumber"];
     bool? versionIsRequired = docSnapshot.data()!["versionIsRequired"];
@@ -34,13 +31,7 @@ class PlatformDataService {
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
     try {
       promo = snapshot.data()!['newPostTaxRate'].toDouble();
-    } catch (e) {
-      // _snackbarService.showSnackbar(
-      //   title: 'Promotion Error',
-      //   message: "There Was an Issue Getting Webblen Promotions",
-      //   duration: Duration(seconds: 5),
-      // );
-    }
+    } catch (e) {}
     return promo;
   }
 

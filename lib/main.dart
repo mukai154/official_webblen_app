@@ -57,7 +57,7 @@ void main() async {
   await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
     alert: true,
     badge: true,
-    sound: true,
+    sound: false,
   );
 
   //Get User Instance if Previously Logged In
@@ -75,7 +75,6 @@ Future<void> setupAuthListener() async {
   UserDataService _userDataService = locator<UserDataService>();
   FirebaseAuth.instance.authStateChanges().listen((event) async {
     if (event != null) {
-      print(event.uid);
       _reactiveUserService.updateUserLoggedIn(true);
       WebblenUser user = await _userDataService.getWebblenUserByID(event.uid);
       _reactiveUserService.updateUser(user);

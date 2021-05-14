@@ -350,7 +350,7 @@ class UserDataService {
   }
 
   Future<List<WebblenUser>> getFollowerSuggestions(String id, String zipcode, List? tags) async {
-    print(tags);
+    //print(tags);
     List<WebblenUser> users = [];
     QuerySnapshot snapshot =
         await userRef.where("nearbyZipcodes", arrayContains: zipcode).where("suggestedAccount", isEqualTo: true).limit(10).get().catchError((e) {

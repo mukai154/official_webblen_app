@@ -1,3 +1,4 @@
+import 'package:permission_handler/permission_handler.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 import 'package:webblen/app/app.locator.dart';
@@ -26,6 +27,10 @@ class SettingsViewModel extends BaseViewModel {
 
   getHelpFAQ() {
     UrlHandler().launchInWebViewOrVC("https://www.webblen.io/faq");
+  }
+
+  openPermissionsAndSettings() {
+    openAppSettings();
   }
 
   signOut() async {

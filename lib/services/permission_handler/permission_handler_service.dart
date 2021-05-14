@@ -7,7 +7,9 @@ class PermissionHandlerService {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
 
     bool hasPermission = false;
-    PermissionStatus status = await Permission.camera.status;
+    PermissionStatus status = await Permission.camera.status.catchError((e) {
+      print(e);
+    });
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {
@@ -15,7 +17,7 @@ class PermissionHandlerService {
       if (status.isGranted) {
         hasPermission = true;
       }
-    } else if (status.isPermanentlyDenied || status.isRestricted) {
+    } else {
       _customDialogService.showAppSettingsDialog(
         title: "Camera Permission Required",
         description: "Please open your app settings and enable your camera",
@@ -29,7 +31,9 @@ class PermissionHandlerService {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
 
     bool hasPermission = false;
-    PermissionStatus status = await Permission.photos.status;
+    PermissionStatus status = await Permission.photos.status.catchError((e) {
+      print(e);
+    });
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {
@@ -51,7 +55,9 @@ class PermissionHandlerService {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
 
     bool hasPermission = false;
-    PermissionStatus status = await Permission.microphone.status;
+    PermissionStatus status = await Permission.microphone.status.catchError((e) {
+      print(e);
+    });
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {
@@ -60,6 +66,7 @@ class PermissionHandlerService {
         hasPermission = true;
       }
     } else if (status.isPermanentlyDenied || status.isRestricted) {
+      print("denied");
       _customDialogService.showAppSettingsDialog(
         title: "Microphone Permission Required",
         description: "Please open your app settings and enable your microphone",
@@ -73,7 +80,10 @@ class PermissionHandlerService {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
 
     bool hasPermission = false;
-    PermissionStatus status = await Permission.calendar.status;
+    PermissionStatus status = await Permission.calendar.status.catchError((e) {
+      print(e);
+    });
+    ;
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {
@@ -95,7 +105,9 @@ class PermissionHandlerService {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
 
     bool hasPermission = false;
-    PermissionStatus status = await Permission.location.status;
+    PermissionStatus status = await Permission.location.status.catchError((e) {
+      print(e);
+    });
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {
@@ -117,7 +129,9 @@ class PermissionHandlerService {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
 
     bool hasPermission = false;
-    PermissionStatus status = await Permission.notification.status;
+    PermissionStatus status = await Permission.notification.status.catchError((e) {
+      print(e);
+    });
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {

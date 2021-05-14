@@ -1,26 +1,58 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.webblen.events.webblen">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
-    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Permissions options for the `camera` group -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- Permissions options for the `microphone` or `speech` group -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Permissions options for the `internet & network state` group -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <!-- Permissions options for the `vending` group -->
     <uses-permission android:name="com.android.vending.BILLING" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+    <!-- Permissions options for the `calendar` group -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+    <!-- Permissions options for the `storage` group -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+
+    <!-- Permissions options for the `accessMediaLocation` group -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+
+    <!-- Permissions options for the `location` group -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!-- Permissions options for the `bluetooth` group -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <!-- Permissions options for the `phone` group -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 
     <application
-        android:name=".Application"
+        android:name="io.flutter.app.FlutterApplication"
         android:label="webblen"
         android:icon="@mipmap/ic_launcher">
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="high_importance_channel" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_notification" />
+
         <activity
-            android:name=".MainActivity"
+            android:name="com.webblen.events.webblen.MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -56,9 +88,6 @@
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-2136415475966451~9434499178"/>
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
@@ -83,8 +112,6 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <meta-data
-            android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="high_importance_channel" />
+
     </application>
 </manifest>

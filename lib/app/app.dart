@@ -359,6 +359,7 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
       classType: ThemeService,
       resolveUsing: ThemeService.getInstance,
     ),
+    LazySingleton(classType: PermissionHandlerService),
     LazySingleton(classType: NavigationService),
     LazySingleton(classType: DialogService),
     LazySingleton(classType: BottomSheetService),
@@ -390,7 +391,6 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
     LazySingleton(classType: ShareService),
     LazySingleton(classType: ActivityDataService),
     LazySingleton(classType: UserPreferenceDataService),
-    LazySingleton(classType: PermissionHandlerService),
     LazySingleton(classType: GiftDonationDataService),
     LazySingleton(classType: AgoraLiveStreamService),
 

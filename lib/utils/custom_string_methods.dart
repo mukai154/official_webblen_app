@@ -68,3 +68,23 @@ List<String> getListOfUsernamesFromString(String val) {
   });
   return usernames;
 }
+
+String getGiftAmountFromGiftID(int id) {
+  String giftAmount = "1.00";
+  if (id == 1) {
+    giftAmount = "0.10";
+  } else if (id == 2) {
+    giftAmount = "0.50";
+  } else if (id == 3) {
+    giftAmount = "5.00";
+  } else if (id == 4) {
+    giftAmount = "25.00";
+  } else if (id == 5) {
+    giftAmount = "50.00";
+  } else if (id == 6) {
+    giftAmount = "100.00";
+  } else if (id == 7) {
+    giftAmount = "500.00";
+  }
+  return giftAmount;
+}

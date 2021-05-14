@@ -28,16 +28,6 @@ class OnboardingPathSelectView extends StatelessWidget {
                 freeze: true,
                 onChange: (val) {
                   model.updatePageNum(val);
-                  if (model.pageNum == 0) {
-                    model.showNextButton = true;
-                  } else {
-                    model.showNextButton = false;
-                  }
-                  if (model.pageNum == 1) {
-                    model.showSkipButton = true;
-                  } else {
-                    model.showSkipButton = false;
-                  }
                   if (model.pageNum == 0 || model.pageNum == 1 || model.pageNum == 2) {
                     model.updateImgFlex(3);
                   } else {
@@ -46,7 +36,7 @@ class OnboardingPathSelectView extends StatelessWidget {
                 },
                 onDone: () {},
                 onSkip: () => model.navigateToNextPage(),
-                showSkipButton: model.showSkipButton,
+                showSkipButton: false,
                 showNextButton: model.showNextButton,
                 skipFlex: 0,
                 nextFlex: 0,
@@ -96,9 +86,9 @@ class _OnboardingImage extends StatelessWidget {
 class OnboardingPathSelectPages {
   PageDecoration pageDecoration = PageDecoration(
     contentMargin: EdgeInsets.all(0),
-    titleTextStyle: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w700),
-    bodyTextStyle: TextStyle(fontSize: 16.0),
-    titlePadding: EdgeInsets.only(top: 16.0, bottom: 8.0, left: 16, right: 16),
+    titleTextStyle: TextStyle(fontSize: 18.0, fontWeight: FontWeight.w700),
+    bodyTextStyle: TextStyle(fontSize: 14.0),
+    titlePadding: EdgeInsets.only(top: 8.0, bottom: 8.0, left: 16, right: 16),
     imageFlex: 1,
     descriptionPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
     pageColor: Colors.white,
@@ -310,7 +300,7 @@ class OnboardingPathSelectPages {
             Text(
               "The Culture of ${model.areaName}\nis in Your Hands",
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.w700),
             )
           ],
         ),
@@ -318,7 +308,7 @@ class OnboardingPathSelectPages {
       bodyWidget: Text(
         "How Would You Like to Be Involved?",
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 18.0, height: 1.5),
+        style: TextStyle(fontSize: 14.0, height: 1.5),
       ),
       image: _OnboardingImage(assetName: 'city_buildings'),
       decoration: pageDecoration,
@@ -330,7 +320,7 @@ class OnboardingPathSelectPages {
               textColor: Colors.black,
               backgroundColor: Colors.white,
               width: 300.0,
-              height: 45.0,
+              height: 40.0,
               onPressed: () => model.transitionToEventHostPath(),
               isBusy: false,
             ),
@@ -340,7 +330,7 @@ class OnboardingPathSelectPages {
               textColor: Colors.black,
               backgroundColor: Colors.white,
               width: 300.0,
-              height: 45.0,
+              height: 40.0,
               onPressed: () => model.transitionToStreamerPath(),
               isBusy: false,
             ),
@@ -350,7 +340,7 @@ class OnboardingPathSelectPages {
               textColor: Colors.black,
               backgroundColor: Colors.white,
               width: 300.0,
-              height: 45.0,
+              height: 40.0,
               onPressed: () => model.transitionToExplorerPath(),
               isBusy: false,
             ),

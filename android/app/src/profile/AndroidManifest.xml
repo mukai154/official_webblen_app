@@ -4,4 +4,40 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Permissions options for the `camera` group -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+
+    <!-- Permissions options for the `microphone` or `speech` group -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+
+    <!-- Permissions options for the `internet & network state` group -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Permissions options for the `vending` group -->
+    <uses-permission android:name="com.android.vending.BILLING" />
+
+    <!-- Permissions options for the `calendar` group -->
+    <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <uses-permission android:name="android.permission.WRITE_CALENDAR" />
+
+    <!-- Permissions options for the `storage` group -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
+
+    <!-- Permissions options for the `accessMediaLocation` group -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
+
+    <!-- Permissions options for the `location` group -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <!-- Permissions options for the `bluetooth` group -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
+    <!-- Permissions options for the `phone` group -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
 </manifest>

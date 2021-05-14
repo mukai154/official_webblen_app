@@ -32,7 +32,6 @@ class MyTicketsViewModel extends ReactiveViewModel {
   initialize() async {
     setBusy(true);
     List<WebblenEventTicket> purchasedTickets = await _ticketDistroDataService.getPurchasedTickets(user.id!);
-    print(purchasedTickets);
     organizeNumOfTicketsByEvent(purchasedTickets);
     setBusy(false);
   }
@@ -50,10 +49,6 @@ class MyTicketsViewModel extends ReactiveViewModel {
           'eventEndTime': ticket.endTime!,
           'eventTimezone': ticket.timezone!,
         });
-        // WebblenEvent event = await EventDataService().getEventByID(ticket.eventID!);
-        // if (event.isValid()) {
-        //   events.add(event);
-        // }
       }
       if (ticsPerEvent[ticket.eventID] == null) {
         ticsPerEvent[ticket.eventID!] = 1;

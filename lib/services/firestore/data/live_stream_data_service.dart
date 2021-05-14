@@ -196,6 +196,44 @@ class LiveStreamDataService {
     return token;
   }
 
+  addToActiveViewers({required String uid, required String streamID}) async {
+    String? error;
+    DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
+      error = e.message;
+      print(error);
+    });
+    if (error != null) {
+      return;
+    }
+    Map<String, dynamic>? docData = snapshot.data();
+    List viewers = docData!['activeViewers'] == null ? [] : docData!['activeViewers'].toList(growable: true);
+    if (!viewers.contains(uid)) {
+      viewers.add(uid);
+      streamsRef.doc(streamID).update({'activeViewers': viewers}).catchError((e) {
+        print(e.message);
+      });
+    }
+  }
+
+  removeFromActiveViewers({required String uid, required String streamID}) async {
+    String? error;
+    DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
+      error = e.message;
+      print(error);
+    });
+    if (error != null) {
+      return;
+    }
+    Map<String, dynamic>? docData = snapshot.data();
+    List viewers = docData!['activeViewers'] == null ? [] : docData!['activeViewers'].toList(growable: true);
+    if (viewers.contains(uid)) {
+      viewers.remove(uid);
+      streamsRef.doc(streamID).update({'activeViewers': viewers}).catchError((e) {
+        print(e.message);
+      });
+    }
+  }
+
   Future<bool> checkIntoStream({required String uid, required String streamID}) async {
     bool checkedIn = false;
     DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {

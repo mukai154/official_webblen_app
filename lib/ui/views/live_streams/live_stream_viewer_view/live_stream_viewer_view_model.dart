@@ -137,8 +137,6 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     }, joinChannelSuccess: (channel, uid, elapsed) async {
       //enable wakelock
       print('joinChannelSuccess $channel $uid $elapsed');
-      showWaitingRoom = false;
-      notifyListeners();
       await Wakelock.enable();
     }, leaveChannel: (stats) {
       //leave channel
@@ -155,6 +153,9 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
       notifyListeners();
     }, firstRemoteVideoFrame: (uid, width, height, elapsed) {
       //video started
+      if (webblenLiveStream.activeViewers == null || !webblenLiveStream.activeViewers!.contains(user.id!)) {
+        _liveStreamDataService.addToActiveViewers(uid: user.id!, streamID: webblenLiveStream.id!);
+      }
       showWaitingRoom = false;
       notifyListeners();
     }));
@@ -206,6 +207,9 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
   }
 
   endStream() async {
+    if (webblenLiveStream.activeViewers != null && webblenLiveStream.activeViewers!.contains(user.id!)) {
+      _liveStreamDataService.removeFromActiveViewers(uid: user.id!, streamID: webblenLiveStream.id!);
+    }
     await Wakelock.disable();
     agoraRtcEngine.leaveChannel();
     agoraRtcEngine.destroy();

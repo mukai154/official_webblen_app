@@ -121,17 +121,4 @@ class StripeAccountBlockViewModel extends StreamViewModel<UserStripeInfo> with R
       }
     }
   }
-
-  ///NAVIGATION
-  navigateToCreatePostPage() {
-    // _navigationService.navigateTo(Routes.CreatePostViewRoute);
-  }
-
-  navigateToRedeemedRewardsView() {
-    //_navigationService.navigateTo(Routes.RedeemedRewardsViewRoute, arguments: {'currentUser': webblenBaseViewModel.user});
-  }
-
-  navigateToCreateEventPage() {
-    // _navigationService.navigateTo(Routes.CreateEventViewRoute);
-  }
 }

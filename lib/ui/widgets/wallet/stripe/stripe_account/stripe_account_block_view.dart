@@ -92,9 +92,9 @@ class _StripeAccountPendingBlock extends StatelessWidget {
                             ),
                             padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                             child: Text(
-                              'Retrieving Account Status...',
+                              'One Moment...',
                               style: TextStyle(
-                                fontSize: 12.0,
+                                fontSize: 10.0,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w500,
                               ),

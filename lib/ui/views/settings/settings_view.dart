@@ -37,6 +37,14 @@ class SettingsView extends StatelessWidget {
                 textAlign: TextAlign.left,
               ),
               CustomFlatButton(
+                onTap: () => model.openPermissionsAndSettings(),
+                fontColor: appFontColor(),
+                fontSize: 16,
+                text: "Device Permissions & Settings",
+                showBottomBorder: true,
+                textAlign: TextAlign.left,
+              ),
+              CustomFlatButton(
                 onTap: () => model.signOut(),
                 fontColor: Colors.red,
                 fontSize: 16,

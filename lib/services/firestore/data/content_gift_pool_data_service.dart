@@ -94,7 +94,7 @@ class ContentGiftPoolDataService {
       //log donation
       giftPoolRef.doc(giftPoolID).collection('logs').doc(timePostedInMilliseconds.toString()).set({
         'senderUsername': user.username,
-        'message': "@${user.username}\nGifted $amount WBLN",
+        'message': "@${user.username}\nGifted ${amount!.toStringAsFixed(2)} WBLN",
         'giftID': giftID,
         'timePostedInMilliseconds': timePostedInMilliseconds,
       });

@@ -288,11 +288,25 @@ class CreateEventViewModel extends ReactiveViewModel {
         bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
         if (hasCameraPermission) {
           fileToUpload = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        } else {
+          if (Platform.isAndroid) {
+            _customDialogService.showAppSettingsDialog(
+              title: "Camera Permission Required",
+              description: "Please open your app settings and enable your camera",
+            );
+          }
         }
       } else if (source == "gallery") {
         bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
         if (hasPhotosPermission) {
           fileToUpload = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        } else {
+          if (Platform.isAndroid) {
+            _customDialogService.showAppSettingsDialog(
+              title: "Photos Permission Required",
+              description: "Please open your app settings and enable access to your photos",
+            );
+          }
         }
       }
 

@@ -68,23 +68,29 @@ class EditProfileViewModel extends ReactiveViewModel {
         bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
         if (hasCameraPermission) {
           updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        } else {
+          if (Platform.isAndroid) {
+            _customDialogService.showAppSettingsDialog(
+              title: "Camera Permission Required",
+              description: "Please open your app settings and enable access to your camera",
+            );
+          }
         }
       } else if (source == "gallery") {
         bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
         if (hasPhotosPermission) {
           updatedProfilePicFile = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        } else {
+          if (Platform.isAndroid) {
+            _customDialogService.showAppSettingsDialog(
+              title: "Photo storage Permission Required",
+              description: "Please open your app settings and enable access to your photo storage",
+            );
+          }
         }
       }
 
       notifyListeners();
-
-      if (updatedProfilePicFile != null) {
-        String? imageURL =
-            await _firestoreStorageService.uploadImage(img: updatedProfilePicFile!, storageBucket: "images", folderName: "users", fileName: user.id!);
-        if (imageURL != null) {
-          await _userDataService.updateProfilePicURL(id: user.id!, url: imageURL);
-        }
-      }
     }
   }
 
@@ -105,6 +111,14 @@ class EditProfileViewModel extends ReactiveViewModel {
     notifyListeners();
     bool updateSuccessful = true;
 
+    //update image
+    if (updatedProfilePicFile != null) {
+      String? imageURL =
+          await _firestoreStorageService.uploadImage(img: updatedProfilePicFile!, storageBucket: "images", folderName: "users", fileName: user.id!);
+      if (imageURL != null) {
+        await _userDataService.updateProfilePicURL(id: user.id!, url: imageURL);
+      }
+    }
     //update bio
     updateSuccessful = await _userDataService.updateBio(id: user.id!, bio: bioTextController.text.trim());
 

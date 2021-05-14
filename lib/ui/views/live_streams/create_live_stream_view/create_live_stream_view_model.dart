@@ -15,6 +15,7 @@ import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
@@ -30,6 +31,7 @@ import 'package:webblen/utils/webblen_image_picker.dart';
 
 class CreateLiveStreamViewModel extends BaseViewModel {
   CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
   DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
@@ -239,11 +241,25 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
         if (hasCameraPermission) {
           img = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+        } else {
+          if (Platform.isAndroid) {
+            _customDialogService.showAppSettingsDialog(
+              title: "Camera Permission Required",
+              description: "Please open your app settings and enable your camera",
+            );
+          }
         }
       } else if (source == "gallery") {
         bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
         if (hasPhotosPermission) {
           img = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+        } else {
+          if (Platform.isAndroid) {
+            _customDialogService.showAppSettingsDialog(
+              title: "Storage Permission Required",
+              description: "Please open your app settings and enable your access to your storage",
+            );
+          }
         }
       }
 

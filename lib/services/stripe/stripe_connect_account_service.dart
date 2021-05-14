@@ -51,9 +51,16 @@ class StripeConnectAccountService {
     if (locale == null) {
       print('create stripe connect account error');
     } else {
-      String country = locale.split('-')[1].toUpperCase();
-      String stripeConnectURL = 'https://us-central1-webblen-events.cloudfunctions.net/createWebblenStripeConnectAccount?uid=$uid&country=$country';
-      UrlHandler().launchInWebViewOrVC(stripeConnectURL);
+      String? country;
+      if (locale.contains("-")) {
+        country = locale.split('-')[1].toUpperCase();
+      } else if (locale.contains('_')) {
+        country = locale.split('_')[1].toUpperCase();
+      }
+      if (country != null) {
+        String stripeConnectURL = 'https://us-central1-webblen-events.cloudfunctions.net/createWebblenStripeConnectAccount?uid=$uid&country=$country';
+        UrlHandler().launchInWebViewOrVC(stripeConnectURL);
+      }
     }
   }
 

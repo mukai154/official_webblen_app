@@ -5,14 +5,17 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked/stacked_annotations.dart';
+import 'package:stacked_hooks/stacked_hooks.dart';
 import 'package:webblen/ui/views/live_streams/live_stream_host_view/live_stream_host_view_model.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/check_in_count_box.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/video_streaming_status.dart';
 import 'package:webblen/ui/widgets/live_streams/video_ui/viewer_count_box.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class LiveStreamHostView extends StatefulWidget {
   final String? id;
@@ -111,7 +114,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
               children: [
                 LiveNowBox(),
                 SizedBox(width: 8.0),
-                ViewerCountBox(viewCount: 1),
+                ViewerCountBox(viewCount: model.webblenLiveStream.activeViewers == null ? 0 : model.webblenLiveStream.activeViewers!.length),
                 SizedBox(width: 8.0),
                 CheckInCountBox(checkInCount: model.webblenLiveStream.attendees == null ? 0 : model.webblenLiveStream.attendees!.length),
               ],
@@ -439,78 +442,6 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
       );
     }
 
-    Widget giftsAndDonationsStream(LiveStreamHostViewModel model) {
-      return Container(
-        margin: EdgeInsets.only(bottom: 50),
-        alignment: Alignment.centerLeft,
-        child: FractionallySizedBox(
-          heightFactor: 0.3,
-          child: Container(
-            child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection("webblen_content_gift_pools")
-                  .doc(model.webblenLiveStream.id)
-                  .collection("logs")
-                  .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
-                  .orderBy("timePostedInMilliseconds", descending: false)
-                  .snapshots(),
-              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return Container();
-                return ListView.builder(
-                  //controller: chatViewController,
-                  itemCount: 1, //snapshot.data.docs.length,
-                  itemBuilder: (context, index) {
-                    int? giftID = snapshot.data!.docs.last.data()['giftID'];
-                    String? message = snapshot.data!.docs.last.data()['message'].toStringAsFixed(2);
-                    giftAnimationController.forward();
-                    return FadeTransition(
-                      opacity: giftAnimation as Animation<double>,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width - 32,
-                        child: Column(
-                          children: [
-                            Container(
-                              height: 50,
-                              width: 50,
-                              child: Image.asset(
-                                giftID == 1
-                                    ? 'assets/images/heart_icon.png'
-                                    : giftID == 2
-                                        ? 'assets/images/double_heart_icon.png'
-                                        : giftID == 3
-                                            ? 'assets/images/confetti_icon.png'
-                                            : giftID == 4
-                                                ? 'assets/images/dj_icon.png'
-                                                : giftID == 5
-                                                    ? 'assets/images/wolf_icon.png'
-                                                    : giftID == 6
-                                                        ? 'assets/images/eagle_icon.png'
-                                                        : giftID == 7
-                                                            ? 'assets/images/heart_fire_icon.png'
-                                                            : 'assets/images/webblen_coin.png',
-                              ),
-                            ),
-                            CustomText(
-                              text: message,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                        //color: Colors.green,
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        ),
-      );
-    }
-
     return ViewModelBuilder<LiveStreamHostViewModel>.reactive(
       onModelReady: (model) => model.initialize(widget.id!),
       onDispose: () => LiveStreamHostViewModel().endStream(),
@@ -537,7 +468,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                         )
                       : viewRows(model), // Video Widget
                   if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) streamHeader(model),
-                  if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) giftsAndDonationsStream(model),
+                  if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) _GiftsAndDonationsAnimator(),
                   if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) messageList(model),
                   if (!model.endingStream && !model.isBusy && model.webblenLiveStream.isValid()) bottomBar(model), // send message
                   if (model.endingStream && !model.isBusy) endLive(model), //
@@ -546,6 +477,90 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GiftsAndDonationsAnimator extends HookViewModelWidget<LiveStreamHostViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, LiveStreamHostViewModel model) {
+    AnimationController _animationController = useAnimationController(duration: Duration(milliseconds: 2500));
+    Animation<double> _giftAnimation = CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+    _animationController.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        _animationController.reverse();
+      }
+    });
+
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        alignment: Alignment.center,
+        constraints: BoxConstraints(
+          maxHeight: 300,
+          maxWidth: 500,
+        ),
+        child: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection("webblen_content_gift_pools")
+              .doc(model.webblenLiveStream.id)
+              .collection("logs")
+              .where('timePostedInMilliseconds', isGreaterThan: DateTime.now().millisecondsSinceEpoch - 30000)
+              .orderBy("timePostedInMilliseconds", descending: false)
+              .snapshots(),
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) return Container();
+            return ListView.builder(
+              shrinkWrap: true,
+              itemCount: 1,
+              itemBuilder: (context, index) {
+                int? giftID = snapshot.data!.docs.last.data()['giftID'];
+                String? senderUsername = snapshot.data!.docs.last.data()['senderUsername'];
+                _animationController.forward();
+                return FadeTransition(
+                  opacity: _giftAnimation,
+                  child: Container(
+                    child: Column(
+                      children: [
+                        Container(
+                          height: 50,
+                          width: 50,
+                          child: Image.asset(
+                            giftID == 1
+                                ? 'assets/images/heart_icon.png'
+                                : giftID == 2
+                                    ? 'assets/images/double_heart_icon.png'
+                                    : giftID == 3
+                                        ? 'assets/images/confetti_icon.png'
+                                        : giftID == 4
+                                            ? 'assets/images/dj_icon.png'
+                                            : giftID == 5
+                                                ? 'assets/images/wolf_icon.png'
+                                                : giftID == 6
+                                                    ? 'assets/images/eagle_icon.png'
+                                                    : giftID == 7
+                                                        ? 'assets/images/heart_fire_icon.png'
+                                                        : 'assets/images/webblen_coin.png',
+                          ),
+                        ),
+                        Container(
+                          child: CustomText(
+                            text: "@$senderUsername gifted ${getGiftAmountFromGiftID(giftID!)} WBLN",
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            );
+          },
         ),
       ),
     );

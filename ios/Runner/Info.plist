@@ -83,6 +83,10 @@
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
 	<string>Webblen Would Like Access to Your Media to Save and Access Audio/Video You've Recorded</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Webblen Would Like Access to Use Bluetooth to Notify You When You Can Check into Events</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Webblen Would Like Access to Use Bluetooth to Check into Events</string>
 	<key>NSCalendarsUsageDescription</key>
 	<string>Webblen Would Like Access to Your Calendar to Add Events</string>
 	<key>NSCameraUsageDescription</key>

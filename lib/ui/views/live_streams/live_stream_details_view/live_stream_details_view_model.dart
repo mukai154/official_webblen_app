@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
@@ -16,6 +19,7 @@ import 'package:webblen/utils/add_to_calendar.dart';
 import 'package:webblen/utils/url_handler.dart';
 
 class LiveStreamDetailsViewModel extends BaseViewModel {
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
   CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
@@ -162,6 +166,20 @@ class LiveStreamDetailsViewModel extends BaseViewModel {
       print(hasMicrophonePermission);
       if (hasMicrophonePermission) {
         _customNavigationService.navigateToLiveStreamHostView(id);
+      } else {
+        if (Platform.isAndroid) {
+          _customDialogService.showAppSettingsDialog(
+            title: "Microphone Permission Required",
+            description: "Please open your app settings and enable access to your microphone",
+          );
+        }
+      }
+    } else {
+      if (Platform.isAndroid) {
+        _customDialogService.showAppSettingsDialog(
+          title: "Camera Permission Required",
+          description: "Please open your app settings and enable your camera",
+        );
       }
     }
   }

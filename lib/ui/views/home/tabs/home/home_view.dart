@@ -24,6 +24,7 @@ class HomeView extends StatelessWidget {
       initialiseSpecialViewModelsOnce: true,
       viewModelBuilder: () => locator<HomeViewModel>(),
       builder: (context, model, child) => Container(
+        width: screenWidth(context),
         height: screenHeight(context),
         color: appBackgroundColor(),
         child: SafeArea(
@@ -76,13 +77,13 @@ class _HomeHead extends HookViewModelWidget<HomeViewModel> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            width: 200,
+          Expanded(
+            flex: 3,
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                " ${model.cityName}",
+                "${model.cityName}",
                 style: TextStyle(
                   color: appFontColor(),
                   fontWeight: FontWeight.bold,
@@ -91,21 +92,24 @@ class _HomeHead extends HookViewModelWidget<HomeViewModel> {
               ),
             ),
           ),
-          Row(
-            children: [
-              NotificationBellView(uid: model.user.id),
-              horizontalSpaceSmall,
-              IconButton(
-                iconSize: 20,
-                onPressed: () => model.customBottomSheetService.openFilter(),
-                icon: Icon(FontAwesomeIcons.slidersH, color: appIconColor()),
-              ),
-              IconButton(
-                iconSize: 20,
-                onPressed: () => model.customBottomSheetService.showAddContentOptions(),
-                icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
-              ),
-            ],
+          Expanded(
+            flex: 2,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                NotificationBellView(uid: model.user.id),
+                IconButton(
+                  iconSize: 20,
+                  onPressed: () => model.customBottomSheetService.openFilter(),
+                  icon: Icon(FontAwesomeIcons.slidersH, color: appIconColor()),
+                ),
+                IconButton(
+                  iconSize: 20,
+                  onPressed: () => model.customBottomSheetService.showAddContentOptions(),
+                  icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
+                ),
+              ],
+            ),
           ),
         ],
       ),
