@@ -100,7 +100,7 @@ class ContentGiftPoolDataService {
       });
       //Update user balance;
       double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN!;
-      double newBalance = initialBalance - amount!;
+      double newBalance = initialBalance - amount;
       await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
         print(e.message);
         //error = e.toString();

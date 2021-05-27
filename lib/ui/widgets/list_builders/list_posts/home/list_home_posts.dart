@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
@@ -9,21 +10,14 @@ import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts
 import 'package:webblen/ui/widgets/posts/post_img_block/post_img_block_view.dart';
 import 'package:webblen/ui/widgets/posts/post_text_block/post_text_block_view.dart';
 
-class ListHomePosts extends StatefulWidget {
-  @override
-  _ListHomePostsState createState() => _ListHomePostsState();
-}
-
-class _ListHomePostsState extends State<ListHomePosts> with AutomaticKeepAliveClientMixin {
-  @override
-  bool get wantKeepAlive => true;
-
+class ListHomePosts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return ViewModelBuilder<ListHomePostsModel>.reactive(
+      fireOnModelReadyOnce: true,
+      disposeViewModel: false,
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => ListHomePostsModel(),
+      viewModelBuilder: () => locator<ListHomePostsModel>(),
       builder: (context, model, child) => model.isBusy
           ? Container()
           : model.dataResults.isEmpty
@@ -69,7 +63,7 @@ class _ListHomePostsState extends State<ListHomePosts> with AutomaticKeepAliveCl
                         } else {
                           if (model.moreDataAvailable) {
                             WidgetsBinding.instance!.addPostFrameCallback((_) {
-                             model.loadAdditionalData();
+                              model.loadAdditionalData();
                             });
                             return Align(
                               alignment: Alignment.center,

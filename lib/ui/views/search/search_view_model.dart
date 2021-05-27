@@ -92,18 +92,17 @@ class SearchViewModel extends BaseViewModel {
   }
 
   navigateToUserView(Map<String, dynamic> userData) {
-    _algoliaSearchService!.storeSearchTerm(uid: user.id!, searchTerm: userData['username']);
+    _algoliaSearchService.storeSearchTerm(uid: user.id!, searchTerm: userData['username']);
     _navigationService.navigateTo(Routes.UserProfileView(id: userData['id']));
   }
 
   navigateToLiveStreamView(Map<String, dynamic> streamData) {
-    _algoliaSearchService!.storeSearchTerm(uid: user.id!, searchTerm: streamData['name']);
+    _algoliaSearchService.storeSearchTerm(uid: user.id!, searchTerm: streamData['name']);
     _navigationService.navigateTo(Routes.LiveStreamViewRoute(id: streamData['id']));
   }
 
   navigateToEventView(Map<String, dynamic> eventData) {
-    print(eventData);
-    _algoliaSearchService!.storeSearchTerm(uid: user.id!, searchTerm: eventData['name']);
+    _algoliaSearchService.storeSearchTerm(uid: user.id!, searchTerm: eventData['name']);
     _navigationService.navigateTo(Routes.EventViewRoute(id: eventData['id']));
   }
 

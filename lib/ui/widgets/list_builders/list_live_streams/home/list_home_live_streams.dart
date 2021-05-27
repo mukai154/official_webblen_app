@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
@@ -13,8 +14,10 @@ class ListHomeLiveStreams extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<ListHomeLiveStreamsModel>.reactive(
+      fireOnModelReadyOnce: true,
+      disposeViewModel: false,
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => ListHomeLiveStreamsModel(),
+      viewModelBuilder: () => locator<ListHomeLiveStreamsModel>(),
       builder: (context, model, child) => model.isBusy
           ? Container()
           : model.dataResults.isEmpty

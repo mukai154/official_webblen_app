@@ -97,7 +97,11 @@ class CustomBottomSheetService {
     WebblenUser user = _reactiveUserService.user;
     var sheetResponse = await _bottomSheetService.showCustomSheet(
       barrierDismissible: true,
-      customData: content is WebblenEvent && user.id == content.authorID && content.hasTickets! ? {'checkInAttendees': true} : {'checkInAttendees': false},
+      customData: content is WebblenEvent && user.id == content.authorID && content.hasTickets!
+          ? {'checkInAttendees': true, 'canDuplicate': true}
+          : content is WebblenEvent || content is WebblenLiveStream
+              ? {'checkInAttendees': false, 'canDuplicate': true}
+              : {'checkInAttendees': false, 'canDuplicate': false},
       variant: content is WebblenLiveStream
           ? user.id == content.hostID
               ? BottomSheetType.contentAuthorOptions
@@ -157,6 +161,14 @@ class CustomBottomSheetService {
       } else if (res == "check in") {
         //scanner content
         _navigationService.navigateTo(Routes.CheckInAttendeesViewRoute(id: content.id));
+      } else if (res == "duplicate") {
+        if (content is WebblenEvent) {
+          //duplicate event
+          _navigationService.navigateTo(Routes.CreateEventViewRoute(id: "duplicate_${content.id}", promo: 0));
+        } else if (content is WebblenLiveStream) {
+          //duplicate stream
+          _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: "duplicate_${content.id}", promo: 0));
+        }
       } else if (res == "delete") {
         //delete content
         bool deletedContent = await deleteContentConfirmation(content: content);
