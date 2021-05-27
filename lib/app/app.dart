@@ -76,6 +76,9 @@ import 'package:webblen/ui/views/users/followers/user_followers_view.dart';
 import 'package:webblen/ui/views/users/following/user_following_view.dart';
 import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
 import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
+import 'package:webblen/ui/widgets/list_builders/list_events/home/list_home_events_model.dart';
+import 'package:webblen/ui/widgets/list_builders/list_live_streams/home/list_home_live_streams_model.dart';
+import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts_model.dart';
 
 @StackedApp(
   routes: [
@@ -405,6 +408,9 @@ import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
     Singleton(classType: HomeViewModel),
     Singleton(classType: RecentSearchViewModel),
     Singleton(classType: WalletViewModel),
+    Singleton(classType: ListHomePostsModel),
+    Singleton(classType: ListHomeLiveStreamsModel),
+    Singleton(classType: ListHomeEventsModel),
   ],
 )
 class AppSetup {

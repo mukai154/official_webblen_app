@@ -295,4 +295,46 @@ class WebblenNotification {
     );
     return notif;
   }
+
+  //Ticket Purchased Notification
+  WebblenNotification generateTicketsPurchasedNotification({
+    required String eventID,
+    required String eventTitle,
+    required String uid,
+    required int numberOfTickets,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: uid,
+      senderUID: eventID,
+      type: NotificationType.tickets,
+      header: "Tickets Purchased!",
+      subHeader: "You've purchased $numberOfTickets ticket(s) for the event: $eventTitle",
+      additionalData: null,
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
+
+  //Ticket Sold Notification
+  WebblenNotification generateTicketsSoldNotification({
+    required String receiverUID,
+    required String senderUID,
+    required String eventTitle,
+    required int numberOfTickets,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: receiverUID,
+      senderUID: senderUID,
+      type: NotificationType.earnings,
+      header: "Tickets Sold!",
+      subHeader: "You've sold $numberOfTickets ticket(s) for your event: $eventTitle",
+      additionalData: null,
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
 }

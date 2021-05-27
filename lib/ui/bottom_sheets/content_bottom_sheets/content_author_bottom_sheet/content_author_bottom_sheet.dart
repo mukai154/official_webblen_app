@@ -55,6 +55,20 @@ class ContentAuthorBottomSheet extends StatelessWidget {
               isBusy: false,
             ),
             verticalSpaceSmall,
+            request!.customData != null && request!.customData['canDuplicate']
+                ? CustomButton(
+                    onPressed: () => completer!(SheetResponse(responseData: "duplicate")),
+                    text: "Duplicate",
+                    textSize: 16,
+                    textColor: appFontColor(),
+                    height: 45,
+                    width: screenWidth(context),
+                    backgroundColor: appBackgroundColor(),
+                    elevation: 1.0,
+                    isBusy: false,
+                  )
+                : Container(),
+            request!.customData != null && request!.customData['canDuplicate'] ? verticalSpaceSmall : Container(),
             CustomButton(
               onPressed: () => completer!(SheetResponse(responseData: "share")),
               text: "Share",

@@ -97,7 +97,7 @@ class CreateLiveStreamView extends StatelessWidget {
         ? ImagePreviewButton(
             onTap: () => model.selectImage(),
             file: null,
-            imgURL: model.stream!.imageURL,
+            imgURL: model.stream.imageURL,
             height: screenWidth(context),
             width: screenWidth(context),
           )

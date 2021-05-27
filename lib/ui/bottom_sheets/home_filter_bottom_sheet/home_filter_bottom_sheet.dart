@@ -92,7 +92,7 @@ class HomeFilterBottomSheet extends HookWidget {
                     direction: AxisDirection.up,
                     textFieldConfiguration: TextFieldConfiguration(
                       controller: location,
-                      cursorColor: Colors.black,
+                      cursorColor: appCursorColor(),
                       decoration: InputDecoration(
                         hintText: model.tempCityName.isEmpty ? "Search Location" : model.tempCityName,
                         border: InputBorder.none,

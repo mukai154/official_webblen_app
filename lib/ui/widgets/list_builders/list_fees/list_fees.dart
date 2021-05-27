@@ -84,7 +84,7 @@ class ListFeesForEditing extends StatelessWidget {
           ListView.builder(
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            itemCount: ticketDistro!.fees!.length,
+            itemCount: ticketDistro.fees!.length,
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
@@ -96,7 +96,7 @@ class ListFeesForEditing extends StatelessWidget {
                       child: Container(
                         margin: EdgeInsets.only(right: 4),
                         child: CustomText(
-                          text: ticketDistro!.fees![index]["feeName"],
+                          text: ticketDistro.fees![index]["feeName"],
                           color: appFontColor(),
                           fontSize: 12.0,
                           fontWeight: FontWeight.w500,
@@ -114,7 +114,7 @@ class ListFeesForEditing extends StatelessWidget {
                       child: Container(
                         margin: EdgeInsets.only(right: 4),
                         child: CustomText(
-                          text: ticketDistro!.fees![index]["feePrice"],
+                          text: ticketDistro.fees![index]["feePrice"],
                           color: appFontColor(),
                           textAlign: TextAlign.right,
                           fontSize: 12.0,
