@@ -4,98 +4,114 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.7.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  #Firestore Dependencies
-  cloud_firestore: ^0.14.3
-  firebase_storage: ^5.0.1
-  firebase_auth: ^0.18.3
-  firebase_messaging: ^7.0.3
-  firebase_dynamic_links: ^0.6.2
-  cloud_functions: ^0.7.0+1
-  flutter_native_admob: ^2.1.0+3
+  #ARCHITECTURE
+  stacked: ^2.1.0
+  stacked_services: ^0.8.3
+  stacked_themes: ^0.3.2
+  stacked_hooks: ^0.2.0
+  flutter_hooks: ^0.16.0
 
-  #Analytics
-  firebase_analytics: ^6.0.2
-  facebook_app_events: ^0.7.1
+  #FIRESTORE/FIREBASE
+  firebase_core: ^1.1.0
+  firebase_auth: ^1.1.4
+  firebase_auth_oauth: ^1.0.1
+  firebase_dynamic_links: ^2.0.2
+  firebase_messaging: ^9.1.3
+  firebase_storage: ^8.0.5
+  cloud_functions: ^1.0.5
+  cloud_firestore: ^1.0.7
 
-  #Payment Dependencies
-  flutter_credit_card: 0.1.1
-  flutter_inapp_purchase: ^2.2.0
-  stripe_sdk: ^2.4.2
-  flutter_appauth: ^0.6.0
+  #ANALYTICS
+  firebase_analytics: ^8.0.2
+  facebook_app_events: ^0.12.0
 
-  #Social Dependencies
-  google_sign_in: ^4.5.9
-  flutter_facebook_auth: ^0.3.2
-  apple_sign_in: ^0.1.0
+  #SOCIAL DEPENDENCIES
+  google_sign_in: ^5.0.2
+  flutter_facebook_auth: ^3.3.2+2
 
-  #Location Dependencies
-  location: ^3.0.2
-  location_permissions: ^3.0.0
-  geoflutterfire: ^2.2.1
-  geocoder: ^0.2.1
-  #flutter_background_geolocation: ^1.3.2
-  flutter_google_places: ^0.2.6
-  google_maps_webservice: ^0.0.15
+  #HTTP REQUESTS
+  http:
 
-  #Image Dependencies
-  cached_network_image: ^2.0.0-rc
-  image_cropper: ^1.1.0
-  image_picker: ^0.6.7+11
-  flutter_image_compress: ^0.7.0
-  image_gallery_saver: '^1.6.7'
+  #ADD CANCELLABLE ACTIONS TO ASYNC
+  async:
 
-  #Video Dependencies
-  agora_rtc_engine: ^3.1.4-rc.0
-  flick_video_player: ^0.1.1
-  video_compress: "2.0.0"
+  #FULL TEXT SEARCH
+  algolia: ^1.0.1
 
-  #QR READ/RENDER
-  qr_flutter: ^3.1.0
-  qr_code_scanner:
+  #STREAM & VIDEO
+  agora_rtc_engine: ^4.0.0-rc.3
+
+  #PHONE UTILITIES
+  url_launcher: ^6.0.3
+  share: ^2.0.1
+  permission_handler: ^7.1.0
+  app_settings: ^4.1.0
+  shared_preferences: ^2.0.5
+  wakelock: ^0.5.1
+  devicelocale: ^0.4.1
+  flutter_local_notifications: ^5.0.0+4
+
+
+  #IMAGES
+  transparent_image: ^2.0.0
+  cached_network_image: ^3.0.0
+  image_cropper: ^1.4.0
+  image_picker: ^0.7.4
+  flutter_image_compress: ^1.0.0
+  carousel_slider: ^4.0.0-nullsafety.0
+  image: ^3.0.2
+
+
+  #LOCATION
+  location: ^4.1.1
+  geolocator: ^7.0.3
+  geocode: ^1.0.1
+  geoflutterfire: ^3.0.0-nullsafety.2
+  google_place: ^0.4.0
+  google_maps_webservice: ^0.0.20-nullsafety.4
+  google_maps_flutter: ^2.0.3
+  maps_launcher: ^2.0.0
+
+  #DATE & TIME
+  flutter_calendar_carousel: ^2.0.0
+  add_2_calendar: ^2.1.0
+
+  #UI
+  font_awesome_flutter: ^9.0.0
+  shimmer: ^2.0.0
+
+  #FINANCE
+  flutter_credit_card: ^2.0.0
+  stripe_sdk: ^5.0.0-nullsafety.0
+  flutter_inapp_purchase: ^5.0.1
+
+  #OTHER
+  qr_flutter: ^4.0.0
+  qr_code_scanner: ^0.4.0
+  auto_size_text: ^3.0.0-nullsafety.0
+  flutter_typeahead: ^3.1.1
+  introduction_screen: ^2.1.0
+  flutter_masked_text2: ^0.9.1
+  mask_text_input_formatter: ^2.0.0-nullsafety.2
+  flutter_xlider:
     git:
-      url: git://github.com/juliuscanute/qr_code_scanner.git
-
-  #Phone Util Dependencies
-  flutter_local_notifications: ^0.8.4
-  url_launcher: ^5.4.1
-  share: ^0.6.1+1
-  flutter_sms: ^1.0.1
-  connectivity: ^0.4.4
-
-  #Date Time Dependencies
-  timezone: ^0.5.6
-  flutter_calendar_carousel: ^1.4.12
-
-  #Other Dependencies
-  rflutter_alert: ^1.0.3
-  provider: ^4.1.3
-  algolia: ^0.1.7
-  font_awesome_flutter: 8.5.0
-  liquid_pull_to_refresh: ^1.1.1
-  shimmer: ^1.0.1
-  flutter_masked_text: ^0.8.0
-  intl: ^0.16.0
-  random_string: ^1.1.0
-  wakelock: ^0.1.4+2
-  permission_handler: ^5.0.1+1
-  introduction_screen: ^1.0.9
-  adaptive_dialog: ^0.9.0
-  flutter_typeahead: ^1.8.8
-  carousel_pro: ^1.0.0
-  particles_flutter: "^0.1.1"
+      url: https://github.com/mukai154/flutter_xlider.git
+  intl_phone_field: ^2.0.0
+  liquid_pull_to_refresh: ^3.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+  build_runner:
+  stacked_generator: ^0.3.2
+
 
 # The following section is specific to Flutter.
 flutter:

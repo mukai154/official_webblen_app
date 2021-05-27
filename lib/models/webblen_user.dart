@@ -1,108 +1,159 @@
-class WebblenUser {
-  List blockedUsers;
-  String username;
-  String uid;
-  String profile_pic;
-  double webblen;
-  double eventPoints;
-  double impactPoints;
-  int lastCheckInTimeInMilliseconds;
-  List eventHistory;
-  List rewards;
-  List savedEvents;
-  List achievements;
-  int lastNotifInMilliseconds;
-  int messageNotificationCount;
-  int notificationCount;
-  int apLvl;
-  double ap;
-  int lastPayoutTimeInMilliseconds;
-  int eventsToLvlUp;
-  List following;
-  List followers;
-  List tags;
+import 'package:webblen/utils/custom_string_methods.dart';
+import 'package:webblen/utils/random_image_generator.dart';
 
-  // bool isCommunityBuilder;
-  // bool isNewCommunityBuilder;
-  // bool notifyFlashEvents;
-  // bool notifyFriendRequests;
-  // bool notifyHotEvents;
-  // bool notifySuggestedEvents;
-  // bool notifyWalletDeposits;
-  // bool notifyNewMessages;
+class WebblenUser {
+  // ignore: non_constant_identifier_names
+  double? WBLN;
+  List? achievements;
+  double? ap;
+  int? apLvl;
+  List? blockedUsers;
+  String? emailAddress;
+  int? eventsToLvlUp;
+  String? fbAccessToken;
+  List? mutedBy;
+  List? followers;
+  List? following;
+  String? googleAccessToken;
+  String? googleIDToken;
+  String? id;
+  bool? isAdmin;
+  String? profilePicURL;
+  String? username;
+  String? bio;
+  String? website;
+  bool? isPrivate;
+  List? recentSearchTerms;
+  bool? onboarded;
+  String? lastSeenZipcode;
+  String? lastSeenCity;
+  List? tags;
 
   WebblenUser({
-    this.blockedUsers,
-    this.username,
-    this.uid,
-    this.profile_pic,
-    this.webblen,
-    this.eventPoints,
-    this.impactPoints,
-    this.lastCheckInTimeInMilliseconds,
-    this.eventHistory,
-    this.rewards,
-    this.savedEvents,
+    // ignore: non_constant_identifier_names
+    this.WBLN,
     this.achievements,
-    this.lastNotifInMilliseconds,
-    this.messageNotificationCount,
-    this.notificationCount,
-    this.apLvl,
     this.ap,
-    this.lastPayoutTimeInMilliseconds,
+    this.apLvl,
+    this.blockedUsers,
+    this.emailAddress,
     this.eventsToLvlUp,
-    this.following,
+    this.fbAccessToken,
+    this.mutedBy,
     this.followers,
+    this.following,
+    this.googleAccessToken,
+    this.googleIDToken,
+    this.id,
+    this.isAdmin,
+    this.profilePicURL,
+    this.username,
+    this.bio,
+    this.website,
+    this.isPrivate,
+    this.recentSearchTerms,
+    this.onboarded,
+    this.lastSeenZipcode,
+    this.lastSeenCity,
+    this.tags,
   });
 
   WebblenUser.fromMap(Map<String, dynamic> data)
       : this(
-          blockedUsers: data['blockedUsers'],
-          username: data['username'],
-          uid: data['uid'],
-          profile_pic: data['profile_pic'],
-          webblen: data['webblen'] == null ? null : data['webblen'] * 1.00,
-          eventPoints: data['eventPoints'] * 1.00,
-          impactPoints: data['impactPoints'] * 1.00,
-//      userLat: data['userLat'],
-//      userLon: data['userLon'],
-          lastCheckInTimeInMilliseconds: data['lastCheckInTimeInMilliseconds'],
-          eventHistory: data['eventHistory'],
-          rewards: data['rewards'],
-          savedEvents: data['savedEvents'],
-          achievements: data['acheivements'],
-          lastNotifInMilliseconds: data['lastNotifInMilliseconds'],
-          messageNotificationCount: data['messageNotificationCount'],
-          notificationCount: data['notificationCount'],
+          WBLN: data['WBLN'].toDouble(),
+          achievements: data['achievements'],
           ap: data['ap'],
           apLvl: data['apLvl'],
-          lastPayoutTimeInMilliseconds: data['lastPayoutTimeInMilliseconds'],
+          blockedUsers: data['blockedUsers'],
+          emailAddress: data['emailAddress'],
           eventsToLvlUp: data['eventsToLvlUp'],
-          following: data['following'],
+          fbAccessToken: data['fbAccessToken'],
+          mutedBy: data['mutedBy'],
           followers: data['followers'],
+          following: data['following'],
+          googleAccessToken: data['googleAccessToken'],
+          googleIDToken: data['googleIDToken'],
+          id: data['id'],
+          isAdmin: data['isAdmin'],
+          profilePicURL: data['profilePicURL'],
+          username: data['username'],
+          bio: data['bio'],
+          website: data['website'],
+          isPrivate: data['isPrivate'],
+          recentSearchTerms: data['recentSearchTerms'],
+          onboarded: data['onboarded'],
+          lastSeenZipcode: data['lastSeenZipcode'],
+          lastSeenCity: data['lastSeenCity'],
+          tags: data['tags'],
         );
 
   Map<String, dynamic> toMap() => {
-        'blockedUsers': this.blockedUsers,
-        'username': this.username,
-        'uid': this.uid,
-        'profile_pic': this.profile_pic,
-        'webblen': this.webblen,
-        'eventPoints': this.eventPoints,
-        'impactPoints': this.impactPoints,
-        'lastCheckInTimeInMilliseconds': this.lastCheckInTimeInMilliseconds,
-        'eventHistory': this.eventHistory,
-        'rewards': this.rewards,
-        'savedEvents': this.savedEvents,
+        'WBLN': this.WBLN,
         'achievements': this.achievements,
-        'lastNotifInMilliseconds': this.lastNotifInMilliseconds,
-        'messageNotificationCount': this.messageNotificationCount,
-        'notificationCount': this.notificationCount,
         'ap': this.ap,
         'apLvl': this.apLvl,
-        'lastPayoutTimeInMilliseconds': this.lastPayoutTimeInMilliseconds,
+        'blockedUsers': this.blockedUsers,
+        'emailAddress': this.emailAddress,
         'eventsToLvlUp': this.eventsToLvlUp,
-        'following': this.following,
+        'fbAccessToken': this.fbAccessToken,
+        'mutedBy': mutedBy,
         'followers': this.followers,
+        'following': this.following,
+        'googleAccessToken': this.googleAccessToken,
+        'googleIDToken': this.googleIDToken,
+        'id': this.id,
+        'isAdmin': this.isAdmin,
+        'profilePicURL': this.profilePicURL,
+        'username': this.username,
+        'bio': this.bio,
+        'website': this.website,
+        'isPrivate': this.isPrivate,
+        'recentSearchTerms': this.recentSearchTerms,
+        'onboarded': this.onboarded,
+        'lastSeenZipcode': this.lastSeenZipcode,
+        'lastSeenCity': this.lastSeenCity,
+        'tags': this.tags,
       };
+
+  WebblenUser generateNewUser(String id) {
+    String randomUsername = "user" + getRandomString(5);
+    String randomImgURL = getRandomImageURL();
+    WebblenUser user = WebblenUser(
+      id: id,
+      WBLN: 5.0001,
+      achievements: [],
+      ap: 1.00,
+      apLvl: 1,
+      blockedUsers: [],
+      emailAddress: null,
+      eventsToLvlUp: 20,
+      fbAccessToken: null,
+      mutedBy: [],
+      followers: [],
+      following: [],
+      googleAccessToken: null,
+      googleIDToken: googleIDToken,
+      isAdmin: false,
+      profilePicURL: randomImgURL,
+      username: randomUsername,
+      bio: null,
+      website: null,
+      isPrivate: false,
+      recentSearchTerms: [],
+      onboarded: false,
+      lastSeenZipcode: "58104",
+      lastSeenCity: "Fargo",
+      tags: [],
+    );
+    return user;
+  }
+
+  //checks if obj is valid
+  bool isValid() {
+    bool isValid = true;
+    if (id == null) {
+      isValid = false;
+    }
+    return isValid;
+  }
 }

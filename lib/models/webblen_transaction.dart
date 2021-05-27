@@ -1,44 +1,75 @@
 class WebblenTransaction {
-  String status;
-  int dateSubmittedInMilliseconds;
-  String transactionType;
-  String transactionDescription;
-  double transactionAmount;
-  String depositAccountName;
-  String transactionUserUid;
-  bool isNew;
+  String? receiverUID;
+  String? senderUID;
+  String? contentID;
+  String? type;
+  String? currency;
+  String? header;
+  String? subHeader;
+  dynamic additionalData;
+  int? timePostedInMilliseconds;
+  bool? read;
 
   WebblenTransaction({
-    this.status,
-    this.dateSubmittedInMilliseconds,
-    this.transactionType,
-    this.transactionDescription,
-    this.transactionAmount,
-    this.depositAccountName,
-    this.transactionUserUid,
-    this.isNew,
+    this.receiverUID,
+    this.senderUID,
+    this.contentID,
+    this.type,
+    this.currency,
+    this.header,
+    this.subHeader,
+    this.additionalData,
+    this.timePostedInMilliseconds,
+    this.read,
   });
 
   WebblenTransaction.fromMap(Map<String, dynamic> data)
       : this(
-          status: data['status'],
-          dateSubmittedInMilliseconds: data['dateSubmittedInMilliseconds'],
-          transactionType: data['transactionType'],
-          transactionDescription: data['transactionDescription'],
-          transactionAmount: data['transactionAmount'],
-          depositAccountName: data['depositAccountName'],
-          transactionUserUid: data['transactionUserUid'],
-          isNew: data['isNew'],
+          receiverUID: data['receiverUID'],
+          senderUID: data['senderUID'],
+          contentID: data['contentID'],
+          type: data['type'],
+          currency: data['currency'],
+          header: data['header'],
+          subHeader: data['subHeader'],
+          additionalData: data['additionalData'],
+          timePostedInMilliseconds: data['timePostedInMilliseconds'],
+          read: data['read'],
         );
 
   Map<String, dynamic> toMap() => {
-        'status': this.status,
-        'dateSubmittedInMilliseconds': this.dateSubmittedInMilliseconds,
-        'transactionType': this.transactionType,
-        'transactionDescription': this.transactionDescription,
-        'transactionAmount': this.transactionAmount,
-        'depositAccountName': this.depositAccountName,
-        'transactionUserUid': this.transactionUserUid,
-        'isNew': this.isNew,
+        'receiverUID': this.receiverUID,
+        'senderUID': this.senderUID,
+        'contentID': this.contentID,
+        'type': this.type,
+        'currency': this.currency,
+        'header': this.header,
+        'subHeader': this.subHeader,
+        'additionalData': this.additionalData,
+        'timePostedInMilliseconds': this.timePostedInMilliseconds,
+        'read': this.read,
       };
+
+  //
+  // //Webblen Received Notification
+  // WebblenNotification generateWebblenReceivedNotification({
+  //   @required String postID,
+  //   @required String receiverUID,
+  //   @required String senderUID,
+  //   @required String senderUsername,
+  //   @required String amountReceived,
+  // }) {
+  //   WebblenNotification notif = WebblenNotification(
+  //     receiverUID: receiverUID,
+  //     senderUID: senderUID,
+  //     type: NotificationType.webblenReceived,
+  //     header: '$senderUsername sent you WBLN',
+  //     subHeader: '$amountReceived WBLN has been deposited in your wallet',
+  //     additionalData: {'postID': postID},
+  //     timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+  //     expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+  //     read: false,
+  //   );
+  //   return notif;
+  // }
 }

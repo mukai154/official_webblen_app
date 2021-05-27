@@ -1,49 +1,49 @@
 import 'package:cloud_functions/cloud_functions.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:geocoder/geocoder.dart';
 import 'package:location/location.dart';
-import 'package:webblen/constants/strings.dart';
-import 'package:webblen/services_general/services_show_alert.dart';
+import 'package:maps_launcher/maps_launcher.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:stacked_services/stacked_services.dart';
+import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
 
 class LocationService {
-  Map<String, double> currentLocation;
+  Map<String, double>? currentLocation;
   Location currentUserLocation = Location();
+  SnackbarService? _snackbarService = locator<SnackbarService>();
+  PlatformDataService? _platformDataService = locator<PlatformDataService>();
 
-  Future<LocationData> getCurrentLocation(BuildContext context) async {
-    LocationData locationData;
-    String error = "";
+  Future<LocationData?> getCurrentLocation() async {
+    LocationData? locationData;
     try {
       locationData = await currentUserLocation.getLocation();
     } on PlatformException catch (e) {
       if (e.code == 'PERMISSION_DENIED') {
-        error = 'Location Permission Denied';
-        if (context != null) {
-          ShowAlertDialogService().showFailureDialog(
-            context,
-            error,
-            "Please Enable Location Services from Your App Settings to Find Events",
-          );
-        }
+        _snackbarService!.showSnackbar(
+          title: 'Error',
+          message: "Please Enable Location Services from Your App Settings to Find Events",
+          mainButtonTitle: "Open App Settings",
+          onTap: (val) => openAppSettings(),
+          duration: Duration(seconds: 5),
+        );
       } else if (e.code == 'PERMISSION_DENIED_NEVER_ASK') {
-        error = 'Webblen Needs Permission to Access Your Location';
-        if (context != null) {
-          ShowAlertDialogService().showFailureDialog(
-            context,
-            error,
-            "Please Enable Location Services from Your App Settings to Find Events",
-          );
-        }
+        _snackbarService!.showSnackbar(
+          title: 'Error',
+          message: "Please Enable Location Services from Your App Settings to Find Events",
+          mainButtonTitle: "Open App Settings",
+          onTap: (val) => openAppSettings(),
+          duration: Duration(seconds: 5),
+        );
       }
       locationData = null;
     }
     return locationData;
   }
 
-  Future<List> findNearestZipcodes(String zipcode) async {
-    List zips = [];
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'findNearestZipcodes',
+  Future<List?> findNearestZipcodes(String? zipcode) async {
+    List? zips;
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+      'findNearestZipcodes',
     );
 
     final HttpsCallableResult result = await callable.call(
@@ -51,10 +51,10 @@ class LocationService {
         'zipcode': zipcode,
       },
     ).catchError((e) {
-      print(e);
+      //print(e);
     });
     if (result != null) {
-      List areaCodes = result.data['data'];
+      List? areaCodes = result.data['data'];
       if (areaCodes != null && areaCodes.isNotEmpty) {
         zips = areaCodes;
       }
@@ -62,19 +62,18 @@ class LocationService {
     return zips;
   }
 
-  Future<Map<dynamic, dynamic>> reverseGeocodeLatLon(double lat, double lon) async {
-    Map<dynamic, dynamic> data;
-    final HttpsCallable callable = CloudFunctions.instance.getHttpsCallable(
-      functionName: 'reverseGeocodeLatLon',
+  Future<Map<dynamic, dynamic>?> reverseGeocodeLatLon(double lat, double lon) async {
+    Map<dynamic, dynamic>? data;
+    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
+      'reverseGeocodeLatLon',
     );
-
     final HttpsCallableResult result = await callable.call(
       <String, dynamic>{
         'lat': lat,
         'lon': lon,
       },
     ).catchError((e) {
-      print(e);
+      //print(e);
     });
     if (result != null) {
       data = result.data['data'][0];
@@ -82,50 +81,76 @@ class LocationService {
     return data;
   }
 
-  Future<String> getAddressFromLatLon(double lat, double lon) async {
-    String foundAddress;
-    Coordinates coordinates = Coordinates(lat, lon);
-    var addresses = await Geocoder.google(Strings.googleAPIKEY).findAddressesFromCoordinates(coordinates);
-    var address = addresses.first;
-    foundAddress = address.addressLine;
+  Future<String?> getCurrentZipcode() async {
+    LocationData? locationData = await getCurrentLocation();
+    if (locationData == null) {
+      return null;
+    }
+    double? lat = locationData.latitude;
+    double? lon = locationData.longitude;
+    String? zip = await getZipFromLatLon(lat!, lon!);
+    return zip;
+  }
+
+  Future<String?> getCurrentCity() async {
+    LocationData? locationData = await getCurrentLocation();
+    if (locationData == null) {
+      return null;
+    }
+    double? lat = locationData.latitude;
+    double? lon = locationData.longitude;
+    String? city = await getCityNameFromLatLon(lat!, lon!);
+    return city;
+  }
+
+  Future<String?> getCurrentProvince() async {
+    LocationData? locationData = await getCurrentLocation();
+    if (locationData == null) {
+      return null;
+    }
+    double? lat = locationData.latitude;
+    double? lon = locationData.longitude;
+    String? province = await getProvinceFromLatLon(lat!, lon!);
+    return province;
+  }
+
+  Future<String?> getAddressFromLatLon(double lat, double lon) async {
+    String? foundAddress;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      foundAddress = data['formattedAddress'];
+    }
     return foundAddress;
   }
 
-  Future<String> getZipFromLatLon(double lat, double lon) async {
-    String zip;
-    Coordinates coordinates = Coordinates(lat, lon);
-    if (coordinates != null) {
-      var addresses = await Geocoder.google(Strings.googleAPIKEY).findAddressesFromCoordinates(coordinates).catchError((e) {
-        //print(e);
-      });
-      if (addresses != null) {
-        var address = addresses.first;
-        zip = address.postalCode;
-      }
+  Future<String?> getZipFromLatLon(double lat, double lon) async {
+    String? zip;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      zip = data['zipcode'];
     }
     return zip;
   }
 
-  Future<String> getCityNameFromLatLon(double lat, double lon) async {
-    String cityName;
-    Coordinates coordinates = Coordinates(lat, lon);
-    var addresses = await Geocoder.google(Strings.googleAPIKEY).findAddressesFromCoordinates(coordinates);
-    var address = addresses.first;
-    cityName = address.locality;
+  Future<String?> getCityNameFromLatLon(double lat, double lon) async {
+    String? cityName;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      cityName = data['city'];
+    }
     return cityName;
   }
 
-  double getLatFromGeopoint(Map<dynamic, dynamic> geoP) {
-    double lat;
-    List coordinates = geoP.values.toList();
-    lat = coordinates[0];
-    return lat == null ? 0.0 : lat;
+  Future<String?> getProvinceFromLatLon(double lat, double lon) async {
+    String? province;
+    Map<dynamic, dynamic>? data = await reverseGeocodeLatLon(lat, lon);
+    if (data != null) {
+      province = data['administrativeLevels']['level1short'];
+    }
+    return province;
   }
 
-  double getLonFromGeopoint(Map<dynamic, dynamic> geoP) {
-    double lon;
-    List coordinates = geoP.values.toList();
-    lon = coordinates[1];
-    return lon == null ? 0.0 : lon;
+  openMaps({required String address}) {
+    MapsLauncher.launchQuery(address);
   }
 }

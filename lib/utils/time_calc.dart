@@ -9,13 +9,11 @@ class TimeCalc {
 
   String getStringFromDate(DateTime data) {
     String dateTime = formatter.format(data);
-    print(dateTime);
     return dateTime;
   }
 
   DateTime getDateTimeFromString(String data) {
     DateTime dateTime = formatter.parse(data);
-    print(dateTime);
     return dateTime;
   }
 

@@ -1,15 +1,16 @@
-import 'package:connectivity/connectivity.dart';
+import 'dart:io';
 
 class NetworkStatus {
   Future<bool> isConnected() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile) {
-      print('mobile');
-      return true;
-    } else if (connectivityResult == ConnectivityResult.wifi) {
-      print('wifi');
-      return true;
+    bool isConnected = false;
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        isConnected = true;
+      }
+    } on SocketException catch (_) {
+      //print('not connected');
     }
-    return false;
+    return isConnected;
   }
 }

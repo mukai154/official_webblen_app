@@ -1,57 +1,60 @@
+import 'package:webblen/utils/custom_string_methods.dart';
+
 class WebblenEvent {
-  String id;
-  String authorID;
-  bool hasTickets;
-  bool flashEvent;
-  bool isDigitalEvent;
-  String digitalEventLink;
-  String title;
-  String desc;
-  String imageURL;
-  String venueName;
-  String streetAddress;
-  List nearbyZipcodes;
-  String city;
-  String province;
-  double lat;
-  double lon;
-  List sharedComs;
-  List tags;
-  int clicks;
-  String website;
-  String fbUsername;
-  String twitterUsername;
-  String instaUsername;
-  double checkInRadius;
-  int estimatedTurnout;
-  int actualTurnout;
-  List attendees;
-  double eventPayout;
-  String recurrence;
-  int startDateTimeInMilliseconds;
-  int endDateTimeInMilliseconds;
-  String startDate;
-  String startTime;
-  String endDate;
-  String endTime;
-  String timezone;
-  String privacy;
-  bool reported;
-  String webAppLink;
-  List savedBy;
-  bool paidOut;
+  String? id;
+  String? authorID;
+  bool? hasTickets;
+  bool? flashEvent;
+  bool? hasStream;
+  String? title;
+  String? description;
+  String? imageURL;
+  String? venueName;
+  String? venueSize;
+  String? streetAddress;
+  List? nearbyZipcodes;
+  String? city;
+  String? province;
+  double? lat;
+  double? lon;
+  List? sharedComs;
+  List? tags;
+  int? clicks;
+  String? website;
+  String? fbUsername;
+  String? twitterUsername;
+  String? instaUsername;
+  int? estimatedTurnout;
+  int? actualTurnout;
+  Map<dynamic, dynamic>? attendees;
+  double? payout;
+  String? recurrence;
+  int? startDateTimeInMilliseconds;
+  int? endDateTimeInMilliseconds;
+  String? startDate;
+  String? startTime;
+  String? endDate;
+  String? endTime;
+  String? timezone;
+  String? privacy;
+  bool? reported;
+  String? webAppLink;
+  List? savedBy;
+  bool? paidOut;
+  bool? openToSponsors;
+  List? suggestedUIDs;
 
   WebblenEvent({
     this.id,
     this.authorID,
     this.hasTickets,
+    this.hasStream,
     this.flashEvent,
-    this.isDigitalEvent,
-    this.digitalEventLink,
     this.title,
-    this.desc,
+    this.description,
     this.imageURL,
     this.venueName,
+    this.venueSize,
     this.nearbyZipcodes,
     this.streetAddress,
     this.city,
@@ -65,11 +68,10 @@ class WebblenEvent {
     this.fbUsername,
     this.twitterUsername,
     this.instaUsername,
-    this.checkInRadius,
     this.estimatedTurnout,
     this.actualTurnout,
     this.attendees,
-    this.eventPayout,
+    this.payout,
     this.recurrence,
     this.startDateTimeInMilliseconds,
     this.endDateTimeInMilliseconds,
@@ -83,6 +85,8 @@ class WebblenEvent {
     this.webAppLink,
     this.savedBy,
     this.paidOut,
+    this.openToSponsors,
+    this.suggestedUIDs,
   });
 
   WebblenEvent.fromMap(Map<String, dynamic> data)
@@ -91,12 +95,12 @@ class WebblenEvent {
           authorID: data['authorID'],
           hasTickets: data['hasTickets'],
           flashEvent: data['flashEvent'],
-          isDigitalEvent: data['isDigitalEvent'],
-          digitalEventLink: data['digitalEventLink'],
+          hasStream: data['hasStream'],
           title: data['title'],
-          desc: data['desc'],
+          description: data['description'],
           imageURL: data['imageURL'],
           venueName: data['venueName'],
+          venueSize: data['venueSize'],
           nearbyZipcodes: data['nearbyZipcodes'],
           streetAddress: data['streetAddress'],
           city: data['city'],
@@ -110,11 +114,10 @@ class WebblenEvent {
           fbUsername: data['fbUsername'],
           twitterUsername: data['twitterUsername'],
           instaUsername: data['instaUsername'],
-          checkInRadius: data['checkInRadius'] * 1.0001,
           estimatedTurnout: data['estimatedTurnout'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
-          eventPayout: data['eventPayout'] * 1.001,
+          payout: data['payout'] == null ? null : data['payout'] * 1.001,
           recurrence: data['recurrence'],
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
           endDateTimeInMilliseconds: data['endDateTimeInMilliseconds'],
@@ -128,6 +131,8 @@ class WebblenEvent {
           webAppLink: data['webAppLink'],
           savedBy: data['savedBy'],
           paidOut: data['paidOut'],
+          openToSponsors: data['openToSponsors'],
+          suggestedUIDs: data['suggestedUIDs'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -135,12 +140,12 @@ class WebblenEvent {
         'authorID': this.authorID,
         'hasTickets': this.hasTickets,
         'flashEvent': this.flashEvent,
-        'isDigitalEvent': this.isDigitalEvent,
-        'digitalEventLink': this.digitalEventLink,
+        'hasStream': this.hasStream,
         'title': this.title,
-        'desc': this.desc,
+        'description': this.description,
         'imageURL': this.imageURL,
         'venueName': this.venueName,
+        'venueSize': this.venueSize,
         'nearbyZipcodes': this.nearbyZipcodes,
         'streetAddress': this.streetAddress,
         'city': this.city,
@@ -154,11 +159,10 @@ class WebblenEvent {
         'fbUsername': this.fbUsername,
         'twitterUsername': this.twitterUsername,
         'instaUsername': this.instaUsername,
-        'checkInRadius': this.checkInRadius,
         'estimatedTurnout': this.estimatedTurnout,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
-        'eventPayout': this.eventPayout,
+        'eventPayout': this.payout,
         'recurrence': this.recurrence,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
         'endDateTimeInMilliseconds': this.endDateTimeInMilliseconds,
@@ -172,5 +176,36 @@ class WebblenEvent {
         'webAppLink': this.webAppLink,
         'savedBy': this.savedBy,
         'paidOut': this.paidOut,
+        'openToSponsors': this.openToSponsors,
+        'suggestedUIDs': this.suggestedUIDs,
       };
+
+  WebblenEvent generateNewWebblenEvent({required String authorID, required List suggestedUIDs}) {
+    String id = getRandomString(30);
+    WebblenEvent event = WebblenEvent(
+      id: id,
+      authorID: authorID,
+      privacy: "Public",
+      reported: false,
+      hasStream: false,
+      hasTickets: false,
+      paidOut: false,
+      openToSponsors: false,
+      tags: [],
+      savedBy: [],
+      attendees: {},
+      clicks: 0,
+      estimatedTurnout: 0,
+    );
+    return event;
+  }
+
+  //checks if obj is valid
+  bool isValid() {
+    bool isValid = true;
+    if (id == null) {
+      isValid = false;
+    }
+    return isValid;
+  }
 }
