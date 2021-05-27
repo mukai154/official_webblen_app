@@ -206,7 +206,7 @@ class LiveStreamDataService {
       return;
     }
     Map<String, dynamic>? docData = snapshot.data();
-    List viewers = docData!['activeViewers'] == null ? [] : docData!['activeViewers'].toList(growable: true);
+    List viewers = docData!['activeViewers'] == null ? [] : docData['activeViewers'].toList(growable: true);
     if (!viewers.contains(uid)) {
       viewers.add(uid);
       streamsRef.doc(streamID).update({'activeViewers': viewers}).catchError((e) {
@@ -225,7 +225,7 @@ class LiveStreamDataService {
       return;
     }
     Map<String, dynamic>? docData = snapshot.data();
-    List viewers = docData!['activeViewers'] == null ? [] : docData!['activeViewers'].toList(growable: true);
+    List viewers = docData!['activeViewers'] == null ? [] : docData['activeViewers'].toList(growable: true);
     if (viewers.contains(uid)) {
       viewers.remove(uid);
       streamsRef.doc(streamID).update({'activeViewers': viewers}).catchError((e) {

@@ -6,13 +6,14 @@ import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/email/email_service.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
@@ -22,7 +23,7 @@ import 'package:webblen/services/stripe/stripe_payment_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class TicketPurchaseViewModel extends ReactiveViewModel {
-  AuthService _authService = locator<AuthService>();
+  NotificationDataService _notificationDataService = locator<NotificationDataService>();
   EmailService _emailService = locator<EmailService>();
   CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
   UserDataService _userDataService = locator<UserDataService>();
@@ -49,6 +50,10 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
 
   ///HOST
   WebblenUser? host;
+
+  ///NOTIFS
+  WebblenNotification purchaseNotif = WebblenNotification();
+  WebblenNotification soldNotif = WebblenNotification();
 
   ///TICKET DATA
   WebblenEvent? event;
@@ -143,8 +148,22 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
     taxRate = await _platformDataService.getTaxRate();
     //calculate totals
     calculateChargeTotals();
-    notifyListeners();
 
+    //pre-generate notifications to send
+    purchaseNotif = WebblenNotification().generateTicketsPurchasedNotification(
+      eventID: event!.id!,
+      eventTitle: event!.title!,
+      uid: user.id!,
+      numberOfTickets: numOfTicketsToPurchase,
+    );
+    soldNotif = WebblenNotification().generateTicketsSoldNotification(
+      receiverUID: event!.authorID!,
+      senderUID: user.id!,
+      eventTitle: event!.title!,
+      numberOfTickets: numOfTicketsToPurchase,
+    );
+
+    notifyListeners();
     setBusy(false);
   }
 
@@ -188,6 +207,7 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
             discountCodeDescription = " \$${(discountAmount).toStringAsFixed(2)} off ";
             ticketCharge = ticketCharge - discountAmount;
             if (ticketCharge <= 0) {
+              ticketCharge = 0;
               ticketFeeCharge = 0;
               taxCharge = (ticketCharge + ticketFeeCharge) * taxRate!;
               chargeAmount = ticketCharge + ticketFeeCharge + taxCharge;
@@ -290,10 +310,16 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
 
   processPurchase() async {
     if (chargeAmount <= 0) {
+      processingPayment = true;
+      notifyListeners();
       if (emailAddress == null || !isValidEmail(emailAddress!)) {
         customDialogService.showErrorDialog(description: "Please provide a valid email address");
+        processingPayment = false;
+        notifyListeners();
         return;
       }
+      await _notificationDataService.sendNotification(notif: purchaseNotif);
+      await _notificationDataService.sendNotification(notif: soldNotif);
       List purchasedTickets = await _ticketDistroDataService.completeTicketPurchase(user.id!, ticketsToPurchase, event!);
       _emailService.sendTicketPurchaseConfirmationEmail(
         emailAddress: emailAddress!,
@@ -327,6 +353,8 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
         email: emailAddress!,
       );
       if (status == "passed") {
+        await _notificationDataService.sendNotification(notif: purchaseNotif);
+        await _notificationDataService.sendNotification(notif: soldNotif);
         List purchasedTickets = await _ticketDistroDataService.completeTicketPurchase(user.id!, ticketsToPurchase, event!);
         _emailService.sendTicketPurchaseConfirmationEmail(
           emailAddress: emailAddress!,

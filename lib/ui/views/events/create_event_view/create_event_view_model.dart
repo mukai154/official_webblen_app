@@ -106,6 +106,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   ///EVENT DATA
   String? id;
   bool isEditing = false;
+  bool isDuplicate = false;
 
   WebblenEvent event = WebblenEvent();
 
@@ -177,9 +178,19 @@ class CreateEventViewModel extends ReactiveViewModel {
     event.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
     notifyListeners();
 
-    //check for promos & if editing existing event
-    if (eventID != "new") {
-      event = await _eventDataService.getEventByID(eventID!);
+    //check for promos & if editing/duplicating existing event
+    if (eventID!.contains("duplicate_")) {
+      String id = eventID.replaceAll("duplicate_", "");
+      event = await _eventDataService.getEventByID(id);
+      if (event.isValid()) {
+        event.id = getRandomString(32);
+        isDuplicate = true;
+        if (event.hasTickets!) {
+          ticketDistro = await _ticketDistroDataService.getTicketDistroByID(event.id);
+        }
+      }
+    } else if (eventID != "new") {
+      event = await _eventDataService.getEventByID(eventID);
       if (event.isValid()) {
         eventStartDateTextController.text = event.startDate!;
         eventEndDateTextController.text = event.endDate!;
@@ -213,10 +224,8 @@ class CreateEventViewModel extends ReactiveViewModel {
   ///LOAD PREVIOUS DATA
   String loadPreviousTitle() {
     String val = "";
-    if (!loadedPreviousTitle) {
-      if (isEditing) {
-        val = event.title!;
-      }
+    if (!loadedPreviousTitle && (isEditing || isDuplicate)) {
+      val = event.title!;
     }
     loadedPreviousTitle = true;
     notifyListeners();
@@ -225,10 +234,8 @@ class CreateEventViewModel extends ReactiveViewModel {
 
   String loadPreviousDesc() {
     String val = "";
-    if (!loadedPreviousDescription) {
-      if (isEditing) {
-        val = event.description!;
-      }
+    if (!loadedPreviousDescription && (isEditing || isDuplicate)) {
+      val = event.description!;
     }
     loadedPreviousDescription = true;
     notifyListeners();
@@ -237,10 +244,8 @@ class CreateEventViewModel extends ReactiveViewModel {
 
   String loadPreviousVenueName() {
     String val = "";
-    if (!loadedPreviousVenueName) {
-      if (isEditing) {
-        val = event.venueName!;
-      }
+    if (!loadedPreviousVenueName && (isEditing || isDuplicate)) {
+      val = event.venueName!;
     }
     loadedPreviousVenueName = true;
     notifyListeners();
@@ -248,28 +253,60 @@ class CreateEventViewModel extends ReactiveViewModel {
   }
 
   String loadPreviousFBUsername() {
-    String val = _sharedPreferences.getString('fbUsername') == null ? "" : _sharedPreferences.getString('fbUsername')!;
+    String val = "";
+    if (!loadedPreviousFBUsername) {
+      if (isEditing || isDuplicate) {
+        val = event.fbUsername ?? "";
+      }
+      if (val.isEmpty) {
+        val = _sharedPreferences.getString('fbUsername') == null ? "" : _sharedPreferences.getString('fbUsername')!;
+      }
+    }
     loadedPreviousFBUsername = true;
     notifyListeners();
     return val;
   }
 
   String loadPreviousInstaUsername() {
-    String val = _sharedPreferences.getString('instaUsername') == null ? "" : _sharedPreferences.getString('instaUsername')!;
+    String val = "";
+    if (!loadedPreviousInstaUsername) {
+      if (isEditing || isDuplicate) {
+        val = event.instaUsername ?? "";
+      }
+      if (val.isEmpty) {
+        val = _sharedPreferences.getString('instaUsername') == null ? "" : _sharedPreferences.getString('instaUsername')!;
+      }
+    }
     loadedPreviousInstaUsername = true;
     notifyListeners();
     return val;
   }
 
   String loadPreviousTwitterUsername() {
-    String val = _sharedPreferences.getString('twitterUsername') == null ? "" : _sharedPreferences.getString('twitterUsername')!;
+    String val = "";
+    if (!loadedPreviousTwitterUsername) {
+      if (isEditing || isDuplicate) {
+        val = event.twitterUsername ?? "";
+      }
+      if (val.isEmpty) {
+        val = _sharedPreferences.getString('twitterUsername') == null ? "" : _sharedPreferences.getString('twitterUsername')!;
+      }
+    }
     loadedPreviousTwitterUsername = true;
     notifyListeners();
     return val;
   }
 
   String loadPreviousWebsite() {
-    String val = _sharedPreferences.getString('website') == null ? "" : _sharedPreferences.getString('website')!;
+    String val = "";
+    if (!loadedPreviousWebsite) {
+      if (isEditing || isDuplicate) {
+        val = event.website ?? "";
+      }
+      if (val.isEmpty) {
+        val = _sharedPreferences.getString('website') == null ? "" : _sharedPreferences.getString('website')!;
+      }
+    }
     loadedPreviousWebsite = true;
     notifyListeners();
     return val;

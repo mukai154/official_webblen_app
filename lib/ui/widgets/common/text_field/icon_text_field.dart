@@ -51,8 +51,8 @@ class IconTextField extends StatelessWidget {
                   child: TextFormField(
                     controller: controller,
                     cursorColor: appFontColor(),
-                    textInputAction: TextInputAction.search,
-                    onChanged: onChanged == null ? null : (val) => onChanged(val),
+                    textInputAction: TextInputAction.done,
+                    onChanged: (val) => onChanged(val),
                     keyboardType: keyboardType == null ? TextInputType.text : keyboardType,
                     obscureText: hidden != null ? hidden! : false,
                     decoration: InputDecoration(

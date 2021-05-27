@@ -83,7 +83,7 @@ class _HomeHead extends HookViewModelWidget<HomeViewModel> {
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
-                "${model.cityName}",
+                model.isBusy ? "" : "${model.cityName}",
                 style: TextStyle(
                   color: appFontColor(),
                   fontWeight: FontWeight.bold,
