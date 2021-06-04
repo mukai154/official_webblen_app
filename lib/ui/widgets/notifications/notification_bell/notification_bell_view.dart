@@ -6,51 +6,53 @@ import 'package:webblen/constants/app_colors.dart';
 import 'notification_bell_view_model.dart';
 
 class NotificationBellView extends StatelessWidget {
-  final String? uid;
-  NotificationBellView({
-    required this.uid,
-  });
-
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<NotificationBellViewModel>.reactive(
-      onModelReady: (model) => model.initialize(uid),
       viewModelBuilder: () => NotificationBellViewModel(),
-      builder: (context, model, child) => GestureDetector(
-        onTap: () => model.navigateToNotificationsView(),
-        child: Stack(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(
-                right: 4.0,
-                top: 0.0,
-              ),
-              child: Icon(
-                FontAwesomeIcons.bell,
-                size: 22.0,
-                color: appIconColor(),
-              ),
-            ),
-            Positioned(
-              top: 0.0,
-              right: 4.0,
-              child: model.notifCount! > 0
-                  ? Container(
-                      height: 10.0,
-                      width: 10.0,
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        shape: BoxShape.circle,
+      builder: (context, model, child) => model.unreadNotifications > 0
+          ? GestureDetector(
+              onTap: () => model.navigateToNotificationsView(),
+              child: Container(
+                height: 25,
+                width: 25,
+                padding: EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+                decoration: BoxDecoration(
+                  color: appActiveColor(),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.center,
+                    child: Text(
+                      model.unreadNotifications >= 10
+                        ? "10+"
+                        : model.unreadNotifications.toString(),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
                       ),
-                    )
-                  : Container(
-                      height: 0.0,
-                      width: 0.0,
                     ),
+                  ),
+                ),
+              ),
+            )
+          : GestureDetector(
+              onTap: () => model.navigateToNotificationsView(),
+              child: Container(
+                height: 25,
+                width: 25,
+                child: Center(
+                  child: Icon(
+                    FontAwesomeIcons.bell,
+                    size: 20,
+                    color: appIconColor(),
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }

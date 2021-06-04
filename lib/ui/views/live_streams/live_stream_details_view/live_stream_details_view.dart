@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked/stacked_annotations.dart';
 import 'package:webblen/constants/app_colors.dart';
@@ -213,29 +212,29 @@ class LiveStreamDetailsView extends StatelessWidget {
               model.stream.twitchUsername == null || model.stream.twitchUsername!.isEmpty
                   ? Container()
                   : Container(
-                margin: EdgeInsets.only(right: 16),
-                child: GestureDetector(
-                  onTap: () => model.openTwitch(),
-                  child: Icon(
-                    FontAwesomeIcons.twitch,
-                    size: 30,
-                    color: appIconColor(),
-                  ),
-                ),
-              ),
+                      margin: EdgeInsets.only(right: 16),
+                      child: GestureDetector(
+                        onTap: () => model.openTwitch(),
+                        child: Icon(
+                          FontAwesomeIcons.twitch,
+                          size: 30,
+                          color: appIconColor(),
+                        ),
+                      ),
+                    ),
               model.stream.youtube == null || model.stream.youtube!.isEmpty
                   ? Container()
                   : Container(
-                margin: EdgeInsets.only(right: 16),
-                child: GestureDetector(
-                  onTap: () => model.openYoutube(),
-                  child: Icon(
-                    FontAwesomeIcons.youtube,
-                    size: 30,
-                    color: appIconColor(),
-                  ),
-                ),
-              ),
+                      margin: EdgeInsets.only(right: 16),
+                      child: GestureDetector(
+                        onTap: () => model.openYoutube(),
+                        child: Icon(
+                          FontAwesomeIcons.youtube,
+                          size: 30,
+                          color: appIconColor(),
+                        ),
+                      ),
+                    ),
               model.stream.website == null || model.stream.website!.isEmpty
                   ? Container()
                   : Container(
@@ -311,7 +310,7 @@ class LiveStreamDetailsView extends StatelessWidget {
               ? Container()
               : Stack(
                   children: [
-                    LiquidPullToRefresh(
+                    RefreshIndicator(
                       backgroundColor: appBackgroundColor(),
                       onRefresh: () async {},
                       child: ListView(

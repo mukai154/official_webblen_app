@@ -55,7 +55,7 @@ class ListRecentlySearchedTerms extends StatelessWidget {
                       return RecentSearchTermView(
                         onSearchTermSelected: () => model.navigateToSearchWithTerm(model.user.recentSearchTerms![index]),
                         searchTerm: model.user.recentSearchTerms![index],
-                        displayBottomBorder: index == model.user.recentSearchTerms![index].length ? false : true,
+                        displayBottomBorder: true,
                         displayIcon: true,
                       );
                     },

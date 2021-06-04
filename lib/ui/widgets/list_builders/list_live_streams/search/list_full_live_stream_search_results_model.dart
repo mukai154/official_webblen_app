@@ -46,7 +46,7 @@ class ListFullLiveStreamSearchResultsModel extends BaseViewModel {
   }
 
   loadData() async {
-    dataResults = await _algoliaSearchService.queryStreams(searchTerm: searchTerm, resultsLimit: resultsLimit);
+    dataResults = await _algoliaSearchService.queryStreams(searchTerm: searchTerm ?? "", resultsLimit: resultsLimit);
     resultsPageNum += 1;
     notifyListeners();
   }
@@ -58,7 +58,7 @@ class ListFullLiveStreamSearchResultsModel extends BaseViewModel {
     loadingAdditionalData = true;
     notifyListeners();
     List<WebblenLiveStream> newResults = await _algoliaSearchService.queryAdditionalStreams(
-      searchTerm: searchTerm,
+      searchTerm: searchTerm ?? "",
       resultsLimit: resultsLimit,
       pageNum: resultsPageNum,
     );

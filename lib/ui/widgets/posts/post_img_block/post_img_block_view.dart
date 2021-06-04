@@ -111,7 +111,7 @@ class PostImgBlockView extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               GestureDetector(
-                onTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post!.id),
+                onTap: () => model.saveUnsavePost(post: post!),
                 child: Icon(
                   model.savedPost ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
                   size: 18,
@@ -217,7 +217,7 @@ class PostImgBlockView extends StatelessWidget {
       viewModelBuilder: () => PostImgBlockViewModel(),
       onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post!.authorID, postID: post!.id),
       builder: (context, model, child) => GestureDetector(
-        onDoubleTap: () => model.saveUnsavePost(currentUID: currentUID, postID: post!.id),
+        onDoubleTap: () => model.saveUnsavePost(post: post!),
         onLongPress: () {
           HapticFeedback.lightImpact();
           showPostOptions!(post);

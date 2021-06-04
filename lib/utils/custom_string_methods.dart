@@ -19,7 +19,7 @@ bool isValidEmail(String val) {
 }
 
 bool isValidUsername(String val) {
-  bool isValid = RegExp(r"^[A-Za-z0-9_-]*$").hasMatch(val);
+  bool isValid = RegExp(r"^[A-Za-z0-9-._]*$").hasMatch(val);
   return isValid;
 }
 

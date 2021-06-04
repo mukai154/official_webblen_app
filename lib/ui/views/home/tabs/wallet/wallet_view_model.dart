@@ -3,17 +3,17 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/user_stripe_info.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
-import 'package:webblen/services/stripe/stripe_payment_service.dart';
 import 'package:webblen/ui/views/base/app_base_view_model.dart';
 
 class WalletViewModel extends StreamViewModel<UserStripeInfo> with ReactiveServiceMixin {
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
   StripeConnectAccountService _stripeConnectAccountService = locator<StripeConnectAccountService>();
   CustomBottomSheetService customBottomSheetService = locator<CustomBottomSheetService>();
-  StripePaymentService? _stripePaymentService = locator<StripePaymentService>();
+  CustomDialogService customDialogService = locator<CustomDialogService>();
   AppBaseViewModel appBaseViewModel = locator<AppBaseViewModel>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
 

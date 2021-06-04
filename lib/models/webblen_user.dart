@@ -62,7 +62,7 @@ class WebblenUser {
       : this(
           WBLN: data['WBLN'].toDouble(),
           achievements: data['achievements'],
-          ap: data['ap'],
+          ap: data['ap'].toDouble(),
           apLvl: data['apLvl'],
           blockedUsers: data['blockedUsers'],
           emailAddress: data['emailAddress'],
@@ -155,5 +155,14 @@ class WebblenUser {
       isValid = false;
     }
     return isValid;
+  }
+
+  //checks if ob is identical to another
+  bool isIdenticalTo(WebblenUser data) {
+    bool isIdentical = false;
+    if (this.toMap().toString() == data.toMap().toString()) {
+      isIdentical = true;
+    }
+    return isIdentical;
   }
 }

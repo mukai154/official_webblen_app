@@ -34,11 +34,14 @@ class ListFullLiveStreamSearchResults extends StatelessWidget {
                   height: screenHeight(context),
                   color: appBackgroundColor(),
                   child: RefreshIndicator(
-                    onRefresh: model.refreshData,
-                    child: ListView.builder(
-                      cacheExtent: 8000,
-                      controller: model.scrollController,
-                      key: PageStorageKey(model.listKey),
+                  onRefresh: model.refreshData,
+                  backgroundColor: appBackgroundColor(),
+                  color: appFontColorAlt(),
+                  child: SingleChildScrollView(
+                  controller: model.scrollController,
+                  child: ListView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  key: PageStorageKey(model.listKey),
                       addAutomaticKeepAlives: true,
                       shrinkWrap: true,
                       itemCount: model.dataResults.length + 1,
@@ -64,6 +67,7 @@ class ListFullLiveStreamSearchResults extends StatelessWidget {
                     ),
                   ),
                 ),
+      ),
     );
   }
 }

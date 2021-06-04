@@ -7,6 +7,7 @@ import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class LiveStreamDataService {
@@ -15,6 +16,7 @@ class LiveStreamDataService {
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   DialogService? _dialogService = locator<DialogService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
+  UserDataService _userDataService = locator<UserDataService>();
 
   int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
 
@@ -104,11 +106,43 @@ class LiveStreamDataService {
     }
   }
 
-  Future createStream({required WebblenLiveStream stream}) async {
+  Future<bool> createStream({required WebblenLiveStream stream}) async {
+    String? error;
     await streamsRef.doc(stream.id).set(stream.toMap()).catchError((e) {
-      print(e.message);
-      return e.message;
+      error = e.message;
     });
+    if (error != null) {
+      _customDialogService.showErrorDialog(description: error!);
+      return false;
+    }
+    if (isValidString(stream.fbUsername)) {
+      await _userDataService.updateFbUsername(id: stream.hostID!, val: stream.fbUsername!);
+    }
+    if (isValidString(stream.twitterUsername)) {
+      await _userDataService.updateTwitterUsername(id: stream.hostID!, val: stream.twitterUsername!);
+    }
+    if (isValidString(stream.website)) {
+      await _userDataService.updateWebsite(id: stream.hostID!, website: stream.website!);
+    }
+    if (isValidString(stream.fbStreamKey)) {
+      await _userDataService.updateFBStreamKey(id: stream.hostID!, val: stream.fbStreamKey!);
+    }
+    if (isValidString(stream.fbStreamURL)) {
+      await _userDataService.updateFBStreamURL(id: stream.hostID!, val: stream.fbStreamURL!);
+    }
+    if (isValidString(stream.twitchStreamKey)) {
+      await _userDataService.updateTwitchStreamKey(id: stream.hostID!, val: stream.twitchStreamKey!);
+    }
+    if (isValidString(stream.twitchStreamURL)) {
+      await _userDataService.updateTwitchStreamURL(id: stream.hostID!, val: stream.twitchStreamURL!);
+    }
+    if (isValidString(stream.youtubeStreamKey)) {
+      await _userDataService.updateYoutubeStreamKey(id: stream.hostID!, val: stream.youtubeStreamKey!);
+    }
+    if (isValidString(stream.youtubeStreamURL)) {
+      await _userDataService.updateYoutubeStreamURL(id: stream.hostID!, val: stream.youtubeStreamURL!);
+    }
+    return true;
   }
 
   Future updateStream({required WebblenLiveStream stream}) async {
@@ -313,7 +347,6 @@ class LiveStreamDataService {
           description: e.message,
         );
       }
-      return [];
     });
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
@@ -321,7 +354,7 @@ class LiveStreamDataService {
         docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => docB.data()!['startDateTimeInMilliseconds'].compareTo(docA.data()!['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) => docA.data()!['startDateTimeInMilliseconds'].compareTo(docB.data()!['startDateTimeInMilliseconds']));
       } else {
         docs.sort((docA, docB) => docB.data()!['savedBy'].length.compareTo(docA.data()!['savedBy'].length));
       }
@@ -355,7 +388,6 @@ class LiveStreamDataService {
           description: e.message,
         );
       }
-      return [];
     });
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
@@ -363,7 +395,7 @@ class LiveStreamDataService {
         docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => docB.data()!['startDateTimeInMilliseconds'].compareTo(docA.data()!['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) => docA.data()!['startDateTimeInMilliseconds'].compareTo(docB.data()!['startDateTimeInMilliseconds']));
       } else {
         docs.sort((docA, docB) => docB.data()!['savedBy'].length.compareTo(docA.data()!['savedBy'].length));
       }

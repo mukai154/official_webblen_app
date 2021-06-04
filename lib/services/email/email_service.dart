@@ -17,16 +17,21 @@ class EmailService {
       'sendTicketPurchaseConfirmationEmail',
     );
 
-    callable.call(
-      <String, dynamic>{
-        'emailAddress': emailAddress,
-        'eventTitle': eventTitle,
-        'purchasedTickets': purchasedTickets,
-        'additionalTaxesAndFees': additionalTaxesAndFees,
-        'discountCodeDescription': discountCodeDescription,
-        'discountValue': discountValue,
-        'totalCharge': totalCharge,
-      },
-    );
+    callable
+        .call(
+          <String, dynamic>{
+            'emailAddress': emailAddress,
+            'eventTitle': eventTitle,
+            'purchasedTickets': purchasedTickets,
+            'additionalTaxesAndFees': additionalTaxesAndFees,
+            'discountCodeDescription': discountCodeDescription,
+            'discountValue': discountValue,
+            'totalCharge': totalCharge,
+          },
+        )
+        .timeout(Duration(seconds: 10))
+        .catchError((e) {
+          //print(e);
+        });
   }
 }

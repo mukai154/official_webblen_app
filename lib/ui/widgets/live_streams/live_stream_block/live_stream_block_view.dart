@@ -84,7 +84,7 @@ class LiveStreamBlockView extends StatelessWidget {
                                   size: 18,
                                   color: model.savedStream ? appSavedContentColor() : Colors.white54,
                                 ),
-                                onPressed: () => model.saveUnsaveStream(streamID: stream.id),
+                                onPressed: () => model.saveUnsaveStream(stream: stream),
                               ),
                             ],
                           ),
@@ -202,7 +202,7 @@ class LiveStreamBlockView extends StatelessWidget {
           : Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: GestureDetector(
-                onDoubleTap: () => model.saveUnsaveStream(streamID: stream.id),
+                onDoubleTap: () => model.saveUnsaveStream(stream: stream),
                 onLongPress: () {
                   HapticFeedback.lightImpact();
                   showStreamOptions(stream);

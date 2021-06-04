@@ -325,7 +325,7 @@ class CreateLiveStreamView extends StatelessWidget {
                           subHeader:
                               "Webblen will acquire sponsors for this stream. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
                               "guaranteed.",
-                          initialValue: model.stream.openToSponsors,
+                          initialValue: model.stream.openToSponsors ?? false,
                           onChanged: (val) => model.setSponsorshipStatus(val),
                         ),
                         verticalSpaceMedium,

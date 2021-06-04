@@ -54,33 +54,37 @@ class ListProfileLiveStreams extends StatelessWidget {
                   color: appBackgroundColor(),
                   child: RefreshIndicator(
                     onRefresh: model.refreshData,
-                    child: ListView.builder(
-                      cacheExtent: 8000,
-                      key: PageStorageKey(model.listKey),
-                      addAutomaticKeepAlives: true,
-                      shrinkWrap: true,
-                      itemCount: model.dataResults.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < model.dataResults.length) {
-                          WebblenLiveStream stream;
-                          stream = WebblenLiveStream.fromMap(model.dataResults[index].data()!);
-                          return LiveStreamBlockView(
-                            stream: stream,
-                            showStreamOptions: (stream) => model.showContentOptions(stream),
-                          );
-                        } else {
-                          if (model.moreDataAvailable) {
-                            WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              model.loadAdditionalData();
-                            });
-                            return Align(
-                              alignment: Alignment.center,
-                              child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                    backgroundColor: appBackgroundColor(),
+                    color: appFontColorAlt(),
+                    child: SingleChildScrollView(
+                      child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        key: PageStorageKey(model.listKey),
+                        addAutomaticKeepAlives: true,
+                        shrinkWrap: true,
+                        itemCount: model.dataResults.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < model.dataResults.length) {
+                            WebblenLiveStream stream;
+                            stream = WebblenLiveStream.fromMap(model.dataResults[index].data()!);
+                            return LiveStreamBlockView(
+                              stream: stream,
+                              showStreamOptions: (stream) => model.showContentOptions(stream),
                             );
+                          } else {
+                            if (model.moreDataAvailable) {
+                              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                                model.loadAdditionalData();
+                              });
+                              return Align(
+                                alignment: Alignment.center,
+                                child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                              );
+                            }
+                            return Container();
                           }
-                          return Container();
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ),
                 ),

@@ -236,4 +236,16 @@ class WebblenLiveStream {
     }
     return isValid;
   }
+
+  bool concluded() {
+    bool concluded = false;
+    if (endDateTimeInMilliseconds != null) {
+      DateTime currentDateTime = DateTime.now();
+      DateTime contentDateTime = DateTime.fromMillisecondsSinceEpoch(endDateTimeInMilliseconds!);
+      if (contentDateTime.isBefore(currentDateTime)) {
+        concluded = true;
+      }
+    }
+    return concluded;
+  }
 }

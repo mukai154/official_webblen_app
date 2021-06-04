@@ -56,9 +56,11 @@ class EventTicketsView extends StatelessWidget {
                             model.event.isValid()
                                 ? _EventTicketsHead()
                                 : Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 12),
                                     child: Center(
                                       child: CustomText(
-                                        text: "There was an issue loading your tickets for this event.\nPlease Contact "
+                                        text:
+                                            "There was an issue loading your tickets for this event.\nIt's very likely this event no longer exists.\n\nIf this is a mistake, please Contact "
                                             "team@webblen.com for support",
                                         textAlign: TextAlign.center,
                                         fontSize: 16,
@@ -192,12 +194,12 @@ class _EventTicketsList extends HookViewModelWidget<EventTicketsViewModel> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         CustomText(
-                          text: model.ticketDistro!.validTicketIDs!.contains(model.tickets[index].id)
+                          text: model.tickets[index].used == null || !model.tickets[index].used!
                               ? "${model.tickets[index].name}"
                               : "${model.tickets[index].name} (Used)",
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: model.ticketDistro!.validTicketIDs!.contains(model.tickets[index].id) ? Colors.blueAccent : appFontColorAlt(),
+                          color: (model.tickets[index].used == null || !model.tickets[index].used!) ? Colors.blueAccent : appFontColorAlt(),
                         ),
                         CustomText(
                           text: "Ticket ID: ${model.tickets[index].id}",

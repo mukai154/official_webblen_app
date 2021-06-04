@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
@@ -26,7 +25,6 @@ import 'package:webblen/services/permission_handler/permission_handler_service.d
 import 'package:webblen/services/reactive/file_uploader/reactive_file_uploader_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
-import 'package:webblen/ui/views/base/app_base_view_model.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
@@ -34,7 +32,6 @@ class CreateEventViewModel extends ReactiveViewModel {
   CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
-  NavigationService _navigationService = locator<NavigationService>();
   PlatformDataService _platformDataService = locator<PlatformDataService>();
   UserDataService _userDataService = locator<UserDataService>();
   LocationService _locationService = locator<LocationService>();
@@ -43,11 +40,9 @@ class CreateEventViewModel extends ReactiveViewModel {
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
   TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
   StripeConnectAccountService _stripeConnectAccountService = locator<StripeConnectAccountService>();
-  AppBaseViewModel _appBaseViewModel = locator<AppBaseViewModel>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   ReactiveFileUploaderService _reactiveFileUploaderService = locator<ReactiveFileUploaderService>();
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
-  late SharedPreferences _sharedPreferences;
 
   ///EVENT DETAILS CONTROLLERS
   TextEditingController tagTextController = TextEditingController();
@@ -163,8 +158,6 @@ class CreateEventViewModel extends ReactiveViewModel {
     if (promoVal != null) {
       promo = double.parse(promoVal);
     }
-    _sharedPreferences = await SharedPreferences.getInstance();
-
     //generate new event
     ticketDistro.authorID = user.id;
     event = WebblenEvent().generateNewWebblenEvent(authorID: user.id!, suggestedUIDs: user.followers == null ? [] : user.followers!);
@@ -184,10 +177,13 @@ class CreateEventViewModel extends ReactiveViewModel {
       event = await _eventDataService.getEventByID(id);
       if (event.isValid()) {
         event.id = getRandomString(32);
-        isDuplicate = true;
         if (event.hasTickets!) {
-          ticketDistro = await _ticketDistroDataService.getTicketDistroByID(event.id);
+          ticketDistro = await _ticketDistroDataService.getTicketDistroByID(id);
+          ticketDistro.eventID = event.id;
         }
+        event.attendees = {};
+        event.savedBy = [];
+        isDuplicate = true;
       }
     } else if (eventID != "new") {
       event = await _eventDataService.getEventByID(eventID);
@@ -201,6 +197,11 @@ class CreateEventViewModel extends ReactiveViewModel {
           ticketDistro = await _ticketDistroDataService.getTicketDistroByID(event.id);
         }
       }
+    } else {
+      event.fbUsername = await _userDataService.getCurrentFbUsername(user.id!);
+      event.instaUsername = await _userDataService.getCurrentInstaUsername(user.id!);
+      event.twitterUsername = await _userDataService.getCurrentTwitterUsername(user.id!);
+      event.website = await _userDataService.getCurrentUserWebsite(user.id!);
     }
 
     //get webblen rates
@@ -224,8 +225,8 @@ class CreateEventViewModel extends ReactiveViewModel {
   ///LOAD PREVIOUS DATA
   String loadPreviousTitle() {
     String val = "";
-    if (!loadedPreviousTitle && (isEditing || isDuplicate)) {
-      val = event.title!;
+    if (!loadedPreviousTitle) {
+      val = event.title ?? "";
     }
     loadedPreviousTitle = true;
     notifyListeners();
@@ -234,8 +235,8 @@ class CreateEventViewModel extends ReactiveViewModel {
 
   String loadPreviousDesc() {
     String val = "";
-    if (!loadedPreviousDescription && (isEditing || isDuplicate)) {
-      val = event.description!;
+    if (!loadedPreviousDescription) {
+      val = event.description ?? "";
     }
     loadedPreviousDescription = true;
     notifyListeners();
@@ -244,8 +245,8 @@ class CreateEventViewModel extends ReactiveViewModel {
 
   String loadPreviousVenueName() {
     String val = "";
-    if (!loadedPreviousVenueName && (isEditing || isDuplicate)) {
-      val = event.venueName!;
+    if (!loadedPreviousVenueName) {
+      val = event.venueName ?? "";
     }
     loadedPreviousVenueName = true;
     notifyListeners();
@@ -255,12 +256,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   String loadPreviousFBUsername() {
     String val = "";
     if (!loadedPreviousFBUsername) {
-      if (isEditing || isDuplicate) {
-        val = event.fbUsername ?? "";
-      }
-      if (val.isEmpty) {
-        val = _sharedPreferences.getString('fbUsername') == null ? "" : _sharedPreferences.getString('fbUsername')!;
-      }
+      val = event.fbUsername ?? "";
     }
     loadedPreviousFBUsername = true;
     notifyListeners();
@@ -270,12 +266,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   String loadPreviousInstaUsername() {
     String val = "";
     if (!loadedPreviousInstaUsername) {
-      if (isEditing || isDuplicate) {
-        val = event.instaUsername ?? "";
-      }
-      if (val.isEmpty) {
-        val = _sharedPreferences.getString('instaUsername') == null ? "" : _sharedPreferences.getString('instaUsername')!;
-      }
+      val = event.instaUsername ?? "";
     }
     loadedPreviousInstaUsername = true;
     notifyListeners();
@@ -285,12 +276,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   String loadPreviousTwitterUsername() {
     String val = "";
     if (!loadedPreviousTwitterUsername) {
-      if (isEditing || isDuplicate) {
-        val = event.twitterUsername ?? "";
-      }
-      if (val.isEmpty) {
-        val = _sharedPreferences.getString('twitterUsername') == null ? "" : _sharedPreferences.getString('twitterUsername')!;
-      }
+      val = event.twitterUsername ?? "";
     }
     loadedPreviousTwitterUsername = true;
     notifyListeners();
@@ -300,12 +286,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   String loadPreviousWebsite() {
     String val = "";
     if (!loadedPreviousWebsite) {
-      if (isEditing || isDuplicate) {
-        val = event.website ?? "";
-      }
-      if (val.isEmpty) {
-        val = _sharedPreferences.getString('website') == null ? "" : _sharedPreferences.getString('website')!;
-      }
+      val = event.website ?? "";
     }
     loadedPreviousWebsite = true;
     notifyListeners();
@@ -861,10 +842,15 @@ class CreateEventViewModel extends ReactiveViewModel {
     }
 
     //cache username data
-    await _sharedPreferences.setString('fbUsername', event.fbUsername == null ? "" : event.fbUsername!);
-    await _sharedPreferences.setString('instaUsername', event.instaUsername == null ? "" : event.instaUsername!);
-    await _sharedPreferences.setString('twitterUsername', event.twitterUsername == null ? "" : event.twitterUsername!);
-    await _sharedPreferences.setString('website', event.website == null ? "" : event.website!);
+    if (isValidString(event.fbUsername)) {
+      await _userDataService.updateFbUsername(id: event.authorID!, val: event.fbUsername!);
+    }
+    if (isValidString(event.instaUsername)) {
+      await _userDataService.updateInstaUsername(id: event.authorID!, val: event.instaUsername!);
+    }
+    if (isValidString(event.twitterUsername)) {
+      await _userDataService.updateTwitterUsername(id: event.authorID!, val: event.twitterUsername!);
+    }
 
     return success;
   }

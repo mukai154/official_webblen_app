@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/custom_colors.dart';
@@ -133,7 +132,7 @@ class RedeemedRewardsView extends StatelessWidget {
             appBar: CustomAppBar().basicAppBar(
               title: "Redeemed Rewards",
               showBackButton: true,
-            ) as PreferredSizeWidget?,
+            ),
             body: model.isBusy
                 ? Container(
                     color: appBackgroundColor(),
@@ -148,7 +147,7 @@ class RedeemedRewardsView extends StatelessWidget {
                     color: appBackgroundColor(),
                     height: MediaQuery.of(context).size.height,
                     child: model.redeemedRewardResults.isEmpty
-                        ? LiquidPullToRefresh(
+                        ? RefreshIndicator(
                             onRefresh: () => model.refreshRedeemedRewards(context),
                             child: Center(
                               child: ListView(

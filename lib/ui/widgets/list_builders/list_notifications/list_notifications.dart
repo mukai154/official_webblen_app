@@ -35,37 +35,40 @@ class ListNotifications extends StatelessWidget {
                   child: RefreshIndicator(
                     onRefresh: model.refreshData,
                     backgroundColor: appBackgroundColor(),
-                    child: ListView.builder(
-                      physics: AlwaysScrollableScrollPhysics(),
+                    color: appFontColorAlt(),
+                    child: SingleChildScrollView(
                       controller: model.scrollController,
-                      key: PageStorageKey(model.listKey),
-                      addAutomaticKeepAlives: true,
-                      shrinkWrap: true,
-                      padding: EdgeInsets.only(
-                        top: 4.0,
-                        bottom: 4.0,
-                      ),
-                      itemCount: model.dataResults.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < model.dataResults.length) {
-                          WebblenNotification notification;
-                          notification = WebblenNotification.fromMap(model.dataResults[index].data()!);
-                          return NotificationBlockWidget(
-                            notification: notification,
-                          );
-                        } else {
-                          if (model.moreDataAvailable) {
-                            WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              model.loadAdditionalData();
-                            });
-                            return Align(
-                              alignment: Alignment.center,
-                              child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                      child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        key: PageStorageKey(model.listKey),
+                        addAutomaticKeepAlives: true,
+                        shrinkWrap: true,
+                        padding: EdgeInsets.only(
+                          top: 4.0,
+                          bottom: 4.0,
+                        ),
+                        itemCount: model.dataResults.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < model.dataResults.length) {
+                            WebblenNotification notification;
+                            notification = WebblenNotification.fromMap(model.dataResults[index].data()!);
+                            return NotificationBlockWidget(
+                              notification: notification,
                             );
+                          } else {
+                            if (model.moreDataAvailable) {
+                              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                                model.loadAdditionalData();
+                              });
+                              return Align(
+                                alignment: Alignment.center,
+                                child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                              );
+                            }
+                            return Container();
                           }
-                          return Container();
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ),
                 ),

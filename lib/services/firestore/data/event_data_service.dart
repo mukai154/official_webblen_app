@@ -7,11 +7,11 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_event_ticket.dart';
-import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class EventDataService {
@@ -21,6 +21,7 @@ class EventDataService {
   SnackbarService? _snackbarService = locator<SnackbarService>();
   TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
+  UserDataService _userDataService = locator<UserDataService>();
 
   int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
   int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
@@ -91,8 +92,7 @@ class EventDataService {
     bool checkedIn = true;
     if (isValidTicket(ticketID)) {
       WebblenEventTicket ticket = await _ticketDistroDataService.getTicketByID(ticketID);
-      WebblenTicketDistro ticketDistro = await _ticketDistroDataService.getTicketDistroByID(eventID);
-      if (ticketDistro.validTicketIDs!.contains(ticketID)) {
+      if (ticket.eventID == eventID) {
         if (ticket.used == null || !ticket.used!) {
           ticket.used = await _ticketDistroDataService.scanInTicket(ticket.id!);
           if (ticket.used!) {
@@ -207,10 +207,16 @@ class EventDataService {
     }
   }
 
-  Future createEvent({required WebblenEvent event}) async {
+  Future<bool> createEvent({required WebblenEvent event}) async {
+    String? error;
     await eventsRef.doc(event.id).set(event.toMap()).catchError((e) {
-      return e.message;
+      error = e.message;
     });
+    if (error != null) {
+      _customDialogService.showErrorDialog(description: error!);
+      return false;
+    }
+    return true;
   }
 
   Future updateEvent({required WebblenEvent event}) async {
@@ -464,23 +470,25 @@ class EventDataService {
 
     if (snapshot.docs.isNotEmpty) {
       snapshot.docs.forEach((doc) {
-        double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
-        String venueSize = doc.data()['venueSize'] ?? "small";
-        if (venueSize == "small") {
-          if (distanceFromPoint < 0.03) {
-            docs.add(doc);
-          }
-        } else if (venueSize == "medium") {
-          if (distanceFromPoint < 0.06) {
-            docs.add(doc);
-          }
-        } else if (venueSize == "large") {
-          if (distanceFromPoint < 0.1) {
-            docs.add(doc);
-          }
-        } else if (venueSize == "huge") {
-          if (distanceFromPoint < 0.5) {
-            docs.add(doc);
+        if (doc.data()['startDateTimeInMilliseconds'] != null && doc.data()['startDateTimeInMilliseconds'] <= currentDateTimeInMilliseconds) {
+          double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+          String venueSize = doc.data()['venueSize'] ?? "small";
+          if (venueSize == "small") {
+            if (distanceFromPoint < 0.03) {
+              docs.add(doc);
+            }
+          } else if (venueSize == "medium") {
+            if (distanceFromPoint < 0.06) {
+              docs.add(doc);
+            }
+          } else if (venueSize == "large") {
+            if (distanceFromPoint < 0.1) {
+              docs.add(doc);
+            }
+          } else if (venueSize == "huge") {
+            if (distanceFromPoint < 0.5) {
+              docs.add(doc);
+            }
           }
         }
       });

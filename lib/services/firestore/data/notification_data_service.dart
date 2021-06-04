@@ -2,18 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_notification.dart';
+import 'package:webblen/utils/custom_string_methods.dart';
 
 class NotificationDataService {
   SnackbarService? _snackbarService = locator<SnackbarService>();
   CollectionReference notifsRef = FirebaseFirestore.instance.collection("webblen_notifications");
 
-  Future<int> getNumberOfUnreadNotifications(String? uid) async {
-    int num = 0;
-    QuerySnapshot snapshot = await notifsRef.where('receiverUID', isEqualTo: uid).where('read', isEqualTo: false).get();
+  Future<int> unreadNotifications(String? uid) async {
+    int unreadNotifs = 0;
+    QuerySnapshot snapshot = await notifsRef.where('receiverUID', isEqualTo: uid).where('read', isEqualTo: false).limit(10).get();
     if (snapshot.docs.isNotEmpty) {
-      num = snapshot.docs.length;
+      unreadNotifs = snapshot.docs.length;
     }
-    return num;
+    return unreadNotifs;
   }
 
   clearNotifications(String? uid) async {
@@ -30,7 +31,7 @@ class NotificationDataService {
   Future sendNotification({
     required WebblenNotification notif,
   }) async {
-    String notifID = notif.receiverUID! + "-" + notif.timePostedInMilliseconds.toString();
+    String notifID = notif.receiverUID! + "-" + notif.timePostedInMilliseconds.toString() + getRandomString(5);
     await notifsRef.doc(notifID).set(notif.toMap()).catchError((e) {
       return e.message;
     });

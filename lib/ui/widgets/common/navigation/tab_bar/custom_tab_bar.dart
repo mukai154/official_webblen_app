@@ -5,9 +5,10 @@ class WebblenHomePageTabBar extends StatelessWidget {
   final TabController? tabController;
   WebblenHomePageTabBar({this.tabController});
 
+  final FontWeight fontWeight = FontWeight.w600;
+
   @override
   Widget build(BuildContext context) {
-    FontWeight fontWeight = FontWeight.w600;
     return Container(
       height: 30,
       padding: EdgeInsets.only(bottom: 4),

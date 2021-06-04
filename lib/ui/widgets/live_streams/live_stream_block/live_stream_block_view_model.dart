@@ -3,22 +3,24 @@ import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
+import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
+import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class LiveStreamBlockViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
-  SnackbarService? _snackbarService = locator<SnackbarService>();
-  NavigationService? _navigationService = locator<NavigationService>();
-  LiveStreamDataService? _liveStreamDataService = locator<LiveStreamDataService>();
+  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
   UserDataService _userDataService = locator<UserDataService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  NotificationDataService _notificationDataService = locator<NotificationDataService>();
+
+  ///USER DATA
+  WebblenUser get user => _reactiveUserService.user;
 
   bool isLive = false;
   bool savedStream = false;
@@ -57,14 +59,21 @@ class LiveStreamBlockViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  saveUnsaveStream({String? streamID}) async {
+  saveUnsaveStream({required WebblenLiveStream stream}) async {
     if (savedStream) {
       savedStream = false;
     } else {
       savedStream = true;
+      WebblenNotification notification = WebblenNotification().generateContentSavedNotification(
+        receiverUID: stream.hostID!,
+        senderUID: user.id!,
+        username: user.username!,
+        content: stream,
+      );
+      _notificationDataService.sendNotification(notif: notification);
     }
     HapticFeedback.lightImpact();
     notifyListeners();
-    await _liveStreamDataService!.saveUnsaveStream(uid: _reactiveUserService.user.id, streamID: streamID, savedStream: savedStream);
+    await _liveStreamDataService.saveUnsaveStream(uid: user.id, streamID: stream.id!, savedStream: savedStream);
   }
 }

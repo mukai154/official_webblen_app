@@ -8,7 +8,7 @@ import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 
 class PostDataService {
-  CollectionReference postsRef = FirebaseFirestore.instance.collection('posts');
+  CollectionReference postsRef = FirebaseFirestore.instance.collection('webblen_posts');
   int dateTimeInMilliseconds1YearAgo = DateTime.now().millisecondsSinceEpoch - 31500000000;
   DialogService? _dialogService = locator<DialogService>();
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();

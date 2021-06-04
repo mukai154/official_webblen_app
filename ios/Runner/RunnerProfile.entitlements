@@ -13,6 +13,7 @@
 		<string>applinks:app.webblen.io/shared_link</string>
 		<string>applinks:app.webblen.io/shared_link?mode=developer</string>
 		<string>webcredentials:app.webblen.io/shared_link</string>
+		<string>webcredentials:app.webblen.io/shared_link?mode=developer</string>
 	</array>
 </dict>
 </plist>

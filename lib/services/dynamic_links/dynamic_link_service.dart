@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:app_links/app_links.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
@@ -9,7 +12,6 @@ import 'package:webblen/services/navigation/custom_navigation_service.dart';
 
 class DynamicLinkService {
   SnackbarService _snackbarService = locator<SnackbarService>();
-  NavigationService _navigationService = locator<NavigationService>();
 
   String webblenShareContentPrefix = 'https://app.webblen.io/shared_link';
   String androidPackageName = 'com.webblen.events.webblen';
@@ -18,21 +20,27 @@ class DynamicLinkService {
 
   Future<String> createProfileLink({required WebblenUser user}) async {
     //set uri
-    Uri postURI = Uri.parse('https://app.webblen.io/profiles/profile?id=${user.id}');
+    Uri uri = Uri.parse('https://app.webblen.io/profiles/${user.id}');
 
     //set dynamic link params
     final DynamicLinkParameters params = DynamicLinkParameters(
       dynamicLinkParametersOptions: DynamicLinkParametersOptions(
         shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
       ),
+      navigationInfoParameters: NavigationInfoParameters(
+        forcedRedirectEnabled: true,
+      ),
       uriPrefix: webblenShareContentPrefix,
-      link: postURI,
+      link: uri,
       androidParameters: AndroidParameters(
         packageName: androidPackageName,
+        fallbackUrl: uri,
       ),
       iosParameters: IosParameters(
         bundleId: iosBundleID,
         appStoreId: iosAppStoreID,
+        fallbackUrl: uri,
+        ipadFallbackUrl: uri,
       ),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: "Checkout ${user.username}'s account on Webblen",
@@ -49,7 +57,7 @@ class DynamicLinkService {
 
   Future<String> createPostLink({required String? authorUsername, required WebblenPost post}) async {
     //set uri
-    Uri postURI = Uri.parse('https://app.webblen.io/posts/post?id=${post.id}');
+    Uri uri = Uri.parse('https://app.webblen.io/posts/${post.id}');
 
     //set dynamic link params
     final DynamicLinkParameters params = DynamicLinkParameters(
@@ -57,13 +65,19 @@ class DynamicLinkService {
         shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
       ),
       uriPrefix: webblenShareContentPrefix,
-      link: postURI,
+      link: uri,
+      navigationInfoParameters: NavigationInfoParameters(
+        forcedRedirectEnabled: true,
+      ),
       androidParameters: AndroidParameters(
         packageName: androidPackageName,
+        fallbackUrl: uri,
       ),
       iosParameters: IosParameters(
         bundleId: iosBundleID,
         appStoreId: iosAppStoreID,
+        fallbackUrl: uri,
+        ipadFallbackUrl: uri,
       ),
       socialMetaTagParameters: SocialMetaTagParameters(
         title: "Checkout $authorUsername's post on Webblen",
@@ -80,7 +94,7 @@ class DynamicLinkService {
 
   Future<String> createEventLink({required String? authorUsername, required WebblenEvent event}) async {
     //set uri
-    Uri postURI = Uri.parse('https://app.webblen.io/events/event?id=${event.id}');
+    Uri uri = Uri.parse('https://app.webblen.io/events/${event.id}');
 
     //set dynamic link params
     final DynamicLinkParameters params = DynamicLinkParameters(
@@ -88,16 +102,22 @@ class DynamicLinkService {
         shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
       ),
       uriPrefix: webblenShareContentPrefix,
-      link: postURI,
+      link: uri,
+      navigationInfoParameters: NavigationInfoParameters(
+        forcedRedirectEnabled: true,
+      ),
       androidParameters: AndroidParameters(
         packageName: androidPackageName,
+        fallbackUrl: uri,
       ),
       iosParameters: IosParameters(
         bundleId: iosBundleID,
         appStoreId: iosAppStoreID,
+        fallbackUrl: uri,
+        ipadFallbackUrl: uri,
       ),
       socialMetaTagParameters: SocialMetaTagParameters(
-        title: "Checkout ${event.title} hosted by @$authorUsername on Webblen",
+        title: "Checkout ${event.title} hosted by $authorUsername on Webblen",
         description: event.description!.length > 200 ? event.description!.substring(0, 190) + "..." : event.description,
         imageUrl: event.imageURL != null ? Uri.parse(event.imageURL!) : null,
       ),
@@ -111,7 +131,7 @@ class DynamicLinkService {
 
   Future<String> createLiveStreamLink({required String? authorUsername, required WebblenLiveStream stream}) async {
     //set uri
-    Uri postURI = Uri.parse('https://app.webblen.io/streams/stream?id=${stream.id}');
+    Uri uri = Uri.parse('https://app.webblen.io/streams/${stream.id}');
 
     //set dynamic link params
     final DynamicLinkParameters params = DynamicLinkParameters(
@@ -119,16 +139,22 @@ class DynamicLinkService {
         shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
       ),
       uriPrefix: webblenShareContentPrefix,
-      link: postURI,
+      link: uri,
+      navigationInfoParameters: NavigationInfoParameters(
+        forcedRedirectEnabled: true,
+      ),
       androidParameters: AndroidParameters(
         packageName: androidPackageName,
+        fallbackUrl: uri,
       ),
       iosParameters: IosParameters(
         bundleId: iosBundleID,
         appStoreId: iosAppStoreID,
+        fallbackUrl: uri,
+        ipadFallbackUrl: uri,
       ),
       socialMetaTagParameters: SocialMetaTagParameters(
-        title: "Checkout this video stream: ${stream.title}\nhosted by @$authorUsername on Webblen",
+        title: "Checkout this video stream: ${stream.title}\nhosted by $authorUsername on Webblen",
         description: stream.description!.length > 200 ? stream.description!.substring(0, 190) + "..." : stream.description,
         imageUrl: stream.imageURL != null ? Uri.parse(stream.imageURL!) : null,
       ),
@@ -140,10 +166,23 @@ class DynamicLinkService {
     return dynamicURL.toString();
   }
 
-  Future handleDynamicLinks() async {
-    // get dynamic link on app open
-    final PendingDynamicLinkData? data = await FirebaseDynamicLinks.instance.getInitialLink();
+  Future handleVariousAppLinks() async {
+    AppLinks(
+      onAppLink: (uri, error) {
+        if (uri.toString().contains('shared_link')) {
+          print('handle dynamic link');
+          handleDynamicLinks(uri);
+        } else {
+          _handleAppLink(uri);
+        }
+      },
+    );
+  }
 
+  Future handleDynamicLinks(Uri link) async {
+    // get dynamic link on app open
+    final PendingDynamicLinkData? data = await FirebaseDynamicLinks.instance.getDynamicLink(link);
+    print(data);
     _handleDynamicLink(data);
 
     // get dynamic link if app already running
@@ -152,36 +191,36 @@ class DynamicLinkService {
     }, onError: (OnLinkErrorException err) async {
       _snackbarService.showSnackbar(
         title: 'App Link Error',
-        message: err.message!,
+        message: 'There was an issues loading the desired link',
         duration: Duration(seconds: 5),
       );
     });
   }
 
   void _handleDynamicLink(PendingDynamicLinkData? linkData) {
-    CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
     final Uri? link = linkData?.link;
+    _handleAppLink(link);
+  }
+
+  void _handleAppLink(Uri? link) {
+    CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
     if (link != null) {
-      print(link);
-      String? id = link.queryParameters['id'];
-      if (id != null) {
-        if (link.pathSegments.contains('profile')) {
-          _customNavigationService.navigateToUserView(id);
-        } else if (link.pathSegments.contains('post')) {
-          _customNavigationService.navigateToPostView(id);
-        } else if (link.pathSegments.contains('event')) {
-          _customNavigationService.navigateToEventView(id);
-        } else if (link.pathSegments.contains('stream')) {
-          _customNavigationService.navigateToLiveStreamView(id);
-        } else if (link.pathSegments.contains('ticket')) {
-          _customNavigationService.navigateToTicketView(id);
-        } else {
-          _snackbarService.showSnackbar(
-            title: 'App Link Error',
-            message: 'There was an issues loading the desired link',
-            duration: Duration(seconds: 5),
-          );
-        }
+      String stringifiedLink = link.toString();
+      int index = stringifiedLink.lastIndexOf("/");
+      String id = stringifiedLink.substring(index + 1, stringifiedLink.length);
+      print(id);
+      if (stringifiedLink.contains('profile')) {
+        _customNavigationService.navigateToUserView(id);
+      } else if (stringifiedLink.contains('post')) {
+        _customNavigationService.navigateToPostView(id);
+      } else if (stringifiedLink.contains('event')) {
+        _customNavigationService.navigateToEventView(id);
+      } else if (stringifiedLink.contains('stream')) {
+        _customNavigationService.navigateToLiveStreamView(id);
+      } else if (stringifiedLink.contains('my_tickets')) {
+        _customNavigationService.navigateToMyTicketsView();
+      } else if (stringifiedLink.contains('ticket') && !stringifiedLink.contains('my_tickets')) {
+        _customNavigationService.navigateToTicketView(id);
       } else {
         _snackbarService.showSnackbar(
           title: 'App Link Error',

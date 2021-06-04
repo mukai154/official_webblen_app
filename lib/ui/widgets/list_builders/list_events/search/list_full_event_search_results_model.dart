@@ -46,7 +46,7 @@ class ListFullEventSearchResultsModel extends BaseViewModel {
   }
 
   loadData() async {
-    dataResults = await _algoliaSearchService.queryEvents(searchTerm: searchTerm, resultsLimit: resultsLimit);
+    dataResults = await _algoliaSearchService.queryEvents(searchTerm: searchTerm ?? "", resultsLimit: resultsLimit);
     resultsPageNum += 1;
     notifyListeners();
   }
@@ -58,7 +58,7 @@ class ListFullEventSearchResultsModel extends BaseViewModel {
     loadingAdditionalData = true;
     notifyListeners();
     List<WebblenEvent> newResults = await _algoliaSearchService.queryAdditionalEvents(
-      searchTerm: searchTerm,
+      searchTerm: searchTerm ?? "",
       resultsLimit: resultsLimit,
       pageNum: resultsPageNum,
     );

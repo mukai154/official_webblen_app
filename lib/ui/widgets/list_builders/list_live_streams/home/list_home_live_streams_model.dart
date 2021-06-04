@@ -120,8 +120,8 @@ class ListHomeLiveStreamsModel extends ReactiveViewModel {
   }
 
   showContentOptions(dynamic content) async {
-    String val = await customBottomSheetService.showContentOptions(content: content);
-    if (val == "deleted content") {
+    String? val = await customBottomSheetService.showContentOptions(content: content);
+    if (val != null && val == "deleted content") {
       dataResults.removeWhere((doc) => doc.id == content.id);
       listKey = getRandomString(5);
       notifyListeners();

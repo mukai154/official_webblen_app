@@ -22,7 +22,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
   UserDataService _userDataService = locator<UserDataService>();
   LocationService? _locationService = locator<LocationService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
-  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
+  DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   ReactiveContentFilterService _reactiveContentFilterService = locator<ReactiveContentFilterService>();
@@ -35,8 +35,6 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
   bool configuredMessaging = false;
 
   ///LOCATION DATA
-  String get cityName => _reactiveContentFilterService.cityName;
-  String get areaCode => _reactiveContentFilterService.areaCode;
   bool hasLocation = false;
 
   ///TAB BAR STATE
@@ -57,7 +55,8 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
         _reactiveUserService.updateUser(data);
         notifyListeners();
         setBusy(false);
-      } else if (user != data) {
+      } else if (!user.isIdenticalTo(data)) {
+        print(true);
         _reactiveUserService.updateUser(data);
         _reactiveUserService.updateUserLoggedIn(true);
         if (!hasLocation) {
@@ -97,6 +96,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
       try {
         int pageNum = int.parse(page);
         setNavBarIndex(pageNum);
+        notifyListeners();
       } catch (e) {}
     }
 
@@ -161,7 +161,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
 
     //if there are no errors, check for dynamic links
     initErrorStatus = InitErrorStatus.none;
-    await _dynamicLinkService!.handleDynamicLinks();
+    await _dynamicLinkService.handleVariousAppLinks();
     notifyListeners();
     setBusy(false);
   }

@@ -58,30 +58,31 @@ class Routes {
   static const String OnboardingCompleteViewRoute = '/onboarding/completed';
   static const String _AppBaseViewRoute = '/home/:page';
   static String AppBaseViewRoute({@required dynamic page}) => '/home/$page';
-  static const String _PostViewRoute = '/post/:id';
-  static String PostViewRoute({@required dynamic id}) => '/post/$id';
-  static const String _CreatePostViewRoute = '/post/publish/:id/:promo';
+  static const String _PostViewRoute = '/posts/:id';
+  static String PostViewRoute({@required dynamic id}) => '/posts/$id';
+  static const String _CreatePostViewRoute = '/posts/publish/:id/:promo';
   static String CreatePostViewRoute(
           {@required dynamic id, @required dynamic promo}) =>
-      '/post/publish/$id/$promo';
-  static const String _EventViewRoute = '/event/:id';
-  static String EventViewRoute({@required dynamic id}) => '/event/$id';
-  static const String _CreateEventViewRoute = '/event/publish/:id/:promo';
+      '/posts/publish/$id/$promo';
+  static const String _EventViewRoute = '/events/:id';
+  static String EventViewRoute({@required dynamic id}) => '/events/$id';
+  static const String _CreateEventViewRoute = '/events/publish/:id/:promo';
   static String CreateEventViewRoute(
           {@required dynamic id, @required dynamic promo}) =>
-      '/event/publish/$id/$promo';
-  static const String _LiveStreamViewRoute = '/stream/:id';
-  static String LiveStreamViewRoute({@required dynamic id}) => '/stream/$id';
-  static const String _CreateLiveStreamViewRoute = '/stream/publish/:id/:promo';
+      '/events/publish/$id/$promo';
+  static const String _LiveStreamViewRoute = '/streams/:id';
+  static String LiveStreamViewRoute({@required dynamic id}) => '/streams/$id';
+  static const String _CreateLiveStreamViewRoute =
+      '/streams/publish/:id/:promo';
   static String CreateLiveStreamViewRoute(
           {@required dynamic id, @required dynamic promo}) =>
-      '/stream/publish/$id/$promo';
-  static const String _LiveStreamHostViewRoute = '/stream/host/:id';
+      '/streams/publish/$id/$promo';
+  static const String _LiveStreamHostViewRoute = '/streams/host/:id';
   static String LiveStreamHostViewRoute({@required dynamic id}) =>
-      '/stream/host/$id';
-  static const String _LiveStreamViewerViewRoute = '/stream/viewer/:id';
+      '/streams/host/$id';
+  static const String _LiveStreamViewerViewRoute = '/streams/viewer/:id';
   static String LiveStreamViewerViewRoute({@required dynamic id}) =>
-      '/stream/viewer/$id';
+      '/streams/viewer/$id';
   static const String _AllSearchResultsViewRoute = '/all_results/:term';
   static String AllSearchResultsViewRoute({@required dynamic term}) =>
       '/all_results/$term';
@@ -90,12 +91,12 @@ class Routes {
   static String UserProfileView({@required dynamic id}) => '/profile/$id';
   static const String EditProfileViewRoute = '/edit_profile';
   static const String SavedContentViewRoute = '/saved';
-  static const String _UserFollowersViewRoute = '/profile/followers/:id';
+  static const String _UserFollowersViewRoute = '/profiles/followers/:id';
   static String UserFollowersViewRoute({@required dynamic id}) =>
-      '/profile/followers/$id';
-  static const String _UserFollowingViewRoute = '/profile/following/:id';
+      '/profiles/followers/$id';
+  static const String _UserFollowingViewRoute = '/profiles/following/:id';
   static String UserFollowingViewRoute({@required dynamic id}) =>
-      '/profile/following/$id';
+      '/profiles/following/$id';
   static const String SuggestAccountsViewRoute = '/suggest_accounts';
   static const String SettingsViewRoute = '/settings';
   static const String MyTicketsViewRoute = '/wallet/my_tickets';

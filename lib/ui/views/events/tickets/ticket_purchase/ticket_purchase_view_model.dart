@@ -320,7 +320,7 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
       }
       await _notificationDataService.sendNotification(notif: purchaseNotif);
       await _notificationDataService.sendNotification(notif: soldNotif);
-      List purchasedTickets = await _ticketDistroDataService.completeTicketPurchase(user.id!, ticketsToPurchase, event!);
+      List purchasedTickets = await _ticketDistroDataService.completeTicketPurchase(uid: user.id!, event: event!, ticketsToPurchase: ticketsToPurchase);
       _emailService.sendTicketPurchaseConfirmationEmail(
         emailAddress: emailAddress!,
         eventTitle: event!.title!,
@@ -355,7 +355,7 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
       if (status == "passed") {
         await _notificationDataService.sendNotification(notif: purchaseNotif);
         await _notificationDataService.sendNotification(notif: soldNotif);
-        List purchasedTickets = await _ticketDistroDataService.completeTicketPurchase(user.id!, ticketsToPurchase, event!);
+        List purchasedTickets = await _ticketDistroDataService.completeTicketPurchase(uid: user.id!, event: event!, ticketsToPurchase: ticketsToPurchase);
         _emailService.sendTicketPurchaseConfirmationEmail(
           emailAddress: emailAddress!,
           eventTitle: event!.title!,

@@ -208,7 +208,7 @@ class AuthView extends StatelessWidget {
         backgroundColor: Colors.white,
         body: Center(
           child: GestureDetector(
-            onTap: FocusScope.of(context).unfocus,
+            onTap: () => FocusScope.of(context).unfocus(),
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 32),
               constraints: BoxConstraints(

@@ -17,7 +17,8 @@ class ListHomeEventsModel extends ReactiveViewModel {
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
 
   ///HELPERS
-  ScrollController scrollController = ScrollController();
+  ScrollController scrollController = ScrollController(keepScrollOffset: true);
+  String positionKey = "home-events-position-key";
   String listKey = "initial-home-events-key";
 
   ///FILTER DATA
@@ -33,10 +34,11 @@ class ListHomeEventsModel extends ReactiveViewModel {
   ///DATA
   List<DocumentSnapshot> dataResults = [];
 
+  bool initializing = true;
   bool loadingAdditionalData = false;
   bool moreDataAvailable = true;
 
-  int resultsLimit = 30;
+  int resultsLimit = 20;
 
   @override
   List<ReactiveServiceMixin> get reactiveServices => [_reactiveContentFilterService];
@@ -56,8 +58,6 @@ class ListHomeEventsModel extends ReactiveViewModel {
   }
 
   Future<void> refreshData() async {
-    scrollController.jumpTo(scrollController.position.minScrollExtent);
-
     //clear previous data
     dataResults = [];
     loadingAdditionalData = false;
@@ -82,6 +82,8 @@ class ListHomeEventsModel extends ReactiveViewModel {
     if (dataResults.length < resultsLimit) {
       moreDataAvailable = false;
     }
+
+    initializing = false;
 
     notifyListeners();
 

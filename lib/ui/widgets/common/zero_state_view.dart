@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 
@@ -119,8 +118,10 @@ class ZeroStateView extends StatelessWidget {
   Widget body() {
     return refreshData == null
         ? list()
-        : LiquidPullToRefresh(
+        : RefreshIndicator(
             onRefresh: refreshData as Future<void> Function(),
+            backgroundColor: appBackgroundColor(),
+            color: appFontColorAlt(),
             child: list(),
           );
   }

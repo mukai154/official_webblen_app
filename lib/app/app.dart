@@ -142,14 +142,14 @@ import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts
     CustomRoute(
       page: PostView,
       name: "PostViewRoute",
-      path: "/post/:id",
+      path: "/posts/:id",
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: CreatePostView,
       name: "CreatePostViewRoute",
-      path: "/post/publish/:id/:promo",
+      path: "/posts/publish/:id/:promo",
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
@@ -158,13 +158,13 @@ import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts
     CustomRoute(
       page: EventView,
       name: "EventViewRoute",
-      path: "/event/:id",
+      path: "/events/:id",
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: CreateEventView,
       name: "CreateEventViewRoute",
-      path: "/event/publish/:id/:promo",
+      path: "/events/publish/:id/:promo",
       durationInMilliseconds: 0,
     ),
 
@@ -172,25 +172,25 @@ import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts
     CustomRoute(
       page: LiveStreamDetailsView,
       name: "LiveStreamViewRoute",
-      path: "/stream/:id",
+      path: "/streams/:id",
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: CreateLiveStreamView,
       name: "CreateLiveStreamViewRoute",
-      path: "/stream/publish/:id/:promo",
+      path: "/streams/publish/:id/:promo",
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: LiveStreamHostView,
       name: "LiveStreamHostViewRoute",
-      path: "/stream/host/:id",
+      path: "/streams/host/:id",
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: LiveStreamViewerView,
       name: "LiveStreamViewerViewRoute",
-      path: "/stream/viewer/:id",
+      path: "/streams/viewer/:id",
       durationInMilliseconds: 0,
     ),
 
@@ -234,14 +234,14 @@ import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts
     CustomRoute(
       page: UserFollowersView,
       name: "UserFollowersViewRoute",
-      path: "/profile/followers/:id",
+      path: "/profiles/followers/:id",
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),
     CustomRoute(
       page: UserFollowingView,
       name: "UserFollowingViewRoute",
-      path: "/profile/following/:id",
+      path: "/profiles/following/:id",
       //transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 0,
     ),

@@ -13,6 +13,7 @@ import 'package:webblen/ui/widgets/list_builders/list_events/home/list_home_even
 import 'package:webblen/ui/widgets/list_builders/list_live_streams/home/list_home_live_streams.dart';
 import 'package:webblen/ui/widgets/list_builders/list_posts/home/list_home_posts.dart';
 import 'package:webblen/ui/widgets/notifications/notification_bell/notification_bell_view.dart';
+import 'package:webblen/ui/widgets/reactive/location_name_block/location_name_block_view.dart';
 
 import 'home_view_model.dart';
 
@@ -22,6 +23,7 @@ class HomeView extends StatelessWidget {
     return ViewModelBuilder<HomeViewModel>.reactive(
       disposeViewModel: false,
       initialiseSpecialViewModelsOnce: true,
+      fireOnModelReadyOnce: true,
       viewModelBuilder: () => locator<HomeViewModel>(),
       builder: (context, model, child) => Container(
         width: screenWidth(context),
@@ -58,11 +60,9 @@ class _HomeView extends HookViewModelWidget<HomeViewModel> {
           tabController: _tabController,
         ),
         SizedBox(height: 8),
-        model.cityName.isEmpty
-            ? Container()
-            : _HomeBody(
-                tabController: _tabController,
-              ),
+        _HomeBody(
+          tabController: _tabController,
+        ),
       ],
     );
   }
@@ -78,35 +78,42 @@ class _HomeHead extends HookViewModelWidget<HomeViewModel> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
-            flex: 3,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerLeft,
-              child: Text(
-                model.isBusy ? "" : "${model.cityName}",
-                style: TextStyle(
-                  color: appFontColor(),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 35,
-                ),
-              ),
-            ),
+            flex: 6,
+            child: LocationBlockView(),
           ),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                NotificationBellView(uid: model.user.id),
-                IconButton(
-                  iconSize: 20,
-                  onPressed: () => model.customBottomSheetService.openFilter(),
-                  icon: Icon(FontAwesomeIcons.slidersH, color: appIconColor()),
+                NotificationBellView(),
+                GestureDetector(
+                  onTap: () => model.customBottomSheetService.openFilter(),
+                  child: Container(
+                    height: 25,
+                    width: 25,
+                    child: Center(
+                      child: Icon(
+                        FontAwesomeIcons.slidersH,
+                        size: 20,
+                        color: appIconColor(),
+                      ),
+                    ),
+                  ),
                 ),
-                IconButton(
-                  iconSize: 20,
-                  onPressed: () => model.customBottomSheetService.showAddContentOptions(),
-                  icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
+                GestureDetector(
+                  onTap: () => model.customBottomSheetService.showAddContentOptions(),
+                  child: Container(
+                    height: 25,
+                    width: 25,
+                    child: Center(
+                      child: Icon(
+                        FontAwesomeIcons.plus,
+                        size: 20,
+                        color: appIconColor(),
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),

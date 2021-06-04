@@ -1,10 +1,8 @@
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_event_ticket.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/firestore/data/event_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
@@ -13,8 +11,6 @@ import 'package:webblen/utils/time_calc.dart';
 
 class MyTicketsViewModel extends ReactiveViewModel {
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
-  EventDataService _eventDataService = locator<EventDataService>();
-  NavigationService _navigationService = locator<NavigationService>();
   TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   ShareService shareService = locator<ShareService>();
@@ -22,9 +18,13 @@ class MyTicketsViewModel extends ReactiveViewModel {
   ///USER DATA
   WebblenUser get user => _reactiveUserService.user;
 
+  ///EVENT & TICKET DATA
   List<WebblenEvent> events = [];
   List loadedEvents = [];
   Map<String, dynamic> ticsPerEvent = {};
+
+  ///FILTER DATA
+  String searchTerm = "";
 
   @override
   List<ReactiveServiceMixin> get reactiveServices => [_reactiveUserService];
@@ -66,5 +66,10 @@ class MyTicketsViewModel extends ReactiveViewModel {
           .inMilliseconds
           .compareTo(DateTime.now().difference(TimeCalc().getDateTimeFromString(eventB['eventStartDate'])).inMilliseconds));
     } catch (e) {}
+  }
+
+  updateSearchTerm(String val) {
+    searchTerm = val.toLowerCase();
+    notifyListeners();
   }
 }

@@ -1,4 +1,7 @@
 import 'package:webblen/enums/notifcation_type.dart';
+import 'package:webblen/models/webblen_event.dart';
+import 'package:webblen/models/webblen_live_stream.dart';
+import 'package:webblen/models/webblen_post.dart';
 
 class WebblenNotification {
   String? receiverUID;
@@ -274,6 +277,37 @@ class WebblenNotification {
     return notif;
   }
 
+  //Content Saved Notification
+  WebblenNotification generateContentSavedNotification({
+    required String receiverUID,
+    required String senderUID,
+    required String username,
+    required dynamic content,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: receiverUID,
+      senderUID: senderUID,
+      type: NotificationType.follower,
+      header: content is WebblenEvent
+          ? '@$username saved your event'
+          : content is WebblenLiveStream
+              ? '@$username saved your stream'
+              : '@$username saved your post',
+      subHeader: content is WebblenEvent || content is WebblenLiveStream
+          ? content.title
+          : content is WebblenPost
+              ? content.body!.length > 30
+                  ? '${content.body!.substring(0, 29)}...'
+                  : content.body
+              : 'View Profile',
+      additionalData: {'id': senderUID},
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
+
   //Webblen Received Notification
   WebblenNotification generateWebblenReceivedNotification({
     required String postID,
@@ -288,7 +322,7 @@ class WebblenNotification {
       type: NotificationType.webblenReceived,
       header: '$senderUsername sent you WBLN',
       subHeader: '$amountReceived WBLN has been deposited in your wallet',
-      additionalData: null,
+      additionalData: {'id': ''},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -309,7 +343,7 @@ class WebblenNotification {
       type: NotificationType.tickets,
       header: "Tickets Purchased!",
       subHeader: "You've purchased $numberOfTickets ticket(s) for the event: $eventTitle",
-      additionalData: null,
+      additionalData: {'id': ''},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,
@@ -330,7 +364,7 @@ class WebblenNotification {
       type: NotificationType.earnings,
       header: "Tickets Sold!",
       subHeader: "You've sold $numberOfTickets ticket(s) for your event: $eventTitle",
-      additionalData: null,
+      additionalData: {'id': ''},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,

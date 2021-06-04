@@ -10,7 +10,7 @@ class CommentDataService {
   final ActivityDataService? _activityDataService = locator<ActivityDataService>();
   final SnackbarService? _snackbarService = locator<SnackbarService>();
   final CollectionReference commentsRef = FirebaseFirestore.instance.collection("comments");
-  final CollectionReference postsRef = FirebaseFirestore.instance.collection("posts");
+  final CollectionReference postsRef = FirebaseFirestore.instance.collection("webblen_posts");
 
   //CREATE
   Future<String?> sendComment(String? parentID, String? postAuthorID, WebblenPostComment comment) async {

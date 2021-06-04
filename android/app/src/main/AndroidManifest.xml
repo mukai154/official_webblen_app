@@ -51,14 +51,28 @@
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />
 
-        <!-- Deep linking -->
-        <meta-data android:name="flutter_deeplinking_enabled" android:value="true" />
+        <!-- Deep Links -->
+        <intent-filter>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.DEFAULT" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
+            <data
+                android:scheme="https"
+                android:host="app.webblen.io" />
+        </intent-filter>
+
+        <!-- App Links -->
         <intent-filter android:autoVerify="true">
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="http" android:host="app.webblen.io" />
-            <data android:scheme="https" />
+            <!-- Accepts URIs that begin with https://YOUR_HOST -->
+            <data
+                android:scheme="https"
+                android:host="app.webblen.io"
+                android:pathPrefix="/shared_link"
+                />
         </intent-filter>
 
 

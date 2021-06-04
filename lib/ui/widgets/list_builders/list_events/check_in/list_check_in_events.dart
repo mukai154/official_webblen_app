@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_event.dart';
@@ -49,41 +48,42 @@ class ListCheckInEvents extends StatelessWidget {
               : Container(
                   height: screenHeight(context),
                   color: appBackgroundColor(),
-                  child: LiquidPullToRefresh(
-                    backgroundColor: appBackgroundColor(),
-                    color: appActiveColor(),
+                  child: RefreshIndicator(
                     onRefresh: model.refreshData,
-                    child: ListView.builder(
-                      cacheExtent: 8000,
+                    backgroundColor: appBackgroundColor(),
+                    color: appFontColorAlt(),
+                    child: SingleChildScrollView(
                       controller: model.scrollController,
-                      physics: AlwaysScrollableScrollPhysics(),
-                      key: PageStorageKey(model.listKey),
-                      addAutomaticKeepAlives: true,
-                      shrinkWrap: true,
-                      itemCount: model.dataResults.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < model.dataResults.length) {
-                          WebblenEvent event;
-                          event = WebblenEvent.fromMap(model.dataResults[index].data()!);
-                          return EventCheckInBlock(
-                            event: event,
-                            showEventOptions: (event) => model.showContentOptions(event),
-                          );
-                        } else {
-                          if (model.moreDataAvailable) {
-                            WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              if (model.dataResults.length > 10) {
-                                model.loadAdditionalData();
-                              }
-                            });
-                            return Align(
-                              alignment: Alignment.center,
-                              child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                      child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        key: PageStorageKey(model.listKey),
+                        addAutomaticKeepAlives: true,
+                        shrinkWrap: true,
+                        itemCount: model.dataResults.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < model.dataResults.length) {
+                            WebblenEvent event;
+                            event = WebblenEvent.fromMap(model.dataResults[index].data()!);
+                            return EventCheckInBlock(
+                              event: event,
+                              showEventOptions: (event) => model.showContentOptions(event),
                             );
+                          } else {
+                            if (model.moreDataAvailable) {
+                              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                                if (model.dataResults.length > 10) {
+                                  model.loadAdditionalData();
+                                }
+                              });
+                              return Align(
+                                alignment: Alignment.center,
+                                child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                              );
+                            }
+                            return Container();
                           }
-                          return Container();
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ),
                 ),

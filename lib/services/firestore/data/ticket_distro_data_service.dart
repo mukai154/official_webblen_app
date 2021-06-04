@@ -110,24 +110,38 @@ class TicketDistroDataService {
     }
   }
 
-  Future<List> completeTicketPurchase(String uid, List ticketsToPurchase, WebblenEvent event) async {
-    List purchasedTickets = [];
+  Future<bool> updateTicketDistroQuantities({required String eventID, required String ticketName, required int numOfTicketsPurchased}) async {
+    if (numOfTicketsPurchased == 0) {
+      return true;
+    }
+    //print('updating ticket quantities');
     String? error;
-    DocumentSnapshot snapshot = await ticketDistroRef.doc(event.id).get();
-    print(snapshot);
+    DocumentSnapshot snapshot = await ticketDistroRef.doc(eventID).get();
     WebblenTicketDistro ticketDistro = WebblenTicketDistro.fromMap(snapshot.data()!);
-    List validTicketIDs = ticketDistro.validTicketIDs == null ? [] : ticketDistro.validTicketIDs!.toList(growable: true);
-    ticketsToPurchase.forEach((purchasedTicket) async {
-      String ticketName = purchasedTicket['ticketName'];
-      String ticketPrice = purchasedTicket['ticketPrice'];
-      int ticketIndex = ticketDistro.tickets!.indexWhere((ticket) => ticket["ticketName"] == ticketName);
-      int ticketPurchaseQty = purchasedTicket['purchaseQty'];
-      int ticketAvailableQty = int.parse(purchasedTicket['ticketQuantity']);
-      String newTicketAvailableQty = (ticketAvailableQty - ticketPurchaseQty).toString();
-      ticketDistro.tickets![ticketIndex]['ticketQuantity'] = newTicketAvailableQty;
-      for (int i = ticketPurchaseQty; i >= 1; i--) {
+    int ticketIndex = ticketDistro.tickets!.indexWhere((ticket) => ticket["ticketName"] == ticketName);
+    int numOfTicketsAvailable = int.parse(ticketDistro.tickets![ticketIndex]['ticketQuantity']);
+    String newTicketAvailableQty = (numOfTicketsAvailable - numOfTicketsPurchased).toString();
+    ticketDistro.tickets![ticketIndex]['ticketQuantity'] = newTicketAvailableQty;
+    //print('updating ticket $ticketName qty data to ${ticketDistro.tickets![ticketIndex]['ticketQuantity'].toString()}');
+    await ticketDistroRef.doc(eventID).update({"tickets": ticketDistro.tickets}).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      print('failed to update ticket quantities: $error');
+      return false;
+    }
+    //print('update success');
+    return true;
+  }
+
+  Future<List> completeTicketPurchase({required String uid, required WebblenEvent event, required List ticketsToPurchase}) async {
+    List tickets = [];
+    for (var val in ticketsToPurchase) {
+      String ticketName = val['ticketName'];
+      String ticketPrice = val['ticketPrice'];
+      int numOfTicketsPurchased = val['purchaseQty'];
+      for (int i = numOfTicketsPurchased; i >= 1; i--) {
         String ticketID = getRandomString(32);
-        validTicketIDs.add(ticketID);
         WebblenEventTicket newTicket = WebblenEventTicket(
           id: ticketID,
           name: ticketName,
@@ -143,20 +157,19 @@ class TicketDistroDataService {
           timezone: event.timezone,
           price: ticketPrice,
           ticketURL: "https://app.webblen.io/tickets/view/$ticketID",
+          used: false,
         );
-        purchasedTickets.add(newTicket.toMap());
+        tickets.add(newTicket.toMap());
         await purchasedTicketRef.doc(ticketID).set(newTicket.toMap()).catchError((e) {
-          error = e;
+          print(e);
+        });
+        await ticketDistroRef.doc(event.id).update({
+          "validTicketIDs": FieldValue.arrayUnion([ticketID])
         });
       }
-      await ticketDistroRef.doc(event.id).update({
-        "tickets": ticketDistro.tickets,
-        "validTicketIDs": validTicketIDs,
-      }).catchError((e) {
-        error = e;
-      });
-    });
-    return purchasedTickets;
+      await updateTicketDistroQuantities(eventID: event.id!, ticketName: ticketName, numOfTicketsPurchased: numOfTicketsPurchased);
+    }
+    return tickets;
   }
 
   Future<List<WebblenEventTicket>> getPurchasedTickets(String uid) async {

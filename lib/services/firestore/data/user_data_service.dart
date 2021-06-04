@@ -5,13 +5,11 @@ import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
-import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 
 class UserDataService {
   CollectionReference userRef = FirebaseFirestore.instance.collection('webblen_users');
-  CollectionReference postsRef = FirebaseFirestore.instance.collection('posts');
-  FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
+  CollectionReference postsRef = FirebaseFirestore.instance.collection('webblen_posts');
   SnackbarService? _snackbarService = locator<SnackbarService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   LocationService _locationService = locator<LocationService>();
@@ -98,6 +96,126 @@ class UserDataService {
       user = WebblenUser.fromMap(docData);
     }
     return user;
+  }
+
+  Future<String> getCurrentFbUsername(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['fbUsername'] != null) {
+      val = data['fbUsername'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentInstaUsername(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['instaUsername'] != null) {
+      val = data['instaUsername'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentTwitterUsername(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['twitterUsername'] != null) {
+      val = data['twitterUsername'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentTwitchUsername(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['twitchUsername'] != null) {
+      val = data['twitchUsername'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentYoutube(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['youtube'] != null) {
+      val = data['youtube'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserWebsite(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['website'] != null) {
+      val = data['website'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserTwitchStreamURL(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['twitchStreamURL'] != null) {
+      val = data['twitchStreamURL'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserTwitchStreamKey(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['twitchStreamKey'] != null) {
+      val = data['twitchStreamKey'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserYoutubeStreamURL(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['youtubeStreamURL'] != null) {
+      val = data['youtubeStreamURL'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserYoutubeStreamKey(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['youtubeStreamKey'] != null) {
+      val = data['youtubeStreamKey'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserFBStreamURL(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['fbStreamURL'] != null) {
+      val = data['fbStreamURL'];
+    }
+    return val;
+  }
+
+  Future<String> getCurrentUserFBStreamKey(String id) async {
+    String val = "";
+    DocumentSnapshot snapshot = await userRef.doc(id).get();
+    Map<String, dynamic> data = snapshot.data()!;
+    if (data['fbStreamKey'] != null) {
+      val = data['fbStreamKey'];
+    }
+    return val;
   }
 
   Future<bool> updateAssociatedEmailAddress(String uid, String emailAddress) async {
@@ -195,6 +313,160 @@ class UserDataService {
     String? error;
     await userRef.doc(id).update({
       "website": website,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateFbUsername({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "fbUsername": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateInstaUsername({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "instaUsername": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateTwitterUsername({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "twitterUsername": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateTwitchUsername({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "twitchUsername": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateYoutube({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "youtube": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateYoutubeStreamURL({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "youtubeStreamURL": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateYoutubeStreamKey({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "youtubeStreamKey": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateTwitchStreamURL({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "twitchStreamURL": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateTwitchStreamKey({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "twitchStreamKey": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateFBStreamURL({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "fbStreamURL": val,
+    }).catchError((e) {
+      error = e.message;
+    });
+    if (error != null) {
+      updated = false;
+    }
+    return updated;
+  }
+
+  Future<bool> updateFBStreamKey({String? id, String? val}) async {
+    bool updated = true;
+    String? error;
+    await userRef.doc(id).update({
+      "fbStreamKey": val,
     }).catchError((e) {
       error = e.message;
     });

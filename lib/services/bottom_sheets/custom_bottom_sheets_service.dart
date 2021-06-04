@@ -19,7 +19,6 @@ import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/share/share_service.dart';
-import 'package:webblen/services/stripe/stripe_payment_service.dart';
 
 class CustomBottomSheetService {
   BottomSheetService _bottomSheetService = locator<BottomSheetService>();
@@ -34,7 +33,6 @@ class CustomBottomSheetService {
   PostDataService _postDataService = locator<PostDataService>();
   EventDataService _eventDataService = locator<EventDataService>();
   LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
-  StripePaymentService _stripePaymentService = locator<StripePaymentService>();
 
   //filters
   openFilter() async {
@@ -119,10 +117,18 @@ class CustomBottomSheetService {
           _navigationService.navigateTo(Routes.CreatePostViewRoute(id: content.id, promo: 0));
         } else if (content is WebblenEvent) {
           //edit event
-          _navigationService.navigateTo(Routes.CreateEventViewRoute(id: content.id, promo: 0));
+          if (content.concluded()) {
+            _customDialogService.showErrorDialog(description: "You Cannot Edit Past Events");
+          } else {
+            _navigationService.navigateTo(Routes.CreateEventViewRoute(id: content.id, promo: 0));
+          }
         } else if (content is WebblenLiveStream) {
           //edit stream
-          _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: content.id, promo: 0));
+          if (content.concluded()) {
+            _customDialogService.showErrorDialog(description: "You Cannot Edit Past Streams");
+          } else {
+            _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: content.id, promo: 0));
+          }
         }
       } else if (res == "share") {
         if (content is WebblenPost) {
@@ -219,7 +225,7 @@ class CustomBottomSheetService {
       var sheetResponse = await _bottomSheetService.showCustomSheet(
         title: "Delete Stream",
         description: "Are You Sure You Want to Delete this Stream?",
-        mainButtonTitle: "Delete Post",
+        mainButtonTitle: "Delete Stream",
         secondaryButtonTitle: "Cancel",
         barrierDismissible: true,
         variant: BottomSheetType.destructiveConfirmation,

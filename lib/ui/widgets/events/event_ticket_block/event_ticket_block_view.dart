@@ -27,7 +27,7 @@ class EventTicketBlock extends StatelessWidget {
     return GestureDetector(
       onTap: viewEventTickets,
       child: Container(
-        margin: EdgeInsets.only(bottom: 16),
+        margin: EdgeInsets.only(top: 8, bottom: 8, left: 16, right: 16),
         padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 16.0),
         decoration: BoxDecoration(
           color: appBackgroundColor(),

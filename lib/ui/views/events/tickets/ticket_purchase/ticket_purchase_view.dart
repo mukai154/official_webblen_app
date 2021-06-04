@@ -613,11 +613,7 @@ class _EmailAddressField extends HookViewModelWidget<TicketPurchaseViewModel> {
           border: InputBorder.none,
         ),
         onChanged: model.updateEmailAddress,
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w400,
-        ),
+        cursorColor: appFontColor(),
         maxLines: 1,
         textInputAction: TextInputAction.done,
         autocorrect: false,
@@ -650,11 +646,7 @@ class _CardNumField extends HookViewModelWidget<TicketPurchaseViewModel> {
           cardNumField.selection = TextSelection.fromPosition(TextPosition(offset: cardNumField.text.length));
           model.updateCardNumber(maskedText);
         },
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w400,
-        ),
+        cursorColor: appFontColor(),
         maxLines: 1,
         inputFormatters: [
           LengthLimitingTextInputFormatter(19),
@@ -691,11 +683,7 @@ class _ExpiryMonthField extends HookViewModelWidget<TicketPurchaseViewModel> {
           expiryMonth.selection = TextSelection.fromPosition(TextPosition(offset: expiryMonth.text.length));
           model.updateExpiryMonth(maskedText);
         },
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w400,
-        ),
+        cursorColor: appFontColor(),
         maxLines: 1,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
@@ -733,11 +721,7 @@ class _ExpiryYearField extends HookViewModelWidget<TicketPurchaseViewModel> {
           expiryYear.selection = TextSelection.fromPosition(TextPosition(offset: expiryYear.text.length));
           model.updateExpiryYear(maskedText);
         },
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w400,
-        ),
+        cursorColor: appFontColor(),
         maxLines: 1,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
@@ -775,11 +759,7 @@ class _CVCField extends HookViewModelWidget<TicketPurchaseViewModel> {
           cvc.selection = TextSelection.fromPosition(TextPosition(offset: cvc.text.length));
           model.updateCVC(maskedText);
         },
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w400,
-        ),
+        cursorColor: appFontColor(),
         maxLines: 1,
         inputFormatters: [
           FilteringTextInputFormatter.digitsOnly,
@@ -808,11 +788,7 @@ class _CardHolderNameField extends HookViewModelWidget<TicketPurchaseViewModel> 
           border: InputBorder.none,
         ),
         onChanged: model.updateCardHolderName,
-        style: TextStyle(
-          color: Colors.black,
-          fontSize: 18.0,
-          fontWeight: FontWeight.w400,
-        ),
+        cursorColor: appFontColor(),
         maxLines: 1,
         textInputAction: TextInputAction.done,
         autocorrect: false,

@@ -103,7 +103,7 @@ dependencies:
     git:
       url: https://github.com/mukai154/flutter_xlider.git
   intl_phone_field: ^2.0.0
-  liquid_pull_to_refresh: ^3.0.0
+  app_links: ^2.1.0
 
 dev_dependencies:
   flutter_test:

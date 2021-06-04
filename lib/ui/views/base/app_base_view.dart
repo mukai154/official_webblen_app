@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked/stacked_annotations.dart';
+import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/ui/views/base/init_error_views/under_maintenance/under_maintenance_error_view.dart';
@@ -23,31 +24,22 @@ class AppBaseView extends StatelessWidget {
   final String? page;
   AppBaseView({@PathParam() this.page});
 
+  final List<Widget> views = [
+    HomeView(),
+    RecentSearchView(),
+    CheckInView(),
+    WalletView(),
+    ProfileView(),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    Widget getViewForIndex(int index, AppBaseViewModel model) {
-      switch (index) {
-        case 0:
-          return HomeView();
-        case 1:
-          return RecentSearchView();
-        case 2:
-          return CheckInView();
-        case 3:
-          return WalletView();
-        case 4:
-          return ProfileView();
-        default:
-          return HomeView();
-      }
-    }
-
     return ViewModelBuilder<AppBaseViewModel>.reactive(
       disposeViewModel: false,
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
       onModelReady: (model) => model.initialize(page),
-      viewModelBuilder: () => AppBaseViewModel(),
+      viewModelBuilder: () => locator<AppBaseViewModel>(),
       builder: (context, model, child) => Scaffold(
         body: model.isBusy
             ? Container(
@@ -75,7 +67,7 @@ class AppBaseView extends StatelessWidget {
                             ? LocationErrorView(
                                 tryAgainAction: () => model.initialize(page),
                               )
-                            : getViewForIndex(model.navBarIndex, model),
+                            : views[model.navBarIndex],
         bottomNavigationBar: CustomNavBar(
           navBarItems: [
             CustomNavBarItem(

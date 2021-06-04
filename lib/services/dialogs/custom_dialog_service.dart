@@ -2,12 +2,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/services/firestore/data/platform_data_service.dart';
 
 class CustomDialogService {
   DialogService _dialogService = locator<DialogService>();
   NavigationService _navigationService = locator<NavigationService>();
-  PlatformDataService _platformDataService = locator<PlatformDataService>();
 
   showErrorDialog({required String description}) async {
     _dialogService.showDialog(
@@ -56,7 +54,7 @@ class CustomDialogService {
 
   showCancelContentDialog({required bool isEditing, required String contentType}) async {
     DialogResponse? response = await _dialogService.showDialog(
-      title: isEditing ? "Cancel Editing ${contentType}?" : "Cancel Creating ${contentType}?",
+      title: isEditing ? "Cancel Editing $contentType?" : "Cancel Creating $contentType?",
       description:
           isEditing ? "Changes to this ${contentType.toLowerCase()} will not be saved" : "The details for this  ${contentType.toLowerCase()} will not be saved",
       cancelTitle: "Cancel",
@@ -101,6 +99,15 @@ class CustomDialogService {
       barrierDismissible: true,
       title: "Account Setup Error",
       description: "There was an Issue Adding Your Account\nPlease Verify Your Info and Try Again",
+      buttonTitle: "Ok",
+    );
+  }
+
+  showComingSoonDialog() {
+    _dialogService.showDialog(
+      barrierDismissible: true,
+      title: "Coming Soon",
+      description: "Webblen token features coming soon",
       buttonTitle: "Ok",
     );
   }

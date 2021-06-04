@@ -1,6 +1,7 @@
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/app/app.router.dart';
+import 'package:webblen/ui/views/base/app_base_view_model.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
 
 class CustomNavigationService {
@@ -110,6 +111,8 @@ class CustomNavigationService {
 
   ///USERS
   navigateToCurrentUserView() {
+    AppBaseViewModel _appBaseViewModel = locator<AppBaseViewModel>();
+    _appBaseViewModel.setNavBarIndex(4);
     _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute(page: "4"));
   }
 
@@ -119,6 +122,8 @@ class CustomNavigationService {
 
   ///WALLET
   navigateToWalletView() {
+    AppBaseViewModel _appBaseViewModel = locator<AppBaseViewModel>();
+    _appBaseViewModel.setNavBarIndex(3);
     _navigationService.pushNamedAndRemoveUntil(Routes.AppBaseViewRoute(page: "3"));
   }
 

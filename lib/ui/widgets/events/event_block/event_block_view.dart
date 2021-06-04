@@ -87,7 +87,7 @@ class EventBlockView extends StatelessWidget {
                                   size: 18,
                                   color: model.savedEvent ? appSavedContentColor() : Colors.white54,
                                 ),
-                                onPressed: () => model.saveUnsaveEvent(eventID: event.id),
+                                onPressed: () => model.saveUnsaveEvent(event: event),
                               ),
                             ],
                           ),
@@ -205,7 +205,7 @@ class EventBlockView extends StatelessWidget {
           : Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               child: GestureDetector(
-                onDoubleTap: () => model.saveUnsaveEvent(eventID: event.id),
+                onDoubleTap: () => model.saveUnsaveEvent(event: event),
                 onLongPress: () {
                   HapticFeedback.lightImpact();
                   showEventOptions(event);
