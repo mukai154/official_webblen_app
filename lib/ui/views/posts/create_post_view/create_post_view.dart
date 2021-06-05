@@ -15,7 +15,7 @@ import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/text_field/auto_complete_address_text_field/auto_complete_address_text_field.dart';
 import 'package:webblen/ui/widgets/common/text_field/multi_line_text_field.dart';
-import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
+import 'package:webblen/ui/widgets/tags/tag_auto_complete.field.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
 
 class CreatePostView extends StatelessWidget {

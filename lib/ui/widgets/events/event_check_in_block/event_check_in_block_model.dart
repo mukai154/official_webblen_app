@@ -37,7 +37,8 @@ class EventCheckInBlockModel extends BaseViewModel {
 
     if (event.isValid()) {
       //check if user checked into event
-      List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
+      // List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
+      List attendeeUIDs = event.attendees != null ? event.attendees! : [];
       if (attendeeUIDs.contains(user.id)) {
         checkedIn = true;
       }
@@ -77,13 +78,13 @@ class EventCheckInBlockModel extends BaseViewModel {
       if (checkedIn) {
         bool confirmedCheckout = await customBottomSheetService.showCheckoutEventDialog();
         if (confirmedCheckout) {
-          bool checkedOut = await _eventDataService.checkOutOfEvent(uid: user.id!, eventID: event.id!);
+          bool checkedOut = await _eventDataService.checkOutOfEvent(user: user, eventID: event.id!);
           if (checkedOut) {
             checkedIn = false;
           }
         }
       } else {
-        checkedIn = await _eventDataService.checkIntoEvent(uid: user.id!, eventID: event.id!);
+        checkedIn = await _eventDataService.checkIntoEvent(user: user, eventID: event.id!);
       }
       updatingCheckIn = false;
       notifyListeners();

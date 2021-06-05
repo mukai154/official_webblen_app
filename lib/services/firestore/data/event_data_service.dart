@@ -8,21 +8,30 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_event_ticket.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
+import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class EventDataService {
-  final CollectionReference eventsRef = FirebaseFirestore.instance.collection("webblen_events");
+  final CollectionReference eventsRef =
+      FirebaseFirestore.instance.collection("webblen_events");
+  final CollectionReference usersRef =
+      FirebaseFirestore.instance.collection("webblen_users");
   PostDataService? _postDataService = locator<PostDataService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
-  TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
-  FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
+  TicketDistroDataService _ticketDistroDataService =
+      locator<TicketDistroDataService>();
+  FirestoreStorageService? _firestoreStorageService =
+      locator<FirestoreStorageService>();
+  UserDataService _userDataService = locator<UserDataService>();
 
-  int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
+  int dateTimeInMilliseconds2hrsAgog =
+      DateTime.now().millisecondsSinceEpoch - 7200000;
   int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
 
   Future<bool?> checkIfEventExists(String id) async {
@@ -43,12 +52,15 @@ class EventDataService {
     return exists;
   }
 
-  Future<bool?> checkIfEventSaved({required String uid, required String eventID}) async {
+  Future<bool?> checkIfEventSaved(
+      {required String uid, required String eventID}) async {
     bool saved = false;
     try {
       DocumentSnapshot snapshot = await eventsRef.doc(eventID).get();
       if (snapshot.exists) {
-        List savedBy = snapshot.data()!['savedBy'] == null ? [] : snapshot.data()!['savedBy'].toList(growable: true);
+        List savedBy = snapshot.data()!['savedBy'] == null
+            ? []
+            : snapshot.data()!['savedBy'].toList(growable: true);
         if (!savedBy.contains(uid)) {
           saved = false;
         } else {
@@ -61,9 +73,13 @@ class EventDataService {
     return saved;
   }
 
-  Future saveUnsaveEvent({required String? uid, required String? eventID, required bool savedEvent}) async {
+  Future saveUnsaveEvent(
+      {required String? uid,
+      required String? eventID,
+      required bool savedEvent}) async {
     List? savedBy = [];
-    DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
+    DocumentSnapshot snapshot =
+        await eventsRef.doc(eventID).get().catchError((e) {
       _snackbarService!.showSnackbar(
         title: 'Event Error',
         message: e.message,
@@ -72,7 +88,9 @@ class EventDataService {
       return false;
     });
     if (snapshot.exists) {
-      savedBy = snapshot.data()!['savedBy'] == null ? [] : snapshot.data()!['savedBy'].toList(growable: true);
+      savedBy = snapshot.data()!['savedBy'] == null
+          ? []
+          : snapshot.data()!['savedBy'].toList(growable: true);
       if (savedEvent) {
         if (!savedBy!.contains(uid)) {
           savedBy.add(uid);
@@ -87,16 +105,22 @@ class EventDataService {
     return savedBy.contains(uid);
   }
 
-  Future<bool> checkInScannedTicket({required String ticketID, required String eventID}) async {
+  Future<bool> checkInScannedTicket(
+      {required String ticketID, required String eventID}) async {
     bool checkedIn = true;
     if (isValidTicket(ticketID)) {
-      WebblenEventTicket ticket = await _ticketDistroDataService.getTicketByID(ticketID);
-      WebblenTicketDistro ticketDistro = await _ticketDistroDataService.getTicketDistroByID(eventID);
+      WebblenEventTicket ticket =
+          await _ticketDistroDataService.getTicketByID(ticketID);
+      WebblenTicketDistro ticketDistro =
+          await _ticketDistroDataService.getTicketDistroByID(eventID);
       if (ticketDistro.validTicketIDs!.contains(ticketID)) {
         if (ticket.used == null || !ticket.used!) {
           ticket.used = await _ticketDistroDataService.scanInTicket(ticket.id!);
           if (ticket.used!) {
-            checkIntoEvent(uid: ticket.purchaserUID!, eventID: eventID);
+            WebblenUser user =
+                await _userDataService.getWebblenUserByID(ticket.purchaserUID!);
+            checkIntoEvent(user: user, eventID: eventID);
+            // checkIntoEvent(uid: ticket.purchaserUID!, eventID: eventID);
             HapticFeedback.lightImpact();
           } else {
             checkedIn = false;
@@ -105,7 +129,8 @@ class EventDataService {
             HapticFeedback.heavyImpact();
           }
         } else {
-          _customDialogService.showErrorDialog(description: "This ticket has already been checked in");
+          _customDialogService.showErrorDialog(
+              description: "This ticket has already been checked in");
           checkedIn = false;
           HapticFeedback.heavyImpact();
           await Future.delayed(Duration(milliseconds: 200));
@@ -119,7 +144,8 @@ class EventDataService {
         checkedIn = false;
       }
     } else {
-      _customDialogService.showErrorDialog(description: "This is not a Webblen Ticket");
+      _customDialogService.showErrorDialog(
+          description: "This is not a Webblen Ticket");
       HapticFeedback.heavyImpact();
       await Future.delayed(Duration(milliseconds: 200));
       HapticFeedback.heavyImpact();
@@ -128,58 +154,118 @@ class EventDataService {
     return checkedIn;
   }
 
-  Future<bool> checkIntoEvent({required String uid, required String eventID}) async {
-    bool checkedIn = false;
-    DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
-      _customDialogService.showErrorDialog(description: "There was an error checking into this event. Please try again.");
+  Future<bool> checkIntoEvent({
+    required WebblenUser user,
+    required String eventID,
+  }) async {
+    bool checkedInToThisEvent = false;
+    DocumentSnapshot snapshot =
+        await eventsRef.doc(eventID).get().catchError((e) {
+      _customDialogService.showErrorDialog(
+          description:
+              "There was an error checking into this event. Please try again.");
+    });
+
+    if (snapshot.exists) {
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+
+      List<CheckIn> checkIns = event.checkIns != null ? event.checkIns! : [];
+
+      // check if user already checked in to an event
+      if (user.isCheckedIntoEvent!) {
+        checkedInToThisEvent = false;
+        return checkedInToThisEvent;
+      }
+
+      CheckIn newCheckIn = CheckIn(
+        uid: user.id,
+        checkInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+        checkOutTimeInMilliseconds: null,
+      );
+
+      checkIns.add(newCheckIn);
+
+      await eventsRef.doc(eventID).update({
+        'checkIns': checkIns,
+      });
+
+      await usersRef.doc(user.id).update({
+        'isCheckedIntoEvent': true,
+      });
+
+      // If the user hasn't checked into this event before, add them to the attendees list
+      if (!event.attendees!.contains(user.id)) {
+        event.attendees!.add(user.id);
+        await eventsRef.doc(eventID).update({
+          'attendees': event.attendees,
+        });
+      }
+
+      checkedInToThisEvent = true;
+    }
+    return checkedInToThisEvent;
+  }
+
+  Future<bool> checkOutOfEvent({
+    required WebblenUser user,
+    required String eventID,
+  }) async {
+    bool checkedOutOfThisEvent = false;
+    DocumentSnapshot snapshot =
+        await eventsRef.doc(eventID).get().catchError((e) {
+      _customDialogService.showErrorDialog(
+          description:
+              "There was an error checking out of this event. Please try again.");
     });
     if (snapshot.exists) {
       WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
-      List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
-      //check if user already checked in
-      if (attendeeUIDs.contains(uid)) {
-        checkedIn = true;
-        return checkedIn;
+
+      List<CheckIn> checkIns = event.checkIns != null ? event.checkIns! : [];
+
+      // Check to see if user is already checked out
+      if (!user.isCheckedIntoEvent!) {
+        checkedOutOfThisEvent = false;
+        return checkedOutOfThisEvent;
       }
 
-      event.attendees![uid] = {
-        'checkInTime': DateTime.now().millisecondsSinceEpoch,
-        'checkOutTime': null,
-      };
+      // Finds the relevant CheckIn instance the user should check out of
+      CheckIn checkInToCheckOutOf = checkIns.singleWhere(
+        (checkIn) =>
+            checkIn.uid == user.id &&
+            checkIn.checkOutTimeInMilliseconds == null,
+      );
 
-      await eventsRef.doc(eventID).update({
-        'attendees': event.attendees,
-      });
+      int currentTime = DateTime.now().millisecondsSinceEpoch;
 
-      checkedIn = true;
-    }
-    return checkedIn;
-  }
-
-  Future<bool> checkOutOfEvent({required String uid, required String eventID}) async {
-    bool checkedOut = false;
-    DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
-      _customDialogService.showErrorDialog(description: "There was an error checking out of this event. Please try again.");
-    });
-    if (snapshot.exists) {
-      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
-      List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
-      //check if user already checked in
-      if (!attendeeUIDs.contains(uid)) {
-        checkedOut = true;
-        return checkedOut;
+      // Adds check out time to CheckIn instace,
+      // if checked out after event end time then event end time is added instead
+      if (currentTime > event.endDateTimeInMilliseconds!) {
+        checkInToCheckOutOf.checkOutTimeInMilliseconds =
+            event.endDateTimeInMilliseconds;
+      } else {
+        checkInToCheckOutOf.checkOutTimeInMilliseconds = currentTime;
       }
-      event.attendees!.remove(uid);
+
+      // Updates list entry
+      checkIns[checkIns.indexWhere((checkIn) =>
+          checkIn.uid == user.id &&
+          checkIn.checkOutTimeInMilliseconds == null)] = checkInToCheckOutOf;
+
+      // Updates event doc
       await eventsRef.doc(eventID).update({
-        'attendees': event.attendees,
+        'checkIns': checkIns,
       });
-      checkedOut = true;
+
+      checkedOutOfThisEvent = true;
     }
-    return checkedOut;
+
+    return checkedOutOfThisEvent;
   }
 
-  Future reportEvent({required String? eventID, required String? reporterID}) async {
-    DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
+  Future reportEvent(
+      {required String? eventID, required String? reporterID}) async {
+    DocumentSnapshot snapshot =
+        await eventsRef.doc(eventID).get().catchError((e) {
       _snackbarService!.showSnackbar(
         title: 'Event Error',
         message: e.message,
@@ -188,11 +274,14 @@ class EventDataService {
       return null;
     });
     if (snapshot.exists) {
-      List reportedBy = snapshot.data()!['reportedBy'] == null ? [] : snapshot.data()!['reportedBy'].toList(growable: true);
+      List reportedBy = snapshot.data()!['reportedBy'] == null
+          ? []
+          : snapshot.data()!['reportedBy'].toList(growable: true);
       if (reportedBy.contains(reporterID)) {
         return _snackbarService!.showSnackbar(
           title: 'Report Error',
-          message: "You've already reported this event. This event is currently pending review.",
+          message:
+              "You've already reported this event. This event is currently pending review.",
           duration: Duration(seconds: 5),
         );
       } else {
@@ -222,9 +311,11 @@ class EventDataService {
   Future deleteEvent({required WebblenEvent event}) async {
     await eventsRef.doc(event.id).delete();
     if (event.imageURL != null) {
-      await _firestoreStorageService!.deleteImage(storageBucket: 'images', folderName: 'events', fileName: event.id!);
+      await _firestoreStorageService!.deleteImage(
+          storageBucket: 'images', folderName: 'events', fileName: event.id!);
     }
-    await _postDataService!.deleteEventOrStreamPost(eventOrStreamID: event.id, postType: 'event');
+    await _postDataService!
+        .deleteEventOrStreamPost(eventOrStreamID: event.id, postType: 'event');
   }
 
   Future<WebblenEvent> getEventByID(String id) async {
@@ -235,13 +326,15 @@ class EventDataService {
       _customDialogService.showErrorDialog(description: error!);
     });
     if (error != null) {
-      _customDialogService.showErrorDialog(description: "There was an unknown issue loading this event");
+      _customDialogService.showErrorDialog(
+          description: "There was an unknown issue loading this event");
       return event;
     }
     if (snapshot.exists) {
       event = WebblenEvent.fromMap(snapshot.data()!);
     } else if (!snapshot.exists) {
-      _customDialogService.showErrorDialog(description: "This Event No Longer Exists");
+      _customDialogService.showErrorDialog(
+          description: "This Event No Longer Exists");
       return event;
     }
     return event;
@@ -272,13 +365,15 @@ class EventDataService {
     String? error;
     if (areaCode.isEmpty) {
       query = eventsRef
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds',
+              isGreaterThan: dateTimeInMilliseconds2hrsAgog)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .limit(resultsLimit);
     } else {
       query = eventsRef
           .where('nearbyZipcodes', arrayContains: areaCode)
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds',
+              isGreaterThan: dateTimeInMilliseconds2hrsAgog)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .limit(resultsLimit);
     }
@@ -298,29 +393,40 @@ class EventDataService {
         docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => docA.data()!['startDateTimeInMilliseconds'].compareTo(docB.data()!['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) => docA
+            .data()!['startDateTimeInMilliseconds']
+            .compareTo(docB.data()!['startDateTimeInMilliseconds']));
       } else {
-        docs.sort((docA, docB) => docB.data()!['savedBy'].length.compareTo(docA.data()!['savedBy'].length));
+        docs.sort((docA, docB) => docB
+            .data()!['savedBy']
+            .length
+            .compareTo(docA.data()!['savedBy'].length));
       }
     }
     return docs;
   }
 
   Future<List<DocumentSnapshot>> loadAdditionalEvents(
-      {required DocumentSnapshot lastDocSnap, required String areaCode, required int resultsLimit, required String tagFilter, required String sortBy}) async {
+      {required DocumentSnapshot lastDocSnap,
+      required String areaCode,
+      required int resultsLimit,
+      required String tagFilter,
+      required String sortBy}) async {
     Query query;
     List<DocumentSnapshot> docs = [];
     String? error;
     if (areaCode.isEmpty) {
       query = eventsRef
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds',
+              isGreaterThan: dateTimeInMilliseconds2hrsAgog)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
     } else {
       query = eventsRef
           .where('nearbyZipcodes', arrayContains: areaCode)
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds',
+              isGreaterThan: dateTimeInMilliseconds2hrsAgog)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
@@ -341,18 +447,27 @@ class EventDataService {
         docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => docA.data()!['startDateTimeInMilliseconds'].compareTo(docB.data()!['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) => docA
+            .data()!['startDateTimeInMilliseconds']
+            .compareTo(docB.data()!['startDateTimeInMilliseconds']));
       } else {
-        docs.sort((docA, docB) => docB.data()!['savedBy'].length.compareTo(docA.data()!['savedBy'].length));
+        docs.sort((docA, docB) => docB
+            .data()!['savedBy']
+            .length
+            .compareTo(docA.data()!['savedBy'].length));
       }
     }
     return docs;
   }
 
-  Future<List<DocumentSnapshot>> loadEventsByUserID({required String? id, required int resultsLimit}) async {
+  Future<List<DocumentSnapshot>> loadEventsByUserID(
+      {required String? id, required int resultsLimit}) async {
     List<DocumentSnapshot> docs = [];
     String? error;
-    Query query = eventsRef.where('authorID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
+    Query query = eventsRef
+        .where('authorID', isEqualTo: id)
+        .orderBy('startDateTimeInMilliseconds', descending: true)
+        .limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       print(e.message);
       error = e.message;
@@ -376,8 +491,11 @@ class EventDataService {
   }) async {
     List<DocumentSnapshot> docs = [];
     String? error;
-    Query query =
-        eventsRef.where('authorID', isEqualTo: id).orderBy('startDateTimeInMilliseconds', descending: true).startAfterDocument(lastDocSnap).limit(resultsLimit);
+    Query query = eventsRef
+        .where('authorID', isEqualTo: id)
+        .orderBy('startDateTimeInMilliseconds', descending: true)
+        .startAfterDocument(lastDocSnap)
+        .limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       print(e.message);
       error = e.message;
@@ -394,10 +512,14 @@ class EventDataService {
     return docs;
   }
 
-  Future<List<DocumentSnapshot>> loadSavedEvents({required String? id, required int resultsLimit}) async {
+  Future<List<DocumentSnapshot>> loadSavedEvents(
+      {required String? id, required int resultsLimit}) async {
     List<DocumentSnapshot> docs = [];
     String? error;
-    Query query = eventsRef.where('savedBy', arrayContains: id).orderBy('startDateTimeInMilliseconds', descending: true).limit(resultsLimit);
+    Query query = eventsRef
+        .where('savedBy', arrayContains: id)
+        .orderBy('startDateTimeInMilliseconds', descending: true)
+        .limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
       print(e.message);
       error = e.message;
@@ -442,14 +564,19 @@ class EventDataService {
     return docs;
   }
 
-  Future<List<DocumentSnapshot>> loadNearbyEvents({required String areaCode, required double lat, required double lon, required int resultsLimit}) async {
+  Future<List<DocumentSnapshot>> loadNearbyEvents(
+      {required String areaCode,
+      required double lat,
+      required double lon,
+      required int resultsLimit}) async {
     Geoflutterfire geoFlutterFire = Geoflutterfire();
     GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
     List<DocumentSnapshot> docs = [];
     String? error;
     Query query = eventsRef
         .where('nearbyZipcodes', arrayContains: areaCode)
-        .where('endDateTimeInMilliseconds', isGreaterThan: currentDateTimeInMilliseconds)
+        .where('endDateTimeInMilliseconds',
+            isGreaterThan: currentDateTimeInMilliseconds)
         .orderBy('endDateTimeInMilliseconds', descending: false)
         .limit(resultsLimit);
     QuerySnapshot snapshot = await query.get().catchError((e) {
@@ -464,7 +591,8 @@ class EventDataService {
 
     if (snapshot.docs.isNotEmpty) {
       snapshot.docs.forEach((doc) {
-        double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+        double distanceFromPoint =
+            geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
         String venueSize = doc.data()['venueSize'] ?? "small";
         if (venueSize == "small") {
           if (distanceFromPoint < 0.03) {
@@ -501,7 +629,8 @@ class EventDataService {
     String? error;
     Query query = eventsRef
         .where('nearbyZipcodes', arrayContains: areaCode)
-        .where('endDateTimeInMilliseconds', isGreaterThan: currentDateTimeInMilliseconds)
+        .where('endDateTimeInMilliseconds',
+            isGreaterThan: currentDateTimeInMilliseconds)
         .orderBy('endDateTimeInMilliseconds', descending: false)
         .startAfterDocument(lastDocSnap)
         .limit(resultsLimit);
@@ -517,7 +646,8 @@ class EventDataService {
 
     if (snapshot.docs.isNotEmpty) {
       snapshot.docs.forEach((doc) {
-        double distanceFromPoint = geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
+        double distanceFromPoint =
+            geoPoint.distance(lat: doc.data()['lat'], lng: doc.data()['lon']);
         String venueSize = doc.data()['venueSize'] ?? "small";
         if (venueSize == "small") {
           if (distanceFromPoint < 0.03) {

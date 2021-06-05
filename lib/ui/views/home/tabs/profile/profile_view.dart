@@ -31,6 +31,14 @@ class ProfileView extends StatelessWidget {
                 _ProfileBody(
                   user: model.user,
                 ),
+                ElevatedButton(
+                  onPressed: () => model.generateHotWallet(),
+                  child: Text('generate hotwallet'),
+                ),
+                ElevatedButton(
+                  onPressed: () => model.generateEscrowHotWallets(),
+                  child: Text('create 100 escrow wallets'),
+                ),
               ],
             ),
           ),
@@ -69,7 +77,8 @@ class _ProfileHead extends HookViewModelWidget<ProfileViewModel> {
               ),
               IconButton(
                 iconSize: 20,
-                onPressed: () => model.customBottomSheetService.showAddContentOptions(),
+                onPressed: () =>
+                    model.customBottomSheetService.showAddContentOptions(),
                 icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
               ),
             ],
@@ -104,7 +113,10 @@ class _ProfileBody extends HookViewModelWidget<ProfileViewModel> {
                 floating: true,
                 snap: true,
                 forceElevated: innerBoxIsScrolled,
-                expandedHeight: ((user.bio != null && user.bio!.isNotEmpty) || (user.website != null && user.website!.isNotEmpty)) ? 250 : 200,
+                expandedHeight: ((user.bio != null && user.bio!.isNotEmpty) ||
+                        (user.website != null && user.website!.isNotEmpty))
+                    ? 250
+                    : 200,
                 backgroundColor: appBackgroundColor(),
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(

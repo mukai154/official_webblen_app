@@ -1,4 +1,31 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:webblen/utils/custom_string_methods.dart';
+
+class CheckIn {
+  String? uid;
+  int? checkInTimeInMilliseconds;
+  int? checkOutTimeInMilliseconds;
+
+  CheckIn({
+    this.uid,
+    this.checkInTimeInMilliseconds,
+    this.checkOutTimeInMilliseconds,
+  });
+
+  CheckIn.fromMap(Map<String, dynamic> data)
+      : this(
+          uid: data['uid'],
+          checkInTimeInMilliseconds: data['checkInTimeInMilliseconds'],
+          checkOutTimeInMilliseconds: data['checkOutTimeInMilliseconds'],
+        );
+
+  Map<String, dynamic> toMap() => {
+        'uid': uid,
+        'checkInTimeInMilliseconds': checkInTimeInMilliseconds,
+        'checkOutTimeInMilliseconds': checkOutTimeInMilliseconds,
+      };
+}
 
 class WebblenEvent {
   String? id;
@@ -26,7 +53,8 @@ class WebblenEvent {
   String? instaUsername;
   int? estimatedTurnout;
   int? actualTurnout;
-  Map<dynamic, dynamic>? attendees;
+  List? attendees;
+  List<CheckIn>? checkIns;
   double? payout;
   String? recurrence;
   int? startDateTimeInMilliseconds;
@@ -71,6 +99,7 @@ class WebblenEvent {
     this.estimatedTurnout,
     this.actualTurnout,
     this.attendees,
+    this.checkIns,
     this.payout,
     this.recurrence,
     this.startDateTimeInMilliseconds,
@@ -117,6 +146,12 @@ class WebblenEvent {
           estimatedTurnout: data['estimatedTurnout'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
+          checkIns: data['checkIns'] != null
+              ? data['checkIns']
+                  .map((cert) => CheckIn.fromMap(cert))
+                  .cast<CheckIn>()
+                  .toList()
+              : [],
           payout: data['payout'] == null ? null : data['payout'] * 1.001,
           recurrence: data['recurrence'],
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
@@ -162,6 +197,9 @@ class WebblenEvent {
         'estimatedTurnout': this.estimatedTurnout,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
+        'checkIns': checkIns != null
+            ? checkIns!.map((cert) => cert.toMap()).toList()
+            : [],
         'eventPayout': this.payout,
         'recurrence': this.recurrence,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
@@ -180,7 +218,8 @@ class WebblenEvent {
         'suggestedUIDs': this.suggestedUIDs,
       };
 
-  WebblenEvent generateNewWebblenEvent({required String authorID, required List suggestedUIDs}) {
+  WebblenEvent generateNewWebblenEvent(
+      {required String authorID, required List suggestedUIDs}) {
     String id = getRandomString(30);
     WebblenEvent event = WebblenEvent(
       id: id,
@@ -193,7 +232,8 @@ class WebblenEvent {
       openToSponsors: false,
       tags: [],
       savedBy: [],
-      attendees: {},
+      attendees: [],
+      checkIns: [],
       clicks: 0,
       estimatedTurnout: 0,
     );
