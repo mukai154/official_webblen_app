@@ -31,7 +31,6 @@
     <!-- Permissions options for the `location` group -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <!-- Permissions options for the `bluetooth` group -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -50,31 +49,6 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />
-
-        <!-- Deep Links -->
-        <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.DEFAULT" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
-            <data
-                android:scheme="https"
-                android:host="app.webblen.io" />
-        </intent-filter>
-
-        <!-- App Links -->
-        <intent-filter android:autoVerify="true">
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.DEFAULT" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <!-- Accepts URIs that begin with https://YOUR_HOST -->
-            <data
-                android:scheme="https"
-                android:host="app.webblen.io"
-                android:pathPrefix="/shared_link"
-                />
-        </intent-filter>
-
 
         <activity
             android:name="com.webblen.events.webblen.MainActivity"
@@ -103,6 +77,30 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <!-- Deep Links -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
+                <data
+                    android:scheme="https"
+                    android:host="app.webblen.io"
+                    />
+            </intent-filter>
+
+            <!-- App Links -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with https://YOUR_HOST -->
+                <data
+                    android:scheme="https"
+                    android:host="app.webblen.io"
+                    android:pathPrefix="/shared_link"
+                    />
             </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.

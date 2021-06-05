@@ -82,7 +82,7 @@
 		<true/>
 	</dict>
 	<key>NSAppleMusicUsageDescription</key>
-	<string>Webblen Would Like Access to Your Media to Save and Access Audio/Video You&apos;ve Recorded</string>
+	<string>Webblen Would Like Access to Your Media to Save and Access Audio/Video You've Recorded</string>
 	<key>NSBluetoothAlwaysUsageDescription</key>
 	<string>Webblen Would Like Access to Use Bluetooth to Notify You When You Can Check into Events</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
@@ -93,6 +93,8 @@
 	<string>this will enable you to take take photos and stream video for your account and events.</string>
 	<key>NSContactsUsageDescription</key>
 	<string>Webblen Would Like to Access Your Contacts to Share Streams and Events</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>Webblen Would Access Your Local Network to Communicate with Nearby Devices</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Webblen Would Like to Access Your Location to Let You Know About Events Happening Around You</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -104,13 +106,11 @@
 	<key>NSMotionUsageDescription</key>
 	<string>Webblen Would Like to Access Your Motion Activity to Let You Check Into Events</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Webblen Would Like Access to Your Media to Save and Access Images You&apos;ve Taken</string>
+	<string>Webblen Would Like Access to Your Media to Save and Access Images You've Taken</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>this will enable you to choose photos from your library and save videos recorded from streams.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Webblen Would Like to Use Speech Recognition for Voice to Text</string>
-	<key>NSLocalNetworkUsageDescription</key>
-    <string>Webblen Would Access Your Local Network to Communicate with Nearby Devices</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
