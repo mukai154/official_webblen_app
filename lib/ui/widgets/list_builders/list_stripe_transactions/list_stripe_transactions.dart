@@ -35,49 +35,50 @@ class ListStripeTransactions extends StatelessWidget {
               : Container(
                   color: appBackgroundColor(),
                   child: RefreshIndicator(
-    onRefresh: model.refreshData,
-    backgroundColor: appBackgroundColor(),
-    color: appFontColorAlt(),
-    child: SingleChildScrollView(
-    controller: model.scrollController,
-    child: ListView.builder(
-    physics: NeverScrollableScrollPhysics(),
-    key: PageStorageKey(model.listKey),
-                      addAutomaticKeepAlives: true,
-                      shrinkWrap: true,
-                      itemCount: model.dataResults.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < model.dataResults.length) {
-                          StripeTransaction transaction;
-                          transaction = StripeTransaction.fromMap(model.dataResults[index].data()!);
-                          return searchFilter != null || searchFilter!.isNotEmpty
-                              ? transaction.description!.toLowerCase().contains(searchFilter!)
-                                  ? StripeTransactionBlock(
-                                      transaction: transaction,
-                                    )
-                                  : Container()
-                              : StripeTransactionBlock(
-                                  transaction: transaction,
-                                );
-                        } else {
-                          if (model.moreDataAvailable) {
-                            WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              model.loadAdditionalData();
-                            });
-                            return Align(
-                              alignment: Alignment.center,
-                              child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                    onRefresh: model.refreshData,
+                    backgroundColor: appBackgroundColor(),
+                    color: appFontColorAlt(),
+                    child: SingleChildScrollView(
+                      controller: model.scrollController,
+                      child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        key: PageStorageKey(model.listKey),
+                        addAutomaticKeepAlives: true,
+                        shrinkWrap: true,
+                        itemCount: model.dataResults.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
+                            StripeTransaction transaction;
+                            transaction = StripeTransaction.fromMap(snapshotData);
+                            return searchFilter != null || searchFilter!.isNotEmpty
+                                ? transaction.description!.toLowerCase().contains(searchFilter!)
+                                    ? StripeTransactionBlock(
+                                        transaction: transaction,
+                                      )
+                                    : Container()
+                                : StripeTransactionBlock(
+                                    transaction: transaction,
+                                  );
+                          } else {
+                            if (model.moreDataAvailable) {
+                              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                                model.loadAdditionalData();
+                              });
+                              return Align(
+                                alignment: Alignment.center,
+                                child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                              );
+                            }
+                            return Container(
+                              height: 500,
                             );
                           }
-                          return Container(
-                            height: 500,
-                          );
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ),
                 ),
-      ),
     );
   }
 }

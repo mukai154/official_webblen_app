@@ -42,8 +42,8 @@ class EventBlockView extends StatelessWidget {
                   begin: Alignment.bottomLeft,
                   end: Alignment.topRight,
                   colors: [
-                    Colors.black.withOpacity(.9),
-                    Colors.black.withOpacity(.5),
+                    Colors.black.withOpacity(.8),
+                    Colors.black.withOpacity(.4),
                   ],
                 ),
               ),
@@ -77,19 +77,29 @@ class EventBlockView extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: Icon(
+                        GestureDetector(
+                          onTap: () => model.saveUnsaveEvent(event: event),
+                          child: Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "${model.savedBy.length}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                                SizedBox(width: 6),
+                                Icon(
                                   FontAwesomeIcons.solidHeart,
                                   size: 18,
                                   color: model.savedEvent ? appSavedContentColor() : Colors.white54,
                                 ),
-                                onPressed: () => model.saveUnsaveEvent(event: event),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],

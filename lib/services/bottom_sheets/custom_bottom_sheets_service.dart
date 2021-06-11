@@ -162,7 +162,7 @@ class CustomBottomSheetService {
           _eventDataService.reportEvent(eventID: content.id, reporterID: user.id);
         } else if (content is WebblenLiveStream) {
           //report stream
-          _liveStreamDataService.reportStream(streamID: content.id, reporterID: user.id);
+          _liveStreamDataService.reportStream(streamID: content.id!, reporterID: user.id!);
         }
       } else if (res == "check in") {
         //scanner content

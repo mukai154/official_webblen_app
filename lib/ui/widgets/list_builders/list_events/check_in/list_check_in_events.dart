@@ -19,30 +19,43 @@ class ListCheckInEvents extends StatelessWidget {
           ? Container()
           : model.dataResults.isEmpty
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Opacity(
-                            opacity: 0.5,
-                            child: Image.asset(
-                              'assets/images/modern_city.png',
-                              height: 200,
-                              fit: BoxFit.cover,
-                              filterQuality: FilterQuality.medium,
+                  child: RefreshIndicator(
+                    onRefresh: model.refreshData,
+                    backgroundColor: appBackgroundColor(),
+                    color: appFontColor(),
+                    child: SingleChildScrollView(
+                      controller: model.scrollController,
+                      physics: AlwaysScrollableScrollPhysics(),
+                      child: Container(
+                        height: screenHeight(context) - 300,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                                child: Opacity(
+                                  opacity: 0.5,
+                                  child: Image.asset(
+                                    'assets/images/modern_city.png',
+                                    height: 150,
+                                    fit: BoxFit.fitHeight,
+                                    filterQuality: FilterQuality.medium,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            CustomText(
+                              text: "You are not near any active events",
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: appFontColorAlt(),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
                         ),
                       ),
-                      CustomText(
-                        text: "You are not near any active events",
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: appFontColorAlt(),
-                      ),
-                    ],
+                    ),
                   ),
                 )
               : Container(
@@ -62,8 +75,9 @@ class ListCheckInEvents extends StatelessWidget {
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenEvent event;
-                            event = WebblenEvent.fromMap(model.dataResults[index].data()!);
+                            event = WebblenEvent.fromMap(snapshotData);
                             return EventCheckInBlock(
                               event: event,
                               showEventOptions: (event) => model.showContentOptions(event),

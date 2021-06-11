@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:webblen/models/webblen_user_preferences.dart';
 
 class UserPreferenceDataService {
@@ -25,8 +24,10 @@ class UserPreferenceDataService {
   Future<WebblenUserPreferences> getExistingPreferences({required String id}) async {
     WebblenUserPreferences preferences;
     DocumentSnapshot snapshot = await prefRef.doc(id).get();
+
     if (snapshot.exists) {
-      preferences = WebblenUserPreferences.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      preferences = WebblenUserPreferences.fromMap(snapshotData);
     } else {
       preferences = WebblenUserPreferences().generateNewPreferences(id: id);
     }

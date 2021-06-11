@@ -8,28 +8,21 @@ import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
-import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
-import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class PostViewModel extends BaseViewModel {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
   UserDataService? _userDataService = locator<UserDataService>();
   PostDataService? _postDataService = locator<PostDataService>();
   CommentDataService? _commentDataService = locator<CommentDataService>();
   NotificationDataService? _notificationDataService = locator<NotificationDataService>();
-  DynamicLinkService? _dynamicLinkService = locator<DynamicLinkService>();
-  ShareService? _shareService = locator<ShareService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   CustomBottomSheetService customBottomSheetService = locator<CustomBottomSheetService>();
 
@@ -143,18 +136,19 @@ class PostViewModel extends BaseViewModel {
       );
 
       //send comment & notification
-      await _commentDataService!.sendComment(post!.id, post!.authorID, comment);
-      if (user.id! != post!.authorID) {
-        sendCommentNotification(text);
-      }
+      _commentDataService!.sendComment(post!.id, post!.authorID, comment).then((err) {
+        if (err == null && (user.id! != post!.authorID)) {
+          sendCommentNotification(text);
 
-      //send notification to mentioned users
-      if (commentData['mentionedUsers'].isNotEmpty) {
-        List<WebblenUser> users = commentData['mentionedUsers'];
-        users.forEach((user) {
-          sendCommentMentionNotification(user.id, text);
-        });
-      }
+          //send notification to mentioned users
+          if (commentData['mentionedUsers'].isNotEmpty) {
+            List<WebblenUser> users = commentData['mentionedUsers'];
+            users.forEach((user) {
+              sendCommentMentionNotification(user.id, text);
+            });
+          }
+        }
+      });
 
       clearState(context);
     }
@@ -176,26 +170,32 @@ class PostViewModel extends BaseViewModel {
         originalReplyCommentID: commentToReplyTo!.timePostedInMilliseconds.toString(),
         timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       );
-      await _commentDataService!.replyToComment(
+
+      //send reply
+      await _commentDataService!
+          .replyToComment(
         post!.id,
         commentToReplyTo!.senderUID,
         commentToReplyTo!.timePostedInMilliseconds.toString(),
         comment,
-      );
-    }
+      )
+          .then((err) {
+        if (err != null && (user.id! != post!.authorID)) {
+          //send reply notification
+          sendCommentReplyNotification(commentToReplyTo!.senderUID, text);
 
-    if (user.id! != post!.authorID) {
-      sendCommentReplyNotification(commentToReplyTo!.senderUID, text);
-    }
-
-    //send notification to mentioned users
-    if (commentData['mentionedUsers'].isNotEmpty) {
-      List<WebblenUser> users = commentData['mentionedUsers'];
-      users.forEach((user) {
-        sendCommentMentionNotification(user.id, text);
+          //send notification to mentioned users
+          if (commentData['mentionedUsers'].isNotEmpty) {
+            List<WebblenUser> users = commentData['mentionedUsers'];
+            users.forEach((user) {
+              sendCommentMentionNotification(user.id, text);
+            });
+          }
+        }
       });
     }
 
+    //clear textfield and refresh comments
     clearState(context);
     refreshComments();
   }

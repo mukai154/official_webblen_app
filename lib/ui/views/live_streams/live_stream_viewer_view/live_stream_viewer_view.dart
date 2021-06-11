@@ -300,13 +300,14 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                   controller: chatViewController,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
+                    Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
                     try {
                       scrollToChatMessage();
                     } catch (e) {}
-                    String? uid = snapshot.data!.docs[index].data()['senderUID'];
-                    String username = '@' + snapshot.data!.docs[index].data()['username'];
-                    String? message = snapshot.data!.docs[index].data()['message'];
-                    String? userImgURL = snapshot.data!.docs[index].data()['userImgURL'];
+                    String? uid = snapshotData['senderUID'];
+                    String username = '@' + snapshotData['username'];
+                    String? message = snapshotData['message'];
+                    String? userImgURL = snapshotData['userImgURL'];
                     return username == '@system'
                         ? Container(
                             margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -408,8 +409,9 @@ class _LiveStreamViewerViewState extends State<LiveStreamViewerView> with Widget
                   //controller: chatViewController,
                   itemCount: 1, //snapshot.data.docs.length,
                   itemBuilder: (context, index) {
-                    int? giftID = snapshot.data!.docs.last.data()['giftID'];
-                    String? message = snapshot.data!.docs.last.data()['message'];
+                    Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                    int? giftID = snapshotData['giftID'];
+                    String? message = snapshotData['message'];
                     giftAnimationController.forward();
                     return FadeTransition(
                       opacity: giftAnimation,
@@ -545,9 +547,10 @@ class _GiftsAndDonationsAnimator extends HookViewModelWidget<LiveStreamViewerVie
             shrinkWrap: true,
             itemCount: 1,
             itemBuilder: (context, index) {
-              int? giftID = snapshot.data!.docs.last.data()['giftID'];
-              String? message = snapshot.data!.docs.last.data()['message'];
-              String? senderUsername = snapshot.data!.docs.last.data()['senderUsername'];
+              Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+              int? giftID = snapshotData['giftID'];
+              String? message = snapshotData['message'];
+              String? senderUsername = snapshotData['senderUsername'];
               print(giftID);
               print(message);
               _animationController.forward();
@@ -867,10 +870,11 @@ class _PortraitChat extends HookViewModelWidget<LiveStreamViewerViewModel> {
               controller: _scrollController,
               itemCount: snapshot.data!.docs.length,
               itemBuilder: (BuildContext context, int index) {
-                String? uid = snapshot.data!.docs[index].data()['senderUID'];
-                String username = '@' + snapshot.data!.docs[index].data()['username'];
-                String? message = snapshot.data!.docs[index].data()['message'];
-                String? userImgURL = snapshot.data!.docs[index].data()['userImgURL'];
+                Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                String? uid = snapshotData['senderUID'];
+                String username = '@' + snapshotData['username'];
+                String? message = snapshotData['message'];
+                String? userImgURL = snapshotData['userImgURL'];
                 return username == '@system'
                     ? Container(
                         margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -1244,10 +1248,11 @@ class _LandscapeChat extends HookViewModelWidget<LiveStreamViewerViewModel> {
                 controller: _scrollController,
                 itemCount: snapshot.data!.docs.length,
                 itemBuilder: (BuildContext context, int index) {
-                  String? uid = snapshot.data!.docs[index].data()['senderUID'];
-                  String username = '@' + snapshot.data!.docs[index].data()['username'];
-                  String? message = snapshot.data!.docs[index].data()['message'];
-                  String? userImgURL = snapshot.data!.docs[index].data()['userImgURL'];
+                  Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+                  String? uid = snapshotData['senderUID'];
+                  String username = '@' + snapshotData['username'];
+                  String? message = snapshotData['message'];
+                  String? userImgURL = snapshotData['userImgURL'];
                   return username == '@system'
                       ? Container(
                           margin: EdgeInsets.symmetric(vertical: 8.0),

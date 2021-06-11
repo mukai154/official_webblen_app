@@ -1,11 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
@@ -24,6 +22,7 @@ class LiveStreamBlockViewModel extends BaseViewModel {
 
   bool isLive = false;
   bool savedStream = false;
+  List savedBy = [];
   String? hostImageURL = "";
   String? hostUsername = "";
 
@@ -31,8 +30,13 @@ class LiveStreamBlockViewModel extends BaseViewModel {
     setBusy(true);
 
     //check if user saved event
-    if (stream.savedBy!.contains(_reactiveUserService.user.id)) {
-      savedStream = true;
+    if (stream.savedBy != null) {
+      if (stream.savedBy!.contains(user.id)) {
+        savedStream = true;
+      }
+      savedBy = stream.savedBy!;
+    } else {
+      savedBy = [];
     }
 
     //check if event is happening now
@@ -62,8 +66,10 @@ class LiveStreamBlockViewModel extends BaseViewModel {
   saveUnsaveStream({required WebblenLiveStream stream}) async {
     if (savedStream) {
       savedStream = false;
+      savedBy.remove(user.id);
     } else {
       savedStream = true;
+      savedBy.add(user.id);
       WebblenNotification notification = WebblenNotification().generateContentSavedNotification(
         receiverUID: stream.hostID!,
         senderUID: user.id!,
@@ -74,6 +80,6 @@ class LiveStreamBlockViewModel extends BaseViewModel {
     }
     HapticFeedback.lightImpact();
     notifyListeners();
-    await _liveStreamDataService.saveUnsaveStream(uid: user.id, streamID: stream.id!, savedStream: savedStream);
+    await _liveStreamDataService.saveUnsaveStream(uid: user.id!, streamID: stream.id!, savedStream: savedStream);
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
@@ -14,10 +13,8 @@ class ListHomePosts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<ListHomePostsModel>.reactive(
-      fireOnModelReadyOnce: true,
-      disposeViewModel: false,
       onModelReady: (model) => model.initialize(),
-      viewModelBuilder: () => locator<ListHomePostsModel>(),
+      viewModelBuilder: () => ListHomePostsModel(),
       builder: (context, model, child) => model.isBusy
           ? Container()
           : model.dataResults.isEmpty
@@ -50,8 +47,9 @@ class ListHomePosts extends StatelessWidget {
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenPost post;
-                            post = WebblenPost.fromMap(model.dataResults[index].data()!);
+                            post = WebblenPost.fromMap(snapshotData);
                             return post.imageURL == null
                                 ? PostTextBlockView(
                                     post: post,

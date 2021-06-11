@@ -8,6 +8,7 @@ import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
+import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
 
 class HomeFilterBottomSheetModel extends BaseViewModel {
   ///SERVICES
@@ -18,6 +19,7 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
   GooglePlacesService googlePlacesService = locator<GooglePlacesService>();
   AlgoliaSearchService algoliaSearchService = locator<AlgoliaSearchService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
+  HomeFeedModel _homeFeedModel = locator<HomeFeedModel>();
 
   bool updatingData = false;
 
@@ -25,6 +27,7 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
   String get cityName => _reactiveContentFilterService.cityName;
   String get areaCode => _reactiveContentFilterService.areaCode;
   String get tagFilter => _reactiveContentFilterService.tagFilter;
+  String get contentType => _homeFeedModel.contentType;
   String get sortByFilter => _reactiveContentFilterService.sortByFilter;
   WebblenUser get user => _reactiveUserService.user;
 
@@ -32,9 +35,11 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
   String tempCityName = "";
   String tempAreaCode = "";
   String tempTagFilter = "";
+  String tempContentType = "";
   String tempSortByFilter = "Latest";
 
   ///FILTERS
+  List<String> contentTypeList = ["Posts, Streams, and Events", "Posts Only", "Streams Only", "Events Only"];
   List<String> sortByList = ["Latest", "Most Popular"];
   Map<String, dynamic> placeSearchResults = {};
 
@@ -46,8 +51,14 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
     tempCityName = cityName;
     tempAreaCode = areaCode;
     tempTagFilter = tagFilter;
+    tempContentType = contentType;
     tempSortByFilter = sortByFilter;
     googleAPIKey = await _platformDataService.getGoogleApiKey();
+    notifyListeners();
+  }
+
+  updateContentType(String val) {
+    tempContentType = val;
     notifyListeners();
   }
 
@@ -102,12 +113,13 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
     _reactiveContentFilterService.updateAreaCode(tempAreaCode);
     _reactiveContentFilterService.updateSortByFilter(tempSortByFilter);
     _reactiveContentFilterService.updateTagFilter(tempTagFilter);
+    _homeFeedModel.updateContentType(tempContentType);
     notifyListeners();
     updateUserData();
   }
 
   updateUserData() async {
-    if (tempAreaCode.isNotEmpty) {
+    if (tempAreaCode.isNotEmpty && tempAreaCode != areaCode) {
       _userDataService.updateLastSeenZipcode(id: user.id, zip: tempAreaCode);
     }
   }

@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:location/location.dart';
 import 'package:stacked/stacked.dart';
-import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/enums/init_error_status.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/firestore/common/firebase_messaging_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
@@ -21,7 +21,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
   PlatformDataService _platformDataService = locator<PlatformDataService>();
   UserDataService _userDataService = locator<UserDataService>();
   LocationService? _locationService = locator<LocationService>();
-  SnackbarService? _snackbarService = locator<SnackbarService>();
+  CustomDialogService _customDialogService = locator<CustomDialogService>();
   DynamicLinkService _dynamicLinkService = locator<DynamicLinkService>();
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
@@ -105,10 +105,9 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
     if (!connectedToNetwork) {
       initErrorStatus = InitErrorStatus.network;
       notifyListeners();
-      _snackbarService!.showSnackbar(
+      _customDialogService.showDetailedErrorDialog(
         title: 'Network Error',
-        message: "There Was an Issue Connecting to the Internet",
-        duration: Duration(seconds: 5),
+        description: "There Was an Issue Connecting to the Internet",
       );
       setBusy(false);
       return;
@@ -121,10 +120,9 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
       if (!isAdmin) {
         initErrorStatus = InitErrorStatus.underMaintenance;
         notifyListeners();
-        _snackbarService!.showSnackbar(
+        _customDialogService.showDetailedErrorDialog(
           title: 'Servers Currently Under Maintenance',
-          message: "Please Try Again Later",
-          duration: Duration(seconds: 5),
+          description: "Please Try Again Later",
         );
         setBusy(false);
         return;
@@ -134,12 +132,11 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
     //check update status
     bool updateRequired = await _platformDataService.isUpdateAvailable();
     if (updateRequired) {
-      initErrorStatus = InitErrorStatus.underMaintenance;
+      initErrorStatus = InitErrorStatus.updateRequired;
       notifyListeners();
-      _snackbarService!.showSnackbar(
+      _customDialogService.showDetailedErrorDialog(
         title: 'Update Required',
-        message: "Please Update Webblen to Continue",
-        duration: Duration(seconds: 5),
+        description: "Please Update Webblen to Continue",
       );
       setBusy(false);
       return;
@@ -150,10 +147,9 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
     if (!locationGranted) {
       initErrorStatus = InitErrorStatus.location;
       notifyListeners();
-      _snackbarService!.showSnackbar(
+      _customDialogService.showDetailedErrorDialog(
         title: 'Location Error',
-        message: "There Was an Issue Getting Your Location",
-        duration: Duration(seconds: 5),
+        description: "There Was an Issue Getting Your Location",
       );
       setBusy(false);
       return;

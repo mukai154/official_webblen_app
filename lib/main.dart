@@ -88,7 +88,7 @@ void setupSnackBarUi() {
     SnackbarConfig(
       backgroundColor: Colors.red,
       textColor: Colors.white,
-      mainButtonTextColor: Colors.black,
+      mainButtonTextColor: Colors.white,
     ),
   );
 }

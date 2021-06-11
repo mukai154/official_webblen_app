@@ -118,6 +118,14 @@ class PostImgBlockView extends StatelessWidget {
                   color: model.savedPost ? appSavedContentColor() : appIconColorAlt(),
                 ),
               ),
+              SizedBox(width: 6),
+              Text(
+                "${model.savedBy.length}",
+                style: TextStyle(
+                  fontSize: 14,
+                  color: appFontColorAlt(),
+                ),
+              ),
             ],
           ),
           Text(
@@ -215,7 +223,7 @@ class PostImgBlockView extends StatelessWidget {
       fireOnModelReadyOnce: true,
       initialiseSpecialViewModelsOnce: true,
       viewModelBuilder: () => PostImgBlockViewModel(),
-      onModelReady: (model) => model.initialize(currentUID: currentUID, postAuthorID: post!.authorID, postID: post!.id),
+      onModelReady: (model) => model.initialize(post: post!),
       builder: (context, model, child) => GestureDetector(
         onDoubleTap: () => model.saveUnsavePost(post: post!),
         onLongPress: () {

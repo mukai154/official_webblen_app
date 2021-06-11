@@ -209,7 +209,9 @@ class AuthService {
   Future<bool> signInWithFacebook() async {
     bool signedIn = false;
     final FacebookAuth fbAuth = FacebookAuth.instance;
-    final LoginResult result = await fbAuth.login(permissions: ['email']);
+    final LoginResult result = await fbAuth.login(permissions: ['email'], loginBehavior: LoginBehavior.webOnly).catchError((e) {
+      print(e);
+    });
     switch (result.status) {
       case LoginStatus.success:
         final AuthCredential credential = FacebookAuthProvider.credential(result.accessToken!.token);
@@ -235,6 +237,7 @@ class AuthService {
         // TODO: Handle this case.
         break;
     }
+    print(result.status);
     return signedIn;
   }
 

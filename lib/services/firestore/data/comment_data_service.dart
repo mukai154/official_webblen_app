@@ -4,11 +4,8 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_post_comment.dart';
 
-import 'activity_data_service.dart';
-
 class CommentDataService {
-  final ActivityDataService? _activityDataService = locator<ActivityDataService>();
-  final SnackbarService? _snackbarService = locator<SnackbarService>();
+  final SnackbarService _snackbarService = locator<SnackbarService>();
   final CollectionReference commentsRef = FirebaseFirestore.instance.collection("comments");
   final CollectionReference postsRef = FirebaseFirestore.instance.collection("webblen_posts");
 
@@ -18,33 +15,45 @@ class CommentDataService {
     await commentsRef.doc(parentID).collection("comments").doc(comment.timePostedInMilliseconds.toString()).set(comment.toMap()).catchError((e) {
       error = e.details;
     });
+
     DocumentSnapshot snapshot = await postsRef.doc(parentID).get();
-    WebblenPost post = WebblenPost.fromMap(snapshot.data()!);
-    post.commentCount = post.commentCount! + 1;
-    await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
-      error = e.details;
-    });
-    if (error == null && postAuthorID != comment.senderUID) {
-      //NotificationDataService().sendPostCommentNotification(comment.postID, postAuthorID, comment.senderUID, comment.message);
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+
+      if (snapshotData.isNotEmpty) {
+        WebblenPost post = WebblenPost.fromMap(snapshotData);
+        post.commentCount = post.commentCount! + 1;
+        await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
+          error = e.details;
+        });
+      }
+    } else {
+      error = "This post no longer exists";
     }
+
     return error;
   }
 
   Future<String?> replyToComment(String? parentID, String? originaCommenterUID, String originalCommentID, WebblenPostComment comment) async {
     String? error;
     DocumentSnapshot snapshot = await commentsRef.doc(parentID).collection("comments").doc(originalCommentID).get();
-    WebblenPostComment originalComment = WebblenPostComment.fromMap(snapshot.data()!);
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
 
-    List replies = originalComment.replies!.toList(growable: true);
-    replies.add(comment.toMap());
-    originalComment.replies = replies;
-    originalComment.replyCount = originalComment.replyCount! + 1;
-    await commentsRef.doc(parentID).collection("comments").doc(originalCommentID).update(originalComment.toMap()).catchError((e) {
-      error = e.details;
-    });
-    if (error == null && originaCommenterUID != comment.senderUID) {
-      //NotificationDataService().sendPostCommentReplyNotification(comment.postID, originaCommenterUID, originalCommentID, comment.senderUID, comment.message);
+      if (snapshotData.isNotEmpty) {
+        WebblenPostComment originalComment = WebblenPostComment.fromMap(snapshotData);
+        List replies = originalComment.replies!.toList(growable: true);
+        replies.add(comment.toMap());
+        originalComment.replies = replies;
+        originalComment.replyCount = originalComment.replyCount! + 1;
+        await commentsRef.doc(parentID).collection("comments").doc(originalCommentID).update(originalComment.toMap()).catchError((e) {
+          error = e.details;
+        });
+      }
+    } else {
+      error = "This post no longer exists";
     }
+
     return error;
   }
 
@@ -55,27 +64,46 @@ class CommentDataService {
     await commentsRef.doc(parentID).collection("comments").doc(commentID).delete().catchError((e) {
       error = e.toString();
     });
+
     DocumentSnapshot snapshot = await postsRef.doc(parentID).get();
-    WebblenPost post = WebblenPost.fromMap(snapshot.data()!);
-    post.commentCount = post.commentCount! - 1;
-    await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
-      error = e.details;
-    });
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+
+      if (snapshotData.isNotEmpty) {
+        WebblenPost post = WebblenPost.fromMap(snapshotData);
+        post.commentCount = post.commentCount! - 1;
+        await postsRef.doc(parentID).update(post.toMap()).catchError((e) {
+          error = e.details;
+        });
+      }
+    } else {
+      error = "This post no longer exists";
+    }
+
     return error;
   }
 
   Future<String?> deleteReply(String? parentID, WebblenPostComment comment) async {
     String? error;
     DocumentSnapshot snapshot = await commentsRef.doc(parentID).collection("comments").doc(comment.originalReplyCommentID).get();
-    WebblenPostComment originalComment = WebblenPostComment.fromMap(snapshot.data()!);
-    List replies = originalComment.replies!.toList(growable: true);
-    int replyIndex = replies.indexWhere((element) => element['message'] == comment.message);
-    replies.removeAt(replyIndex);
-    originalComment.replies = replies;
-    originalComment.replyCount = originalComment.replyCount! - 1;
-    await commentsRef.doc(parentID).collection("comments").doc(comment.originalReplyCommentID).update(originalComment.toMap()).catchError((e) {
-      error = e.details;
-    });
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+
+    if (snapshot.exists) {
+      if (snapshotData.isNotEmpty) {
+        WebblenPostComment originalComment = WebblenPostComment.fromMap(snapshotData);
+        List replies = originalComment.replies!.toList(growable: true);
+        int replyIndex = replies.indexWhere((element) => element['message'] == comment.message);
+        replies.removeAt(replyIndex);
+        originalComment.replies = replies;
+        originalComment.replyCount = originalComment.replyCount! - 1;
+        await commentsRef.doc(parentID).collection("comments").doc(comment.originalReplyCommentID).update(originalComment.toMap()).catchError((e) {
+          error = e.details;
+        });
+      }
+    } else {
+      error = "This post no longer exists";
+    }
+
     return error;
   }
 
@@ -86,16 +114,22 @@ class CommentDataService {
     required int resultsLimit,
   }) async {
     List<DocumentSnapshot> docs = [];
+    String? error;
     Query query = commentsRef.doc(postID).collection('comments').orderBy('timePostedInMilliseconds', descending: true).limit(resultsLimit);
 
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      _snackbarService!.showSnackbar(
-        title: 'Error',
+      error = e.message;
+      _snackbarService.showSnackbar(
+        title: 'Error Loading Comments',
         message: e.message,
         duration: Duration(seconds: 5),
       );
-      return docs;
     });
+
+    if (error != null) {
+      return docs;
+    }
+
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
     }
@@ -118,7 +152,7 @@ class CommentDataService {
         .limit(resultsLimit);
 
     QuerySnapshot snapshot = await query.get().catchError((e) {
-      _snackbarService!.showSnackbar(
+      _snackbarService.showSnackbar(
         title: 'Error',
         message: e.message,
         duration: Duration(seconds: 5),

@@ -15,9 +15,11 @@ class AlgoliaSearchService {
     String? appID;
     String? apiKey;
     DocumentSnapshot snapshot = await algoliaDocRef.get();
-    appID = snapshot.data()!['appID'];
-    apiKey = snapshot.data()!['apiKey'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    appID = snapshotData['appID'];
+    apiKey = snapshotData['apiKey'];
     algolia = Algolia.init(applicationId: appID!, apiKey: apiKey!);
+
     return algolia;
   }
 
@@ -335,11 +337,14 @@ class AlgoliaSearchService {
   Future<List?> getRecentSearchTerms({required String uid}) async {
     List? recentSearchTerms = [];
     DocumentSnapshot snapshot = await userDocRef.doc(uid).get();
+
     if (snapshot.exists) {
-      if (snapshot.data()!['recentSearchTerms'] != null) {
-        recentSearchTerms = snapshot.data()!['recentSearchTerms'].toList(growable: true);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty && snapshotData['recentSearchTerms'] != null) {
+        recentSearchTerms = snapshotData['recentSearchTerms'].toList(growable: true);
       }
     }
+
     return recentSearchTerms;
   }
 
@@ -347,8 +352,11 @@ class AlgoliaSearchService {
     List? recentSearchTerms = [];
     DocumentSnapshot snapshot = await userDocRef.doc(uid).get();
     if (snapshot.exists) {
-      if (snapshot.data()!['recentSearchTerms'] != null) {
-        recentSearchTerms = snapshot.data()!['recentSearchTerms'].toList(growable: true);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+
+      if (snapshotData.isNotEmpty && snapshotData['recentSearchTerms'] != null) {
+        recentSearchTerms = snapshotData['recentSearchTerms'].toList(growable: true);
+
         if (!recentSearchTerms!.contains(searchTerm)) {
           recentSearchTerms.insert(0, searchTerm);
         }
@@ -359,6 +367,7 @@ class AlgoliaSearchService {
       } else {
         recentSearchTerms.add(searchTerm);
       }
+
       userDocRef.doc(uid).update({'recentSearchTerms': recentSearchTerms});
     }
   }

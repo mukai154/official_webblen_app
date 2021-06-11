@@ -47,8 +47,9 @@ class ListSavedEvents extends StatelessWidget {
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenEvent event;
-                            event = WebblenEvent.fromMap(model.dataResults[index].data()!);
+                            event = WebblenEvent.fromMap(snapshotData);
                             return EventBlockView(
                               event: event,
                               showEventOptions: (event) => model.showContentOptions(event),

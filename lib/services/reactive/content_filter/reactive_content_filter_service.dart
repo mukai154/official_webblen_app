@@ -11,11 +11,7 @@ class ReactiveContentFilterService with ReactiveServiceMixin {
   String get tagFilter => _tagFilter.value;
   String get sortByFilter => _sortByFilter.value;
 
-  void updateCityName(String val) {
-    _cityName.value = val;
-    print("updating city name to: $val");
-  }
-
+  void updateCityName(String val) => _cityName.value = val;
   void updateAreaCode(String val) => _areaCode.value = val;
   void updateTagFilter(String val) => _tagFilter.value = val;
   void updateSortByFilter(String val) => _sortByFilter.value = val;

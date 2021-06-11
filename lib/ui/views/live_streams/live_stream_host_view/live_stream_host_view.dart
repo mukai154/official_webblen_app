@@ -355,13 +355,15 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                   controller: chatViewController,
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
+                    Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
+
                     try {
                       scrollToChatMessage();
                     } catch (e) {}
-                    String? uid = snapshot.data!.docs[index].data()['senderUID'];
-                    String username = '@' + snapshot.data!.docs[index].data()['username'];
-                    String? message = snapshot.data!.docs[index].data()['message'];
-                    String? userImgURL = snapshot.data!.docs[index].data()['userImgURL'];
+                    String? uid = snapshotData['senderUID'];
+                    String username = '@' + snapshotData['username'];
+                    String? message = snapshotData['message'];
+                    String? userImgURL = snapshotData['userImgURL'];
                     return username == '@system'
                         ? Container(
                             margin: EdgeInsets.symmetric(vertical: 8.0),
@@ -516,8 +518,9 @@ class _GiftsAndDonationsAnimator extends HookViewModelWidget<LiveStreamHostViewM
               shrinkWrap: true,
               itemCount: 1,
               itemBuilder: (context, index) {
-                int? giftID = snapshot.data!.docs.last.data()['giftID'];
-                String? senderUsername = snapshot.data!.docs.last.data()['senderUsername'];
+                Map<String, dynamic> snapshotData = snapshot.data!.docs.last.data() as Map<String, dynamic>;
+                int? giftID = snapshotData['giftID'];
+                String? senderUsername = snapshotData['senderUsername'];
                 _animationController.forward();
                 return FadeTransition(
                   opacity: _giftAnimation,

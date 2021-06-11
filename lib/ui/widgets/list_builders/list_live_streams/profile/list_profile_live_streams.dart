@@ -65,8 +65,9 @@ class ListProfileLiveStreams extends StatelessWidget {
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenLiveStream stream;
-                            stream = WebblenLiveStream.fromMap(model.dataResults[index].data()!);
+                            stream = WebblenLiveStream.fromMap(snapshotData);
                             return LiveStreamBlockView(
                               stream: stream,
                               showStreamOptions: (stream) => model.showContentOptions(stream),

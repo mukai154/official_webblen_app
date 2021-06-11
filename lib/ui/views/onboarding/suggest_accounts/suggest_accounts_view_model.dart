@@ -42,14 +42,14 @@ class SuggestAccountsViewModel extends BaseViewModel {
     if (newFollows.contains(id)) {
       return;
     }
-    _userDataService.followUser(user.id, id);
+    _userDataService.followUser(user.id!, id);
     newFollows.add(id);
     notifyListeners();
   }
 
   unfollowUser(String id) async {
     if (newFollows.contains(id)) {
-      _userDataService.unFollowUser(user.id, id);
+      _userDataService.unFollowUser(user.id!, id);
       newFollows.remove(id);
       notifyListeners();
     }

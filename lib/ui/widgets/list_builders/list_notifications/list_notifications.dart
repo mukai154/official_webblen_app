@@ -50,8 +50,9 @@ class ListNotifications extends StatelessWidget {
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenNotification notification;
-                            notification = WebblenNotification.fromMap(model.dataResults[index].data()!);
+                            notification = WebblenNotification.fromMap(snapshotData);
                             return NotificationBlockWidget(
                               notification: notification,
                             );

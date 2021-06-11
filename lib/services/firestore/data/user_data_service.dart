@@ -24,12 +24,17 @@ class UserDataService {
     if (error != null) {
       return false;
     }
+
     if (snapshot.exists) {
-      WebblenUser user = WebblenUser.fromMap(snapshot.data()!);
-      if (user.isAdmin != null && user.isAdmin!) {
-        isAdmin = true;
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        WebblenUser user = WebblenUser.fromMap(snapshotData);
+        if (user.isAdmin != null && user.isAdmin!) {
+          isAdmin = true;
+        }
       }
     }
+
     return isAdmin;
   }
 
@@ -73,8 +78,12 @@ class UserDataService {
     if (error != null) {
       return user;
     }
+
     if (snapshot.exists) {
-      user = WebblenUser.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        user = WebblenUser.fromMap(snapshotData);
+      }
     }
     return user;
   }
@@ -92,7 +101,7 @@ class UserDataService {
     }
     if (querySnapshot.docs.isNotEmpty) {
       DocumentSnapshot doc = querySnapshot.docs.first;
-      Map<String, dynamic> docData = doc.data()!;
+      Map<String, dynamic> docData = doc.data() as Map<String, dynamic>;
       user = WebblenUser.fromMap(docData);
     }
     return user;
@@ -101,49 +110,78 @@ class UserDataService {
   Future<String> getCurrentFbUsername(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['fbUsername'] != null) {
-      val = data['fbUsername'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['fbUsername'] != null) {
+          val = snapshotData['fbUsername'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentInstaUsername(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['instaUsername'] != null) {
-      val = data['instaUsername'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['instaUsername'] != null) {
+          val = snapshotData['instaUsername'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentTwitterUsername(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['twitterUsername'] != null) {
-      val = data['twitterUsername'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['twitterUsername'] != null) {
+          val = snapshotData['twitterUsername'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentTwitchUsername(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['twitchUsername'] != null) {
-      val = data['twitchUsername'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['twitchUsername'] != null) {
+          val = snapshotData['twitchUsername'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentYoutube(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['youtube'] != null) {
-      val = data['youtube'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['youtube'] != null) {
+          val = snapshotData['youtube'];
+        }
+      }
     }
     return val;
   }
@@ -151,70 +189,112 @@ class UserDataService {
   Future<String> getCurrentUserWebsite(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['website'] != null) {
-      val = data['website'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['website'] != null) {
+          val = snapshotData['website'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentUserTwitchStreamURL(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['twitchStreamURL'] != null) {
-      val = data['twitchStreamURL'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['twitchStreamURL'] != null) {
+          val = snapshotData['twitchStreamURL'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentUserTwitchStreamKey(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['twitchStreamKey'] != null) {
-      val = data['twitchStreamKey'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['twitchStreamKey'] != null) {
+          val = snapshotData['twitchStreamKey'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentUserYoutubeStreamURL(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['youtubeStreamURL'] != null) {
-      val = data['youtubeStreamURL'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['youtubeStreamURL'] != null) {
+          val = snapshotData['youtubeStreamURL'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentUserYoutubeStreamKey(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['youtubeStreamKey'] != null) {
-      val = data['youtubeStreamKey'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['youtubeStreamKey'] != null) {
+          val = snapshotData['youtubeStreamKey'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentUserFBStreamURL(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['fbStreamURL'] != null) {
-      val = data['fbStreamURL'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['fbStreamURL'] != null) {
+          val = snapshotData['fbStreamURL'];
+        }
+      }
     }
+
     return val;
   }
 
   Future<String> getCurrentUserFBStreamKey(String id) async {
     String val = "";
     DocumentSnapshot snapshot = await userRef.doc(id).get();
-    Map<String, dynamic> data = snapshot.data()!;
-    if (data['fbStreamKey'] != null) {
-      val = data['fbStreamKey'];
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        if (snapshotData['fbStreamKey'] != null) {
+          val = snapshotData['fbStreamKey'];
+        }
+      }
     }
+
     return val;
   }
 
@@ -502,123 +582,105 @@ class UserDataService {
     return true;
   }
 
-  Future<bool> followUser(String? currentUID, String? targetUserID) async {
+  Future<bool> followUser(String currentUID, String targetUserID) async {
     bool didFollow = true;
-    DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
-    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
-    Map<String, dynamic> currentUserData = currentUserSnapshot.data()!;
-    Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
-    List currentUserFollowing = currentUserData['following'] == null ? [] : currentUserData['following'].toList(growable: true);
-    List targetUserFollowers = targetUserData['followers'] == null ? [] : targetUserData['followers'].toList(growable: true);
-    if (!currentUserFollowing.contains(targetUserID)) {
-      currentUserFollowing.add(targetUserID);
-      await userRef.doc(currentUID).update({'following': currentUserFollowing}).catchError((e) {
-        print(e);
-        didFollow = false;
-      });
-    }
-    if (!targetUserFollowers.contains(currentUID)) {
-      targetUserFollowers.add(currentUID);
-      await userRef.doc(targetUserID).update({'followers': targetUserFollowers}).catchError((e) {
-        print(e);
-        didFollow = false;
-      });
-    }
+    await userRef.doc(currentUID).update({
+      'following': FieldValue.arrayUnion([targetUserID])
+    }).catchError((e) {
+      print(e);
+      didFollow = false;
+    });
+    await userRef.doc(targetUserID).update({
+      'followers': FieldValue.arrayUnion([currentUID])
+    }).catchError((e) {
+      print(e);
+      didFollow = false;
+    });
 
     //follow posts by user
-    QuerySnapshot postQuery = await postsRef.where('authorID', isEqualTo: targetUserID).get();
-    postQuery.docs.forEach((doc) {
-      List followers = doc.data()['followers'].toList(growable: true);
-      if (!followers.contains(currentUID)) {
-        followers.add(currentUID);
-        postsRef.doc(doc.id).update({'followers': followers}).catchError((e) {
-          print(e);
-          didFollow = false;
+    if (didFollow) {
+      QuerySnapshot postQuery = await postsRef.where('authorID', isEqualTo: targetUserID).get();
+      postQuery.docs.forEach((doc) {
+        postsRef.doc(doc.id).update({
+          'suggestedUIDs': FieldValue.arrayUnion([currentUID])
         });
-      }
-    });
+      });
+    }
     return didFollow;
   }
 
-  Future<bool> unFollowUser(String? currentUID, String? targetUserID) async {
-    DocumentSnapshot currentUserSnapshot = await userRef.doc(currentUID).get();
-    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
-    Map<String, dynamic> currentUserData = currentUserSnapshot.data()!;
-    Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
-    List currentUserFollowing = currentUserData['following'] == null ? [] : currentUserData['following'].toList(growable: true);
-    List targetUserFollowers = targetUserData['followers'] == null ? [] : targetUserData['followers'].toList(growable: true);
-    if (currentUserFollowing.contains(targetUserID)) {
-      currentUserFollowing.remove(targetUserID);
-      await userRef.doc(currentUID).update({'following': currentUserFollowing}).catchError((e) {
-        print(e);
-        return false;
-      });
-    }
-    if (targetUserFollowers.contains(currentUID)) {
-      targetUserFollowers.remove(currentUID);
-      await userRef.doc(targetUserID).update({'followers': targetUserFollowers}).catchError((e) {
-        print(e);
-        return false;
-      });
-    }
-    QuerySnapshot postQuery = await postsRef.where('authorID', isEqualTo: targetUserID).get().catchError((e) {
+  Future<bool> unFollowUser(String currentUID, String targetUserID) async {
+    bool didUnfollow = true;
+    await userRef.doc(currentUID).update({
+      'following': FieldValue.arrayRemove([targetUserID])
+    }).catchError((e) {
       print(e);
-      return false;
+      didUnfollow = false;
     });
-    postQuery.docs.forEach((doc) {
-      List followers = doc.data()['followers'].toList(growable: true);
-      if (followers.contains(currentUID)) {
-        followers.remove(currentUID);
-        postsRef.doc(doc.id).update({'followers': followers}).catchError((e) {
-          print(e);
+    await userRef.doc(targetUserID).update({
+      'followers': FieldValue.arrayRemove([currentUID])
+    }).catchError((e) {
+      print(e);
+      didUnfollow = false;
+    });
+
+    //follow posts by user
+    if (didUnfollow) {
+      QuerySnapshot postQuery = await postsRef.where('authorID', isEqualTo: targetUserID).get();
+      postQuery.docs.forEach((doc) {
+        postsRef.doc(doc.id).update({
+          'suggestedUIDs': FieldValue.arrayRemove([currentUID])
         });
-      }
-    });
-    return true;
+      });
+    }
+    return didUnfollow;
   }
 
-  Future<bool> muteUser(String? currentUID, String? targetUserID) async {
+  Future<bool> muteUser(String currentUID, String targetUserID) async {
     bool didMute = true;
-    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
-    Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
-    List mutedByList = targetUserData['mutedBy'] == null ? [] : targetUserData['mutedBy'].toList(growable: true);
-    if (!mutedByList.contains(currentUID)) {
-      mutedByList.add(currentUID);
-      await userRef.doc(targetUserID).update({'mutedBy': mutedByList}).catchError((e) {
-        print(e);
-        didMute = false;
-      });
-    }
+
+    await userRef.doc(targetUserID).update({
+      'mutedBy': FieldValue.arrayUnion([currentUID])
+    }).catchError((e) {
+      print(e);
+      didMute = false;
+    });
+
     return didMute;
   }
 
-  Future<bool> unMuteUser(String? currentUID, String? targetUserID) async {
+  Future<bool> unMuteUser(String currentUID, String targetUserID) async {
     bool didUnMute = true;
-    DocumentSnapshot targetUserSnapshot = await userRef.doc(targetUserID).get();
-    Map<String, dynamic> targetUserData = targetUserSnapshot.data()!;
-    List mutedByList = targetUserData['mutedBy'] == null ? [] : targetUserData['mutedBy'].toList(growable: true);
-    if (mutedByList.contains(currentUID)) {
-      mutedByList.remove(currentUID);
-      await userRef.doc(targetUserID).update({'mutedBy': mutedByList}).catchError((e) {
-        print(e);
-        didUnMute = false;
-      });
-    }
+
+    await userRef.doc(targetUserID).update({
+      'mutedBy': FieldValue.arrayRemove([currentUID])
+    }).catchError((e) {
+      print(e);
+      didUnMute = false;
+    });
+
     return didUnMute;
   }
 
   Future<void> updateUserAppOpen({required String uid, required String zipcode}) async {
     int appOpenInMilliseconds = DateTime.now().millisecondsSinceEpoch;
     DocumentSnapshot snapshot = await userRef.doc(uid).get();
-    List? nearbyZipcodes = snapshot.data()!['nearbyZipcodes'] == null ? [] : snapshot.data()!['nearbyZipcodes'];
-    if (!nearbyZipcodes!.contains(zipcode)) {
-      nearbyZipcodes = await _locationService.findNearestZipcodes(zipcode) ?? nearbyZipcodes;
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        List? nearbyZipcodes = snapshotData['nearbyZipcodes'] == null ? [] : snapshotData['nearbyZipcodes'];
+        if (!nearbyZipcodes!.contains(zipcode)) {
+          nearbyZipcodes = await _locationService.findNearestZipcodes(zipcode) ?? nearbyZipcodes;
+        }
+
+        userRef.doc(uid).update({
+          'appOpenInMilliseconds': appOpenInMilliseconds,
+          'lastSeenZipcode': zipcode,
+          'nearbyZipcodes': nearbyZipcodes,
+        });
+      }
     }
-    userRef.doc(uid).update({
-      'appOpenInMilliseconds': appOpenInMilliseconds,
-      'lastSeenZipcode': zipcode,
-      'nearbyZipcodes': nearbyZipcodes,
-    });
   }
 
   Future<List<WebblenUser>> getFollowerSuggestions(String id, String zipcode, List? tags) async {
@@ -629,8 +691,9 @@ class UserDataService {
       //print(e);
     });
     snapshot.docs.forEach((doc) {
-      if ((doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) && doc.id != id) {
-        WebblenUser user = WebblenUser.fromMap(doc.data());
+      Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
+      if ((snapshotData['followers'] == null || !snapshotData['followers'].contains(id)) && doc.id != id) {
+        WebblenUser user = WebblenUser.fromMap(snapshotData);
         if (user.id! != id) {
           users.add(user);
         }
@@ -641,8 +704,9 @@ class UserDataService {
         //print(e);
       });
       snapshot.docs.forEach((doc) {
-        if ((doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) && doc.id != id) {
-          WebblenUser user = WebblenUser.fromMap(doc.data());
+        Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
+        if ((snapshotData['followers'] == null || !snapshotData['followers'].contains(id)) && doc.id != id) {
+          WebblenUser user = WebblenUser.fromMap(snapshotData);
           if (user.tags != null) {
             for (String tag in user.tags!) {
               print(tags);
@@ -668,8 +732,9 @@ class UserDataService {
         //print(e);
       });
       query.docs.forEach((doc) {
-        if ((doc.data()['followers'] == null || !doc.data()['followers'].contains(id)) && doc.id != id) {
-          WebblenUser user = WebblenUser.fromMap(doc.data());
+        Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
+        if ((snapshotData['followers'] == null || !snapshotData['followers'].contains(id)) && doc.id != id) {
+          WebblenUser user = WebblenUser.fromMap(snapshotData);
           if (user.id != id) {
             List existing = users.where((x) => x.id == doc.id).toList();
             if (existing.isEmpty) {
@@ -693,13 +758,20 @@ class UserDataService {
   Future<bool> depositWebblen({required String uid, required double amount}) async {
     //String error;
     DocumentSnapshot snapshot = await userRef.doc(uid).get();
-    WebblenUser user = WebblenUser.fromMap(snapshot.data()!);
-    double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN!;
-    double newBalance = amount + initialBalance;
-    await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
-      print(e.message);
-      //error = e.toString();
-    });
+
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        WebblenUser user = WebblenUser.fromMap(snapshotData);
+        double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN!;
+        double newBalance = amount + initialBalance;
+        await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
+          print(e.message);
+          //error = e.toString();
+        });
+      }
+    }
+
     return true;
   }
 
@@ -707,14 +779,21 @@ class UserDataService {
     //String error;
 
     DocumentSnapshot snapshot = await userRef.doc(uid).get();
-    WebblenUser user = WebblenUser.fromMap(snapshot.data()!);
-    double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN!;
-    double newBalance = initialBalance - amount;
 
-    await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
-      print(e.message);
-      //error = e.toString();
-    });
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        WebblenUser user = WebblenUser.fromMap(snapshotData);
+        double initialBalance = user.WBLN == null ? 0.00001 : user.WBLN!;
+        double newBalance = initialBalance - amount;
+
+        await userRef.doc(uid).update({"WBLN": newBalance}).catchError((e) {
+          print(e.message);
+          //error = e.toString();
+        });
+      }
+    }
+
     return true;
   }
 

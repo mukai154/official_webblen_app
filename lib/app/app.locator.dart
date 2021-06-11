@@ -47,9 +47,7 @@ import '../ui/views/base/app_base_view_model.dart';
 import '../ui/views/home/tabs/home/home_view_model.dart';
 import '../ui/views/home/tabs/search/recent_search_view_model.dart';
 import '../ui/views/home/tabs/wallet/wallet_view_model.dart';
-import '../ui/widgets/list_builders/list_events/home/list_home_events_model.dart';
-import '../ui/widgets/list_builders/list_live_streams/home/list_home_live_streams_model.dart';
-import '../ui/widgets/list_builders/list_posts/home/list_home_posts_model.dart';
+import '../ui/widgets/home_feed/home_feed_model.dart';
 
 final locator = StackedLocator.instance;
 
@@ -94,9 +92,7 @@ void setupLocator() {
   locator.registerLazySingleton(() => ReactiveInAppPurchaseService());
   locator.registerSingleton(AppBaseViewModel());
   locator.registerSingleton(HomeViewModel());
+  locator.registerSingleton(HomeFeedModel());
   locator.registerSingleton(RecentSearchViewModel());
   locator.registerSingleton(WalletViewModel());
-  locator.registerSingleton(ListHomePostsModel());
-  locator.registerSingleton(ListHomeLiveStreamsModel());
-  locator.registerSingleton(ListHomeEventsModel());
 }

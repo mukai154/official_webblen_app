@@ -168,6 +168,7 @@ class EventHostPathPages {
         child: StreamBuilder(
           stream: FirebaseFirestore.instance.collection("stripe").doc(model.user.id).snapshots(),
           builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            Map<String, dynamic> snapshotData = snapshot.data!.data() as Map<String, dynamic>;
             if (!snapshot.hasData || snapshot.data!.data() == null)
               return Column(
                 children: [
@@ -196,14 +197,13 @@ class EventHostPathPages {
             return Column(
               children: [
                 Text(
-                  snapshot.data!.data()!['verified'] == "pending" || snapshot.data!.data()!['verified'] == "unverified"
+                  snapshotData['verified'] == "pending" || snapshotData['verified'] == "unverified"
                       ? "Your Earnings Account is Under Review"
                       : "Your Earnings Account Has Been Approved!",
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                      color: snapshot.data!.data()!['verified'] == "pending" || snapshot.data!.data()!['verified'] == "unverified"
-                          ? Colors.black54
-                          : CustomColors.darkMountainGreen,
+                      color:
+                          snapshotData['verified'] == "pending" || snapshotData['verified'] == "unverified" ? Colors.black54 : CustomColors.darkMountainGreen,
                       fontSize: 16.0,
                       fontWeight: FontWeight.w700),
                 ),

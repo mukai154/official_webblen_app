@@ -13,26 +13,38 @@ class GiftDonationDataService {
 
   Future<bool> sendGift({required String contentID, required String receiverUID, required String senderUID, required GiftDonation giftDonation}) async {
     bool sentGift = true;
-    String? error;
 
     bool giftPoolExists = await _contentGiftPoolDataService.checkIfGiftPoolExists(contentID);
 
     if (!giftPoolExists) {
-      WebblenContentGiftPool giftPool = WebblenContentGiftPool(id: contentID, hostID: receiverUID, gifters: {}, totalGiftAmount: 0, paidOut: false);
-      await _contentGiftPoolDataService.createGiftPool(giftPool);
+      WebblenContentGiftPool giftPool = WebblenContentGiftPool(
+        id: contentID,
+        hostID: receiverUID,
+        gifters: {},
+        totalGiftAmount: 0,
+        paidOut: false,
+      );
+      bool createdGiftPool = await _contentGiftPoolDataService.createGiftPool(giftPool);
+      if (!createdGiftPool) {
+        _customDialogService.showErrorDialog(description: "There was an error sending your gift");
+        return false;
+      }
     }
 
     DocumentSnapshot snapshot = await userRef.doc(senderUID).get();
-    double userWalletAmount = snapshot.data()!['WBLN'];
-    if (giftDonation.giftAmount! > userWalletAmount) {
-      _customDialogService.showErrorDialog(description: "Insufficient WBLN");
-      sentGift = false;
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      double userWalletAmount = snapshotData['WBLN'];
+      if (giftDonation.giftAmount! > userWalletAmount) {
+        _customDialogService.showErrorDialog(description: "Insufficient WBLN");
+        sentGift = false;
+      }
+
+      userWalletAmount = userWalletAmount - giftDonation.giftAmount!;
+      await userRef.doc(senderUID).update({"WBLN": userWalletAmount});
+
+      await _contentGiftPoolDataService.addToGiftPool(giftPoolID: contentID, uid: senderUID, giftID: giftDonation.giftID, amount: giftDonation.giftAmount!);
     }
-
-    userWalletAmount = userWalletAmount - giftDonation.giftAmount!;
-    await userRef.doc(senderUID).update({"WBLN": userWalletAmount});
-
-    await _contentGiftPoolDataService.addToGiftPool(giftPoolID: contentID, uid: senderUID, giftID: giftDonation.giftID, amount: giftDonation.giftAmount!);
 
     return sentGift;
   }
@@ -45,28 +57,31 @@ class GiftDonationDataService {
     required GiftDonation giftDonation,
   }) async {
     bool updated = true;
-    String? error;
     Map<dynamic, dynamic> donators = {};
     double giftPool;
     DocumentSnapshot snapshot = await giftDonationRef.doc(contentID).get();
-    if (snapshot.exists && snapshot.data()!.isNotEmpty) {
-      donators = snapshot.data()!['donators'];
-      giftPool = snapshot.data()!['giftPool'] == null ? 0.0001 : snapshot.data()!['giftPool'];
-      if (donators[senderUID] == null) {
-        donators[senderUID] = {'uid': senderUID, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': giftDonation.giftAmount};
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        donators = snapshotData['donators'];
+        giftPool = snapshotData['giftPool'] == null ? 0.0001 : snapshotData['giftPool'];
+        if (donators[senderUID] == null) {
+          donators[senderUID] = {'uid': senderUID, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': giftDonation.giftAmount};
+        } else {
+          Map<String, dynamic> donator = donators[senderUID];
+          double prevGiftAmount = donator['totalGiftAmount'];
+          double newGiftAmount = prevGiftAmount + giftDonation.giftAmount!;
+          donators[senderUID] = {'uid': senderUID, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': newGiftAmount};
+        }
+        giftPool += giftDonation.giftAmount!;
+        await giftDonationRef.doc(contentID).update({'donators': donators, 'giftPool': giftPool});
       } else {
-        Map<String, dynamic> donator = donators[senderUID];
-        double prevGiftAmount = donator['totalGiftAmount'];
-        double newGiftAmount = prevGiftAmount + giftDonation.giftAmount!;
-        donators[senderUID] = {'uid': senderUID, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': newGiftAmount};
+        donators[senderUID] = {'uid': senderUID, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': giftDonation.giftAmount};
+        giftPool = giftDonation.giftAmount!;
+        await giftDonationRef.doc(contentID).set({'donators': donators, 'giftPool': giftPool});
       }
-      giftPool += giftDonation.giftAmount!;
-      await giftDonationRef.doc(contentID).update({'donators': donators, 'giftPool': giftPool});
-    } else {
-      donators[senderUID] = {'uid': senderUID, 'username': username, 'userImgURL': userImgURL, 'totalGiftAmount': giftDonation.giftAmount};
-      giftPool = giftDonation.giftAmount!;
-      await giftDonationRef.doc(contentID).set({'donators': donators, 'giftPool': giftPool});
     }
+
     return updated;
   }
 }

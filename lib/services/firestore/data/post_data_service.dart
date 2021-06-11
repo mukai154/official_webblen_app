@@ -35,13 +35,17 @@ class PostDataService {
       return false;
     }
     if (snapshot.exists) {
-      List savedBy = snapshot.data()!['savedBy'] == null ? [] : snapshot.data()!['savedBy'].toList(growable: true);
-      if (!savedBy.contains(userID)) {
-        saved = false;
-      } else {
-        saved = true;
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        List savedBy = snapshotData['savedBy'] == null ? [] : snapshotData['savedBy'].toList(growable: true);
+        if (!savedBy.contains(userID)) {
+          saved = false;
+        } else {
+          saved = true;
+        }
       }
     }
+
     return saved;
   }
 
@@ -55,21 +59,26 @@ class PostDataService {
       );
       error = e.message;
     });
+
     if (error != null) {
       return false;
     }
+
     if (snapshot.exists) {
-      savedBy = snapshot.data()!['savedBy'] == null ? [] : snapshot.data()!['savedBy'].toList(growable: true);
-      if (savedPost) {
-        if (!savedBy!.contains(userID)) {
-          savedBy.add(userID);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        savedBy = snapshotData['savedBy'] == null ? [] : snapshotData['savedBy'].toList(growable: true);
+        if (savedPost) {
+          if (!savedBy!.contains(userID)) {
+            savedBy.add(userID);
+          }
+        } else {
+          if (savedBy!.contains(userID)) {
+            savedBy.remove(userID);
+          }
         }
-      } else {
-        if (savedBy!.contains(userID)) {
-          savedBy.remove(userID);
-        }
+        await postsRef.doc(postID).update({'savedBy': savedBy});
       }
-      await postsRef.doc(postID).update({'savedBy': savedBy});
     }
     return savedBy.contains(userID);
   }
@@ -86,20 +95,24 @@ class PostDataService {
     if (error != null) {
       return;
     }
+
     if (snapshot.exists) {
-      List reportedBy = snapshot.data()!['reportedBy'] == null ? [] : snapshot.data()!['reportedBy'].toList(growable: true);
-      if (reportedBy.contains(reporterID)) {
-        return _dialogService!.showDialog(
-          title: "Report Error",
-          description: "You've already reported this post. This post is currently pending review.",
-        );
-      } else {
-        reportedBy.add(reporterID);
-        postsRef.doc(postID).update({"reportedBy": reportedBy});
-        return _dialogService!.showDialog(
-          title: "Report Error",
-          description: "This post is now pending review",
-        );
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        List reportedBy = snapshotData['reportedBy'] == null ? [] : snapshotData['reportedBy'].toList(growable: true);
+        if (reportedBy.contains(reporterID)) {
+          return _dialogService!.showDialog(
+            title: "Report Error",
+            description: "You've already reported this post. This post is currently pending review.",
+          );
+        } else {
+          reportedBy.add(reporterID);
+          postsRef.doc(postID).update({"reportedBy": reportedBy});
+          return _dialogService!.showDialog(
+            title: "Report Error",
+            description: "This post is now pending review",
+          );
+        }
       }
     }
   }
@@ -148,8 +161,12 @@ class PostDataService {
     if (error != null) {
       return post;
     }
+
     if (snapshot.exists) {
-      post = WebblenPost.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        post = WebblenPost.fromMap(snapshotData);
+      }
     } else {
       _dialogService!.showDialog(
         title: "Post Error",
@@ -173,8 +190,12 @@ class PostDataService {
     }
 
     if (snapshot.exists) {
-      post = WebblenPost.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        post = WebblenPost.fromMap(snapshotData);
+      }
     }
+
     return post;
   }
 
@@ -215,12 +236,13 @@ class PostDataService {
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
       if (tagFilter!.isNotEmpty) {
-        docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
+        docs.removeWhere((doc) => !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => docB.data()!['postDateTimeInMilliseconds'].compareTo(docA.data()!['postDateTimeInMilliseconds']));
+        docs.sort((docA, docB) =>
+            (docB.data() as Map<String, dynamic>)['postDateTimeInMilliseconds'].compareTo((docA.data() as Map<String, dynamic>)['postDateTimeInMilliseconds']));
       } else {
-        docs.sort((docA, docB) => docB.data()!['commentCount'].compareTo(docA.data()!['commentCount']));
+        docs.sort((docA, docB) => (docB.data() as Map<String, dynamic>)['commentCount'].compareTo((docA.data() as Map<String, dynamic>)['commentCount']));
       }
     }
     return docs;
@@ -265,12 +287,13 @@ class PostDataService {
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
       if (tagFilter!.isNotEmpty) {
-        docs.removeWhere((doc) => !doc.data()!['tags'].contains(tagFilter));
+        docs.removeWhere((doc) => !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => docB.data()!['postDateTimeInMilliseconds'].compareTo(docA.data()!['postDateTimeInMilliseconds']));
+        docs.sort((docA, docB) =>
+            (docB.data() as Map<String, dynamic>)['postDateTimeInMilliseconds'].compareTo((docA.data() as Map<String, dynamic>)['postDateTimeInMilliseconds']));
       } else {
-        docs.sort((docA, docB) => docB.data()!['commentCount'].compareTo(docA.data()!['commentCount']));
+        docs.sort((docA, docB) => (docB.data() as Map<String, dynamic>)['commentCount'].compareTo((docA.data() as Map<String, dynamic>)['commentCount']));
       }
     }
     return docs;

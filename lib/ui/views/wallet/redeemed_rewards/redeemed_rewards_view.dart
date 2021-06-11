@@ -216,9 +216,8 @@ class RedeemedRewardsView extends StatelessWidget {
                             shrinkWrap: true,
                             itemCount: model.redeemedRewardResults.length,
                             itemBuilder: (context, index) {
-                              WebblenRedeemedReward redeemedReward = WebblenRedeemedReward.fromMap(
-                                model.redeemedRewardResults[index].data()!,
-                              );
+                              Map<String, dynamic> snapshotData = model.redeemedRewardResults[index].data() as Map<String, dynamic>;
+                              WebblenRedeemedReward redeemedReward = WebblenRedeemedReward.fromMap(snapshotData);
                               return redeemedReward.rewardType == RewardType.webblenClothes ? merchBlock(redeemedReward) : cashBlock(redeemedReward);
                             },
                           ),

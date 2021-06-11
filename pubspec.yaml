@@ -11,29 +11,28 @@ dependencies:
     sdk: flutter
 
   #ARCHITECTURE
-  stacked: ^2.1.0
-  stacked_services: ^0.8.3
-  stacked_themes: ^0.3.2
-  stacked_hooks: ^0.2.0
-  flutter_hooks: ^0.16.0
+  stacked: ^2.1.8
+  stacked_services: ^0.8.6
+  stacked_themes: ^0.3.3
+  stacked_hooks: ^0.2.1
+  flutter_hooks: ^0.17.0
 
   #FIRESTORE/FIREBASE
-  firebase_core: ^1.1.0
-  firebase_auth: ^1.1.4
+  firebase_core: ^1.3.0
+  firebase_auth: ^1.4.1
   firebase_auth_oauth: ^1.0.1
-  firebase_dynamic_links: ^2.0.2
-  firebase_messaging: ^9.1.3
-  firebase_storage: ^8.0.5
-  cloud_functions: ^1.0.5
-  cloud_firestore: ^1.0.7
+  firebase_dynamic_links: ^2.0.6
+  firebase_messaging: ^10.0.2
+  firebase_storage: ^8.1.3
+  cloud_functions: ^1.1.2
+  cloud_firestore: ^2.2.1
 
   #ANALYTICS
-  firebase_analytics: ^8.0.2
-  facebook_app_events: ^0.12.0
+  firebase_analytics: ^8.1.2
 
   #SOCIAL DEPENDENCIES
-  google_sign_in: ^5.0.2
-  flutter_facebook_auth: ^3.3.2+2
+  google_sign_in: ^5.0.4
+  flutter_facebook_auth: ^3.4.1
 
   #HTTP REQUESTS
   http:
@@ -45,7 +44,7 @@ dependencies:
   algolia: ^1.0.1
 
   #STREAM & VIDEO
-  agora_rtc_engine: ^4.0.0-rc.3
+  agora_rtc_engine: ^4.0.2
 
   #PHONE UTILITIES
   url_launcher: ^6.0.3
@@ -72,7 +71,7 @@ dependencies:
   location: ^4.1.1
   geolocator: ^7.0.3
   geocode: ^1.0.1
-  geoflutterfire: ^3.0.0-nullsafety.2
+  geoflutterfire2: ^2.3.7
   google_place: ^0.4.0
   google_maps_webservice: ^0.0.20-nullsafety.4
   google_maps_flutter: ^2.0.3
@@ -104,6 +103,8 @@ dependencies:
       url: https://github.com/mukai154/flutter_xlider.git
   intl_phone_field: ^2.0.0
   app_links: ^2.1.0
+  lazy_loading_list: ^1.0.1
+  lazy_load_scrollview: 1.3.0
 
 dev_dependencies:
   flutter_test:

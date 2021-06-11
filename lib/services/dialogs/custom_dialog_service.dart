@@ -16,6 +16,15 @@ class CustomDialogService {
     );
   }
 
+  showDetailedErrorDialog({required String title, required String description}) async {
+    _dialogService.showDialog(
+      barrierDismissible: true,
+      title: title,
+      description: description,
+      buttonTitle: "Ok",
+    );
+  }
+
   showSuccessDialog({required String title, required String description}) async {
     _dialogService.showDialog(
       barrierDismissible: true,

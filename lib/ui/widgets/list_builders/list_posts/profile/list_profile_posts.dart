@@ -66,8 +66,9 @@ class ListProfilePosts extends StatelessWidget {
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenPost post;
-                            post = WebblenPost.fromMap(model.dataResults[index].data()!);
+                            post = WebblenPost.fromMap(snapshotData);
                             return post.imageURL == null
                                 ? PostTextBlockView(
                                     post: post,

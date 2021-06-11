@@ -9,20 +9,10 @@ import 'package:webblen/ui/widgets/events/event_block/event_block_view.dart';
 
 import 'list_home_events_model.dart';
 
-class ListHomeEvents extends StatefulWidget {
-  @override
-  _ListHomeEventsState createState() => _ListHomeEventsState();
-}
-
-class _ListHomeEventsState extends State<ListHomeEvents> with AutomaticKeepAliveClientMixin<ListHomeEvents> {
-  @override
-  bool get wantKeepAlive => true;
-
+class ListHomeEvents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    super.build(context);
     return ViewModelBuilder<ListHomeEventsModel>.reactive(
-      fireOnModelReadyOnce: true,
       onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => ListHomeEventsModel(),
       builder: (context, model, child) => model.isBusy
@@ -56,8 +46,9 @@ class _ListHomeEventsState extends State<ListHomeEvents> with AutomaticKeepAlive
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
                           if (index < model.dataResults.length) {
+                            Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                             WebblenEvent event;
-                            event = WebblenEvent.fromMap(model.dataResults[index].data()!);
+                            event = WebblenEvent.fromMap(snapshotData);
                             return EventBlockView(
                               event: event,
                               showEventOptions: (event) => model.showContentOptions(event),

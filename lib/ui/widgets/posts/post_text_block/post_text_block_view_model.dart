@@ -22,21 +22,29 @@ class PostTextBlockViewModel extends BaseViewModel {
 
   ///POST DATA
   bool savedPost = false;
+  List savedBy = [];
   String? authorImageURL =
       "https://icon2.cleanpng.com/20180228/hdq/kisspng-circle-angle-material-gray-circle-pattern-5a9716f391f119.9417320315198512515978.jpg";
   String? authorUsername = "";
 
-  initialize({String? currentUID, String? postID, String? postAuthorID}) async {
+  initialize({required WebblenPost post}) async {
     setBusy(true);
 
-    savedPost = await _postDataService.checkIfPostSaved(userID: currentUID, postID: postID);
+    if (post.savedBy != null) {
+      if (post.savedBy!.contains(user.id)) {
+        savedPost = true;
+      }
+      savedBy = post.savedBy!;
+    } else {
+      savedBy = [];
+    }
 
     //Get Post Author Data
-    WebblenUser user = await _userDataService.getWebblenUserByID(postAuthorID);
+    WebblenUser author = await _userDataService.getWebblenUserByID(post.authorID);
 
-    if (user.isValid()) {
-      authorImageURL = user.profilePicURL;
-      authorUsername = user.username;
+    if (author.isValid()) {
+      authorImageURL = author.profilePicURL;
+      authorUsername = author.username;
     }
     notifyListeners();
     setBusy(false);
@@ -45,8 +53,10 @@ class PostTextBlockViewModel extends BaseViewModel {
   saveUnsavePost({required WebblenPost post}) async {
     if (savedPost) {
       savedPost = false;
+      savedBy.remove(user.id);
     } else {
       savedPost = true;
+      savedBy.add(user.id);
       WebblenNotification notification = WebblenNotification().generateContentSavedNotification(
         receiverUID: post.authorID!,
         senderUID: user.id!,

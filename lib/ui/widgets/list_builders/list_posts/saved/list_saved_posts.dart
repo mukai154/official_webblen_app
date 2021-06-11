@@ -47,9 +47,10 @@ class ListSavedPosts extends StatelessWidget {
                         shrinkWrap: true,
                         itemCount: model.dataResults.length + 1,
                         itemBuilder: (context, index) {
+                          Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
                           if (index < model.dataResults.length) {
                             WebblenPost post;
-                            post = WebblenPost.fromMap(model.dataResults[index].data()!);
+                            post = WebblenPost.fromMap(snapshotData);
                             return post.imageURL == null
                                 ? PostTextBlockView(
                                     post: post,

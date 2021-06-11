@@ -74,19 +74,29 @@ class LiveStreamBlockView extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Container(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              IconButton(
-                                icon: Icon(
+                        GestureDetector(
+                          onTap: () => model.saveUnsaveStream(stream: stream),
+                          child: Container(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "${model.savedBy.length}",
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                                SizedBox(width: 4),
+                                Icon(
                                   FontAwesomeIcons.solidHeart,
                                   size: 18,
                                   color: model.savedStream ? appSavedContentColor() : Colors.white54,
                                 ),
-                                onPressed: () => model.saveUnsaveStream(stream: stream),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ],

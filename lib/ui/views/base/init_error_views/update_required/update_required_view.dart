@@ -20,11 +20,21 @@ class UpdateRequiredView extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              "Update Required\n Please Update Webblen to Continue",
+              "Update Required",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: appFontColor(),
                 fontWeight: FontWeight.bold,
+                fontSize: 18,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              "Please Update Webblen to Continue",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: appFontColor(),
+                fontWeight: FontWeight.w500,
                 fontSize: 18,
               ),
             ),

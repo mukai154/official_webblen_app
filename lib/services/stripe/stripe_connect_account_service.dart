@@ -25,9 +25,14 @@ class StripeConnectAccountService {
   Future<String?> getStripeUID(String? uid) async {
     String? stripeUID;
     DocumentSnapshot snapshot = await stripeRef.doc(uid).get();
+
     if (snapshot.exists) {
-      Map<String, dynamic> data = snapshot.data()!;
-      stripeUID = data['stripeUID'];
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {}
+    }
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      stripeUID = snapshotData['stripeUID'];
     }
     return stripeUID;
   }
@@ -41,7 +46,8 @@ class StripeConnectAccountService {
     });
 
     if (snapshot.exists) {
-      userStripeInfo = UserStripeInfo.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      userStripeInfo = UserStripeInfo.fromMap(snapshotData);
     }
     return userStripeInfo;
   }
@@ -87,11 +93,10 @@ class StripeConnectAccountService {
   }
 
   Future<void> updateStripeAccountBalance({required String uid}) async {
-    print('updating account balance');
     final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
       'updateStripeAccountBalance',
     );
-    final HttpsCallableResult result = await callable.call(
+    await callable.call(
       <String, dynamic>{
         'uid': uid,
       },

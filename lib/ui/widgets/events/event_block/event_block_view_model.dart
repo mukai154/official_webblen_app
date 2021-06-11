@@ -22,6 +22,7 @@ class EventBlockViewModel extends BaseViewModel {
 
   bool eventIsHappeningNow = false;
   bool savedEvent = false;
+  List savedBy = [];
   String? authorImageURL = "";
   String? authorUsername = "";
 
@@ -29,8 +30,13 @@ class EventBlockViewModel extends BaseViewModel {
     setBusy(true);
 
     //check if user saved event
-    if (event.savedBy!.contains(_reactiveUserService.user.id)) {
-      savedEvent = true;
+    if (event.savedBy != null) {
+      if (event.savedBy!.contains(user.id)) {
+        savedEvent = true;
+      }
+      savedBy = event.savedBy!;
+    } else {
+      savedBy = [];
     }
 
     //check if event is happening now
@@ -61,8 +67,10 @@ class EventBlockViewModel extends BaseViewModel {
   saveUnsaveEvent({required WebblenEvent event}) async {
     if (savedEvent) {
       savedEvent = false;
+      savedBy.remove(user.id);
     } else {
       savedEvent = true;
+      savedBy.add(user.id);
       WebblenNotification notification = WebblenNotification().generateContentSavedNotification(
         receiverUID: event.authorID!,
         senderUID: user.id!,
@@ -73,6 +81,6 @@ class EventBlockViewModel extends BaseViewModel {
     }
     HapticFeedback.lightImpact();
     notifyListeners();
-    await _eventDataService.saveUnsaveEvent(uid: user.id, eventID: event.id!, savedEvent: savedEvent);
+    await _eventDataService.saveUnsaveEvent(uid: user.id!, eventID: event.id!, savedEvent: savedEvent);
   }
 }

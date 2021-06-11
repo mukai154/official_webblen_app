@@ -8,10 +8,11 @@ class PlatformDataService {
 
   Future<bool> isUpdateAvailable() async {
     bool updateAvailable = false;
-    String currentVersion = "10.1.0";
-    DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
-    String? releasedVersion = docSnapshot.data()!["versionNumber"];
-    bool? versionIsRequired = docSnapshot.data()!["versionIsRequired"];
+    String currentVersion = "10.1.1";
+    DocumentSnapshot snapshot = await appReleaseRef.doc("general").get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    String? releasedVersion = snapshotData["versionNumber"];
+    bool? versionIsRequired = snapshotData["versionIsRequired"];
     if (currentVersion != releasedVersion && versionIsRequired!) {
       updateAvailable = true;
     }
@@ -20,8 +21,9 @@ class PlatformDataService {
 
   Future<bool> isUnderMaintenance() async {
     bool underMaintenance = false;
-    DocumentSnapshot docSnapshot = await appReleaseRef.doc("general").get();
-    underMaintenance = docSnapshot.data()!["underMaintenance"];
+    DocumentSnapshot snapshot = await appReleaseRef.doc("general").get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    underMaintenance = snapshotData["underMaintenance"];
     return underMaintenance;
   }
 
@@ -29,8 +31,9 @@ class PlatformDataService {
   Future<double?> getNewPostTaxRate() async {
     double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      promo = snapshot.data()!['newPostTaxRate'].toDouble();
+      promo = snapshotData['newPostTaxRate'].toDouble();
     } catch (e) {}
     return promo;
   }
@@ -38,8 +41,9 @@ class PlatformDataService {
   Future<double?> getNewStreamTaxRate() async {
     double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      promo = snapshot.data()!['newStreamTaxRate'].toDouble();
+      promo = snapshotData['newStreamTaxRate'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -53,8 +57,9 @@ class PlatformDataService {
   Future<double?> getNewEventTaxRate() async {
     double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      promo = snapshot.data()!['newEventTaxRate'].toDouble();
+      promo = snapshotData['newEventTaxRate'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -68,8 +73,9 @@ class PlatformDataService {
   Future<double> getNewAccountReward() async {
     double val = 1.001;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_ECONOMY').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      val = snapshot.data()!['newAccountReward'].toDouble();
+      val = snapshotData['newAccountReward'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -84,8 +90,9 @@ class PlatformDataService {
   Future<double?> getPostPromo() async {
     double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      promo = snapshot.data()!['postPromo'].toDouble();
+      promo = snapshotData['postPromo'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -99,8 +106,9 @@ class PlatformDataService {
   Future<double?> getStreamPromo() async {
     double? promo;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      promo = snapshot.data()!['streamPromo'].toDouble();
+      promo = snapshotData['streamPromo'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -114,8 +122,9 @@ class PlatformDataService {
   Future<double> getEventPromo() async {
     double promo = 0;
     DocumentSnapshot snapshot = await webblenCurrencyRef.doc('APP_INCENTIVES').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
     try {
-      promo = snapshot.data()!['eventPromo'].toDouble();
+      promo = snapshotData['eventPromo'].toDouble();
     } catch (e) {
       // _snackbarService.showSnackbar(
       //   title: 'Promotion Error',
@@ -129,32 +138,35 @@ class PlatformDataService {
   Future<double> getEventTicketFee() async {
     double eventTicketFee = 0;
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
-    eventTicketFee = snapshot.data()!['ticketFee'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    eventTicketFee = snapshotData['ticketFee'];
     return eventTicketFee;
   }
 
   Future<double> getTaxRate() async {
     double taxRate = 0;
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
-    taxRate = snapshot.data()!['taxRate'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    taxRate = snapshotData['taxRate'];
     return taxRate;
   }
 
   Future<String?> getWebblenDownloadLink() async {
     String? key;
     DocumentSnapshot snapshot = await appReleaseRef.doc('webblen').get();
-    key = snapshot.data()!['downloadLink'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    key = snapshotData['downloadLink'];
     return key;
   }
 
   Future<String> getStripePubKey() async {
     String pubKey = "";
-    DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
-    DocumentSnapshot stripeSnapshot = await appReleaseRef.doc('stripe').get();
-    if (snapshot.data()!['underMaintenance']) {
-      pubKey = stripeSnapshot.data()!['testPubKey'];
+    DocumentSnapshot snapshot = await appReleaseRef.doc('stripe').get();
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    if (snapshotData['underMaintenance']) {
+      pubKey = snapshotData['testPubKey'];
     } else {
-      pubKey = stripeSnapshot.data()!['pubKey'];
+      pubKey = snapshotData['pubKey'];
     }
     return pubKey;
   }
@@ -162,35 +174,40 @@ class PlatformDataService {
   Future<String?> getSendGridApiKey() async {
     String? appID;
     DocumentSnapshot snapshot = await appReleaseRef.doc('sendgrid').get();
-    appID = snapshot.data()!['apiKey'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    appID = snapshotData['apiKey'];
     return appID;
   }
 
   Future<String?> getSendGridTicketTemplateID() async {
     String? appID;
     DocumentSnapshot snapshot = await appReleaseRef.doc('sendgrid').get();
-    appID = snapshot.data()!['ticketEmailTemplateID'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    appID = snapshotData['ticketEmailTemplateID'];
     return appID;
   }
 
   Future<String?> getAgoraAppID() async {
     String? appID;
     DocumentSnapshot snapshot = await appReleaseRef.doc('agora').get();
-    appID = snapshot.data()!['appID'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    appID = snapshotData['appID'];
     return appID;
   }
 
   Future<String?> getGoogleApiKey() async {
     String? key;
     DocumentSnapshot snapshot = await appReleaseRef.doc('google').get();
-    key = snapshot.data()!['apiKey'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    key = snapshotData['apiKey'];
     return key;
   }
 
   Future<String> getPlatformLogoURL() async {
     String url = '';
     DocumentSnapshot snapshot = await appReleaseRef.doc('general').get();
-    url = snapshot.data()!['logoURL'];
+    Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+    url = snapshotData['logoURL'];
     return url;
   }
 }

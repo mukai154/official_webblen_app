@@ -90,11 +90,11 @@ class UserProfileViewModel extends StreamViewModel<WebblenUser> {
     } else if (isFollowingUser!) {
       isFollowingUser = false;
       notifyListeners();
-      await _userDataService.unFollowUser(currentUser.id, user!.id);
+      await _userDataService.unFollowUser(currentUser.id!, user!.id!);
     } else {
       isFollowingUser = true;
       notifyListeners();
-      bool followedUser = await _userDataService.followUser(currentUser.id, user!.id);
+      bool followedUser = await _userDataService.followUser(currentUser.id!, user!.id!);
       if (followedUser) {
         WebblenNotification notification = WebblenNotification().generateNewFollowerNotification(
           receiverUID: user!.id,
@@ -114,11 +114,11 @@ class UserProfileViewModel extends StreamViewModel<WebblenUser> {
     } else if (mutedUser!) {
       mutedUser = false;
       notifyListeners();
-      await _userDataService.unMuteUser(currentUser.id, user!.id);
+      await _userDataService.unMuteUser(currentUser.id!, user!.id!);
     } else {
       mutedUser = true;
       notifyListeners();
-      await _userDataService.muteUser(currentUser.id, user!.id);
+      await _userDataService.muteUser(currentUser.id!, user!.id!);
     }
   }
 

@@ -4,7 +4,6 @@ import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'package:webblen/ui/widgets/common/text_field/text_field_container.dart';
 
@@ -42,12 +41,65 @@ class HomeFilterBottomSheet extends HookWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Container(
+                  height: 35,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: Text(
+                          "Preferences",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: appFontColor(),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 1,
+                        child: CustomButton(
+                          text: "Apply",
+                          textSize: 12,
+                          height: 26,
+                          width: 125,
+                          onPressed: () {
+                            model.updatePreferences();
+                            completer!(SheetResponse());
+                          },
+                          backgroundColor: appActiveColor(),
+                          textColor: Colors.white,
+                          elevation: 2,
+                          isBusy: model.updatingData,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
                 Text(
-                  "Preferences",
+                  "Feed Type:",
                   style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: appFontColor(),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: appFontColorAlt(),
+                  ),
+                ),
+                SizedBox(height: 4),
+                TextFieldContainer(
+                  height: 38,
+                  child: DropdownButton(
+                    isExpanded: true,
+                    underline: Container(),
+                    value: model.tempContentType,
+                    items: model.contentTypeList.map((String val) {
+                      return DropdownMenuItem<String>(
+                        value: val,
+                        child: Text(val),
+                      );
+                    }).toList(),
+                    onChanged: (dynamic val) => model.updateContentType(val),
                   ),
                 ),
                 SizedBox(height: 10),
@@ -192,21 +244,6 @@ class HomeFilterBottomSheet extends HookWidget {
                   ),
                 ),
                 SizedBox(height: 32),
-                CustomButton(
-                  text: "Apply",
-                  textSize: 16,
-                  height: 40,
-                  width: screenWidth(context),
-                  onPressed: () {
-                    model.updatePreferences();
-                    completer!(SheetResponse());
-                  },
-                  backgroundColor: appButtonColor(),
-                  textColor: appFontColor(),
-                  elevation: 2,
-                  isBusy: model.updatingData,
-                ),
-                verticalSpaceMedium,
               ],
             ),
           ],

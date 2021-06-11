@@ -59,9 +59,14 @@ class TicketDistroDataService {
     if (error != null) {
       return ticketDistro;
     }
+
     if (snapshot.exists) {
-      ticketDistro = WebblenTicketDistro.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        ticketDistro = WebblenTicketDistro.fromMap(snapshotData);
+      }
     }
+
     return ticketDistro;
   }
 
@@ -93,9 +98,14 @@ class TicketDistroDataService {
     if (error != null) {
       return ticket;
     }
+
     if (snapshot.exists) {
-      ticket = WebblenEventTicket.fromMap(snapshot.data()!);
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        ticket = WebblenEventTicket.fromMap(snapshotData);
+      }
     }
+
     return ticket;
   }
 
@@ -117,15 +127,21 @@ class TicketDistroDataService {
     //print('updating ticket quantities');
     String? error;
     DocumentSnapshot snapshot = await ticketDistroRef.doc(eventID).get();
-    WebblenTicketDistro ticketDistro = WebblenTicketDistro.fromMap(snapshot.data()!);
-    int ticketIndex = ticketDistro.tickets!.indexWhere((ticket) => ticket["ticketName"] == ticketName);
-    int numOfTicketsAvailable = int.parse(ticketDistro.tickets![ticketIndex]['ticketQuantity']);
-    String newTicketAvailableQty = (numOfTicketsAvailable - numOfTicketsPurchased).toString();
-    ticketDistro.tickets![ticketIndex]['ticketQuantity'] = newTicketAvailableQty;
-    //print('updating ticket $ticketName qty data to ${ticketDistro.tickets![ticketIndex]['ticketQuantity'].toString()}');
-    await ticketDistroRef.doc(eventID).update({"tickets": ticketDistro.tickets}).catchError((e) {
-      error = e.message;
-    });
+    if (snapshot.exists) {
+      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      if (snapshotData.isNotEmpty) {
+        WebblenTicketDistro ticketDistro = WebblenTicketDistro.fromMap(snapshotData);
+        int ticketIndex = ticketDistro.tickets!.indexWhere((ticket) => ticket["ticketName"] == ticketName);
+        int numOfTicketsAvailable = int.parse(ticketDistro.tickets![ticketIndex]['ticketQuantity']);
+        String newTicketAvailableQty = (numOfTicketsAvailable - numOfTicketsPurchased).toString();
+        ticketDistro.tickets![ticketIndex]['ticketQuantity'] = newTicketAvailableQty;
+        //print('updating ticket $ticketName qty data to ${ticketDistro.tickets![ticketIndex]['ticketQuantity'].toString()}');
+        await ticketDistroRef.doc(eventID).update({"tickets": ticketDistro.tickets}).catchError((e) {
+          error = e.message;
+        });
+      }
+    }
+
     if (error != null) {
       print('failed to update ticket quantities: $error');
       return false;
@@ -176,7 +192,8 @@ class TicketDistroDataService {
     List<WebblenEventTicket> eventTickets = [];
     QuerySnapshot snapshot = await purchasedTicketRef.where("purchaserUID", isEqualTo: uid).get();
     snapshot.docs.forEach((doc) {
-      WebblenEventTicket ticket = WebblenEventTicket.fromMap(doc.data());
+      Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
+      WebblenEventTicket ticket = WebblenEventTicket.fromMap(snapshotData);
       eventTickets.add(ticket);
     });
     return eventTickets;
@@ -186,7 +203,8 @@ class TicketDistroDataService {
     List<WebblenEventTicket> eventTickets = [];
     QuerySnapshot snapshot = await purchasedTicketRef.where("purchaserUID", isEqualTo: uid).where("eventID", isEqualTo: eventID).get();
     snapshot.docs.forEach((doc) {
-      WebblenEventTicket ticket = WebblenEventTicket.fromMap(doc.data());
+      Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
+      WebblenEventTicket ticket = WebblenEventTicket.fromMap(snapshotData);
       eventTickets.add(ticket);
     });
     return eventTickets;
