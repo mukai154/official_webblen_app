@@ -49,7 +49,14 @@ class WebblenLiveStream {
   String? twitchStreamKey;
   String? fbStreamURL;
   String? fbStreamKey;
-  String? agoraToken;
+  String? muxStreamID;
+  String? muxStreamKey;
+  String? muxAssetPlaybackID;
+  double? muxAssetDuration;
+  bool? initializedMuxStream;
+  bool? isLive;
+  bool? notifiedPotentialViewers;
+  int? commentCount;
 
   WebblenLiveStream({
     this.id,
@@ -99,8 +106,15 @@ class WebblenLiveStream {
     this.twitchStreamKey,
     this.fbStreamURL,
     this.fbStreamKey,
-    this.agoraToken,
+    this.muxStreamID,
+    this.muxStreamKey,
+    this.muxAssetPlaybackID,
+    this.muxAssetDuration,
+    this.initializedMuxStream,
     this.activeViewers,
+    this.isLive,
+    this.notifiedPotentialViewers,
+    this.commentCount,
   });
 
   WebblenLiveStream.fromMap(Map<String, dynamic> data)
@@ -152,8 +166,15 @@ class WebblenLiveStream {
           twitchStreamKey: data['twitchStreamKey'],
           fbStreamURL: data['fbStreamURL'],
           fbStreamKey: data['fbStreamKey'],
-          agoraToken: data['agoraToken'],
+          muxStreamID: data['muxStreamID'],
+          muxStreamKey: data['muxStreamKey'],
+          muxAssetPlaybackID: data['muxAssetPlaybackID'],
+          muxAssetDuration: data['muxAssetDuration'],
+          initializedMuxStream: data['initializedMuxStream'],
           activeViewers: data['activeViewers'],
+          isLive: data['isLive'] == null ? false : data['isLive'],
+          notifiedPotentialViewers: data['notifiedPotentialViewers'] == null ? false : data['notifiedPotentialViewers'],
+          commentCount: data['commentCount'] == null ? 0 : data['commentCount'],
         );
 
   Map<String, dynamic> toMap() => {
@@ -204,8 +225,14 @@ class WebblenLiveStream {
         'twitchStreamKey': this.twitchStreamKey,
         'fbStreamURL': this.fbStreamURL,
         'fbStreamKey': this.fbStreamKey,
-        'agoraToken': this.agoraToken,
+        'muxStreamID': this.muxStreamID,
+        'muxStreamKey': this.muxStreamKey,
+        'muxAssetPlaybackID': this.muxAssetPlaybackID,
+        'muxAssetDuration': muxAssetDuration,
         'activeViewers': this.activeViewers,
+        'isLive': this.isLive,
+        'notifiedPotentialViewers': this.notifiedPotentialViewers,
+        'commentCount': this.commentCount,
       };
 
   WebblenLiveStream generateNewWebblenLiveStream({required String hostID, required List suggestedUIDs}) {
@@ -223,8 +250,11 @@ class WebblenLiveStream {
       clickedBy: [],
       attendees: {},
       clicks: 0,
+      commentCount: 0,
       suggestedUIDs: suggestedUIDs,
       activeViewers: [],
+      isLive: false,
+      notifiedPotentialViewers: false,
     );
     return stream;
   }

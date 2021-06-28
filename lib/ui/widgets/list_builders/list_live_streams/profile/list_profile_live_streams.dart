@@ -58,6 +58,7 @@ class ListProfileLiveStreams extends StatelessWidget {
                     color: appFontColorAlt(),
                     child: SingleChildScrollView(
                       child: ListView.builder(
+                        padding: EdgeInsets.only(bottom: 80),
                         physics: NeverScrollableScrollPhysics(),
                         key: PageStorageKey(model.listKey),
                         addAutomaticKeepAlives: true,
@@ -70,6 +71,7 @@ class ListProfileLiveStreams extends StatelessWidget {
                             stream = WebblenLiveStream.fromMap(snapshotData);
                             return LiveStreamBlockView(
                               stream: stream,
+                              canOpenMiniVideoPlayer: isCurrentUser ? true : false,
                               showStreamOptions: (stream) => model.showContentOptions(stream),
                             );
                           } else {

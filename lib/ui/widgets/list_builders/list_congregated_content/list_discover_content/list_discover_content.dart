@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:lazy_loading_list/lazy_loading_list.dart';
 import 'package:stacked/stacked.dart';
+import 'package:stacked_hooks/stacked_hooks.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/zero_state_view.dart';
+import 'package:webblen/ui/widgets/list_builders/list_live_streams/horizontal_feed/list_horizontal_streams_feed.dart';
 
 import 'list_discover_content_model.dart';
 
@@ -38,17 +40,20 @@ class ListDiscoverContent extends StatelessWidget {
                     child: ListView.builder(
                       physics: AlwaysScrollableScrollPhysics(),
                       shrinkWrap: true,
-                      itemCount: model.dataResults.length,
+                      itemCount: model.dataResults.length + 1,
                       itemBuilder: (context, index) {
-                        Map<String, dynamic> snapshotData = model.dataResults[index].data() as Map<String, dynamic>;
+                        Map<String, dynamic>? snapshotData;
+                        if (index != 0) {
+                          snapshotData = model.dataResults[index - 1].data() as Map<String, dynamic>;
+                        }
                         return LazyLoadingList(
                           key: PageStorageKey(model.listKey),
                           initialSizeOfItems: model.dataResults.length,
                           loadMore: () => model.loadAdditionalData(),
-                          child: snapshotData['postDateTimeInMilliseconds'] != null
-                              ? model.getPostWidget(snapshotData)
-                              : snapshotData['hostID'] != null
-                                  ? model.getStreamWidget(snapshotData)
+                          child: index == 0
+                              ? _StreamsFeed()
+                              : snapshotData!['postDateTimeInMilliseconds'] != null
+                                  ? model.getPostWidget(snapshotData)
                                   : snapshotData['venueSize'] != null
                                       ? model.getEventWidget(snapshotData)
                                       : SizedBox(height: 0, width: 0),
@@ -59,6 +64,26 @@ class ListDiscoverContent extends StatelessWidget {
                     ),
                   ),
                 ),
+    );
+  }
+}
+
+class _StreamsFeed extends HookViewModelWidget<ListDiscoverContentModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, ListDiscoverContentModel model) {
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        constraints: BoxConstraints(
+          maxHeight: 175,
+          maxWidth: 500,
+        ),
+        child: Container(
+          height: double.infinity,
+          width: double.infinity,
+          child: ListHorizontalStreamsFeed(),
+        ),
+      ),
     );
   }
 }

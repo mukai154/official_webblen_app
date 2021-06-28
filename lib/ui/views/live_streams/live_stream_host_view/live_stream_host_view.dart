@@ -301,13 +301,14 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
   }
 
   scrollToChatMessage() async {
-    if (chatViewController.hasClients &&
-        (chatViewController.position.maxScrollExtent != null && chatViewController.position.pixels == chatViewController.position.maxScrollExtent)) {
-      await Future.delayed(Duration(milliseconds: 500));
+    try {
       if (chatViewController.hasClients) {
-        chatViewController.jumpTo(chatViewController.position.maxScrollExtent);
+        if (chatViewController.position.pixels == chatViewController.position.maxScrollExtent) {
+          await Future.delayed(Duration(milliseconds: 500));
+          chatViewController.jumpTo(chatViewController.position.maxScrollExtent);
+        }
       }
-    }
+    } catch (e) {}
   }
 
   @override
@@ -356,10 +357,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (BuildContext context, int index) {
                     Map<String, dynamic> snapshotData = snapshot.data!.docs[index].data() as Map<String, dynamic>;
-
-                    try {
-                      scrollToChatMessage();
-                    } catch (e) {}
+                    scrollToChatMessage();
                     String? uid = snapshotData['senderUID'];
                     String username = '@' + snapshotData['username'];
                     String? message = snapshotData['message'];

@@ -59,6 +59,7 @@ class ListProfilePosts extends StatelessWidget {
                     color: appFontColorAlt(),
                     child: SingleChildScrollView(
                       child: ListView.builder(
+                        padding: EdgeInsets.only(bottom: 80),
                         physics: NeverScrollableScrollPhysics(),
                         key: PageStorageKey(model.listKey),
                         addAutomaticKeepAlives: true,

@@ -40,6 +40,7 @@ class ListHomeLiveStreams extends StatelessWidget {
                     child: SingleChildScrollView(
                       controller: model.scrollController,
                       child: ListView.builder(
+                        padding: EdgeInsets.only(bottom: 80),
                         physics: NeverScrollableScrollPhysics(),
                         key: PageStorageKey(model.listKey),
                         addAutomaticKeepAlives: true,
@@ -52,6 +53,7 @@ class ListHomeLiveStreams extends StatelessWidget {
                             stream = WebblenLiveStream.fromMap(snapshotData);
                             return LiveStreamBlockView(
                               stream: stream,
+                              canOpenMiniVideoPlayer: true,
                               showStreamOptions: (stream) => model.showContentOptions(stream),
                             );
                           } else {

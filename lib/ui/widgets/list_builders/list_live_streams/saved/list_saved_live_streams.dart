@@ -52,6 +52,7 @@ class ListSavedLiveStreams extends StatelessWidget {
                             stream = WebblenLiveStream.fromMap(snapshotData);
                             return LiveStreamBlockView(
                               stream: stream,
+                              canOpenMiniVideoPlayer: false,
                               showStreamOptions: (stream) => model.showContentOptions(stream),
                             );
                           } else {

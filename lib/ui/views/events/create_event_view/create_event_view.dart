@@ -474,7 +474,6 @@ class _EventDescriptionField extends HookViewModelWidget<CreateEventViewModel> {
       initialValue: null,
       maxLines: null,
       onChanged: (val) {
-        description.selection = TextSelection.fromPosition(TextPosition(offset: description.text.length));
         model.updateDescription(val);
       },
     );
@@ -497,6 +496,7 @@ class _EventAddressAutoComplete extends HookViewModelWidget<CreateEventViewModel
     return AutoCompleteAddressTextField(
       initialValue: model.event.streetAddress == null ? "" : model.event.streetAddress!,
       hintText: "Address",
+      showCurrentLocationButton: true,
       onSelectedAddress: (val) => model.updateLocation(val),
     );
   }

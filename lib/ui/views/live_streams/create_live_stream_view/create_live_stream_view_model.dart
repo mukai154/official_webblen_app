@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
@@ -11,14 +10,12 @@ import 'package:webblen/constants/time.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/extensions/custom_date_time_extensions.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
-import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/platform_data_service.dart';
-import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
@@ -26,6 +23,7 @@ import 'package:webblen/services/permission_handler/permission_handler_service.d
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
+import 'package:webblen/utils/url_handler.dart';
 import 'package:webblen/utils/webblen_image_picker.dart';
 
 class CreateLiveStreamViewModel extends BaseViewModel {
@@ -33,7 +31,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
   DialogService? _dialogService = locator<DialogService>();
-  NavigationService? _navigationService = locator<NavigationService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   PlatformDataService? _platformDataService = locator<PlatformDataService>();
   UserDataService _userDataService = locator<UserDataService>();
@@ -41,7 +38,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   FirestoreStorageService? _firestoreStorageService = locator<FirestoreStorageService>();
   LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
-  TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
   StripeConnectAccountService? _stripeConnectAccountService = locator<StripeConnectAccountService>();
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
 
@@ -65,38 +61,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   TextEditingController fbStreamKeyTextController = TextEditingController();
   TextEditingController twitchStreamKeyTextController = TextEditingController();
   TextEditingController youtubeStreamKeyTextController = TextEditingController();
-  TextEditingController fbStreamURLTextController = TextEditingController();
-  TextEditingController twitchStreamURLTextController = TextEditingController();
-  TextEditingController youtubeStreamURLTextController = TextEditingController();
-
-  ///TICKET DETAILS CONTROLLERS
-  TextEditingController ticketNameTextController = TextEditingController();
-  TextEditingController ticketQuantityTextController = TextEditingController();
-  MoneyMaskedTextController ticketPriceTextController = MoneyMaskedTextController(
-    leftSymbol: "\$",
-    precision: 2,
-    decimalSeparator: '.',
-    thousandSeparator: ',',
-  );
-
-  ///FEE DETAILS CONTROLLERS
-  TextEditingController feeNameTextController = TextEditingController();
-  MoneyMaskedTextController feePriceTextController = MoneyMaskedTextController(
-    leftSymbol: "\$",
-    precision: 2,
-    decimalSeparator: '.',
-    thousandSeparator: ',',
-  );
-
-  ///DISCOUNT DETAILS CONTROLLERS
-  TextEditingController discountNameTextController = TextEditingController();
-  TextEditingController discountLimitTextController = TextEditingController();
-  MoneyMaskedTextController discountValueTextController = MoneyMaskedTextController(
-    leftSymbol: "\$",
-    precision: 2,
-    decimalSeparator: '.',
-    thousandSeparator: ',',
-  );
 
   ///HELPERS
   bool initialized = false;
@@ -108,9 +72,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   ///STREAM DATA
   bool isEditing = false;
   bool isDuplicate = false;
-  int? ticketToEditIndex;
-  int? feeToEditIndex;
-  int? discountToEditIndex;
   File? img;
 
   WebblenLiveStream stream = WebblenLiveStream();
@@ -129,25 +90,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   DateFormat dateTimeFormatter = DateFormat('MMM dd, yyyy h:mm a');
   DateTime selectedStartDate = DateTime.now();
   DateTime? selectedEndDate;
-
-  ///TICKETING
-  WebblenTicketDistro? ticketDistro = WebblenTicketDistro(tickets: [], fees: [], discountCodes: []);
-  GlobalKey ticketFormKey = GlobalKey<FormState>();
-  GlobalKey feeFormKey = GlobalKey<FormState>();
-  GlobalKey discountFormKey = GlobalKey<FormState>();
-
-  bool showTicketForm = false;
-  bool showFeeForm = false;
-  bool showDiscountCodeForm = false;
-
-  String? ticketName;
-  String? ticketPrice;
-  String? ticketQuantity;
-  String? feeName;
-  String? feeAmount;
-  String? discountCodeName;
-  String? discountCodeQuantity;
-  String? discountCodePercentage;
 
   ///WEBBLEN CURRENCY
   double? newStreamTaxRate;
@@ -169,26 +111,29 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     stream.endTime = timeFormatter.format(DateTime.now().add(Duration(hours: 2)).roundDown(delta: Duration(minutes: 30)));
     notifyListeners();
 
-    //set previously used social accounts
-    await setPreviousSocialData();
-
     //check for promos & if editing/duplicating existing stream
     if (id.contains("duplicate_")) {
       id = id.replaceAll("duplicate_", "");
       stream = await _liveStreamDataService.getStreamByID(id);
       if (stream.isValid()) {
         stream.id = getRandomString(32);
-        setPreviousStreamData();
+        prepopulateFields();
         stream.attendees = {};
         stream.savedBy = [];
+        stream.muxStreamID = null;
+        stream.muxAssetDuration = null;
+        stream.muxAssetPlaybackID = null;
+        stream.muxStreamKey = null;
         isDuplicate = true;
       }
     } else if (id != "new") {
       stream = await _liveStreamDataService.getStreamByID(id);
       if (stream.isValid()) {
-        setPreviousStreamData();
+        await setPreviousSocialData();
         isEditing = true;
       }
+    } else {
+      await setPreviousSocialData();
     }
 
     //get webblen rates
@@ -206,21 +151,41 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   ///PREVIOUS SOCIAL DATA
   setPreviousSocialData() async {
-    fbUsernameTextController.text = await _userDataService.getCurrentFbUsername(user.id!);
+    //fb
+    String fbUsername = await _userDataService.getCurrentFbUsername(user.id!);
+    String fbStreamKey = await _userDataService.getCurrentUserFBStreamKey(user.id!);
+    fbUsernameTextController.text = fbUsername;
+    fbStreamKeyTextController.text = fbStreamKey;
+    stream.fbUsername = fbUsername;
+    stream.fbStreamKey = fbStreamKey;
+
+    //insta
     instaUsernameTextController.text = await _userDataService.getCurrentInstaUsername(user.id!);
+
+    //twitter
     twitterUsernameTextController.text = await _userDataService.getCurrentTwitterUsername(user.id!);
+
+    //twitch
+    String twitchUsername = await _userDataService.getCurrentTwitchUsername(user.id!);
+    String twitchStreamKey = await _userDataService.getCurrentUserTwitchStreamKey(user.id!);
+    twitchTextController.text = twitchUsername;
+    twitchStreamKeyTextController.text = twitchStreamKey;
+    stream.twitchUsername = twitchUsername;
+    stream.twitchStreamKey = twitchStreamKey;
+
+    //website
     websiteTextController.text = await _userDataService.getCurrentUserWebsite(user.id!);
-    twitchTextController.text = await _userDataService.getCurrentTwitchUsername(user.id!);
-    youtubeTextController.text = await _userDataService.getCurrentYoutube(user.id!);
-    fbStreamKeyTextController.text = await _userDataService.getCurrentUserFBStreamKey(user.id!);
-    twitchStreamKeyTextController.text = await _userDataService.getCurrentUserTwitchStreamKey(user.id!);
-    youtubeStreamKeyTextController.text = await _userDataService.getCurrentUserYoutubeStreamKey(user.id!);
-    fbStreamURLTextController.text = await _userDataService.getCurrentUserFBStreamURL(user.id!);
-    twitchStreamURLTextController.text = await _userDataService.getCurrentUserTwitchStreamURL(user.id!);
-    youtubeStreamURLTextController.text = await _userDataService.getCurrentUserYoutubeStreamURL(user.id!);
+
+    //youtube
+    String youtubeChannelLink = await _userDataService.getCurrentYoutube(user.id!);
+    String youtubeStreamKey = await _userDataService.getCurrentUserYoutubeStreamKey(user.id!);
+    youtubeTextController.text = youtubeChannelLink;
+    youtubeStreamKeyTextController.text = youtubeStreamKey;
+    stream.youtube = youtubeChannelLink;
+    stream.youtubeStreamKey = youtubeStreamKey;
   }
 
-  setPreviousStreamData() {
+  prepopulateFields() {
     titleTextController.text = stream.title!;
     descTextController.text = stream.description!;
     startDateTextController.text = stream.startDate!;
@@ -234,11 +199,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     fbStreamKeyTextController.text = stream.fbStreamKey == null ? "" : stream.fbStreamKey!;
     twitchStreamKeyTextController.text = stream.twitchStreamKey == null ? "" : stream.twitchStreamKey!;
     youtubeStreamKeyTextController.text = stream.youtubeStreamKey == null ? "" : stream.youtubeStreamKey!;
-    fbStreamURLTextController.text = stream.fbStreamURL == null ? "" : stream.fbStreamURL!;
-    twitchStreamURLTextController.text = stream.twitchStreamURL == null ? "" : stream.twitchStreamURL!;
-    youtubeStreamURLTextController.text = stream.youtubeStreamURL == null ? "" : stream.youtubeStreamURL!;
     selectedStartDate = dateFormatter.parse(stream.startDate!);
     selectedEndDate = dateFormatter.parse(stream.endDate!);
+  }
+
+  ///HOW TO FIND STREAM KEYS
+  showHowToFindStreamKeys() {
+    UrlHandler().launchInWebViewOrVC("https://www.webblen.io/post/getting-started-stream-to-twitch-youtube-and-facebook");
   }
 
   ///STREAM IMAGE
@@ -410,200 +377,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  ///STREAM TICKETING, FEES, AND DISCOUNTS
-  //tickets
-  toggleTicketForm({required int? ticketIndex}) {
-    if (ticketIndex == null) {
-      if (showTicketForm) {
-        showTicketForm = false;
-      } else {
-        showTicketForm = true;
-      }
-    } else {
-      showTicketForm = true;
-      Map<String, dynamic> ticket = ticketDistro!.tickets![ticketIndex];
-      ticketNameTextController.text = ticket['ticketName'];
-      ticketQuantityTextController.text = ticket['ticketQuantity'];
-      ticketPriceTextController.text = ticket['ticketPrice'];
-      ticketToEditIndex = ticketIndex;
-    }
-    notifyListeners();
-  }
-
-  addTicket() {
-    if (ticketNameTextController.text.trim().isEmpty) {
-      _snackbarService!.showSnackbar(
-        title: 'Ticket Name Required',
-        message: 'Please add a name for this ticket',
-        duration: Duration(seconds: 3),
-      );
-      return;
-    } else if (ticketQuantityTextController.text.trim().isEmpty) {
-      _snackbarService!.showSnackbar(
-        title: 'Ticket Quantity Required',
-        message: 'Please set a quantity for this ticket',
-        duration: Duration(seconds: 3),
-      );
-      return;
-    }
-
-    Map<String, dynamic> eventTicket = {
-      "ticketName": ticketNameTextController.text.trim(),
-      "ticketQuantity": ticketQuantityTextController.text.trim(),
-      "ticketPrice": ticketPriceTextController.text.trim(),
-    };
-
-    ticketNameTextController.clear();
-    ticketQuantityTextController.clear();
-    ticketPriceTextController.text = "\$0.00";
-
-    if (ticketToEditIndex != null) {
-      ticketDistro!.tickets![ticketToEditIndex!] = eventTicket;
-      ticketToEditIndex = null;
-    } else {
-      ticketDistro!.tickets!.add(eventTicket);
-    }
-    showTicketForm = false;
-    notifyListeners();
-  }
-
-  deleteTicket() {
-    ticketNameTextController.clear();
-    ticketQuantityTextController.clear();
-    ticketPriceTextController.text = "\$0.00";
-    showTicketForm = false;
-    if (ticketToEditIndex != null) {
-      ticketDistro!.tickets!.removeAt(ticketToEditIndex!);
-      ticketToEditIndex = null;
-    }
-    notifyListeners();
-  }
-
-  //fees
-  toggleFeeForm({required int? feeIndex}) {
-    if (feeIndex == null) {
-      if (showFeeForm) {
-        showFeeForm = false;
-      } else {
-        showFeeForm = true;
-      }
-    } else {
-      showFeeForm = true;
-      Map<String, dynamic> fee = ticketDistro!.fees![feeIndex];
-      feeNameTextController.text = fee['feeName'];
-      feePriceTextController.text = fee['feePrice'];
-      feeToEditIndex = feeIndex;
-    }
-    notifyListeners();
-  }
-
-  addFee() {
-    if (feeNameTextController.text.trim().isEmpty) {
-      _snackbarService!.showSnackbar(
-        title: 'Fee Name Required',
-        message: 'Please add a name for this fee',
-        duration: Duration(seconds: 3),
-      );
-      return;
-    }
-
-    Map<String, dynamic> eventFee = {
-      "feeName": feeNameTextController.text.trim(),
-      "feePrice": feePriceTextController.text.trim(),
-    };
-
-    feeNameTextController.clear();
-    feePriceTextController.text = "\$0.00";
-
-    if (feeToEditIndex != null) {
-      ticketDistro!.fees![feeToEditIndex!] = eventFee;
-      feeToEditIndex = null;
-    } else {
-      ticketDistro!.fees!.add(eventFee);
-    }
-    showFeeForm = false;
-    notifyListeners();
-  }
-
-  deleteFee() {
-    feeNameTextController.clear();
-    feePriceTextController.text = "\$0.00";
-    showFeeForm = false;
-    if (feeToEditIndex != null) {
-      ticketDistro!.fees!.removeAt(feeToEditIndex!);
-      feeToEditIndex = null;
-    }
-    notifyListeners();
-  }
-
-  //discounts
-  toggleDiscountsForm({required int? discountIndex}) {
-    if (discountIndex == null) {
-      if (showDiscountCodeForm) {
-        showDiscountCodeForm = false;
-      } else {
-        showDiscountCodeForm = true;
-      }
-    } else {
-      showDiscountCodeForm = true;
-      Map<String, dynamic> discount = ticketDistro!.discountCodes![discountIndex];
-      discountNameTextController.text = discount['discountName'];
-      discountLimitTextController.text = discount['discountLimit'];
-      discountValueTextController.text = discount['discountValue'];
-      discountToEditIndex = discountIndex;
-    }
-    notifyListeners();
-  }
-
-  addDiscount() {
-    if (discountNameTextController.text.trim().isEmpty) {
-      _snackbarService!.showSnackbar(
-        title: 'Discount Code Required',
-        message: 'Please add a code for this discount',
-        duration: Duration(seconds: 3),
-      );
-      return;
-    } else if (discountLimitTextController.text.trim().isEmpty) {
-      _snackbarService!.showSnackbar(
-        title: 'Discount Limit Required',
-        message: 'Please set a limit for the number of times this discount can be used',
-        duration: Duration(seconds: 5),
-      );
-      return;
-    }
-
-    Map<String, dynamic> eventDiscount = {
-      "discountName": discountNameTextController.text.trim(),
-      "discountLimit": discountLimitTextController.text.trim(),
-      "discountValue": discountValueTextController.text.trim(),
-    };
-
-    discountNameTextController.clear();
-    discountLimitTextController.clear();
-    discountValueTextController.text = "\$0.00";
-
-    if (discountToEditIndex != null) {
-      ticketDistro!.discountCodes![discountToEditIndex!] = eventDiscount;
-      discountToEditIndex = null;
-    } else {
-      ticketDistro!.discountCodes!.add(eventDiscount);
-    }
-    showDiscountCodeForm = false;
-    notifyListeners();
-  }
-
-  deleteDiscount() {
-    discountNameTextController.clear();
-    discountLimitTextController.clear();
-    discountValueTextController.text = "\$0.00";
-    showDiscountCodeForm = false;
-    if (discountToEditIndex != null) {
-      ticketDistro!.discountCodes!.removeAt(discountToEditIndex!);
-      discountToEditIndex = null;
-    }
-    notifyListeners();
-  }
-
   ///ADDITIONAL STREAM INFO
   setSponsorshipStatus(bool val) {
     stream.openToSponsors = val;
@@ -640,28 +413,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     notifyListeners();
   }
 
-  setYoutubeStreamURL(String val) {
-    stream.youtubeStreamURL = val.trim();
-    notifyListeners();
-  }
-
   setYoutubeStreamKey(String val) {
     stream.youtubeStreamKey = val.trim();
     notifyListeners();
   }
 
-  setTwitchStreamURL(String val) {
-    stream.twitchStreamURL = val.trim();
-    notifyListeners();
-  }
-
   setTwitchStreamKey(String val) {
     stream.twitchStreamKey = val.trim();
-    notifyListeners();
-  }
-
-  setFBStreamURL(String val) {
-    stream.fbStreamURL = val.trim();
     notifyListeners();
   }
 
@@ -878,20 +636,11 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     if (isValidString(stream.youtube)) {
       await _userDataService.updateYoutube(id: stream.hostID!, val: stream.youtube!);
     }
-    if (isValidString(stream.youtubeStreamURL)) {
-      await _userDataService.updateYoutubeStreamURL(id: stream.hostID!, val: stream.youtubeStreamURL!);
-    }
     if (isValidString(stream.youtubeStreamKey)) {
       await _userDataService.updateYoutubeStreamKey(id: stream.hostID!, val: stream.youtubeStreamKey!);
     }
-    if (isValidString(stream.twitchStreamURL)) {
-      await _userDataService.updateTwitchStreamURL(id: stream.hostID!, val: stream.twitchStreamURL!);
-    }
     if (isValidString(stream.twitchStreamKey)) {
       await _userDataService.updateTwitchStreamKey(id: stream.hostID!, val: stream.twitchStreamKey!);
-    }
-    if (isValidString(stream.fbStreamURL)) {
-      await _userDataService.updateFBStreamURL(id: stream.hostID!, val: stream.fbStreamURL!);
     }
     if (isValidString(stream.fbStreamKey)) {
       await _userDataService.updateFBStreamKey(id: stream.hostID!, val: stream.fbStreamKey!);

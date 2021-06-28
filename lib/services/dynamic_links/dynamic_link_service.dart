@@ -8,7 +8,11 @@ import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_post.dart';
 import 'package:webblen/models/webblen_user.dart';
+import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
+import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/reactive/mini_video_player/reactive_mini_video_player_service.dart';
+import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_model.dart';
 
 class DynamicLinkService {
   SnackbarService _snackbarService = locator<SnackbarService>();
@@ -166,11 +170,47 @@ class DynamicLinkService {
     return dynamicURL.toString();
   }
 
+  Future<String> createVideoLink({required String? authorUsername, required WebblenLiveStream stream}) async {
+    //set uri
+    Uri uri = Uri.parse('https://app.webblen.io/video/${stream.id}');
+
+    //set dynamic link params
+    final DynamicLinkParameters params = DynamicLinkParameters(
+      dynamicLinkParametersOptions: DynamicLinkParametersOptions(
+        shortDynamicLinkPathLength: ShortDynamicLinkPathLength.short,
+      ),
+      uriPrefix: webblenShareContentPrefix,
+      link: uri,
+      navigationInfoParameters: NavigationInfoParameters(
+        forcedRedirectEnabled: true,
+      ),
+      androidParameters: AndroidParameters(
+        packageName: androidPackageName,
+        fallbackUrl: uri,
+      ),
+      iosParameters: IosParameters(
+        bundleId: iosBundleID,
+        appStoreId: iosAppStoreID,
+        fallbackUrl: uri,
+        ipadFallbackUrl: uri,
+      ),
+      socialMetaTagParameters: SocialMetaTagParameters(
+        title: "Checkout this video: ${stream.title}\nby $authorUsername on Webblen",
+        description: stream.description!.length > 200 ? stream.description!.substring(0, 190) + "..." : stream.description,
+        imageUrl: stream.imageURL != null ? Uri.parse(stream.imageURL!) : null,
+      ),
+    );
+
+    ShortDynamicLink shortDynamicLink = await params.buildShortLink();
+    Uri dynamicURL = shortDynamicLink.shortUrl;
+
+    return dynamicURL.toString();
+  }
+
   Future handleVariousAppLinks() async {
     AppLinks(
       onAppLink: (uri, error) {
         if (uri.toString().contains('shared_link')) {
-          print('handle dynamic link');
           handleDynamicLinks(uri);
         } else {
           _handleAppLink(uri);
@@ -202,8 +242,9 @@ class DynamicLinkService {
     _handleAppLink(link);
   }
 
-  void _handleAppLink(Uri? link) {
+  void _handleAppLink(Uri? link) async {
     CustomNavigationService _customNavigationService = locator<CustomNavigationService>();
+
     if (link != null) {
       String stringifiedLink = link.toString();
       int index = stringifiedLink.lastIndexOf("/");
@@ -219,6 +260,20 @@ class DynamicLinkService {
         _customNavigationService.navigateToLiveStreamView(id);
       } else if (stringifiedLink.contains('my_tickets')) {
         _customNavigationService.navigateToMyTicketsView();
+      } else if (stringifiedLink.contains('video')) {
+        ///OPENS VIDEO or RECORDED STREAM
+        LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
+        ReactiveMiniVideoPlayerService _reactiveMiniVideoPlayerService = locator<ReactiveMiniVideoPlayerService>();
+        UserDataService _userDataService = locator<UserDataService>();
+        MiniVideoPlayerViewModel _miniVideoPlayerViewModel = locator<MiniVideoPlayerViewModel>();
+        WebblenLiveStream stream = await _liveStreamDataService.getStreamByID(id);
+
+        if (stream.hostID != null) {
+          WebblenUser host = await _userDataService.getWebblenUserByID(stream.hostID);
+          _reactiveMiniVideoPlayerService.updateSelectedStream(stream);
+          _reactiveMiniVideoPlayerService.updateSelectedStreamCreator(host.username!);
+          _miniVideoPlayerViewModel.expandMiniPlayer();
+        }
       } else if (stringifiedLink.contains('ticket') && !stringifiedLink.contains('my_tickets')) {
         _customNavigationService.navigateToTicketView(id);
       } else {

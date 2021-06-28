@@ -1,17 +1,17 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:webblen/constants/app_colors.dart';
+import 'package:webblen/constants/custom_colors.dart';
 
 class UserProfilePic extends StatelessWidget {
   final String? userPicUrl;
   final double? size;
   final bool? isBusy;
+  final bool? hasBorder;
 
   UserProfilePic({
+    this.hasBorder = false,
     this.userPicUrl,
     this.size,
     this.isBusy,
@@ -23,57 +23,23 @@ class UserProfilePic extends StatelessWidget {
         ? Container(
             height: size,
             width: size,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(size! / 2),
-              child: Container(
-                height: size,
-                width: size,
-                child: Shimmer.fromColors(
-                  baseColor: appShimmerBaseColor(),
-                  highlightColor: appShimmerHighlightColor(),
-                  child: Container(
-                    height: size,
-                    width: size,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
+            decoration: BoxDecoration(color: CustomColors.iosOffWhite, borderRadius: BorderRadius.all(Radius.circular(size! / 2))),
           )
-        : Container(
-            height: size,
-            width: size,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(size! / 2),
-              child: CachedNetworkImage(
-                fit: BoxFit.cover,
-                imageUrl: userPicUrl!,
-                filterQuality: FilterQuality.medium,
-                placeholder: (context, url) => Container(
-                  height: size,
-                  width: size,
-                  child: Shimmer.fromColors(
-                      baseColor: appShimmerBaseColor(),
-                      highlightColor: appShimmerHighlightColor(),
-                      child: Container(
-                        height: size,
-                        width: size,
-                        color: Colors.white,
-                      )),
+        : hasBorder!
+            ? CircleAvatar(
+                backgroundColor: appActiveColor(),
+                radius: size! / 2 - 1,
+                child: CircleAvatar(
+                  radius: (size! / 2) - 3,
+                  backgroundImage: NetworkImage(userPicUrl!),
+                  backgroundColor: CustomColors.iosOffWhite,
                 ),
-                errorWidget: (
-                  context,
-                  url,
-                  error,
-                ) =>
-                    Icon(
-                  FontAwesomeIcons.user,
-                  color: appFontColor(),
-                ),
-                useOldImageOnUrlChange: false,
-              ),
-            ),
-          );
+              )
+            : CircleAvatar(
+                radius: size! / 2,
+                backgroundImage: NetworkImage(userPicUrl!),
+                backgroundColor: CustomColors.iosOffWhite,
+              );
   }
 }
 

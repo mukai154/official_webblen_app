@@ -29,6 +29,7 @@ class ContentAuthorBottomSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            //can check in attendees
             request!.customData != null && request!.customData['checkInAttendees']
                 ? CustomButton(
                     onPressed: () => completer!(SheetResponse(responseData: "check in")),
@@ -43,18 +44,40 @@ class ContentAuthorBottomSheet extends StatelessWidget {
                   )
                 : Container(),
             request!.customData != null && request!.customData['checkInAttendees'] ? verticalSpaceSmall : Container(),
-            CustomButton(
-              onPressed: () => completer!(SheetResponse(responseData: "edit")),
-              text: "Edit",
-              textSize: 16,
-              textColor: appFontColor(),
-              height: 45,
-              width: screenWidth(context),
-              backgroundColor: appBackgroundColor(),
-              elevation: 1.0,
-              isBusy: false,
-            ),
-            verticalSpaceSmall,
+
+            //can publish recording
+            request!.customData != null && request!.customData['canPublishRecording']
+                ? CustomButton(
+                    onPressed: () => completer!(SheetResponse(responseData: "publishRecording")),
+                    text: "Publish Recording",
+                    textSize: 16,
+                    textColor: appFontColor(),
+                    height: 45,
+                    width: screenWidth(context),
+                    backgroundColor: appBackgroundColor(),
+                    elevation: 1.0,
+                    isBusy: false,
+                  )
+                : Container(),
+            request!.customData != null && request!.customData['canPublishRecording'] ? verticalSpaceSmall : Container(),
+
+            //can edit
+            request!.customData != null && request!.customData['availableForEditing']
+                ? CustomButton(
+                    onPressed: () => completer!(SheetResponse(responseData: "edit")),
+                    text: "Edit",
+                    textSize: 16,
+                    textColor: appFontColor(),
+                    height: 45,
+                    width: screenWidth(context),
+                    backgroundColor: appBackgroundColor(),
+                    elevation: 1.0,
+                    isBusy: false,
+                  )
+                : Container(),
+            request!.customData != null && request!.customData['availableForEditing'] ? verticalSpaceSmall : Container(),
+
+            //can duplicate
             request!.customData != null && request!.customData['canDuplicate']
                 ? CustomButton(
                     onPressed: () => completer!(SheetResponse(responseData: "duplicate")),
@@ -69,6 +92,8 @@ class ContentAuthorBottomSheet extends StatelessWidget {
                   )
                 : Container(),
             request!.customData != null && request!.customData['canDuplicate'] ? verticalSpaceSmall : Container(),
+
+            //can share
             CustomButton(
               onPressed: () => completer!(SheetResponse(responseData: "share")),
               text: "Share",
@@ -81,6 +106,8 @@ class ContentAuthorBottomSheet extends StatelessWidget {
               isBusy: false,
             ),
             verticalSpaceSmall,
+
+            //can delete
             CustomButton(
               onPressed: () => completer!(SheetResponse(responseData: "delete")),
               text: "Delete",

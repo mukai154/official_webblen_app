@@ -8,14 +8,17 @@ import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/live_streams/live_stream_block/live_stream_block_view_model.dart';
+import 'package:webblen/ui/widgets/live_streams/video_ui/video_duration_block.dart';
+import 'package:webblen/ui/widgets/live_streams/video_ui/video_streaming_status.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
 
 class LiveStreamBlockView extends StatelessWidget {
   final WebblenLiveStream stream;
   final Function(WebblenLiveStream) showStreamOptions;
+  final bool canOpenMiniVideoPlayer;
 
-  LiveStreamBlockView({required this.stream, required this.showStreamOptions});
+  LiveStreamBlockView({required this.stream, required this.showStreamOptions, required this.canOpenMiniVideoPlayer});
 
   Widget streamBody(BuildContext context, LiveStreamBlockViewModel model) {
     return Container(
@@ -48,6 +51,7 @@ class LiveStreamBlockView extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Container(
+                    margin: EdgeInsets.only(top: 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -89,10 +93,10 @@ class LiveStreamBlockView extends StatelessWidget {
                                   ),
                                   textAlign: TextAlign.right,
                                 ),
-                                SizedBox(width: 4),
+                                SizedBox(width: 6),
                                 Icon(
                                   FontAwesomeIcons.solidHeart,
-                                  size: 18,
+                                  size: 14,
                                   color: model.savedStream ? appSavedContentColor() : Colors.white54,
                                 ),
                               ],
@@ -123,43 +127,33 @@ class LiveStreamBlockView extends StatelessWidget {
                               fontWeight: FontWeight.w500,
                               color: Colors.white,
                             ),
-                            model.isLive
-                                ? Container(
-                                    padding: EdgeInsets.all(4),
-                                    decoration: BoxDecoration(
-                                      color: appActiveColor(),
-                                      borderRadius: BorderRadius.all(Radius.circular(8)),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        "Happening Now",
-                                        style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+                            stream.isLive != null && stream.isLive!
+                                ? LiveNowBox()
+                                : stream.muxAssetDuration != null
+                                    ? VideoDurationBlock(durationInSeconds: stream.muxAssetDuration!)
+                                    : Container(
+                                        child: Row(
+                                          children: <Widget>[
+                                            Icon(
+                                              Icons.access_time,
+                                              size: 12,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(
+                                              width: 8,
+                                            ),
+                                            CustomText(
+                                              text: "${stream.startDate!.substring(0, stream.startDate!.length - 6)} - ${stream.startTime} ${stream.timezone}",
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  )
-                                : Container(
-                                    child: Row(
-                                      children: <Widget>[
-                                        Icon(
-                                          Icons.access_time,
-                                          size: 12,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(
-                                          width: 8,
-                                        ),
-                                        CustomText(
-                                          text: "${stream.startDate!.substring(0, stream.startDate!.length - 6)} - ${stream.startTime} ${stream.timezone}",
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                        ),
-                                        SizedBox(
-                                          width: 10,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
                           ],
                         ),
                         verticalSpaceSmall,
@@ -217,7 +211,7 @@ class LiveStreamBlockView extends StatelessWidget {
                   HapticFeedback.lightImpact();
                   showStreamOptions(stream);
                 },
-                onTap: () => model.customNavigationService.navigateToLiveStreamView(stream.id!),
+                onTap: () => model.navigateToStreamView(stream: stream, canOpenMiniVideoPlayer: canOpenMiniVideoPlayer),
                 child: streamBody(context, model),
               ),
             ),

@@ -34,40 +34,41 @@ class ListFullLiveStreamSearchResults extends StatelessWidget {
                   height: screenHeight(context),
                   color: appBackgroundColor(),
                   child: RefreshIndicator(
-                  onRefresh: model.refreshData,
-                  backgroundColor: appBackgroundColor(),
-                  color: appFontColorAlt(),
-                  child: SingleChildScrollView(
-                  controller: model.scrollController,
-                  child: ListView.builder(
-                  physics: NeverScrollableScrollPhysics(),
-                  key: PageStorageKey(model.listKey),
-                      addAutomaticKeepAlives: true,
-                      shrinkWrap: true,
-                      itemCount: model.dataResults.length + 1,
-                      itemBuilder: (context, index) {
-                        if (index < model.dataResults.length) {
-                          return LiveStreamBlockView(
-                            stream: model.dataResults[index],
-                            showStreamOptions: (event) => model.showContentOptions(event),
-                          );
-                        } else {
-                          if (model.moreDataAvailable) {
-                            WidgetsBinding.instance!.addPostFrameCallback((_) {
-                              model.loadAdditionalData();
-                            });
-                            return Align(
-                              alignment: Alignment.center,
-                              child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                    onRefresh: model.refreshData,
+                    backgroundColor: appBackgroundColor(),
+                    color: appFontColorAlt(),
+                    child: SingleChildScrollView(
+                      controller: model.scrollController,
+                      child: ListView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        key: PageStorageKey(model.listKey),
+                        addAutomaticKeepAlives: true,
+                        shrinkWrap: true,
+                        itemCount: model.dataResults.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index < model.dataResults.length) {
+                            return LiveStreamBlockView(
+                              stream: model.dataResults[index],
+                              canOpenMiniVideoPlayer: false,
+                              showStreamOptions: (event) => model.showContentOptions(event),
                             );
+                          } else {
+                            if (model.moreDataAvailable) {
+                              WidgetsBinding.instance!.addPostFrameCallback((_) {
+                                model.loadAdditionalData();
+                              });
+                              return Align(
+                                alignment: Alignment.center,
+                                child: CustomCircleProgressIndicator(size: 10, color: appActiveColor()),
+                              );
+                            }
+                            return Container();
                           }
-                          return Container();
-                        }
-                      },
+                        },
+                      ),
                     ),
                   ),
                 ),
-      ),
     );
   }
 }

@@ -7,8 +7,7 @@ import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
-import 'package:webblen/services/firestore/data/user_data_service.dart';
-import 'package:webblen/utils/custom_string_methods.dart';
+import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
 
 class LiveStreamDataService {
   final CollectionReference streamsRef = FirebaseFirestore.instance.collection("webblen_live_streams");
@@ -17,7 +16,7 @@ class LiveStreamDataService {
   DialogService _dialogService = locator<DialogService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
-  UserDataService _userDataService = locator<UserDataService>();
+  MuxLiveStreamService _muxLiveStreamService = locator<MuxLiveStreamService>();
 
   int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
 
@@ -87,19 +86,11 @@ class LiveStreamDataService {
       Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
       List reportedBy = snapshotData['reportedBy'] == null ? [] : snapshotData['reportedBy'].toList(growable: true);
       if (reportedBy.contains(reporterID)) {
-        _snackbarService.showSnackbar(
-          title: 'Report Error',
-          message: "You've already reported this stream. This event is currently pending review.",
-          duration: Duration(seconds: 5),
-        );
+        _customDialogService.showErrorDialog(description: "You've already reported this stream. This stream is currently pending review.");
       } else {
         reportedBy.add(reporterID);
         streamsRef.doc(streamID).update({"reportedBy": reportedBy});
-        _snackbarService.showSnackbar(
-          title: 'Stream Reported',
-          message: "This stream is now pending review.",
-          duration: Duration(seconds: 5),
-        );
+        _customDialogService.showSuccessDialog(title: 'Stream Reported', description: "This stream is now pending review.",);
       }
     }
   }
@@ -109,36 +100,12 @@ class LiveStreamDataService {
     await streamsRef.doc(stream.id).set(stream.toMap()).catchError((e) {
       error = e.message;
     });
+
     if (error != null) {
       _customDialogService.showErrorDialog(description: error!);
       return false;
-    }
-    if (isValidString(stream.fbUsername)) {
-      await _userDataService.updateFbUsername(id: stream.hostID!, val: stream.fbUsername!);
-    }
-    if (isValidString(stream.twitterUsername)) {
-      await _userDataService.updateTwitterUsername(id: stream.hostID!, val: stream.twitterUsername!);
-    }
-    if (isValidString(stream.website)) {
-      await _userDataService.updateWebsite(id: stream.hostID!, website: stream.website!);
-    }
-    if (isValidString(stream.fbStreamKey)) {
-      await _userDataService.updateFBStreamKey(id: stream.hostID!, val: stream.fbStreamKey!);
-    }
-    if (isValidString(stream.fbStreamURL)) {
-      await _userDataService.updateFBStreamURL(id: stream.hostID!, val: stream.fbStreamURL!);
-    }
-    if (isValidString(stream.twitchStreamKey)) {
-      await _userDataService.updateTwitchStreamKey(id: stream.hostID!, val: stream.twitchStreamKey!);
-    }
-    if (isValidString(stream.twitchStreamURL)) {
-      await _userDataService.updateTwitchStreamURL(id: stream.hostID!, val: stream.twitchStreamURL!);
-    }
-    if (isValidString(stream.youtubeStreamKey)) {
-      await _userDataService.updateYoutubeStreamKey(id: stream.hostID!, val: stream.youtubeStreamKey!);
-    }
-    if (isValidString(stream.youtubeStreamURL)) {
-      await _userDataService.updateYoutubeStreamURL(id: stream.hostID!, val: stream.youtubeStreamURL!);
+    } else {
+      await _muxLiveStreamService.createMuxStream(stream: stream);
     }
     return true;
   }
@@ -154,6 +121,9 @@ class LiveStreamDataService {
     await streamsRef.doc(stream.id).delete();
     if (stream.imageURL != null) {
       await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'streams', fileName: stream.id!);
+      if (stream.muxStreamID != null) {
+        await _muxLiveStreamService.deleteStreamAndAsset(stream: stream);
+      }
     }
     await _postDataService.deleteEventOrStreamPost(eventOrStreamID: stream.id, postType: 'stream');
   }
@@ -209,25 +179,33 @@ class LiveStreamDataService {
     return stream;
   }
 
-  Future<String?> generateStreamToken(String streamID) async {
-    String? token;
-    DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
-      _customDialogService.showErrorDialog(description: "There was an issue starting this stream");
+  addClick({required String? uid, required String? streamID, required int clickCount}) async {
+    await streamsRef.doc(streamID).update({
+      'clickedBy': FieldValue.arrayUnion([uid!]),
+      'clickCount': clickCount,
     });
+  }
 
-    if (snapshot.exists) {
-      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
-      if (snapshotData.isNotEmpty) {
-        if (snapshotData['token'] != null) {
-          token = snapshotData['token'];
-        } else {
-          token = getRandomString(30);
-          await streamsRef.doc(streamID).update({'token': token});
-        }
-      }
-    }
+  Future updateStreamMuxStreamKey(
+      {required String streamID, required String muxStreamID, required String muxStreamKey, required String muxAssetPlaybackID}) async {
+    await streamsRef.doc(streamID).update({
+      "muxStreamID": muxStreamID,
+      "muxStreamKey": muxStreamKey,
+      "muxAssetPlaybackID": muxAssetPlaybackID,
+    }).catchError((e) {
+      print(e.message);
+      return e.message;
+    });
+  }
 
-    return token;
+  Future updateStreamMuxAssetData({required String streamID, required String muxAssetPlaybackID, required double muxAssetDuration}) async {
+    await streamsRef.doc(streamID).update({
+      "muxAssetPlaybackID": muxAssetPlaybackID,
+      "muxAssetDuration": muxAssetDuration,
+    }).catchError((e) {
+      print(e.message);
+      return e.message;
+    });
   }
 
   addToActiveViewers({required String uid, required String streamID}) async {

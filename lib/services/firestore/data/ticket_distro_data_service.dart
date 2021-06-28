@@ -203,6 +203,7 @@ class TicketDistroDataService {
     List<WebblenEventTicket> eventTickets = [];
     QuerySnapshot snapshot = await purchasedTicketRef.where("purchaserUID", isEqualTo: uid).where("eventID", isEqualTo: eventID).get();
     snapshot.docs.forEach((doc) {
+      print(doc);
       Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
       WebblenEventTicket ticket = WebblenEventTicket.fromMap(snapshotData);
       eventTickets.add(ticket);

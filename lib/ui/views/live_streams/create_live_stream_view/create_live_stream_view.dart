@@ -253,6 +253,7 @@ class CreateLiveStreamView extends StatelessWidget {
                         AutoCompleteAddressTextField(
                           initialValue: model.stream.audienceLocation == null ? "" : model.stream.audienceLocation!,
                           hintText: "Location",
+                          showCurrentLocationButton: true,
                           onSelectedAddress: (val) => model.setStreamAudienceLocation(val),
                         ),
                         verticalSpaceMedium,
@@ -470,7 +471,15 @@ class CreateLiveStreamView extends StatelessWidget {
                           subHeader: "Stream on Additional Platforms at the Same Time.",
                           required: false,
                         ),
-                        verticalSpaceSmall,
+                        SizedBox(height: 6),
+                        CustomTextButton(
+                          onTap: () => model.showHowToFindStreamKeys(),
+                          text: "Where can I find these?",
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: appTextButtonColor(),
+                        ),
+                        SizedBox(height: 16),
                         Container(
                           child: Row(
                             children: [
@@ -478,27 +487,6 @@ class CreateLiveStreamView extends StatelessWidget {
                                 FontAwesomeIcons.facebook,
                                 color: appFontColor(),
                                 size: 24,
-                              ),
-                              horizontalSpaceSmall,
-                              Expanded(
-                                child: SingleLineTextField(
-                                  controller: model.fbStreamURLTextController,
-                                  hintText: "Facebook Stream URL",
-                                  textLimit: null,
-                                  isPassword: false,
-                                  onChanged: (val) => model.setFBStreamURL(val),
-                                  keyboardType: TextInputType.url,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        verticalSpaceSmall,
-                        Container(
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 24,
                               ),
                               horizontalSpaceSmall,
                               Expanded(
@@ -514,7 +502,7 @@ class CreateLiveStreamView extends StatelessWidget {
                             ],
                           ),
                         ),
-                        verticalSpaceMedium,
+                        verticalSpaceSmall,
                         Container(
                           child: Row(
                             children: [
@@ -522,27 +510,6 @@ class CreateLiveStreamView extends StatelessWidget {
                                 FontAwesomeIcons.twitch,
                                 color: appFontColor(),
                                 size: 24,
-                              ),
-                              horizontalSpaceSmall,
-                              Expanded(
-                                child: SingleLineTextField(
-                                  controller: model.twitchStreamURLTextController,
-                                  hintText: "Twitch Stream URL",
-                                  textLimit: null,
-                                  isPassword: false,
-                                  onChanged: (val) => model.setTwitchStreamURL(val),
-                                  keyboardType: TextInputType.url,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        verticalSpaceSmall,
-                        Container(
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 24,
                               ),
                               horizontalSpaceSmall,
                               Expanded(
@@ -558,7 +525,7 @@ class CreateLiveStreamView extends StatelessWidget {
                             ],
                           ),
                         ),
-                        verticalSpaceMedium,
+                        verticalSpaceSmall,
                         Container(
                           child: Row(
                             children: [
@@ -566,27 +533,6 @@ class CreateLiveStreamView extends StatelessWidget {
                                 FontAwesomeIcons.youtube,
                                 color: appFontColor(),
                                 size: 24,
-                              ),
-                              horizontalSpaceSmall,
-                              Expanded(
-                                child: SingleLineTextField(
-                                  controller: model.youtubeStreamURLTextController,
-                                  hintText: "Youtube Stream URL",
-                                  textLimit: null,
-                                  isPassword: false,
-                                  onChanged: (val) => model.setYoutubeStreamURL(val),
-                                  keyboardType: TextInputType.url,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        verticalSpaceSmall,
-                        Container(
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 24,
                               ),
                               horizontalSpaceSmall,
                               Expanded(

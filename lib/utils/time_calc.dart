@@ -17,6 +17,14 @@ class TimeCalc {
     return dateTime;
   }
 
+  String getStringFromDurationInSeconds(double durationInSeconds) {
+    Duration duration = Duration(seconds: durationInSeconds.round());
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
+    String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
+    return duration.inHours == 0 ? "${duration.inMinutes.remainder(60)}:$twoDigitSeconds" : "${duration.inHours}:$twoDigitMinutes:$twoDigitSeconds";
+  }
+
   getTimeDifferenceInMinutes(String endTime) {
     String difference = "1 hour";
     String formattedTime = timeFormatter.format(currentDateTime);

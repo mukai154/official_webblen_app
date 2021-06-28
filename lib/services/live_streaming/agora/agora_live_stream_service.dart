@@ -28,15 +28,14 @@ class AgoraLiveStreamService {
     VideoEncoderConfiguration vidConfig = VideoEncoderConfiguration(
       dimensions: VideoDimensions(720, 1280),
       frameRate: VideoFrameRate.Fps30,
+      degradationPrefer: DegradationPreference.MaintainBalanced,
       orientationMode: VideoOutputOrientationMode.FixedLandscape,
-      bitrate: 1130,
+      bitrate: 4000,
     );
     return vidConfig;
   }
 
   LiveTranscoding configureTranscoding(int uid) {
-    String watermarkAddress = 'https://firebasestorage.googleapis.com/v0/b/webblen-events.appspot.com/o/app_images%2FtinyLogo'
-        '.png?alt=media&token=c8fdcce3-34a7-4455-b07f-8daf254a65be';
     TranscodingUser transcodingUser = TranscodingUser(uid, 0, 0, width: 1280, height: 720, audioChannel: AudioChannel.Channel0, alpha: 1, zOrder: 0);
     List<TranscodingUser> transcodingUsers = [transcodingUser];
     LiveTranscoding transcoding = LiveTranscoding(transcodingUsers);
@@ -47,7 +46,6 @@ class AgoraLiveStreamService {
     transcoding.height = 720;
     transcoding.videoCodecProfile = VideoCodecProfileType.Main;
     transcoding.transcodingUsers = transcodingUsers;
-    transcoding.watermark = AgoraImage(watermarkAddress, 1220, 660, 50, 50);
     return transcoding;
   }
 }

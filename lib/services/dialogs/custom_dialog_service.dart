@@ -77,6 +77,15 @@ class CustomDialogService {
     }
   }
 
+  showPublishRecordingConfirmedDialog() {
+    _dialogService.showDialog(
+      barrierDismissible: true,
+      title: "Publishing Recording!",
+      description: "A recording of this stream will be available for playback within the next 30 minutes",
+      buttonTitle: "Ok",
+    );
+  }
+
   Future<bool> showNavigateToEarningsAccountDialog({required bool isEditing, required String contentType}) async {
     DialogResponse? response = await _dialogService.showDialog(
       title: "Create an Earnings Account?",

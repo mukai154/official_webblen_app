@@ -47,6 +47,7 @@ import '../ui/views/users/followers/user_followers_view.dart';
 import '../ui/views/users/following/user_following_view.dart';
 import '../ui/views/users/profile/user_profile_view.dart';
 import '../ui/views/users/saved/saved_content_view.dart';
+import '../ui/views/video_player/standard/standard_video_player_view.dart';
 
 class Routes {
   static const String RootViewRoute = '/';
@@ -83,6 +84,9 @@ class Routes {
   static const String _LiveStreamViewerViewRoute = '/streams/viewer/:id';
   static String LiveStreamViewerViewRoute({@required dynamic id}) =>
       '/streams/viewer/$id';
+  static const String _StandardVideoPlayerViewRoute = '/video/:id';
+  static String StandardVideoPlayerViewRoute({@required dynamic id}) =>
+      '/video/$id';
   static const String _AllSearchResultsViewRoute = '/all_results/:term';
   static String AllSearchResultsViewRoute({@required dynamic term}) =>
       '/all_results/$term';
@@ -146,6 +150,7 @@ class Routes {
     _CreateLiveStreamViewRoute,
     _LiveStreamHostViewRoute,
     _LiveStreamViewerViewRoute,
+    _StandardVideoPlayerViewRoute,
     _AllSearchResultsViewRoute,
     NotificationsViewRoute,
     _UserProfileView,
@@ -192,6 +197,8 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes._CreateLiveStreamViewRoute, page: CreateLiveStreamView),
     RouteDef(Routes._LiveStreamHostViewRoute, page: LiveStreamHostView),
     RouteDef(Routes._LiveStreamViewerViewRoute, page: LiveStreamViewerView),
+    RouteDef(Routes._StandardVideoPlayerViewRoute,
+        page: StandardVideoPlayerView),
     RouteDef(Routes._AllSearchResultsViewRoute, page: AllSearchResultsView),
     RouteDef(Routes.NotificationsViewRoute, page: NotificationsView),
     RouteDef(Routes._UserProfileView, page: UserProfileView),
@@ -346,6 +353,14 @@ class StackedRouter extends RouterBase {
       return PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             LiveStreamViewerView(data.pathParams['id'].value),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    StandardVideoPlayerView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            StandardVideoPlayerView(data.pathParams['id'].value),
         settings: data,
         transitionDuration: const Duration(milliseconds: 0),
       );

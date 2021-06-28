@@ -3,9 +3,11 @@ import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/app/app.router.dart';
 import 'package:webblen/ui/views/base/app_base_view_model.dart';
 import 'package:webblen/ui/views/search/search_view.dart';
+import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_model.dart';
 
 class CustomNavigationService {
   NavigationService _navigationService = locator<NavigationService>();
+  MiniVideoPlayerViewModel _miniVideoPlayerViewModel = locator<MiniVideoPlayerViewModel>();
 
   navigateBack() {
     _navigationService.back();
@@ -31,10 +33,12 @@ class CustomNavigationService {
 
   ///POSTS
   navigateToPostView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.PostViewRoute(id: id));
   }
 
   navigateToCreatePostView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.CreatePostViewRoute(id: id, promo: "0"));
   }
 
@@ -44,14 +48,17 @@ class CustomNavigationService {
 
   ///EVENTS
   navigateToEventView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.EventViewRoute(id: id));
   }
 
   navigateToCreateEventView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.CreateEventViewRoute(id: id, promo: "0"));
   }
 
   navigateToCreateEventViewWithPromo(String id, String promo) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.CreateEventViewRoute(id: id, promo: promo));
   }
 
@@ -65,6 +72,7 @@ class CustomNavigationService {
 
   ///TICKETS
   navigateToMyTicketsView() {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.MyTicketsViewRoute);
   }
 
@@ -90,6 +98,7 @@ class CustomNavigationService {
 
   ///STREAMS
   navigateToLiveStreamView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.LiveStreamViewRoute(id: id));
   }
 
@@ -102,11 +111,18 @@ class CustomNavigationService {
   }
 
   navigateToCreateLiveStreamView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: id, promo: "0"));
   }
 
   navigateToCreateLiveStreamViewRouteWithPromo(String id, String promo) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: id, promo: promo));
+  }
+
+  ///VIDEO
+  navigateToStandardVideoPlayer(String id) {
+    _navigationService.navigateTo(Routes.StandardVideoPlayerViewRoute(id: id));
   }
 
   ///USERS
@@ -117,6 +133,7 @@ class CustomNavigationService {
   }
 
   navigateToUserView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.UserProfileView(id: id));
   }
 
@@ -129,28 +146,34 @@ class CustomNavigationService {
 
   ///EARNINGS
   navigateToSetUpInstantDepositView() {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.SetUpInstantDepositViewRoute);
   }
 
   navigateToSetUpDirectDepositView() {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.SetUpDirectDepositViewRoute);
   }
 
   navigateToUSDBalanceHistoryView() {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.USDBalanceHistoryViewRoute);
   }
 
   ///SEARCH
   navigateToSearchView() {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateWithTransition(SearchView(), transition: 'fade', opaque: true);
   }
 
   navigateToSearchViewWithTerm(String term) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateWithTransition(SearchView(term: term), transition: 'fade', opaque: true);
   }
 
   ///NOTIFICATIONS
   navigateToNotificationsView() {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.NotificationsViewRoute);
   }
 }

@@ -55,7 +55,7 @@ class RemovableTagButton extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 8),
       child: Material(
         elevation: 0,
-        color: appBorderColorAlt(),
+        color: appTextFieldContainerColor(),
         borderRadius: BorderRadius.circular(14.0),
         child: InkWell(
           borderRadius: BorderRadius.circular(14.0),

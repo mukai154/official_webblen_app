@@ -1,5 +1,6 @@
-class WebblenPostComment {
+class WebblenComment {
   String? postID;
+  String? streamID;
   String? senderUID;
   String? username;
   String? message;
@@ -10,8 +11,9 @@ class WebblenPostComment {
   int? replyCount;
   int? timePostedInMilliseconds;
 
-  WebblenPostComment({
+  WebblenComment({
     this.postID,
+    this.streamID,
     this.senderUID,
     this.username,
     this.message,
@@ -23,9 +25,10 @@ class WebblenPostComment {
     this.timePostedInMilliseconds,
   });
 
-  WebblenPostComment.fromMap(Map<String, dynamic> data)
+  WebblenComment.fromMap(Map<String, dynamic> data)
       : this(
           postID: data['postID'],
+          streamID: data['streamID'],
           senderUID: data['senderUID'],
           username: data['username'],
           message: data['message'],
@@ -39,6 +42,7 @@ class WebblenPostComment {
 
   Map<String, dynamic> toMap() => {
         'postID': this.postID,
+        'streamID': this.streamID,
         'senderUID': this.senderUID,
         'username': this.username,
         'message': this.message,

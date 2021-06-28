@@ -67,7 +67,9 @@ class ListCheckInEvents extends StatelessWidget {
                     color: appFontColorAlt(),
                     child: SingleChildScrollView(
                       controller: model.scrollController,
+                      physics: AlwaysScrollableScrollPhysics(),
                       child: ListView.builder(
+                        padding: EdgeInsets.only(bottom: 80),
                         physics: NeverScrollableScrollPhysics(),
                         key: PageStorageKey(model.listKey),
                         addAutomaticKeepAlives: true,

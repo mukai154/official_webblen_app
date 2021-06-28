@@ -7,10 +7,10 @@
 // ignore_for_file: public_member_api_docs
 
 import 'package:stacked/stacked.dart';
+import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
 
-import '../services/agora/agora_live_stream_service.dart';
 import '../services/algolia/algolia_search_service.dart';
 import '../services/auth/auth_service.dart';
 import '../services/bottom_sheets/custom_bottom_sheets_service.dart';
@@ -32,6 +32,8 @@ import '../services/firestore/data/redeemed_reward_data_service.dart';
 import '../services/firestore/data/ticket_distro_data_service.dart';
 import '../services/firestore/data/user_data_service.dart';
 import '../services/firestore/data/user_preference_data_service.dart';
+import '../services/live_streaming/agora/agora_live_stream_service.dart';
+import '../services/live_streaming/mux/mux_live_stream_service.dart';
 import '../services/location/google_places_service.dart';
 import '../services/location/location_service.dart';
 import '../services/navigation/custom_navigation_service.dart';
@@ -39,6 +41,7 @@ import '../services/permission_handler/permission_handler_service.dart';
 import '../services/reactive/content_filter/reactive_content_filter_service.dart';
 import '../services/reactive/file_uploader/reactive_file_uploader_service.dart';
 import '../services/reactive/in_app_purchases/reactive_in_app_purchase_service.dart';
+import '../services/reactive/mini_video_player/reactive_mini_video_player_service.dart';
 import '../services/reactive/user/reactive_user_service.dart';
 import '../services/share/share_service.dart';
 import '../services/stripe/stripe_connect_account_service.dart';
@@ -48,10 +51,16 @@ import '../ui/views/home/tabs/home/home_view_model.dart';
 import '../ui/views/home/tabs/search/recent_search_view_model.dart';
 import '../ui/views/home/tabs/wallet/wallet_view_model.dart';
 import '../ui/widgets/home_feed/home_feed_model.dart';
+import '../ui/widgets/mini_video_player/mini_video_player_view_model.dart';
 
 final locator = StackedLocator.instance;
 
-void setupLocator() {
+void setupLocator({String? environment, EnvironmentFilter? environmentFilter}) {
+// Register environments
+  locator.registerEnvironment(
+      environment: environment, environmentFilter: environmentFilter);
+
+// Register dependencies
   locator.registerLazySingleton(() => ThemeService.getInstance());
   locator.registerLazySingleton(() => PermissionHandlerService());
   locator.registerLazySingleton(() => NavigationService());
@@ -86,8 +95,11 @@ void setupLocator() {
   locator.registerLazySingleton(() => UserPreferenceDataService());
   locator.registerLazySingleton(() => GiftDonationDataService());
   locator.registerLazySingleton(() => AgoraLiveStreamService());
+  locator.registerLazySingleton(() => MuxLiveStreamService());
+  locator.registerLazySingleton(() => MiniVideoPlayerViewModel());
   locator.registerLazySingleton(() => ReactiveUserService());
   locator.registerLazySingleton(() => ReactiveContentFilterService());
+  locator.registerLazySingleton(() => ReactiveMiniVideoPlayerService());
   locator.registerLazySingleton(() => ReactiveFileUploaderService());
   locator.registerLazySingleton(() => ReactiveInAppPurchaseService());
   locator.registerSingleton(AppBaseViewModel());

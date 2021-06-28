@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
 
 class CustomAppBar {
-  PreferredSizeWidget basicAppBar({required String title, required bool showBackButton, Widget? bottomWidget, double? bottomWidgetHeight}) {
+  PreferredSizeWidget basicAppBar({
+    required String title,
+    required bool showBackButton,
+    Widget? bottomWidget,
+    double? bottomWidgetHeight,
+    VoidCallback? onPressedBack,
+  }) {
     return AppBar(
       elevation: 0,
       backgroundColor: appBackgroundColor(),
@@ -15,7 +21,7 @@ class CustomAppBar {
         ),
       ),
       brightness: appBrightness(),
-      leading: showBackButton ? BackButton(color: appIconColor()) : Container(),
+      leading: showBackButton ? BackButton(color: appIconColor(), onPressed: onPressedBack != null ? onPressedBack : null) : Container(),
       bottom: PreferredSize(
         child: bottomWidget == null ? Container() : bottomWidget,
         preferredSize: Size.fromHeight(bottomWidgetHeight == null ? 4.0 : bottomWidgetHeight),

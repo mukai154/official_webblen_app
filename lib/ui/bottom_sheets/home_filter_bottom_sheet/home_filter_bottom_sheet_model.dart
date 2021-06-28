@@ -39,7 +39,7 @@ class HomeFilterBottomSheetModel extends BaseViewModel {
   String tempSortByFilter = "Latest";
 
   ///FILTERS
-  List<String> contentTypeList = ["Posts, Streams, and Events", "Posts Only", "Streams Only", "Events Only"];
+  List<String> contentTypeList = ["Posts, Streams, and Events", "Posts Only", "Streams & Video Only", "Live Only", "Events Only"];
   List<String> sortByList = ["Latest", "Most Popular"];
   Map<String, dynamic> placeSearchResults = {};
 

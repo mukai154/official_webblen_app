@@ -267,9 +267,75 @@ class WebblenNotification {
       receiverUID: receiverUID,
       senderUID: senderUID,
       type: NotificationType.postComment,
-      header: '$commenterUsername mentioned you in post',
+      header: '$commenterUsername mentioned you in a post',
       subHeader: comment,
       additionalData: {'id': postID},
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
+
+  //Video Comment Notification
+  WebblenNotification generateVideoCommentNotification({
+    required String? streamID,
+    required String? receiverUID,
+    required String? senderUID,
+    required String commenterUsername,
+    required String comment,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: receiverUID,
+      senderUID: senderUID,
+      type: NotificationType.postComment,
+      header: '$commenterUsername commented on your video',
+      subHeader: comment,
+      additionalData: {'id': streamID},
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
+
+  //Video Comment Reply Notification
+  WebblenNotification generateVideoCommentReplyNotification({
+    required String streamID,
+    required String receiverUID,
+    required String senderUID,
+    required String commenterUsername,
+    required String comment,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: receiverUID,
+      senderUID: senderUID,
+      type: NotificationType.postCommentReply,
+      header: '$commenterUsername replied to your video comment',
+      subHeader: comment,
+      additionalData: {'id': streamID},
+      timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+      expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
+      read: false,
+    );
+    return notif;
+  }
+
+  //Video Comment Mention Notification
+  WebblenNotification generateWebblenVideoCommentMentionNotification({
+    required String? streamID,
+    required String? receiverUID,
+    required String? senderUID,
+    required String commenterUsername,
+    required String comment,
+  }) {
+    WebblenNotification notif = WebblenNotification(
+      receiverUID: receiverUID,
+      senderUID: senderUID,
+      type: NotificationType.postComment,
+      header: '$commenterUsername mentioned you in a video',
+      subHeader: comment,
+      additionalData: {'id': streamID},
       timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       expDateInMilliseconds: DateTime.now().millisecondsSinceEpoch + 7884000000, //Expiration Date Set 3 Months from Now
       read: false,

@@ -15,6 +15,7 @@ import 'package:webblen/ui/views/home/tabs/wallet/wallet_view.dart';
 import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar.dart';
 import 'package:webblen/ui/widgets/common/navigation/nav_bar/custom_nav_bar_item.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
+import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view.dart';
 
 import 'app_base_view_model.dart';
 import 'init_error_views/location_error/location_error_view.dart';
@@ -67,7 +68,12 @@ class AppBaseView extends StatelessWidget {
                             ? LocationErrorView(
                                 tryAgainAction: () => model.initialize(page),
                               )
-                            : views[model.navBarIndex],
+                            : Stack(
+                                children: [
+                                  views[model.navBarIndex],
+                                  MiniVideoPlayerView(),
+                                ],
+                              ),
         bottomNavigationBar: CustomNavBar(
           navBarItems: [
             CustomNavBarItem(

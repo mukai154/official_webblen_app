@@ -5,6 +5,7 @@ enum BottomSheetType {
   contentOptions,
   contentAuthorOptions,
   destructiveConfirmation,
+  positiveConfirmation,
   homeFilter,
   imagePicker,
   currentUserOptions,

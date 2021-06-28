@@ -16,6 +16,7 @@ import 'package:webblen/services/firestore/data/event_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
+import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
 import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/share/share_service.dart';
@@ -93,21 +94,77 @@ class CustomBottomSheetService {
   //bottom sheet for options one can take with post, event, or stream
   Future showContentOptions({required dynamic content}) async {
     WebblenUser user = _reactiveUserService.user;
+
+    //map options available for content
+    Map<String, dynamic> bottomSheetData = {
+      'checkInAttendees': false,
+      'canDuplicate': false,
+      'canPublishRecording': false,
+      'availableForEditing': true,
+    };
+    bool isContentCreator = false;
+    if (content is WebblenEvent) {
+      if (content.authorID == user.id) {
+        isContentCreator = true;
+      }
+      if (isContentCreator) {
+        if (content.concluded()) {
+          bottomSheetData = {
+            'checkInAttendees': false,
+            'canDuplicate': true,
+            'canPublishRecording': false,
+            'availableForEditing': false,
+          };
+        } else {
+          if (content.hasTickets!) {
+            bottomSheetData = {
+              'checkInAttendees': true,
+              'canDuplicate': true,
+              'canPublishRecording': false,
+              'availableForEditing': true,
+            };
+          } else {
+            bottomSheetData = {
+              'checkInAttendees': false,
+              'canDuplicate': true,
+              'canPublishRecording': false,
+              'availableForEditing': true,
+            };
+          }
+        }
+      }
+    } else if (content is WebblenLiveStream) {
+      if (content.hostID == user.id) {
+        isContentCreator = true;
+      }
+      if (isContentCreator) {
+        if (content.concluded()) {
+          bottomSheetData = {
+            'checkInAttendees': false,
+            'canDuplicate': true,
+            'canPublishRecording': true,
+            'availableForEditing': false,
+          };
+        } else {
+          bottomSheetData = {
+            'checkInAttendees': false,
+            'canDuplicate': true,
+            'canPublishRecording': false,
+            'availableForEditing': true,
+          };
+        }
+      }
+    } else if (content is WebblenPost) {
+      if (content.authorID == user.id) {
+        isContentCreator = true;
+      }
+    }
+
+    //show bottom sheet
     var sheetResponse = await _bottomSheetService.showCustomSheet(
-      barrierDismissible: true,
-      customData: content is WebblenEvent && user.id == content.authorID && content.hasTickets!
-          ? {'checkInAttendees': true, 'canDuplicate': true}
-          : content is WebblenEvent || content is WebblenLiveStream
-              ? {'checkInAttendees': false, 'canDuplicate': true}
-              : {'checkInAttendees': false, 'canDuplicate': false},
-      variant: content is WebblenLiveStream
-          ? user.id == content.hostID
-              ? BottomSheetType.contentAuthorOptions
-              : BottomSheetType.contentOptions
-          : user.id == content.authorID
-              ? BottomSheetType.contentAuthorOptions
-              : BottomSheetType.contentOptions,
-    );
+        barrierDismissible: true,
+        customData: bottomSheetData,
+        variant: isContentCreator ? BottomSheetType.contentAuthorOptions : BottomSheetType.contentOptions);
 
     if (sheetResponse != null) {
       String? res = sheetResponse.responseData;
@@ -175,6 +232,11 @@ class CustomBottomSheetService {
           //duplicate stream
           _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: "duplicate_${content.id}", promo: 0));
         }
+      } else if (res == "publishRecording") {
+        bool confirmedPublishRecording = await publishStreamRecordingConfirmation(content: content);
+        if (confirmedPublishRecording) {
+          return "published recording";
+        }
       } else if (res == "delete") {
         //delete content
         bool deletedContent = await deleteContentConfirmation(content: content);
@@ -237,6 +299,28 @@ class CustomBottomSheetService {
           _customDialogService.showStreamDeletedDialog();
           return true;
         }
+      }
+    }
+    return false;
+  }
+
+  //bottom sheet for confirming the publishing of a stream recording
+  Future<bool> publishStreamRecordingConfirmation({dynamic content}) async {
+    MuxLiveStreamService _muxLiveStreamService = locator<MuxLiveStreamService>();
+    var sheetResponse = await _bottomSheetService.showCustomSheet(
+      title: "Publish Stream Recording?",
+      description: "A recording of this stream will be available for\nplayback and download",
+      mainButtonTitle: "Publish Recording",
+      secondaryButtonTitle: "Cancel",
+      barrierDismissible: true,
+      variant: BottomSheetType.positiveConfirmation,
+    );
+    if (sheetResponse != null) {
+      String? res = sheetResponse.responseData;
+      if (res == "confirmed") {
+        _muxLiveStreamService.completeStreamAndLinkMuxAsset(stream: content);
+        _customDialogService.showPublishRecordingConfirmedDialog();
+        return true;
       }
     }
     return false;

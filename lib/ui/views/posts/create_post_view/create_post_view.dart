@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:stacked/stacked.dart';
@@ -257,6 +258,7 @@ class _PostAddressAutoComplete extends HookViewModelWidget<CreatePostViewModel> 
     return AutoCompleteAddressTextField(
       initialValue: model.post.city == null ? "" : model.post.city!,
       hintText: "Address",
+      showCurrentLocationButton: true,
       onSelectedAddress: (val) => model.updateLocation(val),
     );
   }
@@ -280,7 +282,7 @@ class _PostMessageField extends HookViewModelWidget<CreatePostViewModel> {
       initialValue: null,
       maxLines: 5,
       onChanged: (val) {
-        description.selection = TextSelection.fromPosition(TextPosition(offset: description.text.length));
+        //description.selection = TextSelection.fromPosition(TextPosition(offset: description.text.length));
         model.updatePostMessage(val);
       },
     );

@@ -19,4 +19,18 @@ class CustomColors {
   static const webblenMatteBlue = Color.fromRGBO(63, 61, 86, 1.0);
   static const webblenMidGray = Color.fromRGBO(182, 182, 189, 1.0);
   static const webblenDarkGray = Color.fromRGBO(25, 25, 25, 1.0);
+
+  ///GRADIENTS
+  static const LinearGradient webblenGradient = LinearGradient(
+    colors: [
+      webblenRed,
+      webblenPink,
+    ],
+  );
+
+  static const LinearGradient livestreamBlockGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [Colors.transparent, Colors.black38],
+  );
 }

@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/app/app.router.dart';
 import 'package:webblen/enums/bottom_sheet_type.dart';
+import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/models/webblen_notification.dart';
 import 'package:webblen/models/webblen_post.dart';
-import 'package:webblen/models/webblen_post_comment.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
@@ -48,7 +49,7 @@ class PostViewModel extends BaseViewModel {
   bool isAuthor = false;
   bool isReplying = false;
   bool refreshingComments = true;
-  WebblenPostComment? commentToReplyTo;
+  WebblenComment? commentToReplyTo;
 
   ///INITIALIZE
   initialize(String id) async {
@@ -114,7 +115,7 @@ class PostViewModel extends BaseViewModel {
   }
 
   ///COMMENTING
-  toggleReply(FocusNode focusNode, WebblenPostComment comment) {
+  toggleReply(FocusNode focusNode, WebblenComment comment) {
     isReplying = true;
     commentToReplyTo = comment;
     focusNode.requestFocus();
@@ -124,7 +125,7 @@ class PostViewModel extends BaseViewModel {
     isReplying = false;
     String text = commentData['comment'].trim();
     if (text.isNotEmpty) {
-      WebblenPostComment comment = WebblenPostComment(
+      WebblenComment comment = WebblenComment(
         postID: post!.id,
         senderUID: user.id!,
         username: user.username,
@@ -158,7 +159,7 @@ class PostViewModel extends BaseViewModel {
   replyToComment({BuildContext? context, required Map<String, dynamic> commentData}) async {
     String text = commentData['comment'].trim();
     if (text.isNotEmpty) {
-      WebblenPostComment comment = WebblenPostComment(
+      WebblenComment comment = WebblenComment(
         postID: post!.id,
         senderUID: user.id!,
         username: user.username,
@@ -200,7 +201,7 @@ class PostViewModel extends BaseViewModel {
     refreshComments();
   }
 
-  deleteComment({BuildContext? context, required WebblenPostComment comment}) async {
+  deleteComment({BuildContext? context, required WebblenComment comment}) async {
     isReplying = false;
     if (comment.isReply!) {
       await CommentDataService().deleteReply(post!.id, comment);
@@ -276,7 +277,7 @@ class PostViewModel extends BaseViewModel {
     }
   }
 
-  showDeleteCommentConfirmation({BuildContext? context, WebblenPostComment? comment}) async {
+  showDeleteCommentConfirmation({BuildContext? context, WebblenComment? comment}) async {
     var sheetResponse = await _bottomSheetService!.showCustomSheet(
       title: "Delete Comment",
       description: "Are You Sure You Want to Delete this Comment?",
@@ -295,14 +296,6 @@ class PostViewModel extends BaseViewModel {
 
   ///NAVIGATION
   navigateToUserView(String? id) {
-    //_navigationService.navigateTo(Routes.UserProfileView, arguments: {'id': id});
+    _navigationService!.navigateTo(Routes.UserProfileView(id: id!));
   }
-
-// replaceWithPage() {
-//   _navigationService.replaceWith(PageRouteName);
-// }
-//
-// navigateToPage() {
-//   _navigationService.navigateTo(PageRouteName);
-// }
 }

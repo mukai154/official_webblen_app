@@ -14,6 +14,7 @@ import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/permission_handler/permission_handler_service.dart';
 import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
+import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_model.dart';
 import 'package:webblen/utils/network_status.dart';
 
 class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveServiceMixin {
@@ -26,6 +27,7 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
   ReactiveContentFilterService _reactiveContentFilterService = locator<ReactiveContentFilterService>();
+  MiniVideoPlayerViewModel _miniVideoPlayerViewModel = locator<MiniVideoPlayerViewModel>();
 
   ///INITIALIZATION DATA
   InitErrorStatus initErrorStatus = InitErrorStatus.none;
@@ -43,6 +45,9 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
 
   void setNavBarIndex(int index) {
     _navBarIndex = index;
+    if (_miniVideoPlayerViewModel.isExpanded) {
+      _miniVideoPlayerViewModel.shrinkMiniPlayer();
+    }
     notifyListeners();
   }
 

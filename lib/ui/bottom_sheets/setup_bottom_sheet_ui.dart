@@ -12,6 +12,7 @@ import 'package:webblen/ui/bottom_sheets/video_streaming_bottom_sheets/host/gift
 import 'package:webblen/ui/bottom_sheets/video_streaming_bottom_sheets/viewer/gift_webblen_bottom_sheet.dart';
 
 import 'confirmation_bottom_sheets/new_content_confirmation_bottom_sheet/new_content_confirmation_bottom_sheet.dart';
+import 'confirmation_bottom_sheets/positive_confirmation/positive_confirmation_bottom_sheet.dart';
 import 'content_bottom_sheets/add_content_bottom_sheet/add_content_bottom_sheet/add_content_bottom_sheet.dart';
 import 'content_bottom_sheets/add_content_bottom_sheet/add_content_successful_bottom_sheet/add_content_successful_bottom_sheet.dart';
 import 'content_bottom_sheets/content_author_bottom_sheet/content_author_bottom_sheet.dart';
@@ -33,6 +34,7 @@ void setupBottomSheetUI() {
         NewContentConfirmationBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.destructiveConfirmation: (context, sheetRequest, completer) =>
         DestructiveConfirmationBottomSheet(request: sheetRequest, completer: completer),
+    BottomSheetType.positiveConfirmation: (context, sheetRequest, completer) => PositiveConfirmationBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.currentUserOptions: (context, sheetRequest, completer) => CurrentUserOptionsBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.userOptions: (context, sheetRequest, completer) => UserOptionsBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.homeFilter: (context, sheetRequest, completer) => HomeFilterBottomSheet(request: sheetRequest, completer: completer),

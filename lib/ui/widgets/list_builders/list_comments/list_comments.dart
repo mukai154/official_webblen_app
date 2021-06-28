@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_post_comment.dart';
+import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/comments/comment_block/comment_block_view.dart';
 
@@ -12,8 +12,8 @@ class ListComments extends StatelessWidget {
   final PageStorageKey? pageStorageKey;
   final ScrollController? scrollController;
   final bool? refreshingData;
-  final Function(WebblenPostComment) replyToComment;
-  final Function(WebblenPostComment) deleteComment;
+  final Function(WebblenComment) replyToComment;
+  final Function(WebblenComment) deleteComment;
   ListComments({
     required this.refreshData,
     required this.results,
@@ -38,13 +38,13 @@ class ListComments extends StatelessWidget {
               physics: NeverScrollableScrollPhysics(),
               itemCount: results.length,
               itemBuilder: (context, index) {
-                WebblenPostComment comment;
+                WebblenComment comment;
 
                 ///GET POST OBJECT
                 if (results[index] is DocumentSnapshot) {
-                  comment = WebblenPostComment.fromMap(results[index].data());
+                  comment = WebblenComment.fromMap(results[index].data());
                 } else if (results[index] is Map<String, dynamic>) {
-                  comment = WebblenPostComment.fromMap(results[index]);
+                  comment = WebblenComment.fromMap(results[index]);
                 } else {
                   comment = results[index];
                 }
@@ -73,11 +73,11 @@ class ListComments extends StatelessWidget {
       ),
       itemCount: results.length,
       itemBuilder: (context, index) {
-        WebblenPostComment comment;
+        WebblenComment comment;
 
         ///GET POST COMMENT OBJECT
         if (results[index] is DocumentSnapshot) {
-          comment = WebblenPostComment.fromMap(results[index].data());
+          comment = WebblenComment.fromMap(results[index].data());
         } else {
           comment = results[index];
         }

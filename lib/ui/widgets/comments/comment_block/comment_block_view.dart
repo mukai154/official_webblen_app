@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/models/webblen_post_comment.dart';
+import 'package:webblen/models/webblen_comment.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/list_builders/list_comments/list_comments.dart';
 import 'package:webblen/ui/widgets/user/user_profile_pic.dart';
@@ -11,10 +11,10 @@ import 'package:webblen/utils/time_calc.dart';
 import 'comment_block_view_model.dart';
 
 class CommentBlockView extends StatelessWidget {
-  final Function(WebblenPostComment) replyToComment;
-  final Function(WebblenPostComment) deleteComment;
+  final Function(WebblenComment) replyToComment;
+  final Function(WebblenComment) deleteComment;
 
-  final WebblenPostComment comment;
+  final WebblenComment comment;
   CommentBlockView({required this.comment, required this.replyToComment, required this.deleteComment});
 
   List<TextSpan> convertToRichText(String text, CommentBlockViewModel model) {
@@ -154,7 +154,7 @@ class CommentBlockView extends StatelessWidget {
                                 pageStorageKey: null,
                                 scrollController: null,
                                 refreshingData: null,
-                                replyToComment: (WebblenPostComment) {},
+                                replyToComment: (WebblenComment) {},
                               )
                             : Container(),
                       ],

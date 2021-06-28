@@ -1,7 +1,6 @@
 import 'package:stacked/stacked_annotations.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:stacked_themes/stacked_themes.dart';
-import 'package:webblen/services/agora/agora_live_stream_service.dart';
 import 'package:webblen/services/algolia/algolia_search_service.dart';
 import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
@@ -23,6 +22,8 @@ import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dar
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/firestore/data/user_preference_data_service.dart';
+import 'package:webblen/services/live_streaming/agora/agora_live_stream_service.dart';
+import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
@@ -30,6 +31,7 @@ import 'package:webblen/services/permission_handler/permission_handler_service.d
 import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
 import 'package:webblen/services/reactive/file_uploader/reactive_file_uploader_service.dart';
 import 'package:webblen/services/reactive/in_app_purchases/reactive_in_app_purchase_service.dart';
+import 'package:webblen/services/reactive/mini_video_player/reactive_mini_video_player_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 import 'package:webblen/services/share/share_service.dart';
 import 'package:webblen/services/stripe/stripe_connect_account_service.dart';
@@ -76,7 +78,9 @@ import 'package:webblen/ui/views/users/followers/user_followers_view.dart';
 import 'package:webblen/ui/views/users/following/user_following_view.dart';
 import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
 import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
+import 'package:webblen/ui/views/video_player/standard/standard_video_player_view.dart';
 import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
+import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_model.dart';
 
 @StackedApp(
   routes: [
@@ -173,6 +177,7 @@ import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
       path: "/streams/:id",
       durationInMilliseconds: 0,
     ),
+
     CustomRoute(
       page: CreateLiveStreamView,
       name: "CreateLiveStreamViewRoute",
@@ -189,6 +194,14 @@ import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
       page: LiveStreamViewerView,
       name: "LiveStreamViewerViewRoute",
       path: "/streams/viewer/:id",
+      durationInMilliseconds: 0,
+    ),
+
+    //VIDEO
+    CustomRoute(
+      page: StandardVideoPlayerView,
+      name: "StandardVideoPlayerViewRoute",
+      path: "/video/:id",
       durationInMilliseconds: 0,
     ),
 
@@ -394,10 +407,13 @@ import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
     LazySingleton(classType: UserPreferenceDataService),
     LazySingleton(classType: GiftDonationDataService),
     LazySingleton(classType: AgoraLiveStreamService),
+    LazySingleton(classType: MuxLiveStreamService),
+    LazySingleton(classType: MiniVideoPlayerViewModel),
 
     //REACTIVE LAZY SINGLETONS
     LazySingleton(classType: ReactiveUserService),
     LazySingleton(classType: ReactiveContentFilterService),
+    LazySingleton(classType: ReactiveMiniVideoPlayerService),
     LazySingleton(classType: ReactiveFileUploaderService),
     LazySingleton(classType: ReactiveInAppPurchaseService),
 

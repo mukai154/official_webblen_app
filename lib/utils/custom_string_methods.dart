@@ -37,7 +37,7 @@ bool isValidPassword(String val) {
 
 bool isValidString(String? val) {
   bool isValid = true;
-  if (val == null || val.isEmpty) {
+  if (val == null || val.trim().isEmpty) {
     isValid = false;
   }
   return isValid;

@@ -15,7 +15,7 @@ import 'comment_text_field_view_model.dart';
 
 class CommentTextFieldView extends StatelessWidget {
   final String contentID;
-  final FocusNode focusNode;
+  final FocusNode? focusNode;
   final bool isReplying;
   final String? replyReceiverUsername;
   final TextEditingController commentTextController;
@@ -183,7 +183,7 @@ class CommentTextFieldView extends StatelessWidget {
                           onSuggestionSelected: (user) {
                             if (user is WebblenUser) {
                               model.addUserToMentions(user);
-                              focusNode.requestFocus();
+                              focusNode!.requestFocus();
                               int cursorPosition = commentTextController.selection.baseOffset;
                               String startOfString = commentTextController.text.substring(0, cursorPosition - 1);
                               String endOfString = commentTextController.text.substring(cursorPosition - 1, commentTextController.text.length - 1);

@@ -9,20 +9,16 @@ import 'package:webblen/enums/bottom_sheet_type.dart';
 import 'package:webblen/models/webblen_live_stream.dart';
 import 'package:webblen/models/webblen_stream_chat_message.dart';
 import 'package:webblen/models/webblen_user.dart';
-import 'package:webblen/services/agora/agora_live_stream_service.dart';
-import 'package:webblen/services/auth/auth_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
-import 'package:webblen/services/firestore/data/platform_data_service.dart';
+import 'package:webblen/services/live_streaming/agora/agora_live_stream_service.dart';
+import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
 import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 
 class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
-  AuthService? _authService = locator<AuthService>();
-  DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
-  PlatformDataService _platformDataService = locator<PlatformDataService>();
   LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
@@ -31,6 +27,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   CustomNavigationService customNavigationService = locator<CustomNavigationService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   AgoraLiveStreamService _agoraLiveStreamService = locator<AgoraLiveStreamService>();
+  MuxLiveStreamService _muxLiveStreamService = locator<MuxLiveStreamService>();
 
   ///USER DATA
   WebblenUser get user => _reactiveUserService.user;
@@ -48,6 +45,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   bool endingStream = false;
   List users = <int>[];
   String appID = '60693de17bbe4f2598f9f465d1695de1';
+  String muxStreamURL = 'rtmps://global-live.mux.com:443/app/';
 
   ///CHAT
   int startChatAfterTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
@@ -149,44 +147,43 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   }
 
   publishStreams(int uid) async {
-    LiveTranscoding transcoding = _agoraLiveStreamService.configureTranscoding(uid);
-    await agoraRtcEngine.setLiveTranscoding(transcoding);
+    String? muxStreamKey;
+    String? muxStreamID;
+    String? muxAssetPlaybackID;
+    if (webblenLiveStream.muxStreamKey == null) {
+      Map<String, dynamic>? muxData = await _muxLiveStreamService.createMuxStream(stream: webblenLiveStream);
+      if (muxData != null) {
+        muxStreamID = muxData['id'];
+        muxStreamKey = muxData['stream_key'];
+        muxAssetPlaybackID = muxData['playback_ids'][0]['id'];
+        await _liveStreamDataService.updateStreamMuxStreamKey(
+          streamID: webblenLiveStream.id!,
+          muxStreamID: muxStreamID!,
+          muxStreamKey: muxStreamKey!,
+          muxAssetPlaybackID: muxAssetPlaybackID!,
+        );
+      }
+    } else {
+      muxStreamID = webblenLiveStream.muxStreamID;
+      muxStreamKey = webblenLiveStream.muxStreamKey;
+    }
 
-    if (webblenLiveStream.twitchStreamURL != null &&
-        webblenLiveStream.twitchStreamURL!.isNotEmpty &&
-        webblenLiveStream.twitchStreamKey != null &&
-        webblenLiveStream.twitchStreamKey!.isNotEmpty) {
-      if (!webblenLiveStream.twitchStreamURL!.endsWith("/")) {
-        webblenLiveStream.twitchStreamURL = webblenLiveStream.twitchStreamURL! + "/";
-      }
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.twitchStreamURL! + webblenLiveStream.twitchStreamKey!, true).catchError((e) {
-        print(e);
-      });
+    await Future.delayed(Duration(seconds: 3));
+
+    ///stream to mux
+    if (muxStreamID != null) {
+      agoraRtcEngine.addPublishStreamUrl(muxStreamURL + muxStreamKey!, false);
     }
-    if (webblenLiveStream.fbStreamURL != null &&
-        webblenLiveStream.fbStreamURL!.isNotEmpty &&
-        webblenLiveStream.fbStreamKey != null &&
-        webblenLiveStream.fbStreamKey!.isNotEmpty) {
-      if (!webblenLiveStream.fbStreamURL!.endsWith("/")) {
-        webblenLiveStream.fbStreamURL = webblenLiveStream.fbStreamURL! + "/";
-      }
-      print('attempt facebook publish...');
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.fbStreamURL! + webblenLiveStream.fbStreamKey!, true).onError((error, stackTrace) {
-        print(error.toString());
-      }).catchError((e) {
-        print(e);
-      });
+    if (webblenLiveStream.twitchStreamKey != null && webblenLiveStream.twitchStreamKey!.isNotEmpty) {
+      agoraRtcEngine.addPublishStreamUrl("rtmp://ord02.contribute.live-video.net/app/" + webblenLiveStream.twitchStreamKey!, false);
     }
-    if (webblenLiveStream.youtubeStreamURL != null &&
-        webblenLiveStream.youtubeStreamURL!.isNotEmpty &&
-        webblenLiveStream.youtubeStreamKey != null &&
-        webblenLiveStream.youtubeStreamKey!.isNotEmpty) {
-      if (!webblenLiveStream.youtubeStreamURL!.endsWith("/")) {
-        webblenLiveStream.youtubeStreamURL = webblenLiveStream.youtubeStreamURL! + "/";
-      }
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.youtubeStreamURL! + webblenLiveStream.youtubeStreamKey!, true).catchError((e) {
-        print(e);
-      });
+    if (webblenLiveStream.youtubeStreamKey != null && webblenLiveStream.youtubeStreamKey!.isNotEmpty) {
+      agoraRtcEngine.addPublishStreamUrl("rtmp://a.rtmp.youtube.com/live2/" + webblenLiveStream.youtubeStreamKey!, false);
+    }
+    if (webblenLiveStream.fbStreamKey != null && webblenLiveStream.fbStreamKey!.isNotEmpty) {
+      LiveTranscoding transcoding = _agoraLiveStreamService.configureTranscoding(uid);
+      await agoraRtcEngine.setLiveTranscoding(transcoding);
+      agoraRtcEngine.addPublishStreamUrl("rtmps://live-api-s.facebook.com:443/rtmp/" + webblenLiveStream.fbStreamKey!, true);
     }
   }
 

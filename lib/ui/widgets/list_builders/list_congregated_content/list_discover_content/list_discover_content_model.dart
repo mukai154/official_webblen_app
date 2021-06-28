@@ -353,6 +353,7 @@ class ListDiscoverContentModel extends ReactiveViewModel {
     WebblenLiveStream stream = WebblenLiveStream.fromMap(data);
     return LiveStreamBlockView(
       stream: stream,
+      canOpenMiniVideoPlayer: true,
       showStreamOptions: (stream) => showContentOptions(stream),
     );
   }
