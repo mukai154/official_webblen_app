@@ -1,31 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webblen/models/webblen_check_in.dart';
 
 import 'package:webblen/utils/custom_string_methods.dart';
-
-class CheckIn {
-  String? uid;
-  int? checkInTimeInMilliseconds;
-  int? checkOutTimeInMilliseconds;
-
-  CheckIn({
-    this.uid,
-    this.checkInTimeInMilliseconds,
-    this.checkOutTimeInMilliseconds,
-  });
-
-  CheckIn.fromMap(Map<String, dynamic> data)
-      : this(
-          uid: data['uid'],
-          checkInTimeInMilliseconds: data['checkInTimeInMilliseconds'],
-          checkOutTimeInMilliseconds: data['checkOutTimeInMilliseconds'],
-        );
-
-  Map<String, dynamic> toMap() => {
-        'uid': uid,
-        'checkInTimeInMilliseconds': checkInTimeInMilliseconds,
-        'checkOutTimeInMilliseconds': checkOutTimeInMilliseconds,
-      };
-}
 
 class WebblenEvent {
   String? id;
@@ -54,7 +30,7 @@ class WebblenEvent {
   int? estimatedTurnout;
   int? actualTurnout;
   List? attendees;
-  List<CheckIn>? checkIns;
+  List<WebblenCheckIn>? webblenCheckIns;
   double? payout;
   String? recurrence;
   int? startDateTimeInMilliseconds;
@@ -99,7 +75,7 @@ class WebblenEvent {
     this.estimatedTurnout,
     this.actualTurnout,
     this.attendees,
-    this.checkIns,
+    this.webblenCheckIns,
     this.payout,
     this.recurrence,
     this.startDateTimeInMilliseconds,
@@ -146,10 +122,10 @@ class WebblenEvent {
           estimatedTurnout: data['estimatedTurnout'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
-          checkIns: data['checkIns'] != null
+          webblenCheckIns: data['checkIns'] != null
               ? data['checkIns']
-                  .map((cert) => CheckIn.fromMap(cert))
-                  .cast<CheckIn>()
+                  .map((cert) => WebblenCheckIn.fromMap(cert))
+                  .cast<WebblenCheckIn>()
                   .toList()
               : [],
           payout: data['payout'] == null ? null : data['payout'] * 1.001,
@@ -197,8 +173,8 @@ class WebblenEvent {
         'estimatedTurnout': this.estimatedTurnout,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
-        'checkIns': checkIns != null
-            ? checkIns!.map((cert) => cert.toMap()).toList()
+        'webblenCheckIns': webblenCheckIns != null
+            ? webblenCheckIns!.map((cert) => cert.toMap()).toList()
             : [],
         'eventPayout': this.payout,
         'recurrence': this.recurrence,
@@ -233,7 +209,7 @@ class WebblenEvent {
       tags: [],
       savedBy: [],
       attendees: [],
-      checkIns: [],
+      webblenCheckIns: [],
       clicks: 0,
       estimatedTurnout: 0,
     );

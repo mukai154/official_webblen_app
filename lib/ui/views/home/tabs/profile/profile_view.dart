@@ -28,17 +28,14 @@ class ProfileView extends StatelessWidget {
             child: Column(
               children: [
                 _ProfileHead(),
+                ElevatedButton(
+                  onPressed: () => model.startEarningWebblen(),
+                  child: Text('Get webblen lmao'),
+                ),
                 _ProfileBody(
                   user: model.user,
                 ),
-                ElevatedButton(
-                  onPressed: () => model.generateHotWallet(),
-                  child: Text('generate hotwallet'),
-                ),
-                ElevatedButton(
-                  onPressed: () => model.generateEscrowHotWallets(),
-                  child: Text('create 100 escrow wallets'),
-                ),
+                
               ],
             ),
           ),

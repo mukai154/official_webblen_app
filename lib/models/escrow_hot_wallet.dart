@@ -21,8 +21,8 @@ class EscrowHotWallet {
           activeEventId: data['activeEventId'],
           address: data['address'],
           passphrase: data['passphrase'],
-          webblenAmount: data['webblenAmount'],
-          algoAmount: data['algoAmount'],
+          webblenAmount: data['webblenAmount'].toDouble(),
+          algoAmount: data['algoAmount'].toDouble(),
         );
 
   Map<String, dynamic> toMap() => {

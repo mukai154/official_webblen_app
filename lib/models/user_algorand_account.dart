@@ -44,8 +44,8 @@ class UserAlgorandAccount {
           uid: data['uid'],
           address: data['address'],
           passphrase: data['passphrase'],
-          webblenAmount: data['webblenAmount'],
-          algoAmount: data['algoAmount'],
+          webblenAmount: data['webblenAmount'].toDouble(),
+          algoAmount: data['algoAmount'].toDouble(),
           assetIds: data['certifications'] != null
               ? data['assetIds']
                   .map((cert) => AssetId.fromMap(cert))

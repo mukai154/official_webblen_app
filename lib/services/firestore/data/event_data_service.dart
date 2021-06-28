@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/app/app.locator.dart';
+import 'package:webblen/models/webblen_check_in.dart';
 import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_event_ticket.dart';
 import 'package:webblen/models/webblen_ticket_distro.dart';
@@ -169,24 +170,43 @@ class EventDataService {
     if (snapshot.exists) {
       WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
 
-      List<CheckIn> checkIns = event.checkIns != null ? event.checkIns! : [];
+      List<WebblenCheckIn> checkIns =
+          event.webblenCheckIns != null ? event.webblenCheckIns! : [];
 
       // check if user already checked in to an event
       if (user.isCheckedIntoEvent!) {
-        checkedInToThisEvent = false;
         return checkedInToThisEvent;
       }
 
-      CheckIn newCheckIn = CheckIn(
-        uid: user.id,
-        checkInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
-        checkOutTimeInMilliseconds: null,
+      // Find if user has already checked into this event
+      WebblenCheckIn checkInResult = checkIns.singleWhere(
+        (checkIn) => checkIn.uid == user.id,
+        orElse: () => WebblenCheckIn(uid: ''),
       );
 
-      checkIns.add(newCheckIn);
+      // If user has already checked into this event, add to their check in data
+      if (checkInResult.uid != null) {
+        List<CheckInData> userCheckInData = checkInResult.checkInData!;
+        CheckInData newCheckIn = CheckInData(
+          checkInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+          checkOutTimeInMilliseconds: null,
+        );
+        userCheckInData.add(newCheckIn);
+        checkIns[checkIns.indexWhere((checkIn) => checkIn.uid == user.id)] =
+            checkInResult;
+        // Otherwise create a new check in
+      } else {
+        WebblenCheckIn newCheckIn = WebblenCheckIn(uid: user.id, checkInData: [
+          CheckInData(
+            checkInTimeInMilliseconds: DateTime.now().millisecondsSinceEpoch,
+            checkOutTimeInMilliseconds: null,
+          )
+        ]);
+        checkIns.add(newCheckIn);
+      }
 
       await eventsRef.doc(eventID).update({
-        'checkIns': checkIns,
+        'webblenCheckIns': checkIns,
       });
 
       await usersRef.doc(user.id).update({
@@ -220,46 +240,116 @@ class EventDataService {
     if (snapshot.exists) {
       WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
 
-      List<CheckIn> checkIns = event.checkIns != null ? event.checkIns! : [];
+      List<WebblenCheckIn> checkIns =
+          event.webblenCheckIns != null ? event.webblenCheckIns! : [];
 
       // Check to see if user is already checked out
       if (!user.isCheckedIntoEvent!) {
-        checkedOutOfThisEvent = false;
         return checkedOutOfThisEvent;
       }
 
-      // Finds the relevant CheckIn instance the user should check out of
-      CheckIn checkInToCheckOutOf = checkIns.singleWhere(
-        (checkIn) =>
-            checkIn.uid == user.id &&
-            checkIn.checkOutTimeInMilliseconds == null,
+      // Finds the relevant WebblenCheckIn instance the user should check out of
+      WebblenCheckIn checkInToCheckOutOfResult = checkIns.singleWhere(
+        (checkIn) => checkIn.uid == user.id,
+        orElse: () => WebblenCheckIn(uid: ''),
       );
 
-      int currentTime = DateTime.now().millisecondsSinceEpoch;
+      if (checkInToCheckOutOfResult.uid != '') {
+        List<CheckInData> userCheckInData =
+            checkInToCheckOutOfResult.checkInData!;
 
-      // Adds check out time to CheckIn instace,
-      // if checked out after event end time then event end time is added instead
-      if (currentTime > event.endDateTimeInMilliseconds!) {
-        checkInToCheckOutOf.checkOutTimeInMilliseconds =
-            event.endDateTimeInMilliseconds;
+        // Finds the check in data that's null to fill in
+        CheckInData unCompletedCheckInResult = userCheckInData.singleWhere(
+          (val) => val.checkOutTimeInMilliseconds == null,
+          orElse: () => CheckInData(
+            checkInTimeInMilliseconds: 0,
+          ),
+        );
+
+        if (unCompletedCheckInResult.checkInTimeInMilliseconds != 0) {
+          int currentTime = DateTime.now().millisecondsSinceEpoch;
+
+          // Adds check out time to CheckIn instace,
+          // if checked out after event end time then event end time is added instead
+          if (currentTime > event.endDateTimeInMilliseconds!) {
+            unCompletedCheckInResult.checkOutTimeInMilliseconds =
+                event.endDateTimeInMilliseconds;
+          } else {
+            unCompletedCheckInResult.checkOutTimeInMilliseconds = currentTime;
+          }
+
+          // Updates check in data list entry
+          userCheckInData[userCheckInData.indexWhere(
+            (val) =>
+                val.checkInTimeInMilliseconds ==
+                unCompletedCheckInResult.checkInTimeInMilliseconds,
+          )] = unCompletedCheckInResult;
+
+          // Updates webbldn check in entry
+          checkIns[checkIns.indexWhere((checkIn) => checkIn.uid == user.id)] =
+              checkInToCheckOutOfResult;
+        } else {
+          print('1: There was an error in check out function');
+        }
       } else {
-        checkInToCheckOutOf.checkOutTimeInMilliseconds = currentTime;
+        print('2: There was an error in the check out function');
       }
-
-      // Updates list entry
-      checkIns[checkIns.indexWhere((checkIn) =>
-          checkIn.uid == user.id &&
-          checkIn.checkOutTimeInMilliseconds == null)] = checkInToCheckOutOf;
 
       // Updates event doc
       await eventsRef.doc(eventID).update({
-        'checkIns': checkIns,
+        'webblenCheckIns': checkIns,
       });
+
+      // await usersRef.doc(user.id).update({
+      //   'isCheckedIntoEvent': false,
+      // });
 
       checkedOutOfThisEvent = true;
     }
 
     return checkedOutOfThisEvent;
+  }
+
+  Future<bool> isCheckedIntoThisEvent({
+    required WebblenUser user,
+    required String eventID,
+  }) async {
+    bool isCheckedintoThisEvent = false;
+    DocumentSnapshot snapshot =
+        await eventsRef.doc(eventID).get().catchError((e) {
+      _customDialogService.showErrorDialog(
+          description:
+              "There was an error checking out of this stream. Please try again.");
+    });
+    if (snapshot.exists) {
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+
+      List<WebblenCheckIn> checkIns =
+          event.webblenCheckIns != null ? event.webblenCheckIns! : [];
+
+      // Finds the relevant CheckIn instance the user should check out of
+      final checkInToCheckOutOfResult = checkIns.singleWhere(
+          (checkIn) => checkIn.uid == user.id,
+          orElse: () => WebblenCheckIn(uid: ''));
+
+      // If the user is currently checked into event or has checked into event in the past
+      if (checkInToCheckOutOfResult.uid != '') {
+        for (CheckInData checkInData
+            in checkInToCheckOutOfResult.checkInData!) {
+          // If user has not checkout of event (meaning they're checked in)
+          if (checkInData.checkOutTimeInMilliseconds == null) {
+            isCheckedintoThisEvent = true;
+          // Otherwise the user has checked into event in the past but is not currently checked in
+          } else {
+            isCheckedintoThisEvent = false;
+          }
+        }
+        // The user has never checked into this event
+      } else {
+        isCheckedintoThisEvent = false;
+      }
+    }
+    return isCheckedintoThisEvent;
   }
 
   Future reportEvent(

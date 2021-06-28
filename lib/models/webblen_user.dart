@@ -11,6 +11,7 @@ class WebblenUser {
   String? emailAddress;
   int? eventsToLvlUp;
   bool? isCheckedIntoEvent;
+  bool? isCheckedIntoStream;
   String? fbAccessToken;
   List? mutedBy;
   List? followers;
@@ -40,6 +41,7 @@ class WebblenUser {
     this.emailAddress,
     this.eventsToLvlUp,
     this.isCheckedIntoEvent,
+    this.isCheckedIntoStream,
     this.fbAccessToken,
     this.mutedBy,
     this.followers,
@@ -70,6 +72,7 @@ class WebblenUser {
           emailAddress: data['emailAddress'],
           eventsToLvlUp: data['eventsToLvlUp'],
           isCheckedIntoEvent: data['isCheckedIntoEvent'],
+          isCheckedIntoStream: data['isCheckedIntoStream'],
           fbAccessToken: data['fbAccessToken'],
           mutedBy: data['mutedBy'],
           followers: data['followers'],
@@ -99,6 +102,7 @@ class WebblenUser {
         'emailAddress': this.emailAddress,
         'eventsToLvlUp': this.eventsToLvlUp,
         'isCheckedIntoEvent': this.isCheckedIntoEvent,
+        'isCheckedIntoStream': this.isCheckedIntoStream,
         'fbAccessToken': this.fbAccessToken,
         'mutedBy': mutedBy,
         'followers': this.followers,
@@ -132,6 +136,7 @@ class WebblenUser {
       emailAddress: null,
       eventsToLvlUp: 20,
       isCheckedIntoEvent: false,
+      isCheckedIntoStream: false,
       fbAccessToken: null,
       mutedBy: [],
       followers: [],

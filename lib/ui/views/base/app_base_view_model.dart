@@ -115,35 +115,35 @@ class AppBaseViewModel extends StreamViewModel<WebblenUser> with ReactiveService
     }
 
     //check maintenance status
-    bool underMaintenance = await _platformDataService.isUnderMaintenance();
-    if (underMaintenance) {
-      bool isAdmin = await _userDataService.checkIfCurrentUserIsAdmin(user.id!);
-      if (!isAdmin) {
-        initErrorStatus = InitErrorStatus.underMaintenance;
-        notifyListeners();
-        _snackbarService!.showSnackbar(
-          title: 'Servers Currently Under Maintenance',
-          message: "Please Try Again Later",
-          duration: Duration(seconds: 5),
-        );
-        setBusy(false);
-        return;
-      }
-    }
+    // bool underMaintenance = await _platformDataService.isUnderMaintenance();
+    // if (underMaintenance) {
+    //   bool isAdmin = await _userDataService.checkIfCurrentUserIsAdmin(user.id!);
+    //   if (!isAdmin) {
+    //     initErrorStatus = InitErrorStatus.underMaintenance;
+    //     notifyListeners();
+    //     _snackbarService!.showSnackbar(
+    //       title: 'Servers Currently Under Maintenance',
+    //       message: "Please Try Again Later",
+    //       duration: Duration(seconds: 5),
+    //     );
+    //     setBusy(false);
+    //     return;
+    //   }
+    // }
 
     //check update status
-    bool updateRequired = await _platformDataService.isUpdateAvailable();
-    if (updateRequired) {
-      initErrorStatus = InitErrorStatus.underMaintenance;
-      notifyListeners();
-      _snackbarService!.showSnackbar(
-        title: 'Update Required',
-        message: "Please Update Webblen to Continue",
-        duration: Duration(seconds: 5),
-      );
-      setBusy(false);
-      return;
-    }
+    // bool updateRequired = await _platformDataService.isUpdateAvailable();
+    // if (updateRequired) {
+    //   initErrorStatus = InitErrorStatus.underMaintenance;
+    //   notifyListeners();
+    //   _snackbarService!.showSnackbar(
+    //     title: 'Update Required',
+    //     message: "Please Update Webblen to Continue",
+    //     duration: Duration(seconds: 5),
+    //   );
+    //   setBusy(false);
+    //   return;
+    // }
 
     //check gps permissions
     bool locationGranted = await getLocationDetails();

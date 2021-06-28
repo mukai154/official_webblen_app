@@ -23,14 +23,18 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   DialogService? _dialogService = locator<DialogService>();
   NavigationService? _navigationService = locator<NavigationService>();
   PlatformDataService _platformDataService = locator<PlatformDataService>();
-  LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
+  LiveStreamDataService _liveStreamDataService =
+      locator<LiveStreamDataService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
-  LiveStreamChatDataService? _liveStreamChatDataService = locator<LiveStreamChatDataService>();
+  LiveStreamChatDataService? _liveStreamChatDataService =
+      locator<LiveStreamChatDataService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
-  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  CustomNavigationService customNavigationService =
+      locator<CustomNavigationService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
-  AgoraLiveStreamService _agoraLiveStreamService = locator<AgoraLiveStreamService>();
+  AgoraLiveStreamService _agoraLiveStreamService =
+      locator<AgoraLiveStreamService>();
 
   ///USER DATA
   WebblenUser get user => _reactiveUserService.user;
@@ -60,13 +64,15 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     setBusy(true);
 
     //Set Device Orientation
-    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
     //get stream data
     if (id.isEmpty) {
       _snackbarService!.showSnackbar(
         title: 'Stream Error',
-        message: "There was an unknown error starting your stream. Please try again later.",
+        message:
+            "There was an unknown error starting your stream. Please try again later.",
         duration: Duration(seconds: 5),
       );
       _navigationService!.back();
@@ -76,7 +82,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       if (!webblenLiveStream.isValid()) {
         _snackbarService!.showSnackbar(
           title: 'Stream Error',
-          message: "There was an unknown error starting your stream. Please try again later.",
+          message:
+              "There was an unknown error starting your stream. Please try again later.",
           duration: Duration(seconds: 5),
         );
         _navigationService!.back();
@@ -85,7 +92,11 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     }
 
     //join chat
-    _liveStreamChatDataService!.joinChatStream(streamID: webblenLiveStream.id, uid: user.id, isHost: true, username: user.username);
+    _liveStreamChatDataService!.joinChatStream(
+        streamID: webblenLiveStream.id,
+        uid: user.id,
+        isHost: true,
+        username: user.username);
   }
 
   Future<bool> initializeAgoraRtc() async {
@@ -99,7 +110,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     notifyListeners();
 
     await setAgoraRtcEventHandlers();
-    VideoEncoderConfiguration vidConfig = _agoraLiveStreamService.getVideoConfig();
+    VideoEncoderConfiguration vidConfig =
+        _agoraLiveStreamService.getVideoConfig();
 
     await agoraRtcEngine.setVideoEncoderConfiguration(vidConfig);
     await agoraRtcEngine.enableVideo();
@@ -109,9 +121,11 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
 
-    String? token = await _agoraLiveStreamService.generateStreamToken(channelName: webblenLiveStream.id!, uid: user.id!, role: "PUBLISHER");
+    String? token = await _agoraLiveStreamService.generateStreamToken(
+        channelName: webblenLiveStream.id!, uid: user.id!, role: "PUBLISHER");
     if (token != null) {
-      await agoraRtcEngine.joinChannelWithUserAccount(token, webblenLiveStream.id!, user.id!);
+      await agoraRtcEngine.joinChannelWithUserAccount(
+          token, webblenLiveStream.id!, user.id!);
     } else {
       initialized = false;
     }
@@ -149,7 +163,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   }
 
   publishStreams(int uid) async {
-    LiveTranscoding transcoding = _agoraLiveStreamService.configureTranscoding(uid);
+    LiveTranscoding transcoding =
+        _agoraLiveStreamService.configureTranscoding(uid);
     await agoraRtcEngine.setLiveTranscoding(transcoding);
 
     if (webblenLiveStream.twitchStreamURL != null &&
@@ -157,9 +172,15 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
         webblenLiveStream.twitchStreamKey != null &&
         webblenLiveStream.twitchStreamKey!.isNotEmpty) {
       if (!webblenLiveStream.twitchStreamURL!.endsWith("/")) {
-        webblenLiveStream.twitchStreamURL = webblenLiveStream.twitchStreamURL! + "/";
+        webblenLiveStream.twitchStreamURL =
+            webblenLiveStream.twitchStreamURL! + "/";
       }
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.twitchStreamURL! + webblenLiveStream.twitchStreamKey!, true).catchError((e) {
+      agoraRtcEngine
+          .addPublishStreamUrl(
+              webblenLiveStream.twitchStreamURL! +
+                  webblenLiveStream.twitchStreamKey!,
+              true)
+          .catchError((e) {
         print(e);
       });
     }
@@ -171,7 +192,11 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
         webblenLiveStream.fbStreamURL = webblenLiveStream.fbStreamURL! + "/";
       }
       print('attempt facebook publish...');
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.fbStreamURL! + webblenLiveStream.fbStreamKey!, true).onError((error, stackTrace) {
+      agoraRtcEngine
+          .addPublishStreamUrl(
+              webblenLiveStream.fbStreamURL! + webblenLiveStream.fbStreamKey!,
+              true)
+          .onError((error, stackTrace) {
         print(error.toString());
       }).catchError((e) {
         print(e);
@@ -182,9 +207,15 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
         webblenLiveStream.youtubeStreamKey != null &&
         webblenLiveStream.youtubeStreamKey!.isNotEmpty) {
       if (!webblenLiveStream.youtubeStreamURL!.endsWith("/")) {
-        webblenLiveStream.youtubeStreamURL = webblenLiveStream.youtubeStreamURL! + "/";
+        webblenLiveStream.youtubeStreamURL =
+            webblenLiveStream.youtubeStreamURL! + "/";
       }
-      agoraRtcEngine.addPublishStreamUrl(webblenLiveStream.youtubeStreamURL! + webblenLiveStream.youtubeStreamKey!, true).catchError((e) {
+      agoraRtcEngine
+          .addPublishStreamUrl(
+              webblenLiveStream.youtubeStreamURL! +
+                  webblenLiveStream.youtubeStreamKey!,
+              true)
+          .catchError((e) {
         print(e);
       });
     }
@@ -226,7 +257,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
         message: text,
         timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       );
-      _liveStreamChatDataService!.sendStreamChatMessage(streamID: webblenLiveStream.id, message: message);
+      _liveStreamChatDataService!.sendStreamChatMessage(
+          streamID: webblenLiveStream.id, message: message);
     }
     messageFieldController.clear();
     notifyListeners();
@@ -237,6 +269,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     try {
       agoraRtcEngine.leaveChannel();
       agoraRtcEngine.destroy();
+      _liveStreamDataService.endStream(streamID: webblenLiveStream.id!);
     } catch (e) {}
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _navigationService!.back();
@@ -259,7 +292,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
               if (!setEventHandlers) {
                 _snackbarService!.showSnackbar(
                   title: 'Stream Error',
-                  message: "There was an unknown error starting your stream. Please try again later.",
+                  message:
+                      "There was an unknown error starting your stream. Please try again later.",
                   duration: Duration(seconds: 5),
                 );
               }
@@ -267,7 +301,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
             } else {
               _snackbarService!.showSnackbar(
                 title: 'Stream Error',
-                message: "There was an unknown error starting your stream. Please try again later.",
+                message:
+                    "There was an unknown error starting your stream. Please try again later.",
                 duration: Duration(seconds: 5),
               );
             }

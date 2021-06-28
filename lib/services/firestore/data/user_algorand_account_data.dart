@@ -1,5 +1,7 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:webblen/app/app.locator.dart';
 import 'package:webblen/models/user_algorand_account.dart';
@@ -16,29 +18,30 @@ class UserAlgorandAccountDataService {
       locator<AlgorandTransactionDataService>();
   HotWalletDataService _hotWalletDataService = locator<HotWalletDataService>();
 
-  Future<void> createUserAlgorandAccount({required String uid}) async {
-    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'createAlgorandAccount',
-    );
-    final HttpsCallableResult result = await callable.call().catchError((e) {
-      print(e);
-    });
-    if (result.data != null) {
+  Future<void> createUserAlgorandAccount(String uid) async {
+    final response = await http.get(Uri.parse(
+        'https://us-central1-webblen-events.cloudfunctions.net/createAlgorandAccount'));
+
+    if (response.statusCode == 200) {
+      String id = getRandomString(30);
+      Map<String, dynamic> result = jsonDecode(response.body);
       final userAlgorandAccount = UserAlgorandAccount(
-        id: getRandomString(30),
+        id: id,
         uid: uid,
-        address: result.data['user_address'],
-        passphrase: result.data['user_passphrase'],
+        address: result['user_address'],
+        passphrase: result['user_passphrase'],
         webblenAmount: 0,
         algoAmount: 0,
         assetIds: [],
       );
       await userAlgorandAccountRef
-          .doc()
+          .doc(id)
           .set(userAlgorandAccount.toMap())
           .catchError((e) {
         return e.message;
       });
+    } else {
+      throw Exception('Failed to create hot wallet');
     }
   }
 
@@ -86,41 +89,56 @@ class UserAlgorandAccountDataService {
   Future<void> sendAlgosToNewAccount(String uid) async {
     final hotWallet = await _hotWalletDataService.getMostAlgoFundedHotWallet();
     final userAlgorandAccount = await getUserAlgorandAccountByUID(uid);
-    // Current this is hardcoded as 2,000,000 micro algos or 2 Algos for short
-    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'sendAlgosToNewAccount',
+
+    print('most funded algo wallet id: ${hotWallet.id}');
+
+    // Currently this is hardcoded as 2,000,000 micro algos or 2 Algos for short
+    final response = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/sendAlgosToNewAccount'),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': hotWallet.passphrase,
+        'receiver_address': userAlgorandAccount.address,
+      }),
     );
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{
-      'sender_passphrase': hotWallet.passphrase,
-      "receiver_address": userAlgorandAccount.address,
-    }).catchError((e) {
-      print(e);
-    });
-    if (result.data != null) {
+    if (response.statusCode == 200) {
+      Map<String, dynamic> result = jsonDecode(response.body);
+
       await _algorandTransactionDataService.saveAlgorandTransaction(
-        txid: result.data['txid'],
-        senderAlgorandAddress: result.data['sender_address'],
-        receiverAlgorandAddress: result.data['receiver_address'],
+        txid: result['txid'],
+        senderAlgorandAddress: result['sender_address'],
+        receiverAlgorandAddress: result['receiver_address'],
       );
+    } else {
+      throw Exception(
+          'sendAlgosToNewAccount failed. Status code: ${response.statusCode}');
     }
   }
 
   Future<void> webblenOptIn(String uid) async {
     final userAlgorandAccount = await getUserAlgorandAccountByUID(uid);
-    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'wblnOptIn',
+
+    final response = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/wblnOptIn'),
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': userAlgorandAccount.passphrase,
+      }),
     );
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{
-      'sender_passphrase': userAlgorandAccount.passphrase,
-    }).catchError((e) {
-      print(e);
-    });
-    if (result.data != null) {
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> result = jsonDecode(response.body);
       await _algorandTransactionDataService.saveAlgorandTransaction(
-        txid: result.data['txid'],
-        senderAlgorandAddress: result.data['sender_address'],
-        receiverAlgorandAddress: result.data['sender_address'],
+        txid: result['txid'],
+        senderAlgorandAddress: '',
+        receiverAlgorandAddress: '',
       );
+    } else {
+      throw Exception(
+          'webblenOptIn failed. Status code: ${response.statusCode}');
     }
   }
 
@@ -128,29 +146,39 @@ class UserAlgorandAccountDataService {
     final hotWallet =
         await _hotWalletDataService.getMostWebblenFundedHotWallet();
     final userAlgorandAccount = await getUserAlgorandAccountByUID(uid);
+
+    print('most funded webblen wallet id: ${hotWallet.id}');
+
     // Current this is hardcoded as 5,000,000 micro webblen or 5 Webblen for short
-    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'sendWblnToNewAccount',
+    final response = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/sendWblnToNewAccount'),
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': hotWallet.passphrase,
+        'receiver_address': userAlgorandAccount.address,
+      }),
     );
-    final HttpsCallableResult result = await callable.call(<String, dynamic>{
-      'sender_passphrase': hotWallet.passphrase,
-      "receiver_address": userAlgorandAccount.address,
-    }).catchError((e) {
-      print(e);
-    });
-    if (result.data != null) {
+
+    if (response.statusCode == 200) {
+      Map<String, dynamic> result = jsonDecode(response.body);
       await _algorandTransactionDataService.saveAlgorandTransaction(
-        txid: result.data['txid'],
-        senderAlgorandAddress: result.data['sender_address'],
-        receiverAlgorandAddress: result.data['receiver_address'],
+        txid: result['txid'],
+        senderAlgorandAddress: result['sender_address'],
+        receiverAlgorandAddress: result['receiver_address'],
       );
+    } else {
+      throw Exception(
+          'sendWebblenToNewAccount failed. Status code: ${response.statusCode}');
     }
   }
 
   Future<void> setUpUserAlgorandAccount(String uid) async {
-    await createUserAlgorandAccount(uid: uid);
+    // await createUserAlgorandAccount(uid);
     await sendAlgosToNewAccount(uid);
+    print('done 1');
     await webblenOptIn(uid);
+    print('done 2');
     await sendWebblenToNewAccount(uid);
+    print('done 3');
   }
 }

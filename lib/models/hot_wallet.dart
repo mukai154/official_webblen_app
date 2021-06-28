@@ -18,8 +18,8 @@ class HotWallet {
           id: data['id'],
           address: data['address'],
           passphrase: data['passphrase'],
-          webblenAmount: data['webblenAmount'],
-          algoAmount: data['algoAmount'],
+          webblenAmount: data['webblenAmount'].toDouble(),
+          algoAmount: data['algoAmount'].toDouble(),
         );
 
   Map<String, dynamic> toMap() => {

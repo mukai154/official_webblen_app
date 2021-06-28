@@ -1,11 +1,12 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:webblen/models/webblen_activity.dart';
 
 class ActivityDataService {
-  final CollectionReference activityRef = FirebaseFirestore.instance.collection("webblen_activity");
+  final CollectionReference activityRef =
+      FirebaseFirestore.instance.collection("webblen_activity");
 
   Future createActivity({required WebblenActivity activity}) async {
     await activityRef.doc(activity.id).set(activity.toMap()).catchError((e) {
@@ -32,10 +33,16 @@ class ActivityDataService {
     Query query;
     List<DocumentSnapshot> docs = [];
     if (personalActivity) {
-      query = activityRef.where('uid', isEqualTo: uid).orderBy('timePostedInMilliseconds', descending: true).limit(resultsLimit);
+      query = activityRef
+          .where('uid', isEqualTo: uid)
+          .orderBy('timePostedInMilliseconds', descending: true)
+          .limit(resultsLimit);
     } else {
-      query =
-          activityRef.where('uid', isEqualTo: uid).where('isPublic', isEqualTo: true).orderBy('timePostedInMilliseconds', descending: true).limit(resultsLimit);
+      query = activityRef
+          .where('uid', isEqualTo: uid)
+          .where('isPublic', isEqualTo: true)
+          .orderBy('timePostedInMilliseconds', descending: true)
+          .limit(resultsLimit);
     }
     QuerySnapshot snapshot = await query.get().catchError((e) {});
     if (snapshot.docs.isNotEmpty) {
@@ -53,8 +60,11 @@ class ActivityDataService {
     Query query;
     List<DocumentSnapshot> docs = [];
     if (personalActivity) {
-      query =
-          activityRef.where('uid', isEqualTo: uid).startAfterDocument(lastDocSnap).orderBy('timePostedInMilliseconds', descending: true).limit(resultsLimit);
+      query = activityRef
+          .where('uid', isEqualTo: uid)
+          .startAfterDocument(lastDocSnap)
+          .orderBy('timePostedInMilliseconds', descending: true)
+          .limit(resultsLimit);
     } else {
       query = activityRef
           .where('uid', isEqualTo: uid)

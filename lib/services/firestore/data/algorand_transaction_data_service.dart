@@ -17,7 +17,7 @@ class AlgorandTransactionDataService {
   }
 
   Future saveAlgorandTransaction({
-    required int txid,
+    required String txid,
     required String senderAlgorandAddress,
     required String receiverAlgorandAddress,
   }) async {

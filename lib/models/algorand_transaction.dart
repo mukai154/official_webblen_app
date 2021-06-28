@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AlgorandTransaction {
-  int? txid;
+  String? txid;
   String? senderAlgorandAddress;
   String? receiverAlgorandAddress;
   int? creationTimeInMilliseconds;

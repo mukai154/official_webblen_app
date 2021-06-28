@@ -16,8 +16,9 @@ class WebblenShopEntryDataService {
     required double price,
     required String transactionCurrency,
   }) async {
+    // TODO: Find better way to make a unique asset name
     // Mint NFT and return the newly created asset id
-    final newAssetId = await _nftService.mintNft(creatorUid: uid);
+    final newAssetId = await _nftService.mintNft(creatorUid: uid, assetName: title);
 
     // Add item to shop collection with the asset id and user shop input
     final webblenShopEntry = WebblenShopEntry(

@@ -1,6 +1,8 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:webblen/app/app.locator.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:webblen/models/escrow_hot_wallet.dart';
 import 'package:webblen/services/firestore/data/algorand_transaction_data_service.dart';
@@ -16,32 +18,34 @@ class EscrowHotWalletDataService {
       locator<AlgorandTransactionDataService>();
 
   Future<EscrowHotWallet> createEscrowWallet() async {
-    String id = getRandomString(30);
+    final response = await http.get(Uri.parse(
+        'https://us-central1-webblen-events.cloudfunctions.net/createAlgorandAccount'));
 
-    final HttpsCallable callable = FirebaseFunctions.instance.httpsCallable(
-      'createAlgorandAccount',
-    );
-    final HttpsCallableResult result = await callable.call().catchError((e) {
-      return e.message;
-    });
+    if (response.statusCode == 200) {
+      String id = getRandomString(30);
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      Map<String, dynamic> result = jsonDecode(response.body);
+      print(result);
+      EscrowHotWallet newEscrowHotWallet = EscrowHotWallet(
+        id: id,
+        activeEventId: '',
+        address: result['user_address'],
+        passphrase: result['user_passphrase'],
+        webblenAmount: 0,
+        algoAmount: 0,
+      );
 
-    EscrowHotWallet newEscrowHotWallet = EscrowHotWallet(
-      id: id,
-      activeEventId: '',
-      address: result.data['user_address'],
-      passphrase: result.data['user_passphrase'],
-      webblenAmount: 0,
-      algoAmount: 0,
-    );
-
-    await escrowHotWalletsRef
-        .doc(id)
-        .set(newEscrowHotWallet.toMap())
-        .catchError((e) {
-      return e.message;
-    });
-
-    return newEscrowHotWallet;
+      await escrowHotWalletsRef
+          .doc(id)
+          .set(newEscrowHotWallet.toMap())
+          .catchError((e) {
+        return e.message;
+      });
+      return newEscrowHotWallet;
+    } else {
+      throw Exception('Failed to create hot wallet');
+    }
   }
 
   Future<void> create100EscrowWallets() async {
@@ -101,47 +105,58 @@ class EscrowHotWalletDataService {
     coldStorageMicroWebblen += remainderMicroWebblen;
 
     // Fund escrow wallet
-    final HttpsCallable webblenForEvent =
-        FirebaseFunctions.instance.httpsCallable(
-      'sendWbln',
-    );
-    final HttpsCallableResult webblenForEventResult =
-        await webblenForEvent.call(<String, dynamic>{
-      'sender_passphrase': userAlgorandAccount.passphrase,
-      'receiver_address': availableEscrowHotWallet.address,
-      'WBLN_amount': eventMicroWebblen,
-    }).catchError((e) {
-      print(e);
-    });
-    // Save transaction into collection
-    await _algorandTransactionDataService.saveAlgorandTransaction(
-      txid: webblenForEventResult.data['txid'],
-      senderAlgorandAddress: webblenForEventResult.data['sender_address'],
-      receiverAlgorandAddress: webblenForEventResult.data['receiver_address'],
+    final escrowWalletResponse = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/sendWbln'),
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': userAlgorandAccount.passphrase,
+        'receiver_address': availableEscrowHotWallet.address,
+        'WBLN_amount': eventMicroWebblen,
+      }),
     );
 
-    // Fund cold storage
-    final HttpsCallable webblenForColdStorage =
-        FirebaseFunctions.instance.httpsCallable(
-      'sendWbln',
+    if (escrowWalletResponse.statusCode == 201) {
+      // If the server did return a 201 CREATED response,
+      // Save transaction into collection
+      Map<String, dynamic> result = jsonDecode(escrowWalletResponse.body);
+      await _algorandTransactionDataService.saveAlgorandTransaction(
+        txid: result['txid'],
+        senderAlgorandAddress: result['sender_address'],
+        receiverAlgorandAddress: result['receiver_address'],
+      );
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create album.');
+    }
+
+    // Fund cold storage wallet
+    final coldStorageResponse = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/sendWbln'),
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': userAlgorandAccount.passphrase,
+        // Cold storage address
+        'receiver_address':
+            'UXT53ITFZIIVS4MTG2UMCLX352N3YF5RZFEQA63VOO6CAYVZ3MZQ37QBVM',
+        'WBLN_amount': coldStorageMicroWebblen,
+      }),
     );
-    final HttpsCallableResult webblenForColdStorageResult =
-        await webblenForColdStorage.call(<String, dynamic>{
-      'sender_passphrase': userAlgorandAccount.passphrase,
-      // Cold storage address
-      'receiver_address':
-          'UXT53ITFZIIVS4MTG2UMCLX352N3YF5RZFEQA63VOO6CAYVZ3MZQ37QBVM',
-      'WBLN_amount': coldStorageMicroWebblen,
-    }).catchError((e) {
-      print(e);
-    });
-    // Save transaction into collection
-    await _algorandTransactionDataService.saveAlgorandTransaction(
-      txid: webblenForColdStorageResult.data['txid'],
-      senderAlgorandAddress: webblenForColdStorageResult.data['sender_address'],
-      receiverAlgorandAddress:
-          webblenForColdStorageResult.data['receiver_address'],
-    );
+
+    if (coldStorageResponse.statusCode == 201) {
+      // If the server did return a 201 CREATED response,
+      // Save transaction into collection
+      Map<String, dynamic> result = jsonDecode(coldStorageResponse.body);
+      await _algorandTransactionDataService.saveAlgorandTransaction(
+        txid: result['txid'],
+        senderAlgorandAddress: result['sender_address'],
+        receiverAlgorandAddress: result['receiver_address'],
+      );
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create album.');
+    }
   }
 
   Future<void> increaseEscrowHotWalletFund({
@@ -171,46 +186,57 @@ class EscrowHotWalletDataService {
     coldStorageMicroWebblen += remainderMicroWebblen;
 
     // Fund escrow wallet
-    final HttpsCallable webblenForEvent =
-        FirebaseFunctions.instance.httpsCallable(
-      'sendWbln',
-    );
-    final HttpsCallableResult webblenForEventResult =
-        await webblenForEvent.call(<String, dynamic>{
-      'sender_passphrase': userAlgorandAccount.passphrase,
-      'receiver_address': relevantEscrowHotWallet.address,
-      'WBLN_amount': eventMicroWebblen,
-    }).catchError((e) {
-      print(e);
-    });
-    // Save transaction into collection
-    await _algorandTransactionDataService.saveAlgorandTransaction(
-      txid: webblenForEventResult.data['txid'],
-      senderAlgorandAddress: webblenForEventResult.data['sender_address'],
-      receiverAlgorandAddress: webblenForEventResult.data['receiver_address'],
+    final escrowWalletResponse = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/sendWbln'),
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': userAlgorandAccount.passphrase,
+        'receiver_address': relevantEscrowHotWallet.address,
+        'WBLN_amount': eventMicroWebblen,
+      }),
     );
 
-    // Fund cold storage
-    final HttpsCallable webblenForColdStorage =
-        FirebaseFunctions.instance.httpsCallable(
-      'sendWbln',
+    if (escrowWalletResponse.statusCode == 201) {
+      // If the server did return a 201 CREATED response,
+      // Save transaction into collection
+      Map<String, dynamic> result = jsonDecode(escrowWalletResponse.body);
+      await _algorandTransactionDataService.saveAlgorandTransaction(
+        txid: result['txid'],
+        senderAlgorandAddress: result['sender_address'],
+        receiverAlgorandAddress: result['receiver_address'],
+      );
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create album.');
+    }
+
+    // Fund cold storage wallet
+    final coldStorageResponse = await http.post(
+      Uri.parse(
+          'https://us-central1-webblen-events.cloudfunctions.net/sendWbln'),
+      body: jsonEncode(<String, dynamic>{
+        'sender_passphrase': userAlgorandAccount.passphrase,
+        // Cold storage address
+        'receiver_address':
+            'UXT53ITFZIIVS4MTG2UMCLX352N3YF5RZFEQA63VOO6CAYVZ3MZQ37QBVM',
+        'WBLN_amount': coldStorageMicroWebblen,
+      }),
     );
-    final HttpsCallableResult webblenForColdStorageResult =
-        await webblenForColdStorage.call(<String, dynamic>{
-      'sender_passphrase': userAlgorandAccount.passphrase,
-      // Cold storage address
-      'receiver_address':
-          'UXT53ITFZIIVS4MTG2UMCLX352N3YF5RZFEQA63VOO6CAYVZ3MZQ37QBVM',
-      'WBLN_amount': coldStorageMicroWebblen,
-    }).catchError((e) {
-      print(e);
-    });
-    // Save transaction into collection
-    await _algorandTransactionDataService.saveAlgorandTransaction(
-      txid: webblenForColdStorageResult.data['txid'],
-      senderAlgorandAddress: webblenForColdStorageResult.data['sender_address'],
-      receiverAlgorandAddress:
-          webblenForColdStorageResult.data['receiver_address'],
-    );
+
+    if (coldStorageResponse.statusCode == 201) {
+      // If the server did return a 201 CREATED response,
+      // Save transaction into collection
+      Map<String, dynamic> result = jsonDecode(coldStorageResponse.body);
+      await _algorandTransactionDataService.saveAlgorandTransaction(
+        txid: result['txid'],
+        senderAlgorandAddress: result['sender_address'],
+        receiverAlgorandAddress: result['receiver_address'],
+      );
+    } else {
+      // If the server did not return a 201 CREATED response,
+      // then throw an exception.
+      throw Exception('Failed to create album.');
+    }
   }
 }
