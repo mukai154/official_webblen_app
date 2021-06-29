@@ -142,32 +142,6 @@ class CreateLiveStreamView extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  model.hasEarningsAccount!
-                      ? Container()
-                      : GestureDetector(
-                          onTap: () => model.navigateBackToWalletPage(),
-                          child: Container(
-                            margin: EdgeInsets.only(bottom: 16),
-                            height: 35,
-                            constraints: BoxConstraints(
-                              maxWidth: 500,
-                            ),
-                            decoration: BoxDecoration(
-                              color: CustomColors.darkMountainGreen,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Center(
-                              child: CustomText(
-                                text: "Want to Monetize Your Stream with Sponsors?\n Create an Earnings Account!",
-                                textAlign: TextAlign.center,
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-
                   ///POST IMAGE
                   model.img == null && model.stream.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
                   verticalSpaceMedium,

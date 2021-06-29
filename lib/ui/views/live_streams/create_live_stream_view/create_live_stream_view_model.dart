@@ -338,13 +338,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
         : {'minSelectedDate': selectedStartDate, 'selectedDate': selectedEndDate ?? selectedStartDate};
     var sheetResponse = await _bottomSheetService!.showCustomSheet(
       title: selectingStartDate ? "Start Date" : "End Date",
-      customData: customData,
+      data: customData,
       barrierDismissible: true,
       variant: BottomSheetType.calendar,
     );
     if (sheetResponse != null) {
       //format selected date
-      DateTime selectedDate = sheetResponse.responseData;
+      DateTime selectedDate = sheetResponse.data;
       String formattedDate = dateFormatter.format(selectedDate);
 
       //set start date

@@ -49,7 +49,7 @@ dependencies:
   #PHONE UTILITIES
   url_launcher: ^6.0.3
   share: ^2.0.1
-  permission_handler: ^7.1.0
+  permission_handler: ^8.1.2
   app_settings: ^4.1.0
   shared_preferences: ^2.0.5
   wakelock: ^0.5.2

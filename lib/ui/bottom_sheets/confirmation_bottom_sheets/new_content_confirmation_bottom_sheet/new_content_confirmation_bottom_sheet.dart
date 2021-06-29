@@ -48,7 +48,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                 color: appFontColor(),
                 textAlign: TextAlign.left,
               ),
-              verticalSpaceTiny,
+              SizedBox(height: 2),
               CustomText(
                 text: request!.description,
                 fontSize: 14,
@@ -120,15 +120,13 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                   ),
                 ],
               ),
-              verticalSpaceMedium,
               Divider(
                 color: appBorderColor(),
                 indent: 8.0,
                 endIndent: 8.0,
                 thickness: 1.0,
-                height: 4,
+                height: 24,
               ),
-              verticalSpaceMedium,
               model.user.WBLN == null
                   ? Container(height: 15)
                   : Row(
@@ -153,7 +151,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                         ),
                       ],
                     ),
-              verticalSpaceLarge,
+              SizedBox(height: 16),
               CustomButton(
                 onPressed: model.user.WBLN == null
                     ? null
@@ -164,7 +162,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                 text: model.user.WBLN == null ? "Calculating Total..." : request!.mainButtonTitle,
                 textSize: 16,
                 textColor: model.user.WBLN == null ? appFontColorAlt() : Colors.white,
-                height: 40,
+                height: 35,
                 width: screenWidth(context),
                 backgroundColor: model.user.WBLN == null ? appButtonColor() : appConfirmationColor(),
                 elevation: 1.0,
@@ -176,7 +174,7 @@ class NewContentConfirmationBottomSheet extends StatelessWidget {
                 text: request!.secondaryButtonTitle,
                 textSize: 16,
                 textColor: appFontColor(),
-                height: 40,
+                height: 35,
                 width: screenWidth(context),
                 backgroundColor: appButtonColorAlt(),
                 elevation: 1.0,

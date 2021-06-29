@@ -27,7 +27,7 @@ apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
@@ -40,10 +40,10 @@ android {
     defaultConfig {
         applicationId "com.webblen.events.webblen"
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         multiDexEnabled true
         manifestPlaceholders = [appAuthRedirectScheme: 'com.webblen.events.webblen']
-        versionCode 92
+        versionCode 93
         versionName '10.2.0'
         ndk.abiFilters 'armeabi-v7a','arm64-v8a','x86','x86_64'
     }
