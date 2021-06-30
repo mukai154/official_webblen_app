@@ -90,7 +90,10 @@ class LiveStreamDataService {
       } else {
         reportedBy.add(reporterID);
         streamsRef.doc(streamID).update({"reportedBy": reportedBy});
-        _customDialogService.showSuccessDialog(title: 'Stream Reported', description: "This stream is now pending review.",);
+        _customDialogService.showSuccessDialog(
+          title: 'Stream Reported',
+          description: "This stream is now pending review.",
+        );
       }
     }
   }
@@ -125,7 +128,6 @@ class LiveStreamDataService {
         await _muxLiveStreamService.deleteStreamAndAsset(stream: stream);
       }
     }
-    await _postDataService.deleteEventOrStreamPost(eventOrStreamID: stream.id, postType: 'stream');
   }
 
   Future<WebblenLiveStream> getStreamByID(String? id) async {

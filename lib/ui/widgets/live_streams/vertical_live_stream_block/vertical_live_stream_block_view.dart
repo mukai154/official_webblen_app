@@ -32,13 +32,13 @@ class VerticalLiveStreamBlockView extends StatelessWidget {
                         stream.imageURL!,
                         filterQuality: FilterQuality.medium,
                         height: double.infinity,
-                        width: 175,
+                        width: 150,
                         fit: BoxFit.cover,
                       ),
                     ),
                     Container(
                       height: double.infinity,
-                      width: 175,
+                      width: 150,
                       decoration: BoxDecoration(
                         gradient: CustomColors.livestreamBlockGradient,
                         borderRadius: BorderRadius.circular(12),

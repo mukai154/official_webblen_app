@@ -74,8 +74,9 @@ class _StreamsFeed extends HookViewModelWidget<ListDiscoverContentModel> {
     return Align(
       alignment: Alignment.center,
       child: Container(
+        margin: EdgeInsets.only(bottom: 16),
         constraints: BoxConstraints(
-          maxHeight: 175,
+          maxHeight: 125,
           maxWidth: 500,
         ),
         child: Container(

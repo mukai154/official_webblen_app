@@ -45,7 +45,7 @@ class EventDataService {
   Future<bool> checkIfEventSaved({required String uid, required String eventID}) async {
     bool saved = false;
     DocumentSnapshot snapshot = await eventsRef.doc(eventID).get();
-    if (snapshot.exists){
+    if (snapshot.exists) {
       Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
       List savedBy = snapshotData['savedBy'] == null ? [] : snapshotData['savedBy'].toList(growable: true);
       if (!savedBy.contains(uid)) {
@@ -59,12 +59,16 @@ class EventDataService {
 
   Future<String?> saveUnsaveEvent({required String uid, required String eventID, required bool savedEvent}) async {
     String? error;
-    if (savedEvent){
-      await eventsRef.doc(eventID).update({'savedBy': FieldValue.arrayUnion([uid])}).catchError((e){
+    if (savedEvent) {
+      await eventsRef.doc(eventID).update({
+        'savedBy': FieldValue.arrayUnion([uid])
+      }).catchError((e) {
         error = e.message;
       });
     } else {
-      await eventsRef.doc(eventID).update({'savedBy': FieldValue.arrayRemove([uid])}).catchError((e){
+      await eventsRef.doc(eventID).update({
+        'savedBy': FieldValue.arrayRemove([uid])
+      }).catchError((e) {
         error = e.message;
       });
     }
@@ -116,7 +120,7 @@ class EventDataService {
     DocumentSnapshot snapshot = await eventsRef.doc(eventID).get().catchError((e) {
       _customDialogService.showErrorDialog(description: "There was an error checking into this event. Please try again.");
     });
-    if (snapshot.exists){
+    if (snapshot.exists) {
       Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
       WebblenEvent event = WebblenEvent.fromMap(snapshotData);
       List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
@@ -174,7 +178,7 @@ class EventDataService {
         duration: Duration(seconds: 5),
       );
     });
-    if (snapshot.exists){
+    if (snapshot.exists) {
       Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
       List reportedBy = snapshotData['reportedBy'] == null ? [] : snapshotData['reportedBy'].toList(growable: true);
       if (reportedBy.contains(reporterID)) {
@@ -218,7 +222,6 @@ class EventDataService {
     if (event.imageURL != null) {
       await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'events', fileName: event.id!);
     }
-    await _postDataService.deleteEventOrStreamPost(eventOrStreamID: event.id, postType: 'event');
   }
 
   Future<WebblenEvent> getEventByID(String id) async {
@@ -303,8 +306,8 @@ class EventDataService {
         docs.removeWhere((doc) => !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds'].compareTo((docB.data() as Map<String, dynamic>)
-        ['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) => (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']
+            .compareTo((docB.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']));
       } else {
         docs.sort((docA, docB) => (docB.data() as Map<String, dynamic>)['savedBy'].length.compareTo((docA.data() as Map<String, dynamic>)['savedBy'].length));
       }
@@ -347,8 +350,8 @@ class EventDataService {
         docs.removeWhere((doc) => !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds'].compareTo((docB.data() as Map<String, dynamic>)
-        ['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) => (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']
+            .compareTo((docB.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']));
       } else {
         docs.sort((docA, docB) => (docB.data() as Map<String, dynamic>)['savedBy'].length.compareTo((docA.data() as Map<String, dynamic>)['savedBy'].length));
       }
@@ -529,7 +532,7 @@ class EventDataService {
       snapshot.docs.forEach((doc) {
         Map<String, dynamic> snapshotData = doc.data() as Map<String, dynamic>;
         double distanceFromPoint = geoPoint.distance(lat: snapshotData['lat'], lng: snapshotData['lon']);
-        String venueSize =snapshotData['venueSize'] ?? "small";
+        String venueSize = snapshotData['venueSize'] ?? "small";
         if (venueSize == "small") {
           if (distanceFromPoint < 0.03) {
             docs.add(doc);

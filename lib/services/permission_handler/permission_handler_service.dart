@@ -103,7 +103,6 @@ class PermissionHandlerService {
 
   Future<bool> hasLocationPermission() async {
     CustomDialogService _customDialogService = locator<CustomDialogService>();
-
     bool hasPermission = false;
     PermissionStatus status = await Permission.location.status.catchError((e) {
       print(e);
@@ -111,7 +110,7 @@ class PermissionHandlerService {
     if (status.isGranted || status.isLimited) {
       hasPermission = true;
     } else if (status.isDenied) {
-      status = await Permission.calendar.request();
+      status = await Permission.location.request();
       if (status.isGranted) {
         hasPermission = true;
       }

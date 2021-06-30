@@ -23,7 +23,7 @@ class PostTextBlockView extends StatelessWidget {
 
   Widget head(PostTextBlockViewModel model) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 4.0),
+      padding: EdgeInsets.fromLTRB(16.0, 8.0, 8.0, 10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -97,7 +97,7 @@ class PostTextBlockView extends StatelessWidget {
         post!.body!,
         style: TextStyle(
           color: appFontColor(),
-          fontSize: 18.0,
+          fontSize: 15.0,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -147,7 +147,7 @@ class PostTextBlockView extends StatelessWidget {
                 Text(
                   post!.commentCount == 1 ? "${post!.commentCount} comment" : "${post!.commentCount} comments",
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: appFontColorAlt(),
                   ),
                 ),
@@ -186,6 +186,7 @@ class PostTextBlockView extends StatelessWidget {
           Text(
             TimeCalc().getPastTimeFromMilliseconds(post!.postDateTimeInMilliseconds!),
             style: TextStyle(
+              fontSize: 12,
               color: Colors.grey,
             ),
           ),
@@ -247,7 +248,8 @@ class PostTextBlockView extends StatelessWidget {
               commentSaveAndPostTime(model),
               postTags(model),
               Divider(
-                thickness: 4.0,
+                thickness: 0.5,
+                height: 50,
                 color: appDividerColor(),
               ),
             ],

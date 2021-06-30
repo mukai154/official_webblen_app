@@ -131,6 +131,7 @@ class PostImgBlockView extends StatelessWidget {
           Text(
             TimeCalc().getPastTimeFromMilliseconds(post!.postDateTimeInMilliseconds!),
             style: TextStyle(
+              fontSize: 12,
               color: Colors.grey,
             ),
           ),
@@ -150,7 +151,7 @@ class PostImgBlockView extends StatelessWidget {
                 Text(
                   post!.commentCount == 1 ? "${post!.commentCount} comment" : "${post!.commentCount} comments",
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     color: appFontColorAlt(),
                   ),
                 ),
@@ -245,7 +246,8 @@ class PostImgBlockView extends StatelessWidget {
               verticalSpaceSmall,
               postTags(model),
               Divider(
-                thickness: 4.0,
+                thickness: 0.5,
+                height: 50,
                 color: appDividerColor(),
               ),
             ],

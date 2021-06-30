@@ -42,7 +42,7 @@ Color appFontColorAlt() {
 }
 
 Color appDividerColor() {
-  return _themeService!.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
+  return _themeService!.isDarkMode ? Colors.white12 : Colors.black12;
 }
 
 Color appBorderColor() {

@@ -429,13 +429,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   }
 
   ///FORM VALIDATION
-  bool tagsAreValid() {
-    if (stream.tags == null || stream.tags!.isEmpty) {
-      return false;
-    } else {
-      return true;
-    }
-  }
+  // bool tagsAreValid() {
+  //   if (stream.tags == null || stream.tags!.isEmpty) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }
 
   bool titleIsValid() {
     return isValidString(stream.title);
@@ -498,12 +498,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       _snackbarService!.showSnackbar(
         title: 'Stream Image Error',
         message: 'Your stream must have an image',
-        duration: Duration(seconds: 3),
-      );
-    } else if (!tagsAreValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Tag Error',
-        message: 'Your stream must contain at least 1 tag',
         duration: Duration(seconds: 3),
       );
     } else if (!titleIsValid()) {

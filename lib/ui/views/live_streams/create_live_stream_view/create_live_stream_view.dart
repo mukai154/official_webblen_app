@@ -7,7 +7,6 @@ import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/add_image_button.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_text_button.dart';
-import 'package:webblen/ui/widgets/common/checkbox/custom_check_box.dart';
 import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/dropdown/event_privacy_dropdown.dart';
 import 'package:webblen/ui/widgets/common/dropdown/time_dropdown.dart';
@@ -18,7 +17,6 @@ import 'package:webblen/ui/widgets/common/text_field/auto_complete_address_text_
 import 'package:webblen/ui/widgets/common/text_field/icon_text_field.dart';
 import 'package:webblen/ui/widgets/common/text_field/multi_line_text_field.dart';
 import 'package:webblen/ui/widgets/common/text_field/single_line_text_field.dart';
-import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
 import 'package:webblen/ui/widgets/tags/tag_button.dart';
 
 import 'create_live_stream_view_model.dart';
@@ -42,7 +40,7 @@ class CreateLiveStreamView extends StatelessWidget {
           );
   }
 
-  Widget textFieldHeader({required String header, required String subHeader, required bool required}) {
+  Widget textFieldHeader({required String header, required bool required}) {
     return Container(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,15 +67,7 @@ class CreateLiveStreamView extends StatelessWidget {
                   : Container(),
             ],
           ),
-          SizedBox(height: 4),
-          Text(
-            subHeader,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w300,
-              color: appFontColorAlt(),
-            ),
-          ),
+          SizedBox(height: 8),
         ],
       ),
     );
@@ -110,23 +100,8 @@ class CreateLiveStreamView extends StatelessWidget {
           );
   }
 
-  Widget formSectionDivider({required String sectionName}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        verticalSpaceMedium,
-        verticalSpaceMedium,
-        Text(
-          sectionName,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w300,
-            color: appFontColorAlt(),
-          ),
-        ),
-        verticalSpaceSmall,
-      ],
-    );
+  Widget formSectionDivider() {
+    return SizedBox(height: 80);
   }
 
   Widget form(BuildContext context, CreateLiveStreamViewModel model) {
@@ -146,34 +121,15 @@ class CreateLiveStreamView extends StatelessWidget {
                   model.img == null && model.stream.imageURL == null ? imgBtn(context, model) : imgPreview(context, model),
                   verticalSpaceMedium,
 
-                  ///POST TAGS
-                  selectedTags(model),
-                  verticalSpaceMedium,
-
                   ///POST FIELDS
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        ///EVENT TAGS
-                        textFieldHeader(
-                          header: "Tags",
-                          subHeader: "What topics are related to this stream?",
-                          required: true,
-                        ),
-                        verticalSpaceSmall,
-                        TagAutoCompleteField(
-                          enabled: model.textFieldEnabled,
-                          controller: model.tagTextController,
-                          onTagSelected: (tag) => model.addTag(tag!),
-                        ),
-                        verticalSpaceMedium,
-
                         ///EVENT TITLE
                         textFieldHeader(
                           header: "Title",
-                          subHeader: "What is the name of this stream?",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -189,7 +145,6 @@ class CreateLiveStreamView extends StatelessWidget {
                         ///STREAM BODY
                         textFieldHeader(
                           header: "Description",
-                          subHeader: "Provide details about the stream",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -206,7 +161,6 @@ class CreateLiveStreamView extends StatelessWidget {
                         ///EVENT PRIVACY
                         textFieldHeader(
                           header: "Privacy",
-                          subHeader: "Is this a public or private event?",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -215,12 +169,11 @@ class CreateLiveStreamView extends StatelessWidget {
                           onChanged: (val) => model.onSelectedPrivacyFromDropdown(val!),
                         ),
 
-                        formSectionDivider(sectionName: "AUDIENCE LOCATION, DATE, & TIME"),
+                        formSectionDivider(),
 
                         ///STREAM AUDIENCE LOCATION
                         textFieldHeader(
                           header: "Audience Location",
-                          subHeader: "Where is your target audience located?",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -235,7 +188,6 @@ class CreateLiveStreamView extends StatelessWidget {
                         ///STREAM START DATE
                         textFieldHeader(
                           header: "Start Date & Time",
-                          subHeader: "When will this stream start?",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -259,7 +211,6 @@ class CreateLiveStreamView extends StatelessWidget {
                         ///EVENT END DATE
                         textFieldHeader(
                           header: "End Date & Time",
-                          subHeader: "When will this stream end?",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -283,7 +234,6 @@ class CreateLiveStreamView extends StatelessWidget {
                         ///EVENT TIMEZONE
                         textFieldHeader(
                           header: "Timezone",
-                          subHeader: "Which timezone is the stream in?",
                           required: true,
                         ),
                         verticalSpaceSmall,
@@ -292,23 +242,22 @@ class CreateLiveStreamView extends StatelessWidget {
                           onChanged: (val) => model.onSelectedTimezoneFromDropdown(val!),
                         ),
 
-                        formSectionDivider(sectionName: "ADDITIONAL INFO"),
+                        formSectionDivider(),
 
                         ///EVENT SPONSORSHIP
-                        CustomDetailedCheckbox(
-                          header: "Available for Sponsors",
-                          subHeader:
-                              "Webblen will acquire sponsors for this stream. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
-                              "guaranteed.",
-                          initialValue: model.stream.openToSponsors ?? false,
-                          onChanged: (val) => model.setSponsorshipStatus(val),
-                        ),
-                        verticalSpaceMedium,
+                        // CustomDetailedCheckbox(
+                        //   header: "Available for Sponsors",
+                        //   subHeader:
+                        //       "Webblen will acquire sponsors for this stream. You will be contacted whenever a suitable sponsor is found.\nSponsors are not "
+                        //       "guaranteed.",
+                        //   initialValue: model.stream.openToSponsors ?? false,
+                        //   onChanged: (val) => model.setSponsorshipStatus(val),
+                        // ),
+                        // verticalSpaceMedium,
 
                         ///SOCIAL ACCOUNTS & WEBSITE
                         textFieldHeader(
                           header: "Social Accounts & Website",
-                          subHeader: "Link your social accounts and website",
                           required: false,
                         ),
                         verticalSpaceSmall,
@@ -318,11 +267,11 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.facebook,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               IconTextField(
-                                iconData: FontAwesomeIcons.at,
+                                iconData: Icons.alternate_email,
                                 controller: model.fbUsernameTextController,
                                 hintText: "Facebook Username",
                                 onChanged: (val) => model.setFBUsername(val),
@@ -338,11 +287,11 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.instagram,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               IconTextField(
-                                iconData: FontAwesomeIcons.at,
+                                iconData: Icons.alternate_email,
                                 controller: model.instaUsernameTextController,
                                 hintText: "Instagram Username",
                                 onChanged: (val) => model.setInstaUsername(val),
@@ -358,11 +307,11 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.twitter,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               IconTextField(
-                                iconData: FontAwesomeIcons.at,
+                                iconData: Icons.alternate_email,
                                 controller: model.twitterUsernameTextController,
                                 hintText: "Twitter Username",
                                 onChanged: (val) => model.setTwitterUsername(val),
@@ -378,11 +327,11 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.twitch,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               IconTextField(
-                                iconData: FontAwesomeIcons.at,
+                                iconData: Icons.alternate_email,
                                 controller: model.twitchTextController,
                                 hintText: "Twitch Username",
                                 onChanged: (val) => model.setTwitchUsername(val),
@@ -398,7 +347,7 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.youtube,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               Expanded(
@@ -421,7 +370,7 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.link,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               Expanded(
@@ -442,8 +391,15 @@ class CreateLiveStreamView extends StatelessWidget {
                         ///STREAM KEYS
                         textFieldHeader(
                           header: "Additional Streams",
-                          subHeader: "Stream on Additional Platforms at the Same Time.",
                           required: false,
+                        ),
+                        Text(
+                          "Stream on Additional Platforms at the Same Time.",
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w300,
+                            color: appFontColorAlt(),
+                          ),
                         ),
                         SizedBox(height: 6),
                         CustomTextButton(
@@ -460,7 +416,7 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.facebook,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               Expanded(
@@ -483,7 +439,7 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.twitch,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               Expanded(
@@ -506,7 +462,7 @@ class CreateLiveStreamView extends StatelessWidget {
                               Icon(
                                 FontAwesomeIcons.youtube,
                                 color: appFontColor(),
-                                size: 24,
+                                size: 20,
                               ),
                               horizontalSpaceSmall,
                               Expanded(

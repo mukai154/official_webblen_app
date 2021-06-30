@@ -136,18 +136,6 @@ class PostDataService {
     }
   }
 
-  Future deleteEventOrStreamPost({required String? eventOrStreamID, required String postType}) async {
-    QuerySnapshot snapshot = await postsRef.where("parentID", isEqualTo: eventOrStreamID).get();
-    snapshot.docs.forEach((doc) async {
-      await postsRef.doc(doc.id).delete();
-      if (postType == 'event') {
-        await _firestoreStorageService!.deleteImage(storageBucket: 'images', folderName: 'events', fileName: eventOrStreamID!);
-      } else {
-        await _firestoreStorageService!.deleteImage(storageBucket: 'images', folderName: 'streams', fileName: eventOrStreamID!);
-      }
-    });
-  }
-
   Future getPostByID(String? id) async {
     WebblenPost? post;
     String? error;
