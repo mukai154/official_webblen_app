@@ -20,6 +20,8 @@ class MultiLineTextField extends StatelessWidget {
         initialValue: initialValue,
         controller: controller,
         maxLines: maxLines,
+        keyboardType: TextInputType.multiline,
+        textCapitalization: TextCapitalization.sentences,
         cursorColor: appFontColorAlt(),
         onChanged: onChanged == null ? null : (val) => onChanged!(val),
         style: TextStyle(color: appFontColor()),

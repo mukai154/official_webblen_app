@@ -12,6 +12,11 @@ class TimeCalc {
     return dateTime;
   }
 
+  String getFormattedTimeFromDateTime(DateTime data) {
+    String dateTime = timeFormatter.format(data);
+    return dateTime;
+  }
+
   DateTime getDateTimeFromString(String data) {
     DateTime dateTime = formatter.parse(data);
     return dateTime;

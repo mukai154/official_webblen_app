@@ -9,7 +9,6 @@ import 'package:stacked_hooks/stacked_hooks.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/constants/custom_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
-import 'package:webblen/ui/views/events/create_event_view/create_event_view_model.dart';
 import 'package:webblen/ui/widgets/common/buttons/add_image_button.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_text_button.dart';
@@ -31,34 +30,13 @@ import 'package:webblen/ui/widgets/events/ticketing_fees_and_discount_forms/tick
 import 'package:webblen/ui/widgets/list_builders/list_discounts/list_discounts.dart';
 import 'package:webblen/ui/widgets/list_builders/list_fees/list_fees.dart';
 import 'package:webblen/ui/widgets/list_builders/list_tickets/list_tickets.dart';
-import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
-import 'package:webblen/ui/widgets/tags/tag_button.dart';
+
+import 'create_event_view_model.dart';
 
 class CreateEventView extends StatelessWidget {
   final String? id;
   final String? promo;
   CreateEventView(@PathParam() this.id, @PathParam() this.promo);
-
-  Widget appBarLoadingIndicator() {
-    return Padding(
-      padding: EdgeInsets.only(right: 16),
-      child: AppBarCircleProgressIndicator(color: appActiveColor(), size: 25),
-    );
-  }
-
-  Widget doneButton(BuildContext context, CreateEventViewModel model) {
-    return Padding(
-      padding: EdgeInsets.only(right: 16, top: 18),
-      child: CustomTextButton(
-        onTap: () => model.showNewContentConfirmationBottomSheet(context: context),
-        color: appFontColor(),
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        text: 'Done',
-        textAlign: TextAlign.right,
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -73,8 +51,8 @@ class CreateEventView extends StatelessWidget {
           actionWidget: !model.initialized
               ? Container()
               : model.isBusy
-                  ? appBarLoadingIndicator()
-                  : doneButton(context, model),
+                  ? _AppBarLoadingIndicator()
+                  : _DoneButton(onTap: () => model.showNewContentConfirmationBottomSheet(context: context)),
           bottomWidget: model.hasEarningsAccount != null && !model.hasEarningsAccount!
               ? GestureDetector(
                   onTap: () => model.navigateBackToWalletPage(),
@@ -129,99 +107,71 @@ class CreateEventView extends StatelessWidget {
                                     ),
                               verticalSpaceMedium,
 
-                              ///TAGS
-                              _SelectedTags(
-                                tags: model.event.tags,
-                                removeTagAtIndex: (index) => model.removeTagAtIndex(index),
-                              ),
-                              verticalSpaceMedium,
-
                               ///FORM FIELDS
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 16),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    ///TAG AUTOCOMPLETE
-                                    _TextFieldHeader(
-                                      header: "Tags",
-                                      subHeader: "What topics are related to this event?",
-                                      required: true,
-                                    ),
-                                    verticalSpaceSmall,
-                                    TagAutoCompleteField(
-                                      enabled: model.textFieldEnabled,
-                                      controller: model.tagTextController,
-                                      onTagSelected: (tag) => model.addTag(tag!),
-                                    ),
-                                    verticalSpaceMedium,
-
                                     ///TITLE
                                     _TextFieldHeader(
                                       header: "Title",
-                                      subHeader: "What is the name of this event?",
                                       required: true,
                                     ),
-                                    verticalSpaceSmall,
+                                    verticalSpaceTiny,
                                     _EventTitleField(),
                                     verticalSpaceMedium,
 
                                     ///DESCRIPTION
                                     _TextFieldHeader(
                                       header: "Description",
-                                      subHeader: "Provide details about the event",
                                       required: true,
                                     ),
-                                    verticalSpaceSmall,
+                                    verticalSpaceTiny,
                                     _EventDescriptionField(),
                                     verticalSpaceMedium,
 
                                     ///PRIVACY
                                     _TextFieldHeader(
                                       header: "Privacy",
-                                      subHeader: "Is this a public or private event?",
                                       required: true,
                                     ),
-                                    verticalSpaceSmall,
+                                    verticalSpaceTiny,
                                     _EventPrivacyDropDownField(),
 
-                                    _FormSectionDivider(sectionName: "LOCATION"),
+                                    _FormSectionDivider(),
 
                                     ///EVENT ADDRESS
                                     _TextFieldHeader(
                                       header: "Address",
-                                      subHeader: "Where is this event taking place?",
                                       required: true,
                                     ),
-                                    verticalSpaceSmall,
+                                    verticalSpaceTiny,
                                     _EventAddressAutoComplete(),
                                     verticalSpaceMedium,
 
                                     ///EVENT VENUE NAME
                                     _TextFieldHeader(
                                       header: "Venue Name",
-                                      subHeader: "What is the name of the building/area for the event?",
                                       required: true,
                                     ),
-                                    verticalSpaceSmall,
+                                    verticalSpaceTiny,
                                     _EventVenueNameField(),
                                     verticalSpaceMedium,
 
                                     ///EVENT VENUE SIZE
                                     _TextFieldHeader(
                                       header: "Venue Size",
-                                      subHeader: "What is the size of the venue/area for the event?",
                                       required: true,
                                     ),
-                                    verticalSpaceSmall,
+                                    verticalSpaceTiny,
                                     _EventVenueSizeSlider(),
 
-                                    _FormSectionDivider(sectionName: "DATE & TIME"),
+                                    _FormSectionDivider(),
 
                                     ///EVENT START DATE
                                     _TextFieldHeader(
                                       header: "Start Date & Time",
-                                      subHeader: "When does this event start?",
                                       required: true,
                                     ),
                                     verticalSpaceSmall,
@@ -233,7 +183,6 @@ class CreateEventView extends StatelessWidget {
                                     ///EVENT END DATE
                                     _TextFieldHeader(
                                       header: "End Date & Time",
-                                      subHeader: "When does this event end?",
                                       required: true,
                                     ),
                                     verticalSpaceSmall,
@@ -245,7 +194,6 @@ class CreateEventView extends StatelessWidget {
                                     ///EVENT TIMEZONE
                                     _TextFieldHeader(
                                       header: "Timezone",
-                                      subHeader: "Which timezone is the event in?",
                                       required: true,
                                     ),
                                     verticalSpaceSmall,
@@ -254,11 +202,7 @@ class CreateEventView extends StatelessWidget {
                                     ///EVENT TICKETING
                                     model.hasEarningsAccount != null && model.hasEarningsAccount! ? _EventTicketingForm() : Container(),
 
-                                    _FormSectionDivider(sectionName: "ADDITIONAL INFO"),
-
-                                    // ///STREAM EVENT
-                                    // _ScheduleLiveStreamCheckBox(),
-                                    // verticalSpaceSmall,
+                                    _FormSectionDivider(),
 
                                     ///EVENT SPONSORSHIP
                                     _AvailableToSponsorsCheckBox(),
@@ -267,7 +211,6 @@ class CreateEventView extends StatelessWidget {
                                     ///SOCIAL ACCOUNTS & WEBSITE
                                     _TextFieldHeader(
                                       header: "Social Accounts & Website",
-                                      subHeader: "Link your social accounts and website",
                                       required: false,
                                     ),
                                     verticalSpaceSmall,
@@ -295,36 +238,47 @@ class CreateEventView extends StatelessWidget {
   }
 }
 
-class _FormSectionDivider extends StatelessWidget {
-  final String sectionName;
-  _FormSectionDivider({required this.sectionName});
+class _AppBarLoadingIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(right: 16),
+      child: AppBarCircleProgressIndicator(color: appActiveColor(), size: 25),
+    );
+  }
+}
+
+class _DoneButton extends StatelessWidget {
+  final VoidCallback onTap;
+  _DoneButton({required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        verticalSpaceMedium,
-        verticalSpaceMedium,
-        Text(
-          sectionName,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w300,
-            color: appFontColorAlt(),
-          ),
-        ),
-        verticalSpaceSmall,
-      ],
+    return Padding(
+      padding: EdgeInsets.only(right: 16, top: 18),
+      child: CustomTextButton(
+        onTap: onTap,
+        color: appFontColor(),
+        fontSize: 16,
+        fontWeight: FontWeight.bold,
+        text: 'Done',
+        textAlign: TextAlign.right,
+      ),
     );
+  }
+}
+
+class _FormSectionDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(height: 80);
   }
 }
 
 class _TextFieldHeader extends StatelessWidget {
   final String header;
-  final String subHeader;
   final bool required;
-  _TextFieldHeader({required this.header, required this.subHeader, required this.required});
+  _TextFieldHeader({required this.header, required this.required});
 
   @override
   Widget build(BuildContext context) {
@@ -355,14 +309,6 @@ class _TextFieldHeader extends StatelessWidget {
             ],
           ),
           SizedBox(height: 4),
-          Text(
-            subHeader,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w300,
-              color: appFontColorAlt(),
-            ),
-          ),
         ],
       ),
     );
@@ -406,28 +352,6 @@ class _ImagePreview extends StatelessWidget {
             imgURL: null,
             height: screenWidth(context),
             width: screenWidth(context),
-          );
-  }
-}
-
-class _SelectedTags extends StatelessWidget {
-  final List? tags;
-  final String Function(int) removeTagAtIndex;
-  _SelectedTags({this.tags, required this.removeTagAtIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    return tags == null || tags!.isEmpty
-        ? Container()
-        : Container(
-            height: 30,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: tags!.length,
-              itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => removeTagAtIndex(index), tag: tags![index]);
-              },
-            ),
           );
   }
 }
@@ -605,14 +529,13 @@ class _EventTicketingForm extends HookViewModelWidget<CreateEventViewModel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _FormSectionDivider(sectionName: "TICKETING"),
+        _FormSectionDivider(),
 
         _TextFieldHeader(
           header: "Ticketing",
-          subHeader: "Add ticketing, fees, and discount info for your event",
           required: false,
         ),
-        verticalSpaceSmall,
+        verticalSpaceTiny,
 
         //list tickets
         model.ticketDistro.tickets!.isEmpty

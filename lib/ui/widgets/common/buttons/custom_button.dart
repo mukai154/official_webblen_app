@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:webblen/constants/app_colors.dart';
 import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
+import 'package:webblen/ui/widgets/common/custom_text.dart';
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 
 class CustomButton extends StatelessWidget {
@@ -136,6 +138,56 @@ class CustomIconButton extends StatelessWidget {
               : Center(
                   child: icon,
                 ),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomVerticalIconButton extends StatelessWidget {
+  final Icon icon;
+  final String text;
+  final double height;
+  final double width;
+  final VoidCallback onTap;
+  final Color backgroundColor;
+  final Color? textColor;
+
+  CustomVerticalIconButton({
+    required this.icon,
+    required this.text,
+    required this.height,
+    required this.width,
+    required this.onTap,
+    required this.backgroundColor,
+    this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: height,
+        width: width,
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: backgroundColor,
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: icon,
+            ),
+            SizedBox(height: 8),
+            CustomText(
+              text: text,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: appFontColor(),
+            ),
+          ],
         ),
       ),
     );

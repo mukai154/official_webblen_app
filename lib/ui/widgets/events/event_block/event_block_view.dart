@@ -120,11 +120,32 @@ class EventBlockView extends StatelessWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            CustomText(
-                              text: "${event.city}, ${event.province}",
-                              fontSize: 12,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.white,
+                            Container(
+                              child: Row(
+                                children: [
+                                  event.flashEvent != null && event.flashEvent!
+                                      ? Container(
+                                          margin: EdgeInsets.only(right: 4),
+                                          padding: EdgeInsets.all(4),
+                                          decoration: BoxDecoration(
+                                            color: appBackgroundColor(),
+                                            borderRadius: BorderRadius.circular(30),
+                                          ),
+                                          child: Icon(
+                                            FontAwesomeIcons.bolt,
+                                            size: 10,
+                                            color: appIconColor(),
+                                          ),
+                                        )
+                                      : Container(),
+                                  CustomText(
+                                    text: "${event.city}, ${event.province}",
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ],
+                              ),
                             ),
                             model.eventIsHappeningNow
                                 ? Container(

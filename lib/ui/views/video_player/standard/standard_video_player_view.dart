@@ -26,80 +26,104 @@ class StandardVideoPlayerView extends StatelessWidget {
     return ViewModelBuilder<StandardVideoPlayerViewModel>.reactive(
       onModelReady: (model) => model.initialize(id!),
       viewModelBuilder: () => StandardVideoPlayerViewModel(),
-      builder: (context, model, child) => Scaffold(
-        appBar: CustomAppBar().basicAppBar(
-          title: "Video",
-          showBackButton: true,
-          onPressedBack: () => model.dismissVideoPlayer(),
-        ),
-        body: GestureDetector(
-          onTap: () => model.unFocusKeyboard(context),
-          child: Container(
-            height: screenHeight(context),
-            color: appBackgroundColor(),
-            child: model.isBusy
-                ? Center(
-                    child: CustomCircleProgressIndicator(
-                      size: 20,
-                      color: appActiveColor(),
-                    ),
-                  )
-                : !model.stream.isValid()
-                    ? Center(
-                        child: CustomCircleProgressIndicator(
-                          size: 20,
-                          color: appActiveColor(),
-                        ),
-                      )
-                    : Stack(
-                        children: [
-                          ListView(
-                            physics: AlwaysScrollableScrollPhysics(),
-                            controller: model.scrollController,
-                            shrinkWrap: true,
-                            children: [
-                              Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  constraints: BoxConstraints(
-                                    maxWidth: screenWidth(context),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      _CustomVideoPlayer(),
-                                      SizedBox(height: 100),
-                                    ],
-                                  ),
+      builder: (context, model, child) => OrientationBuilder(
+        builder: (context, orientation) {
+          return orientation == Orientation.portrait ? _PortraitMode() : _LandscapeMode();
+        },
+      ),
+    );
+  }
+}
+
+class _PortraitMode extends HookViewModelWidget<StandardVideoPlayerViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, StandardVideoPlayerViewModel model) {
+    return Scaffold(
+      appBar: CustomAppBar().basicAppBar(
+        title: "Video",
+        showBackButton: true,
+        onPressedBack: () => model.dismissVideoPlayer(),
+      ),
+      body: GestureDetector(
+        onTap: () => model.unFocusKeyboard(context),
+        child: Container(
+          height: screenHeight(context),
+          color: appBackgroundColor(),
+          child: model.isBusy
+              ? Center(
+                  child: CustomCircleProgressIndicator(
+                    size: 20,
+                    color: appActiveColor(),
+                  ),
+                )
+              : !model.stream.isValid()
+                  ? Center(
+                      child: CustomCircleProgressIndicator(
+                        size: 20,
+                        color: appActiveColor(),
+                      ),
+                    )
+                  : Stack(
+                      children: [
+                        ListView(
+                          physics: AlwaysScrollableScrollPhysics(),
+                          controller: model.scrollController,
+                          shrinkWrap: true,
+                          children: [
+                            Align(
+                              alignment: Alignment.center,
+                              child: Container(
+                                constraints: BoxConstraints(
+                                  maxWidth: screenWidth(context),
+                                ),
+                                child: Column(
+                                  children: [
+                                    _CustomPortraitVideoPlayer(),
+                                    SizedBox(height: 100),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                          Align(
-                            alignment: Alignment.bottomCenter,
-                            child: CommentTextFieldView(
-                              onSubmitted: model.isReplying
-                                  ? (val) => model.replyToComment(
-                                        context: context,
-                                        commentData: val,
-                                      )
-                                  : (val) => model.submitComment(context: context, commentData: val),
-                              focusNode: model.focusNode,
-                              commentTextController: model.commentTextController,
-                              isReplying: model.isReplying,
-                              replyReceiverUsername: model.isReplying ? model.commentToReplyTo!.username : null,
-                              contentID: '',
                             ),
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: CommentTextFieldView(
+                            onSubmitted: model.isReplying
+                                ? (val) => model.replyToComment(
+                                      context: context,
+                                      commentData: val,
+                                    )
+                                : (val) => model.submitComment(context: context, commentData: val),
+                            focusNode: model.focusNode,
+                            commentTextController: model.commentTextController,
+                            isReplying: model.isReplying,
+                            replyReceiverUsername: model.isReplying ? model.commentToReplyTo!.username : null,
+                            contentID: '',
                           ),
-                        ],
-                      ),
-          ),
+                        ),
+                      ],
+                    ),
         ),
       ),
     );
   }
 }
 
-class _CustomVideoPlayer extends HookViewModelWidget<StandardVideoPlayerViewModel> {
+class _LandscapeMode extends HookViewModelWidget<StandardVideoPlayerViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, StandardVideoPlayerViewModel model) {
+    return Scaffold(
+      body: Container(
+        height: screenHeight(context),
+        width: screenWidth(context),
+        child: _CustomLandscapeVideoPlayer(),
+      ),
+    );
+  }
+}
+
+class _CustomPortraitVideoPlayer extends HookViewModelWidget<StandardVideoPlayerViewModel> {
   @override
   Widget buildViewModelWidget(BuildContext context, StandardVideoPlayerViewModel model) {
     return SafeArea(
@@ -142,6 +166,18 @@ class _CustomVideoPlayer extends HookViewModelWidget<StandardVideoPlayerViewMode
                                     ),
                                   ),
                             Positioned(
+                              bottom: 8,
+                              left: 4,
+                              child: GestureDetector(
+                                onTap: () => model.toggleLandscapeMode(),
+                                child: Icon(
+                                  Icons.crop_landscape,
+                                  color: Colors.white54,
+                                  size: 24.0,
+                                ),
+                              ),
+                            ),
+                            Positioned(
                               bottom: 0,
                               left: 0,
                               right: 0,
@@ -161,6 +197,64 @@ class _CustomVideoPlayer extends HookViewModelWidget<StandardVideoPlayerViewMode
         ],
       ),
     );
+  }
+}
+
+class _CustomLandscapeVideoPlayer extends HookViewModelWidget<StandardVideoPlayerViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, StandardVideoPlayerViewModel model) {
+    return !model.videoPlayerController!.value.isInitialized
+        ? Center(
+            child: CustomCircleProgressIndicator(
+              size: 20,
+              color: appActiveColor(),
+            ),
+          )
+        : Stack(
+            children: [
+              GestureDetector(
+                onTap: () => model.pausePlayVideoPlayer(),
+                child: AspectRatio(
+                  aspectRatio: model.videoPlayerController!.value.aspectRatio,
+                  child: VideoPlayer(model.videoPlayerController!),
+                ),
+              ),
+              model.videoPlayerController!.value.isPlaying
+                  ? Container()
+                  : GestureDetector(
+                      onTap: () => model.pausePlayVideoPlayer(),
+                      child: AspectRatio(
+                        aspectRatio: model.videoPlayerController!.value.aspectRatio,
+                        child: model.videoPlayerController!.value.isPlaying
+                            ? Container()
+                            : Center(
+                                child: Icon(Icons.play_arrow, size: 30, color: Colors.white),
+                              ),
+                      ),
+                    ),
+              Positioned(
+                bottom: 8,
+                left: 4,
+                child: GestureDetector(
+                  onTap: () => model.toggleLandscapeMode(),
+                  child: Icon(
+                    Icons.crop_landscape,
+                    color: Colors.white54,
+                    size: 24.0,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: VideoProgressIndicator(
+                  model.videoPlayerController!,
+                  allowScrubbing: true,
+                ),
+              ),
+            ],
+          );
   }
 }
 

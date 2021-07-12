@@ -18,17 +18,20 @@ class ListDiscoverContent extends StatelessWidget {
       builder: (context, model, child) => model.isBusy
           ? Container()
           : model.dataResults.isEmpty
-              ? ZeroStateView(
-                  scrollController: model.scrollController,
-                  imageAssetName: "modern_city",
-                  imageSize: 200,
-                  header: "No Posts, Streams, or Events in ${model.cityName} Found",
-                  subHeader: "Create Something for ${model.cityName} Now!",
-                  mainActionButtonTitle: "Create",
-                  mainAction: () => model.customBottomSheetService.showAddContentOptions(),
-                  secondaryActionButtonTitle: null,
-                  secondaryAction: null,
-                  refreshData: model.refreshData,
+              ? Container(
+                  margin: EdgeInsets.symmetric(horizontal: 16),
+                  child: ZeroStateView(
+                    scrollController: model.scrollController,
+                    imageAssetName: "modern_city",
+                    imageSize: 200,
+                    header: "No Posts, Streams, or Events in ${model.cityName} Found",
+                    subHeader: "Create Something for ${model.cityName} Now!",
+                    mainActionButtonTitle: "Create",
+                    mainAction: () => model.customBottomSheetService.showAddContentOptions(),
+                    secondaryActionButtonTitle: null,
+                    secondaryAction: null,
+                    refreshData: model.refreshData,
+                  ),
                 )
               : Container(
                   height: screenHeight(context),

@@ -22,14 +22,14 @@ class CalendarBottomSheet extends StatelessWidget {
     return ViewModelBuilder<CalendarBottomSheetModel>.reactive(
       viewModelBuilder: () => CalendarBottomSheetModel(),
       builder: (context, model, child) => Container(
-        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        padding: EdgeInsets.only(left: 8, top: 32, right: 0),
         decoration: BoxDecoration(
           color: appBackgroundColor(),
           borderRadius: BorderRadius.circular(15),
         ),
         child: Container(
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -40,28 +40,30 @@ class CalendarBottomSheet extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: appFontColor(),
               ),
-              CalendarCarousel(
-                isScrollable: true,
-                width: 300,
-                height: 280,
-                headerMargin: EdgeInsets.symmetric(vertical: 0),
-                headerTextStyle: TextStyle(
-                  color: appFontColor(),
-                  fontWeight: FontWeight.w700,
+              Expanded(
+                child: CalendarCarousel(
+                  isScrollable: true,
+                  headerMargin: EdgeInsets.symmetric(vertical: 8),
+                  headerTextStyle: TextStyle(
+                    color: appFontColor(),
+                    fontWeight: FontWeight.w700,
+                  ),
+                  daysTextStyle: TextStyle(color: appFontColor()),
+                  iconColor: appIconColor(),
+                  todayButtonColor: appShadowColor(),
+                  todayTextStyle: TextStyle(color: appFontColor()),
+                  weekdayTextStyle: TextStyle(color: appFontColor()),
+                  selectedDayTextStyle: TextStyle(color: Colors.white),
+                  selectedDayButtonColor: appActiveColor(),
+                  weekendTextStyle: TextStyle(
+                    color: appSavedContentColor(),
+                  ),
+                  inactiveDaysTextStyle: TextStyle(color: appFontColorAlt()),
+                  inactiveWeekendTextStyle: TextStyle(color: appFontColorAlt()),
+                  selectedDateTime: request!.data['selectedDate'],
+                  minSelectedDate: DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day),
+                  onDayPressed: (DateTime date, List<Event> events) => completer!(SheetResponse(data: date)),
                 ),
-                daysTextStyle: TextStyle(color: appFontColor()),
-                iconColor: appIconColor(),
-                todayButtonColor: appShadowColor(),
-                todayTextStyle: TextStyle(color: appFontColor()),
-                weekdayTextStyle: TextStyle(color: appFontColor()),
-                selectedDayTextStyle: TextStyle(color: Colors.white),
-                selectedDayButtonColor: appActiveColor(),
-                weekendTextStyle: TextStyle(
-                  color: appSavedContentColor(),
-                ),
-                selectedDateTime: request!.data['selectedDate'],
-                minSelectedDate: request!.data['minSelectedDate'],
-                onDayPressed: (DateTime date, List<Event> events) => completer!(SheetResponse(data: date)),
               ),
             ],
           ),

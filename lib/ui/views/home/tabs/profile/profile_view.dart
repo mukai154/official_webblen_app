@@ -112,6 +112,7 @@ class _ProfileBody extends HookViewModelWidget<ProfileViewModel> {
                       children: [
                         _UserDetails(
                           user: user,
+                          editProfile: () => model.navigateToEditProfile(),
                           followerCount: user.followers!.length,
                           followingCount: user.following!.length,
                           viewFollowers: () => model.navigateToFollowers(),
@@ -167,6 +168,7 @@ class _UserDetails extends StatelessWidget {
   final VoidCallback viewFollowers;
   final VoidCallback viewFollowing;
   final VoidCallback viewWebsite;
+  final VoidCallback editProfile;
   _UserDetails({
     required this.user,
     required this.followerCount,
@@ -174,6 +176,7 @@ class _UserDetails extends StatelessWidget {
     required this.viewFollowers,
     required this.viewFollowing,
     required this.viewWebsite,
+    required this.editProfile,
   });
 
   @override
@@ -184,10 +187,11 @@ class _UserDetails extends StatelessWidget {
           SizedBox(height: 16),
 
           ///USERNAME & PROFILE
-          UserProfilePic(
-            userPicUrl: user.profilePicURL,
-            size: 60,
+          CurrentUserProfilePic(
+            userPicUrl: user.profilePicURL!,
+            size: 90,
             isBusy: false,
+            editProfileAction: editProfile,
           ),
           SizedBox(height: 8),
           Text(
@@ -228,7 +232,7 @@ class _UserDetails extends StatelessWidget {
                     ? GestureDetector(
                         onTap: viewWebsite,
                         child: Container(
-                          margin: EdgeInsets.only(top: 8),
+                          margin: EdgeInsets.only(top: 4),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,

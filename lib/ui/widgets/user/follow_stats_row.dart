@@ -23,7 +23,7 @@ class FollowStatsRow extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: viewFollowersAction,
-            child: Column(
+            child: Row(
               children: [
                 CustomText(
                   text: followersLength.toString(),
@@ -31,6 +31,7 @@ class FollowStatsRow extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: appFontColor(),
                 ),
+                SizedBox(width: 6),
                 CustomText(
                   text: "Followers",
                   fontSize: 14,
@@ -43,7 +44,7 @@ class FollowStatsRow extends StatelessWidget {
           SizedBox(width: 32.0),
           GestureDetector(
             onTap: viewFollowingAction,
-            child: Column(
+            child: Row(
               children: [
                 CustomText(
                   text: followingLength.toString(),
@@ -51,6 +52,7 @@ class FollowStatsRow extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: appFontColor(),
                 ),
+                SizedBox(width: 6),
                 CustomText(
                   text: "Following",
                   fontSize: 14,

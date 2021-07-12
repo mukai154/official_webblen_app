@@ -57,6 +57,11 @@ class CustomNavigationService {
     _navigationService.navigateTo(Routes.CreateEventViewRoute(id: id, promo: "0"));
   }
 
+  navigateToCreateFlashEventView(String id) {
+    _miniVideoPlayerViewModel.dismissMiniPlayer();
+    _navigationService.navigateTo(Routes.CreateFlashEventViewRoute(id: id, promo: "0"));
+  }
+
   navigateToCreateEventViewWithPromo(String id, String promo) {
     _miniVideoPlayerViewModel.dismissMiniPlayer();
     _navigationService.navigateTo(Routes.CreateEventViewRoute(id: id, promo: promo));
@@ -123,6 +128,10 @@ class CustomNavigationService {
   ///VIDEO
   navigateToStandardVideoPlayer(String id) {
     _navigationService.navigateTo(Routes.StandardVideoPlayerViewRoute(id: id));
+  }
+
+  navigateToExpandedLandscapeMiniPlayer(String id) {
+    _navigationService.navigateTo(Routes.ExpandedLandscapeMiniPlayerViewRoute(id: id));
   }
 
   ///USERS

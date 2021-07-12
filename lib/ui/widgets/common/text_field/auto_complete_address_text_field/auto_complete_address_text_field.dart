@@ -26,7 +26,7 @@ class AutoCompleteAddressTextField extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             TextFieldContainer(
-              height: 38,
+              height: 40,
               child: TypeAheadField(
                 hideOnEmpty: true,
                 hideOnLoading: true,
@@ -65,7 +65,7 @@ class AutoCompleteAddressTextField extends StatelessWidget {
                 },
               ),
             ),
-            showCurrentLocationButton ? verticalSpaceTiny : Container(),
+            showCurrentLocationButton ? verticalSpaceSmall : Container(),
             showCurrentLocationButton
                 ? CustomTextButton(
                     onTap: () async {

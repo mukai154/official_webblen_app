@@ -102,7 +102,7 @@ class HomeFilterBottomSheet extends HookWidget {
                     onChanged: (dynamic val) => model.updateContentType(val),
                   ),
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: 16),
                 Text(
                   "Sort By:",
                   style: TextStyle(
@@ -127,7 +127,7 @@ class HomeFilterBottomSheet extends HookWidget {
                     onChanged: (dynamic val) => model.updateSortByFilter(val),
                   ),
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: 16),
                 Text(
                   "Location:",
                   style: TextStyle(
@@ -138,6 +138,7 @@ class HomeFilterBottomSheet extends HookWidget {
                 ),
                 SizedBox(height: 4),
                 TextFieldContainer(
+                  height: 38,
                   child: TypeAheadField(
                     hideOnEmpty: true,
                     hideOnLoading: true,
@@ -176,74 +177,14 @@ class HomeFilterBottomSheet extends HookWidget {
                 SizedBox(height: 8),
                 GestureDetector(
                   onTap: () => model.clearLocationFilter(),
-                  child: Text(
-                    "Remove Location Filter",
-                    style: TextStyle(
-                      color: appTextButtonColor(),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
+                  child: Text("Remove Location Filter",
+                      style: TextStyle(
+                        color: appTextButtonColor(),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      )),
                 ),
-                SizedBox(height: 24),
-                Text(
-                  "Filter By Tag:",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: appFontColorAlt(),
-                  ),
-                ),
-                SizedBox(height: 4),
-                TextFieldContainer(
-                  child: TypeAheadField(
-                    hideOnLoading: true,
-                    noItemsFoundBuilder: (BuildContext context) {
-                      return Text(
-                        'No Results Found',
-                        style: TextStyle(color: appFontColorAlt(), fontSize: 14.0, fontWeight: FontWeight.w500),
-                      );
-                    },
-                    direction: AxisDirection.up,
-                    textFieldConfiguration: TextFieldConfiguration(
-                      controller: tag,
-                      cursorColor: Colors.black,
-                      decoration: InputDecoration(
-                        hintText: model.tempTagFilter.isEmpty ? "Search for Tag" : model.tempTagFilter,
-                        border: InputBorder.none,
-                      ),
-                      autofocus: false,
-                    ),
-                    suggestionsCallback: (searchTerm) async {
-                      return await model.algoliaSearchService.queryTags(searchTerm);
-                    },
-                    itemBuilder: (context, dynamic tag) {
-                      return ListTile(
-                        title: Text(
-                          tag,
-                          style: TextStyle(color: appFontColor(), fontSize: 14.0, fontWeight: FontWeight.w500),
-                        ),
-                      );
-                    },
-                    onSuggestionSelected: (dynamic val) {
-                      tag.text = val;
-                      model.setTagFilter(val);
-                    },
-                  ),
-                ),
-                SizedBox(height: 8),
-                GestureDetector(
-                  onTap: () => model.clearTagFilter(),
-                  child: Text(
-                    "Clear Tag Filter",
-                    style: TextStyle(
-                      color: appTextButtonColor(),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                SizedBox(height: 32),
+                SizedBox(height: 16),
               ],
             ),
           ],

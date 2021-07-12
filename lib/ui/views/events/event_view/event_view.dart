@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
@@ -121,7 +122,7 @@ class EventView extends StatelessWidget {
   Widget eventDesc(EventViewModel model) {
     List<TextSpan> linkifiedText = [];
 
-    linkifiedText.addAll(linkify(text: model.event!.description!.trim(), fontSize: 16));
+    linkifiedText.addAll(linkify(text: model.event!.description!.trim(), fontSize: 14));
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
@@ -138,8 +139,8 @@ class EventView extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: CustomText(
         text: "${model.event!.title}",
-        fontSize: 16,
-        fontWeight: FontWeight.w500,
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
         color: appFontColor(),
       ),
     );
@@ -208,18 +209,18 @@ class EventView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          verticalSpaceTiny,
+          verticalSpaceSmall,
           Row(
             children: [
               model.event!.fbUsername == null || model.event!.fbUsername!.isEmpty
                   ? Container()
                   : Container(
-                      margin: EdgeInsets.only(right: 16),
+                      margin: EdgeInsets.only(right: 24),
                       child: GestureDetector(
                         onTap: () => model.openFacebook(),
                         child: Icon(
                           FontAwesomeIcons.facebook,
-                          size: 30,
+                          size: 24,
                           color: appIconColor(),
                         ),
                       ),
@@ -227,12 +228,12 @@ class EventView extends StatelessWidget {
               model.event!.instaUsername == null || model.event!.instaUsername!.isEmpty
                   ? Container()
                   : Container(
-                      margin: EdgeInsets.only(right: 16),
+                      margin: EdgeInsets.only(right: 24),
                       child: GestureDetector(
                         onTap: () => model.openInstagram(),
                         child: Icon(
                           FontAwesomeIcons.instagram,
-                          size: 30,
+                          size: 24,
                           color: appIconColor(),
                         ),
                       ),
@@ -240,12 +241,12 @@ class EventView extends StatelessWidget {
               model.event!.twitterUsername == null || model.event!.twitterUsername!.isEmpty
                   ? Container()
                   : Container(
-                      margin: EdgeInsets.only(right: 16),
+                      margin: EdgeInsets.only(right: 24),
                       child: GestureDetector(
                         onTap: () => model.openTwitter(),
                         child: Icon(
                           FontAwesomeIcons.twitter,
-                          size: 30,
+                          size: 24,
                           color: appIconColor(),
                         ),
                       ),
@@ -253,12 +254,12 @@ class EventView extends StatelessWidget {
               model.event!.website == null || model.event!.website!.isEmpty
                   ? Container()
                   : Container(
-                      margin: EdgeInsets.only(right: 16),
+                      margin: EdgeInsets.only(right: 24),
                       child: GestureDetector(
                         onTap: () => model.openWebsite(),
                         child: Icon(
                           FontAwesomeIcons.link,
-                          size: 30,
+                          size: 24,
                           color: appIconColor(),
                         ),
                       ),
@@ -281,20 +282,35 @@ class EventView extends StatelessWidget {
           eventHead(model),
           verticalSpaceSmall,
           eventImg(model.event!.imageURL!),
-          eventTags(model),
-          verticalSpaceSmall,
-          sectionDivider(sectionName: "Title"),
+          verticalSpaceMedium,
           eventTitle(model),
           verticalSpaceSmall,
-          sectionDivider(sectionName: "Details"),
           eventDesc(model),
-          verticalSpaceMedium,
+          Divider(
+            height: 50,
+            thickness: 0.3,
+            color: appBorderColorAlt(),
+            indent: 16,
+            endIndent: 16,
+          ),
           sectionDivider(sectionName: "Date & Time"),
           eventDateAndTime(model),
-          verticalSpaceMedium,
+          Divider(
+            height: 50,
+            thickness: 0.3,
+            color: appBorderColorAlt(),
+            indent: 16,
+            endIndent: 16,
+          ),
           sectionDivider(sectionName: "Location"),
           eventLocation(model),
-          verticalSpaceMedium,
+          Divider(
+            height: 50,
+            thickness: 0.3,
+            color: appBorderColorAlt(),
+            indent: 16,
+            endIndent: 16,
+          ),
           model.hasSocialAccounts ? sectionDivider(sectionName: "Social Accounts & Websites") : Container(),
           eventSocialAccounts(model),
           verticalSpaceMedium,
@@ -330,7 +346,8 @@ class EventView extends StatelessWidget {
                   children: [
                     RefreshIndicator(
                       backgroundColor: appBackgroundColor(),
-                      onRefresh: () async {},
+                      color: appIconColor(),
+                      onRefresh: () => model.initialize(id!),
                       child: ListView(
                         physics: AlwaysScrollableScrollPhysics(),
                         controller: null,

@@ -6,7 +6,6 @@ class HomeFeedModel extends BaseViewModel {
 
   updateContentType(String val) {
     contentType = val;
-    print(contentType);
     notifyListeners();
   }
 }

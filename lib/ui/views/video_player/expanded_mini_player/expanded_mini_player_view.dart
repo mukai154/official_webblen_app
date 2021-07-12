@@ -57,7 +57,7 @@ class ExpandedMiniPlayerView extends StatelessWidget {
                                   ),
                                   child: Column(
                                     children: [
-                                      _CustomVideoPlayer(),
+                                      _PortraitVideoPlayer(),
                                       SizedBox(height: 100),
                                     ],
                                   ),
@@ -90,7 +90,7 @@ class ExpandedMiniPlayerView extends StatelessWidget {
   }
 }
 
-class _CustomVideoPlayer extends HookViewModelWidget<ExpandedMiniPlayerViewModel> {
+class _PortraitVideoPlayer extends HookViewModelWidget<ExpandedMiniPlayerViewModel> {
   @override
   Widget buildViewModelWidget(BuildContext context, ExpandedMiniPlayerViewModel model) {
     return SafeArea(
@@ -119,10 +119,17 @@ class _CustomVideoPlayer extends HookViewModelWidget<ExpandedMiniPlayerViewModel
                                 child: VideoPlayer(model.miniVideoPlayerViewModel.videoPlayerController!),
                               ),
                             ),
-                            IconButton(
-                              onPressed: () => model.miniVideoPlayerViewModel.shrinkMiniPlayer(),
-                              iconSize: 30,
-                              icon: Icon(Icons.keyboard_arrow_down, color: Colors.white),
+                            Positioned(
+                              top: 8,
+                              left: 4,
+                              child: GestureDetector(
+                                onTap: () => model.miniVideoPlayerViewModel.shrinkMiniPlayer(),
+                                child: Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Colors.white54,
+                                  size: 24.0,
+                                ),
+                              ),
                             ),
                             model.miniVideoPlayerViewModel.videoPlayerController!.value.isPlaying
                                 ? Container()
@@ -130,13 +137,36 @@ class _CustomVideoPlayer extends HookViewModelWidget<ExpandedMiniPlayerViewModel
                                     onTap: () => model.miniVideoPlayerViewModel.pausePlayVideoPlayer(),
                                     child: AspectRatio(
                                       aspectRatio: model.miniVideoPlayerViewModel.videoPlayerController!.value.aspectRatio,
-                                      child: model.miniVideoPlayerViewModel.videoPlayerController!.value.isPlaying
-                                          ? Container()
-                                          : Center(
-                                              child: Icon(Icons.play_arrow, size: 30, color: Colors.white),
-                                            ),
+                                      child: model.miniVideoPlayerViewModel.videoPlayerController!.value.isBuffering
+                                          ? Center(
+                                              child: CustomCircleProgressIndicator(
+                                                size: 20,
+                                                color: Colors.white54,
+                                              ),
+                                            )
+                                          : model.miniVideoPlayerViewModel.videoPlayerController!.value.isPlaying
+                                              ? Container()
+                                              : Center(
+                                                  child: Icon(Icons.play_arrow, size: 30, color: Colors.white),
+                                                ),
                                     ),
                                   ),
+                            Positioned(
+                              bottom: 8,
+                              left: 4,
+                              child: Container(
+                                height: 20,
+                                width: 20,
+                                child: GestureDetector(
+                                  onTap: () => model.toggleLandscapeMode(),
+                                  child: Icon(
+                                    FontAwesomeIcons.expand,
+                                    color: Colors.white54,
+                                    size: 14.0,
+                                  ),
+                                ),
+                              ),
+                            ),
                             Positioned(
                               bottom: 0,
                               left: 0,
@@ -157,6 +187,24 @@ class _CustomVideoPlayer extends HookViewModelWidget<ExpandedMiniPlayerViewModel
         ],
       ),
     );
+  }
+}
+
+class _LandscapeVideoPlayer extends HookViewModelWidget<ExpandedMiniPlayerViewModel> {
+  @override
+  Widget buildViewModelWidget(BuildContext context, ExpandedMiniPlayerViewModel model) {
+    return !model.miniVideoPlayerViewModel.videoPlayerController!.value.isInitialized
+        ? Center(
+            child: CustomCircleProgressIndicator(
+              size: 20,
+              color: appActiveColor(),
+            ),
+          )
+        : Container(
+            height: screenHeight(context),
+            width: screenWidth(context),
+            color: Colors.red,
+          );
   }
 }
 

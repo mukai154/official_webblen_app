@@ -71,7 +71,7 @@ class _StripeAccountPendingBlock extends StatelessWidget {
                 Text(
                   'Earnings Account Pending',
                   style: TextStyle(
-                    fontSize: 16.0,
+                    fontSize: 14.0,
                     color: appFontColor(),
                     fontWeight: FontWeight.bold,
                   ),
@@ -125,7 +125,7 @@ class _StripeAccountPendingBlock extends StatelessWidget {
                                 child: Text(
                                   'View Account Status',
                                   style: TextStyle(
-                                    fontSize: 12.0,
+                                    fontSize: 10.0,
                                     color: Colors.white,
                                     fontWeight: FontWeight.w500,
                                   ),

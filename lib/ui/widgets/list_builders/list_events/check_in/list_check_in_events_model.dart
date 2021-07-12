@@ -46,16 +46,15 @@ class ListCheckInEventsModel extends ReactiveViewModel {
   }
 
   Future<void> refreshData() async {
-    scrollController.jumpTo(scrollController.position.minScrollExtent);
-
     //clear previous data
     dataResults = [];
     loadingAdditionalData = false;
     moreDataAvailable = true;
 
-    notifyListeners();
     //load all data
     await loadData();
+
+    notifyListeners();
   }
 
   loadData() async {
@@ -76,6 +75,8 @@ class ListCheckInEventsModel extends ReactiveViewModel {
         if (dataResults.length < resultsLimit) {
           moreDataAvailable = false;
         }
+
+        print(dataResults.length);
 
         notifyListeners();
       }

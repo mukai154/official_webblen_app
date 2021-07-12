@@ -106,7 +106,9 @@ dependencies:
   app_links: ^2.1.0
   lazy_loading_list: ^1.0.1
   video_player: ^2.1.6
-  miniplayer: ^1.0.0+2
+  miniplayer:
+    git:
+      url: git://github.com/Shahmirzali-Huseynov/miniplayer_for_araf.git
 
 dependency_overrides:
   analyzer: 1.7.0

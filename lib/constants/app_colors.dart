@@ -53,6 +53,10 @@ Color appBorderColorAlt() {
   return _themeService!.isDarkMode ? Colors.white12 : Colors.black12;
 }
 
+Color iconButtonBackgroundColor() {
+  return _themeService!.isDarkMode ? Colors.white12 : CustomColors.iosOffWhite;
+}
+
 Color appConfirmationColor() {
   return CustomColors.darkMountainGreen;
 }

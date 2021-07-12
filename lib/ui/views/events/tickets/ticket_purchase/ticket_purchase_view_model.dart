@@ -370,7 +370,11 @@ class TicketPurchaseViewModel extends ReactiveViewModel {
         }
         _customNavigationService.navigateToTicketPurchaseSuccessView(emailAddress!);
       } else {
-        customDialogService.showErrorDialog(description: status!);
+        if (status == "error") {
+          customDialogService.showErrorDialog(description: "There was an issue processing your card. Please verify your details and try again");
+        } else {
+          customDialogService.showErrorDialog(description: status!);
+        }
       }
       processingPayment = false;
       notifyListeners();

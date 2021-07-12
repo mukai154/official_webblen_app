@@ -36,11 +36,9 @@ class CreatePostViewModel extends ReactiveViewModel {
 
   ///HELPERS
   bool initializing = true;
-  TextEditingController tagTextController = TextEditingController();
   bool textFieldEnabled = true;
 
   ///USER DATA
-  bool? hasEarningsAccount;
   WebblenUser get user => _reactiveUserService.user;
 
   ///FILE DATA
@@ -99,32 +97,6 @@ class CreatePostViewModel extends ReactiveViewModel {
     return val;
   }
 
-  ///POST TAGS
-  addTag(String tag) {
-    List tags = post.tags == null ? [] : post.tags!.toList(growable: true);
-
-    //check if tag already listed
-    if (!tags.contains(tag)) {
-      //check if tag limit has been reached
-      if (tags.length == 3) {
-        _customDialogService.showErrorDialog(description: "You can only add up to 3 tags for your post");
-      } else {
-        //add tag
-        tags.add(tag);
-        post.tags = tags;
-        notifyListeners();
-      }
-    }
-    tagTextController.clear();
-  }
-
-  removeTagAtIndex(int index) {
-    List tags = post.tags == null ? [] : post.tags!.toList(growable: true);
-    tags.removeAt(index);
-    post.tags = tags;
-    notifyListeners();
-  }
-
   ///POST MESSAGE
   updatePostMessage(String val) {
     post.body = val.trim();
@@ -134,13 +106,17 @@ class CreatePostViewModel extends ReactiveViewModel {
   Future<bool> updateLocation(Map<String, dynamic> details) async {
     bool success = true;
 
+    setBusy(true);
+
     if (details.isEmpty) {
+      setBusy(false);
       return false;
     }
 
     //set nearest zipcodes
     post.nearbyZipcodes = await _locationService.findNearestZipcodes(details['areaCode']);
     if (post.nearbyZipcodes == null) {
+      setBusy(false);
       return false;
     }
 
@@ -157,7 +133,7 @@ class CreatePostViewModel extends ReactiveViewModel {
     post.province = details['province'];
 
     notifyListeners();
-
+    setBusy(false);
     return success;
   }
 
@@ -166,26 +142,16 @@ class CreatePostViewModel extends ReactiveViewModel {
     return isValidString(post.body);
   }
 
-  bool postTagsAreValid() {
-    if (post.tags == null || post.tags!.isEmpty) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   bool postLocationIsValid() {
     return isValidString(post.city);
   }
 
   bool formIsValid() {
     bool isValid = false;
-    if (!postTagsAreValid()) {
-      _customDialogService.showErrorDialog(description: "Your post must contain at least 1 tag");
-    } else if (!postBodyIsValid()) {
-      _customDialogService.showErrorDialog(description: "The message for your post cannot be empty");
+    if (!postBodyIsValid()) {
+      _customDialogService.showErrorDialog(description: "Message required");
     } else if (!postLocationIsValid()) {
-      _customDialogService.showErrorDialog(description: "Please choose a location for your post");
+      _customDialogService.showErrorDialog(description: "Location required");
     } else {
       isValid = true;
     }
@@ -326,7 +292,7 @@ class CreatePostViewModel extends ReactiveViewModel {
 
       //get image from camera or gallery
       if (res == "insufficient funds") {
-        _customDialogService.showErrorDialog(description: 'You do no have enough WBLN to publish this post');
+        _customDialogService.showErrorDialog(description: 'You do not have enough WBLN to publish this post');
       } else if (res == "confirmed") {
         submitForm();
       }

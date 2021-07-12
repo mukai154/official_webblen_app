@@ -16,8 +16,6 @@ import 'package:webblen/ui/widgets/common/navigation/app_bar/custom_app_bar.dart
 import 'package:webblen/ui/widgets/common/progress_indicator/custom_circle_progress_indicator.dart';
 import 'package:webblen/ui/widgets/common/text_field/auto_complete_address_text_field/auto_complete_address_text_field.dart';
 import 'package:webblen/ui/widgets/common/text_field/multi_line_text_field.dart';
-import 'package:webblen/ui/widgets/tags/tag_auto_complete_field.dart';
-import 'package:webblen/ui/widgets/tags/tag_button.dart';
 
 class CreatePostView extends StatelessWidget {
   final String? id;
@@ -81,50 +79,27 @@ class CreatePostView extends StatelessWidget {
                               ),
                         verticalSpaceMedium,
 
-                        ///TAGS
-                        _SelectedTags(
-                          tags: model.post.tags,
-                          removeTagAtIndex: (index) => model.removeTagAtIndex(index),
-                        ),
-                        verticalSpaceMedium,
-
                         ///POST FIELDS
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              ///TAG AUTOCOMPLETE
-                              _TextFieldHeader(
-                                header: "Tags",
-                                subHeader: "What topics are related to this post?",
-                                required: true,
-                              ),
-                              verticalSpaceSmall,
-                              TagAutoCompleteField(
-                                enabled: model.textFieldEnabled,
-                                controller: model.tagTextController,
-                                onTagSelected: (tag) => model.addTag(tag!),
-                              ),
-                              verticalSpaceMedium,
-
-                              ///DESCRIPTION
+                              ///MESSAGE
                               _TextFieldHeader(
                                 header: "Message",
-                                subHeader: "What would you like to share?",
                                 required: true,
                               ),
-                              verticalSpaceSmall,
+                              verticalSpaceTiny,
                               _PostMessageField(),
                               verticalSpaceMedium,
 
                               ///Location
                               _TextFieldHeader(
                                 header: "Location",
-                                subHeader: "Which city would you like to show this post to?",
                                 required: true,
                               ),
-                              verticalSpaceSmall,
+                              verticalSpaceTiny,
                               _PostAddressAutoComplete(),
                               verticalSpaceMedium,
                             ],
@@ -142,9 +117,8 @@ class CreatePostView extends StatelessWidget {
 
 class _TextFieldHeader extends StatelessWidget {
   final String header;
-  final String subHeader;
   final bool required;
-  _TextFieldHeader({required this.header, required this.subHeader, required this.required});
+  _TextFieldHeader({required this.header, required this.required});
 
   @override
   Widget build(BuildContext context) {
@@ -173,15 +147,6 @@ class _TextFieldHeader extends StatelessWidget {
                     )
                   : Container(),
             ],
-          ),
-          SizedBox(height: 4),
-          Text(
-            subHeader,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w300,
-              color: appFontColorAlt(),
-            ),
           ),
         ],
       ),
@@ -226,28 +191,6 @@ class _ImagePreview extends StatelessWidget {
             imgURL: null,
             height: screenWidth(context),
             width: screenWidth(context),
-          );
-  }
-}
-
-class _SelectedTags extends StatelessWidget {
-  final List? tags;
-  final String Function(int) removeTagAtIndex;
-  _SelectedTags({this.tags, required this.removeTagAtIndex});
-
-  @override
-  Widget build(BuildContext context) {
-    return tags == null || tags!.isEmpty
-        ? Container()
-        : Container(
-            height: 30,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: tags!.length,
-              itemBuilder: (BuildContext context, int index) {
-                return RemovableTagButton(onTap: () => removeTagAtIndex(index), tag: tags![index]);
-              },
-            ),
           );
   }
 }

@@ -46,7 +46,8 @@ import 'package:webblen/ui/views/earnings/set_up_instant_deposit/set_up_instant_
 import 'package:webblen/ui/views/earnings/usd_balance_history/usd_balance_history_view.dart';
 import 'package:webblen/ui/views/events/check_in/check_in_attendees/check_in_attendees_view.dart';
 import 'package:webblen/ui/views/events/check_in/scan_attendees/scan_attendees_view.dart';
-import 'package:webblen/ui/views/events/create_event_view/create_event_view.dart';
+import 'package:webblen/ui/views/events/create_event/create_event_view.dart';
+import 'package:webblen/ui/views/events/create_flash_event/create_flash_event_view.dart';
 import 'package:webblen/ui/views/events/event_view/event_view.dart';
 import 'package:webblen/ui/views/events/tickets/event_tickets/event_tickets_view.dart';
 import 'package:webblen/ui/views/events/tickets/my_tickets/my_tickets_view.dart';
@@ -78,6 +79,7 @@ import 'package:webblen/ui/views/users/followers/user_followers_view.dart';
 import 'package:webblen/ui/views/users/following/user_following_view.dart';
 import 'package:webblen/ui/views/users/profile/user_profile_view.dart';
 import 'package:webblen/ui/views/users/saved/saved_content_view.dart';
+import 'package:webblen/ui/views/video_player/expanded_landscape_mini_player/expanded_landscape_mini_player_view.dart';
 import 'package:webblen/ui/views/video_player/standard/standard_video_player_view.dart';
 import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
 import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_model.dart';
@@ -169,6 +171,12 @@ import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_mode
       path: "/events/publish/:id/:promo",
       durationInMilliseconds: 0,
     ),
+    CustomRoute(
+      page: CreateFlashEventView,
+      name: "CreateFlashEventViewRoute",
+      path: "/events/flash/publish/:id/:promo",
+      durationInMilliseconds: 0,
+    ),
 
     // //STREAM
     CustomRoute(
@@ -202,6 +210,12 @@ import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_mode
       page: StandardVideoPlayerView,
       name: "StandardVideoPlayerViewRoute",
       path: "/video/:id",
+      durationInMilliseconds: 0,
+    ),
+    CustomRoute(
+      page: ExpandedLandscapeMiniPlayerView,
+      name: "ExpandedLandscapeMiniPlayerViewRoute",
+      path: "/video_expanded_miniplayer/:id",
       durationInMilliseconds: 0,
     ),
 

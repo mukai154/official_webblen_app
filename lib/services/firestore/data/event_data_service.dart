@@ -9,20 +9,15 @@ import 'package:webblen/models/webblen_event.dart';
 import 'package:webblen/models/webblen_event_ticket.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
-import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
 
 class EventDataService {
   final CollectionReference eventsRef = FirebaseFirestore.instance.collection("webblen_events");
-  PostDataService _postDataService = locator<PostDataService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
   TicketDistroDataService _ticketDistroDataService = locator<TicketDistroDataService>();
   FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
-
-  int dateTimeInMilliseconds2hrsAgog = DateTime.now().millisecondsSinceEpoch - 7200000;
-  int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
 
   Future<bool?> checkIfEventExists(String id) async {
     bool exists = false;
@@ -275,18 +270,19 @@ class EventDataService {
     required String tagFilter,
     required String sortBy,
   }) async {
+    int dateTimeInMilliseconds2hrsAgo = DateTime.now().millisecondsSinceEpoch - 7200000;
     Query query;
     List<DocumentSnapshot> docs = [];
     String? error;
     if (areaCode.isEmpty) {
       query = eventsRef
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgo)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .limit(resultsLimit);
     } else {
       query = eventsRef
           .where('nearbyZipcodes', arrayContains: areaCode)
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgo)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .limit(resultsLimit);
     }
@@ -315,21 +311,27 @@ class EventDataService {
     return docs;
   }
 
-  Future<List<DocumentSnapshot>> loadAdditionalEvents(
-      {required DocumentSnapshot lastDocSnap, required String areaCode, required int resultsLimit, required String tagFilter, required String sortBy}) async {
+  Future<List<DocumentSnapshot>> loadAdditionalEvents({
+    required DocumentSnapshot lastDocSnap,
+    required String areaCode,
+    required int resultsLimit,
+    required String tagFilter,
+    required String sortBy,
+  }) async {
+    int dateTimeInMilliseconds2hrsAgo = DateTime.now().millisecondsSinceEpoch - 7200000;
     Query query;
     List<DocumentSnapshot> docs = [];
     String? error;
     if (areaCode.isEmpty) {
       query = eventsRef
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgo)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
     } else {
       query = eventsRef
           .where('nearbyZipcodes', arrayContains: areaCode)
-          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgog)
+          .where('startDateTimeInMilliseconds', isGreaterThan: dateTimeInMilliseconds2hrsAgo)
           .orderBy('startDateTimeInMilliseconds', descending: false)
           .startAfterDocument(lastDocSnap)
           .limit(resultsLimit);
@@ -453,6 +455,7 @@ class EventDataService {
   }
 
   Future<List<DocumentSnapshot>> loadNearbyEvents({required String areaCode, required double lat, required double lon, required int resultsLimit}) async {
+    int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
     GeoFlutterFire geoFlutterFire = GeoFlutterFire();
     GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
     List<DocumentSnapshot> docs = [];
@@ -508,6 +511,7 @@ class EventDataService {
     required DocumentSnapshot lastDocSnap,
     required int resultsLimit,
   }) async {
+    int currentDateTimeInMilliseconds = DateTime.now().millisecondsSinceEpoch;
     GeoFlutterFire geoFlutterFire = GeoFlutterFire();
     GeoFirePoint geoPoint = geoFlutterFire.point(latitude: lat, longitude: lon);
     List<DocumentSnapshot> docs = [];

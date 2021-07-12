@@ -28,9 +28,9 @@ class AgoraLiveStreamService {
     VideoEncoderConfiguration vidConfig = VideoEncoderConfiguration(
       dimensions: VideoDimensions(720, 1280),
       frameRate: VideoFrameRate.Fps30,
-      degradationPrefer: DegradationPreference.MaintainBalanced,
+      degradationPrefer: DegradationPreference.MaintainFramerate,
       orientationMode: VideoOutputOrientationMode.FixedLandscape,
-      bitrate: 4000,
+      bitrate: 3000,
     );
     return vidConfig;
   }

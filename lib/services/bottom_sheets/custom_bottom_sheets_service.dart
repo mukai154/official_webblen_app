@@ -87,6 +87,8 @@ class CustomBottomSheetService {
         _navigationService.navigateTo(Routes.CreateLiveStreamViewRoute(id: "new", promo: 0));
       } else if (res == "new event") {
         _navigationService.navigateTo(Routes.CreateEventViewRoute(id: "new", promo: 0));
+      } else if (res == "new flash event") {
+        _navigationService.navigateTo(Routes.CreateFlashEventViewRoute(id: "new", promo: 0));
       }
     }
   }
@@ -176,6 +178,8 @@ class CustomBottomSheetService {
           //edit event
           if (content.concluded()) {
             _customDialogService.showErrorDialog(description: "You Cannot Edit Past Events");
+          } else if (content.flashEvent != null && content.flashEvent!) {
+            _customDialogService.showErrorDialog(description: "You Cannot Edit Flash Events");
           } else {
             _navigationService.navigateTo(Routes.CreateEventViewRoute(id: content.id, promo: 0));
           }

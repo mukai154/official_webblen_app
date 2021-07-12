@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:miniplayer/miniplayer.dart';
 import 'package:stacked/stacked.dart';
 import 'package:video_player/video_player.dart';
@@ -20,6 +21,7 @@ class MiniVideoPlayerViewModel extends BaseViewModel {
   bool videoBuffering = false;
   bool videoMuted = false;
   bool isExpanded = true;
+  bool isPaused = true;
 
   initialize() async {
     setBusy(true);
@@ -59,8 +61,12 @@ class MiniVideoPlayerViewModel extends BaseViewModel {
   pausePlayVideoPlayer() {
     if (videoPlayerController != null) {
       if (videoPlayerController!.value.isPlaying) {
+        isPaused = true;
+        notifyListeners();
         videoPlayerController!.pause();
       } else {
+        isPaused = false;
+        notifyListeners();
         videoPlayerController!.play();
       }
     }
@@ -70,6 +76,7 @@ class MiniVideoPlayerViewModel extends BaseViewModel {
     miniplayerController.animateToHeight(
       state: PanelState.MAX,
     );
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     isExpanded = true;
     notifyListeners();
   }
@@ -78,6 +85,7 @@ class MiniVideoPlayerViewModel extends BaseViewModel {
     miniplayerController.animateToHeight(
       state: PanelState.MIN,
     );
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     isExpanded = false;
     notifyListeners();
   }
@@ -86,6 +94,7 @@ class MiniVideoPlayerViewModel extends BaseViewModel {
     if (videoPlayerController != null) {
       await videoPlayerController!.pause();
     }
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _reactiveMiniVideoPlayerService.clearState();
     notifyListeners();
   }

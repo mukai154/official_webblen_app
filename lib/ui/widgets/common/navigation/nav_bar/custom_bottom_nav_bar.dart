@@ -121,10 +121,10 @@ class CustomBottomTicketActionBar extends StatelessWidget {
                 CustomButton(
                   onPressed: buttonAction,
                   text: "Proceed to Checkout",
-                  textSize: 16,
+                  textSize: 14,
                   textColor: enabled ? Colors.white : Colors.black45,
                   height: 35,
-                  width: 200,
+                  width: 175,
                   backgroundColor: enabled ? CustomColors.darkMountainGreen : appTextFieldContainerColor(),
                   elevation: enabled ? 1.0 : 0.0,
                   isBusy: false,

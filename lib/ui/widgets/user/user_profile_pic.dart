@@ -43,6 +43,62 @@ class UserProfilePic extends StatelessWidget {
   }
 }
 
+class CurrentUserProfilePic extends StatelessWidget {
+  final String userPicUrl;
+  final double size;
+  final bool isBusy;
+  final VoidCallback editProfileAction;
+
+  CurrentUserProfilePic({
+    required this.userPicUrl,
+    required this.size,
+    required this.isBusy,
+    required this.editProfileAction,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return isBusy
+        ? Container(
+            height: size,
+            width: size,
+            decoration: BoxDecoration(color: CustomColors.iosOffWhite, borderRadius: BorderRadius.all(Radius.circular(size / 2))),
+          )
+        : GestureDetector(
+            onTap: editProfileAction,
+            child: Container(
+              height: size,
+              width: size,
+              padding: EdgeInsets.all(4),
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: size / 2,
+                    backgroundImage: NetworkImage(userPicUrl),
+                    backgroundColor: CustomColors.iosOffWhite,
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Container(
+                      padding: EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: iconButtonBackgroundColor(),
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: Icon(
+                        Icons.edit,
+                        size: 12,
+                        color: appIconColor(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+  }
+}
+
 class UserProfilePicFromFile extends StatelessWidget {
   final File? file;
   final double? size;

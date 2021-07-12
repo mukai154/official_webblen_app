@@ -82,6 +82,8 @@ class StandardVideoPlayerViewModel extends BaseViewModel {
   ///INITIALIZE
   initialize(String id) async {
     setBusy(true);
+    //Set Device Orientation
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
 
     stream = await _liveStreamDataService.getStreamByID(id);
 
@@ -122,8 +124,9 @@ class StandardVideoPlayerViewModel extends BaseViewModel {
         videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
       );
 
-      videoPlayerController!.setLooping(true);
-      await videoPlayerController!.initialize().then((_) {});
+      await videoPlayerController!.initialize().then((_) {
+        videoPlayerController!.setLooping(true);
+      });
 
       videoPlayer = VideoPlayer(videoPlayerController!);
       configuredVideoPlayer = true;
@@ -208,10 +211,17 @@ class StandardVideoPlayerViewModel extends BaseViewModel {
     notifyListeners();
   }
 
+  toggleLandscapeMode() async {
+    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+    await Future.delayed(Duration(milliseconds: 500));
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+  }
+
   dismissVideoPlayer() async {
     if (videoPlayerController != null) {
       await videoPlayerController!.pause();
     }
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _customNavigationService.navigateBack();
     notifyListeners();
   }

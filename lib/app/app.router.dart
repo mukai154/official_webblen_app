@@ -18,7 +18,8 @@ import '../ui/views/earnings/set_up_instant_deposit/set_up_instant_deposit_view.
 import '../ui/views/earnings/usd_balance_history/usd_balance_history_view.dart';
 import '../ui/views/events/check_in/check_in_attendees/check_in_attendees_view.dart';
 import '../ui/views/events/check_in/scan_attendees/scan_attendees_view.dart';
-import '../ui/views/events/create_event_view/create_event_view.dart';
+import '../ui/views/events/create_event/create_event_view.dart';
+import '../ui/views/events/create_flash_event/create_flash_event_view.dart';
 import '../ui/views/events/event_view/event_view.dart';
 import '../ui/views/events/tickets/event_tickets/event_tickets_view.dart';
 import '../ui/views/events/tickets/my_tickets/my_tickets_view.dart';
@@ -47,6 +48,7 @@ import '../ui/views/users/followers/user_followers_view.dart';
 import '../ui/views/users/following/user_following_view.dart';
 import '../ui/views/users/profile/user_profile_view.dart';
 import '../ui/views/users/saved/saved_content_view.dart';
+import '../ui/views/video_player/expanded_landscape_mini_player/expanded_landscape_mini_player_view.dart';
 import '../ui/views/video_player/standard/standard_video_player_view.dart';
 
 class Routes {
@@ -71,6 +73,11 @@ class Routes {
   static String CreateEventViewRoute(
           {@required dynamic id, @required dynamic promo}) =>
       '/events/publish/$id/$promo';
+  static const String _CreateFlashEventViewRoute =
+      '/events/flash/publish/:id/:promo';
+  static String CreateFlashEventViewRoute(
+          {@required dynamic id, @required dynamic promo}) =>
+      '/events/flash/publish/$id/$promo';
   static const String _LiveStreamViewRoute = '/streams/:id';
   static String LiveStreamViewRoute({@required dynamic id}) => '/streams/$id';
   static const String _CreateLiveStreamViewRoute =
@@ -87,6 +94,10 @@ class Routes {
   static const String _StandardVideoPlayerViewRoute = '/video/:id';
   static String StandardVideoPlayerViewRoute({@required dynamic id}) =>
       '/video/$id';
+  static const String _ExpandedLandscapeMiniPlayerViewRoute =
+      '/video_expanded_miniplayer/:id';
+  static String ExpandedLandscapeMiniPlayerViewRoute({@required dynamic id}) =>
+      '/video_expanded_miniplayer/$id';
   static const String _AllSearchResultsViewRoute = '/all_results/:term';
   static String AllSearchResultsViewRoute({@required dynamic term}) =>
       '/all_results/$term';
@@ -146,11 +157,13 @@ class Routes {
     _CreatePostViewRoute,
     _EventViewRoute,
     _CreateEventViewRoute,
+    _CreateFlashEventViewRoute,
     _LiveStreamViewRoute,
     _CreateLiveStreamViewRoute,
     _LiveStreamHostViewRoute,
     _LiveStreamViewerViewRoute,
     _StandardVideoPlayerViewRoute,
+    _ExpandedLandscapeMiniPlayerViewRoute,
     _AllSearchResultsViewRoute,
     NotificationsViewRoute,
     _UserProfileView,
@@ -193,12 +206,15 @@ class StackedRouter extends RouterBase {
     RouteDef(Routes._CreatePostViewRoute, page: CreatePostView),
     RouteDef(Routes._EventViewRoute, page: EventView),
     RouteDef(Routes._CreateEventViewRoute, page: CreateEventView),
+    RouteDef(Routes._CreateFlashEventViewRoute, page: CreateFlashEventView),
     RouteDef(Routes._LiveStreamViewRoute, page: LiveStreamDetailsView),
     RouteDef(Routes._CreateLiveStreamViewRoute, page: CreateLiveStreamView),
     RouteDef(Routes._LiveStreamHostViewRoute, page: LiveStreamHostView),
     RouteDef(Routes._LiveStreamViewerViewRoute, page: LiveStreamViewerView),
     RouteDef(Routes._StandardVideoPlayerViewRoute,
         page: StandardVideoPlayerView),
+    RouteDef(Routes._ExpandedLandscapeMiniPlayerViewRoute,
+        page: ExpandedLandscapeMiniPlayerView),
     RouteDef(Routes._AllSearchResultsViewRoute, page: AllSearchResultsView),
     RouteDef(Routes.NotificationsViewRoute, page: NotificationsView),
     RouteDef(Routes._UserProfileView, page: UserProfileView),
@@ -325,6 +341,17 @@ class StackedRouter extends RouterBase {
         transitionDuration: const Duration(milliseconds: 0),
       );
     },
+    CreateFlashEventView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            CreateFlashEventView(
+          data.pathParams['id'].value,
+          data.pathParams['promo'].value,
+        ),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
     LiveStreamDetailsView: (data) {
       return PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
@@ -361,6 +388,14 @@ class StackedRouter extends RouterBase {
       return PageRouteBuilder<dynamic>(
         pageBuilder: (context, animation, secondaryAnimation) =>
             StandardVideoPlayerView(data.pathParams['id'].value),
+        settings: data,
+        transitionDuration: const Duration(milliseconds: 0),
+      );
+    },
+    ExpandedLandscapeMiniPlayerView: (data) {
+      return PageRouteBuilder<dynamic>(
+        pageBuilder: (context, animation, secondaryAnimation) =>
+            ExpandedLandscapeMiniPlayerView(),
         settings: data,
         transitionDuration: const Duration(milliseconds: 0),
       );

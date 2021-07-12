@@ -69,6 +69,7 @@ class ExpandedMiniPlayerViewModel extends BaseViewModel {
   List savedBy = [];
   List clickedBy = [];
   bool showVideoInfo = false;
+  bool isLandscape = false;
 
   bool hasSocialAccounts = false;
 
@@ -159,6 +160,10 @@ class ExpandedMiniPlayerViewModel extends BaseViewModel {
       showVideoInfo = true;
     }
     notifyListeners();
+  }
+
+  toggleLandscapeMode() {
+    _customNavigationService.navigateToExpandedLandscapeMiniPlayer(stream.id!);
   }
 
   ///LOAD COMMENTS

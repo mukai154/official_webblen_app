@@ -89,6 +89,7 @@ class LiveStreamBlockViewModel extends BaseViewModel {
     }
     if (stream.muxAssetPlaybackID != null && stream.muxAssetPlaybackID!.isNotEmpty) {
       if (canOpenMiniVideoPlayer) {
+        await _miniVideoPlayerViewModel.dismissMiniPlayer();
         _reactiveMiniVideoPlayerService.updateSelectedStream(stream);
         _reactiveMiniVideoPlayerService.updateSelectedStreamCreator(hostUsername!);
         _miniVideoPlayerViewModel.initialize();

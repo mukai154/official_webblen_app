@@ -5,9 +5,7 @@ import 'package:webblen/models/webblen_ticket_distro.dart';
 import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/bottom_sheets/custom_bottom_sheets_service.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
-import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
-import 'package:webblen/services/firestore/data/notification_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/location/location_service.dart';
@@ -23,8 +21,6 @@ class EventViewModel extends ReactiveViewModel {
   EventDataService _eventDataService = locator<EventDataService>();
   TicketDistroDataService? _ticketDistroDataService = locator<TicketDistroDataService>();
   LocationService? _locationService = locator<LocationService>();
-  CommentDataService? _commentDataService = locator<CommentDataService>();
-  NotificationDataService? _notificationDataService = locator<NotificationDataService>();
   CustomDialogService customDialogService = locator<CustomDialogService>();
   CustomBottomSheetService customBottomSheetService = locator<CustomBottomSheetService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
@@ -104,7 +100,6 @@ class EventViewModel extends ReactiveViewModel {
     if (currentDateInMilli > eventEndDateInMilli!) {
       eventPassed = true;
     }
-    print(liveNow);
     notifyListeners();
   }
 

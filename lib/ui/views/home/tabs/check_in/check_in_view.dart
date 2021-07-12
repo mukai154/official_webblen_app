@@ -12,7 +12,7 @@ class CheckInView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ViewModelBuilder<CheckInViewModel>.reactive(
       disposeViewModel: false,
-      initialiseSpecialViewModelsOnce: true,
+      initialiseSpecialViewModelsOnce: false,
       viewModelBuilder: () => CheckInViewModel(),
       builder: (context, model, child) => Container(
         height: MediaQuery.of(context).size.height,

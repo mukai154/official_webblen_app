@@ -31,7 +31,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   CustomBottomSheetService _customBottomSheetService = locator<CustomBottomSheetService>();
   DialogService? _dialogService = locator<DialogService>();
-  SnackbarService? _snackbarService = locator<SnackbarService>();
   PlatformDataService? _platformDataService = locator<PlatformDataService>();
   UserDataService _userDataService = locator<UserDataService>();
   LocationService? _locationService = locator<LocationService>();
@@ -46,25 +45,25 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   ///USER DATA
   WebblenUser get user => _reactiveUserService.user;
 
-  ///STREAM DETAILS CONTROLLERS
-  TextEditingController tagTextController = TextEditingController();
-  TextEditingController titleTextController = TextEditingController();
-  TextEditingController descTextController = TextEditingController();
+  ///STREAM DATE CONTROLLERS
   TextEditingController startDateTextController = TextEditingController();
   TextEditingController endDateTextController = TextEditingController();
-  TextEditingController instaUsernameTextController = TextEditingController();
-  TextEditingController fbUsernameTextController = TextEditingController();
-  TextEditingController twitterUsernameTextController = TextEditingController();
-  TextEditingController twitchTextController = TextEditingController();
-  TextEditingController youtubeTextController = TextEditingController();
-  TextEditingController websiteTextController = TextEditingController();
-  TextEditingController fbStreamKeyTextController = TextEditingController();
-  TextEditingController twitchStreamKeyTextController = TextEditingController();
-  TextEditingController youtubeStreamKeyTextController = TextEditingController();
 
   ///HELPERS
   bool initialized = false;
   bool textFieldEnabled = true;
+  bool loadedPreviousTitle = false;
+  bool loadedPreviousDescription = false;
+  bool loadedPreviousVenueName = false;
+  bool loadedPreviousFBUsername = false;
+  bool loadedPreviousInstaUsername = false;
+  bool loadedPreviousTwitterUsername = false;
+  bool loadedPreviousTwitchUsername = false;
+  bool loadedPreviousYoutube = false;
+  bool loadedPreviousWebsite = false;
+  bool loadedPreviousFBStreamKey = false;
+  bool loadedPreviousTwitchStreamKey = false;
+  bool loadedPreviousYoutubeStreamKey = false;
 
   ///USER DATA
   bool? hasEarningsAccount;
@@ -72,7 +71,9 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   ///STREAM DATA
   bool isEditing = false;
   bool isDuplicate = false;
-  File? img;
+
+  ///FILE DATA
+  File? fileToUpload;
 
   WebblenLiveStream stream = WebblenLiveStream();
 
@@ -117,7 +118,6 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       stream = await _liveStreamDataService.getStreamByID(id);
       if (stream.isValid()) {
         stream.id = getRandomString(32);
-        prepopulateFields();
         stream.attendees = {};
         stream.savedBy = [];
         stream.muxStreamID = null;
@@ -129,7 +129,10 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     } else if (id != "new") {
       stream = await _liveStreamDataService.getStreamByID(id);
       if (stream.isValid()) {
-        await setPreviousSocialData();
+        startDateTextController.text = stream.startDate!;
+        endDateTextController.text = stream.endDate!;
+        selectedStartDate = dateFormatter.parse(stream.startDate!);
+        selectedEndDate = dateFormatter.parse(stream.endDate!);
         isEditing = true;
       }
     } else {
@@ -152,55 +155,136 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   ///PREVIOUS SOCIAL DATA
   setPreviousSocialData() async {
     //fb
-    String fbUsername = await _userDataService.getCurrentFbUsername(user.id!);
-    String fbStreamKey = await _userDataService.getCurrentUserFBStreamKey(user.id!);
-    fbUsernameTextController.text = fbUsername;
-    fbStreamKeyTextController.text = fbStreamKey;
-    stream.fbUsername = fbUsername;
-    stream.fbStreamKey = fbStreamKey;
+    stream.fbUsername = await _userDataService.getCurrentFbUsername(user.id!);
+    stream.fbStreamKey = await _userDataService.getCurrentUserFBStreamKey(user.id!);
 
     //insta
-    instaUsernameTextController.text = await _userDataService.getCurrentInstaUsername(user.id!);
+    stream.instaUsername = await _userDataService.getCurrentInstaUsername(user.id!);
 
     //twitter
-    twitterUsernameTextController.text = await _userDataService.getCurrentTwitterUsername(user.id!);
+    stream.twitterUsername = await _userDataService.getCurrentTwitterUsername(user.id!);
 
     //twitch
-    String twitchUsername = await _userDataService.getCurrentTwitchUsername(user.id!);
-    String twitchStreamKey = await _userDataService.getCurrentUserTwitchStreamKey(user.id!);
-    twitchTextController.text = twitchUsername;
-    twitchStreamKeyTextController.text = twitchStreamKey;
-    stream.twitchUsername = twitchUsername;
-    stream.twitchStreamKey = twitchStreamKey;
+    stream.twitchUsername = await _userDataService.getCurrentTwitchUsername(user.id!);
+    stream.twitchStreamKey = await _userDataService.getCurrentUserTwitchStreamKey(user.id!);
 
     //website
-    websiteTextController.text = await _userDataService.getCurrentUserWebsite(user.id!);
+    stream.website = await _userDataService.getCurrentUserWebsite(user.id!);
 
     //youtube
-    String youtubeChannelLink = await _userDataService.getCurrentYoutube(user.id!);
-    String youtubeStreamKey = await _userDataService.getCurrentUserYoutubeStreamKey(user.id!);
-    youtubeTextController.text = youtubeChannelLink;
-    youtubeStreamKeyTextController.text = youtubeStreamKey;
-    stream.youtube = youtubeChannelLink;
-    stream.youtubeStreamKey = youtubeStreamKey;
+    stream.youtube = await _userDataService.getCurrentYoutube(user.id!);
+    stream.youtubeStreamKey = await _userDataService.getCurrentUserYoutubeStreamKey(user.id!);
   }
 
-  prepopulateFields() {
-    titleTextController.text = stream.title!;
-    descTextController.text = stream.description!;
-    startDateTextController.text = stream.startDate!;
-    endDateTextController.text = stream.endDate!;
-    fbUsernameTextController.text = stream.fbUsername == null ? "" : stream.fbUsername!;
-    instaUsernameTextController.text = stream.instaUsername == null ? "" : stream.instaUsername!;
-    twitterUsernameTextController.text = stream.twitterUsername == null ? "" : stream.twitterUsername!;
-    websiteTextController.text = stream.website == null ? "" : stream.website!;
-    twitchTextController.text = stream.twitchUsername == null ? "" : stream.twitchUsername!;
-    youtubeTextController.text = stream.youtube == null ? "" : stream.youtube!;
-    fbStreamKeyTextController.text = stream.fbStreamKey == null ? "" : stream.fbStreamKey!;
-    twitchStreamKeyTextController.text = stream.twitchStreamKey == null ? "" : stream.twitchStreamKey!;
-    youtubeStreamKeyTextController.text = stream.youtubeStreamKey == null ? "" : stream.youtubeStreamKey!;
-    selectedStartDate = dateFormatter.parse(stream.startDate!);
-    selectedEndDate = dateFormatter.parse(stream.endDate!);
+  ///LOAD PREVIOUS DATA
+  String loadPreviousTitle() {
+    String val = "";
+    if (!loadedPreviousTitle) {
+      val = stream.title ?? "";
+    }
+    loadedPreviousTitle = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousDesc() {
+    String val = "";
+    if (!loadedPreviousDescription) {
+      val = stream.description ?? "";
+    }
+    loadedPreviousDescription = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousFBUsername() {
+    String val = "";
+    if (!loadedPreviousFBUsername) {
+      val = stream.fbUsername ?? "";
+    }
+    loadedPreviousFBUsername = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousInstaUsername() {
+    String val = "";
+    if (!loadedPreviousInstaUsername) {
+      val = stream.instaUsername ?? "";
+    }
+    loadedPreviousInstaUsername = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousTwitterUsername() {
+    String val = "";
+    if (!loadedPreviousTwitterUsername) {
+      val = stream.twitterUsername ?? "";
+    }
+    loadedPreviousTwitterUsername = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousTwitchUsername() {
+    String val = "";
+    if (!loadedPreviousTwitchUsername) {
+      val = stream.twitchUsername ?? "";
+    }
+    loadedPreviousTwitchUsername = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousYoutubeChannel() {
+    String val = "";
+    if (!loadedPreviousYoutube) {
+      val = stream.youtube ?? "";
+    }
+    loadedPreviousYoutube = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousWebsite() {
+    String val = "";
+    if (!loadedPreviousWebsite) {
+      val = stream.website ?? "";
+    }
+    loadedPreviousWebsite = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousFBStreamKey() {
+    String val = "";
+    if (!loadedPreviousFBStreamKey) {
+      val = stream.fbStreamKey ?? "";
+    }
+    loadedPreviousFBStreamKey = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousTwitchStreamKey() {
+    String val = "";
+    if (!loadedPreviousTwitchStreamKey) {
+      val = stream.twitchStreamKey ?? "";
+    }
+    loadedPreviousTwitchStreamKey = true;
+    notifyListeners();
+    return val;
+  }
+
+  String loadPreviousYoutubeStreamKey() {
+    String val = "";
+    if (!loadedPreviousYoutubeStreamKey) {
+      val = stream.youtubeStreamKey ?? "";
+    }
+    loadedPreviousYoutubeStreamKey = true;
+    notifyListeners();
+    return val;
   }
 
   ///HOW TO FIND STREAM KEYS
@@ -220,7 +304,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       if (source == "camera") {
         bool hasCameraPermission = await _permissionHandlerService.hasCameraPermission();
         if (hasCameraPermission) {
-          img = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
+          fileToUpload = await WebblenImagePicker().retrieveImageFromCamera(ratioX: 1, ratioY: 1);
         } else {
           if (Platform.isAndroid) {
             _customDialogService.showAppSettingsDialog(
@@ -232,7 +316,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       } else if (source == "gallery") {
         bool hasPhotosPermission = await _permissionHandlerService.hasPhotosPermission();
         if (hasPhotosPermission) {
-          img = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
+          fileToUpload = await WebblenImagePicker().retrieveImageFromLibrary(ratioX: 1, ratioY: 1);
         } else {
           if (Platform.isAndroid) {
             _customDialogService.showAppSettingsDialog(
@@ -250,43 +334,13 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     }
   }
 
-  ///STREAM TAGS
-  addTag(String tag) {
-    List tags = stream.tags == null ? [] : stream.tags!.toList(growable: true);
-
-    //check if tag already listed
-    if (!tags.contains(tag)) {
-      //check if tag limit has been reached
-      if (tags.length == 3) {
-        _snackbarService!.showSnackbar(
-          title: 'Tag Limit Reached',
-          message: 'You can only add up to 3 tags for your stream',
-          duration: Duration(seconds: 5),
-        );
-      } else {
-        //add tag
-        tags.add(tag);
-        stream.tags = tags;
-        notifyListeners();
-      }
-    }
-    tagTextController.clear();
-  }
-
-  removeTagAtIndex(int index) {
-    List tags = stream.tags == null ? [] : stream.tags!.toList(growable: true);
-    tags.removeAt(index);
-    stream.tags = tags;
-    notifyListeners();
-  }
-
   ///STREAM INFO
-  setStreamTitle(String val) {
+  updateTitle(String val) {
     stream.title = val;
     notifyListeners();
   }
 
-  setStreamDescription(String val) {
+  updateDescription(String val) {
     stream.description = val;
     notifyListeners();
   }
@@ -297,9 +351,9 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   }
 
   ///STREAM LOCATION
-  Future<bool> setStreamAudienceLocation(Map<String, dynamic> details) async {
+  Future<bool> updateLocation(Map<String, dynamic> details) async {
     bool success = true;
-
+    setBusy(true);
     if (details.isEmpty) {
       return false;
     }
@@ -307,6 +361,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     //set nearest zipcodes
     stream.nearbyZipcodes = await _locationService!.findNearestZipcodes(details['areaCode']);
     if (stream.nearbyZipcodes == null) {
+      setBusy(false);
       return false;
     }
 
@@ -326,7 +381,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     stream.province = details['province'];
 
     notifyListeners();
-
+    setBusy(false);
     return success;
   }
 
@@ -378,65 +433,57 @@ class CreateLiveStreamViewModel extends BaseViewModel {
   }
 
   ///ADDITIONAL STREAM INFO
-  setSponsorshipStatus(bool val) {
+  updateSponsorshipStatus(bool val) {
     stream.openToSponsors = val;
     notifyListeners();
   }
 
-  setFBUsername(String val) {
+  updateFBUsername(String val) {
     stream.fbUsername = val.trim();
     notifyListeners();
   }
 
-  setInstaUsername(String val) {
+  updateInstaUsername(String val) {
     stream.instaUsername = val.trim();
     notifyListeners();
   }
 
-  setTwitterUsername(String val) {
+  updateTwitterUsername(String val) {
     stream.twitterUsername = val.trim();
     notifyListeners();
   }
 
-  setTwitchUsername(String val) {
+  updateTwitchUsername(String val) {
     stream.twitchUsername = val.trim();
     notifyListeners();
   }
 
-  setYoutube(String val) {
+  updateYoutube(String val) {
     stream.youtube = val.trim();
     notifyListeners();
   }
 
-  setWebsite(String val) {
+  updateWebsite(String val) {
     stream.website = val.trim();
     notifyListeners();
   }
 
-  setYoutubeStreamKey(String val) {
+  updateYoutubeStreamKey(String val) {
     stream.youtubeStreamKey = val.trim();
     notifyListeners();
   }
 
-  setTwitchStreamKey(String val) {
+  updateTwitchStreamKey(String val) {
     stream.twitchStreamKey = val.trim();
     notifyListeners();
   }
 
-  setFBStreamKey(String val) {
+  updateFBStreamKey(String val) {
     stream.fbStreamKey = val.trim();
     notifyListeners();
   }
 
   ///FORM VALIDATION
-  // bool tagsAreValid() {
-  //   if (stream.tags == null || stream.tags!.isEmpty) {
-  //     return false;
-  //   } else {
-  //     return true;
-  //   }
-  // }
-
   bool titleIsValid() {
     return isValidString(stream.title);
   }
@@ -494,78 +541,30 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   bool formIsValid() {
     bool isValid = false;
-    if (img == null && stream.imageURL == null) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Image Error',
-        message: 'Your stream must have an image',
-        duration: Duration(seconds: 3),
-      );
+    if (fileToUpload == null && stream.imageURL == null) {
+      _customDialogService.showErrorDialog(description: "Image required");
     } else if (!titleIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Title Required',
-        message: 'The title for your stream cannot be empty',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Title required");
     } else if (!descIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Description Required',
-        message: 'The description for your stream cannot be empty',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Description required");
     } else if (!audienceLocationIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Audiences Location Required',
-        message: 'The target location for your stream cannot be empty',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Audience location required");
     } else if (!startDateIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Start Date Required',
-        message: 'The start date & time for your stream cannot be empty',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Stream start date required");
     } else if (!endDateIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream End Date Error',
-        message: "End date & time must be set after the start date & time",
-        duration: Duration(seconds: 5),
-      );
+      _customDialogService.showErrorDialog(description: "Stream end date required");
     } else if (stream.fbUsername != null && stream.fbUsername!.isNotEmpty && !fbUsernameIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Facebook Username Error',
-        message: "Facebook username must be valid",
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Facebook username is invalid");
     } else if (stream.instaUsername != null && stream.instaUsername!.isNotEmpty && !instaUsernameIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Instagram Username Error',
-        message: "Instagram username must be valid",
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Instagram username is invalid");
     } else if (stream.twitterUsername != null && stream.twitterUsername!.isNotEmpty && !twitterUsernameIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Twitter Username Error',
-        message: "Twitter username must be valid",
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Twitter username is invalid");
     } else if (stream.twitchUsername != null && stream.twitchUsername!.isNotEmpty && !twitchUsernameIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Twitch Username Error',
-        message: "Twitch username must be valid",
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Twitch username is invalid");
     } else if (stream.website != null && stream.website!.isNotEmpty && !websiteIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Website URL Error',
-        message: "Website URL must be valid",
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Website URL is invalid");
     } else if (stream.youtube != null && stream.youtube!.isNotEmpty && !websiteIsValid()) {
-      _snackbarService!.showSnackbar(
-        title: 'Youtube URL Error',
-        message: "Youtube URL must be valid",
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "Youtube URL is invalid");
     } else {
       isValid = true;
     }
@@ -576,14 +575,10 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     bool success = true;
 
     //upload img if exists
-    if (img != null) {
-      String? imageURL = await _firestoreStorageService!.uploadImage(img: img!, storageBucket: 'images', folderName: 'streams', fileName: stream.id!);
+    if (fileToUpload != null) {
+      String? imageURL = await _firestoreStorageService!.uploadImage(img: fileToUpload!, storageBucket: 'images', folderName: 'streams', fileName: stream.id!);
       if (imageURL == null) {
-        _snackbarService!.showSnackbar(
-          title: 'Stream Upload Error',
-          message: 'There was an issue uploading your stream. Please try again.',
-          duration: Duration(seconds: 3),
-        );
+        _customDialogService.showErrorDialog(description: "There was an issue uploading your stream. Please try again.");
         return false;
       }
       stream.imageURL = imageURL;
@@ -601,11 +596,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
     }
 
     if (uploadResult is String) {
-      _snackbarService!.showSnackbar(
-        title: 'Stream Upload Error',
-        message: 'There was an issue uploading your stream. Please try again.',
-        duration: Duration(seconds: 3),
-      );
+      _customDialogService.showErrorDialog(description: "There was an issue uploading your stream. Please try again.");
       return false;
     }
 
@@ -654,7 +645,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
   showNewContentConfirmationBottomSheet({required BuildContext context}) async {
     FocusScope.of(context).unfocus();
-
+    setBusy(true);
     //exit function if form is invalid
     if (!formIsValid()) {
       setBusy(false);
@@ -686,13 +677,12 @@ class CreateLiveStreamViewModel extends BaseViewModel {
 
       //get image from camera or gallery
       if (res == "insufficient funds") {
-        _snackbarService!.showSnackbar(
-          title: 'Insufficient Funds',
-          message: 'You do no have enough WBLN to schedule this stream',
-          duration: Duration(seconds: 3),
-        );
+        setBusy(false);
+        _customDialogService.showErrorDialog(description: "Insufficient funds");
       } else if (res == "confirmed") {
         submitForm();
+      } else {
+        setBusy(false);
       }
 
       //wait a bit to re-enable text fields

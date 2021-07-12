@@ -1,5 +1,4 @@
 import 'package:webblen/utils/custom_string_methods.dart';
-import 'package:webblen/utils/random_image_generator.dart';
 
 class WebblenUser {
   // ignore: non_constant_identifier_names
@@ -117,7 +116,8 @@ class WebblenUser {
 
   WebblenUser generateNewUser(String id) {
     String randomUsername = "user" + getRandomString(5);
-    String randomImgURL = getRandomImageURL();
+    String placeHolderImgURL = "https://firebasestorage.googleapis.com/v0/b/webblen-events.appspot.com/o/user_placeholder_imgs%2Fuser_placeholder"
+        ".png?alt=media&token=029df45f-79af-42a4-93a1-b8a7111516f9";
     WebblenUser user = WebblenUser(
       id: id,
       WBLN: 5.0001,
@@ -134,7 +134,7 @@ class WebblenUser {
       googleAccessToken: null,
       googleIDToken: googleIDToken,
       isAdmin: false,
-      profilePicURL: randomImgURL,
+      profilePicURL: placeHolderImgURL,
       username: randomUsername,
       bio: null,
       website: null,

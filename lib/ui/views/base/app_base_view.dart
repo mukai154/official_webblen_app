@@ -74,34 +74,40 @@ class AppBaseView extends StatelessWidget {
                                   MiniVideoPlayerView(),
                                 ],
                               ),
-        bottomNavigationBar: CustomNavBar(
-          navBarItems: [
-            CustomNavBarItem(
-              onTap: () => model.setNavBarIndex(0),
-              iconData: FontAwesomeIcons.home,
-              isActive: model.navBarIndex == 0 ? true : false,
-            ),
-            CustomNavBarItem(
-              onTap: () => model.setNavBarIndex(1),
-              iconData: FontAwesomeIcons.search,
-              isActive: model.navBarIndex == 1 ? true : false,
-            ),
-            CustomNavBarItem(
-              onTap: () => model.setNavBarIndex(2),
-              iconData: FontAwesomeIcons.mapMarkerAlt,
-              isActive: model.navBarIndex == 2 ? true : false,
-            ),
-            CustomNavBarItem(
-              onTap: () => model.setNavBarIndex(3),
-              iconData: FontAwesomeIcons.wallet,
-              isActive: model.navBarIndex == 3 ? true : false,
-            ),
-            CustomNavBarItem(
-              onTap: () => model.setNavBarIndex(4),
-              iconData: FontAwesomeIcons.user,
-              isActive: model.navBarIndex == 4 ? true : false,
-            ),
-          ],
+        bottomNavigationBar: OrientationBuilder(
+          builder: (context, orientation) {
+            return orientation == Orientation.portrait
+                ? CustomNavBar(
+                    navBarItems: [
+                      CustomNavBarItem(
+                        onTap: () => model.setNavBarIndex(0),
+                        iconData: FontAwesomeIcons.home,
+                        isActive: model.navBarIndex == 0 ? true : false,
+                      ),
+                      CustomNavBarItem(
+                        onTap: () => model.setNavBarIndex(1),
+                        iconData: FontAwesomeIcons.search,
+                        isActive: model.navBarIndex == 1 ? true : false,
+                      ),
+                      CustomNavBarItem(
+                        onTap: () => model.setNavBarIndex(2),
+                        iconData: FontAwesomeIcons.mapMarkerAlt,
+                        isActive: model.navBarIndex == 2 ? true : false,
+                      ),
+                      CustomNavBarItem(
+                        onTap: () => model.setNavBarIndex(3),
+                        iconData: FontAwesomeIcons.wallet,
+                        isActive: model.navBarIndex == 3 ? true : false,
+                      ),
+                      CustomNavBarItem(
+                        onTap: () => model.setNavBarIndex(4),
+                        iconData: FontAwesomeIcons.user,
+                        isActive: model.navBarIndex == 4 ? true : false,
+                      ),
+                    ],
+                  )
+                : Container();
+          },
         ),
       ),
     );

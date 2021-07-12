@@ -31,6 +31,10 @@ class ProfileViewModel extends ReactiveViewModel {
     _navigationService.navigateTo(Routes.UserFollowingViewRoute(id: user.id));
   }
 
+  navigateToEditProfile() {
+    _navigationService.navigateTo(Routes.EditProfileViewRoute);
+  }
+
   //show current user options
   showOptions() {
     customBottomSheetService.showCurrentUserOptions(user);

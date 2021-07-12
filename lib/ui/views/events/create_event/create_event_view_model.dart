@@ -45,7 +45,6 @@ class CreateEventViewModel extends ReactiveViewModel {
   PermissionHandlerService _permissionHandlerService = locator<PermissionHandlerService>();
 
   ///EVENT DETAILS CONTROLLERS
-  TextEditingController tagTextController = TextEditingController();
   TextEditingController eventStartDateTextController = TextEditingController();
   TextEditingController eventEndDateTextController = TextEditingController();
 
@@ -335,32 +334,6 @@ class CreateEventViewModel extends ReactiveViewModel {
     }
   }
 
-  ///EVENT TAGS
-  addTag(String tag) {
-    List tags = event.tags == null ? [] : event.tags!.toList(growable: true);
-
-    //check if tag already listed
-    if (!tags.contains(tag)) {
-      //check if tag limit has been reached
-      if (tags.length == 3) {
-        _customDialogService.showErrorDialog(description: "You can only add up to 3 tags for your event");
-      } else {
-        //add tag
-        tags.add(tag);
-        event.tags = tags;
-        notifyListeners();
-      }
-    }
-    tagTextController.clear();
-  }
-
-  removeTagAtIndex(int index) {
-    List tags = event.tags == null ? [] : event.tags!.toList(growable: true);
-    tags.removeAt(index);
-    event.tags = tags;
-    notifyListeners();
-  }
-
   ///EVENT INFO
   updateTitle(String val) {
     event.title = val;
@@ -380,7 +353,7 @@ class CreateEventViewModel extends ReactiveViewModel {
   ///EVENT LOCATION
   Future<bool> updateLocation(Map<String, dynamic> details) async {
     bool success = true;
-
+    setBusy(true);
     if (details.isEmpty) {
       return false;
     }
@@ -388,6 +361,7 @@ class CreateEventViewModel extends ReactiveViewModel {
     //set nearest zipcodes
     event.nearbyZipcodes = await _locationService.findNearestZipcodes(details['areaCode']);
     if (event.nearbyZipcodes == null) {
+      setBusy(false);
       return false;
     }
 
@@ -407,7 +381,7 @@ class CreateEventViewModel extends ReactiveViewModel {
     event.province = details['province'];
 
     notifyListeners();
-
+    setBusy(false);
     return success;
   }
 
@@ -674,14 +648,6 @@ class CreateEventViewModel extends ReactiveViewModel {
   }
 
   ///FORM VALIDATION
-  bool tagsAreValid() {
-    if (event.tags == null || event.tags!.isEmpty) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
   bool titleIsValid() {
     return isValidString(event.title);
   }
@@ -742,10 +708,6 @@ class CreateEventViewModel extends ReactiveViewModel {
     if (fileToUpload == null && event.imageURL == null) {
       _customDialogService.showErrorDialog(
         description: 'Your event must have an image',
-      );
-    } else if (!tagsAreValid()) {
-      _customDialogService.showErrorDialog(
-        description: 'Your event must contain at least 1 tag',
       );
     } else if (!titleIsValid()) {
       _customDialogService.showErrorDialog(
@@ -867,7 +829,8 @@ class CreateEventViewModel extends ReactiveViewModel {
   }
 
   showNewContentConfirmationBottomSheet({BuildContext? context}) async {
-    //FocusScope.of(context).unfocus();
+    setBusy(true);
+    await Future.delayed(Duration(seconds: 1));
 
     //exit function if form is invalid
     if (!formIsValid()) {
@@ -900,11 +863,14 @@ class CreateEventViewModel extends ReactiveViewModel {
 
       //get image from camera or gallery
       if (res == "insufficient funds") {
+        setBusy(false);
         _customDialogService.showErrorDialog(
           description: 'You do no have enough WBLN to schedule this event',
         );
       } else if (res == "confirmed") {
         submitForm();
+      } else {
+        setBusy(false);
       }
 
       //wait a bit to re-enable text fields

@@ -3,7 +3,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:stacked/stacked.dart';
 import 'package:stacked_services/stacked_services.dart';
 import 'package:webblen/constants/app_colors.dart';
-import 'package:webblen/ui/ui_helpers/ui_helpers.dart';
 import 'package:webblen/ui/widgets/common/buttons/custom_button.dart';
 
 import 'current_user_options_bottom_sheet_model.dart';
@@ -23,9 +22,17 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
     return ViewModelBuilder<CurrentUserOptionsBottomSheetModel>.nonReactive(
       viewModelBuilder: () => CurrentUserOptionsBottomSheetModel(),
       builder: (context, model, child) => Container(
-        margin: EdgeInsets.symmetric(horizontal: 8, vertical: 25),
+        margin: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        color: Colors.transparent,
+        decoration: BoxDecoration(
+          color: appBackgroundColor(),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,12 +45,18 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
               height: 45,
               onPressed: () => completer!(SheetResponse(responseData: "saved")),
               backgroundColor: appButtonColor(),
-              elevation: 1,
+              elevation: 0,
               text: "Saved",
               textColor: appFontColor(),
               centerContent: false,
             ),
-            verticalSpaceSmall,
+            Divider(
+              height: 16,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+              color: appDividerColor(),
+            ),
             CustomIconButton(
               icon: Icon(
                 FontAwesomeIcons.edit,
@@ -52,12 +65,18 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
               height: 45,
               onPressed: () => completer!(SheetResponse(responseData: "edit profile")),
               backgroundColor: appButtonColor(),
-              elevation: 1,
+              elevation: 0,
               text: "Edit Profile",
               textColor: appFontColor(),
               centerContent: false,
             ),
-            verticalSpaceSmall,
+            Divider(
+              height: 16,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+              color: appDividerColor(),
+            ),
             CustomIconButton(
               icon: Icon(
                 FontAwesomeIcons.link,
@@ -66,12 +85,18 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
               height: 45,
               onPressed: () => completer!(SheetResponse(responseData: "share profile")),
               backgroundColor: appButtonColor(),
-              elevation: 1,
+              elevation: 0,
               text: "Share Profile",
               textColor: appFontColor(),
               centerContent: false,
             ),
-            verticalSpaceSmall,
+            Divider(
+              height: 16,
+              thickness: 1,
+              indent: 16,
+              endIndent: 16,
+              color: appDividerColor(),
+            ),
             CustomIconButton(
               icon: Icon(
                 FontAwesomeIcons.cog,
@@ -80,7 +105,7 @@ class CurrentUserOptionsBottomSheet extends StatelessWidget {
               height: 45,
               onPressed: () => completer!(SheetResponse(responseData: "settings")),
               backgroundColor: appButtonColor(),
-              elevation: 1,
+              elevation: 0,
               text: "Settings",
               textColor: appFontColor(),
               centerContent: false,

@@ -1,4 +1,5 @@
 import 'package:webblen/utils/custom_string_methods.dart';
+import 'package:webblen/utils/time_calc.dart';
 
 class WebblenEvent {
   String? id;
@@ -195,6 +196,36 @@ class WebblenEvent {
       savedBy: [],
       attendees: {},
       clicks: 0,
+      estimatedTurnout: 0,
+    );
+    return event;
+  }
+
+  WebblenEvent generateNewWebblenFlashEvent({required String authorID, required List suggestedUIDs}) {
+    String id = getRandomString(30);
+    DateTime currentDateTime = DateTime.now();
+    DateTime dateTimeInHour = currentDateTime.add(Duration(hours: 1));
+    WebblenEvent event = WebblenEvent(
+      id: id,
+      authorID: authorID,
+      privacy: "Public",
+      description: "Flash Event",
+      reported: false,
+      hasStream: false,
+      hasTickets: false,
+      paidOut: false,
+      openToSponsors: false,
+      tags: [],
+      savedBy: [],
+      attendees: {},
+      clicks: 0,
+      startDateTimeInMilliseconds: currentDateTime.millisecondsSinceEpoch,
+      endDateTimeInMilliseconds: dateTimeInHour.millisecondsSinceEpoch,
+      startDate: TimeCalc().getStringFromDate(currentDateTime),
+      endDate: TimeCalc().getStringFromDate(dateTimeInHour),
+      startTime: TimeCalc().getFormattedTimeFromDateTime(currentDateTime),
+      endTime: TimeCalc().getFormattedTimeFromDateTime(dateTimeInHour),
+      flashEvent: true,
       estimatedTurnout: 0,
     );
     return event;
