@@ -55,12 +55,13 @@ class UserAlgorandAccountDataService {
     });
   }
 
-  Future updateUserAlgorandAccountAssetIds(
-      {required String userAlgorandAccountId,
-      required List<AssetId> assetIds}) async {
-    await userAlgorandAccountRef
-        .doc(userAlgorandAccountId)
-        .update({'assetIds': assetIds}).catchError((e) {
+  Future updateUserAlgorandAccountAssetIds({
+    required String userAlgorandAccountId,
+    required List<AssetId> assetIds,
+  }) async {
+    await userAlgorandAccountRef.doc(userAlgorandAccountId).update({
+      'assetIds': assetIds.map((assetId) => assetId.toMap()).toList(),
+    }).catchError((e) {
       return e.message;
     });
   }
@@ -173,12 +174,9 @@ class UserAlgorandAccountDataService {
   }
 
   Future<void> setUpUserAlgorandAccount(String uid) async {
-    // await createUserAlgorandAccount(uid);
+    await createUserAlgorandAccount(uid);
     await sendAlgosToNewAccount(uid);
-    print('done 1');
     await webblenOptIn(uid);
-    print('done 2');
     await sendWebblenToNewAccount(uid);
-    print('done 3');
   }
 }

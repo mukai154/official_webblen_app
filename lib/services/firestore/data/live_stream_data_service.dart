@@ -336,19 +336,19 @@ class LiveStreamDataService {
         checkIns.add(newCheckIn);
       }
 
-      await streamsRef.doc(streamID).update({
-        'webblenCheckIns': checkIns,
-      });
-
-      await usersRef.doc(user.id).update({
-        'isCheckedIntoStream': true,
-      });
-
       // If the user hasn't checked into this event before, add them to the attendees list
       if (!stream.attendees!.contains(user.id)) {
         stream.attendees!.add(user.id);
         await streamsRef.doc(streamID).update({
           'attendees': stream.attendees,
+          'webblenCheckIns': checkIns,
+          'isCheckedIntoStream': true,
+        });
+      } else {
+        // Otherwise just update doc
+        await streamsRef.doc(streamID).update({
+          'webblenCheckIns': checkIns,
+          'isCheckedIntoStream': true,
         });
       }
     }
@@ -475,7 +475,7 @@ class LiveStreamDataService {
     return isCheckedintoThisStream;
   }
 
-  Future startPayoutClock({
+  Future<void> startPayoutClock({
     required WebblenLiveStream currentStream,
     required int payoutClockDurationInMinutes,
     required int durationBetweenPayoutIterationsInMinutes,

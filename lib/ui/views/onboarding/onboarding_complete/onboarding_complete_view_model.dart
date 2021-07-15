@@ -21,17 +21,6 @@ class OnboardingCompleteViewModel extends BaseViewModel {
   late double reward;
   bool pressedButton = false;
 
-  startEarningWebblen() async {
-    pressedButton = true;
-
-    await _userAlgorandAccountDataService.setUpUserAlgorandAccount(user.id!);
-    reward = await _platformDataService.getNewAccountReward();
-    await _userDataService.depositWebblen(uid: user.id!, amount: reward);
-    await _userDataService.completeOnboarding(uid: user.id!);
-
-    notifyListeners();
-  }
-
   testEarningWebblen() async {
     pressedButton = true;
     

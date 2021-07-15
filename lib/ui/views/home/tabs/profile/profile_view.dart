@@ -29,13 +29,20 @@ class ProfileView extends StatelessWidget {
               children: [
                 _ProfileHead(),
                 ElevatedButton(
-                  onPressed: () => model.startEarningWebblen(),
-                  child: Text('Get webblen lmao'),
+                  onPressed: () => model.mintNftTest(),
+                  child: Text('mint nft'),
+                ),
+                ElevatedButton(
+                  onPressed: () => model.buyNftTest(),
+                  child: Text('buy nft'),
+                ),
+                ElevatedButton(
+                  onPressed: () => model.redeemNftTest(),
+                  child: Text('redeem nft'),
                 ),
                 _ProfileBody(
                   user: model.user,
                 ),
-                
               ],
             ),
           ),

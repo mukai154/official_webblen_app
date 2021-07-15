@@ -205,19 +205,19 @@ class EventDataService {
         checkIns.add(newCheckIn);
       }
 
-      await eventsRef.doc(eventID).update({
-        'webblenCheckIns': checkIns,
-      });
-
-      await usersRef.doc(user.id).update({
-        'isCheckedIntoEvent': true,
-      });
-
-      // If the user hasn't checked into this event before, add them to the attendees list
+      // If the user hasn't checked into this event before, add them to the attendees list and update doc
       if (!event.attendees!.contains(user.id)) {
         event.attendees!.add(user.id);
         await eventsRef.doc(eventID).update({
           'attendees': event.attendees,
+          'webblenCheckIns': checkIns,
+          'isCheckedIntoEvent': true,
+        });
+      } else {
+        // Otherwise update doc
+        await eventsRef.doc(eventID).update({
+          'webblenCheckIns': checkIns,
+          'isCheckedIntoEvent': true,
         });
       }
 
@@ -298,11 +298,8 @@ class EventDataService {
       // Updates event doc
       await eventsRef.doc(eventID).update({
         'webblenCheckIns': checkIns,
+        'isCheckedIntoEvent': false,
       });
-
-      // await usersRef.doc(user.id).update({
-      //   'isCheckedIntoEvent': false,
-      // });
 
       checkedOutOfThisEvent = true;
     }
@@ -339,7 +336,7 @@ class EventDataService {
           // If user has not checkout of event (meaning they're checked in)
           if (checkInData.checkOutTimeInMilliseconds == null) {
             isCheckedintoThisEvent = true;
-          // Otherwise the user has checked into event in the past but is not currently checked in
+            // Otherwise the user has checked into event in the past but is not currently checked in
           } else {
             isCheckedintoThisEvent = false;
           }

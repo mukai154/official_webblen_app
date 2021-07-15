@@ -46,9 +46,9 @@ class UserAlgorandAccount {
           passphrase: data['passphrase'],
           webblenAmount: data['webblenAmount'].toDouble(),
           algoAmount: data['algoAmount'].toDouble(),
-          assetIds: data['certifications'] != null
+          assetIds: data['assetIds'] != null
               ? data['assetIds']
-                  .map((cert) => AssetId.fromMap(cert))
+                  .map((assetId) => AssetId.fromMap(assetId))
                   .cast<AssetId>()
                   .toList()
               : [],
@@ -62,7 +62,7 @@ class UserAlgorandAccount {
         'webblenAmount': this.webblenAmount,
         'algoAmount': this.algoAmount,
         'assetIds': assetIds != null
-            ? assetIds!.map((cert) => cert.toMap()).toList()
+            ? assetIds!.map((assetId) => assetId.toMap()).toList()
             : [],
       };
 }
