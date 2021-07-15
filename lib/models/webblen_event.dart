@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:webblen/models/webblen_check_in.dart';
+
 import 'package:webblen/utils/custom_string_methods.dart';
 import 'package:webblen/utils/time_calc.dart';
 
@@ -27,7 +30,8 @@ class WebblenEvent {
   String? instaUsername;
   int? estimatedTurnout;
   int? actualTurnout;
-  Map<dynamic, dynamic>? attendees;
+  List? attendees;
+  List<WebblenCheckIn>? webblenCheckIns;
   double? payout;
   String? recurrence;
   int? startDateTimeInMilliseconds;
@@ -72,6 +76,7 @@ class WebblenEvent {
     this.estimatedTurnout,
     this.actualTurnout,
     this.attendees,
+    this.webblenCheckIns,
     this.payout,
     this.recurrence,
     this.startDateTimeInMilliseconds,
@@ -118,6 +123,12 @@ class WebblenEvent {
           estimatedTurnout: data['estimatedTurnout'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
+          webblenCheckIns: data['checkIns'] != null
+              ? data['checkIns']
+                  .map((cert) => WebblenCheckIn.fromMap(cert))
+                  .cast<WebblenCheckIn>()
+                  .toList()
+              : [],
           payout: data['payout'] == null ? null : data['payout'] * 1.001,
           recurrence: data['recurrence'],
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
@@ -163,6 +174,9 @@ class WebblenEvent {
         'estimatedTurnout': this.estimatedTurnout,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
+        'webblenCheckIns': webblenCheckIns != null
+            ? webblenCheckIns!.map((cert) => cert.toMap()).toList()
+            : [],
         'eventPayout': this.payout,
         'recurrence': this.recurrence,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
@@ -181,7 +195,8 @@ class WebblenEvent {
         'suggestedUIDs': this.suggestedUIDs,
       };
 
-  WebblenEvent generateNewWebblenEvent({required String authorID, required List suggestedUIDs}) {
+  WebblenEvent generateNewWebblenEvent(
+      {required String authorID, required List suggestedUIDs}) {
     String id = getRandomString(30);
     WebblenEvent event = WebblenEvent(
       id: id,
@@ -194,7 +209,8 @@ class WebblenEvent {
       openToSponsors: false,
       tags: [],
       savedBy: [],
-      attendees: {},
+      attendees: [],
+      webblenCheckIns: [],
       clicks: 0,
       estimatedTurnout: 0,
     );

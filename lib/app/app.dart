@@ -9,10 +9,13 @@ import 'package:webblen/services/dynamic_links/dynamic_link_service.dart';
 import 'package:webblen/services/email/email_service.dart';
 import 'package:webblen/services/firestore/common/firestore_storage_service.dart';
 import 'package:webblen/services/firestore/data/activity_data_service.dart';
+import 'package:webblen/services/firestore/data/algorand_transaction_data_service.dart';
 import 'package:webblen/services/firestore/data/comment_data_service.dart';
 import 'package:webblen/services/firestore/data/content_gift_pool_data_service.dart';
+import 'package:webblen/services/firestore/data/escrow_hot_wallet_data_service.dart';
 import 'package:webblen/services/firestore/data/event_data_service.dart';
 import 'package:webblen/services/firestore/data/gift_donation_service.dart';
+import 'package:webblen/services/firestore/data/hot_wallet_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
 import 'package:webblen/services/firestore/data/notification_data_service.dart';
@@ -20,13 +23,16 @@ import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/firestore/data/redeemed_reward_data_service.dart';
 import 'package:webblen/services/firestore/data/ticket_distro_data_service.dart';
+import 'package:webblen/services/firestore/data/user_algorand_account_data.dart';
 import 'package:webblen/services/firestore/data/user_data_service.dart';
 import 'package:webblen/services/firestore/data/user_preference_data_service.dart';
 import 'package:webblen/services/live_streaming/agora/agora_live_stream_service.dart';
 import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
+import 'package:webblen/services/firestore/data/webblen_shop_entry_data_service.dart';
 import 'package:webblen/services/location/google_places_service.dart';
 import 'package:webblen/services/location/location_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
+import 'package:webblen/services/nft/nft_service.dart';
 import 'package:webblen/services/permission_handler/permission_handler_service.dart';
 import 'package:webblen/services/reactive/content_filter/reactive_content_filter_service.dart';
 import 'package:webblen/services/reactive/file_uploader/reactive_file_uploader_service.dart';
@@ -83,6 +89,8 @@ import 'package:webblen/ui/views/video_player/expanded_landscape_mini_player/exp
 import 'package:webblen/ui/views/video_player/standard/standard_video_player_view.dart';
 import 'package:webblen/ui/widgets/home_feed/home_feed_model.dart';
 import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_model.dart';
+
+// flutter pub run build_runner build --delete-conflicting-outputs
 
 @StackedApp(
   routes: [
@@ -423,6 +431,12 @@ import 'package:webblen/ui/widgets/mini_video_player/mini_video_player_view_mode
     LazySingleton(classType: AgoraLiveStreamService),
     LazySingleton(classType: MuxLiveStreamService),
     LazySingleton(classType: MiniVideoPlayerViewModel),
+    LazySingleton(classType: UserAlgorandAccountDataService),
+    LazySingleton(classType: AlgorandTransactionDataService),
+    LazySingleton(classType: HotWalletDataService),
+    LazySingleton(classType: EscrowHotWalletDataService),
+    LazySingleton(classType: WebblenShopEntryDataService),
+    LazySingleton(classType: NftService),
 
     //REACTIVE LAZY SINGLETONS
     LazySingleton(classType: ReactiveUserService),

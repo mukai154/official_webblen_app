@@ -12,6 +12,7 @@ import 'package:webblen/models/webblen_user.dart';
 import 'package:webblen/services/dialogs/custom_dialog_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_chat_data_service.dart';
 import 'package:webblen/services/firestore/data/live_stream_data_service.dart';
+import 'package:webblen/services/firestore/data/platform_data_service.dart';
 import 'package:webblen/services/live_streaming/agora/agora_live_stream_service.dart';
 import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
 import 'package:webblen/services/navigation/custom_navigation_service.dart';
@@ -20,11 +21,14 @@ import 'package:webblen/services/reactive/user/reactive_user_service.dart';
 class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
   NavigationService? _navigationService = locator<NavigationService>();
   LiveStreamDataService _liveStreamDataService = locator<LiveStreamDataService>();
+  PlatformDataService _platformDataService = locator<PlatformDataService>();
   SnackbarService? _snackbarService = locator<SnackbarService>();
   BottomSheetService? _bottomSheetService = locator<BottomSheetService>();
-  LiveStreamChatDataService? _liveStreamChatDataService = locator<LiveStreamChatDataService>();
+  LiveStreamChatDataService? _liveStreamChatDataService =
+      locator<LiveStreamChatDataService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
-  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  CustomNavigationService customNavigationService =
+      locator<CustomNavigationService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   AgoraLiveStreamService _agoraLiveStreamService = locator<AgoraLiveStreamService>();
   MuxLiveStreamService _muxLiveStreamService = locator<MuxLiveStreamService>();
@@ -58,13 +62,15 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     setBusy(true);
 
     //Set Device Orientation
-    SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
 
     //get stream data
     if (id.isEmpty) {
       _snackbarService!.showSnackbar(
         title: 'Stream Error',
-        message: "There was an unknown error starting your stream. Please try again later.",
+        message:
+            "There was an unknown error starting your stream. Please try again later.",
         duration: Duration(seconds: 5),
       );
       _navigationService!.back();
@@ -74,7 +80,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
       if (!webblenLiveStream.isValid()) {
         _snackbarService!.showSnackbar(
           title: 'Stream Error',
-          message: "There was an unknown error starting your stream. Please try again later.",
+          message:
+              "There was an unknown error starting your stream. Please try again later.",
           duration: Duration(seconds: 5),
         );
         _navigationService!.back();
@@ -83,7 +90,11 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     }
 
     //join chat
-    _liveStreamChatDataService!.joinChatStream(streamID: webblenLiveStream.id, uid: user.id, isHost: true, username: user.username);
+    _liveStreamChatDataService!.joinChatStream(
+        streamID: webblenLiveStream.id,
+        uid: user.id,
+        isHost: true,
+        username: user.username);
   }
 
   Future<bool> initializeAgoraRtc() async {
@@ -97,7 +108,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     notifyListeners();
 
     await setAgoraRtcEventHandlers();
-    VideoEncoderConfiguration vidConfig = _agoraLiveStreamService.getVideoConfig();
+    VideoEncoderConfiguration vidConfig =
+        _agoraLiveStreamService.getVideoConfig();
 
     await agoraRtcEngine.setVideoEncoderConfiguration(vidConfig);
     await agoraRtcEngine.enableVideo();
@@ -107,9 +119,11 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     await agoraRtcEngine.setChannelProfile(ChannelProfile.LiveBroadcasting);
     await agoraRtcEngine.setClientRole(ClientRole.Broadcaster);
 
-    String? token = await _agoraLiveStreamService.generateStreamToken(channelName: webblenLiveStream.id!, uid: user.id!, role: "PUBLISHER");
+    String? token = await _agoraLiveStreamService.generateStreamToken(
+        channelName: webblenLiveStream.id!, uid: user.id!, role: "PUBLISHER");
     if (token != null) {
-      await agoraRtcEngine.joinChannelWithUserAccount(token, webblenLiveStream.id!, user.id!);
+      await agoraRtcEngine.joinChannelWithUserAccount(
+          token, webblenLiveStream.id!, user.id!);
     } else {
       initialized = false;
     }
@@ -223,7 +237,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
         message: text,
         timePostedInMilliseconds: DateTime.now().millisecondsSinceEpoch,
       );
-      _liveStreamChatDataService!.sendStreamChatMessage(streamID: webblenLiveStream.id, message: message);
+      _liveStreamChatDataService!.sendStreamChatMessage(
+          streamID: webblenLiveStream.id, message: message);
     }
     messageFieldController.clear();
     notifyListeners();
@@ -234,6 +249,7 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
     try {
       agoraRtcEngine.leaveChannel();
       agoraRtcEngine.destroy();
+      _liveStreamDataService.endStream(streamID: webblenLiveStream.id!);
     } catch (e) {}
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _navigationService!.back();
@@ -256,7 +272,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
               if (!setEventHandlers) {
                 _snackbarService!.showSnackbar(
                   title: 'Stream Error',
-                  message: "There was an unknown error starting your stream. Please try again later.",
+                  message:
+                      "There was an unknown error starting your stream. Please try again later.",
                   duration: Duration(seconds: 5),
                 );
               }
@@ -264,7 +281,8 @@ class LiveStreamHostViewModel extends StreamViewModel<WebblenLiveStream> {
             } else {
               _snackbarService!.showSnackbar(
                 title: 'Stream Error',
-                message: "There was an unknown error starting your stream. Please try again later.",
+                message:
+                    "There was an unknown error starting your stream. Please try again later.",
                 duration: Duration(seconds: 5),
               );
             }

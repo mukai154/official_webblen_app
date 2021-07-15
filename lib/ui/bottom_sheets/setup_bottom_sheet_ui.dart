@@ -24,7 +24,7 @@ void setupBottomSheetUI() {
   final builders = {
     BottomSheetType.addContent: (context, sheetRequest, completer) => AddContentBottomSheet(
           request: sheetRequest,
-          completer: completer,
+          completer: completer
         ),
     BottomSheetType.addContentSuccessful: (context, sheetRequest, completer) => AddContentSuccessfulBottomSheet(request: sheetRequest, completer: completer),
     BottomSheetType.contentAuthorOptions: (context, sheetRequest, completer) => ContentAuthorBottomSheet(request: sheetRequest, completer: completer),

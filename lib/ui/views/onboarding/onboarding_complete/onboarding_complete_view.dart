@@ -14,7 +14,8 @@ class OnboardingCompleteView extends StatefulWidget {
   _OnboardingCompleteViewState createState() => _OnboardingCompleteViewState();
 }
 
-class _OnboardingCompleteViewState extends State<OnboardingCompleteView> with TickerProviderStateMixin {
+class _OnboardingCompleteViewState extends State<OnboardingCompleteView>
+    with TickerProviderStateMixin {
   late Timer timer;
   late AnimationController animationController;
   bool animationComplete = false;
@@ -69,7 +70,7 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> with Ti
   @override
   Widget build(BuildContext context) {
     return ViewModelBuilder<OnboardingCompleteViewModel>.reactive(
-      onModelReady: (model) => model.initialize(),
+      // onModelReady: (model) => model.initialize(),
       viewModelBuilder: () => OnboardingCompleteViewModel(),
       builder: (context, model, child) => Scaffold(
         body: Container(
@@ -96,7 +97,9 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> with Ti
                           animation: Tween<double>(
                             begin: 0,
                             end: model.reward,
-                          ).animate(animationController),
+                          ).animate(
+                            animationController,
+                          ),
                         ),
                       ],
                     ),
@@ -119,7 +122,8 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> with Ti
                             Text(
                               "You're All Set!\nHere's Some Webblen!",
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w700),
+                              style: TextStyle(
+                                  fontSize: 24.0, fontWeight: FontWeight.w700),
                             ),
                             SizedBox(height: 4),
                             Text(
@@ -134,7 +138,8 @@ class _OnboardingCompleteViewState extends State<OnboardingCompleteView> with Ti
                               backgroundColor: Colors.white,
                               height: 45.0,
                               width: 200.0,
-                              onPressed: () => model.customNavigationService.navigateToBase(),
+                              onPressed: () => model.customNavigationService
+                                  .navigateToBase(),
                               isBusy: false,
                             ),
                           ],
@@ -153,7 +158,11 @@ class _AnimatedNumText extends AnimatedWidget {
   final Animation<double> animation;
   final double fontSize;
   final bool animationComplete;
-  _AnimatedNumText({required this.animation, required this.fontSize, required this.animationComplete}) : super(listenable: animation);
+  _AnimatedNumText(
+      {required this.animation,
+      required this.fontSize,
+      required this.animationComplete})
+      : super(listenable: animation);
 
   @override
   build(BuildContext context) {
@@ -176,7 +185,9 @@ class _AnimatedNumText extends AnimatedWidget {
                   fontSize: fontSize,
                   fontWeight: FontWeight.w700,
                 ),
-      duration: animationComplete ? Duration(milliseconds: 200) : Duration(milliseconds: 100),
+      duration: animationComplete
+          ? Duration(milliseconds: 200)
+          : Duration(milliseconds: 100),
     );
   }
 }

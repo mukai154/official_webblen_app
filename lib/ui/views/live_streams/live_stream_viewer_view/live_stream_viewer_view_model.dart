@@ -85,8 +85,7 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     notifyListeners();
 
     //check if user checked into stream
-    List attendeeUIDs = webblenLiveStream.attendees != null ? webblenLiveStream.attendees!.keys.toList(growable: true) : [];
-    if (attendeeUIDs.contains(user.id)) {
+    if (await _liveStreamDataService.isCheckedIntoThisStream(user: user, streamID: streamID!)) {
       checkedIn = true;
     }
 
@@ -237,13 +236,13 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
       if (checkedIn) {
         bool confirmedCheckout = await customBottomSheetService.showCheckoutEventDialog();
         if (confirmedCheckout) {
-          bool checkedOut = await _liveStreamDataService.checkOutOfStream(uid: user.id!, streamID: webblenLiveStream.id!);
+          bool checkedOut = await _liveStreamDataService.checkOutOfStream(user: user, streamID: webblenLiveStream.id!);
           if (checkedOut) {
             checkedIn = false;
           }
         }
       } else {
-        checkedIn = await _liveStreamDataService.checkIntoStream(uid: user.id!, streamID: webblenLiveStream.id!);
+        checkedIn = await _liveStreamDataService.checkIntoStream(user: user, streamID: webblenLiveStream.id!);
       }
       updatingCheckIn = false;
       notifyListeners();
@@ -262,7 +261,7 @@ class LiveStreamViewerViewModel extends StreamViewModel<WebblenLiveStream> {
     }
   }
 
-  ///STREAM USER DATA
+  ///STREAM LIVE STREAM DATA
   @override
   void onData(WebblenLiveStream? data) async {
     if (data != null) {

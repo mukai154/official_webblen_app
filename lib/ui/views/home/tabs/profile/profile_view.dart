@@ -28,6 +28,18 @@ class ProfileView extends StatelessWidget {
             child: Column(
               children: [
                 _ProfileHead(),
+                ElevatedButton(
+                  onPressed: () => model.mintNftTest(),
+                  child: Text('mint nft'),
+                ),
+                ElevatedButton(
+                  onPressed: () => model.buyNftTest(),
+                  child: Text('buy nft'),
+                ),
+                ElevatedButton(
+                  onPressed: () => model.redeemNftTest(),
+                  child: Text('redeem nft'),
+                ),
                 _ProfileBody(
                   user: model.user,
                 ),
@@ -69,7 +81,8 @@ class _ProfileHead extends HookViewModelWidget<ProfileViewModel> {
               ),
               IconButton(
                 iconSize: 20,
-                onPressed: () => model.customBottomSheetService.showAddContentOptions(),
+                onPressed: () =>
+                    model.customBottomSheetService.showAddContentOptions(),
                 icon: Icon(FontAwesomeIcons.plus, color: appIconColor()),
               ),
             ],
@@ -104,7 +117,10 @@ class _ProfileBody extends HookViewModelWidget<ProfileViewModel> {
                 floating: true,
                 snap: true,
                 forceElevated: innerBoxIsScrolled,
-                expandedHeight: ((user.bio != null && user.bio!.isNotEmpty) || (user.website != null && user.website!.isNotEmpty)) ? 250 : 200,
+                expandedHeight: ((user.bio != null && user.bio!.isNotEmpty) ||
+                        (user.website != null && user.website!.isNotEmpty))
+                    ? 250
+                    : 200,
                 backgroundColor: appBackgroundColor(),
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(

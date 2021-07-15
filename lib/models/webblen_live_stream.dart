@@ -1,4 +1,48 @@
+import 'package:webblen/models/webblen_check_in.dart';
 import 'package:webblen/utils/custom_string_methods.dart';
+
+class ActiveViewer {
+  String? uid;
+  bool? isHereSinceLastPayoutIteration;
+
+  ActiveViewer({
+    this.uid,
+    this.isHereSinceLastPayoutIteration,
+  });
+
+  ActiveViewer.fromMap(Map<String, dynamic> data)
+      : this(
+          uid: data['uid'],
+          isHereSinceLastPayoutIteration:
+              data['isHereSinceLastPayoutIteration'],
+        );
+
+  Map<String, dynamic> toMap() => {
+        'uid': uid,
+        'isHereSinceLastPayoutIteration': isHereSinceLastPayoutIteration,
+      };
+}
+
+class LiveStreamUserPayoutData {
+  String? uid;
+  List? microWebblenPayoutAmounts;
+
+  LiveStreamUserPayoutData({
+    this.uid,
+    this.microWebblenPayoutAmounts,
+  });
+
+  LiveStreamUserPayoutData.fromMap(Map<String, dynamic> data)
+      : this(
+          uid: data['uid'],
+          microWebblenPayoutAmounts: data['microWebblenPayoutAmounts'],
+        );
+
+  Map<String, dynamic> toMap() => {
+        'uid': uid,
+        'microWebblenPayoutAmounts': microWebblenPayoutAmounts,
+      };
+}
 
 class WebblenLiveStream {
   String? id;
@@ -23,11 +67,15 @@ class WebblenLiveStream {
   String? youtube;
   String? twitchUsername;
   int? actualTurnout;
-  Map<dynamic, dynamic>? attendees;
-  List? activeViewers;
+  List? attendees;
+  List<ActiveViewer>? activeViewers;
+  List<WebblenCheckIn>? webblenCheckIns;
+  List<LiveStreamUserPayoutData>? liveStreamUserPayoutData;
   double? payout;
   int? startDateTimeInMilliseconds;
   int? endDateTimeInMilliseconds;
+  bool? hasStreamEnded;
+  bool? didPayoutClockEndEarly;
   String? startDate;
   String? startTime;
   String? endDate;
@@ -82,9 +130,13 @@ class WebblenLiveStream {
     this.twitchUsername,
     this.actualTurnout,
     this.attendees,
+    this.webblenCheckIns,
+    this.liveStreamUserPayoutData,
     this.payout,
     this.startDateTimeInMilliseconds,
     this.endDateTimeInMilliseconds,
+    this.hasStreamEnded,
+    this.didPayoutClockEndEarly,
     this.startDate,
     this.startTime,
     this.endDate,
@@ -142,9 +194,23 @@ class WebblenLiveStream {
           twitchUsername: data['twitchUsername'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
+          webblenCheckIns: data['checkIns'] != null
+              ? data['checkIns']
+                  .map((val) => WebblenCheckIn.fromMap(val))
+                  .cast<WebblenCheckIn>()
+                  .toList()
+              : [],
+          liveStreamUserPayoutData: data['liveStreamUserPayoutData'] != null
+              ? data['checkliveStreamUserPayoutDataIns']
+                  .map((val) => LiveStreamUserPayoutData.fromMap(val))
+                  .cast<LiveStreamUserPayoutData>()
+                  .toList()
+              : [],
           payout: data['payout'] == null ? null : data['payout'] * 1.001,
           startDateTimeInMilliseconds: data['startDateTimeInMilliseconds'],
           endDateTimeInMilliseconds: data['endDateTimeInMilliseconds'],
+          hasStreamEnded: data['hasStreamEnded'],
+          didPayoutClockEndEarly: data['didPayoutClockEndEarly'],
           startDate: data['startDate'],
           startTime: data['startTime'],
           endDate: data['endDate'],
@@ -171,10 +237,17 @@ class WebblenLiveStream {
           muxAssetPlaybackID: data['muxAssetPlaybackID'],
           muxAssetDuration: data['muxAssetDuration'],
           initializedMuxStream: data['initializedMuxStream'],
-          activeViewers: data['activeViewers'],
+          // activeViewers: data['activeViewers'],
           isLive: data['isLive'] == null ? false : data['isLive'],
           notifiedPotentialViewers: data['notifiedPotentialViewers'] == null ? false : data['notifiedPotentialViewers'],
           commentCount: data['commentCount'] == null ? 0 : data['commentCount'],
+          // agoraToken: data['agoraToken'],
+          activeViewers: data['activeViewers'] != null
+              ? data['activeViewers']
+                  .map((val) => ActiveViewer.fromMap(val))
+                  .cast<ActiveViewer>()
+                  .toList()
+              : [],
         );
 
   Map<String, dynamic> toMap() => {
@@ -201,9 +274,17 @@ class WebblenLiveStream {
         'twitchUsername': this.twitchUsername,
         'actualTurnout': this.actualTurnout,
         'attendees': this.attendees,
+        'webblenCheckIns': webblenCheckIns != null
+            ? webblenCheckIns!.map((val) => val.toMap()).toList()
+            : [],
+        'liveStreamUserPayoutData': liveStreamUserPayoutData != null
+            ? liveStreamUserPayoutData!.map((val) => val.toMap()).toList()
+            : [],
         'payout': this.payout,
         'startDateTimeInMilliseconds': this.startDateTimeInMilliseconds,
         'endDateTimeInMilliseconds': this.endDateTimeInMilliseconds,
+        'hasStreamEnded': this.hasStreamEnded,
+        'didPayoutClockEndEarly': this.didPayoutClockEndEarly,
         'startDate': this.startDate,
         'startTime': this.startTime,
         'endDate': this.endDate,
@@ -229,13 +310,18 @@ class WebblenLiveStream {
         'muxStreamKey': this.muxStreamKey,
         'muxAssetPlaybackID': this.muxAssetPlaybackID,
         'muxAssetDuration': muxAssetDuration,
-        'activeViewers': this.activeViewers,
+        // 'activeViewers': this.activeViewers,
         'isLive': this.isLive,
         'notifiedPotentialViewers': this.notifiedPotentialViewers,
         'commentCount': this.commentCount,
+        // 'agoraToken': this.agoraToken,
+        'activeViewers': activeViewers != null
+            ? activeViewers!.map((val) => val.toMap()).toList()
+            : [],
       };
 
-  WebblenLiveStream generateNewWebblenLiveStream({required String hostID, required List suggestedUIDs}) {
+  WebblenLiveStream generateNewWebblenLiveStream(
+      {required String hostID, required List suggestedUIDs}) {
     String id = getRandomString(30);
     WebblenLiveStream stream = WebblenLiveStream(
       id: id,
@@ -248,7 +334,11 @@ class WebblenLiveStream {
       tags: [],
       savedBy: [],
       clickedBy: [],
-      attendees: {},
+      attendees: [],
+      webblenCheckIns: [],
+      liveStreamUserPayoutData: [],
+      hasStreamEnded: false,
+      didPayoutClockEndEarly: false,
       clicks: 0,
       commentCount: 0,
       suggestedUIDs: suggestedUIDs,

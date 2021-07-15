@@ -14,8 +14,10 @@ class EventCheckInBlockModel extends BaseViewModel {
   EventDataService _eventDataService = locator<EventDataService>();
   UserDataService _userDataService = locator<UserDataService>();
   ReactiveUserService _reactiveUserService = locator<ReactiveUserService>();
-  CustomBottomSheetService customBottomSheetService = locator<CustomBottomSheetService>();
-  CustomNavigationService customNavigationService = locator<CustomNavigationService>();
+  CustomBottomSheetService customBottomSheetService =
+      locator<CustomBottomSheetService>();
+  CustomNavigationService customNavigationService =
+      locator<CustomNavigationService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
 
   ///USER DATA
@@ -37,15 +39,16 @@ class EventCheckInBlockModel extends BaseViewModel {
 
     if (event.isValid()) {
       //check if user checked into event
-      List attendeeUIDs = event.attendees != null ? event.attendees!.keys.toList(growable: true) : [];
-      if (attendeeUIDs.contains(user.id)) {
+      if (await _eventDataService.isCheckedIntoThisEvent(
+          user: user, eventID: event.id!)) {
         checkedIn = true;
       }
 
       //check if event is happening now
       isEventHappeningNow(event);
 
-      WebblenUser author = await _userDataService.getWebblenUserByID(event.authorID);
+      WebblenUser author =
+          await _userDataService.getWebblenUserByID(event.authorID);
       if (author.isValid()) {
         authorImageURL = author.profilePicURL;
         authorUsername = author.username;
@@ -61,7 +64,8 @@ class EventCheckInBlockModel extends BaseViewModel {
     int currentDateInMilli = DateTime.now().millisecondsSinceEpoch;
     int eventStartDateInMilli = event.startDateTimeInMilliseconds!;
     int? eventEndDateInMilli = event.endDateTimeInMilliseconds;
-    if (currentDateInMilli >= eventStartDateInMilli && currentDateInMilli <= eventEndDateInMilli!) {
+    if (currentDateInMilli >= eventStartDateInMilli &&
+        currentDateInMilli <= eventEndDateInMilli!) {
       eventIsHappeningNow = true;
     } else {
       eventIsHappeningNow = false;
@@ -75,21 +79,25 @@ class EventCheckInBlockModel extends BaseViewModel {
       updatingCheckIn = true;
       notifyListeners();
       if (checkedIn) {
-        bool confirmedCheckout = await customBottomSheetService.showCheckoutEventDialog();
+        bool confirmedCheckout =
+            await customBottomSheetService.showCheckoutEventDialog();
         if (confirmedCheckout) {
-          bool checkedOut = await _eventDataService.checkOutOfEvent(uid: user.id!, eventID: event.id!);
+          bool checkedOut = await _eventDataService.checkOutOfEvent(
+              user: user, eventID: event.id!);
           if (checkedOut) {
             checkedIn = false;
           }
         }
       } else {
-        checkedIn = await _eventDataService.checkIntoEvent(uid: user.id!, eventID: event.id!);
+        checkedIn = await _eventDataService.checkIntoEvent(
+            user: user, eventID: event.id!);
       }
       updatingCheckIn = false;
       notifyListeners();
       HapticFeedback.lightImpact();
     } else {
-      _customDialogService.showErrorDialog(description: "This event has already passed");
+      _customDialogService.showErrorDialog(
+          description: "This event has already passed");
     }
   }
 }
