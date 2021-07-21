@@ -444,7 +444,7 @@ class _LiveStreamHostViewState extends State<LiveStreamHostView> with WidgetsBin
 
     return ViewModelBuilder<LiveStreamHostViewModel>.reactive(
       onModelReady: (model) => model.initialize(widget.id!),
-      onDispose: () => LiveStreamHostViewModel().endStream(),
+      onDispose: (model) => model.endStream(),
       viewModelBuilder: () => LiveStreamHostViewModel(),
       builder: (context, model, child) => SafeArea(
         child: Scaffold(

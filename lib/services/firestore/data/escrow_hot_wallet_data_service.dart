@@ -90,7 +90,7 @@ class EscrowHotWalletDataService {
       );
     } else {
       availableEscrowHotWallet =
-          EscrowHotWallet.fromMap(snapshot.docs[0].data());
+          EscrowHotWallet.fromMap(snapshot.docs[0].data() as Map<String, dynamic>);
       await updateEscrowHotWalletActiveEventId(
         id: availableEscrowHotWallet.id!,
         activeEventId: eventId,
@@ -176,7 +176,7 @@ class EscrowHotWalletDataService {
       print(e);
     });
 
-    relevantEscrowHotWallet = EscrowHotWallet.fromMap(snapshot.docs[0].data());
+    relevantEscrowHotWallet = EscrowHotWallet.fromMap(snapshot.docs[0].data() as Map<String, dynamic>);
 
     // Calculate webblen amounts for escrow wallet and cold storage
     final int eventMicroWebblen = (microWebblenAmount * 0.95).toInt();

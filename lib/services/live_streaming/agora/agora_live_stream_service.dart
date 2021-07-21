@@ -26,7 +26,7 @@ class AgoraLiveStreamService {
   //standard video config of 720x1280
   VideoEncoderConfiguration getVideoConfig() {
     VideoEncoderConfiguration vidConfig = VideoEncoderConfiguration(
-      dimensions: VideoDimensions(720, 1280),
+      dimensions: VideoDimensions(width: 720, height: 1280),
       frameRate: VideoFrameRate.Fps30,
       degradationPrefer: DegradationPreference.MaintainFramerate,
       orientationMode: VideoOutputOrientationMode.FixedLandscape,
@@ -36,7 +36,7 @@ class AgoraLiveStreamService {
   }
 
   LiveTranscoding configureTranscoding(int uid) {
-    TranscodingUser transcodingUser = TranscodingUser(uid, 0, 0, width: 1280, height: 720, audioChannel: AudioChannel.Channel0, alpha: 1, zOrder: 0);
+    TranscodingUser transcodingUser = TranscodingUser(uid, x: 0, y: 0, width: 1280, height: 720, audioChannel: AudioChannel.Channel0, alpha: 1, zOrder: 0);
     List<TranscodingUser> transcodingUsers = [transcodingUser];
     LiveTranscoding transcoding = LiveTranscoding(transcodingUsers);
     transcoding.audioBitrate = 96;

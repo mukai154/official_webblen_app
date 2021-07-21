@@ -118,7 +118,7 @@ class CreateLiveStreamViewModel extends BaseViewModel {
       stream = await _liveStreamDataService.getStreamByID(id);
       if (stream.isValid()) {
         stream.id = getRandomString(32);
-        stream.attendees = {};
+        stream.attendees = [];
         stream.savedBy = [];
         stream.muxStreamID = null;
         stream.muxAssetDuration = null;

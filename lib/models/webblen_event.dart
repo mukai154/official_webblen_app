@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:webblen/models/webblen_check_in.dart';
 
 import 'package:webblen/utils/custom_string_methods.dart';
@@ -30,7 +29,8 @@ class WebblenEvent {
   String? instaUsername;
   int? estimatedTurnout;
   int? actualTurnout;
-  List? attendees;
+  Map<String, dynamic>? attendees; // LEGACY
+  List? eventAttendees;
   List<WebblenCheckIn>? webblenCheckIns;
   double? payout;
   String? recurrence;
@@ -76,6 +76,7 @@ class WebblenEvent {
     this.estimatedTurnout,
     this.actualTurnout,
     this.attendees,
+    this.eventAttendees,
     this.webblenCheckIns,
     this.payout,
     this.recurrence,
@@ -123,6 +124,7 @@ class WebblenEvent {
           estimatedTurnout: data['estimatedTurnout'],
           actualTurnout: data['actualTurnout'],
           attendees: data['attendees'],
+          eventAttendees: data['eventAttendees'],
           webblenCheckIns: data['checkIns'] != null
               ? data['checkIns']
                   .map((cert) => WebblenCheckIn.fromMap(cert))
@@ -173,7 +175,7 @@ class WebblenEvent {
         'instaUsername': this.instaUsername,
         'estimatedTurnout': this.estimatedTurnout,
         'actualTurnout': this.actualTurnout,
-        'attendees': this.attendees,
+        'eventAttendees': this.eventAttendees,
         'webblenCheckIns': webblenCheckIns != null
             ? webblenCheckIns!.map((cert) => cert.toMap()).toList()
             : [],
@@ -209,7 +211,8 @@ class WebblenEvent {
       openToSponsors: false,
       tags: [],
       savedBy: [],
-      attendees: [],
+      attendees: {},
+      eventAttendees: [],
       webblenCheckIns: [],
       clicks: 0,
       estimatedTurnout: 0,
@@ -233,7 +236,6 @@ class WebblenEvent {
       openToSponsors: false,
       tags: [],
       savedBy: [],
-      attendees: {},
       clicks: 0,
       startDateTimeInMilliseconds: currentDateTime.millisecondsSinceEpoch,
       endDateTimeInMilliseconds: dateTimeInHour.millisecondsSinceEpoch,

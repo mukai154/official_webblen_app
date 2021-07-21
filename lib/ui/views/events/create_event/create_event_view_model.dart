@@ -180,7 +180,7 @@ class CreateEventViewModel extends ReactiveViewModel {
           ticketDistro = await _ticketDistroDataService.getTicketDistroByID(id);
           ticketDistro.eventID = event.id;
         }
-        event.attendees = {};
+        event.eventAttendees = [];
         event.savedBy = [];
         isDuplicate = true;
       }

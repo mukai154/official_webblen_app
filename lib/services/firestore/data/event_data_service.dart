@@ -142,7 +142,7 @@ class EventDataService {
     });
 
     if (snapshot.exists) {
-      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()! as Map<String, dynamic>);
 
       List<WebblenCheckIn> checkIns =
           event.webblenCheckIns != null ? event.webblenCheckIns! : [];
@@ -180,10 +180,10 @@ class EventDataService {
       }
 
       // If the user hasn't checked into this event before, add them to the attendees list and update doc
-      if (!event.attendees!.contains(user.id)) {
-        event.attendees!.add(user.id);
+      if (!event.eventAttendees!.contains(user.id)) {
+        event.eventAttendees!.add(user.id);
         await eventsRef.doc(eventID).update({
-          'attendees': event.attendees,
+          'attendees': event.eventAttendees,
           'webblenCheckIns': checkIns,
           'isCheckedIntoEvent': true,
         });
@@ -213,7 +213,7 @@ class EventDataService {
     });
 
     if (snapshot.exists) {
-      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()! as Map<String, dynamic>);
 
       List<WebblenCheckIn> checkIns =
           event.webblenCheckIns != null ? event.webblenCheckIns! : [];
@@ -294,7 +294,7 @@ class EventDataService {
               "There was an error checking out of this stream. Please try again.");
     });
     if (snapshot.exists) {
-      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()!);
+      WebblenEvent event = WebblenEvent.fromMap(snapshot.data()! as Map<String, dynamic>);
 
       List<WebblenCheckIn> checkIns =
           event.webblenCheckIns != null ? event.webblenCheckIns! : [];

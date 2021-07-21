@@ -81,7 +81,7 @@ class UserAlgorandAccountDataService {
     }
     if (querySnapshot.docs.isNotEmpty) {
       DocumentSnapshot doc = querySnapshot.docs.first;
-      Map<String, dynamic> docData = doc.data()!;
+      Map<String, dynamic> docData = doc.data()! as Map<String, dynamic>;
       userAlgorandAccount = UserAlgorandAccount.fromMap(docData);
     }
     return userAlgorandAccount;

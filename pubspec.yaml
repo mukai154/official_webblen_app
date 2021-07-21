@@ -111,7 +111,7 @@ dependencies:
       url: git://github.com/Shahmirzali-Huseynov/miniplayer_for_araf.git
 
 dependency_overrides:
-  analyzer: 1.7.0
+  analyzer: 
 
 dev_dependencies:
   flutter_test:

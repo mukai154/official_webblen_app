@@ -4,6 +4,7 @@
 
 // ignore_for_file: lines_longer_than_80_chars
 
+import 'package:app_links_web/app_links_web.dart';
 import 'package:cloud_firestore_web/cloud_firestore_web.dart';
 import 'package:cloud_functions_web/cloud_functions_web.dart';
 import 'package:devicelocale/devicelocale_web.dart';
@@ -30,6 +31,7 @@ import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 // ignore: public_member_api_docs
 void registerPlugins(Registrar registrar) {
+  AppLinksPluginWeb.registerWith(registrar);
   FirebaseFirestoreWeb.registerWith(registrar);
   FirebaseFunctionsWeb.registerWith(registrar);
   DevicelocaleWeb.registerWith(registrar);

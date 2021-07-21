@@ -12,14 +12,16 @@ import 'package:webblen/services/firestore/data/post_data_service.dart';
 import 'package:webblen/services/live_streaming/mux/mux_live_stream_service.dart';
 
 class LiveStreamDataService {
-  final CollectionReference streamsRef = FirebaseFirestore.instance.collection("webblen_live_streams");
+  final CollectionReference streamsRef =
+      FirebaseFirestore.instance.collection("webblen_live_streams");
   final CollectionReference usersRef =
       FirebaseFirestore.instance.collection("webblen_users");
   PostDataService _postDataService = locator<PostDataService>();
   CustomDialogService _customDialogService = locator<CustomDialogService>();
   DialogService _dialogService = locator<DialogService>();
   SnackbarService _snackbarService = locator<SnackbarService>();
-  FirestoreStorageService _firestoreStorageService = locator<FirestoreStorageService>();
+  FirestoreStorageService _firestoreStorageService =
+      locator<FirestoreStorageService>();
   MuxLiveStreamService _muxLiveStreamService = locator<MuxLiveStreamService>();
 
   int dateTimeInMilliseconds2hrsAgog =
@@ -42,14 +44,18 @@ class LiveStreamDataService {
     return exists;
   }
 
-  Future<bool> checkIfStreamSaved({required String uid, required String eventID}) async {
+  Future<bool> checkIfStreamSaved(
+      {required String uid, required String eventID}) async {
     bool saved = false;
 
     DocumentSnapshot snapshot = await streamsRef.doc(eventID).get();
     if (snapshot.exists) {
-      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> snapshotData =
+          snapshot.data() as Map<String, dynamic>;
       if (snapshotData.isNotEmpty) {
-        List savedBy = snapshotData['savedBy'] == null ? [] : snapshotData['savedBy'].toList(growable: true);
+        List savedBy = snapshotData['savedBy'] == null
+            ? []
+            : snapshotData['savedBy'].toList(growable: true);
         if (!savedBy.contains(uid)) {
           saved = false;
         } else {
@@ -61,7 +67,10 @@ class LiveStreamDataService {
     return saved;
   }
 
-  Future<String?> saveUnsaveStream({required String uid, required String streamID, required bool savedStream}) async {
+  Future<String?> saveUnsaveStream(
+      {required String uid,
+      required String streamID,
+      required bool savedStream}) async {
     String? error;
     if (savedStream) {
       await streamsRef.doc(streamID).update({
@@ -79,8 +88,10 @@ class LiveStreamDataService {
     return error;
   }
 
-  Future reportStream({required String streamID, required String reporterID}) async {
-    DocumentSnapshot snapshot = await streamsRef.doc(streamID).get().catchError((e) {
+  Future reportStream(
+      {required String streamID, required String reporterID}) async {
+    DocumentSnapshot snapshot =
+        await streamsRef.doc(streamID).get().catchError((e) {
       _snackbarService.showSnackbar(
         title: 'Stream Error',
         message: e.message,
@@ -88,10 +99,15 @@ class LiveStreamDataService {
       );
     });
     if (snapshot.exists) {
-      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
-      List reportedBy = snapshotData['reportedBy'] == null ? [] : snapshotData['reportedBy'].toList(growable: true);
+      Map<String, dynamic> snapshotData =
+          snapshot.data() as Map<String, dynamic>;
+      List reportedBy = snapshotData['reportedBy'] == null
+          ? []
+          : snapshotData['reportedBy'].toList(growable: true);
       if (reportedBy.contains(reporterID)) {
-        _customDialogService.showErrorDialog(description: "You've already reported this stream. This stream is currently pending review.");
+        _customDialogService.showErrorDialog(
+            description:
+                "You've already reported this stream. This stream is currently pending review.");
       } else {
         reportedBy.add(reporterID);
         streamsRef.doc(streamID).update({"reportedBy": reportedBy});
@@ -128,7 +144,8 @@ class LiveStreamDataService {
   Future deleteStream({required WebblenLiveStream stream}) async {
     await streamsRef.doc(stream.id).delete();
     if (stream.imageURL != null) {
-      await _firestoreStorageService.deleteImage(storageBucket: 'images', folderName: 'streams', fileName: stream.id!);
+      await _firestoreStorageService.deleteImage(
+          storageBucket: 'images', folderName: 'streams', fileName: stream.id!);
       if (stream.muxStreamID != null) {
         await _muxLiveStreamService.deleteStreamAndAsset(stream: stream);
       }
@@ -151,12 +168,14 @@ class LiveStreamDataService {
     }
 
     if (snapshot.exists) {
-      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> snapshotData =
+          snapshot.data() as Map<String, dynamic>;
       if (snapshotData.isNotEmpty) {
         stream = WebblenLiveStream.fromMap(snapshotData);
       }
     } else {
-      _customDialogService.showErrorDialog(description: "This Stream No Longer Exists");
+      _customDialogService.showErrorDialog(
+          description: "This Stream No Longer Exists");
     }
 
     return stream;
@@ -175,18 +194,23 @@ class LiveStreamDataService {
     }
 
     if (snapshot.exists) {
-      Map<String, dynamic> snapshotData = snapshot.data() as Map<String, dynamic>;
+      Map<String, dynamic> snapshotData =
+          snapshot.data() as Map<String, dynamic>;
       if (snapshotData.isNotEmpty) {
         stream = WebblenLiveStream.fromMap(snapshotData);
       }
     } else {
-      _customDialogService.showErrorDialog(description: "This Stream No Longer Exists");
+      _customDialogService.showErrorDialog(
+          description: "This Stream No Longer Exists");
     }
 
     return stream;
   }
 
-  addClick({required String? uid, required String? streamID, required int clickCount}) async {
+  addClick(
+      {required String? uid,
+      required String? streamID,
+      required int clickCount}) async {
     await streamsRef.doc(streamID).update({
       'clickedBy': FieldValue.arrayUnion([uid!]),
       'clickCount': clickCount,
@@ -194,7 +218,10 @@ class LiveStreamDataService {
   }
 
   Future updateStreamMuxStreamKey(
-      {required String streamID, required String muxStreamID, required String muxStreamKey, required String muxAssetPlaybackID}) async {
+      {required String streamID,
+      required String muxStreamID,
+      required String muxStreamKey,
+      required String muxAssetPlaybackID}) async {
     await streamsRef.doc(streamID).update({
       "muxStreamID": muxStreamID,
       "muxStreamKey": muxStreamKey,
@@ -205,7 +232,10 @@ class LiveStreamDataService {
     });
   }
 
-  Future updateStreamMuxAssetData({required String streamID, required String muxAssetPlaybackID, required double muxAssetDuration}) async {
+  Future updateStreamMuxAssetData(
+      {required String streamID,
+      required String muxAssetPlaybackID,
+      required double muxAssetDuration}) async {
     await streamsRef.doc(streamID).update({
       "muxAssetPlaybackID": muxAssetPlaybackID,
       "muxAssetDuration": muxAssetDuration,
@@ -226,7 +256,8 @@ class LiveStreamDataService {
       return;
     }
     if (snapshot.exists) {
-      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      WebblenLiveStream stream =
+          WebblenLiveStream.fromMap(snapshot.data()! as Map<String, dynamic>);
       List<ActiveViewer> activeViewers = stream.activeViewers!;
       ActiveViewer result = activeViewers.singleWhere(
         (val) => val.uid == uid,
@@ -240,8 +271,7 @@ class LiveStreamDataService {
             isHereSinceLastPayoutIteration: false,
           ),
         );
-        streamsRef
-            .doc(streamID)
+        streamsRef.doc(streamID)
             // TODO: Change to use map method to convert list into map for firebase
             .update({'activeViewers': activeViewers}).catchError((e) {
           print(e.message);
@@ -262,7 +292,8 @@ class LiveStreamDataService {
       return;
     }
     if (snapshot.exists) {
-      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      WebblenLiveStream stream =
+          WebblenLiveStream.fromMap(snapshot.data()! as Map<String, dynamic>);
       List<ActiveViewer> activeViewers = stream.activeViewers!;
       ActiveViewer result = activeViewers.singleWhere(
         (val) => val.uid == uid,
@@ -270,8 +301,8 @@ class LiveStreamDataService {
       );
       if (result.uid == uid) {
         activeViewers.remove(result);
-        streamsRef
-            .doc(streamID)
+        streamsRef.doc(streamID)
+            // TODO: Redo list logic
             .update({'activeViewers': activeViewers}).catchError((e) {
           print(e.message);
         });
@@ -290,7 +321,8 @@ class LiveStreamDataService {
     });
 
     if (snapshot.exists) {
-      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      WebblenLiveStream stream =
+          WebblenLiveStream.fromMap(snapshot.data()! as Map<String, dynamic>);
 
       List<WebblenCheckIn> checkIns =
           stream.webblenCheckIns != null ? stream.webblenCheckIns! : [];
@@ -332,6 +364,7 @@ class LiveStreamDataService {
         stream.attendees!.add(user.id);
         await streamsRef.doc(streamID).update({
           'attendees': stream.attendees,
+          // TODO: redo list logic
           'webblenCheckIns': checkIns,
           'isCheckedIntoStream': true,
         });
@@ -357,7 +390,8 @@ class LiveStreamDataService {
     });
 
     if (snapshot.exists) {
-      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      WebblenLiveStream stream =
+          WebblenLiveStream.fromMap(snapshot.data()! as Map<String, dynamic>);
 
       List<WebblenCheckIn> checkIns =
           stream.webblenCheckIns != null ? stream.webblenCheckIns! : [];
@@ -416,6 +450,7 @@ class LiveStreamDataService {
 
       // Updates stream doc
       await streamsRef.doc(streamID).update({
+        // TODO: redo list logic
         'webblenCheckIns': checkIns,
       });
 
@@ -437,7 +472,8 @@ class LiveStreamDataService {
       );
     });
     if (snapshot.exists) {
-      WebblenLiveStream stream = WebblenLiveStream.fromMap(snapshot.data()!);
+      WebblenLiveStream stream =
+          WebblenLiveStream.fromMap(snapshot.data()! as Map<String, dynamic>);
 
       List<WebblenCheckIn> checkIns =
           stream.webblenCheckIns != null ? stream.webblenCheckIns! : [];
@@ -541,6 +577,7 @@ class LiveStreamDataService {
           }
           // Updates stream doc with new activeViewers and liveStreamUserPayoutData lists
           await streamsRef.doc(currentStream.id).update({
+            // TODO: redo list logic
             'activeViewers': activeViewers,
             'liveStreamUserPayoutData': liveStreamUserPayoutData,
           });
@@ -557,6 +594,15 @@ class LiveStreamDataService {
           'didPayoutClockEndEarly': true,
         });
       }
+    });
+  }
+
+  Future<void> endStream({required String streamID}) async {
+    await streamsRef.doc(streamID).update({
+      "hasStreamEnded": true,
+    }).catchError((e) {
+      print(e.message);
+      return e.message;
     });
   }
 
@@ -595,20 +641,29 @@ class LiveStreamDataService {
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
       if (tagFilter.isNotEmpty) {
-        docs.removeWhere((doc) => !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
+        docs.removeWhere((doc) =>
+            !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']
-            .compareTo((docB.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) =>
+            (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']
+                .compareTo((docB.data()
+                    as Map<String, dynamic>)['startDateTimeInMilliseconds']));
       } else {
-        docs.sort((docA, docB) => (docB.data() as Map<String, dynamic>)['savedBy'].length.compareTo((docA.data() as Map<String, dynamic>)['savedBy'].length));
+        docs.sort((docA, docB) =>
+            (docB.data() as Map<String, dynamic>)['savedBy'].length.compareTo(
+                (docA.data() as Map<String, dynamic>)['savedBy'].length));
       }
     }
     return docs;
   }
 
   Future<List<DocumentSnapshot>> loadAdditionalStreams(
-      {required DocumentSnapshot lastDocSnap, required String areaCode, required int resultsLimit, required String tagFilter, required String sortBy}) async {
+      {required DocumentSnapshot lastDocSnap,
+      required String areaCode,
+      required int resultsLimit,
+      required String tagFilter,
+      required String sortBy}) async {
     Query query;
     List<DocumentSnapshot> docs = [];
     if (areaCode.isEmpty) {
@@ -639,13 +694,18 @@ class LiveStreamDataService {
     if (snapshot.docs.isNotEmpty) {
       docs = snapshot.docs;
       if (tagFilter.isNotEmpty) {
-        docs.removeWhere((doc) => !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
+        docs.removeWhere((doc) =>
+            !(doc.data() as Map<String, dynamic>)['tags'].contains(tagFilter));
       }
       if (sortBy == "Latest") {
-        docs.sort((docA, docB) => (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']
-            .compareTo((docB.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']));
+        docs.sort((docA, docB) =>
+            (docA.data() as Map<String, dynamic>)['startDateTimeInMilliseconds']
+                .compareTo((docB.data()
+                    as Map<String, dynamic>)['startDateTimeInMilliseconds']));
       } else {
-        docs.sort((docA, docB) => (docB.data() as Map<String, dynamic>)['savedBy'].length.compareTo((docA.data() as Map<String, dynamic>)['savedBy'].length));
+        docs.sort((docA, docB) =>
+            (docB.data() as Map<String, dynamic>)['savedBy'].length.compareTo(
+                (docA.data() as Map<String, dynamic>)['savedBy'].length));
       }
     }
     return docs;

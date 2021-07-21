@@ -41,7 +41,7 @@ class HotWalletDataService {
         .limit(1)
         .get();
 
-    final hotWalletDoc = hotWalletQuerySnapshot.docs[0].data();
+    final hotWalletDoc = hotWalletQuerySnapshot.docs[0].data()  as Map<String, dynamic>;
 
     final mostWebblenFundedHotWallet = HotWallet.fromMap(hotWalletDoc);
 
@@ -54,7 +54,7 @@ class HotWalletDataService {
         .limit(1)
         .get();
 
-    final hotWalletDoc = hotWalletQuerySnapshot.docs[0].data();
+    final hotWalletDoc = hotWalletQuerySnapshot.docs[0].data() as Map<String, dynamic>;
 
     final mostAlgoFundedHotWallet = HotWallet.fromMap(hotWalletDoc);
 
